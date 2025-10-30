@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http:/www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta charset="UTF-8">
+	<title>여운 프로젝트 Home</title>
+	<link rel="stylesheet" th:href="@{/css/common.css}"/>
+</head>
+<body>
+	<header th:insert="~{fragments/header}">헤더</header>
+	<nav th:insert="~{fragments/nav}">메뉴바</nav>
+	<main th:insert="~{fragments/mainSample}">본문샘플</main>
+	<footer th:insert="~{fragments/footer}">푸터</footer>
+</body>
+</html>

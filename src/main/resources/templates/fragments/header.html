@@ -1,0 +1,17 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<div>
+	<ul>
+       	<li><button th:href=@{/} id="btn" onclick='change()'>알림</button></li>
+        <li><a th:href="@{/}">메신저</a></li>
+        <li><a th:href="@{/}">이름(사원)</a></li>
+        <li><a th:href="@{/}">로그인</a></li>
+    </ul>
+</div>
+<script>
+
+ function change()  {
+	 const btnElement = document.getElementById('btn');
+	 btnElement.innerText = "알림중";
+}
+</script>
