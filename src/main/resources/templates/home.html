@@ -75,12 +75,15 @@
 	      
 	       <div class="layout-page">
 <!-- <!-- 		       header 추가 되고 --> 
-		       <th:block th:insert="~{fragments/header}"></th:block>
-<!-- <!-- 			   header 추가 되고 --> 
-	       
-<!-- <!-- 		       Content 추가 -->
-		       <th:block th:insert="~{fragments/mainSample}"></th:block>
-<!-- <!-- 		       Content 추가 -->
+		        <th:block th:insert="~{fragments/header}"></th:block>
+<!-- <!-- 			   header 추가 되고 -->
+ 				<!--  content  추가 -->
+				<th:block layout:fragment="content"></th:block>
+ 				<!--  content  추가 -->
+							       	
+<!-- <!-- 		       footer 추가 -->
+		        <th:block th:insert="~{fragments/footer}"></th:block>
+<!-- <!-- 		       footer 추가 -->
 	       
 	      	</div>
 	      </div>
