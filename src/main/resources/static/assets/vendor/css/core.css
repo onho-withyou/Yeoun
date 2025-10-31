@@ -1,4 +1,11 @@
 @charset "UTF-8";
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Thin.woff2') format('woff2');
+    font-weight: 100;
+    font-display: swap;
+}
+
 :root {
   --bs-blue: #007bff;
   --bs-indigo: #6610f2;
@@ -13576,6 +13583,7 @@ button.list-group-item-gray.active {
 
 .me-3 {
   margin-right: 1rem !important;
+  cursor: pointer;
 }
 
 .me-4 {
@@ -15009,6 +15017,15 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
   flex: 0 1 auto;
   margin: 0;
 }
+
+.menu-font-size{
+	position: relative;
+	display: flex;
+	align-items: center;
+	flex: 0 1 auto;
+	margin-left: 5px;
+	font-size: 23px;
+}
 .menu-item.disabled .menu-link {
   cursor: not-allowed !important;
 }
@@ -15381,7 +15398,9 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
 .layout-menu .menu-vertical {
   height: 100%;
 }
-
+.nav-font-size {/* 추가 */
+  font-size: 23px;
+}
 .layout-content-navbar .layout-page {
   flex-basis: 100%;
   flex-direction: column;
