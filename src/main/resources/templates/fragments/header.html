@@ -9,21 +9,77 @@
             <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
               <ul class="navbar-nav flex-row align-items-center ms-auto">
               	<li class="nav-item lh-1 me-3">
-                   <img th:src="@{icon/payment-doc.png}" width="33" alt="전자결재 알림"/>
+                   <img th:src="@{icon/payment-doc.png}" data-bs-toggle="dropdown" id="payment" width="33" alt="전자결재 알림"/>
+				    <ul class="dropdown-menu">
+					  <li><a class="dropdown-item" href="#">Action</a></li>
+					  <li><a class="dropdown-item" href="#">Another action</a></li>
+					  <li><a class="dropdown-item" href="#">Something else here</a></li>
+					  <li><hr class="dropdown-divider"></li>
+					  <li><a class="dropdown-item" href="#">Separated link</a></li>
+					</ul>
+                </li>
+              	<li class="nav-item lh-1 me-3"> 
+                   <img th:src="@{icon/bell.png}" data-bs-toggle="dropdown" id="bell" width="33" alt="전체알림"/>
+                   <ul class="dropdown-menu dropdown-menu-dark">
+					  <li><a class="dropdown-item" href="#">bell</a></li>
+					  <li><a class="dropdown-item" href="#">알림</a></li>
+					  <li><a class="dropdown-item" href="#">공지사항</a></li>
+					  <li><hr class="dropdown-divider"></li>
+					  <li><a class="dropdown-item" href="#">집중</a></li>
+					</ul>
                 </li>
               	<li class="nav-item lh-1 me-3">
-                   <img th:src="@{icon/bell.png}" width="33"/>
-                </li>
-              	<li class="nav-item lh-1 me-3">
-                   <img th:src="@{icon/chat.png}" width="33"/>
+                   <img th:src="@{icon/chat.png}" data-bs-toggle="dropdown" id="chat" width="33" alt="메신저"/>
+                   <ul class="dropdown-menu">
+					  <li><a class="dropdown-item" href="#">점심시간입니다.</a></li>
+					  <li><a class="dropdown-item" href="#">퇴근 시간입니다.</a></li>
+					  <li><a class="dropdown-item" href="#">무슨 커피드실래요</a></li>
+					  <li><hr class="dropdown-divider"></li>
+					  <li><a class="dropdown-item" href="#">헤이즐럿라떼요</a></li>
+					</ul>
                 </li>
                 <li class="nav-item lh-1 me-3">
-                    <a class="nav-font-size">이름 (사번)</a>
+                    <a class="nav-font-size" id="name">이름 (사번)</a>
                 </li>
                 <li class="nav-item lh-1 me-3">
-                    <a class="nav-font-size">login</a>
+                    <a class="nav-font-size" id="login">login</a>
                 </li>
               </ul>
             </div>
           </nav>
+          <script >
+         	const payment = document.getElementById("payment");
+      		const bell = document.getElementById("bell");
+      		const chat = document.getElementById("chat");
+   
+          	const nameTag = document.getElementById("name");
+        	const loginTag = document.getElementById("login");
+
+        	   
+    		payment.addEventListener("click",function(){
+          		if(payment.src.match("payment-doc.png")) payment.src ="/icon/payment-doc-ring.png";
+          		else payment.src ="/icon/payment-doc.png";
+      		});
+    		
+    		bell.addEventListener("click",function(){
+    			if(bell.src.match("bell.png")) bell.src ="/icon/bell-ring.png";
+          		else bell.src ="/icon/bell.png";
+      		});
+    		
+    		chat.addEventListener("click",function(){
+      			if(chat.src.match("chat.png")) chat.src ="/icon/chat-ring.png";
+      			else chat.src ="/icon/chat.png";
+      		});
+   
+           	nameTag.addEventListener("click",function() {
+        		if(nameTag.innerText === '이름 (사번)') nameTag.innerText = '사용자 정보';
+        	    else nameTag.innerText = '이름 (사번)';
+        	});
+   
+           	loginTag.addEventListener("click",function() {
+        		if(loginTag.innerText === 'login') loginTag.innerText = 'logout';
+        	    else loginTag.innerText = 'login';
+        	});
+        	    	 
+          </script>
 </th:block>

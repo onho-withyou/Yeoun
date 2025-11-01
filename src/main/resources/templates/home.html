@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 
-<!-- =========================================================
+<!-- 
+=========================================================
 * Sneat - Bootstrap 5 HTML Admin Template - Pro | v1.0.0
 ==============================================================
 
@@ -26,8 +27,7 @@
 <meta name="description" content="" />
 
 <!-- Favicon -->
-<link rel="icon" type="image/x-icon"
-	href="../assets/img/favicon/favicon.ico" />
+<link rel="icon" type="image/x-icon" th:href="@{/icon/yeo-un-logo.png}" />
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -74,13 +74,10 @@
 	      
 	      
 	       <div class="layout-page">
-<!-- <!-- 		       header 추가 되고. --> 
+	 <!-- header 추가 되고. --> 
 		       <th:block th:insert="~{fragments/header}"></th:block>
-<!-- <!-- 			   header 추가 되고 --> 
-	       
-<!-- <!-- 		       Content 추가 -->
+	 <!-- Content 추가 -->
 		       <th:block th:insert="~{fragments/mainSample}"></th:block>
-<!-- <!-- 		       Content 추가 -->
 	       
 	      	</div>
 	      </div>

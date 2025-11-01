@@ -5,6 +5,14 @@
     font-weight: 100;
     font-display: swap;
 }
+/* test용 폰트
+@font-face {
+    font-family: 'OngleipParkDahyeon';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2411-3@1.0/Ownglyph_ParkDaHyun.woff2') format('woff2');
+    font-weight: normal;
+    font-display: swap;
+}
+*/
 
 :root {
   --bs-blue: #007bff;
@@ -71,8 +79,10 @@
   }
 }
 
+
 body {
   margin: 0;
+  --bs-body-font-family: 'Pretendard'; /*   원하는 글꼴로 변경 */
   font-family: var(--bs-body-font-family);
   font-size: var(--bs-body-font-size);
   font-weight: var(--bs-body-font-weight);
@@ -650,12 +660,12 @@ progress {
 }
 @media (min-width: 1200px) {
   .container-xl, .container-lg, .container-md, .container-sm, .container {
-    max-width: 1140px;
+    max-width: 2100px;
   }
 }
 @media (min-width: 1400px) {
   .container-xxl, .container-xl, .container-lg, .container-md, .container-sm, .container {
-    max-width: 1440px;
+    max-width: 1650px;/* main 넓이 */
   }
 }
 .row {
@@ -3143,10 +3153,11 @@ textarea.form-control-lg {
 .dropdown-menu-dark {
   color: rgba(67, 89, 113, 0.3);
   background-color: rgba(67, 89, 113, 0.8);
-  border-color: transparent;
+  border-color: transparent;'
 }
 .dropdown-menu-dark .dropdown-item {
-  color: rgba(67, 89, 113, 0.3);
+/*   color: rgba(67, 89, 113, 0.3); */
+  color: white;
 }
 .dropdown-menu-dark .dropdown-item:hover, .dropdown-menu-dark .dropdown-item:focus {
   color: #fff;
@@ -3621,6 +3632,8 @@ textarea.form-control-lg {
   }
   .navbar-expand-xl .navbar-nav .dropdown-menu {
     position: absolute;
+    margin: 5px;
+    margin-left: 1219px;
   }
   .navbar-expand-xl .navbar-nav .nav-link {
     padding-right: 0.5rem;
@@ -4753,7 +4766,7 @@ textarea.form-control-lg {
 }
 @media (min-width: 1200px) {
   .modal-xl {
-    max-width: 1140px;
+    max-width: 2100px;
   }
 }
 .modal-fullscreen {
@@ -8014,7 +8027,7 @@ form select.selectpicker.is-invalid ~ .btn {
 }
 @media (min-width: 1200px) {
   .modal-xl .modal-dialog {
-    max-width: 1140px;
+    max-width: 2100px;
   }
 }
 .progress {
@@ -15111,13 +15124,15 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
   padding: 0.625rem 2rem 0.625rem 2rem;
 }
 .menu-vertical .menu-item .menu-link {
-  font-size: 0.9375rem;
+  font-size: 20px;/* 폰트 size 변경 */
 }
 .menu-vertical .menu-item.active:not(.open) > .menu-link {
   font-weight: 600;
 }
 .menu-vertical .menu-item .menu-toggle {
+  padding-left: 60px;
   padding-right: calc(1rem + 1.26em);
+
 }
 .menu-vertical .menu-item .menu-toggle::after {
   right: 1rem;
@@ -15130,10 +15145,12 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
 .menu-vertical .menu-sub {
   padding-top: 0.3125rem;
   padding-bottom: 0.3125rem;
+  padding-left: 60px; /* menu:after 자리 */
 }
 .menu-vertical .menu-sub .menu-link {
   padding-top: 0.625rem;
   padding-bottom: 0.625rem;
+  padding-left: 60px; /* menu:after 자리 */
 }
 .menu-vertical .menu-icon {
   width: 1.5rem;
@@ -15314,7 +15331,7 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
   padding: 0 1.5rem;
 }
 .layout-navbar.navbar-detached.container-xxl {
-  max-width: calc(1440px - calc(1.625rem * 2));
+  max-width: calc(1650px - calc(1.625rem * 2)); /* header 넓이 */
 }
 .layout-navbar-fixed .layout-navbar.navbar-detached {
   width: calc(100% - calc(1.625rem * 2) - 16.25rem);
@@ -15407,6 +15424,7 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
   width: 0;
   min-width: 0;
   max-width: 100%;
+/*   background:#000;배경색*/
 }
 .layout-content-navbar .content-wrapper {
   width: 100%;

@@ -34,12 +34,13 @@ li.menu-inner {
 
 /* 공통영역 css */
 .layout-page>.container-xxl {
-	background-color: white;
+	background-color: white;/* main 배경색 */
+/* 	background-color: green;main 배경색 */
 	margin-top: 30px;
 	box-sizing: border-box;
 	padding-left: 1.8rem;
 	padding-right: 1.6rem;
-	width: 80%;
+	width: 95%;
 	border-radius: 0.375rem;
 }
 
