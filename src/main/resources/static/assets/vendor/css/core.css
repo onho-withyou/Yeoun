@@ -1,4 +1,19 @@
 @charset "UTF-8";
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Thin.woff2') format('woff2');
+    font-weight: 100;
+    font-display: swap;
+}
+/* test용 폰트
+@font-face {
+    font-family: 'OngleipParkDahyeon';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2411-3@1.0/Ownglyph_ParkDaHyun.woff2') format('woff2');
+    font-weight: normal;
+    font-display: swap;
+}
+*/
+
 :root {
   --bs-blue: #007bff;
   --bs-indigo: #6610f2;
@@ -41,7 +56,7 @@
   --bs-font-monospace: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
   --bs-root-font-size: 16px;
-  --bs-body-font-family: var(--bs-font-sans-serif);
+  --bs-body-font-family: 'Pretendard';/*원하는 글꼴로 변경 */
   --bs-body-font-size: 0.9375rem;
   --bs-body-font-weight: 400;
   --bs-body-line-height: 1.53;
@@ -63,6 +78,7 @@
     scroll-behavior: smooth;
   }
 }
+
 
 body {
   margin: 0;
@@ -643,12 +659,12 @@ progress {
 }
 @media (min-width: 1200px) {
   .container-xl, .container-lg, .container-md, .container-sm, .container {
-    max-width: 1140px;
+    max-width: 2100px;
   }
 }
 @media (min-width: 1400px) {
   .container-xxl, .container-xl, .container-lg, .container-md, .container-sm, .container {
-    max-width: 1440px;
+    max-width: 1650px;/* main 넓이 */
   }
 }
 .row {
@@ -3136,10 +3152,11 @@ textarea.form-control-lg {
 .dropdown-menu-dark {
   color: rgba(67, 89, 113, 0.3);
   background-color: rgba(67, 89, 113, 0.8);
-  border-color: transparent;
+  border-color: transparent;'
 }
 .dropdown-menu-dark .dropdown-item {
-  color: rgba(67, 89, 113, 0.3);
+/*   color: rgba(67, 89, 113, 0.3); */
+  color: white;
 }
 .dropdown-menu-dark .dropdown-item:hover, .dropdown-menu-dark .dropdown-item:focus {
   color: #fff;
@@ -3614,6 +3631,8 @@ textarea.form-control-lg {
   }
   .navbar-expand-xl .navbar-nav .dropdown-menu {
     position: absolute;
+    margin: 5px;
+    margin-left: 1150px;
   }
   .navbar-expand-xl .navbar-nav .nav-link {
     padding-right: 0.5rem;
@@ -4746,7 +4765,7 @@ textarea.form-control-lg {
 }
 @media (min-width: 1200px) {
   .modal-xl {
-    max-width: 1140px;
+    max-width: 2100px;
   }
 }
 .modal-fullscreen {
@@ -8007,7 +8026,7 @@ form select.selectpicker.is-invalid ~ .btn {
 }
 @media (min-width: 1200px) {
   .modal-xl .modal-dialog {
-    max-width: 1140px;
+    max-width: 2100px;
   }
 }
 .progress {
@@ -13576,6 +13595,7 @@ button.list-group-item-gray.active {
 
 .me-3 {
   margin-right: 1rem !important;
+  cursor: pointer;
 }
 
 .me-4 {
@@ -15009,6 +15029,15 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
   flex: 0 1 auto;
   margin: 0;
 }
+
+.menu-font-size{
+	position: relative;
+	display: flex;
+	align-items: center;
+	flex: 0 1 auto;
+	margin-left: 5px;
+	font-size: 23px;
+}
 .menu-item.disabled .menu-link {
   cursor: not-allowed !important;
 }
@@ -15094,13 +15123,15 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
   padding: 0.625rem 2rem 0.625rem 2rem;
 }
 .menu-vertical .menu-item .menu-link {
-  font-size: 0.9375rem;
+  font-size: 20px;/* 폰트 size 변경 */
 }
 .menu-vertical .menu-item.active:not(.open) > .menu-link {
   font-weight: 600;
 }
 .menu-vertical .menu-item .menu-toggle {
+  padding-left: 60px;
   padding-right: calc(1rem + 1.26em);
+
 }
 .menu-vertical .menu-item .menu-toggle::after {
   right: 1rem;
@@ -15113,10 +15144,12 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
 .menu-vertical .menu-sub {
   padding-top: 0.3125rem;
   padding-bottom: 0.3125rem;
+  padding-left: 60px; /* menu:after 자리 */
 }
 .menu-vertical .menu-sub .menu-link {
   padding-top: 0.625rem;
   padding-bottom: 0.625rem;
+  padding-left: 60px; /* menu:after 자리 */
 }
 .menu-vertical .menu-icon {
   width: 1.5rem;
@@ -15297,7 +15330,7 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
   padding: 0 1.5rem;
 }
 .layout-navbar.navbar-detached.container-xxl {
-  max-width: calc(1440px - calc(1.625rem * 2));
+  max-width: calc(1650px - calc(1.625rem * 2)); /* header 넓이 */
 }
 .layout-navbar-fixed .layout-navbar.navbar-detached {
   width: calc(100% - calc(1.625rem * 2) - 16.25rem);
@@ -15381,13 +15414,16 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
 .layout-menu .menu-vertical {
   height: 100%;
 }
-
+.nav-font-size {/* 추가 */
+  font-size: 23px;
+}
 .layout-content-navbar .layout-page {
   flex-basis: 100%;
   flex-direction: column;
   width: 0;
   min-width: 0;
   max-width: 100%;
+/*   background:#000;배경색*/
 }
 .layout-content-navbar .content-wrapper {
   width: 100%;
