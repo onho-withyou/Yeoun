@@ -1,153 +1,130 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:fragment="aside">
-        <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-          <div class="app-brand demo">
-             <img th:src="@{icon/yeo-un-logo.png}" width="80"/>
-          </div>
-          <!-- data-i18n : 다국어 지원 -->
-          <ul class="menu-inner py-1">
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:fragment="aside">
+    <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+        <div class="app-brand demo">
+            <img th:src="@{icon/yeo-un-logo.png}" width="80"/>
+        </div>
+        <!-- data-i18n : 다국어 지원 -->
+        <ul class="menu-inner py-1">
             <!-- Dashboard -->
-            <li class="menu-item active">
-              <a href="index.html" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                <div data-i18n="Analytics">Dashboard</div>
-              </a>
+            <li class="menu-item" id="main">
+                <a href="/main" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                    <div data-i18n="Analytics">Main</div>
+                </a>
             </li>
-
-            <li class="menu-header small text-uppercase">
-              <!-- <span class="menu-header-text">ERP</span> -->
-            </li>
-            <li class="menu-item">
-              <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <div data-i18n="Announcement">공지사항</div>
-              </a>
-              <ul class="menu-sub">
-                <li class="menu-item">
-                  <a href="" class="menu-link">
-                    <div data-i18n="Menu1">menu1</div>
-                  </a>
-                </li>
-                <li class="menu-item">
-                  <a href="" class="menu-link">
-                    <div data-i18n="Menu2">menu2</div>
-                  </a>
-                </li>
-                <li class="menu-item">
-                  <a href="" class="menu-link">
-                    <div data-i18n="Menu3">menu3</div>
-                  </a>
-                </li>
-              </ul>
+            <li class="menu-item" id="notice" >
+                <a href="/notice" class="menu-link">
+                    <i class='menu-icon bxr  bx-clipboard'></i> 
+                    <div data-i18n="Analytics">공지사항</div>
+                </a>
             </li>
             <li class="menu-item">
-              <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <div data-i18n="Human Resources Management">인사관리</div>
-              </a>
-              <ul class="menu-sub">
-                <li class="menu-item">
-                  <a href="" class="menu-link" target="_blank">
-                    <div data-i18n="Menu1">menu1</div>
-                  </a>
-                </li>
-                <li class="menu-item">
-                  <a href="" class="menu-link" target="_blank">
-                    <div data-i18n="Menu2">menu2</div>
-                  </a>
-                </li>
-                <li class="menu-item">
-                  <a href="" class="menu-link" target="_blank">
-                    <div data-i18n="Menu3">menu3</div>
-                  </a>
-                </li>
-              </ul>
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <div data-i18n="Human Resources Management">인사관리</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item">
+                        <a href="" class="menu-link" target="_blank">
+                            <div data-i18n="Menu1">menu1</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="" class="menu-link" target="_blank">
+                            <div data-i18n="Menu2">menu2</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="" class="menu-link" target="_blank">
+                            <div data-i18n="Menu3">menu3</div>
+                        </a>
+                    </li>
+                </ul>
             </li>
             <li class="menu-item">
-              <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <div data-i18n="Attendance management">근태관리</div>
-              </a>
-              <ul class="menu-sub">
-                <li class="menu-item">
-                  <a href="" class="menu-link">
-                    <div data-i18n="Menu1">menu1</div>
-                  </a>
-                </li>
-                <li class="menu-item">
-                  <a href="" class="menu-link">
-                    <div data-i18n="Menu2">menu2</div>
-                  </a>
-                </li>
-              </ul>
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <div data-i18n="Attendance management">근태관리</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item">
+                        <a href="" class="menu-link">
+                            <div data-i18n="Menu1">menu1</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="" class="menu-link">
+                            <div data-i18n="Menu2">menu2</div>
+                        </a>
+                    </li>
+                </ul>
             </li>
-            
-    		<li class="menu-item">
-              <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <div data-i18n="Electronic payment">전자결재</div>
-              </a>
-              <ul class="menu-sub">
-                <li class="menu-item">
-                  <a href="" class="menu-link" target="_blank">
-                    <div data-i18n="Menu1">menu1</div>
-                  </a>
-                </li>
-                <li class="menu-item">
-                  <a href="" class="menu-link" target="_blank">
-                    <div data-i18n="Menu2">menu2</div>
-                  </a>
-                </li>
-                <li class="menu-item">
-                  <a href="" class="menu-link" target="_blank">
-                    <div data-i18n="Menu3">menu3</div>
-                  </a>
-                </li>
-              </ul>
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <div data-i18n="Electronic payment">전자결재</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item">
+                        <a href="" class="menu-link" target="_blank">
+                            <div data-i18n="Menu1">menu1</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="" class="menu-link" target="_blank">
+                            <div data-i18n="Menu2">menu2</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="" class="menu-link" target="_blank">
+                            <div data-i18n="Menu3">menu3</div>
+                        </a>
+                    </li>
+                </ul>
             </li>
-            
-             <li class="menu-item">
-              <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <div data-i18n="Salary management">급여관리</div>
-              </a>
-              <ul class="menu-sub">
-                <li class="menu-item">
-                  <a href="" class="menu-link" target="_blank">
-                    <div data-i18n="Menu1">menu1</div>
-                  </a>
-                </li>
-                <li class="menu-item">
-                  <a href="" class="menu-link" target="_blank">
-                    <div data-i18n="Menu2">menu2</div>
-                  </a>
-                </li>
-                <li class="menu-item">
-                  <a href="" class="menu-link" target="_blank">
-                    <div data-i18n="Menu3">menu3</div>
-                  </a>
-                </li>
-              </ul>
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <div data-i18n="Salary management">급여관리</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item">
+                        <a href="" class="menu-link" target="_blank">
+                            <div data-i18n="Menu1">menu1</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="" class="menu-link" target="_blank">
+                            <div data-i18n="Menu2">menu2</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="" class="menu-link" target="_blank">
+                            <div data-i18n="Menu3">menu3</div>
+                        </a>
+                    </li>
+                </ul>
             </li>
-             <li class="menu-item">
-              <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <div data-i18n="Setting">Setting</div>
-              </a>
-              <ul class="menu-sub">
-                <li class="menu-item">
-                  <a href="" class="menu-link" target="_blank">
-                    <div data-i18n="Menu1">menu1</div>
-                  </a>
-                </li>
-                <li class="menu-item">
-                  <a href="" class="menu-link" target="_blank">
-                    <div data-i18n="Menu2">menu2</div>
-                  </a>
-                </li>
-                <li class="menu-item">
-                  <a href="" class="menu-link" target="_blank">
-                    <div data-i18n="Menu3">menu3</div>
-                  </a>
-                </li>
-              </ul>
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <div data-i18n="Setting">Setting</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item">
+                        <a href="" class="menu-link" target="_blank">
+                            <div data-i18n="Menu1">menu1</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="" class="menu-link" target="_blank">
+                            <div data-i18n="Menu2">menu2</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="" class="menu-link" target="_blank">
+                            <div data-i18n="Menu3">menu3</div>
+                        </a>
+                    </li>
+                </ul>
             </li>
-              </ul>
-            </li>
-        </aside>
+        </ul>
+    </aside>
 </th:block>
