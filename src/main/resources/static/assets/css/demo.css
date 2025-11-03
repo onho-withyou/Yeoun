@@ -6,13 +6,13 @@
 .menu .app-brand.demo {
   height: 64px;
   margin-top: 12px;
-  margin-left: 60px;/* 추가함 */
+/*   margin-left: 60px;추가함 */
   
 }
 
 .app-brand-logo.demo svg {
   width: 22px;
-  height: 38px;
+  height: 50px;
 }
 
 .app-brand-text.demo {
