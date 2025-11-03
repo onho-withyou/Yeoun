@@ -1,0 +1,49 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/layouts/layout.html}">
+<body>
+<th:block layout:fragment="content">
+	<div class="custom-body container-xxl flex-grow-1 container-p-y">
+		<!-- 본문 영역-->
+		<div class="custom-content">
+			<div class="box2 d-flex gap-3">
+				<!-- 달력 -->
+				<section class="panel calendar flex-grow-1" style="border: solid;" >
+				    <div class="calendar-header d-flex align-items-center justify-content-between pb-0">
+				        <div class="calendar-nav">
+				            <button id="btn-prev" class="nav-btn">◀ 이전</button>
+				            <span id="current-date"></span>
+				            <button id="btn-next" class="nav-btn">다음 ▶</button>
+				            <button id="btn-today" class="nav-btn">오늘</button>
+				        </div>
+				        <div class="view-btns">
+				            <button id="btn-week">주간</button>
+				            <button id="btn-month">월간</button>
+				        </div>
+				    </div>
+				    <div id="calendar" style="height: 700px;"></div>
+		    	</section>
+		    	<!-- box2 사이드면 -->
+		    	<div class="box2Side d-flex flex-column gap-3" style="width:28%;">
+		    		<!-- 사원정보 -->
+		    		<section class="" style="border: solid; color: red; min-height:30%">
+		    			<h1>신필용</h1>
+		    			<button class="btn btn-primary">출근</button>
+		    			<button class="btn btn-primary">출입</button>
+		    		</section>
+		    		<section class="panel" style="border: solid; color: red; min-height:30%" >
+		    			<h1>공지목록</h1>
+		    		</section>
+		    		<section class="panel" style="border: solid; color: red; min-height:30%">
+		    			<h1>결제목록</h1>
+		    		</section>
+		    	</div>
+		    </div>
+		</div>
+	</div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@toast-ui/calendar@2.1.3/dist/toastui-calendar.min.css" />
+	<script src="https://cdn.jsdelivr.net/npm/@toast-ui/calendar@2.1.3/dist/toastui-calendar.min.js"></script>
+	<script src="/js/main/calendar.js"></script>
+</th:block>
+
+</body>

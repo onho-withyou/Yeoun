@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class MainController {
 	@GetMapping("")
 	public String Main() {
-		return "main";
+		return "/main/main";
 	}
 	
 }
