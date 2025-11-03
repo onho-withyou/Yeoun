@@ -3524,7 +3524,7 @@ textarea.form-control-lg {
     flex-direction: row;
   }
   .navbar-expand-md .navbar-nav .dropdown-menu {
-    position: absolute;
+    position: absolute;/*dropdown 위치 지정 */
   }
   .navbar-expand-md .navbar-nav .nav-link {
     padding-right: 0.5rem;
@@ -3630,9 +3630,10 @@ textarea.form-control-lg {
     flex-direction: row;
   }
   .navbar-expand-xl .navbar-nav .dropdown-menu {
-    position: absolute;
-    margin: 5px;
-    margin-left: 1150px;
+  	position: absolute;
+    margin-top: 15px;
+    font-size: 18px;
+/*     margin-left: 1150px; */
   }
   .navbar-expand-xl .navbar-nav .nav-link {
     padding-right: 0.5rem;
@@ -15124,6 +15125,7 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
 }
 .menu-vertical .menu-item .menu-link {
   font-size: 20px;/* 폰트 size 변경 */
+  font-weight: 800;
 }
 .menu-vertical .menu-item.active:not(.open) > .menu-link {
   font-weight: 600;
@@ -15414,8 +15416,9 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
 .layout-menu .menu-vertical {
   height: 100%;
 }
-.nav-font-size {/* 추가 */
+.nav-font-size {/* header 폰트 사이즈 */
   font-size: 23px;
+  font-weight: 800;
 }
 .layout-content-navbar .layout-page {
   flex-basis: 100%;
