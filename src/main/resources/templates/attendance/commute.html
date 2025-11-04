@@ -1,0 +1,46 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/layouts/layout.html}">
+<head>
+</head>
+<body>
+	<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
+		<h3>나의 출퇴근 현황</h3>
+		<div class="d-flex">
+			<div class="row flex-nowrap">
+				<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0">
+					<input type="date" name="srhStrDate" class="form-control">
+				</div>
+                ~
+                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0">
+	                <input type="date" name="srhEndDate" class="form-control">
+                </div>
+			</div>
+		</div>
+		<div class="card mt-4">
+			<div class="table-responsive text-nowrap">
+				<table class="table">
+					<thead class="table-light">
+						<tr>
+							<th>날짜</th>
+							<th>출근시간</th>
+							<th>퇴근시간</th>
+							<th>상태</th>
+							<th>총근무시간</th>
+						</tr>
+					</thead>
+					<tbody class="table-border-bottom-0">
+						<tr>
+							<td>2025-11-04</td>
+							<td>09:00</td>
+							<td>09:01</td>
+							<td>출근</td>
+							<td>0시간 1분</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</body>
+</th:block>
