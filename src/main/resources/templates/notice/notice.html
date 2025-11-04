@@ -153,32 +153,25 @@
 					<div class="modal-content">
 						<!-- 모달 제목 -->
 						<div class="modal-header">
-							<h5 class="modal-title" id="modalCenterTitle"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">공지사항 쓰기</font></font></h5>
+							<h5 class="modal-title" id="modalCenterTitle"><font dir="auto" style="vertical-align: inherit;">
+								<font dir="auto" style="vertical-align: inherit;">공지사항 쓰기</font></font>
+							</h5>
 							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫다"></button>
 						</div>
 						<!-- 모달 본문 -->
 						<div class="modal-body">
 							<form id="noticeForm">
-	<!-- 							<div class="mb-3"> -->
-	<!-- 								<label for="defaultSelect" class="form-label">Default select</label> -->
-	<!-- 								<select id="defaultSelect" class="form-select"> -->
-	<!-- 									<option>Default select</option> -->
-	<!-- 									<option value="1">One</option> -->
-	<!-- 									<option value="2">Two</option> -->
-	<!-- 									<option value="3">Three</option> -->
-	<!-- 								</select> -->
-	<!-- 							</div> -->
 								<div class="mb-3" style="display:flex; gap:8px;">
-								    <input type="text" class="form-control" id="basic-default-fullname" placeholder="제목" style="flex:1;">
+								    <input type="text" class="form-control" id="notice-title-write" placeholder="제목" style="flex:1;">
 								    <label class="form-check-label" for="fixedCheck">고정</label>
 								    <input class="form-check-input" type="checkbox" value="" id="fixedCheck" checked="">
 								</div>
 							    <div class="mb-3">
-							        <textarea id="basic-default-message" class="form-control" rows="10" placeholder="공지사항 내용 작성"></textarea>
+							        <textarea id="notice-content-write" class="form-control" rows="10" placeholder="공지사항 내용 작성"></textarea>
 							    </div>
 							    <div>
 									<label for="formFileDisabled" class="form-label">파일 첨부</label>
-									<input class="form-control" type="file" id="formFileDisabled" multiple>
+									<input class="form-control" type="file" id="notice-files-write" multiple>
 								</div>
 							</form>
 						</div>
@@ -188,11 +181,14 @@
 									닫기
 								</font></font>
 							</button>
-							<button type="submit" class="btn btn-primary" form="noticeForm"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">글 쓰기</font></font></button>
+							<button type="submit" class="btn btn-primary" form="noticeForm">
+								<font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">글 쓰기</font></font>
+							</button>
 						</div>
 					</div>
 				</div>
 			</div>
+			<!-- /공지쓰기모달 -->
 			
 			<!-- 공지조회모달 -->
 			<div class="modal fade" id="showNotice" tabindex="-1" style="display: none;" aria-hidden="true">
@@ -200,7 +196,9 @@
 					<div class="modal-content">
 						<!-- 모달 제목 -->
 						<div class="modal-header">
-							<h5 class="modal-title" id="modalCenterTitle"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">공지사항 조회</font></font></h5>
+							<h5 class="modal-title" id="modalCenterTitle"><font dir="auto" style="vertical-align: inherit;">
+								<font dir="auto" style="vertical-align: inherit;">공지사항 조회</font></font>
+							</h5>
 							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫다"></button>
 						</div>
 						<!-- 모달 본문 -->
@@ -216,7 +214,7 @@
 	<!-- 								</select> -->
 	<!-- 							</div> -->
 								<div class="mb-3" style="display:flex; gap:8px;">
-								    <input type="text" class="form-control" id="basic-default-fullname" placeholder="제목" style="flex:1;">
+								    <input type="text" class="form-control" id="notice-title-read" placeholder="제목" style="flex:1;">
 								    <label class="form-check-label" for="fixedCheck">고정</label>
 								    <input class="form-check-input" type="checkbox" value="" id="fixedCheck" checked="">
 								</div>
@@ -225,7 +223,7 @@
 									<p class="" style="flex:1;">2024-10-01 14:30</p>
 								</div>
 							    <div class="mb-3">
-							        <textarea id="basic-default-message" class="form-control" rows="10" placeholder="공지사항 내용 작성"></textarea>
+							        <textarea id="notice-content-read" class="form-control" rows="10" placeholder="공지사항 내용 작성"></textarea>
 							    </div>
 							    <div>
 									<label for="formFileDisabled" class="form-label">파일 첨부</label>
@@ -239,11 +237,16 @@
 									닫기
 								</font></font>
 							</button>
-							<button type="submit" class="btn btn-primary" form="noticeForm"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">수정</font></font></button>
+							<button type="button" class="btn btn-primary" id="notice-modify">
+								<font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">
+								수정</font></font>
+							</button>
 						</div>
 					</div>
 				</div>
 			</div>
+			<!-- /공지조회모달 -->
+		<!-- body 끝 -->	
 		</div>
 	</th:block>
 </body>

@@ -1,4 +1,3 @@
-
 const uri = "https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getHoliDeInfo?Servicekey";
 const myApiKey = "3bb524dc5656794ff51462c21245e81ffd44e902f5c3220a4d89b540465280e9";
 
@@ -25,7 +24,6 @@ const calendar = new tui.Calendar(calendarEl, {
 });
 
 
-
 let holidayData = null;
 let calendarYear = null;
 let scheduleData = null;
@@ -44,11 +42,9 @@ function updateCurrentDate() {
     
 	if(!calendarYear) { //처음 캘린더 생성
 		calendarYear = year;
-		console.log(calendarYear, "새로만든거");
 		InstallHoliday(year);
 	} else if(calendarYear != year) { // 선택된 년도가 바뀔때
 		calendarYear = year;
-		console.log(calendarYear, "다른해");
 		InstallHoliday(year);
 	}
 	
@@ -90,17 +86,17 @@ document.getElementById('btn-next').onclick = function() {
     updateCurrentDate();
 };
 
-	 // 주간 보기 버튼
-	 document.getElementById('btn-week').onclick = function() {
-	     calendar.changeView('week');
-	     updateCurrentDate();
-	 };
-
-	 // 월간 보기 버튼
-	 document.getElementById('btn-month').onclick = function() {
-	     calendar.changeView('month');
-	     updateCurrentDate();
-	 };
+//	 // 주간 보기 버튼
+//	 document.getElementById('btn-week').onclick = function() {
+//	     calendar.changeView('week');
+//	     updateCurrentDate();
+//	 };
+//
+//	 // 월간 보기 버튼
+//	 document.getElementById('btn-month').onclick = function() {
+//	     calendar.changeView('month');
+//	     updateCurrentDate();
+//	 };
 
 
 // 휴일정보 받아오기
@@ -126,7 +122,7 @@ function yearHoliday(year){
 			});
 			
 			// 스케줄 캘린더에 추가
-			console.log("스케줄데이터", schedule);
+//			console.log("스케줄데이터", schedule);
 			calendar.clear()
             calendar.createEvents(schedule);
 		})
