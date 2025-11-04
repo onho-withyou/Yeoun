@@ -3466,7 +3466,7 @@ textarea.form-control-lg {
   padding-left: 0;
 }
 .navbar-nav .dropdown-menu {
-  position: static;
+  /*position: static;*/
 }
 
 .navbar-text {
