@@ -6,6 +6,10 @@
 .menu .app-brand.demo {
   height: 64px;
   margin-top: 12px;
+<<<<<<< HEAD
+=======
+/*   margin-left: 20px;추가함 */
+>>>>>>> refs/heads/develop
 }
 
 .app-brand-logo.demo svg {

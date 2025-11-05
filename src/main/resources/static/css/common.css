@@ -34,8 +34,8 @@ li.menu-inner {
 
 /* 공통영역 css */
 .layout-page>.container-xxl {
-	background-color: white;/* main 배경색 */
-/* 	background-color: green;main 배경색 */
+/* 	background-color: white;main 배경색 */
+	background-color: var(--bs-body-bg);/* 본문 배경색 */
 	margin-top: 30px;
 	box-sizing: border-box;
 	padding-left: 1.8rem;
@@ -47,6 +47,7 @@ li.menu-inner {
 .custom-body h2{
 	font-size: 1.8em;
 	margin-bottom: 1.8rem;
+	color: var(--bs-body-color); /* 본문 글자색 */
 }
 
 .operator-side {
