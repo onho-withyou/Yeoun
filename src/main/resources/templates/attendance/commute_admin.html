@@ -23,6 +23,9 @@
 	                	<option value="">근무유형</option>
 	                </select>
                 </div>
+                <div class="mb-6 col-lg-6 col-xl-2 col-12 mb-0">
+	             	<button class="btn btn-primary">조회</button>
+                </div>
 			</div>
 			<div class="d-flex">
 	            <div class="mb-6 mb-0">
@@ -61,6 +64,61 @@
 						</tr>
 					</tbody>
 				</table>
+			</div>
+		</div>
+		<div class="modal fade" id="modalCenter" tabindex="-1" style="display: none;" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="modalCenterTitle">출/퇴근 입력</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<form>
+							<div class="col mb-6">
+								<label class="form-label">부서</label>
+								<select class="form-select">
+									<option value="">부서</option>
+									<option value="">개발부</option>
+									<option value="">인사부</option>
+								</select>
+							</div>
+							<div class="col mb-6">
+								<label class="form-label">직급</label>
+								<select class="form-select">
+									<option value="">직급</option>
+									<option value="">과장</option>
+									<option value="">부장</option>
+								</select>
+							</div>
+							<div class="col mb-6">
+								<label for="nameWithTitle" class="form-label">이름</label>
+								<input type="text" id="nameWithTitle" class="form-control"/>
+							</div>
+							<div class="col mb-6">
+								<label for="inTime" class="form-label">출근시간</label>
+								<input type="time" id="inTime" class="form-control"/>
+							</div>
+							<div class="col mb-6">
+								<label for="endTime" class="form-label">퇴근시간</label>
+								<input type="time" id="endTime" class="form-control"/>
+							</div>
+							<div class="col mb-6">
+								<label class="form-label">상태</label>
+								<select class="form-select">
+									<option value="">상태</option>
+									<option value="">출근</option>
+									<option value="">지각</option>
+									<option value="">휴무</option>
+									<option value="">조퇴</option>
+								</select>
+							</div>
+							<div class="modal-footer mt-3 p-0">
+								<button class="btn btn-primary">등록</button>
+							</div>
+						</form>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
