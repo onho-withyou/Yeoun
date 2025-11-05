@@ -9,7 +9,7 @@
               <ul class="navbar-nav flex-row align-items-center ms-auto dropdown">
               	<li class="nav-item lh-1 me-3">
                    <img th:src="@{icon/payment-doc.png}" data-bs-toggle="dropdown" id="payment" width="33" alt="전자결재 알림"/>
-				    <ul class="dropdown-menu">
+				    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
 					  <li><a class="dropdown-item" href="#">Action</a></li>
 					  <li><a class="dropdown-item" href="#">Another action</a></li>
 					  <li><a class="dropdown-item" href="#">Something else here</a></li>
@@ -46,7 +46,7 @@
               </ul>
             </div>
           </nav>
-          <script >
+		  <script>
          	const payment = document.getElementById("payment");
       		const bell = document.getElementById("bell");
       		const chat = document.getElementById("chat");
