@@ -1,0 +1,103 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/layouts/layout.html}">
+
+<th:block layout:fragment="content">
+<body>
+
+	<div class="container-fluid py-4">
+		<!-- ===================== HEADER ===================== -->
+		<header class="mb-4">
+			<nav class="navbar navbar-expand-lg navbar-dark bg-dark rounded">
+				<div class="container-fluid">
+					<a class="navbar-brand fw-bold text-white" href="#">Yeoun ERP</a>
+					<button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+						data-bs-target="#navbarNav" aria-controls="navbarNav"
+						aria-expanded="false" aria-label="Toggle navigation">
+						<span class="navbar-toggler-icon"></span>
+					</button>
+					<div class="collapse navbar-collapse" id="navbarNav">
+						<ul class="navbar-nav ms-auto">
+							<li class="nav-item"><a class="nav-link active" th:href="@{/}">홈</a></li>
+							<li class="nav-item"><a class="nav-link" th:href="@{/pay}">급여계산</a></li>
+							<li class="nav-item"><a class="nav-link" th:href="@{/member}">사원관리</a></li>
+						</ul>
+					</div>
+				</div>
+			</nav>
+		</header>
+
+		<!-- ===================== MAIN CONTENT ===================== -->
+		<div class="custom-body container bg-light p-4 rounded shadow-sm">
+			<h1 class="mb-4 fw-bold text-primary">급여기준정보</h1>
+
+			<div class="mb-5">
+				<h3 class="text-dark">1. 사원 정보 연동 (인사 관리 모듈)</h3>
+				<p>인사 관리 모듈에 등록된 사원 정보(사번, 부서, 직급, 입사일)를 자동으로 불러옵니다.</p>
+				<div class="alert alert-success">
+					최근 연동 상태: <strong>정상</strong> | 최종 연동 시간: 2025-10-28 13:45:00
+				</div>
+				<div class="mb-2">
+					<button class="btn btn-primary me-2" onclick="alert('사원 정보 수동 연동을 실행합니다.')">수동 연동 실행</button>
+					<button class="btn btn-outline-secondary" onclick="alert('연동 설정 화면으로 이동합니다.')">연동 상세 설정</button>
+				</div>
+			</div>
+
+			<div class="mb-5">
+				<h3 class="text-dark">2. 급여 기준 설정 (기준표 관리)</h3>
+				<p>기본급, 수당, 공제 항목 및 4대 보험/세금 설정을 관리합니다.</p>
+
+				<table class="table table-bordered align-middle">
+					<tbody>
+						<tr>
+							<th class="bg-light" style="width: 200px;">급여 항목 관리</th>
+							<td>
+								<p>기본급, 수당(식대, 교통비, 직책수당 등)의 항목 및 계산 방식 설정</p>
+								<button class="btn btn-primary" onclick="alert('급여 항목 설정 페이지로 이동합니다.')">항목 설정</button>
+							</td>
+						</tr>
+						<tr>
+							<th class="bg-light">공제 항목 설정</th>
+							<td>
+								<p>세금(소득세, 지방세) 및 기타 공제 항목(상조회비 등) 설정</p>
+								<button class="btn btn-primary" onclick="alert('공제 항목 설정 페이지로 이동합니다.')">공제 설정</button>
+							</td>
+						</tr>
+						<tr>
+							<th class="bg-light">4대 보험 설정</th>
+							<td>
+								<p>4대 보험 요율 설정 및 최저/최고 상한액 기준 관리</p>
+								<button class="btn btn-primary" onclick="alert('4대 보험 요율 관리 페이지로 이동합니다.')">4대 보험 설정</button>
+							</td>
+						</tr>
+						<tr>
+							<th class="bg-light">직급별 급여 기준표</th>
+							<td>
+								<p>부서 이동 및 직급 변경 시 자동 적용될 급여 기준 테이블 관리</p>
+								<button class="btn btn-primary" onclick="alert('기준표 관리 페이지로 이동합니다.')">기준표 관리</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div>
+				<h3 class="text-dark">3. 근태 연동 (근태 관리 모듈)</h3>
+				<p>근태 관리 모듈과 연동하여 출근/퇴근, 휴가, 연장 근무 시간 데이터를 자동으로 불러와 급여 계산에 반영합니다.</p>
+
+				<div class="alert alert-warning">
+					최근 연동 상태: <strong>일부 지연</strong> | 최종 데이터 수신: 2025-10-28 12:00:00
+				</div>
+
+				<div>
+					<button class="btn btn-primary me-2" onclick="alert('근태 데이터 수동 동기화를 시도합니다.')">근태 데이터 동기화</button>
+					<button class="btn btn-outline-secondary" onclick="alert('근태 연동 상세 설정 페이지로 이동합니다.')">연동 상세 설정</button>
+				</div>
+			</div>
+		</div>
+
+		
+
+</body>
+</th:block>
+</th:block>
