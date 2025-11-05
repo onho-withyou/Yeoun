@@ -1,5 +1,16 @@
 @charset "UTF-8";
 
+/* 폰트 */
+:root{
+  --bs-font-sans-serif: "Noto Sans KR","Public Sans",system-ui,-apple-system,
+                        "Segoe UI",Roboto,"Helvetica Neue","Apple SD Gothic Neo",
+                        "Malgun Gothic","맑은 고딕",Arial,sans-serif;
+}
+
+body {
+  font-family: var(--bs-font-sans-serif) !important;
+}
+
 
 /* 사이드바 - 로고 위치 설정 */
 .text-primary {
@@ -28,6 +39,12 @@ li.menu-inner {
 	top: 0;
 	left: 0;
 	z-index: 1050;
+}
+
+/* 헤더 a태그 커서 */
+a.nav-font-size {
+  cursor: default !important;
+  transition: color 0.2s ease;
 }
 
 /* 반응형 여백 설정*/

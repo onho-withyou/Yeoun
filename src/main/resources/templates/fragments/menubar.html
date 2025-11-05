@@ -3,7 +3,9 @@
 	layout:fragment="aside">
         <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
           <div class="app-brand demo">
-             <img th:src="@{icon/yeoun-logo.png}" width="190"/>
+          	<a th:href="@{/main}">
+            	<img th:src="@{/icon/yeoun-logo.png}" width="190"/>
+            </a>
           </div>
           <!-- data-i18n : 다국어 지원 -->
           <ul class="menu-inner py-1">
@@ -59,13 +61,13 @@
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item">
-                        <a href="" class="menu-link">
-                            <div data-i18n="Menu1">menu1</div>
+                        <a href="/attendance/my_attendance_list" class="menu-link">
+                            <div data-i18n="Menu2">출/퇴근 현황</div>
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="" class="menu-link">
-                            <div data-i18n="Menu2">menu2</div>
+                        <a href="/attendance/attendance_list" class="menu-link">
+                            <div data-i18n="Menu1">사원 출/퇴근 현황</div>
                         </a>
                     </li>
                 </ul>
@@ -98,18 +100,18 @@
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item">
-                        <a href="" class="menu-link" target="_blank">
-                            <div data-i18n="Menu1">menu1</div>
+                         <a th:href="@{/pay/pay_rule}" class="menu-link">
+                            <div data-i18n="Menu1">기준정보</div>
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="" class="menu-link" target="_blank">
-                            <div data-i18n="Menu2">menu2</div>
+                         <a th:href="@{/pay/payroll_payslip}" class="menu-link">
+                            <div data-i18n="Menu2">급여계산</div>
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="" class="menu-link" target="_blank">
-                            <div data-i18n="Menu3">menu3</div>
+                    <a th:href="@{/pay/emp_pay}" class="menu-link"> 
+                            <div data-i18n="Menu3">급여지급</div>
                         </a>
                     </li>
                 </ul>
