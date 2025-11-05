@@ -1,6 +1,6 @@
 @charset "UTF-8";
 :root {
-  --bs-blue: #007bf
+  --bs-blue: #007bff;
   --bs-indigo: #6610f2;
   --bs-purple: #696cff;
   --bs-pink: #e83e8c;
@@ -128,7 +128,7 @@ body {
   line-height: var(--bs-body-line-height);
   color: var(--bs-body-color);
   text-align: var(--bs-body-text-align);
-  background-color: var(--bs-body-bg);
+  background-color: var(--bs-body-bg-out) !important;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(67, 89, 113, 0);
 }
