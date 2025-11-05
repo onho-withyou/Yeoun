@@ -9,9 +9,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequestMapping("/main")
 public class MainController {
+	// 메인페이지 맵핑
 	@GetMapping("")
 	public String Main() {
 		return "/main/main";
+	}
+	
+	// 메인페이지 스케줄페이지
+	@GetMapping("/schedule")
+	public String schedule() {
+		return "/main/schedule";
 	}
 	
 }
