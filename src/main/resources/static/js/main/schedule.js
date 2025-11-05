@@ -181,6 +181,5 @@ document.addEventListener('DOMContentLoaded', function () {
 		calendar: {
 			showToday : false,
 		}
-
 	});
 });
