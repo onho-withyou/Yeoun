@@ -18,4 +18,10 @@ public class AttendanceController {
 	public String attendance() {
 		return "attendance/commute";
 	}
+	
+	// 근무정책관리
+	@GetMapping("/policy")
+	public String policyForm() {
+		return "attendance/policy";
+	}
 }
