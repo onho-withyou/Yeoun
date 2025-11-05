@@ -1,78 +1,77 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{/layouts/layout.html}">
-
+<head>
+	<link rel="stylesheet" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css">
+	<link rel="stylesheet" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@toast-ui/calendar@2.1.3/dist/toastui-calendar.min.css" />
+</head>
 <body>
 <th:block layout:fragment="content">
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
-		<!-- custom-content -->
-		<div class="container mt-4">
-		    <div class="container mt-4">
-			    <div class="row">
-			        <!-- 왼쪽 열: 일정추가/데이트피커/필터 -->
-			        <div class="col-md-4 col-lg-3">
-			            <!-- 1. 일정추가 버튼 -->
-			            <button class="btn btn-outline-primary w-100 mb-3" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
-			                일정 추가
-			            </button>
-			            <!-- 2. 데이트피커 헤더/네비 -->
-			            <div class="d-flex align-items-center justify-content-between mb-1">
-			                <button id="dp-prev" class="btn btn-sm btn-light">&lt;</button>
-			                <span id="dp-year-month" class="fw-bold"></span>
-			                <button id="dp-next" class="btn btn-sm btn-light">&gt;</button>
-			            </div>
-			            <!-- 3. TUI 데이트피커 -->
-			            <div id="tui-date-picker"></div>
-			            <!-- 4. 체크박스 필터 -->
-			            <div class="mt-4">
-			                <div class="form-check">
-			                    <input class="form-check-input" type="checkbox" value="company" id="filter-company" checked>
-			                    <label class="form-check-label" for="filter-company">회사</label>
-			                </div>
-			                <div class="form-check">
-			                    <input class="form-check-input" type="checkbox" value="department" id="filter-department" checked>
-			                    <label class="form-check-label" for="filter-department">부서</label>
-			                </div>
-			                <div class="form-check">
-			                    <input class="form-check-input" type="checkbox" value="personal" id="filter-personal" checked>
-			                    <label class="form-check-label" for="filter-personal">개인</label>
-			                </div>
-			            </div>
-			        </div>
-			
-			        <!-- 오른쪽 열: 달력/탭(View 변환) 버튼 -->
-			        <div class="col-md-8 col-lg-9">
-			            <section class="panel calendar border">
-			                <!-- 달력 header: 탭(view 변환) 버튼 -->
-			                <div class="calendar-header d-flex align-items-center justify-content-end pb-2">
-			                    <div class="btn-group" role="group">
-			                        <button type="button" class="btn btn-outline-secondary btn-sm calendar-view-tab" data-view="month">Month</button>
-			                        <button type="button" class="btn btn-outline-secondary btn-sm calendar-view-tab" data-view="week">Week</button>
-			                        <button type="button" class="btn btn-outline-secondary btn-sm calendar-view-tab" data-view="day">Day</button>
-			                        <button type="button" class="btn btn-outline-secondary btn-sm calendar-view-tab" data-view="list">List</button>
-			                    </div>
-			                </div>
-			                <!-- 실제 TUI 캘린더 출력 -->
-			                <div id="calendar" style="height: 700px;"></div>
-			            </section>
-			        </div>
-			    </div>
-			</div>
-		</div>
-		<!-- /customcontent -->
-	    
+	    <!-- custom-content -->
+	    <div class="container mt-4">
+	        <div class="row">
+	            <!-- 왼쪽 열: 일정추가/데이트피커/필터 (세로 3구간) -->
+	            <div class="col-md-4 col-lg-3 d-flex flex-column justify-content-between" style="height: 700px;">
+	                <!-- 1. 일정추가 버튼 (상단) -->
+	                <div>
+	                    <button class="btn btn-outline-primary w-100 mb-3"
+	                            data-bs-toggle="modal" data-bs-target="#addScheduleModal">
+	                        일정 추가
+	                    </button>
+	                </div>
+	                <!-- 2. 데이트피커 (중앙) -->
+	                <div class="align-items-center justify-content-center">
+	                    <div id="tui-datepicker" style="margin-top: -1px;"></div>
+	                </div>
+	                <!-- 3. 체크박스 필터 (하단) -->
+	                <div>
+	                    <div class="form-check">
+	                        <input class="form-check-input" type="checkbox" value="company" id="filter-company" checked>
+	                        <label class="form-check-label" for="filter-company">회사</label>
+	                    </div>
+	                    <div class="form-check">
+	                        <input class="form-check-input" type="checkbox" value="department" id="filter-department" checked>
+	                        <label class="form-check-label" for="filter-department">부서</label>
+	                    </div>
+	                    <div class="form-check">
+	                        <input class="form-check-input" type="checkbox" value="personal" id="filter-personal" checked>
+	                        <label class="form-check-label" for="filter-personal">개인</label>
+	                    </div>
+	                </div>
+	            </div>
+	
+	            <!-- 오른쪽 열: 달력/탭(View 변환) -->
+	            <div class="col-md-8 col-lg-9">
+	                <section class="panel calendar border">
+	                    <div class="calendar-header d-flex align-items-center justify-content-end pb-2">
+	                        <div class="btn-group" role="group">
+	                            <button type="button" class="btn btn-outline-secondary btn-sm calendar-view-tab" data-view="month">Month</button>
+	                            <button type="button" class="btn btn-outline-secondary btn-sm calendar-view-tab" data-view="week">Week</button>
+	                            <button type="button" class="btn btn-outline-secondary btn-sm calendar-view-tab" data-view="day">Day</button>
+	                            <button type="button" class="btn btn-outline-secondary btn-sm calendar-view-tab" data-view="list">List</button>
+	                        </div>
+	                    </div>
+	                    <!-- 실제 TUI 캘린더 출력 -->
+	                    <div id="calendar" style="height: 700px;"></div>
+	                </section>
+	            </div>
+	        </div>
+	    </div>
+	    <!-- /customcontent -->
 	</div>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@toast-ui/calendar@2.1.3/dist/toastui-calendar.min.css" />
+	<!-- 타임피커 -->
+	<script src="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.min.js"></script>
+	<!-- 데이트피커 -->
+	<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.js"></script>
+	<!-- 캘린더 -->
 	<script src="https://cdn.jsdelivr.net/npm/@toast-ui/calendar@2.1.3/dist/toastui-calendar.min.js"></script>
 	
-	<link rel="stylesheet" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css">
-	<link rel="stylesheet" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css">
-	<script src="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.min.js"></script>
-	<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.min.js"></script>
 	
 	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 	
-	<script src="/js/main/calendar.js"></script>
+	<script src="/js/main/schedule.js"></script>
 </th:block>
 
 </body>
