@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class NoticeController {
 	@GetMapping("")
 	public String notice() {
-		return "notice";
+		return "/notice/notice";
 	}
 	
 }
