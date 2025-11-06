@@ -1,4 +1,4 @@
-/*home 화면 ui 배경색을 위한 js 파일*/
+/*home 화면 ui 테마변경을 위한 js 파일*/
 
 'use strict';
 
