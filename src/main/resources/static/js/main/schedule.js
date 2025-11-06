@@ -139,9 +139,9 @@ function openMyCustomModal(data) {
 	// 예시: Bootstrap 모달 띄우기
 	new bootstrap.Modal(document.getElementById('addScheduleModal')).show();
 	openAddScheduleModal();
-
-	document.getElementById('startpicker-input').innerText = formatDateToYYYYMMDD(data.start).toString();
-	document.getElementById('endpicker-input').innerText = formatDateToYYYYMMDD(data.end).toString();
+		
+	document.getElementById('startpicker-input').value = formatDateToYYYYMMDD(data.start).toString();
+	document.getElementById('endpicker-input').value = formatDateToYYYYMMDD(data.end).toString();
 	document.getElementById('allDayCheckbox').checked = data.isAllDay;
 }
 
@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	});
 	
 	// ----------------------------------------------------
-	// datepicer 클릭 calendar 연동
+	// datepicker 클릭 calendar 연동
 	dateController.on('change', function() {
 		var selectedDate = dateController.getDate();
 		var formattedDate = formatDateToYYYYMMDD(selectedDate);
@@ -285,11 +285,30 @@ document.addEventListener('DOMContentLoaded', function () {
 	
 	// 스케줄 추가시 커스텀 모달 열기
 	calendar.on('selectDateTime', (event) => {
-		console.log('selectDateTime 이벤트 발생:', event);
-		// 기존 'scheduleDetailClick' 역할
-		openMyCustomModal(event); // event에 정보 있음
-		const selectedEls = document.querySelectorAll('.is-selected, .tui-calendar-event-selected, .focused');
-		selectedEls.forEach(el => el.classList.remove('is-selected', 'tui-calendar-event-selected', 'focused'));
+		const today = new Date();
+		const startDate = new Date(event.start);
+		formattedStartDate = formatDateToYYYYMMDD(startDate);
+		formattedToday = formatDateToYYYYMMDD(today);
+		
+		if(formattedStartDate < formattedToday){
+			alert("과거 날짜에는 일정을 추가할 수 없습니다.");
+		} else {
+			// 기존 'scheduleDetailClick' 역할
+			openMyCustomModal(event); // event에 정보 있음
+		}
+		calendar.clearGridSelections();
+	});
+	// 일정 클릭시 이벤트
+	calendar.on('clickEvent', (eventInfo) => {
+	  const event = eventInfo.event;
+
+	  if (event.calendarId === 'leave') {
+	    // 커스텀 카테고리인 경우 => 커스텀 모달 열기
+	    openMyCustomModal(event);
+	  } else {
+	    // 그 외 일반 카테고리는 기본 모달(Open Detail Popup) 열기
+	    calendar.openDetailPopup(event);
+	  }
 	});
 
 	
