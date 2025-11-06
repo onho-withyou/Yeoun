@@ -1,103 +1,240 @@
-<th:block xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{/layouts/layout.html}">
-
-<th:block layout:fragment="content">
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>급여 기준 정보 (PAY_RULE)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <style>
+        body{background:#f6f7fb}
+        .card{border-radius:14px}
+        .form-text{font-size:12px}
+        .table thead th{white-space:nowrap}
+        .nowrap{white-space:nowrap}
+        .small{font-size:.9rem}
+    </style>
+</head>
 <body>
+<div class="container py-4">
+    <h2 class="fw-bold text-primary mb-3">급여 기준 정보 (PAY_RULE)</h2>
 
-	<div class="container-fluid py-4">
-		<!-- ===================== HEADER ===================== -->
-		<header class="mb-4">
-			<nav class="navbar navbar-expand-lg navbar-dark bg-dark rounded">
-				<div class="container-fluid">
-					<a class="navbar-brand fw-bold text-white" href="#">Yeoun ERP</a>
-					<button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-						data-bs-target="#navbarNav" aria-controls="navbarNav"
-						aria-expanded="false" aria-label="Toggle navigation">
-						<span class="navbar-toggler-icon"></span>
-					</button>
-					<div class="collapse navbar-collapse" id="navbarNav">
-						<ul class="navbar-nav ms-auto">
-							<li class="nav-item"><a class="nav-link active" th:href="@{/}">홈</a></li>
-							<li class="nav-item"><a class="nav-link" th:href="@{/pay}">급여계산</a></li>
-							<li class="nav-item"><a class="nav-link" th:href="@{/member}">사원관리</a></li>
-						</ul>
-					</div>
-				</div>
-			</nav>
-		</header>
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title mb-3">기준 등록</h5>
+            <form th:action="@{/pay/rule}" th:object="${newRule}" method="post" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">적용 시작일 (START_DATE)</label>
+                    <input type="date" th:field="*{startDate}" class="form-control" required>
+                    <div class="form-text">해당 기준의 적용 시작일</div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">적용 종료일 (END_DATE)</label>
+                    <input type="date" th:field="*{endDate}" class="form-control">
+                    <div class="form-text">무기한이면 비워두세요</div>
+                </div>
 
-		<!-- ===================== MAIN CONTENT ===================== -->
-		<div class="custom-body container bg-light p-4 rounded shadow-sm">
-			<h1 class="mb-4 fw-bold text-primary">급여기준정보</h1>
+                <div class="col-md-3">
+                    <label class="form-label">기본급 (BASE_AMT)</label>
+                    <input type="number" th:field="*{baseAmt}" class="form-control" step="0.01" min="0" placeholder="예: 2500000">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">식대 (MEAL_AMT)</label>
+                    <input type="number" th:field="*{mealAmt}" class="form-control" step="0.01" min="0" placeholder="예: 200000">
+                </div>
 
-			<div class="mb-5">
-				<h3 class="text-dark">1. 사원 정보 연동 (인사 관리 모듈)</h3>
-				<p>인사 관리 모듈에 등록된 사원 정보(사번, 부서, 직급, 입사일)를 자동으로 불러옵니다.</p>
-				<div class="alert alert-success">
-					최근 연동 상태: <strong>정상</strong> | 최종 연동 시간: 2025-10-28 13:45:00
-				</div>
-				<div class="mb-2">
-					<button class="btn btn-primary me-2" onclick="alert('사원 정보 수동 연동을 실행합니다.')">수동 연동 실행</button>
-					<button class="btn btn-outline-secondary" onclick="alert('연동 설정 화면으로 이동합니다.')">연동 상세 설정</button>
-				</div>
-			</div>
+                <div class="col-md-3">
+                    <label class="form-label">교통비 (TRANS_AMT)</label>
+                    <input type="number" th:field="*{transAmt}" class="form-control" step="0.01" min="0" placeholder="예: 100000">
+                </div>
 
-			<div class="mb-5">
-				<h3 class="text-dark">2. 급여 기준 설정 (기준표 관리)</h3>
-				<p>기본급, 수당, 공제 항목 및 4대 보험/세금 설정을 관리합니다.</p>
+                <div class="col-md-3">
+                    <label class="form-label">국민연금율 (PEN_RATE)</label>
+                    <input type="number" th:field="*{penRate}" class="form-control" step="0.0001" min="0" max="1" placeholder="예: 0.045">
+                    <div class="form-text">예) 4.5% → 0.045</div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">건강보험율 (HLTH_RATE)</label>
+                    <input type="number" th:field="*{hlthRate}" class="form-control" step="0.0001" min="0" max="1" placeholder="예: 0.035">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">고용보험율 (EMP_RATE)</label>
+                    <input type="number" th:field="*{empRate}" class="form-control" step="0.0001" min="0" max="1" placeholder="예: 0.009">
+                </div>
 
-				<table class="table table-bordered align-middle">
-					<tbody>
-						<tr>
-							<th class="bg-light" style="width: 200px;">급여 항목 관리</th>
-							<td>
-								<p>기본급, 수당(식대, 교통비, 직책수당 등)의 항목 및 계산 방식 설정</p>
-								<button class="btn btn-primary" onclick="alert('급여 항목 설정 페이지로 이동합니다.')">항목 설정</button>
-							</td>
-						</tr>
-						<tr>
-							<th class="bg-light">공제 항목 설정</th>
-							<td>
-								<p>세금(소득세, 지방세) 및 기타 공제 항목(상조회비 등) 설정</p>
-								<button class="btn btn-primary" onclick="alert('공제 항목 설정 페이지로 이동합니다.')">공제 설정</button>
-							</td>
-						</tr>
-						<tr>
-							<th class="bg-light">4대 보험 설정</th>
-							<td>
-								<p>4대 보험 요율 설정 및 최저/최고 상한액 기준 관리</p>
-								<button class="btn btn-primary" onclick="alert('4대 보험 요율 관리 페이지로 이동합니다.')">4대 보험 설정</button>
-							</td>
-						</tr>
-						<tr>
-							<th class="bg-light">직급별 급여 기준표</th>
-							<td>
-								<p>부서 이동 및 직급 변경 시 자동 적용될 급여 기준 테이블 관리</p>
-								<button class="btn btn-primary" onclick="alert('기준표 관리 페이지로 이동합니다.')">기준표 관리</button>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+                <div class="col-md-3">
+                    <label class="form-label">소득세율 (TAX_RATE)</label>
+                    <input type="number" th:field="*{taxRate}" class="form-control" step="0.0001" min="0" max="1" placeholder="예: 0.05">
+                    <div class="form-text">예) 5% → 0.05</div>
+                </div>
 
-			<div>
-				<h3 class="text-dark">3. 근태 연동 (근태 관리 모듈)</h3>
-				<p>근태 관리 모듈과 연동하여 출근/퇴근, 휴가, 연장 근무 시간 데이터를 자동으로 불러와 급여 계산에 반영합니다.</p>
+                <div class="col-md-3">
+                    <label class="form-label">지급일 (PAY_DAY)</label>
+                    <input type="number" th:field="*{payDay}" class="form-control" min="1" max="31" placeholder="예: 25" required>
+                    <div class="form-text">매월 n일 지급</div>
+                </div>
 
-				<div class="alert alert-warning">
-					최근 연동 상태: <strong>일부 지연</strong> | 최종 데이터 수신: 2025-10-28 12:00:00
-				</div>
+                <div class="col-md-3">
+                    <label class="form-label">상태 (STATUS)</label>
+                    <select th:field="*{status}" class="form-select">
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="INACTIVE">INACTIVE</option>
+                    </select>
+                    <div class="form-text">현재 기준 사용 여부</div>
+                </div>
 
-				<div>
-					<button class="btn btn-primary me-2" onclick="alert('근태 데이터 수동 동기화를 시도합니다.')">근태 데이터 동기화</button>
-					<button class="btn btn-outline-secondary" onclick="alert('근태 연동 상세 설정 페이지로 이동합니다.')">연동 상세 설정</button>
-				</div>
-			</div>
-		</div>
+                <div class="col-12">
+                    <label class="form-label">비고 (REMARK)</label>
+                    <textarea th:field="*{remark}" class="form-control" rows="2" placeholder="메모..."></textarea>
+                </div>
 
-		
+                <div class="col-12 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">등록</button>
+                    <button type="reset" class="btn btn-outline-secondary">초기화</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title mb-3">기준 목록</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle bg-white">
+                    <thead class="table-light">
+                    <tr class="text-center">
+                        <th class="nowrap">RULE_ID</th>
+                        <th class="nowrap">START_DATE</th>
+                        <th class="nowrap">END_DATE</th>
+                        <th class="nowrap">BASE_AMT</th>
+                        <th class="nowrap">MEAL_AMT</th>
+                        <th class="nowrap">TRANS_AMT</th>
+                        <th class="nowrap">PEN_RATE</th>
+                        <th class="nowrap">HLTH_RATE</th>
+                        <th class="nowrap">EMP_RATE</th>
+                        <th class="nowrap">TAX_RATE</th>
+                        <th class="nowrap">PAY_DAY</th>
+                        <th class="nowrap">STATUS</th>
+                        <th class="nowrap">REMARK</th>
+                        <th class="nowrap">CREATED_DATE</th>
+                        <th class="nowrap">UPDATED_DATE</th>
+                        <th class="nowrap">관리</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="r : ${rules}">
+                        <td th:text="${r.ruleId}" class="text-center"></td>
+                        <td th:text="${#temporals.format(r.startDate, 'yyyy-MM-dd')}" class="text-center"></td>
+                        <td th:text="${r.endDate != null ? #temporals.format(r.endDate, 'yyyy-MM-dd') : ''}" class="text-center"></td>
+                        <td th:text="${#numbers.formatDecimal(r.baseAmt, 0, 'COMMA', 2, 'POINT')}"></td>
+                        <td th:text="${#numbers.formatDecimal(r.mealAmt, 0, 'COMMA', 2, 'POINT')}"></td>
+                        <td th:text="${#numbers.formatDecimal(r.transAmt, 0, 'COMMA', 2, 'POINT')}"></td>
+                        <td th:text="${r.penRate}"></td>
+                        <td th:text="${r.hlthRate}"></td>
+                        <td th:text="${r.empRate}"></td>
+                        <td th:text="${r.taxRate}"></td>
+                        <td th:text="${r.payDay}" class="text-center"></td>
+                        <td>
+                            <span th:text="${r.status}" th:classappend="${r.status.name()=='ACTIVE'} ? 'badge bg-success' : 'badge bg-secondary'"></span>
+                        </td>
+                        <td th:text="${r.remark}"></td>
+                        <td th:text="${#temporals.format(r.createdDate, 'yyyy-MM-dd HH:mm')}"></td>
+                        <td th:text="${r.updatedDate != null ? #temporals.format(r.updatedDate, 'yyyy-MM-dd HH:mm') : ''}"></td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-primary"
+                                    data-bs-toggle="modal"
+                                    th:attr="data-bs-target=${'#editModal-' + r.ruleId}">
+                                수정
+                            </button>
+                            <a th:href="@{'/pay/rule/delete/' + ${r.ruleId}}"
+                               class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('삭제하시겠습니까?');">삭제</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div th:each="r : ${rules}">
+        <div class="modal fade" th:id="${'editModal-' + r.ruleId}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <form th:action="@{'/pay/rule/' + ${r.ruleId}}" method="post">
+                        <div class="modal-header">
+                            <h5 class="modal-title">기준 수정 - <span th:text="${r.ruleId}"></span></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">START_DATE</label>
+                                    <input type="date" name="startDate" th:value="${#temporals.format(r.startDate, 'yyyy-MM-dd')}" class="form-control" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">END_DATE</label>
+                                    <input type="date" name="endDate" th:value="${r.endDate != null ? #temporals.format(r.endDate, 'yyyy-MM-dd') : ''}" class="form-control">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">PAY_DAY</label>
+                                    <input type="number" name="payDay" th:value="${r.payDay}" class="form-control" min="1" max="31" required>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">BASE_AMT</label>
+                                    <input type="number" name="baseAmt" th:value="${r.baseAmt}" class="form-control" step="0.01" min="0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">MEAL_AMT</label>
+                                    <input type="number" name="mealAmt" th:value="${r.mealAmt}" class="form-control" step="0.01" min="0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">TRANS_AMT</label>
+                                    <input type="number" name="transAmt" th:value="${r.transAmt}" class="form-control" step="0.01" min="0">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label">PEN_RATE</label>
+                                    <input type="number" name="penRate" th:value="${r.penRate}" class="form-control" step="0.0001" min="0" max="1">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">HLTH_RATE</label>
+                                    <input type="number" name="hlthRate" th:value="${r.hlthRate}" class="form-control" step="0.0001" min="0" max="1">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">EMP_RATE</label>
+                                    <input type="number" name="empRate" th:value="${r.empRate}" class="form-control" step="0.0001" min="0" max="1">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">TAX_RATE</label>
+                                    <input type="number" name="taxRate" th:value="${r.taxRate}" class="form-control" step="0.0001" min="0" max="1">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label">STATUS</label>
+                                    <select name="status" class="form-select">
+                                        <option value="ACTIVE" th:selected="${r.status.name() == 'ACTIVE'}">ACTIVE</option>
+                                        <option value="INACTIVE" th:selected="${r.status.name() == 'INACTIVE'}">INACTIVE</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label">REMARK</label>
+                                    <textarea name="remark" class="form-control" rows="2" th:text="${r.remark}"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary" type="submit">저장</button>
+                            <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">닫기</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</th:block>
-</th:block>
+</html>

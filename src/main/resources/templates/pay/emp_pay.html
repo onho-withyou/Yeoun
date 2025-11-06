@@ -1,85 +1,91 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-          layout:decorate="~{/layouts/layout.html}">
+          layout:decorate="~{layouts/layout}"> <!-- 경로 수정: /와 .html 제거 -->
 
   <th:block layout:fragment="content">
 
-    <div class="container-fluid py-4">
+   <div class="container-xxl py-4">
 
       <!-- ===================== PAGE HEADER ===================== -->
       <header>
-        <div class="container row">
+        <div class="container row" style="align-items:center; justify-content:space-between; gap:12px;">
           <div class="grow">
-            <h1>급여 명세서 조회</h1>
+            <h1 style="margin:0">급여 명세서 조회</h1>
             <div class="subtitle">월별 급여명세서 확인 · PDF 다운로드 · 문의 등록</div>
           </div>
-          <div class="toolbar">
-            <button class="btn btn-ghost btn-icon" id="prevMonthBtn">◀ 이전</button>
-            <input id="month" type="month">
-            <button class="btn btn-ghost btn-icon" id="nextMonthBtn">다음 ▶</button>
-            <button class="btn btn-soft btn-icon" id="printBtn">🖨 PDF 저장</button>
+          <div class="toolbar" style="display:flex; gap:8px; align-items:center">
+            <button class="btn btn-outline-secondary btn-sm" id="prevMonthBtn">◀ 이전</button>
+            <input id="month" type="month" class="form-control form-control-sm" style="width:150px">
+            <button class="btn btn-outline-secondary btn-sm" id="nextMonthBtn">다음 ▶</button>
+            <button class="btn btn-outline-primary btn-sm" id="printBtn">🖨 PDF 저장</button>
+            <button class="btn btn-outline-primary btn-sm" id="openCompareBtn">📊 전월/전년도 비교</button>
           </div>
         </div>
       </header>
 
-      <main class="container grid">
+      <main class="container grid" style="margin-top:16px">
         <!-- Summary -->
-        <section class="grid two">
-          <div class="panel">
+        <section class="grid two" style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
+          <div class="panel" style="border:1px solid #e5e7eb; border-radius:8px; padding:16px">
             <div class="muted mini" id="payMonthLabel">2025-01</div>
-            <div class="kpi" id="netPay">₩0</div>
-            <div class="kpi-sub">실수령액</div>
+            <div class="kpi" id="netPay" style="font-size:28px; font-weight:700">₩0</div>
+            <div class="kpi-sub" style="color:#64748b">실수령액</div>
           </div>
-          <div class="panel">
-            <div class="row" style="justify-content:space-between">
+          <div class="panel" style="border:1px solid #e5e7eb; border-radius:8px; padding:16px">
+            <div class="row" style="display:flex; justify-content:space-between; gap:12px">
               <div>
-                <div><strong id="empName">홍길동</strong> <span class="badge" id="empPos">대리</span></div>
+                <div><strong id="empName">홍길동</strong> <span class="badge bg-secondary" id="empPos">대리</span></div>
                 <div class="muted mini">부서: <span id="empDept">개발1팀</span> · 사번: <span id="empNo">E2025001</span></div>
               </div>
-              <div class="right">
+              <div class="right" style="text-align:right">
                 <div>지급일: <span id="payDate">2025-01-25</span></div>
                 <div class="muted mini">지급은행: <span id="bank">국민(**-**-1234)</span></div>
               </div>
             </div>
+            <div class="muted mini" id="memo" style="margin-top:8px">특이사항 없음.</div>
           </div>
         </section>
 
         <!-- Tables -->
-        <section class="grid two">
-          <div class="card">
-            <div class="row" style="justify-content:space-between">
-              <h3 style="margin:0">지급 항목</h3>
+        <section class="grid two" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px">
+          <div class="card" style="border:1px solid #e5e7eb; border-radius:8px; padding:16px">
+            <div class="row" style="display:flex; justify-content:space-between; align-items:center">
+              <h3 style="margin:0; font-size:16px">지급 항목</h3>
               <span class="muted mini" id="earnCount">0개</span>
             </div>
-            <table id="earnTable">
-              <thead><tr><th>항목</th><th class="right">금액</th><th class="right">비고</th></tr></thead>
-              <tbody></tbody>
-              <tfoot><tr><th>소계</th><th class="right" id="earnTotal">₩0</th><th></th></tr></tfoot>
-            </table>
+            <div class="table-responsive" style="margin-top:8px">
+              <table id="earnTable" class="table table-sm">
+                <thead><tr><th>항목</th><th class="text-end">금액</th><th class="text-end">비고</th></tr></thead>
+                <tbody></tbody>
+                <tfoot><tr><th>소계</th><th class="text-end" id="earnTotal">₩0</th><th></th></tr></tfoot>
+              </table>
+            </div>
           </div>
 
-          <div class="card">
-            <div class="row" style="justify-content:space-between">
-              <h3 style="margin:0">공제 항목</h3>
+          <div class="card" style="border:1px solid #e5e7eb; border-radius:8px; padding:16px">
+            <div class="row" style="display:flex; justify-content:space-between; align-items:center">
+              <h3 style="margin:0; font-size:16px">공제 항목</h3>
               <span class="muted mini" id="dedCount">0개</span>
             </div>
-            <table id="deductTable">
-              <thead><tr><th>항목</th><th class="right">금액</th><th class="right">비고</th></tr></thead>
-              <tbody></tbody>
-              <tfoot><tr><th>소계</th><th class="right" id="deductTotal">₩0</th><th></th></tr></tfoot>
-            </table>
+            <div class="table-responsive" style="margin-top:8px">
+              <table id="deductTable" class="table table-sm">
+                <thead><tr><th>항목</th><th class="text-end">금액</th><th class="text-end">비고</th></tr></thead>
+                <tbody></tbody>
+                <tfoot><tr><th>소계</th><th class="text-end" id="deductTotal">₩0</th><th></th></tr></tfoot>
+              </table>
+            </div>
           </div>
         </section>
 
-       
+        
       </main>
 
-     
-
       <script>
+        // 안전 헬퍼
         const el = id => document.getElementById(id);
-        const fmt = n => "₩"+(n||0).toLocaleString("ko-KR");
+        const fmt = n => "₩" + (n || 0).toLocaleString("ko-KR");
 
+        // 데모 데이터
         const SAMPLE = {
           employee: { name:"홍길동", dept:"개발1팀", pos:"대리", no:"E2025001", bank:"국민(**-**-1234)" },
           months: {
@@ -131,7 +137,7 @@
           el('empDept').textContent = emp.dept;
           el('empPos').textContent = emp.pos;
           el('empNo').textContent = emp.no;
-          el('memo').textContent = m.memo || "특이사항 없음.";
+          if (el('memo')) el('memo').textContent = m.memo || "특이사항 없음.";
 
           const earnBody = el('earnTable').querySelector('tbody');
           const dedBody  = el('deductTable').querySelector('tbody');
@@ -141,12 +147,12 @@
           m.earn.forEach(it => {
             earnTotal += it.amount;
             earnBody.insertAdjacentHTML('beforeend',
-              `<tr><td>${it.name}</td><td class="right">${fmt(it.amount)}</td><td class="right muted">${it.note||""}</td></tr>`);
+              `<tr><td>${it.name}</td><td class="text-end">${fmt(it.amount)}</td><td class="text-end text-muted">${it.note||""}</td></tr>`);
           });
           m.deduct.forEach(it => {
             dedTotal += it.amount;
             dedBody.insertAdjacentHTML('beforeend',
-              `<tr><td>${it.name}</td><td class="right">${fmt(it.amount)}</td><td class="right muted">${it.note||""}</td></tr>`);
+              `<tr><td>${it.name}</td><td class="text-end">${fmt(it.amount)}</td><td class="text-end text-muted">${it.note||""}</td></tr>`);
           });
 
           el('earnTotal').textContent = fmt(earnTotal);
@@ -158,73 +164,42 @@
         }
 
         function shiftMonth(current, diff){
+          if(!current){ // 초기값 없으면 오늘 기준
+            const today = new Date();
+            const y = today.getFullYear();
+            const m = String(today.getMonth()+1).padStart(2,'0');
+            current = `${y}-${m}`;
+          }
           const [y,m] = current.split('-').map(Number);
           const d = new Date(y, m-1+diff, 1);
           const yyyy = d.getFullYear();
-          const mm = ('0'+(d.getMonth()+1)).slice(-2);
+          const mm = String(d.getMonth()+1).padStart(2,'0');
           return `${yyyy}-${mm}`;
         }
 
-        // Inquiry storage (local only)
-        const STORE_KEY = "pay_inquiries";
-        const getInquiries = () => { try{return JSON.parse(localStorage.getItem(STORE_KEY)||"[]")}catch{ return [] }};
-        const setInquiries = (arr) => localStorage.setItem(STORE_KEY, JSON.stringify(arr));
-        function renderInquiries(){
-          const list = el('inquiryList');
-          const arr = getInquiries().sort((a,b)=> b.createdAt - a.createdAt);
-          if(arr.length===0){ list.innerHTML = '<span class="muted">등록된 문의가 없습니다.</span>'; return; }
-          list.innerHTML = arr.map(i => `
-            <div class="card" style="margin:10px 0">
-              <div class="row" style="justify-content:space-between">
-                <div><strong>${i.title}</strong> <span class="badge">${i.type}</span></div>
-                <div class="muted mini">${new Date(i.createdAt).toLocaleString()}</div>
-              </div>
-              <div class="divider"></div>
-              <div class="muted">${i.body.replace(/</g,"&lt;")}</div>
-              <div class="row" style="justify-content:space-between;margin-top:8px">
-                <div class="mini muted">연락수단: ${i.channel} · 파일 ${i.files.length}개</div>
-                <div class="status" data-v="${i.status}">${i.status}</div>
-              </div>
-            </div>
-          `).join("");
-        }
-
-        // Drawer helpers
-        const openDrawer = ()=> el('drawer').classList.add('open');
-        const closeDrawer = ()=> el('drawer').classList.remove('open');
-
+       
         document.addEventListener('DOMContentLoaded', () => {
-          // init
+          // 초기 월: 샘플에서 가장 최신
           const keys = Object.keys(SAMPLE.months).sort().reverse();
           loadMonth(keys[0]);
           renderInquiries();
 
-          el('printBtn').addEventListener('click', ()=> window.print());
-          el('prevMonthBtn').addEventListener('click', ()=> loadMonth(shiftMonth(el('month').value, -1)));
-          el('nextMonthBtn').addEventListener('click', ()=> loadMonth(shiftMonth(el('month').value, +1)));
-          el('month').addEventListener('change', e => loadMonth(e.target.value));
+          // 프린트
+          const printBtn = el('printBtn');
+          if (printBtn) printBtn.addEventListener('click', ()=> window.print());
 
-          // 존재 여부 체크(안전)
-          const btn1 = el('openInquiryBtn');
-          if (btn1) btn1.addEventListener('click', openDrawer);
-          el('openInquiryBtn2').addEventListener('click', openDrawer);
-
-          el('closeDrawer').addEventListener('click', closeDrawer);
-          el('cancelInquiry').addEventListener('click', closeDrawer);
-
-          el('inquiryForm').addEventListener('submit', (ev) => {
-            ev.preventDefault();
-            const title = el('inqTitle').value.trim();
-            const type = el('inqType').value;
-            const body = el('inqBody').value.trim();
-            const channel = el('inqChannel').value;
-            if(!title || !body){ alert("제목과 내용을 입력해 주세요."); return; }
-            const files = Array.from(el('inqFiles').files).map(f => ({name:f.name, size:f.size}));
-            const rec = { id: crypto.randomUUID(), title, type, body, channel, files, status:"접수", createdAt: Date.now() };
-            const arr = getInquiries(); arr.push(rec); setInquiries(arr);
-            closeDrawer(); ev.target.reset(); renderInquiries();
-            alert("문의가 등록되었습니다. 담당자 확인 후 안내드리겠습니다.");
-          });
+          // 월 이동
+          const monthInput = el('month');
+          if (monthInput && !monthInput.value) {
+            // 브라우저 기본 월 포맷 세팅
+            const d = new Date(keys[0]+'-01');
+            const v = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+            monthInput.value = v;
+          }
+          const prev = el('prevMonthBtn'), next = el('nextMonthBtn');
+          if (prev) prev.addEventListener('click', ()=> loadMonth(shiftMonth(el('month').value, -1)));
+          if (next) next.addEventListener('click', ()=> loadMonth(shiftMonth(el('month').value, +1)));
+          if (monthInput) monthInput.addEventListener('change', e => loadMonth(e.target.value));
         });
       </script>
 
