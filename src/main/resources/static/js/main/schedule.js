@@ -3,7 +3,7 @@ const myApiKey = "3bb524dc5656794ff51462c21245e81ffd44e902f5c3220a4d89b540465280
 
 let calendar = null; // calendar 객체 선언
 let currentDate = null; // 현재날짜 저장
-// 캘린더 표시 할 위치지정
+// 캘린더위치지정
 const calendarEl = document.getElementById('calendar');
 
 // 캘린더 생성함수
@@ -20,7 +20,7 @@ function createCalendar() {
 	// 캘린더 객체 생성
 	calendar = new tui.Calendar(calendarEl, {
 	    defaultView: 'month',
-	    useCreationPopup: true,
+	    useCreationPopup: false,
 	    useDetailPopup: true,
 		isReadOnly: false,
 		month: {
@@ -90,9 +90,8 @@ document.getElementById('type-day').addEventListener('click', function() {
 	updateCurrentDate();
 		calendar.createEvents([
           {
-			  id: 'unique-id-1',             // 고유값(생략 가능)
-			  calendarId: 'default',         // 사용할 캘린더 id
-			  title: '예시 일정',
+			  calendarId: 'leave',         // 사용할 캘린더 id
+			  title: '연차',
 			  category: 'time',              // 시간 기반 이벤트
 			  start: '2025-10-07T09:00:00',  // 시작 날짜/시간 (ISO 또는 Date 객체 가능)
 			  end: '2025-10-11T18:00:00',    // 종료 날짜/시간
@@ -100,9 +99,8 @@ document.getElementById('type-day').addEventListener('click', function() {
 			  // 필요에 따라 color, backgroundColor, location, etc. 추가 가능
           },
           {
-			  id: 'unique-id-1',             // 고유값(생략 가능)
-			  calendarId: 'default',         // 사용할 캘린더 id
-			  title: '예시 일정2222',
+			  calendarId: 'leave',         // 사용할 캘린더 id
+			  title: '연차',
 			  category: 'time',              // 시간 기반 이벤트
 			  start: '2025-10-07T09:00:00',  // 시작 날짜/시간 (ISO 또는 Date 객체 가능)
 			  end: '2025-10-07T18:00:00',    // 종료 날짜/시간
@@ -134,6 +132,42 @@ function showCalendarView(type) {
 
 // 캘린더버튼 동작 함수 끝
 // ---------------------------------
+// 커스텀 모달 등록 
+
+function openMyCustomModal(data) {
+	console.log(data)
+	// 예시: Bootstrap 모달 띄우기
+	new bootstrap.Modal(document.getElementById('addScheduleModal')).show();
+	openAddScheduleModal();
+
+	document.getElementById('startpicker-input').innerText = formatDateToYYYYMMDD(data.start).toString();
+	document.getElementById('endpicker-input').innerText = formatDateToYYYYMMDD(data.end).toString();
+	document.getElementById('allDayCheckbox').checked = data.isAllDay;
+}
+
+function openAddScheduleModal() {
+	var today = new Date();
+	var picker = tui.DatePicker.createRangePicker({
+	    startpicker: {
+	        date: today,
+	        input: '#startpicker-input',
+	        container: '#startpicker-container'
+	    },
+	    endpicker: {
+	        date: today,
+	        input: '#endpicker-input',
+	        container: '#endpicker-container'
+	    },
+	    selectableRanges: [
+	        [today, new Date(today.getFullYear() + 1, today.getMonth(), today.getDate())]
+	    ],
+	    format: 'YYYY-MM-dd HH:mm',
+		timepicker: {
+            layoutType: 'tab',
+            inputType: 'spinbox'
+        }
+	});
+}
 
 
 
@@ -200,6 +234,14 @@ function convertHolidayDataToSchedules(holidayData) {
         }));
 }
 // ----------------------------------------------------
+// getDate의 값을 YYYY-MM-DD 형식으로 변형
+function formatDateToYYYYMMDD(date) {
+	var year = date.getFullYear();
+	var month = String(date.getMonth() + 1).padStart(2, '0');
+	var day = String(date.getDate()).padStart(2, '0');
+	return year + '-' + month + '-' + day;
+}
+
 // ----------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -230,42 +272,24 @@ document.addEventListener('DOMContentLoaded', function () {
 		calendar.setDate(formattedDate);
 		updateCurrentDate();
 	});
-	
-	// getDate의 값을 YYYY-MM-DD 형식으로 변형
-	function formatDateToYYYYMMDD(date) {
-	  var year = date.getFullYear();
-	  var month = String(date.getMonth() + 1).padStart(2, '0');
-	  var day = String(date.getDate()).padStart(2, '0');
-	  return year + '-' + month + '-' + day;
-	}
+
 	
 	document.getElementById('add-schedule-btn').addEventListener('click', function() {
 //		console.log("모달열기완료");
-		var today = new Date();
-		var picker = tui.DatePicker.createRangePicker({
-		    startpicker: {
-		        date: today,
-		        input: '#startpicker-input',
-		        container: '#startpicker-container'
-		    },
-		    endpicker: {
-		        date: today,
-		        input: '#endpicker-input',
-		        container: '#endpicker-container'
-		    },
-		    selectableRanges: [
-		        [today, new Date(today.getFullYear() + 1, today.getMonth(), today.getDate())]
-		    ],
-		    format: 'YYYY-MM-dd HH:mm',
-			timepicker: {
-                layoutType: 'tab',
-                inputType: 'spinbox'
-            }
-		});
+		openAddScheduleModal()
 		
 		picker.on('change:end', () => {
 		    console.log(123);
 		})
+	});
+	
+	// 스케줄 추가시 커스텀 모달 열기
+	calendar.on('selectDateTime', (event) => {
+		console.log('selectDateTime 이벤트 발생:', event);
+		// 기존 'scheduleDetailClick' 역할
+		openMyCustomModal(event); // event에 정보 있음
+		const selectedEls = document.querySelectorAll('.is-selected, .tui-calendar-event-selected, .focused');
+		selectedEls.forEach(el => el.classList.remove('is-selected', 'tui-calendar-event-selected', 'focused'));
 	});
 
 	
