@@ -1,0 +1,42 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/layouts/layout.html}">
+<body>
+<th:block layout:fragment="content">
+	<div class="custom-body container-xxl flex-grow-1 container-p-y">
+		<h2>전자 결재 작성중</h2>
+		<h2>기안서작성 드롭다운-부트스트랩</h2>
+		<div class="input-group">
+		<form>
+			<select class="form-select" aria-label="Default select example">
+			  <option selected>기안서</option>
+			  <option value="1">휴가(연차)신청서</option>
+			  <option value="2">인사발령신청서</option>
+			  <option value="3">지출결의서</option>
+			  <option value="4">자유양식결재서</option>
+			</select>
+			<button class="btn btn-primary me-2">작성</button>
+		</form>
+		
+		     <input type="date" id="startDate" class="form-control datepicker" placeholder="start">
+		      <span>~</span> 
+		      <input type="date" id="endDate" class="form-control datepicker" placeholder="end">
+		      <input type="text" placeholder="문서이름">
+			  <button class="btn btn-primary me-2">검색</button>
+		
+		</div>
+		
+<!-- 		<div id="foo"> -->
+<!-- 		  <input type="text" name="start"> -->
+<!-- 		  <span>~</span> -->
+<!-- 		  <input type="text" name="end">   -->
+<!-- 		</div> -->
+		<h2>기안자및 문서제목</h2>
+		<h2>검색</h2>
+		<h2>결재사항 표</h2>
+	</div>
+</th:block>
+</body>
+<script>
+
+</script>
