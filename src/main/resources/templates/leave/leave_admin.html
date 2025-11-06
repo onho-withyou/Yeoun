@@ -1,0 +1,95 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/layouts/layout.html}">
+<head>
+</head>
+<body>
+	<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
+		<h3>사원 연차 현황</h3>
+		<div class="my-0">
+			<form class="d-flex justify-content-end">
+	            <div class="dt-search mb-md-6 mb-2 w-25">
+					<input type="text" placeholder="사원번호" class="form-control"/>
+	            </div>
+	            <div class="mb-6 ms-3 mb-0">
+					<button type="submit" class="btn btn-info">검색</button>
+	            </div>
+			</form>
+		</div>
+		<div class="card mt-4">
+			<div class="table-responsive text-nowrap">
+				<table class="table">
+					<thead class="table-light">
+						<tr>
+							<th>부서</th>
+							<th>직급</th>
+							<th>사원번호</th>
+							<th>이름</th>
+							<th>총연차</th>
+							<th>사용연차</th>
+							<th>잔여연차</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody class="table-border-bottom-0">
+						<tr>
+							<td>관리부</td>
+							<td>사장</td>
+							<td>251106123</td>
+							<td>이재용</td>
+							<td>15</td>
+							<td>10</td>
+							<td>5</td>
+							<td>
+								<button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modalCenter">수정</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div class="modal fade" id="modalCenter" tabindex="-1" style="display: none;" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="modalCenterTitle">연차수정</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<form>
+							<div class="col mb-6">
+								<label for="currentLeave" class="form-label">현재 보유 연차</label>
+								<input type="text" id="currentLeave" class="form-control mb-2" value="15" readonly/>
+							</div>
+							<div class="col mb-6">
+								<label class="form-label">증감유형</label>
+								<div class="d-flex">
+									<div class="form-check mb-2">
+										<input type="radio" id="increase" name="changeType" class="form-check-input" required/>
+										<label class="form-check-label" for="increase">증가</label>
+									</div>
+									<div class="form-check ms-3" >
+										<input type="radio" id="decrease" name="changeType" class="form-check-input"/>
+										<label class="form-check-label" for="decrease">감소</label>
+									</div>
+								</div>
+							</div>
+							<div class="col mb-6">
+								<label for="changeDays" class="form-label">변경일수</label>
+								<input type="number" id="changeDays" min="0" class="form-control" required/>
+							</div>
+							<div class="col mb-6">
+								<label for="reason" class="form-label">사유</label>
+								<input type="text" id="reason" class="form-control" required/>
+							</div>
+							<div class="modal-footer mt-3 p-0">
+								<button class="btn btn-warning">수정</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</th:block>
