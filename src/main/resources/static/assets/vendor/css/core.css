@@ -15394,7 +15394,7 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
   padding: 0 1.5rem;
 }
 .layout-navbar.navbar-detached.container-xxl {
-  max-width: calc(1650px - calc(1.625rem * 2)); /* header 넓이 */
+  max-width: calc(1493px - calc(1.625rem * 2))   /* header 넓이 */
 }
 .layout-navbar-fixed .layout-navbar.navbar-detached {
   width: calc(100% - calc(1.625rem * 2) - 16.25rem);
