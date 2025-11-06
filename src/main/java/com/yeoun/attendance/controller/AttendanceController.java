@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/attendance")
 public class AttendanceController {
 	// 관리자용 출/퇴근 현황 페이지
-	@GetMapping("/attendance_list")
+	@GetMapping("/list")
 	public String attendanceAdmin() {
 		return "attendance/commute_admin";
 	}
 	
 	// 개인 출/퇴근 현황 페이지
-	@GetMapping("/my_attendance_list")
+	@GetMapping("/my")
 	public String attendance() {
 		return "attendance/commute";
 	}
