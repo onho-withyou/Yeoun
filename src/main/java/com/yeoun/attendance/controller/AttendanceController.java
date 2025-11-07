@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,7 @@ import com.yeoun.attendance.dto.AttendanceDTO;
 import com.yeoun.attendance.dto.WorkPolicyDTO;
 import com.yeoun.attendance.service.AttendanceService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -80,8 +82,13 @@ public class AttendanceController {
 	}
 	
 	@PostMapping("/policy")
-	public String registPolicy(@ModelAttribute WorkPolicyDTO workPolicyDTO, RedirectAttributes redirectAttributes) {
-		log.info(">>>>>>>>>>>>>>>> workPolicyDTO : " + workPolicyDTO);
+	public String registPolicy(@ModelAttribute("workPolicyDTO") @Valid WorkPolicyDTO workPolicyDTO,  
+			BindingResult bindingResult, 
+			RedirectAttributes redirectAttributes) {
+		
+		if (bindingResult.hasErrors()) {
+			return  "attendance/policy";
+		}
 		
 		String message = attendanceService.registWorkPolicy(workPolicyDTO);
 		redirectAttributes.addFlashAttribute("msg", message);

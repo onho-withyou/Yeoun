@@ -1,9 +1,12 @@
 package com.yeoun.attendance.dto;
 
+import java.time.LocalTime;
+
 import org.modelmapper.ModelMapper;
 
 import com.yeoun.attendance.entity.WorkPolicy;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -36,6 +39,22 @@ public class WorkPolicyDTO {
 	
 	@NotNull
 	private String annualBasis; // 연차 기준 설정 (회계연도 / 입사일 기준)
+	
+	// --------------------------------------------------
+	// 유효성 검사
+	@AssertTrue(message = "퇴근 시간은 출근 시간보다 늦어야 합니다.")
+	public boolean isValidTimeRange() {
+		if (inTime == null || outTime == null) return true;
+		
+		return LocalTime.parse(outTime).isAfter(LocalTime.parse(inTime));
+	}
+	
+	@AssertTrue(message = "점심 종료 시간은 시작 시간보다 늦어야 합니다.")
+	public boolean isValidLunchTimeRange() {
+		if (lunchIn == null || lunchOut == null) return true;
+		
+		return LocalTime.parse(lunchOut).isAfter(LocalTime.parse(lunchIn));
+	}
 	
 	// ------------------------------------------
 	// DTO <-> Entity 변환

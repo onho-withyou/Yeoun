@@ -9,7 +9,7 @@
 	<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
 		<h3>근무 정책 관리</h3>
 		<div class="card-body">
-			<form th:action="@{/attendance/policy}" th:object="${workPolicyDTO}" method="post" class="browser-default-validation w-75 mx-auto">
+			<form th:action="@{/attendance/policy}" th:object="${workPolicyDTO}" method="post" class="browser-default-validation w-75 mx-auto" id="policyForm">
 				<div class="mb-6">
 					<label class="h5" for="inTime">출근 기준 시간</label>
 					<input type="time" class="form-control" id="inTime" th:field="*{inTime}" required/>
@@ -17,6 +17,7 @@
 				<div class="mb-6">
 					<label class="h5 mt-3" for="outTime">퇴근 기준 시간</label>
 					<input type="time" class="form-control" id="outTime" th:field="*{outTime}" required/>
+					<div th:if="${#fields.hasErrors('validTimeRange')}" th:errors="*{validTimeRange}" class="text-danger"></div>
 				</div>
 				<div class="mb-6">
 					<label class="h5 mt-3" for="lunchIn">점심 시작 시간</label>
@@ -25,6 +26,7 @@
 				<div class="mb-6">
 					<label class="h5 mt-3" for="lunchOut">점심 종료 시간</label>
 					<input type="time" class="form-control" id="lunchOut" th:field="*{lunchOut}" required/>
+					<div th:if="${#fields.hasErrors('validLunchTimeRange')}" th:errors="*{validLunchTimeRange}" class="text-danger"></div>
 				</div>
 				<div class="mb-6">
 					<label class="h5 mt-3" for="lateLimit">지각 유예 시간(분)</label>
@@ -58,6 +60,27 @@
 				console.log(message);
 				alert(message);
 			}
+			
+			document.querySelector("#policyForm").addEventListener("submit", (e) => {
+				const inTime = document.querySelector("#inTime").value;
+				const outTime = document.querySelector("#outTime").value;
+				const lunchIn = document.querySelector("#lunchIn").value;
+				const lunchOut = document.querySelector("#lunchOut").value;
+				
+				// 출근 / 퇴근 시간 검증
+				if (outTime <= inTime) {
+					alert("퇴근 시간은 출근 시간보다 늦어야 합니다.");
+					e.preventDefault();
+					return false;
+				}
+				
+				// 점심 시작 시간 /종료 시간 검증
+				if (lunchOut <= lunchIn) {
+					alert("점심 종료 시간은 시작 시간보다 늦어야 합니다.");
+					e.preventDefault();
+					return false;
+				}
+			});
 		</script>
 	</th:block>
 </body>
