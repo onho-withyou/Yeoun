@@ -9,8 +9,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class EmpController {
 	
 	@GetMapping("/list")
-	public String empList() {
-		return "emp";
+	public String List() {
+		return "emp/emp_list";
+	}
+	
+	@GetMapping("/register")
+	public String registerEmployee() {
+		return "emp/emp_register";
 	}
 	
 

@@ -53,14 +53,9 @@
 
 <link rel="stylesheet" href="../assets/vendor/libs/apex-charts/apex-charts.css" />
 <link rel="stylesheet" th:href="@{/css/common.css}"/>
-<!-- Toast UI -->
-<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 
 <!-- Page CSS -->
 
-<!-- Toast ui -->
-<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 <!-- Helpers -->
 <script src="../assets/vendor/js/helpers.js"></script>
 
@@ -79,6 +74,7 @@
 			<div class="layout-page">
 				<!-- header 추가 되고 --> 
 				<th:block th:insert="~{fragments/header}"></th:block>
+<!-- 				<th:block layout:fragment="nav"></th:block> -->
 				<!-- Content 추가 -->
 				<th:block layout:fragment="content"></th:block>
 				<!-- header 추가 되고 --> 
@@ -88,9 +84,9 @@
 		<!-- Overlay -->
 		<div class="layout-overlay layout-menu-toggle"></div>
     </div>
-	<!-- / Layout wrapper -->
+    <!-- 개별 페이지의 자바스크립트 영역 -->
 	<th:block layout:fragment="myScript"></th:block>
-	
+	<!-- / Layout wrapper -->
 
 	<!-- Core JS -->
 	<!-- build:js assets/vendor/js/core.js -->

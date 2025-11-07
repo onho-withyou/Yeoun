@@ -1,103 +1,647 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{/layouts/layout.html}">
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{layouts/layout}">
 
 <th:block layout:fragment="content">
-<body>
 
-	<div class="container-fluid py-4">
-		<!-- ===================== HEADER ===================== -->
-		<header class="mb-4">
-			<nav class="navbar navbar-expand-lg navbar-dark bg-dark rounded">
-				<div class="container-fluid">
-					<a class="navbar-brand fw-bold text-white" href="#">Yeoun ERP</a>
-					<button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-						data-bs-target="#navbarNav" aria-controls="navbarNav"
-						aria-expanded="false" aria-label="Toggle navigation">
-						<span class="navbar-toggler-icon"></span>
-					</button>
-					<div class="collapse navbar-collapse" id="navbarNav">
-						<ul class="navbar-nav ms-auto">
-							<li class="nav-item"><a class="nav-link active" th:href="@{/}">홈</a></li>
-							<li class="nav-item"><a class="nav-link" th:href="@{/pay}">급여계산</a></li>
-							<li class="nav-item"><a class="nav-link" th:href="@{/member}">사원관리</a></li>
-						</ul>
-					</div>
-				</div>
-			</nav>
-		</header>
+  <style>
+    .rule-item-card{border-radius:14px}
+    .nowrap{white-space:nowrap}
+    .amount{font-variant-numeric:tabular-nums}
+    .muted{color:#6b7280}
+  </style>
+  
 
-		<!-- ===================== MAIN CONTENT ===================== -->
-		<div class="custom-body container bg-light p-4 rounded shadow-sm">
-			<h1 class="mb-4 fw-bold text-primary">급여기준정보</h1>
+  <div class="container-xxl py-4">
+  
+  <!-- 메 세 지 -->
+<div th:if="${msg}" class="alert alert-success alert-dismissible fade show" role="alert">
+  <span th:text="${msg}">성공 메시지</span>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
 
-			<div class="mb-5">
-				<h3 class="text-dark">1. 사원 정보 연동 (인사 관리 모듈)</h3>
-				<p>인사 관리 모듈에 등록된 사원 정보(사번, 부서, 직급, 입사일)를 자동으로 불러옵니다.</p>
-				<div class="alert alert-success">
-					최근 연동 상태: <strong>정상</strong> | 최종 연동 시간: 2025-10-28 13:45:00
-				</div>
-				<div class="mb-2">
-					<button class="btn btn-primary me-2" onclick="alert('사원 정보 수동 연동을 실행합니다.')">수동 연동 실행</button>
-					<button class="btn btn-outline-secondary" onclick="alert('연동 설정 화면으로 이동합니다.')">연동 상세 설정</button>
-				</div>
-			</div>
+<div th:if="${err}" class="alert alert-danger alert-dismissible fade show" role="alert">
+  <span th:text="${err}">에러 메시지</span>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+  
+  
 
-			<div class="mb-5">
-				<h3 class="text-dark">2. 급여 기준 설정 (기준표 관리)</h3>
-				<p>기본급, 수당, 공제 항목 및 4대 보험/세금 설정을 관리합니다.</p>
+    <!-- 헤더 -->    
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="fw-bold text-primary mb-0">급여 기준정보</h1>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">등 록</button>
+    </div>
 
-				<table class="table table-bordered align-middle">
-					<tbody>
-						<tr>
-							<th class="bg-light" style="width: 200px;">급여 항목 관리</th>
-							<td>
-								<p>기본급, 수당(식대, 교통비, 직책수당 등)의 항목 및 계산 방식 설정</p>
-								<button class="btn btn-primary" onclick="alert('급여 항목 설정 페이지로 이동합니다.')">항목 설정</button>
-							</td>
-						</tr>
-						<tr>
-							<th class="bg-light">공제 항목 설정</th>
-							<td>
-								<p>세금(소득세, 지방세) 및 기타 공제 항목(상조회비 등) 설정</p>
-								<button class="btn btn-primary" onclick="alert('공제 항목 설정 페이지로 이동합니다.')">공제 설정</button>
-							</td>
-						</tr>
-						<tr>
-							<th class="bg-light">4대 보험 설정</th>
-							<td>
-								<p>4대 보험 요율 설정 및 최저/최고 상한액 기준 관리</p>
-								<button class="btn btn-primary" onclick="alert('4대 보험 요율 관리 페이지로 이동합니다.')">4대 보험 설정</button>
-							</td>
-						</tr>
-						<tr>
-							<th class="bg-light">직급별 급여 기준표</th>
-							<td>
-								<p>부서 이동 및 직급 변경 시 자동 적용될 급여 기준 테이블 관리</p>
-								<button class="btn btn-primary" onclick="alert('기준표 관리 페이지로 이동합니다.')">기준표 관리</button>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+    <!-- 카드형 목록 -->
+   <div>
+    <h5 class="card-title mb-3">급여 기준 목록</h5>
 
-			<div>
-				<h3 class="text-dark">3. 근태 연동 (근태 관리 모듈)</h3>
-				<p>근태 관리 모듈과 연동하여 출근/퇴근, 휴가, 연장 근무 시간 데이터를 자동으로 불러와 급여 계산에 반영합니다.</p>
+    <div class="text-muted" th:if="${#lists.isEmpty(rules)}">등록된 급여 기준이 없습니다.</div>
 
-				<div class="alert alert-warning">
-					최근 연동 상태: <strong>일부 지연</strong> | 최종 데이터 수신: 2025-10-28 12:00:00
-				</div>
+    <div th:each="r : ${rules}"
+         class="card mb-3 border-0 shadow-sm rule-item-card"
+         th:attr="data-rule-id=${r.ruleId}">
+      <div class="card-body p-3">
 
-				<div>
-					<button class="btn btn-primary me-2" onclick="alert('근태 데이터 수동 동기화를 시도합니다.')">근태 데이터 동기화</button>
-					<button class="btn btn-outline-secondary" onclick="alert('근태 연동 상세 설정 페이지로 이동합니다.')">연동 상세 설정</button>
-				</div>
-			</div>
-		</div>
+        <div class="d-flex justify-content-between align-items-center pb-2 border-bottom">
+          <div class="d-flex align-items-center">
+            <h6 class="mb-0 me-3 fw-bold text-dark">
+              기준 ID: <span class="text-primary" th:text="${r.ruleId}"></span>
+            </h6>
+            <span class="text-muted small">
+              (<span th:text="${#temporals.format(r.startDate, 'yyyy.MM.dd')}"></span> ~
+               <span th:text="${r.endDate != null ? #temporals.format(r.endDate, 'yyyy.MM.dd') : '무기한'}"></span>)
+            </span>
+          </div>
 
-		
+          <div class="d-flex align-items-center">
+            <span class="badge me-3" th:classappend="${r.status.name()=='ACTIVE'} ? 'bg-success' : 'bg-secondary'"
+                  th:text="${r.status}"></span>
 
-</body>
+            <button class="btn btn-sm btn-outline-primary me-2"
+                    data-bs-toggle="modal"
+                    th:attr="data-bs-target=${'#editModal-' + r.ruleId}">
+              수정
+            </button>
+
+            <button class="btn btn-sm btn-outline-danger btn-delete-rule"
+                    th:attr="data-href=@{'/pay/rule/delete/' + ${r.ruleId}}, data-rule-id=${r.ruleId}">
+              삭제
+            </button>
+          </div>
+        </div>
+
+        <div class="row g-3 pt-3">
+          <div class="col-lg-5 col-md-6 border-end">
+            <span class="d-block fw-semibold text-secondary mb-2">💰 지급 정보</span>
+
+            <div class="d-flex justify-content-between small mb-1">
+              <span class="text-muted">기본급:</span>
+              <span class="fw-medium amount">
+                <span th:text="${#numbers.formatDecimal(r.baseAmt, 0, 'COMMA', 0, 'POINT')}"></span>원
+              </span>
+            </div>
+            <div class="d-flex justify-content-between small mb-1">
+              <span class="text-muted">식대:</span>
+              <span class="fw-medium amount">
+                <span th:text="${#numbers.formatDecimal(r.mealAmt, 0, 'COMMA', 0, 'POINT')}"></span>원
+              </span>
+            </div>
+            <div class="d-flex justify-content-between small mb-1">
+              <span class="text-muted">교통비:</span>
+              <span class="fw-medium amount">
+                <span th:text="${#numbers.formatDecimal(r.transAmt, 0, 'COMMA', 0, 'POINT')}"></span>원
+              </span>
+            </div>
+            <div class="d-flex justify-content-between small mt-2 pt-2 border-top">
+              <span class="text-muted fw-semibold nowrap">지급일:</span>
+              <span class="fw-bold text-primary" th:text="${r.payDay} + '일'"></span>
+            </div>
+          </div>
+
+          <div class="col-lg-7 col-md-6">
+            <span class="d-block fw-semibold text-secondary mb-2">📉 공제율 기준</span>
+
+            <div class="row row-cols-2 g-2">
+              <div class="col">
+                <div class="d-flex justify-content-between small p-1">
+                  <span class="text-muted">국민연금율:</span>
+                  <span class="fw-medium" th:text="${#numbers.formatDecimal(r.penRate*100,1,'POINT',2,'POINT')} + '%'"></span>
+                </div>
+              </div>
+              <div class="col">
+                <div class="d-flex justify-content-between small p-1">
+                  <span class="text-muted">건강보험율:</span>
+                  <span class="fw-medium" th:text="${#numbers.formatDecimal(r.hlthRate*100,1,'POINT',2,'POINT')} + '%'"></span>
+                </div>
+              </div>
+              <div class="col">
+                <div class="d-flex justify-content-between small p-1">
+                  <span class="text-muted">고용보험율:</span>
+                  <span class="fw-medium" th:text="${#numbers.formatDecimal(r.empRate*100,1,'POINT',2,'POINT')} + '%'"></span>
+                </div>
+              </div>
+              <div class="col">
+                <div class="d-flex justify-content-between small p-1">
+                  <span class="text-muted">소득세율:</span>
+                  <span class="fw-medium" th:text="${#numbers.formatDecimal(r.taxRate*100,1,'POINT',2,'POINT')} + '%'"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-end pt-3 mt-3 border-top">
+          <div class="small text-secondary flex-grow-1 me-4">
+            <span class="fw-semibold me-1">비고:</span>
+            <span th:text="${r.remark ?: '-'}"></span>
+          </div>
+          <div class="text-end small text-muted flex-shrink-0">
+            <span class="d-block">생성:
+              <span th:text="${#temporals.format(r.createdDate, 'yy.MM.dd HH:mm')}"></span>
+            </span>
+            <span class="d-block">수정:
+              <span th:text="${r.updatedDate != null ? #temporals.format(r.updatedDate, 'yy.MM.dd HH:mm') : '-'}"></span>
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+</div>
+
+    <!-- [등록] 모달 -->
+    <div class="modal fade" id="createModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+          <form th:action="@{/pay/rule}" th:object="${newRule}" method="post" class="needs-validation" id="create-rule-form" novalidate>
+            <div class="modal-header">
+              <h5 class="modal-title">급여 기준 등록</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+            </div>
+
+            <div class="modal-body">
+              <div class="row g-4">
+                <div class="col-lg-7">
+                  <h6 class="mb-3 text-secondary">기본/수당 기준</h6>
+
+                  <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                      <label class="form-label">적용 시작일</label>
+                      <input type="date" th:field="*{startDate}" class="form-control" id="create-start" required>
+                      <div class="invalid-feedback">값을 입력하세요</div>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label">적용 종료일</label>
+                      <input type="date" th:field="*{endDate}" class="form-control" id="create-end">
+                      <div class="form-text">무기한이면 비워두세요</div>
+                      <div class="invalid-feedback">종료일은 시작일 이후여야 합니다</div>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label">지급일</label>
+                      <input type="number" th:field="*{payDay}" class="form-control" min="1" max="31" placeholder="예: 25" required>
+                      <div class="invalid-feedback">값을 입력하세요</div>
+                    </div>
+                  </div>
+
+                  <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                      <label class="form-label">기본급</label>
+                      <input type="text" class="form-control amount-input" th:field="*{baseAmt}" inputmode="numeric" required>
+                      <div class="invalid-feedback">값을 입력하세요</div>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label">식대</label>
+                      <input type="text" class="form-control amount-input" th:field="*{mealAmt}" inputmode="numeric" required>
+                      <div class="invalid-feedback">값을 입력하세요</div>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label">교통비</label>
+                      <input type="text" class="form-control amount-input" th:field="*{transAmt}" inputmode="numeric" required>
+                      <div class="invalid-feedback">값을 입력하세요</div>
+                    </div>
+                  </div>
+
+                  <h6 class="mb-3 text-secondary">공제 항목 관리</h6>
+                  <div class="card card-sm">
+                    <div class="card-body p-2">
+                      <table class="table table-sm table-borderless align-middle mb-0">
+                        <thead class="table-light">
+                          <tr><th style="width:120px">항목</th><th style="width:110px">세율</th><th style="width:100px">기준</th><th>법정기준</th></tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>국민연금</td>
+                            <td><input type="number" class="form-control form-control-sm rate-input" th:field="*{penRate}" step="0.0001" min="0" max="1" placeholder="0.045" required></td>
+                            <td>급여</td><td>국민연금법</td>
+                          </tr>
+                          <tr>
+                            <td>건강보험</td>
+                            <td><input type="number" class="form-control form-control-sm rate-input" th:field="*{hlthRate}" step="0.0001" min="0" max="1" placeholder="0.03545" required></td>
+                            <td>급여</td><td>국민건강보험법</td>
+                          </tr>
+                          <tr>
+                            <td>고용보험</td>
+                            <td><input type="number" class="form-control form-control-sm rate-input" th:field="*{empRate}" step="0.0001" min="0" max="1" placeholder="0.009" required></td>
+                            <td>급여</td><td>고용보험법</td>
+                          </tr>
+                          <tr>
+                            <td>소득세</td>
+                            <td><input type="number" class="form-control form-control-sm rate-input" th:field="*{taxRate}" step="0.0001" min="0" max="1" placeholder="0.06" required></td>
+                            <td>과세표준</td><td>소득세법(간이)</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <h6 class="mb-3 mt-4 text-secondary">기타 정보</h6>
+                  <div class="row g-3">
+                    <div class="col-md-4">
+                      <label class="form-label">STATUS</label>
+                      <select class="form-select" th:field="*{status}" required>
+                        <option value="">-- 선택 --</option>
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="INACTIVE">INACTIVE</option>
+                      </select>
+                      <div class="invalid-feedback">값을 입력하세요</div>
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">REMARK</label>
+                      <textarea class="form-control" th:field="*{remark}" rows="2" placeholder="메모..."></textarea>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 등록 미리보기 -->
+                <div class="col-lg-5">
+                  <h6 class="mb-3 text-secondary">급여 공제 미리보기</h6>
+                  <div class="card bg-light border-0">
+                    <div class="card-body">
+                      <p class="mb-3 text-muted">기준 공제액 예상 (세전 급여 <b><span id="create-preview-gross-pay">0</span></b>원)</p>
+                      <table class="table table-sm mb-0">
+                        <thead class="table-light">
+                          <tr><th>항목</th><th class="text-end" style="width:120px">예상 공제액</th></tr>
+                        </thead>
+                        <tbody>
+                          <tr><td>국민연금</td><td class="text-end fw-bold" id="create-preview-pen-amt">₩0</td></tr>
+                          <tr><td>건강보험</td><td class="text-end fw-bold" id="create-preview-hlth-amt">₩0</td></tr>
+                          <tr><td>고용보험</td><td class="text-end fw-bold" id="create-preview-emp-amt">₩0</td></tr>
+                          <tr><td>소득세</td><td class="text-end fw-bold" id="create-preview-tax-amt">₩0</td></tr>
+                          <tr class="table-active">
+                            <td class="fw-bold">합계</td>
+                            <td class="text-end text-primary fw-bold fs-5" id="create-preview-total-amt">₩0</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">등록</button>
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">닫기</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- [수정] 모달들 -->
+    <div th:each="r : ${rules}">
+      <div class="modal fade" th:id="${'editModal-' + r.ruleId}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+          <div class="modal-content">
+            <form th:action="@{'/pay/rule/' + ${r.ruleId}}" method="post" class="needs-validation" novalidate
+                  th:id="${'edit-rule-form-' + r.ruleId}">
+              <div class="modal-header">
+                <h5 class="modal-title">기준 수정 RULE - <span th:text="${r.ruleId}">1</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+              </div>
+
+              <div class="modal-body">
+                <div class="row g-4">
+                  <div class="col-lg-7">
+                    <h6 class="mb-3 text-secondary">기본/수당 기준</h6>
+
+                    <div class="row g-3 mb-4">
+                      <div class="col-md-4">
+                        <label class="form-label">적용시작일</label>
+                        <input type="date" name="startDate" th:value="${#temporals.format(r.startDate, 'yyyy-MM-dd')}"
+                               class="form-control edit-start" required>
+                        <div class="invalid-feedback">값을 입력하세요</div>
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label">적용종료일</label>
+                        <input type="date" name="endDate"
+                               th:value="${r.endDate != null ? #temporals.format(r.endDate, 'yyyy-MM-dd') : ''}"
+                               class="form-control edit-end">
+                        <div class="invalid-feedback">종료일은 시작일 이후여야 합니다</div>
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label">지급일</label>
+                        <input type="number" name="payDay" th:value="${r.payDay}" class="form-control" min="1" max="31" required>
+                        <div class="invalid-feedback">값을 입력하세요</div>
+                      </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                      <!-- 금액 인풋: data-rule-id 로 연결 -->
+                      <div class="col-md-4">
+                        <label class="form-label">기본급</label>
+                        <input type="text" name="baseAmt"
+                               th:value="${#numbers.formatDecimal(r.baseAmt,0,'COMMA',0,'POINT')}"
+                               class="form-control amount-input edit-amount"
+                               th:attr="data-rule-id=${r.ruleId}" required>
+                        <div class="invalid-feedback">값을 입력하세요</div>
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label">식대</label>
+                        <input type="text" name="mealAmt"
+                               th:value="${#numbers.formatDecimal(r.mealAmt,0,'COMMA',0,'POINT')}"
+                               class="form-control amount-input edit-amount"
+                               th:attr="data-rule-id=${r.ruleId}" required>
+                        <div class="invalid-feedback">값을 입력하세요</div>
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label">교통비</label>
+                        <input type="text" name="transAmt"
+                               th:value="${#numbers.formatDecimal(r.transAmt,0,'COMMA',0,'POINT')}"
+                               class="form-control amount-input edit-amount"
+                               th:attr="data-rule-id=${r.ruleId}" required>
+                        <div class="invalid-feedback">값을 입력하세요</div>
+                      </div>
+                    </div>
+
+                    <h6 class="mb-3 text-secondary">공제 항목 관리</h6>
+                    <div class="card card-sm">
+                      <div class="card-body p-2">
+                        <table class="table table-sm table-borderless align-middle mb-0">
+                          <thead class="table-light">
+                            <tr><th style="width:120px">항목</th><th style="width:110px">세율</th><th style="width:100px">기준</th><th>법정기준</th></tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>국민연금</td>
+                              <td><input type="number" name="penRate" th:value="${r.penRate}"
+                                         class="form-control form-control-sm rate-input" step="0.0001" min="0" max="1" required></td>
+                              <td>급여</td><td>국민연금법</td>
+                            </tr>
+                            <tr>
+                              <td>건강보험</td>
+                              <td><input type="number" name="hlthRate" th:value="${r.hlthRate}"
+                                         class="form-control form-control-sm rate-input" step="0.0001" min="0" max="1" required></td>
+                              <td>급여</td><td>국민건강보험법</td>
+                            </tr>
+                            <tr>
+                              <td>고용보험</td>
+                              <td><input type="number" name="empRate" th:value="${r.empRate}"
+                                         class="form-control form-control-sm rate-input" step="0.0001" min="0" max="1" required></td>
+                              <td>급여</td><td>고용보험법</td>
+                            </tr>
+                            <tr>
+                              <td>소득세</td>
+                              <td><input type="number" name="taxRate" th:value="${r.taxRate}"
+                                         class="form-control form-control-sm rate-input" step="0.0001" min="0" max="1" required></td>
+                              <td>과세표준</td><td>소득세법(간이)</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <h6 class="mb-3 mt-4 text-secondary">기타 정보</h6>
+                    <div class="row g-3">
+                      <div class="col-md-4">
+                        <label class="form-label">STATUS</label>
+                        <select name="status" class="form-select" required>
+                          <option value="ACTIVE" th:selected="${r.status.name() == 'ACTIVE'}">ACTIVE</option>
+                          <option value="INACTIVE" th:selected="${r.status.name() == 'INACTIVE'}">INACTIVE</option>
+                        </select>
+                        <div class="invalid-feedback">값을 입력하세요</div>
+                      </div>
+                      <div class="col-12">
+                        <label class="form-label">REMARK</label>
+                        <textarea name="remark" class="form-control" rows="2" th:text="${r.remark}"></textarea>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 수정 미리보기 -->
+                  <div class="col-lg-5">
+                    <h6 class="mb-3 text-secondary">급여 공제 미리보기</h6>
+                    <div class="card bg-light border-0">
+                      <div class="card-body">
+                        <p class="mb-3 text-muted">기준 공제액 예상 (세전 급여 <b><span class="edit-preview-gross-pay">0</span></b>원)</p>
+                        <table class="table table-sm mb-0">
+                          <thead class="table-light">
+                            <tr><th>항목</th><th class="text-end" style="width:120px">예상 공제액</th></tr>
+                          </thead>
+                          <tbody>
+                            <tr><td>국민연금</td><td class="text-end fw-bold edit-preview-pen-amt">₩0</td></tr>
+                            <tr><td>건강보험</td><td class="text-end fw-bold edit-preview-hlth-amt">₩0</td></tr>
+                            <tr><td>고용보험</td><td class="text-end fw-bold edit-preview-emp-amt">₩0</td></tr>
+                            <tr><td>소득세</td><td class="text-end fw-bold edit-preview-tax-amt">₩0</td></tr>
+                            <tr class="table-active">
+                              <td class="fw-bold">합계</td>
+                              <td class="text-end text-primary fw-bold fs-5 edit-preview-total-amt">₩0</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button class="btn btn-primary" type="submit">저장</button>
+                <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">닫기</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 스크립트 -->
+  <script>
+    /* ========= 공통 유틸 ========= */
+    function onlyDigits(str){ return (str||'').replace(/[^\d]/g,''); }
+    function formatAmountValue(v){ if(v===''||v==null) return ''; return Number(v).toLocaleString('ko-KR'); }
+    function parseAmountValue(v){ return Number(onlyDigits(v)); }
+    function fmtKRW(n){ if(!isFinite(n)) n=0; return '₩'+Math.round(n).toLocaleString('ko-KR'); }
+
+    function updatePreview(modal){
+      if(!modal) return;
+      const isCreate = modal.id === 'createModal';
+
+      // 금액값(콤마 제거 후)
+      const base = parseAmountValue( (modal.querySelector(isCreate? 'input[name="baseAmt"]' : 'input[name="baseAmt"]')?.value) || '0' );
+      const meal = parseAmountValue( (modal.querySelector(isCreate? 'input[name="mealAmt"]' : 'input[name="mealAmt"]')?.value) || '0' );
+      const trans = parseAmountValue( (modal.querySelector(isCreate? 'input[name="transAmt"]' : 'input[name="transAmt"]')?.value) || '0' );
+      const gross = base + meal + trans;
+
+      // 세율
+      const pen  = Number(modal.querySelector(isCreate? '#create-rule-form input[name="penRate"]' : 'input[name="penRate"]')?.value || 0);
+      const hlth = Number(modal.querySelector(isCreate? '#create-rule-form input[name="hlthRate"]' : 'input[name="hlthRate"]')?.value || 0);
+      const emp  = Number(modal.querySelector(isCreate? '#create-rule-form input[name="empRate"]' : 'input[name="empRate"]')?.value || 0);
+      const tax  = Number(modal.querySelector(isCreate? '#create-rule-form input[name="taxRate"]' : 'input[name="taxRate"]')?.value || 0);
+
+      const penAmt  = gross * pen;
+      const hlthAmt = gross * hlth;
+      const empAmt  = gross * emp;
+      const taxAmt  = gross * tax;
+      const total   = penAmt + hlthAmt + empAmt + taxAmt;
+
+      if(isCreate){
+        modal.querySelector('#create-preview-gross-pay').textContent = gross.toLocaleString('ko-KR');
+        modal.querySelector('#create-preview-pen-amt').textContent   = fmtKRW(penAmt);
+        modal.querySelector('#create-preview-hlth-amt').textContent  = fmtKRW(hlthAmt);
+        modal.querySelector('#create-preview-emp-amt').textContent   = fmtKRW(empAmt);
+        modal.querySelector('#create-preview-tax-amt').textContent   = fmtKRW(taxAmt);
+        modal.querySelector('#create-preview-total-amt').textContent = fmtKRW(total);
+      }else{
+        modal.querySelector('.edit-preview-gross-pay').textContent = gross.toLocaleString('ko-KR');
+        modal.querySelector('.edit-preview-pen-amt').textContent   = fmtKRW(penAmt);
+        modal.querySelector('.edit-preview-hlth-amt').textContent  = fmtKRW(hlthAmt);
+        modal.querySelector('.edit-preview-emp-amt').textContent   = fmtKRW(empAmt);
+        modal.querySelector('.edit-preview-tax-amt').textContent   = fmtKRW(taxAmt);
+        modal.querySelector('.edit-preview-total-amt').textContent = fmtKRW(total);
+      }
+    }
+
+    function clampEndAfterStart(startEl, endEl){
+      if(!startEl || !endEl) return;
+      if(startEl.value){
+        endEl.min = startEl.value;
+        if(endEl.value && endEl.value < startEl.value){ endEl.value = startEl.value; }
+      }else{
+        endEl.removeAttribute('min');
+      }
+    }
+
+    // 제출 직전 콤마 제거
+    function sanitizeAmountInputs(form){
+      form.querySelectorAll('.amount-input').forEach(inp=>{
+        inp.dataset._formatted = inp.value;         // 복구용 저장
+        inp.value = onlyDigits(inp.value);          // 콤마 제거
+      });
+    }
+    // 검증 실패시 콤마 복원
+    function restoreAmountInputs(form){
+      form.querySelectorAll('.amount-input').forEach(inp=>{
+        if(inp.dataset._formatted){ inp.value = inp.dataset._formatted; delete inp.dataset._formatted; }
+      });
+    }
+
+    /* ========= 등록 모달 바인딩 ========= */
+    const createModal = document.getElementById('createModal');
+    const createForm  = document.getElementById('create-rule-form');
+
+    if(createModal){
+      createModal.addEventListener('shown.bs.modal', ()=>{
+        // 금액 포맷
+        createModal.querySelectorAll('.amount-input').forEach(inp=>{
+          if(inp.value){ inp.value = formatAmountValue(parseAmountValue(inp.value)); }
+        });
+        clampEndAfterStart(document.getElementById('create-start'), document.getElementById('create-end'));
+        updatePreview(createModal);
+      });
+
+      createModal.addEventListener('hidden.bs.modal', ()=>{
+        createForm.reset();
+        createForm.classList.remove('was-validated');
+        const end = document.getElementById('create-end');
+        if(end){ end.setCustomValidity(''); end.removeAttribute('min'); }
+      });
+
+      // 금액/세율 입력 변경 시 미리보기
+      createModal.addEventListener('input', (e)=>{
+        if(e.target.matches('.amount-input')){
+          e.target.value = formatAmountValue(parseAmountValue(e.target.value));
+        }
+        if(e.target.matches('.amount-input, .rate-input')) updatePreview(createModal);
+        if(e.target.id==='create-start' || e.target.id==='create-end'){
+          clampEndAfterStart(document.getElementById('create-start'), document.getElementById('create-end'));
+        }
+      });
+
+      // 제출
+      createForm.addEventListener('submit', (e)=>{
+        sanitizeAmountInputs(createForm);
+        if(!createForm.checkValidity()){
+          e.preventDefault(); e.stopPropagation();
+          createForm.classList.add('was-validated');
+          restoreAmountInputs(createForm);
+          return;
+        }
+        const s = document.getElementById('create-start');
+        const d = document.getElementById('create-end');
+        if(s.value && d.value && d.value < s.value){
+          e.preventDefault(); e.stopPropagation();
+          d.setCustomValidity('종료일은 시작일 이후여야 합니다');
+          d.classList.add('is-invalid');
+          createForm.classList.add('was-validated');
+          restoreAmountInputs(createForm);
+          return;
+        }else{
+          d.setCustomValidity('');
+          d.classList.remove('is-invalid');
+        }
+      });
+    }
+
+    /* ========= 수정 모달 바인딩(공통) ========= */
+    document.addEventListener('shown.bs.modal', (evt)=>{
+      const modal = evt.target;
+      if(!modal.classList.contains('modal')) return;
+      if(modal.dataset.bound === '1') { updatePreview(modal); return; } // 중복 바인딩 방지
+
+      // 초기 포맷/동기화
+      modal.querySelectorAll('.amount-input').forEach(inp=>{
+        if(inp.value){ inp.value = formatAmountValue(parseAmountValue(inp.value)); }
+      });
+      const s = modal.querySelector('.edit-start');
+      const d = modal.querySelector('.edit-end');
+      clampEndAfterStart(s, d);
+      updatePreview(modal);
+
+      // 입력 이벤트
+      modal.addEventListener('input', (e)=>{
+        if(e.target.matches('.amount-input')){
+          e.target.value = formatAmountValue(parseAmountValue(e.target.value));
+        }
+        if(e.target.matches('.amount-input, .rate-input')) updatePreview(modal);
+        if(e.target.classList.contains('edit-start') || e.target.classList.contains('edit-end')){
+          clampEndAfterStart(s, d);
+        }
+      });
+
+      // 제출 처리
+      const form = modal.querySelector('form.needs-validation');
+      form?.addEventListener('submit', (e)=>{
+        sanitizeAmountInputs(form);
+        if(!form.checkValidity()){
+          e.preventDefault(); e.stopPropagation();
+          form.classList.add('was-validated');
+          restoreAmountInputs(form);
+          return;
+        }
+        if(s && d && s.value && d.value && d.value < s.value){
+          e.preventDefault(); e.stopPropagation();
+          d.setCustomValidity('종료일은 시작일 이후여야 합니다');
+          d.classList.add('is-invalid');
+          form.classList.add('was-validated');
+          restoreAmountInputs(form);
+          return;
+        }else{
+          d?.setCustomValidity('');
+          d?.classList.remove('is-invalid');
+        }
+      });
+
+      modal.dataset.bound = '1';
+    });
+
+    /* ========= 삭제 버튼(확인 후 이동) ========= */
+    document.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.btn-delete-rule');
+      if(!btn) return;
+      const id = btn.dataset.ruleId;
+      if(confirm(`기준 ID ${id} 를 삭제하시겠습니까?`)){
+        location.href = btn.dataset.href;
+      }
+    });
+  </script>
+
 </th:block>
 </th:block>

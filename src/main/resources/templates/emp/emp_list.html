@@ -1,0 +1,90 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/layouts/layout.html}">
+<body>
+<th:block layout:fragment="content">
+	<div class="custom-body container-xxl flex-grow-1 container-p-y">
+	
+	<h2>사원 목록</h2>
+	
+	<!-- 한 줄 + 반응형 -->
+	<div class="row align-items-center g-2">
+	  <!-- 왼쪽: 검색 폼 -->
+	  <div class="col-12 col-lg-9">
+	    <form class="row g-2 align-items-center" onsubmit="return false" role="search">
+	
+	      <!-- 입력창 -->
+	      <div class="col-12 col-md-auto">
+	        <input class="form-control"
+	               type="search"
+	               placeholder="사번 / 성명 / 부서 / 직급 / 이메일 검색"
+	               aria-label="Search"
+	               style="width: 280px;">
+	      </div>
+	
+	      <!-- 셀렉트 -->
+	      <div class="col-6 col-md-auto">
+	        <select class="form-select">
+	          <option>부서 전체</option>
+	          <option>개발부</option>
+	          <option>마케팅부</option>
+	          <option>생산부</option>
+	          <option>영업부</option>
+	          <option>인사부</option>
+	        </select>
+	      </div>
+	
+	      <!-- 검색 버튼 -->
+	      <div class="col-6 col-md-auto d-grid">
+	        <button class="btn btn-outline-primary" type="submit">Search</button>
+	      </div>
+	    </form>
+	  </div>
+	
+	  <!-- 오른쪽: 인사등록 버튼 -->
+	  <div class="col-12 col-lg-3 d-grid d-lg-flex justify-content-lg-end">
+	    <a href="/emp/register" class="btn btn-primary">인사 등록</a>
+	  </div>
+	</div>
+
+
+
+	
+	<br>
+	
+	<!-- Basic Bootstrap Table -->
+	<div class="table-responsive">
+	  <table class="table mb-0">
+	    <thead>
+	      <tr>
+	        <th>입사일자</th>
+	        <th>사번</th>
+	        <th>성명</th>
+	        <th>부서</th>
+	        <th>직급</th>
+	        <th>전화번호</th>
+	        <th>Email</th>
+	        <th>상세</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      <tr>
+	      	<td>25050308</td>
+	      	<td>2503485</td>
+	      	<td>홍길동</td>
+	      	<td>인사부</td>
+	      	<td>대리</td>
+	      	<td>010-1234-5678</td>
+	      	<td>hong@hong.com</td>
+	      	<td>
+	      		<button type="button" class="btn btn-info btn-sm">상세</button>
+	      	</td>
+	      </tr>
+	    </tbody>
+	  </table>
+	</div>
+	<!--/ Basic Bootstrap Table -->
+	
+	</div>
+</th:block>
+</body>

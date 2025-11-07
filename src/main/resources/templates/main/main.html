@@ -20,7 +20,7 @@
 		                    </div>
 		                    <!-- 헤더 오른쪽에 버튼들 -->
 		                    <div class="btn-group" role="group">
-		                        <button type="button" class="btn btn-outline-secondary btn-xs" onclick="location.href='/main/schedule'">
+		                        <button type="button" class="btn btn-outline-secondary btn-xs" onclick="location.href='/main/calendar'">
 		                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
 		                        </button>
 		                        <button type="button" class="btn btn-outline-secondary btn-xs" onclick="location.reload();">
@@ -39,7 +39,7 @@
 		            <!-- 프로필 -->
 		            <section class="panel" style="border: solid; color: red; min-height:30%">
 		                <h1>신필용</h1>
-		                <button class="btn btn-primary">출근</button>
+		                <button class="btn btn-primary" onclick="handleAttendanceToggle()" id="attendance">출근</button>
 		                <button class="btn btn-primary">출입</button>
 		            </section>
 		            <!-- 공지목록 -->
@@ -66,6 +66,7 @@
 	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 	
 	<script src="/js/main/calendar.js"></script>
+	<script src="/js/attendance/attendance.js"></script>
 </th:block>
 
 </body>
