@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 const lightBtn = document.getElementById('light-btn');
 const darkBtn = document.getElementById('dark-btn');
+const greenBtn = document.getElementById('green-btn');
 
 lightBtn.addEventListener('click', () => {      
   const currentTheme = document.documentElement.getAttribute("color-theme");
@@ -23,6 +24,12 @@ darkBtn.addEventListener('click', () => {
   const currentTheme = document.documentElement.getAttribute("color-theme");
   document.documentElement.setAttribute("color-theme", "dark");
   localStorage.setItem("color-theme", "dark");
+});
+
+greenBtn.addEventListener('click', () => {      
+  const currentTheme = document.documentElement.getAttribute("color-theme");
+  document.documentElement.setAttribute("color-theme", "green");
+  localStorage.setItem("color-theme", "green");
 });
 
 
