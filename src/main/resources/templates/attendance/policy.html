@@ -2,39 +2,63 @@
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{/layouts/layout.html}">
 <head>
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 </head>
 <body>
 	<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
 		<h3>근무 정책 관리</h3>
 		<div class="card-body">
-			<form class="browser-default-validation w-75 mx-auto">
+			<form th:action="@{/attendance/policy}" th:object="${workPolicyDTO}" method="post" class="browser-default-validation w-75 mx-auto">
 				<div class="mb-6">
-					<label class="h5" for="startTime">출근 기준 시간</label>
-					<input type="time" class="form-control" id="startTime" value="09:00" required/>
+					<label class="h5" for="inTime">출근 기준 시간</label>
+					<input type="time" class="form-control" id="inTime" th:field="*{inTime}" required/>
 				</div>
 				<div class="mb-6">
-					<label class="h5 mt-3" for="endTime">퇴근 기준 시간</label>
-					<input type="time" class="form-control" id="endTime" value="18:00" required/>
+					<label class="h5 mt-3" for="outTime">퇴근 기준 시간</label>
+					<input type="time" class="form-control" id="outTime" th:field="*{outTime}" required/>
 				</div>
 				<div class="mb-6">
-					<label class="h5 mt-3" for="tardiness">지각 유예 시간(분)</label>
-					<input type="number" class="form-control" id="tardiness" min="0" max="60" value="0" required/>
+					<label class="h5 mt-3" for="lunchIn">점심 시작 시간</label>
+					<input type="time" class="form-control" id="lunchIn" th:field="*{lunchIn}" required/>
+				</div>
+				<div class="mb-6">
+					<label class="h5 mt-3" for="lunchOut">점심 종료 시간</label>
+					<input type="time" class="form-control" id="lunchOut" th:field="*{lunchOut}" required/>
+				</div>
+				<div class="mb-6">
+					<label class="h5 mt-3" for="lateLimit">지각 유예 시간(분)</label>
+					<input type="number" class="form-control" id="lateLimit" th:field="*{lateLimit}" min="0" max="60"  required/>
 				</div>
 				<div class="mb-6">
 					<label class="h5 mt-3">연차 기준 설정</label>
 					<div class="d-flex">
 						<div class="form-check mb-2">
-							<input type="radio" id="fiscalYear" name="annualBasis" class="form-check-input"/>
+							<input type="radio" id="fiscalYear" th:field="*{annualBasis}" class="form-check-input" value="FY" required/>
 							<label class="form-check-label" for="fiscalYear">회계연도기준</label>
 						</div>
 						<div class="form-check ms-3" >
-							<input type="radio" id="employmentDate" name="annualBasis" class="form-check-input"/>
+							<input type="radio" id="employmentDate" th:field="*{annualBasis}" class="form-check-input" value="JOIN"/>
 							<label class="form-check-label" for="employmentDate">입사일기준</label>
 						</div>
 					</div>
 				</div>
+				<div class="d-flex justify-content-end">
+					<button type="submit" class="btn btn-primary">저장</button>
+				</div>
 			</form>
+			<div id="grid"></div>
 		</div>
 	</div>
+	<th:block layout:fragment="myScript">
+		<script>
+			const message = "[[${msg}]]";
+			
+			if (message) {
+				console.log(message);
+				alert(message);
+			}
+		</script>
+	</th:block>
 </body>
 </th:block>
