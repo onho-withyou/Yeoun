@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
@@ -57,7 +58,7 @@ public class Attendance {
 	@Column(length = 7)
 	private String updatedUser; // 수정자
 	
-	@CreatedDate
+	@LastModifiedDate
 	private LocalDateTime updatedDate; // 수정일자
 }
 

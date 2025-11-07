@@ -7,19 +7,28 @@ import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.yeoun.attendance.dto.AttendanceDTO;
+import com.yeoun.attendance.dto.WorkPolicyDTO;
 import com.yeoun.attendance.service.AttendanceService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Controller
 @RequestMapping("/attendance")
 @RequiredArgsConstructor
+@Log4j2
 public class AttendanceController {
 	
 	private final AttendanceService attendanceService;
@@ -45,13 +54,16 @@ public class AttendanceController {
 		}
 	}
 	
-	
-	
-	
 	// 관리자용 출/퇴근 현황 페이지
 	@GetMapping("/list")
 	public String attendanceAdmin() {
 		return "attendance/commute_admin";
+	}
+	
+	// 관리자 출/퇴근 수기 등록
+	@PostMapping("/regist")
+	public String registAttendance(@ModelAttribute AttendanceDTO attendanceDTO) {
+		return "redirect:/attendance/list";
 	}
 	
 	// 개인 출/퇴근 현황 페이지
@@ -62,7 +74,25 @@ public class AttendanceController {
 	
 	// 근무정책관리
 	@GetMapping("/policy")
-	public String policyForm() {
+	public String policyForm(Model model) {
+		WorkPolicyDTO workPolicyDTO = attendanceService.getWorkPolicy();
+		model.addAttribute("workPolicyDTO", workPolicyDTO);
+		
 		return "attendance/policy";
+	}
+	
+	@PostMapping("/policy")
+	public String registPolicy(@ModelAttribute("workPolicyDTO") @Valid WorkPolicyDTO workPolicyDTO,  
+			BindingResult bindingResult, 
+			RedirectAttributes redirectAttributes) {
+		
+		if (bindingResult.hasErrors()) {
+			return  "attendance/policy";
+		}
+		
+		String message = attendanceService.registWorkPolicy(workPolicyDTO);
+		redirectAttributes.addFlashAttribute("msg", message);
+		
+		return "redirect:/attendance/policy";
 	}
 }
