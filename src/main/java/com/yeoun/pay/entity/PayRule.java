@@ -1,127 +1,148 @@
-//package com.yeoun.pay.entity;
-//
-//import java.time.LocalDate;
-//import java.time.LocalDateTime;
-//
-//import org.springframework.data.annotation.CreatedDate;
-//import org.springframework.data.annotation.LastModifiedDate;
-//import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-//
-//import jakarta.persistence.Column;
-//import jakarta.persistence.Entity;
-//import jakarta.persistence.EntityListeners;
-//import jakarta.persistence.EnumType;
-//import jakarta.persistence.Enumerated;
-//import jakarta.persistence.GeneratedValue;
-//import jakarta.persistence.GenerationType;
-//import jakarta.persistence.Id;
-//import jakarta.persistence.Lob;
-//import jakarta.persistence.SequenceGenerator;
-//import jakarta.persistence.Table;
-//import lombok.Builder;
-//import lombok.Getter;
-//import lombok.NoArgsConstructor;
-//import lombok.Setter;
-//import lombok.ToString;
-//
-///**
-// * 급여 기준 정보 (PAY_RULE)
-// * - 기본급/식대/교통비/보험요율/지급일/상태/비고 등 일괄 기준 관리
-// */
-//@Entity
-//@Table(name = "PAY_RULE")
-//@NoArgsConstructor
-//@Getter
-//@Setter
-//@ToString
-//@EntityListeners(AuditingEntityListener.class)
-//@SequenceGenerator(
-//        name = "PAY_RULE_SEQ_GENERATOR",   // JPA에서 사용할 시퀀스 이름
-//        sequenceName = "PAY_RULE_SEQ",     // Oracle 실제 시퀀스 이름
-//        initialValue = 1,
-//        allocationSize = 1
-//)
-//public class PayRule {
-//
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.AUTO, generator = "PAY_RULE_SEQ_GENERATOR")
-//    @Column(name = "RULE_ID", nullable = false, updatable = false, precision = 18, scale = 0)
-//    private Long ruleId; // 기준 ID (PK)
-//
-//    @Column(name = "START_DATE", nullable = false)
-//    private LocalDate startDt; // 적용시작일
-//
-//    @Column(name = "END_DATE")
-//    private LocalDate endDt;   // 적용종료일 (NULL=무기한)
-//
-//    // 금액 15,2
-//    @Column(name = "BASE_AMT", precision = 15, scale = 2)
-//    private Double baseAmt;    // 기본급
-//
-//    @Column(name = "MEAL_AMT", precision = 15, scale = 2)
-//    private Double mealAmt;    // 식대
-//
-//    @Column(name = "TRANS_AMT", precision = 15, scale = 2)
-//    private Double transAmt;   // 교통비
-//
-//    // 요율 7,4  (예: 0.045 = 4.5%)
-//    @Column(name = "PEN_RATE", precision = 7, scale = 4)
-//    private Double penRate;    // 국민연금 요율
-//
-//    @Column(name = "HLTH_RATE", precision = 7, scale = 4)
-//    private Double hlthRate;   // 건강보험 요율
-//
-//    @Column(name = "EMP_RATE", precision = 7, scale = 4)
-//    private Double empRate;    // 고용보험 요율
-//
-//    @Column(name = "TAX_RATE", precision = 7, scale = 4)
-//    private Double taxRate;    // 소득세율(간이세율 범위 사용 가능)
-//
-//    @Column(name = "PAY_DAY", precision = 2, scale = 0)
-//    private Integer payDay;    // 지급일(예: 25)
-//
-//    @Enumerated(EnumType.STRING)
-//    @Column(name = "STATUS", length = 10, nullable = false)
-//    private PayRuleStatus status; // ACTIVE / INACTIVE
-//
-//    @Lob
-//    @Column(name = "REMARK")
-//    private String remark;     // 비고(CLOB)
-//
-//    // 감사 필드
-//    @CreatedDate
-//    @Column(name = "CREATED_DATE", updatable = false)
-//    private LocalDateTime createdAt;
-//
-//    @LastModifiedDate
-//    @Column(name = "UPDATED_DATE")
-//    private LocalDateTime updatedAt;
-//
-//    // 빌더 (필수값 위주)
-//    @Builder
-//    public PayRule(LocalDate startDt,
-//                   LocalDate endDt,
-//                   Double baseAmt,
-//                   Double mealAmt,
-//                   Double transAmt,
-//                   Double penRate,
-//                   Double hlthRate,
-//                   Double empRate,
-//                   Double taxRate,
-//                   Integer payDay,
-//                   PayRuleStatus status,
-//                   String remark) {
-//        this.startDt = startDt;
-//        this.endDt = endDt;
-//        this.baseAmt = baseAmt;
-//        this.mealAmt = mealAmt;
-//        this.transAmt = transAmt;
-//        this.penRate = penRate;
-//        this.hlthRate = hlthRate;
-//        this.empRate = empRate;
-//        this.taxRate = taxRate;
-//        this.payDay = payDay;
-//        this.status = status;
-//        this.remark = remark;
-//    }
-//}
+package com.yeoun.pay.entity;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Comment;  
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.yeoun.pay.enums.ActiveStatus;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "PAY_RULE")
+@NoArgsConstructor
+@Getter @Setter
+@ToString
+@EntityListeners(AuditingEntityListener.class)
+@SequenceGenerator(
+        name = "PAY_RULE_SEQ_GENERATOR",
+        sequenceName = "PAY_RULE_SEQ",
+        initialValue = 1,
+        allocationSize = 1
+)
+public class PayRule {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PAY_RULE_SEQ_GENERATOR")
+    @Column(name = "RULE_ID", nullable = false, updatable = false)
+    @Comment("기준 ID (PK)")
+    private Long ruleId;
+
+    @Column(name = "START_DATE", nullable = false)
+    @Comment("적용 시작일 (해당 급여 기준이 적용되기 시작하는 날짜)")
+    private LocalDate startDate;
+
+    @Column(name = "END_DATE")
+    @Comment("적용 종료일 (NULL=무기한)")
+    private LocalDate endDate;
+
+    // 금액: NUMBER(15,2) — Double 사용 시 columnDefinition 지정
+    @Column(name = "BASE_AMT", columnDefinition = "NUMBER(15,2)")
+    @ColumnDefault("0")
+    @Comment("기본금: 사원 급여 산정 시 기준금액 또는 직급별 표준값")
+    private Double baseAmt;
+
+    @Column(name = "MEAL_AMT", columnDefinition = "NUMBER(15,2)")
+    @ColumnDefault("0")
+    @Comment("식대: 별도 입력 없을 시 적용하는 참조 금액")
+    private Double mealAmt;
+
+    @Column(name = "TRANS_AMT", columnDefinition = "NUMBER(15,2)")
+    @ColumnDefault("0")
+    @Comment("교통비: 기본값(정액). 별도 입력 없을 때 사용")
+    private Double transAmt;
+
+    // 요율: NUMBER(7,4)
+    @Column(name = "PEN_RATE", columnDefinition = "NUMBER(7,4)")
+    @ColumnDefault("0.045")
+    @Comment("국민연금 요율 (회사/개인 합산 또는 정책상 기준치) 예: 0.045 = 4.5%")
+    private Double penRate;
+
+    @Column(name = "HLTH_RATE", columnDefinition = "NUMBER(7,4)")
+    @ColumnDefault("0.035")
+    @Comment("건강보험 요율 예: 0.035 = 3.5%")
+    private Double hlthRate;
+
+    @Column(name = "EMP_RATE", columnDefinition = "NUMBER(7,4)")
+    @ColumnDefault("0.009")
+    @Comment("고용보험 요율 예: 0.009 = 0.9%")
+    private Double empRate;
+
+    @Column(name = "TAX_RATE", columnDefinition = "NUMBER(7,4)")
+    @ColumnDefault("0.05")
+    @Comment("소득세율(예: 간이세율 또는 평균세율 참조) 예: 0.05 = 5%")
+    private Double taxRate;
+
+    @Column(name = "PAY_DAY")
+    @ColumnDefault("25")
+    @Comment("지급일자(매월 급여지급 기준일, 1~31)")
+    private Integer payDay;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "STATUS", length = 10, nullable = false)
+    @ColumnDefault("'ACTIVE'")
+    @Comment("상태: ACTIVE(현재 사용 중) / INACTIVE(비활성화)")
+    private ActiveStatus status;
+
+    @Lob
+    @Column(name = "REMARK")
+    @Comment("비고(관리자 메모/설명)")
+    private String remark;
+
+    @CreatedDate
+    @Column(name = "CREATED_DATE", updatable = false)
+    @Comment("생성일시")
+    private LocalDateTime createdDate;
+
+    @LastModifiedDate
+    @Column(name = "UPDATED_DATE")
+    @Comment("수정일시")
+    private LocalDateTime updatedDate;
+
+    @Builder
+    public PayRule(LocalDate startDate,
+                   LocalDate endDate,
+                   Double baseAmt,
+                   Double mealAmt,
+                   Double transAmt,
+                   Double penRate,
+                   Double hlthRate,
+                   Double empRate,
+                   Double taxRate,
+                   Integer payDay,
+                   ActiveStatus status,
+                   String remark) {
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.baseAmt = baseAmt;
+        this.mealAmt = mealAmt;
+        this.transAmt = transAmt;
+        this.penRate = penRate;
+        this.hlthRate = hlthRate;
+        this.empRate = empRate;
+        this.taxRate = taxRate;
+        this.payDay = payDay;
+        this.status = status;
+        this.remark = remark;
+    }
+
+    /** 널로 들어오는 경우를 대비한 엔티티 레벨 기본값 보정 */
+    @PrePersist
+    public void applyDefaults() {
+        if (baseAmt == null) baseAmt = 0d;
+        if (mealAmt == null) mealAmt = 0d;
+        if (transAmt == null) transAmt = 0d;
+        if (penRate == null) penRate = 0.045d;
+        if (hlthRate == null) hlthRate = 0.035d;
+        if (empRate == null) empRate = 0.009d;
+        if (taxRate == null) taxRate = 0.05d;
+        if (payDay == null) payDay = 25;
+        if (status == null) status = ActiveStatus.ACTIVE;
+    }
+}

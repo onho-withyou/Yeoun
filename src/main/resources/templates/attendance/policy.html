@@ -1,0 +1,40 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/layouts/layout.html}">
+<head>
+</head>
+<body>
+	<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
+		<h3>근무 정책 관리</h3>
+		<div class="card-body">
+			<form class="browser-default-validation w-75 mx-auto">
+				<div class="mb-6">
+					<label class="h5" for="startTime">출근 기준 시간</label>
+					<input type="time" class="form-control" id="startTime" value="09:00" required/>
+				</div>
+				<div class="mb-6">
+					<label class="h5 mt-3" for="endTime">퇴근 기준 시간</label>
+					<input type="time" class="form-control" id="endTime" value="18:00" required/>
+				</div>
+				<div class="mb-6">
+					<label class="h5 mt-3" for="tardiness">지각 유예 시간(분)</label>
+					<input type="number" class="form-control" id="tardiness" min="0" max="60" value="0" required/>
+				</div>
+				<div class="mb-6">
+					<label class="h5 mt-3">연차 기준 설정</label>
+					<div class="d-flex">
+						<div class="form-check mb-2">
+							<input type="radio" id="fiscalYear" name="annualBasis" class="form-check-input"/>
+							<label class="form-check-label" for="fiscalYear">회계연도기준</label>
+						</div>
+						<div class="form-check ms-3" >
+							<input type="radio" id="employmentDate" name="annualBasis" class="form-check-input"/>
+							<label class="form-check-label" for="employmentDate">입사일기준</label>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</body>
+</th:block>

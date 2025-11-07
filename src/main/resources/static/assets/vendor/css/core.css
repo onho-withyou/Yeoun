@@ -40,9 +40,12 @@
   --bs-font-sans-serif: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   --bs-font-monospace: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
+  --bs-header-font-size: 18px;
+  --bs-menubar-font-size: 0.9375rem;
+  --bs-menubar-menu-font-size: 1rem;
   --bs-root-font-size: 16px;
-  --bs-body-font-family: var(--bs-font-sans-serif);
   --bs-body-font-size: 0.9375rem;
+  --bs-body-font-family: var(--bs-font-sans-serif);
   --bs-body-font-weight: 400;
   --bs-body-line-height: 1.53;
   --bs-body-color: #697a8d;
@@ -93,9 +96,12 @@
   --bs-font-sans-serif: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;/*원하는 글꼴로 변경*/
   --bs-font-monospace: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
+  --bs-header-font-size: 25px;
+  --bs-menubar-font-size: 25px;
+  --bs-menubar-sub-font-size: 22px;
   --bs-root-font-size: 16px;
+  --bs-body-font-size: 16px;
   --bs-body-font-family: var(--bs-font-sans-serif);
-  --bs-body-font-size: 0.9375rem;
   --bs-body-font-weight: 9900;
   --bs-body-line-height: 1.53;
   --bs-body-color: #45ADFE;/*파랑색*/
@@ -2953,7 +2959,7 @@ textarea.form-control-lg {
 .dropdown-menu[data-bs-popper] {
   top: 100%;
   left: 0;
-  margin-top: 0.125rem;
+  margin-top: 1.125rem;
 }
 
 .dropdown-menu-start {
@@ -3449,7 +3455,7 @@ textarea.form-control-lg {
   padding-left: 0;
 }
 .navbar-nav .dropdown-menu {
-  position: static;
+
 }
 
 .navbar-text {
@@ -9404,8 +9410,8 @@ button.list-group-item-gray.active {
 
 .align-items-center {
   align-items: center !important;
-  color: var(--bs-body-color);
-  /* color: #45ADFE; 헤더 글자색 */
+  color: var(--bs-body-color);/* header 글자색 */
+  font-size: var(--bs-header-font-size);/* 헤더 글자크기*/
 }
 
 .align-items-baseline {
@@ -15154,7 +15160,12 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
   padding: 0.625rem 2rem 0.625rem 2rem;
 }
 .menu-vertical .menu-item .menu-link {
-  font-size: 0.9375rem;
+  color: var(--bs-body-color);/*메뉴바 글자색*/
+  font-size: var(--bs-menubar-font-size);
+}
+.menu-vertical .menu-item .menu-link .menu-link-sub {
+  color: var(--bs-body-color);/*메뉴바-sub 글자색*/
+  font-size: var(--bs-menubar-sub-font-size);/*메뉴-sub 글자 크기*/
 }
 .menu-vertical .menu-item.active:not(.open) > .menu-link {
   font-weight: 600;
@@ -15357,7 +15368,7 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
   padding: 0 1.5rem;
 }
 .layout-navbar.navbar-detached.container-xxl {
-  max-width: calc(1440px - calc(1.625rem * 2));
+  max-width: calc(1493px - calc(1.625rem * 2));
 }
 .layout-navbar-fixed .layout-navbar.navbar-detached {
   width: calc(100% - calc(1.625rem * 2) - 16.25rem);
