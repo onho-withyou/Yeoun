@@ -1,11 +1,14 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{/layouts/layout.html}">
+<head>
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+</head>
 <body>
 <th:block layout:fragment="content">
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
 		<h2>전자 결재 작성중</h2>
-		<h2>기안서작성 드롭다운-부트스트랩</h2>
 		<div class="input-group">
 		<form>
 			<select class="form-select" aria-label="Default select example">
@@ -18,25 +21,126 @@
 			<button class="btn btn-primary me-2">작성</button>
 		</form>
 		
-		     <input type="date" id="startDate" class="form-control datepicker" placeholder="start">
+		      <input type="date" id="startDate" class="form-control datepicker" placeholder="start">
 		      <span>~</span> 
 		      <input type="date" id="endDate" class="form-control datepicker" placeholder="end">
 		      <input type="text" placeholder="문서이름">
 			  <button class="btn btn-primary me-2">검색</button>
 		
 		</div>
-		
-<!-- 		<div id="foo"> -->
-<!-- 		  <input type="text" name="start"> -->
-<!-- 		  <span>~</span> -->
-<!-- 		  <input type="text" name="end">   -->
-<!-- 		</div> -->
-		<h2>기안자및 문서제목</h2>
-		<h2>검색</h2>
-		<h2>결재사항 표</h2>
+		<nav>
+		  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+		    <button class="nav-link active" id="nav-approval-tab" data-bs-toggle="tab" data-bs-target="#nav-approval" type="button" role="tab" aria-controls="nav-home" aria-selected="true">결재사항</button>
+		    <button class="nav-link" id="nav-all-tab" data-bs-toggle="tab" data-bs-target="#nav-all" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">전체결재</button>
+		    <button class="nav-link" id="nav-my-tab" data-bs-toggle="tab" data-bs-target="#nav-my" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">내 결재목록</button>
+		    <button class="nav-link" id="nav-waiting-tab" data-bs-toggle="tab" data-bs-target="#nav-waiting" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">결재대기</button>
+		    <button class="nav-link" id="nav-done-tab" data-bs-toggle="tab" data-bs-target="#nav-done" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">결재완료</button>
+		  </div>
+		</nav>
+		<div class="tab-content" id="nav-tabContent">
+		  <div class="tab-pane fade show active" id="nav-approval" role="tabpanel" aria-labelledby="nav-approval-tab">
+		  	<h2>table1</h2>
+		  	<div id="approvalGrid"></div>
+		  </div>
+		  <div class="tab-pane fade" id="nav-all" role="tabpanel" aria-labelledby="nav-all-tab">
+		  		<h2>table2</h2>	
+		  			  
+		  </div>
+		  <div class="tab-pane fade" id="nav-my" role="tabpanel" aria-labelledby="nav-my-tab">
+		  		<h2>table3</h2>
+		  </div>
+		  <div class="tab-pane fade" id="nav-waiting" role="tabpanel" aria-labelledby="nav-waiting-tab">
+		  		<h2>table4</h2>
+		  </div>
+		  <div class="tab-pane fade" id="nav-done" role="tabpanel" aria-labelledby="nav-done-tab">
+		  		<h2>table5</h2>
+		  </div>
+		</div>
 	</div>
 </th:block>
 </body>
-<script>
 
-</script>
+<th:block layout:fragment="myScript">
+	<script>
+	const Grid = tui.Grid;
+	const instance = new Grid({
+		  el: document.getElementById('approvalGrid'), // Container element
+		  columns: [
+		    {
+		      header: '결재순번',
+		      name: 'RowNo'
+		    },
+		    {
+		      header: '문서제목',
+		      name: 'Document_title'
+		    },
+		    {
+		      header: '기안자',
+		      name: 'drafter'
+		    },
+		    {
+		      header: '부서명',
+		      name: 'Department_name'
+		    },
+		    {
+			  header: '직급',
+			  name: 'rank'
+			},
+			{
+			  header: '생성일',
+			  name: 'Creation_date'
+			},
+			{
+			  header: '결재완료일자',
+			  name: 'Payment_completion_date'
+			},
+			{
+			  header: '상태',
+			  name: 'state'
+			},
+			{
+			  header: '결재여부',
+			  name: 'Payment_status'
+			},
+			{
+			  header: '상세보기',
+			  name: 'View_details'
+
+			}
+		  ],
+		  data: [
+		    {
+		    	RowNo: 1,
+				Document_title: '지출 결의서',
+				drafter:'',
+				Department_name:'',
+				rank:'',
+				Creation_date:'',
+				Payment_completion_date:'',
+				state:'',
+				Payment_status:'',
+				View_details:'<button class="btn btn-primary me-2">상세</button>'
+				
+		    },
+		    {
+		    	RowNo: 2,
+				Document_title: '휴가(연차)신청서',
+				drafter:'',
+				Department_name:'',
+				rank:'',
+				Creation_date:'',
+				Payment_completion_date:'',
+				state:'',
+				Payment_status:'',
+				View_details:'<button class="btn btn-primary me-2">상세</button>'
+				
+		    }
+		  ]
+		});
+	instance.resetData(newData); // Call API of instance's public method
+	
+	Grid.applyTheme('clean'); // Call API of static method
+	
+	</script>
+</th:block>
+
