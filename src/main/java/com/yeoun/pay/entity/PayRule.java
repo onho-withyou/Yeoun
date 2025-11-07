@@ -23,7 +23,7 @@ import lombok.*;
 @SequenceGenerator(
         name = "PAY_RULE_SEQ_GENERATOR",
         sequenceName = "PAY_RULE_SEQ",
-        initialValue = 1,
+        initialValue = 100,
         allocationSize = 1
 )
 public class PayRule {
@@ -132,17 +132,4 @@ public class PayRule {
         this.remark = remark;
     }
 
-    /** 널로 들어오는 경우를 대비한 엔티티 레벨 기본값 보정 */
-    @PrePersist
-    public void applyDefaults() {
-        if (baseAmt == null) baseAmt = 0d;
-        if (mealAmt == null) mealAmt = 0d;
-        if (transAmt == null) transAmt = 0d;
-        if (penRate == null) penRate = 0.045d;
-        if (hlthRate == null) hlthRate = 0.035d;
-        if (empRate == null) empRate = 0.009d;
-        if (taxRate == null) taxRate = 0.05d;
-        if (payDay == null) payDay = 25;
-        if (status == null) status = ActiveStatus.ACTIVE;
-    }
 }
