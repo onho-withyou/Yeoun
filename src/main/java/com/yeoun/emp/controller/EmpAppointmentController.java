@@ -6,16 +6,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/emp")
-public class EmpController {
+public class EmpAppointmentController {
 	
-	@GetMapping("/list")
-	public String List() {
-		return "emp/emp_list";
-	}
-	
-	@GetMapping("/register")
-	public String registerEmployee() {
-		return "emp/emp_register";
+	@GetMapping("/appointment")
+	public String appointment() {
+		return "emp/appointment_list";
 	}
 	
 

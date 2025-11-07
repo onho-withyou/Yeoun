@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>여운</title>
+
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" th:href="@{/icon/favicon.png}" />
+
+<!-- Core CSS -->
+<link rel="stylesheet" href="../assets/vendor/css/core.css"
+	class="template-customizer-core-css" />
+<link rel="stylesheet" href="../assets/vendor/css/theme-default.css"
+	class="template-customizer-theme-css" />
+
+<!-- Vendors CSS -->
+<link rel="stylesheet" th:href="@{/css/common.css}"/>
+
+</head>
+<body>
+
+		<!-- 화면 전체 높이에서 중앙 정렬 -->
+		<div class="min-vh-100 d-flex align-items-center justify-content-center">
+		
+		  <!-- 로그인 카드 -->
+		  <div class="card shadow-sm border-0" style="max-width: 420px; width: 100%;">
+		    <div class="card-body p-4 p-md-5">
+		    
+			<!-- Logo -->
+			<div class="text-center mb-4">
+			  <img th:src="@{/icon/yeoun-logo.png}" width="200" alt="Yeo-un Logo">
+			</div>
+			<!-- /Logo -->
+
+		      <form id="formAuthentication" class="mb-3" action="index.html">
+		        <div class="mb-3">
+		          <label for="email" class="form-label">사원번호</label>
+		          <input type="text" class="form-control" id="empId" name="emp-id"
+		                 placeholder="사원번호를 입력하세요" autofocus="">
+		        </div>
+		
+		        <div class="mb-3 form-password-toggle">
+		          <label class="form-label" for="password">비밀번호</label>
+		          <div class="input-group input-group-merge">
+		            <input type="password" id="password" class="form-control" name="password"
+		                   placeholder="비밀번호를 입력하세요" aria-describedby="password">
+		          </div>
+		        </div>
+		
+		        <div class="mb-4">
+		          <div class="d-flex justify-content-between">
+		            <div class="form-check mb-0">
+		              <input class="form-check-input" type="checkbox" id="remember-me">
+		              <label class="form-check-label" for="remember-me"> 사원번호 저장 </label>
+		            </div>
+		            <div class="form-check mb-0">
+		              <input class="form-check-input" type="checkbox" id="remember-me">
+		              <label class="form-check-label" for="remember-me"> 자동 로그인 </label>
+		            </div>
+		          </div>
+		        </div>
+		
+		        <div class="mb-3">
+		          <button class="btn btn-primary d-grid w-100" type="submit">로그인</button>
+		        </div>
+		      </form>
+		
+		    </div>
+		  </div>
+		</div>
+
+</body>
+</html>
