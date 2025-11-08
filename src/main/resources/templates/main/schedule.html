@@ -5,9 +5,7 @@
 	<link rel="stylesheet" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css">
 	<link rel="stylesheet" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@toast-ui/calendar@2.1.3/dist/toastui-calendar.min.css" />
-    <style type="text/css">
-  
-    </style>
+	
 </head>
 <body>
 <th:block layout:fragment="content">
@@ -55,7 +53,9 @@
 			                </div>
 	                    </div>
 	                    <!-- 실제 TUI 캘린더 출력 -->
-	                    <div id="calendar" style="height: 700px; border: solid;"></div>
+	                    <div id="mainContent"> 
+		                    <div id="calendar" style="height: 700px; border: solid;"></div>
+	                    </div>
 	                </section>
 	            </div>
 	            
@@ -135,7 +135,7 @@
 				</div>
 			</div>
 		</div>
-		<!-- /일정관리모달끝 -->
+		<!-- /일정등록모달끝 -->
 	</div>
 	<!-- /custom-body 끝 -->
 	<!-- 타임피커 -->

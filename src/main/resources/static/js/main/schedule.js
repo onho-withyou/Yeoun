@@ -3,6 +3,9 @@ const myApiKey = "3bb524dc5656794ff51462c21245e81ffd44e902f5c3220a4d89b540465280
 
 let calendar = null; // calendar 객체 선언
 let currentDate = null; // 현재날짜 저장
+
+
+
 // 캘린더위치지정
 const calendarEl = document.getElementById('calendar');
 
@@ -111,15 +114,45 @@ document.getElementById('type-day').addEventListener('click', function() {
 });
 
 document.getElementById('type-list').addEventListener('click', function() {
-	// 만약 이미 달력이 있으면 제거
-	if (calendar) {
-	    calendar.destroy();
-	    calendar = null;
-	}
-	document.getElementById('calendar').innerHTML = `
-		<h1> 일정 목록 표시 </h1>
-	`;
+	location.href = "/main/schedule"
 });
+
+//document.getElementById('type-list').addEventListener('click', function() {
+//	// 만약 이미 달력이 있으면 제거
+//	if (calendar) {
+//	    calendar.destroy();
+//	    calendar = null;
+//	}
+//	
+////	document.getElementById('calendar').innerHTML = `
+////		<h1> 일정 목록 표시 </h1>
+////	`;
+//	// 리스트 컨테이너 생성 또는 선택
+//	  let listContainer = document.getElementById('schedule-list-container');
+//	  console.log("listContainer", listContainer);
+//	  
+//	  if (!listContainer) {
+//	    listContainer = document.createElement('div');
+//	    listContainer.id = 'schedule-list-container';
+//		
+//	    // 달력 자리에 삽입
+//	    const mainContent = document.getElementById('mainContent').parentElement;
+//		console.log("달력엄마 : " + mainContent);
+//
+////	    document.getElementById('calendar').remove(); // 기존 달력 제거
+//	    mainContent.appendChild(listContainer);
+//	  }
+//
+//	  // AJAX로 fragment 불러오기 (예: /schedules/list 엔드포인트)
+//	  fetch('/main/schedule_list')
+//	    .then(response => response.text())
+//	    .then(html => {
+//	      listContainer.innerHTML = html; // fragment content 삽입
+//	    })
+//	    .catch(err => {
+//	      listContainer.innerHTML = '<h1>일정 목록을 불러오는 데 실패했습니다.</h1>';
+//	    });
+//});
 
 function showCalendarView(type) {
     // 달력이 없으면 생성
@@ -273,7 +306,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		updateCurrentDate();
 	});
 
-	
+	//일정등록버튼 함수
 	document.getElementById('add-schedule-btn').addEventListener('click', function() {
 //		console.log("모달열기완료");
 		openAddScheduleModal()
@@ -298,17 +331,18 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 		calendar.clearGridSelections();
 	});
+	
 	// 일정 클릭시 이벤트
 	calendar.on('clickEvent', (eventInfo) => {
-	  const event = eventInfo.event;
-
-	  if (event.calendarId === 'leave') {
-	    // 커스텀 카테고리인 경우 => 커스텀 모달 열기
-	    openMyCustomModal(event);
-	  } else {
-	    // 그 외 일반 카테고리는 기본 모달(Open Detail Popup) 열기
-	    calendar.openDetailPopup(event);
-	  }
+		const event = eventInfo.event;
+	
+		if (event.calendarId === 'leave') {
+			// 커스텀 카테고리인 경우 => 커스텀 모달 열기
+			openMyCustomModal(event);
+		} else {
+			// 그 외 일반 카테고리는 기본 모달(Open Detail Popup) 열기
+			calendar.openDetailPopup(event);
+		}
 	});
 
 	

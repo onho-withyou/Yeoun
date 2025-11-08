@@ -4,8 +4,6 @@ import com.yeoun.pay.entity.PayRule;
 import com.yeoun.pay.enums.ActiveStatus;
 import com.yeoun.pay.repository.PayRuleRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,41 +12,19 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true) // 기본은 읽기 전용
+@Transactional(readOnly = true)
 public class PayRuleService {
+
+    private static final LocalDate MAX = LocalDate.of(9999, 12, 31);
 
     private final PayRuleRepository payRuleRepository;
 
-    // 페이징 + 필터
-    public Page<PayRule> findPage(ActiveStatus status,
-                                  LocalDate startFrom,
-                                  LocalDate startTo,
-                                  Pageable pageable) {
-
+    // 목록 조회(옵션 필터)
+    public List<PayRule> list(ActiveStatus status, LocalDate startFrom, LocalDate startTo) {
         if (startFrom != null && startTo != null && startFrom.isAfter(startTo)) {
             throw new IllegalArgumentException("startFrom은 startTo보다 이후일 수 없습니다.");
         }
-
-        if (status != null && startFrom != null && startTo != null) {
-            return payRuleRepository.findByStatusAndStartDateBetween(status, startFrom, startTo, pageable);
-        } else if (status != null && (startFrom != null || startTo != null)) {
-            // 단일 경계 처리
-            if (startFrom != null) {
-                return payRuleRepository.findByStatusAndStartDateGreaterThanEqual(status, startFrom, pageable);
-            } else {
-                return payRuleRepository.findByStatusAndStartDateLessThanEqual(status, startTo, pageable);
-            }
-        } else if (status != null) {
-            return payRuleRepository.findByStatus(status, pageable);
-        } else if (startFrom != null && startTo != null) {
-            return payRuleRepository.findByStartDateBetween(startFrom, startTo, pageable);
-        } else if (startFrom != null) {
-            return payRuleRepository.findByStartDateGreaterThanEqual(startFrom, pageable);
-        } else if (startTo != null) {
-            return payRuleRepository.findByStartDateLessThanEqual(startTo, pageable);
-        }
-
-        return payRuleRepository.findAll(pageable);
+        return payRuleRepository.search(status, startFrom, startTo);
     }
 
     public List<PayRule> findAll() {
@@ -63,6 +39,7 @@ public class PayRuleService {
     // ===== 쓰기 트랜잭션 =====
     @Transactional
     public PayRule save(PayRule entity) {
+        validateNoOverlap(entity.getStartDate(), entity.getEndDate(), null);
         return payRuleRepository.save(entity);
     }
 
@@ -70,6 +47,8 @@ public class PayRuleService {
     public PayRule update(Long id, PayRule entity) {
         PayRule target = payRuleRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("PAY_RULE not found: " + id));
+
+        validateNoOverlap(entity.getStartDate(), entity.getEndDate(), id);
 
         // 필요한 필드만 갱신
         target.setStartDate(entity.getStartDate());
@@ -85,7 +64,7 @@ public class PayRuleService {
         target.setStatus(entity.getStatus());
         target.setRemark(entity.getRemark());
 
-        return payRuleRepository.save(target); // 명시 저장(감사/이벤트 안전)
+        return payRuleRepository.save(target);
     }
 
     @Transactional
@@ -100,5 +79,17 @@ public class PayRuleService {
     public void delete(Long id) {
         if (!payRuleRepository.existsById(id)) return; // idempotent
         payRuleRepository.deleteById(id);
+    }
+
+    // ===== 겹침 검사 공통 =====
+    private void validateNoOverlap(LocalDate start, LocalDate end, Long excludeId) {
+        if (start == null) throw new IllegalArgumentException("기준 시작일은 필수입니다.");
+        if (end != null && start.isAfter(end)) {
+            throw new IllegalArgumentException("기준 시작일은 종료일 이후일 수 없습니다.");
+        }
+        boolean overlapped = payRuleRepository.existsOverlapping(start, end, MAX, excludeId);
+        if (overlapped) {
+            throw new IllegalStateException("해당 기간에 이미 등록된 급여 기준이 있어 저장할 수 없습니다.");
+        }
     }
 }
