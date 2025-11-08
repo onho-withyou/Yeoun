@@ -9,6 +9,9 @@ import com.yeoun.emp.entity.Emp;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -19,11 +22,16 @@ import lombok.ToString;
 public class EmpDTO {
 
 	@NotBlank(message = "이름은 필수 입력값입니다!")
-	@Length(min = 2, max = 20, message = "이름은 2 ~ 20자리 필수!")
+	@Length(min = 2, max = 20, message = "이름은 2 ~ 20자리 입니다.")
 	private String empName;  // 이름			
 	
+	@NotBlank(message = "성별을 선택해주세요.")
+    @Pattern(regexp = "M|F", message = "성별은 M 또는 F만 가능합니다.")
 	private String gender;  // 성별 
 	
+	// 연락처: 공백불가 + 형식(010-0000-0000)
+    @NotBlank(message = "연락처는 필수입니다.")
+    @Pattern(regexp = "^010-\\d{4}-\\d{4}$", message = "연락처 형식은 010-0000-0000 입니다.")
 	private String mobile;  // 연락처		
 	
 	@NotBlank(message = "이메일은 필수 입력값입니다!")
@@ -37,6 +45,9 @@ public class EmpDTO {
 	private String address1;  // 기본주소 	
 	private String address2;  // 상세주소 	
 	
+	// 입사일: 필수 + 과거/오늘
+    @NotNull(message = "입사일은 필수입니다.")
+    @PastOrPresent(message = "입사일은 오늘 또는 과거 날짜만 가능합니다.")
 	private LocalDate hireDate;  // 입사일 (엔티티 생성 시 자동 등록)	
 	
 	private String status;  // 재직 상태		

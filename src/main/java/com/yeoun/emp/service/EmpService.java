@@ -30,7 +30,7 @@ public class EmpService {
 	// 사원 등록 요청
 	// 1) 사번은 서비스에서 자동 생성 (입사일 기반 + 3자리 난수)
 	// 2) 비밀번호 초기값 1234를 BCrypt로 암호화 저장
-	public void registEmp(@Valid EmpDTO empDTO) {
+	public void registEmp(EmpDTO empDTO) {
 		
 		// 1. 사원번호 자동 생성
 		String empId = generateEmpId(empDTO.getHireDate());
@@ -63,7 +63,7 @@ public class EmpService {
 	private String generateEmpId(LocalDate hireDate) {
 		
 		LocalDate base = (hireDate != null) ? hireDate : LocalDate.now();
-		String datePart = base.format(DateTimeFormatter.ofPattern("yyMMdd"));
+		String datePart = base.format(DateTimeFormatter.ofPattern("yyMM"));
 		String randomPart = String.format("%03d", ThreadLocalRandom.current().nextInt(1000));
 		
 		return datePart + randomPart;
