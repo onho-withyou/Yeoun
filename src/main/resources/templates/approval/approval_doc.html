@@ -9,138 +9,258 @@
 <th:block layout:fragment="content">
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
 		<h2>전자 결재 작성중</h2>
-		<div class="input-group">
-		<form>
-			<select class="form-select" aria-label="Default select example">
-			  <option selected>기안서</option>
-			  <option value="1">휴가(연차)신청서</option>
-			  <option value="2">인사발령신청서</option>
-			  <option value="3">지출결의서</option>
-			  <option value="4">자유양식결재서</option>
-			</select>
-			<button class="btn btn-primary me-2">작성</button>
-		</form>
-		
-		      <input type="date" id="startDate" class="form-control datepicker" placeholder="start">
-		      <span>~</span> 
-		      <input type="date" id="endDate" class="form-control datepicker" placeholder="end">
-		      <input type="text" placeholder="문서이름">
-			  <button class="btn btn-primary me-2">검색</button>
-		
+			<div class="d-flex justify-content-between">
+			<div class="d-flex" style="height: 38.94px;">
+	            <div class="mb-6 mb-0">
+	            	<select class="form-select">
+	            		<option selected>기안서</option>
+	            		<option value="1">휴가(연차)신청서</option>
+						<option value="2">인사발령신청서</option>
+						<option value="3">지출결의서</option>
+						<option value="4">자유양식결재서</option>
+	            	</select>
+	            </div>
+	            <div class="d-flex justify-content-end" style="margin-left: 5px;">
+						<button type="button" class="btn btn-primary" style="width: 71px;">작성</button>
+		        </div>
+		        <div class="row flex-nowrap" style="margin-left: 506px;">
+					<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+						<input type="date" name="startDate" class="form-control">
+					</div>
+	                ~
+	                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+		                <input type="date" name="endDate" class="form-control">
+	                </div>
+	                 <input class="form-control" type="text" placeholder="기안자및문서이름" style="width: 200px;height: 38.94px;">
+	                <div class="mb-6 col-lg-6 col-xl-3 col-12 mb-0">
+		             	<button class="btn btn-primary">검색</button>
+	                </div>
+				</div>
+			</div>
 		</div>
-		<nav>
-		  <div class="nav nav-tabs" id="nav-tab" role="tablist">
-		    <button class="nav-link active" id="nav-approval-tab" data-bs-toggle="tab" data-bs-target="#nav-approval" type="button" role="tab" aria-controls="nav-home" aria-selected="true">결재사항</button>
-		    <button class="nav-link" id="nav-all-tab" data-bs-toggle="tab" data-bs-target="#nav-all" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">전체결재</button>
-		    <button class="nav-link" id="nav-my-tab" data-bs-toggle="tab" data-bs-target="#nav-my" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">내 결재목록</button>
-		    <button class="nav-link" id="nav-waiting-tab" data-bs-toggle="tab" data-bs-target="#nav-waiting" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">결재대기</button>
-		    <button class="nav-link" id="nav-done-tab" data-bs-toggle="tab" data-bs-target="#nav-done" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">결재완료</button>
-		  </div>
-		</nav>
-		<div class="tab-content" id="nav-tabContent">
-		  <div class="tab-pane fade show active" id="nav-approval" role="tabpanel" aria-labelledby="nav-approval-tab">
-		  	<h2>table1</h2>
-		  	<div id="approvalGrid"></div>
-		  </div>
-		  <div class="tab-pane fade" id="nav-all" role="tabpanel" aria-labelledby="nav-all-tab">
-		  		<h2>table2</h2>	
-		  			  
-		  </div>
-		  <div class="tab-pane fade" id="nav-my" role="tabpanel" aria-labelledby="nav-my-tab">
-		  		<h2>table3</h2>
-		  </div>
-		  <div class="tab-pane fade" id="nav-waiting" role="tabpanel" aria-labelledby="nav-waiting-tab">
-		  		<h2>table4</h2>
-		  </div>
-		  <div class="tab-pane fade" id="nav-done" role="tabpanel" aria-labelledby="nav-done-tab">
-		  		<h2>table5</h2>
-		  </div>
+		<hr>
+		<div style="margin-top: 15px;">
+			<nav>
+			  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+			    <button class="nav-link active" id="nav-approval-tab" data-bs-toggle="tab" data-bs-target="#nav-approval" type="button" role="tab" aria-controls="nav-home" aria-selected="true">
+			    	결재사항
+			    </button>
+			    <button class="nav-link" id="nav-all-tab" data-bs-toggle="tab" data-bs-target="#nav-all" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">
+			    	전체결재
+			    </button>
+			    <button class="nav-link" id="nav-my-tab" data-bs-toggle="tab" data-bs-target="#nav-my" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
+			    	내 결재목록
+			    </button>
+			    <button class="nav-link" id="nav-waiting-tab" data-bs-toggle="tab" data-bs-target="#nav-waiting" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
+			    	결재대기
+			    </button>
+			    <button class="nav-link" id="nav-done-tab" data-bs-toggle="tab" data-bs-target="#nav-done" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
+			    	결재완료
+			    </button>
+			  </div>
+			</nav>
+			<div class="tab-content" id="nav-tabContent">
+			  <div class="tab-pane fade show active" id="nav-approval" role="tabpanel" aria-labelledby="nav-approval-tab">
+			  	<h2>table1</h2>
+			  	<div id="approvalGrid"></div>
+			  </div>
+			  <div class="tab-pane fade active" id="nav-all" role="tabpanel" aria-labelledby="nav-all-tab">
+			  		<h2>table2</h2>
+			  		<div id="grid2"></div>
+			  </div>
+			  <div class="tab-pane fade active" id="nav-my" role="tabpanel" aria-labelledby="nav-my-tab">
+			  		<h2>table3</h2>
+			  		<div id="grid3"></div>
+			  </div>
+			  <div class="tab-pane fade active" id="nav-waiting" role="tabpanel" aria-labelledby="nav-waiting-tab">
+			  		<h2>table4</h2>
+			  </div>
+			  <div class="tab-pane fade active" id="nav-done" role="tabpanel" aria-labelledby="nav-done-tab">
+			  		<h2>table5</h2>
+			  </div>
+			</div>
 		</div>
 	</div>
 </th:block>
 </body>
 
 <th:block layout:fragment="myScript">
-	<script>
+<script>
 	const Grid = tui.Grid;
 	const instance = new Grid({
 		  el: document.getElementById('approvalGrid'), // Container element
 		  columns: [
+	
 		    {
-		      header: '결재순번',
-		      name: 'RowNo'
+		      header: '결재순번'
+		      ,name: 'row_no'
+		      ,align: 'center'
 		    },
 		    {
-		      header: '문서제목',
-		      name: 'Document_title'
+		      header: '문서제목'
+		      ,name: 'document_title'
+		      ,align: 'center'
 		    },
 		    {
-		      header: '기안자',
-		      name: 'drafter'
+		      header: '기안자'
+		      ,name: 'drafter'
+		      ,align: 'center'
 		    },
 		    {
-		      header: '부서명',
-		      name: 'Department_name'
+		      header: '부서명'
+		      ,name: 'department_name'
+		      ,align: 'center'
 		    },
 		    {
-			  header: '직급',
-			  name: 'rank'
+			  header: '직급'
+			  ,name: 'rank'
+			  ,align: 'center'
 			},
 			{
-			  header: '생성일',
-			  name: 'Creation_date'
+			  header: '생성일'
+			  ,name: 'creation_date'
+			  ,align: 'center'
 			},
 			{
-			  header: '결재완료일자',
-			  name: 'Payment_completion_date'
+			  header: '결재완료일자'
+			  ,name: 'payment_completion_date'
+			  ,align: 'center'
 			},
 			{
-			  header: '상태',
-			  name: 'state'
+			  header: '상태'
+			  ,name: 'state'
+			  ,align: 'center'
 			},
 			{
-			  header: '결재여부',
-			  name: 'Payment_status'
+			  header: '결재여부'
+			  ,name: 'payment_status'
+			  ,align: 'center'
 			},
 			{
-			  header: '상세보기',
-			  name: 'View_details'
+			  header: '상세보기'
+			  ,name: 'view_details'
+			  ,align: 'center'
 
 			}
 		  ],
 		  data: [
 		    {
-		    	RowNo: 1,
-				Document_title: '지출 결의서',
+		    	row_no: 1,
+				document_title: '지출 결의서',
 				drafter:'',
-				Department_name:'',
+				department_name:'',
 				rank:'',
-				Creation_date:'',
-				Payment_completion_date:'',
+				creation_date:'',
+				payment_completion_date:'',
 				state:'',
-				Payment_status:'',
-				View_details:'<button class="btn btn-primary me-2">상세</button>'
+				payment_status:'',
+				view_details:'<button class="btn btn-primary me-2">상세</button>'
 				
 		    },
 		    {
-		    	RowNo: 2,
-				Document_title: '휴가(연차)신청서',
+		    	row_no: 2,
+				document_title: '휴가(연차)신청서',
 				drafter:'',
-				Department_name:'',
+				department_name:'',
 				rank:'',
-				Creation_date:'',
-				Payment_completion_date:'',
+				creation_date:'',
+				payment_completion_date:'',
 				state:'',
-				Payment_status:'',
-				View_details:'<button class="btn btn-primary me-2">상세</button>'
+				payment_status:'',
+				view_details:'<button class="btn btn-primary me-2">상세</button>'
 				
 		    }
 		  ]
 		});
-	instance.resetData(newData); // Call API of instance's public method
+// 	instance.resetData(newData); // Call API of instance's public method
 	
-	Grid.applyTheme('clean'); // Call API of static method
+// 	Grid.applyTheme('clean'); // Call API of static method
 	
-	</script>
+	const grid2 = new Grid({
+	    el: document.getElementById('grid2'), // 두 번째 컨테이너
+	    columns: [
+	    	
+		    {
+		      header: '결재순번'
+		      ,name: 'row_no'
+		      ,align: 'center'
+		    },
+		    {
+		      header: '문서제목'
+		      ,name: 'document_title'
+		      ,align: 'center'
+		    },
+		    {
+		      header: '기안자'
+		      ,name: 'drafter'
+		      ,align: 'center'
+		    },
+		    {
+		      header: '부서명'
+		      ,name: 'department_name'
+		      ,align: 'center'
+		    },
+		    {
+			  header: '직급'
+			  ,name: 'rank'
+			  ,align: 'center'
+			},
+			{
+			  header: '생성일'
+			  ,name: 'creation_date'
+			  ,align: 'center'
+			},
+			{
+			  header: '결재완료일자'
+			  ,name: 'payment_completion_date'
+			  ,align: 'center'
+			},
+			{
+			  header: '상태'
+			  ,name: 'state'
+			  ,align: 'center'
+			},
+			{
+			  header: '결재여부'
+			  ,name: 'payment_status'
+			  ,align: 'center'
+			},
+			{
+			  header: '상세보기'
+			  ,name: 'view_details'
+			  ,align: 'center'
+
+			}
+		  ],
+		  data: [
+		    {
+		    	row_no: 1,
+				document_title: '지출 결의서',
+				drafter:'',
+				department_name:'',
+				rank:'',
+				creation_date:'',
+				payment_completion_date:'',
+				state:'',
+				payment_status:'',
+				view_details:'<button class="btn btn-primary me-2">상세</button>'
+				
+		    },
+		    {
+		    	row_no: 2,
+				document_title: '휴가(연차)신청서',
+				drafter:'',
+				department_name:'',
+				rank:'',
+				creation_date:'',
+				payment_completion_date:'',
+				state:'',
+				payment_status:'',
+				view_details:'<button class="btn btn-primary me-2">상세</button>'
+				
+		    }
+		  ]
+	});
+</script>
 </th:block>
 
