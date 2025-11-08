@@ -1,4 +1,4 @@
-package common.entity;
+package com.yeoun.common.entity;
 
 import java.time.LocalDateTime;
 
