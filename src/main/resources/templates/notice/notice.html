@@ -9,7 +9,7 @@
 				<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
 				<button class="btn btn-outline-primary" type="submit">Search</button>
 			</form>
-			<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createNotice">글쓰기</button>
+			<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#create-notice">글쓰기</button>
 			</div>
 			<br>
 			<!-- Basic Bootstrap Table -->
@@ -35,7 +35,8 @@
 				                	<td th:text="*{notice.createdDate}"></td>
 				                	<td th:text="*{notice.updatedDate}"></td>
 				                	<td>
-			                            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#showNotice">
+			                            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#show-notice"
+			                            	th:data-notice-id = "*{notice.noticeId}">
 			                                보기
 			                            </button>
 				                	</td>
@@ -85,7 +86,7 @@
 			<!-- 모달구역 -->
 			
 			<!-- 공지쓰기모달 -->
-			<div class="modal fade" id="createNotice" tabindex="-1" style="display: none;" aria-hidden="true">
+			<div class="modal fade" id="create-notice" tabindex="-1" style="display: none;" aria-hidden="true">
 				<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
 					<div class="modal-content">
 						<!-- 모달 제목 -->
@@ -128,7 +129,7 @@
 			<!-- /공지쓰기모달 -->
 			
 			<!-- 공지조회모달 -->
-			<div class="modal fade" id="showNotice" tabindex="-1" style="display: none;" aria-hidden="true">
+			<div class="modal fade" id="show-notice" tabindex="-1" style="display: none;" aria-hidden="true">
 				<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
 					<div class="modal-content">
 						<!-- 모달 제목 -->
@@ -140,7 +141,7 @@
 						</div>
 						<!-- 모달 본문 -->
 						<div class="modal-body">
-							<form id="noticeForm">
+							<form id="notice-form-read" action="" >
 	<!-- 							<div class="mb-3"> -->
 	<!-- 								<label for="defaultSelect" class="form-label">Default select</label> -->
 	<!-- 								<select id="defaultSelect" class="form-select"> -->
@@ -151,13 +152,18 @@
 	<!-- 								</select> -->
 	<!-- 							</div> -->
 								<div class="mb-3" style="display:flex; gap:8px;">
+								    <input type="hidden" class="form-control" id="notice-id-read">
 								    <input type="text" class="form-control" id="notice-title-read" placeholder="제목" style="flex:1;">
-								    <label class="form-check-label" for="fixedCheck">고정</label>
-								    <input class="form-check-input" type="checkbox" value="" id="fixedCheck" checked="">
+								    <label class="form-check-label" for="fixed-check">고정</label>
+								    <input class="form-check-input" type="checkbox" value="" id="fixed-check">
 								</div>
 								<div class="mb-3" style="display:flex; gap:2px;">
-									<p class="" style="flex:1;">인사 신필용</p>
-									<p class="" style="flex:1;">2024-10-01 14:30</p>
+									<p class="" style="flex:1;" >등록자 : </p>
+									<p class="" style="flex:1;" id="notice-writer-read">인사 신필용</p>
+									<p class="" style="flex:1;" >등록일 : </p>
+									<p class="" style="flex:1;"id="notice-createdDate-read">2024-10-01 14:30</p>
+									<p class="" style="flex:1;" >수정일 : </p>
+									<p class="" style="flex:1;"id="notice-updatedDate-read">2024-10-01 14:30</p>
 								</div>
 							    <div class="mb-3">
 							        <textarea id="notice-content-read" class="form-control" rows="10" placeholder="공지사항 내용 작성"></textarea>
@@ -185,5 +191,6 @@
 			<!-- /공지조회모달 -->
 		<!-- body 끝 -->	
 		</div>
+		<script src="/js/notice/notice.js"></script>
 	</th:block>
 </body>
