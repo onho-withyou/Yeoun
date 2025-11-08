@@ -1,5 +1,7 @@
 package com.yeoun.emp.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.yeoun.emp.dto.EmpDTO;
+import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.service.EmpService;
 
 import jakarta.validation.Valid;
@@ -65,9 +68,13 @@ public class EmpController {
 	
 	
 
-	// 사원 목록
+	// 사원 목록 조회
 	@GetMapping("/list")
-	public String List() {
+	public String showEmpList(Model model) {
+		
+		// 서비스에서 리스트 가져오기
+		List<Emp> empList = empService.getEmpList();
+		model.addAttribute("empList", empList);
 		return "emp/emp_list";
 	}
 	

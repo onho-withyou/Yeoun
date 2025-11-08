@@ -64,16 +64,25 @@
 		     </tr>
 		   </thead>
 		   <tbody class="table-border-bottom-0">
-		     <tr>
-		      <td>25050308</td>
-		      <td>2503485</td>
-		      <td>홍길동</td>
-		      <td>인사부</td>
-		      <td>대리</td>
-		      <td>010-1234-5678</td>
-		      <td>hong@hong.com</td>
+		     <tr th:each="emp : ${empList}">
+		      <td th:text="${#temporals.format(emp.hireDate, 'yyyy-MM-dd')}"></td>
+		      <td th:text="${emp.empId}"></td>
+		      <td th:text="${emp.empName}"></td>
+		      <td></td>
+		      <td></td>
+<!-- 		      <td th:text="${emp.deptName}"></td> -->
+<!-- 		      <td th:text="${emp.positionName}"></td> -->
+		      <td th:text="${emp.mobile}"></td>
+		      <td th:text="${emp.email}"></td>
 		      <td>
 		        <button type="button" class="btn btn-info btn-sm">상세</button>
+		      </td>
+		    </tr>
+		    
+		    <!-- 데이터가 없을 때 -->
+		    <tr th:if="${#lists.isEmpty(empList)}">
+		      <td colspan="8" class="text-center text-muted py-3">
+		        등록된 사원이 없습니다.
 		      </td>
 		    </tr>
 		  </tbody>

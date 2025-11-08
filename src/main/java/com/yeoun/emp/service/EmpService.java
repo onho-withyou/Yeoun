@@ -2,6 +2,7 @@ package com.yeoun.emp.service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -69,6 +70,13 @@ public class EmpService {
 		return datePart + randomPart;
 		
 	}
+
+	// 사원 목록 조회
+	public List<Emp> getEmpList() {
+		
+		return empRepository.findAll();
+	}
+
 	
 	
 
