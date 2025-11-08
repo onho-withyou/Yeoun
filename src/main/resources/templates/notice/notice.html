@@ -18,92 +18,29 @@
 			        <table class="table">
 			            <thead>
 			                <tr>
-			                    <th>번호</th>
-			                    <th>제목</th>
-			                    <th>작성자</th>
-			                    <th>대상</th>
-			                    <th>상세</th>
+			                    <th style="width:5%;">번호</th>
+			                    <th style="width:5%;">제목</th>
+			                    <th style="width:5%;">작성자</th>
+			                    <th style="width:5%;">등록일</th>
+			                    <th style="width:5%;">수정일</th>
+			                    <th style="width:5%;">상세</th>
 			                </tr>
 			            </thead>
 			            <tbody class="table-border-bottom-0">
-			                <tr style="background-color: #e4bcd5;">
-			                    <td>1</td>
-			                    <td>2025 하반기 주요 감사 일정 안내</td>
-			                    <td>김관리</td>
-			                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-			                    <td>
-			                        <div class="dropdown">
+			            	<th:block th:each="notice : ${noticeDTOList}">
+				                <tr th:style="${notice.noticeYN == 'Y'} ? 'background-color: #008dff1a;' : ''">
+				                	<td th:text="*{notice.noticeId}"></td>
+				                	<td th:text="*{notice.noticeTitle}"></td>
+				                	<td th:text="*{notice.createdUser}"></td>
+				                	<td th:text="*{notice.createdDate}"></td>
+				                	<td th:text="*{notice.updatedDate}"></td>
+				                	<td>
 			                            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#showNotice">
 			                                보기
 			                            </button>
-			                        </div>
-			                    </td>
-			                </tr>
-			                <tr style="background-color: #e4bcd5;">
-			                    <td>2</td>
-			                    <td>10월의 우수 사원</td>
-			                    <td>김관리</td>
-			                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-			                    <td>
-			                        <div class="dropdown">
-			                            <button type="button" class="btn btn-info btn-sm">
-			                                보기
-			                            </button>
-			                        </div>
-			                    </td>
-			                </tr>
-			                <tr style="background-color: #e4bcd5;">
-			                    <td>3</td>
-			                    <td>중앙 엘리베이터 수리 기간</td>
-			                    <td>김관리</td>
-			                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-			                    <td>
-			                        <div class="dropdown">
-			                            <button type="button" class="btn btn-info btn-sm">
-			                                보기
-			                            </button>
-			                        </div>
-			                    </td>
-			                </tr>
-			                <tr>
-			                    <td>11</td>
-			                    <td>2025 중반기 주요 감사 일정 안내</td>
-			                    <td>김관리</td>
-			                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-			                    <td>
-			                        <div class="dropdown">
-			                            <button type="button" class="btn btn-info btn-sm">
-			                                보기
-			                            </button>
-			                        </div>
-			                    </td>
-			                </tr>
-			                <tr>
-			                    <td>12</td>
-			                    <td>7월의 우수 사원</td>
-			                    <td>김관리</td>
-			                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-			                    <td>
-			                        <div class="dropdown">
-			                            <button type="button" class="btn btn-info btn-sm">
-			                                보기
-			                            </button>
-			                        </div>
-			                    </td>
-			                </tr>
-			                <tr>
-			                    <td>13</td>
-			                    <td>급식업체 변경 알림</td>
-			                    <td>김관리</td>
-			                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-			                    <td>
-			                        <div class="dropdown">
-			                            <button type="button" class="btn btn-info btn-sm">
-			                                보기
-			                            </button>
-			                        </div>
-			                    </td>
-			                </tr>
+				                	</td>
+				                </tr>
+			                </th:block>
 			            </tbody>
 			        </table>
 			    </div>
