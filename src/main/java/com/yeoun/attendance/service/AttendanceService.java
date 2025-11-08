@@ -3,6 +3,7 @@ package com.yeoun.attendance.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -12,6 +13,8 @@ import com.yeoun.attendance.entity.Attendance;
 import com.yeoun.attendance.entity.WorkPolicy;
 import com.yeoun.attendance.repository.AttendanceRepository;
 import com.yeoun.attendance.repository.WorkPolicyRepository;
+import com.yeoun.emp.dto.EmpDTO;
+import com.yeoun.emp.repository.EmpRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +26,7 @@ import lombok.extern.log4j.Log4j2;
 public class AttendanceService {
 	private final AttendanceRepository attendanceRepository;
 	private final WorkPolicyRepository workPolicyRepository;
+	private final EmpRepository empRepository;
 
 	// 출/퇴근 등록
 	@Transactional
@@ -95,6 +99,13 @@ public class AttendanceService {
 		} catch (Exception e) {
 			return "근무 정책 저장 중 오류가 발생했습니다.";
 		}
+	}
+
+	// 사원 아이디로 사원 조회
+	public EmpDTO getEmp(String empId) {
+		return empRepository.findById(empId)
+							.map(emp -> EmpDTO.fromEntity(emp))
+							.orElseThrow(() -> new NoSuchElementException(empId + "에 해당하는 사원이 없습니다."));
 	}
 
 }

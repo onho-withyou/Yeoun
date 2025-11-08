@@ -25,3 +25,33 @@ const handleAttendanceToggle = async () => {
 	
 	alert(msg);
 }
+
+// 2511584
+// 사원번호로 사원 조회
+
+const searchEmp = async () => {
+	const empId = document.querySelector("#nameWithTitle").value;
+	const empName = document.querySelector("#empName");
+	
+	const SEARCH_EMP = `/attendance/search?empId=${empId}`;
+	
+	try {
+		const response = await fetch(SEARCH_EMP, {method: "GET"});
+		
+		if (!response.ok) {
+			const errorData = await response.json;
+			alert(errorData.message || "사원 정보를 찾을 수 없습니다.");
+			return;
+		}		
+		
+		const data = await response.json();
+
+		if (data) {
+			empName.value = data.empName;
+		}
+	} catch (error) {
+		console.erro("사원 조회 중 오류 : " , error);
+		alert("사원 조회 중 오류가 발생했습니다.");
+	}
+}
+

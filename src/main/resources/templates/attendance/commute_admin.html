@@ -79,8 +79,12 @@
 								<label for="nameWithTitle" class="form-label">사원번호</label>
 								<div class="input-group">
 									<input type="text" id="nameWithTitle" class="form-control" name="empId"/>
-									<button type="button" class="btn btn-primary">조회</button>
+									<button type="button" class="btn btn-primary" onclick="searchEmp()">조회</button>
 								</div>
+							</div>
+							<div class="col mb-6">
+								<label for="inTime" class="form-label">사원이름</label>
+								<input type="text" id="empName" class="form-control" disabled/>
 							</div>
 							<div class="col mb-6">
 								<label for="inTime" class="form-label">출근시간</label>
@@ -109,5 +113,8 @@
 			</div>
 		</div>
 	</div>
+	<th:block layout:fragment="myScript">
+		<script src="/js/attendance/attendance.js"></script>
+	</th:block>
 </body>
 </th:block>
