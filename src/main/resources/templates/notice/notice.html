@@ -5,8 +5,8 @@
 	<th:block layout:fragment="content">
 		<div class="custom-body container-xxl flex-grow-1 container-p-y">
 			<div class="d-flex justify-content-between">
-			<form class="d-flex" onsubmit="return false" style="max-width: 300px;">
-				<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+			<form class="d-flex" style="max-width: 300px;"> 
+				<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="searchKeyword" th:value="${searchKeyword}">
 				<button class="btn btn-outline-primary" type="submit">Search</button>
 			</form>
 			<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#create-notice">글쓰기</button>
@@ -18,22 +18,23 @@
 			        <table class="table">
 			            <thead>
 			                <tr>
-			                    <th style="width:5%;">번호</th>
-			                    <th style="width:5%;">제목</th>
-			                    <th style="width:5%;">작성자</th>
-			                    <th style="width:5%;">등록일</th>
-			                    <th style="width:5%;">수정일</th>
+			                    <th data-key="noticeId" onclick="allineTable(this)" style="width:1%;">번호</th>
+			                    <th data-key="noticeTitle" onclick="allineTable(this)"style="width:30%;">제목</th>
+			                    <th data-key="createdUser" onclick="allineTable(this)" style="width:5%;">작성자</th>
+			                    <th data-key="createdDate" onclick="allineTable(this)" style="width:5%;">등록일</th>
+			                    <th data-key="updatedDate" onclick="allineTable(this)"style="width:5%;">수정일</th>
 			                    <th style="width:5%;">상세</th>
 			                </tr>
 			            </thead>
 			            <tbody class="table-border-bottom-0">
 			            	<th:block th:each="notice : ${noticeDTOList}">
 				                <tr th:style="${notice.noticeYN == 'Y'} ? 'background-color: #008dff1a;' : ''">
-				                	<td th:text="*{notice.noticeId}"></td>
-				                	<td th:text="*{notice.noticeTitle}"></td>
-				                	<td th:text="*{notice.createdUser}"></td>
-				                	<td th:text="*{notice.createdDate}"></td>
-				                	<td th:text="*{notice.updatedDate}"></td>
+				                	<td th:text="${notice.noticeId}"></td>
+				                	<td th:text="${notice.noticeTitle}"></td>
+				                	<td th:text="${notice.createdUser}"></td>
+				                	<!-- 로컬데이트타임은 #temporals.format사용 -->
+									<td th:text="${#temporals.format(notice.createdDate, 'yyyy-MM-dd HH:mm')}"></td>
+									<td th:text="${#temporals.format(notice.updatedDate, 'yyyy-MM-dd HH:mm')}"></td>
 				                	<td>
 			                            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#show-notice"
 			                            	th:data-notice-id = "*{notice.noticeId}">
@@ -49,32 +50,24 @@
 					<div class="layout-demo-info" style="display: flex; justify-content: center;">
 						<nav aria-label="Page navigation" >
 							<ul class="pagination ">
-								<li class="page-item first">
-									<a class="page-link" href="javascript:void(0);"><i class="tf-icon bx bx-chevrons-left"></i></a>
+								<li class="page-item first" th:classappend="${currentPage == 0} ? 'disabled'">
+									<a class="page-link" th:href="@{/notices(page=0, searchKeyword=${searchKeyword}, orderKey=${orderKey}, orderMethod=${orderMethod})}"><i class="tf-icon bx bx-chevrons-left"></i></a>
 								</li>
-								<li class="page-item prev">
-									<a class="page-link" href="javascript:void(0);"><i class="tf-icon bx bx-chevron-left"></i></a>
+								<li class="page-item prev" th:classappend="${currentPage == 0} ? 'disabled'">
+									<a class="page-link" th:href="@{/notices(page=${currentPage - 1}, searchKeyword=${searchKeyword}, orderKey=${orderKey}, orderMethod=${orderMethod})}"><i class="tf-icon bx bx-chevron-left"></i></a>
 								</li>
-								<li class="page-item">
-									<a class="page-link" href="javascript:void(0);">1</a>
+								<!-- 앞뒤로 2페이지씩 보이기 -->
+								<li class="page-item"
+								    th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+								    th:if="${i >= currentPage - 2 and i <= currentPage + 2}"
+								    th:classappend="${i == currentPage} ? 'active'">
+								    <a class="page-link" th:href="@{/notices(page=${i}, searchKeyword=${searchKeyword}, orderKey=${orderKey}, orderMethod=${orderMethod})}" th:text="${i + 1}"></a>
 								</li>
-								<li class="page-item">
-									<a class="page-link" href="javascript:void(0);">2</a>
+								<li class="page-item next" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+									<a class="page-link" th:href="@{/notices(page=${currentPage + 1}, searchKeyword=${searchKeyword}, orderKey=${orderKey}, orderMethod=${orderMethod})}"><i class="tf-icon bx bx-chevron-right"></i></a>
 								</li>
-								<li class="page-item active">
-									<a class="page-link" href="javascript:void(0);">3</a>
-								</li>
-								<li class="page-item">
-									<a class="page-link" href="javascript:void(0);">4</a>
-								</li>
-								<li class="page-item">
-									<a class="page-link" href="javascript:void(0);">5</a>
-								</li>
-								<li class="page-item next">
-									<a class="page-link" href="javascript:void(0);"><i class="tf-icon bx bx-chevron-right"></i></a>
-								</li>
-								<li class="page-item last">
-									<a class="page-link" href="javascript:void(0);"><i class="tf-icon bx bx-chevrons-right"></i></a>
+								<li class="page-item last" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+									<a class="page-link" th:href="@{/notices(page=${totalPages - 1}, searchKeyword=${searchKeyword}, orderKey=${orderKey}, orderMethod=${orderMethod})}"><i class="tf-icon bx bx-chevrons-right"></i></a>
 								</li>
 							</ul>
 						</nav>
@@ -102,7 +95,7 @@
 								<div class="mb-3" style="display:flex; gap:8px;">
 								    <input type="text" class="form-control" id="notice-title-write" name="noticeTitle" placeholder="제목" style="flex:1;">
 								    <label class="form-check-label" for="fixedCheck">고정</label>
-								    <input class="form-check-input" type="checkbox" value="" name="noticeYN" value="Y">
+								    <input class="form-check-input" type="checkbox" name="noticeYN" value="Y">
 								</div>
 							    <div class="mb-3">
 							        <textarea id="notice-content-write" name="noticeContent" class="form-control" rows="10" placeholder="공지사항 내용 작성"></textarea>
@@ -153,9 +146,9 @@
 	<!-- 							</div> -->
 								<div class="mb-3" style="display:flex; gap:8px;">
 								    <input type="hidden" class="form-control" id="notice-id-read">
-								    <input type="text" class="form-control" id="notice-title-read" placeholder="제목" style="flex:1;">
+								    <input type="text" class="form-control" id="notice-title-read" name="noticeTitle" placeholder="제목" style="flex:1;">
 								    <label class="form-check-label" for="fixed-check">고정</label>
-								    <input class="form-check-input" type="checkbox" value="" id="fixed-check">
+								    <input class="form-check-input" type="checkbox" value="Y" id="fixed-check" name="noticeYN" onchange="toggleValue(this)">
 								</div>
 								<div class="mb-3" style="display:flex; gap:2px;">
 									<p class="" style="flex:1;" >등록자 : </p>
@@ -166,7 +159,7 @@
 									<p class="" style="flex:1;"id="notice-updatedDate-read">2024-10-01 14:30</p>
 								</div>
 							    <div class="mb-3">
-							        <textarea id="notice-content-read" class="form-control" rows="10" placeholder="공지사항 내용 작성"></textarea>
+							        <textarea id="notice-content-read" class="form-control" rows="10" placeholder="공지사항 내용 작성" name="noticeContent"></textarea>
 							    </div>
 							    <div>
 									<label for="formFileDisabled" class="form-label">파일 첨부</label>
@@ -180,7 +173,7 @@
 									닫기
 								</font></font>
 							</button>
-							<button type="button" class="btn btn-primary" id="notice-modify">
+							<button type="submit" class="btn btn-primary" id="notice-modify" form="notice-form-read">
 								<font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">
 								수정</font></font>
 							</button>
