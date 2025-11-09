@@ -31,3 +31,12 @@ showNoticeModal.addEventListener('show.bs.modal', function(event){
 		})
 		.catch(error => console.error('Error:', error));
 });
+
+
+// 공지사항 등록 모달설정
+const createNoticeModal = document.getElementById('create-notice');
+
+// 공지사항 등록 모달 열기 이벤트
+createNoticeModal.addEventListener('show.bs.modal', function(event){
+	conosole.log("공지등록모달 열기")	
+});

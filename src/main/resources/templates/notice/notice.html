@@ -98,14 +98,14 @@
 						</div>
 						<!-- 모달 본문 -->
 						<div class="modal-body">
-							<form id="noticeForm">
+							<form id="notice-write-form" action="/notices" method="post">
 								<div class="mb-3" style="display:flex; gap:8px;">
-								    <input type="text" class="form-control" id="notice-title-write" placeholder="제목" style="flex:1;">
+								    <input type="text" class="form-control" id="notice-title-write" name="noticeTitle" placeholder="제목" style="flex:1;">
 								    <label class="form-check-label" for="fixedCheck">고정</label>
-								    <input class="form-check-input" type="checkbox" value="" id="fixedCheck" checked="">
+								    <input class="form-check-input" type="checkbox" value="" name="noticeYN" value="Y">
 								</div>
 							    <div class="mb-3">
-							        <textarea id="notice-content-write" class="form-control" rows="10" placeholder="공지사항 내용 작성"></textarea>
+							        <textarea id="notice-content-write" name="noticeContent" class="form-control" rows="10" placeholder="공지사항 내용 작성"></textarea>
 							    </div>
 							    <div>
 									<label for="formFileDisabled" class="form-label">파일 첨부</label>
@@ -119,7 +119,7 @@
 									닫기
 								</font></font>
 							</button>
-							<button type="submit" class="btn btn-primary" form="noticeForm">
+							<button type="submit" class="btn btn-primary" form="notice-write-form">
 								<font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">글 쓰기</font></font>
 							</button>
 						</div>
