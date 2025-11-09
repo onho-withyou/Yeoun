@@ -6,7 +6,12 @@
 <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
 <link rel="stylesheet" href="https://uicdn.toast.com/select-box/latest/toastui-select-box.css">
 <!-- <link href="https://cdn.jsdelivr.net/npm/@coreui/coreui-pro@5.21.1/dist/css/themes/bootstrap/bootstrap.min.css" rel="stylesheet" integrity="sha384-+d0g/xwrqc+suQ74C3VDRRcuOmSa3d1dlJGH4M04eYlHdwXYgTrttDYs+K0J/5L4" crossorigin="anonymous"> -->
-
+<script src="
+https://cdn.jsdelivr.net/npm/@dashboardcode/bsmultiselect@1.1.18/dist/js/BsMultiSelect.min.js
+"></script>
+<link href="
+https://cdn.jsdelivr.net/npm/@dashboardcode/bsmultiselect@1.1.18/dist/css/BsMultiSelect.min.css
+" rel="stylesheet">
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
 <script src="https://uicdn.toast.com/select-box/latest/toastui-select-box.js"></script>
@@ -217,11 +222,11 @@
 		        <h5 class="d-flex">결재권한자: 
 <!-- 		        <div id="container"></div> -->
 		          <div id="select-box" style="width: 200px"></div>
-     				<div id="result"><b>Result of events</b><br></div>
+     				<div id="result"><b>결재권한자</b><br></div>
 		        	<div class="mb-6 mb-0">
-		            	<select class="form-select" data-mdb-select-init multiple size="1">
+		            	<select multiple size="1">
 		            	<optgroup label="인사팀">
-						  <option value="0">홍길동</option>
+						  <option selected value="0">홍길동</option>
 						  <option value="1">이정현</option>
 						  <option value="2">강동원</option>
 						  <option value="3">원빈</option>
@@ -463,18 +468,18 @@
     var selectBox = new tui.SelectBox('#select-box', {
       data: [
         {
-          label: 'Fruits',
-          data: [{ label: 'Apple', value: 'apple' }, 
-        	  	{ label: 'Banana', value: 'banana' }]
+          label: '인사팀',
+          data: [{ label: '한가인', value: '한가인' }, 
+        	  	{ label: '정지훈', value: '정지훈' }]
         },
         {
-          label: 'Colors',
+          label: '개발팀',
           data: [
-            { label: 'Red', value: 'red' },
-            { label: 'Yellow', value: 'yellow' },
-            { label: 'Green', value: 'green'},
-            { label: 'Blue', value: 'blue'},
-            { label: 'Purple', value: 'purple' }
+            { label: '이정현', value: '이정현' },
+            { label: '마이클', value: '마이클' },
+            { label: '기안', value: '기안'},
+            { label: '이지영', value: '이지영'},
+            { label: '박지운', value: '박지운' }
           ]
         }
       ]
