@@ -3,144 +3,501 @@
 	layout:decorate="~{/layouts/layout.html}">
 <head>
 <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+<link rel="stylesheet" href="https://uicdn.toast.com/select-box/latest/toastui-select-box.css">
+<!-- <link href="https://cdn.jsdelivr.net/npm/@coreui/coreui-pro@5.21.1/dist/css/themes/bootstrap/bootstrap.min.css" rel="stylesheet" integrity="sha384-+d0g/xwrqc+suQ74C3VDRRcuOmSa3d1dlJGH4M04eYlHdwXYgTrttDYs+K0J/5L4" crossorigin="anonymous"> -->
+
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+<script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+<script src="https://uicdn.toast.com/select-box/latest/toastui-select-box.js"></script>
+
 </head>
 <body>
 <th:block layout:fragment="content">
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
 		<h2>전자 결재 작성중</h2>
-		<div class="input-group">
-		<form>
-			<select class="form-select" aria-label="Default select example">
-			  <option selected>기안서</option>
-			  <option value="1">휴가(연차)신청서</option>
-			  <option value="2">인사발령신청서</option>
-			  <option value="3">지출결의서</option>
-			  <option value="4">자유양식결재서</option>
-			</select>
-			<button class="btn btn-primary me-2">작성</button>
-		</form>
-		
-		      <input type="date" id="startDate" class="form-control datepicker" placeholder="start">
-		      <span>~</span> 
-		      <input type="date" id="endDate" class="form-control datepicker" placeholder="end">
-		      <input type="text" placeholder="문서이름">
-			  <button class="btn btn-primary me-2">검색</button>
-		
+			<div class="d-flex justify-content-between">
+			<div class="d-flex" style="height: 38.94px;">
+	            <div class="mb-6 mb-0">
+	            	<select class="form-select" onchange="draftValFn(this)">
+	            		<option selected>기안서</option>
+	            		<option name="draft" value="휴가(연차)신청서">휴가(연차)신청서</option>
+						<option name="draft" value="인사발령신청서">인사발령신청서</option>
+						<option name="draft" value="지출결의서">지출결의서</option>
+						<option name="draft" value="자유양식결재서">자유양식결재서</option>
+	            	</select>
+	            </div>
+	            <div class="d-flex justify-content-end" style="margin-left: 5px;">
+						<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop" style="width: 71px;">
+						작성
+						</button>
+		        </div>
+		        <div class="row flex-nowrap" style="margin-left: 506px;">
+					<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+						<input type="date" name="startDate" class="form-control">
+					</div>
+	                ~
+	                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+		                <input type="date" name="endDate" class="form-control">
+	                </div>
+	                 <input class="form-control" type="text" placeholder="기안자및문서이름" style="width: 200px;height: 38.94px;">
+	                <div class="mb-6 col-lg-6 col-xl-3 col-12 mb-0">
+		             	<button class="btn btn-primary">검색</button>
+	                </div>
+				</div>
+			</div>
 		</div>
-		<nav>
-		  <div class="nav nav-tabs" id="nav-tab" role="tablist">
-		    <button class="nav-link active" id="nav-approval-tab" data-bs-toggle="tab" data-bs-target="#nav-approval" type="button" role="tab" aria-controls="nav-home" aria-selected="true">결재사항</button>
-		    <button class="nav-link" id="nav-all-tab" data-bs-toggle="tab" data-bs-target="#nav-all" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">전체결재</button>
-		    <button class="nav-link" id="nav-my-tab" data-bs-toggle="tab" data-bs-target="#nav-my" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">내 결재목록</button>
-		    <button class="nav-link" id="nav-waiting-tab" data-bs-toggle="tab" data-bs-target="#nav-waiting" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">결재대기</button>
-		    <button class="nav-link" id="nav-done-tab" data-bs-toggle="tab" data-bs-target="#nav-done" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">결재완료</button>
-		  </div>
-		</nav>
-		<div class="tab-content" id="nav-tabContent">
-		  <div class="tab-pane fade show active" id="nav-approval" role="tabpanel" aria-labelledby="nav-approval-tab">
-		  	<h2>table1</h2>
-		  	<div id="approvalGrid"></div>
-		  </div>
-		  <div class="tab-pane fade" id="nav-all" role="tabpanel" aria-labelledby="nav-all-tab">
-		  		<h2>table2</h2>	
-		  			  
-		  </div>
-		  <div class="tab-pane fade" id="nav-my" role="tabpanel" aria-labelledby="nav-my-tab">
-		  		<h2>table3</h2>
-		  </div>
-		  <div class="tab-pane fade" id="nav-waiting" role="tabpanel" aria-labelledby="nav-waiting-tab">
-		  		<h2>table4</h2>
-		  </div>
-		  <div class="tab-pane fade" id="nav-done" role="tabpanel" aria-labelledby="nav-done-tab">
-		  		<h2>table5</h2>
-		  </div>
+		<hr>
+		<div style="margin-top: 15px;">
+			<nav>
+			  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+			    <button class="nav-link active" id="nav-approval-tab" data-bs-toggle="tab" data-bs-target="#nav-approval" type="button" role="tab" aria-controls="nav-home" aria-selected="true">
+			    	결재사항
+			    </button>
+			    <button class="nav-link" id="nav-all-tab" data-bs-toggle="tab" data-bs-target="#nav-all" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">
+			    	전체결재
+			    </button>
+			    <button class="nav-link" id="nav-my-tab" data-bs-toggle="tab" data-bs-target="#nav-my" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
+			    	내 결재목록
+			    </button>
+			    <button class="nav-link" id="nav-waiting-tab" data-bs-toggle="tab" data-bs-target="#nav-waiting" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
+			    	결재대기
+			    </button>
+			    <button class="nav-link" id="nav-done-tab" data-bs-toggle="tab" data-bs-target="#nav-done" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
+			    	결재완료
+			    </button>
+			  </div>
+			</nav>
+			<div class="tab-content" id="nav-tabContent">
+			  <div class="tab-pane fade show active" id="nav-approval" role="tabpanel" aria-labelledby="nav-approval-tab">
+			  	<h2>table1</h2>
+			  	<div id="approvalGrid"></div>
+			  </div>
+			  <div class="tab-pane fade active" id="nav-all" role="tabpanel" aria-labelledby="nav-all-tab">
+			  		<h2>table2</h2>
+			  		<div id="grid2"></div>
+			  </div>
+			  <div class="tab-pane fade active" id="nav-my" role="tabpanel" aria-labelledby="nav-my-tab">
+			  		<h2>table3</h2>
+			  		<div id="grid3"></div>
+			  </div>
+			  <div class="tab-pane fade active" id="nav-waiting" role="tabpanel" aria-labelledby="nav-waiting-tab">
+			  		<h2>table4</h2>
+			  </div>
+			  <div class="tab-pane fade active" id="nav-done" role="tabpanel" aria-labelledby="nav-done-tab">
+			  		<h2>table5</h2>
+			  </div>
+			</div>
 		</div>
+		<!-- 모달 -->
+		<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h3 class="modal-title" id="Drafting">기안서 작성</h3>
+		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		      </div>
+		      <div class="modal-body">
+		        <h5 class="d-flex">문서 날짜 : <p id="today-date"></p></h5>
+		        <h5 class="d-flex">문서 제목 : 	                 
+		        	<input class="form-control" type="text" placeholder="문서제목" style="height: 38.94px;">
+		        </h5>
+		        <h5 class="d-flex">양식 종류 : 
+		        	<div class="mb-6 mb-0">
+		            	<select class="form-select" onchange="draftValFn(this)">
+		            		<option selected>기안서</option>
+		            		<option name="draft" value="휴가(연차)신청서">휴가(연차)신청서</option>
+							<option name="draft" value="인사발령신청서">인사발령신청서</option>
+							<option name="draft" value="지출결의서">지출결의서</option>
+							<option name="draft" value="자유양식결재서">자유양식결재서</option>
+		            	</select>
+	            	</div>
+		        </h5>
+		        <h5 class="d-flex">결재자명(기안자): 
+		        	<div class="mb-6 mb-0">
+		            	<select class="form-select">
+		            		<option selected>인사테이블에서불러오기 이름(사번)</option>
+		            		<option name="emp" value="조주영">조주영</option>
+							<option name="emp" value="신필용">신필용</option>
+							<option name="emp" value="서지원">서지원</option>
+							<option name="emp" value="이아름">이아름</option>
+							<option name="emp" value="이정민">이정민</option>
+							<option name="emp" value="박다정">박다정</option>
+		            	</select>
+	            	</div>
+		        </h5>
+		        <h5 class="d-flex">결재 완료기간: 
+			        <div class="row flex-nowrap">
+						<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+							<input type="date" name="startDate" class="form-control">
+						</div>
+		                ~
+		                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+			                <input type="date" name="endDate" class="form-control">
+		                </div>
+					</div>
+		        </h5>
+		        <h5 class="d-flex">기간-휴가(연차)신청서 [기본-hidden]
+		        	<div class="row flex-nowrap">
+						<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+							<input type="date" name="startDate" class="form-control">
+						</div>
+		                ~
+		                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+			                <input type="date" name="endDate" class="form-control">
+		                </div>
+					</div>
+		        </h5>
+		        <h5 class="d-flex">휴가종류-휴가(연차)신청서 [기본-hidden]
+		        	<div class="mb-6 mb-0">
+		            	<select class="form-select">
+		            		<option selected></option>
+		            		<option name="leave" value="연차유급휴가">연차유급휴가</option>
+							<option name="leave" value="출산전후휴가">출산전후휴가</option>
+							<option name="leave" value="배우자출산휴가">배우자출산휴가</option>
+							<option name="leave" value="생리휴가">생리휴가</option>
+							<option name="leave" value="가족돌봄휴가">가족돌봄휴가</option>
+							<option name="leave" value="경조사휴가">경조사휴가</option>
+							<option name="leave" value="여름휴가">여름휴가</option>
+							<option name="leave" value="병가">병가</option>
+							<option name="leave" value="공가">공가</option>
+							<option name="leave" value="개인사정">개인사정</option>
+							<option name="leave" value="기타">기타</option>
+		            	</select>
+	            	</div>
+		        </h5>
+		        <h5 class="d-flex">발령부서- 인사발령신청서 [기본-hidden]
+		        	<div class="mb-6 mb-0">
+		            	<select class="form-select">
+		            		<option selected>부서이름 인사정보테이블에서 가져오기</option>
+		            		<option name="transfer" value="기획조정실">기획조정실</option>
+							<option name="transfer" value="경영기획팀">경영기획팀</option>
+							<option name="transfer" value="인사노무팀">인사노무팀</option>
+							<option name="transfer" value="총무팀">총무팀</option>
+							<option name="transfer" value="재무회계팀">재무회계팀</option>
+							<option name="transfer" value="범무감사팀">범무감사팀</option>
+							<option name="transfer" value="비서실">비서실</option>
+							<option name="transfer" value="대외협력팀">대외협력팀</option>
+							<option name="transfer" value="홍보팀">홍보팀</option>
+							<option name="transfer" value="국제협력팀">국제협력팀</option>
+							<option name="transfer" value="고객만족팀(cs팀)">고객만족팀(cs팀)</option>
+							<option name="transfer" value="사업기획팀">사업기획팀</option>
+							<option name="transfer" value="운영지원팀">운영지원팀</option>
+							<option name="transfer" value="사업관리팀">사업관리팀</option>
+							<option name="transfer" value="성과관리팀">성과관리팀</option>
+							<option name="transfer" value="시설관리팀">시설관리팀</option>
+							<option name="transfer" value="연구개발팀">연구개발팀</option>
+							<option name="transfer" value="기술지원팀">기술지원팀</option>
+							<option name="transfer" value="정보화팀/전산팀">정보화팀/전산팀</option>
+							<option name="transfer" value="데이터관리팀">데이터관리팀</option>
+							<option name="transfer" value="감사실">감사실</option>
+							<option name="transfer" value="윤리경영팀">윤리경영팀</option>
+							<option name="transfer" value="내부감사팀">내부감사팀</option>
+							<option name="transfer" value="리스크 관리팀">리스크 관리팀</option>
+		            	</select>
+	            	</div>
+		        </h5>
+		        <h5 class="d-flex">지출종류 - 지출결의서 [기본-hidden]
+		        	<div class="mb-6 mb-0">
+		            	<select class="form-select">
+		            		<option selected>인사테이블에서불러오기 이름(사번)</option>
+		            		<option name="expense" value="고정지출">고정지출</option>
+							<option name="expense" value="변동지출">변동지출</option>
+							<option name="expense" value="비정기지출">비정기지출</option>
+		            	</select>
+	            	</div>
+		        </h5>
+		        <h5>사유내용 -자유양식결재서:[기본-hidden]
+		        	<textarea id="notice-content-write" class="form-control" rows="10" placeholder="결재사유내용 작성"></textarea>
+		        </h5>
+		        <h5 class="d-flex">결재권한자 변경:
+		        	<input class="form-check-input" type="checkbox" id="opt-in">
+		        
+		        </h5>
+		        <h5 class="d-flex">결재권한자: 
+<!-- 		        <div id="container"></div> -->
+		          <div id="select-box" style="width: 200px"></div>
+     				<div id="result"><b>Result of events</b><br></div>
+		        	<div class="mb-6 mb-0">
+		            	<select class="form-select" data-mdb-select-init multiple size="1">
+		            	<optgroup label="인사팀">
+						  <option value="0">홍길동</option>
+						  <option value="1">이정현</option>
+						  <option value="2">강동원</option>
+						  <option value="3">원빈</option>
+					    </optgroup>
+						<optgroup label="개발팀">
+						    <option value="4">권지용</option>
+						    <option value="5">한가인</option>
+						    <option value="6">정지훈</option>
+						  </optgroup>
+						</select> 
+					</div>
+				</h5>      
+				<h5>결재권한자 순서모양: div 태그로만들기<h5>
+		        
+		        <div id="editor" style="border: 1px solid black;;"></div>
+		        
+		      </div>
+		      <div class="modal-footer">
+		      	<div>
+			     	<button type="button" class="btn btn-primary">첨부파일</button>
+			      	<button type="button" class="btn btn-primary">결재확인</button>
+			    </div>
+		      	<hr>
+		      	<button type="button" class="btn btn-primary">인쇄</button>
+		        <button type="button" class="btn btn-primary">저장</button>
+		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+		      </div>
+		    </div>
+		  </div>
 	</div>
+	</div>
+	
+	
 </th:block>
+	
 </body>
 
+
 <th:block layout:fragment="myScript">
-	<script>
+<script>
 	const Grid = tui.Grid;
 	const instance = new Grid({
 		  el: document.getElementById('approvalGrid'), // Container element
 		  columns: [
+	
 		    {
-		      header: '결재순번',
-		      name: 'RowNo'
+		      header: '결재순번'
+		      ,name: 'row_no'
+		      ,align: 'center'
 		    },
 		    {
-		      header: '문서제목',
-		      name: 'Document_title'
+		      header: '문서제목'
+		      ,name: 'document_title'
+		      ,align: 'center'
 		    },
 		    {
-		      header: '기안자',
-		      name: 'drafter'
+		      header: '기안자'
+		      ,name: 'drafter'
+		      ,align: 'center'
 		    },
 		    {
-		      header: '부서명',
-		      name: 'Department_name'
+		      header: '부서명'
+		      ,name: 'department_name'
+		      ,align: 'center'
 		    },
 		    {
-			  header: '직급',
-			  name: 'rank'
+			  header: '직급'
+			  ,name: 'rank'
+			  ,align: 'center'
 			},
 			{
-			  header: '생성일',
-			  name: 'Creation_date'
+			  header: '생성일'
+			  ,name: 'creation_date'
+			  ,align: 'center'
 			},
 			{
-			  header: '결재완료일자',
-			  name: 'Payment_completion_date'
+			  header: '결재완료일자'
+			  ,name: 'payment_completion_date'
+			  ,align: 'center'
 			},
 			{
-			  header: '상태',
-			  name: 'state'
+			  header: '상태'
+			  ,name: 'state'
+			  ,align: 'center'
 			},
 			{
-			  header: '결재여부',
-			  name: 'Payment_status'
+			  header: '결재여부'
+			  ,name: 'payment_status'
+			  ,align: 'center'
 			},
 			{
-			  header: '상세보기',
-			  name: 'View_details'
+			  header: '상세보기'
+			  ,name: 'view_details'
+			  ,align: 'center'
 
 			}
 		  ],
 		  data: [
 		    {
-		    	RowNo: 1,
-				Document_title: '지출 결의서',
+		    	row_no: 1,
+				document_title: '지출 결의서',
 				drafter:'',
-				Department_name:'',
+				department_name:'',
 				rank:'',
-				Creation_date:'',
-				Payment_completion_date:'',
+				creation_date:'',
+				payment_completion_date:'',
 				state:'',
-				Payment_status:'',
-				View_details:'<button class="btn btn-primary me-2">상세</button>'
+				payment_status:'',
+				view_details:'<button class="btn btn-primary me-2">상세</button>'
 				
 		    },
 		    {
-		    	RowNo: 2,
-				Document_title: '휴가(연차)신청서',
+		    	row_no: 2,
+				document_title: '휴가(연차)신청서',
 				drafter:'',
-				Department_name:'',
+				department_name:'',
 				rank:'',
-				Creation_date:'',
-				Payment_completion_date:'',
+				creation_date:'',
+				payment_completion_date:'',
 				state:'',
-				Payment_status:'',
-				View_details:'<button class="btn btn-primary me-2">상세</button>'
+				payment_status:'',
+				view_details:'<button class="btn btn-primary me-2">상세</button>'
 				
 		    }
 		  ]
 		});
-	instance.resetData(newData); // Call API of instance's public method
+// 	instance.resetData(newData); // Call API of instance's public method
 	
-	Grid.applyTheme('clean'); // Call API of static method
+// 	Grid.applyTheme('clean'); // Call API of static method
 	
-	</script>
+	const grid2 = new Grid({
+	    el: document.getElementById('grid2'), // 두 번째 컨테이너
+	    columns: [
+	    	
+		    {
+		      header: '결재순번'
+		      ,name: 'row_no'
+		      ,align: 'center'
+		    },
+		    {
+		      header: '문서제목'
+		      ,name: 'document_title'
+		      ,align: 'center'
+		    },
+		    {
+		      header: '기안자'
+		      ,name: 'drafter'
+		      ,align: 'center'
+		    },
+		    {
+		      header: '부서명'
+		      ,name: 'department_name'
+		      ,align: 'center'
+		    },
+		    {
+			  header: '직급'
+			  ,name: 'rank'
+			  ,align: 'center'
+			},
+			{
+			  header: '생성일'
+			  ,name: 'creation_date'
+			  ,align: 'center'
+			},
+			{
+			  header: '결재완료일자'
+			  ,name: 'payment_completion_date'
+			  ,align: 'center'
+			},
+			{
+			  header: '상태'
+			  ,name: 'state'
+			  ,align: 'center'
+			},
+			{
+			  header: '결재여부'
+			  ,name: 'payment_status'
+			  ,align: 'center'
+			},
+			{
+			  header: '상세보기'
+			  ,name: 'view_details'
+			  ,align: 'center'
+
+			}
+		  ],
+		  data: [
+		    {
+		    	row_no: 1,
+				document_title: '지출 결의서',
+				drafter:'',
+				department_name:'',
+				rank:'',
+				creation_date:'',
+				payment_completion_date:'',
+				state:'',
+				payment_status:'',
+				view_details:'<button class="btn btn-primary me-2">상세</button>'
+				
+		    },
+		    {
+		    	row_no: 2,
+				document_title: '휴가(연차)신청서',
+				drafter:'',
+				department_name:'',
+				rank:'',
+				creation_date:'',
+				payment_completion_date:'',
+				state:'',
+				payment_status:'',
+				view_details:'<button class="btn btn-primary me-2">상세</button>'
+				
+		    }
+		  ]
+	});
+	
+	//모달창 코드
+	//셀렉트 박스 변경시 모달창에 텍스트 변경함수
+	function draftValFn(e){
+		
+		let draft_doc = e.value;
+		document.getElementById('Drafting').innerText = draft_doc;
+	}
+	
+	let today = new Date();   
+
+	let year = today.getFullYear(); // 년도
+	let month = today.getMonth() + 1;  // 월
+	let date = today.getDate();  // 날짜
+	let day = today.getDay();  // 요일
+
+	// 3. 원하는 형식으로 문자열 만들기
+	const formattedDate = `${year}년 ${month}월 ${date}일`;
+
+	document.getElementById("today-date").textContent = formattedDate;
+
+	//셀렉트박스
+	var resultDiv = document.querySelector('#result');
+    var selectBox = new tui.SelectBox('#select-box', {
+      data: [
+        {
+          label: 'Fruits',
+          data: [{ label: 'Apple', value: 'apple' }, 
+        	  	{ label: 'Banana', value: 'banana' }]
+        },
+        {
+          label: 'Colors',
+          data: [
+            { label: 'Red', value: 'red' },
+            { label: 'Yellow', value: 'yellow' },
+            { label: 'Green', value: 'green'},
+            { label: 'Blue', value: 'blue'},
+            { label: 'Purple', value: 'purple' }
+          ]
+        }
+      ]
+    });
+
+    function print(type, text) {
+      resultDiv.innerHTML += type + ': ' + text + '<br>';
+    }
+
+    selectBox.on('change', function(ev) {
+      print(ev.type,ev.curr.getLabel());
+    });
+
+	//에디터
+	 const editor = new toastui.Editor({
+	  el: document.querySelector('#editor'),
+	  height: '500px',
+	  initialEditType: 'markdown',
+	  previewStyle: 'vertical'
+	});
+	
+	editor.getMarkdown();
+	    
+</script>
 </th:block>
 
