@@ -50,11 +50,20 @@ public class EmpDTO {
     @PastOrPresent(message = "입사일은 오늘 또는 과거 날짜만 가능합니다.")
 	private LocalDate hireDate;  // 입사일 (엔티티 생성 시 자동 등록)	
 	
-	private String status;  // 재직 상태		
+    // 재직 상태		
+	private String status; 
 	
-	// 부서 / 직급
-//    private String deptId;
-//    private String positionId;
+	// ERP / MES 구분
+	@NotBlank(message = "소속 종류를 선택해주세요.")
+	private String empType;
+	
+	// 부서 
+	@NotBlank(message = "부서를 선택해주세요.")
+    private String deptId;
+	
+	// 직급
+	@NotBlank(message = "직급을 선택해주세요.")
+    private String posCode;
 	
 	private Long photoFileId;  // 사진파일ID (사진 파일 FK)	
 	
@@ -75,14 +84,6 @@ public class EmpDTO {
 	public static EmpDTO fromEntity(Emp emp) {
 		return modelMapper.map(emp, EmpDTO.class);
 	}
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	
