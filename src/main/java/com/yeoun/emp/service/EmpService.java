@@ -8,12 +8,13 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.yeoun.common.entity.Role;
-import com.yeoun.common.repository.RoleRepository;
+import com.yeoun.auth.entity.Role;
+import com.yeoun.auth.repository.RoleRepository;
 import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.entity.Dept;
@@ -155,6 +156,24 @@ public class EmpService {
 	            return new EmpListDTO(e.getHireDate(), e.getEmpId(), e.getEmpName(), deptName, posName, e.getMobile(), e.getEmail());
 	        })
 	        .toList();
+	}
+	
+	
+	// ==============================================================================
+	// 사원 정보 조회
+	@Transactional(readOnly = true)
+	public EmpDTO getEmp(String empId) {
+		// EmpRepository - findByempId() 메서드 호출하여 사원 정보 조회
+		Emp emp = empRepository.findByEmpId(empId)
+				.orElseThrow(() -> new UsernameNotFoundException(empId + " 에 해당하는 사원이 없습니다!"));
+		
+		for(EmpRole er : emp.getEmpRoles()) {
+			String code = (er.getRole() != null) ? er.getRole().getRoleCode() : "NULL";
+	        log.info(">>> Role: {}", code);
+		}
+		// ---------------------------------------------------------------------------------------------------------
+		// Emp 엔티티 -> EmpDTO 객체로 변환하여 리턴
+		return EmpDTO.fromEntity(emp);
 	}
 
 	// 활성화된 부서 목록 조회
