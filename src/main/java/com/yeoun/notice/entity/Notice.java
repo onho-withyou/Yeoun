@@ -55,7 +55,7 @@ public class Notice {
 	private LocalDateTime updatedDate; // 공지 수정일
 	
 	@Column(nullable = false, length = 1)
-	private String deleteYN = "N"; // 공지 상단 배치여부
+	private String deleteYN = "N"; // 공지 삭제 판별
 }
 
 

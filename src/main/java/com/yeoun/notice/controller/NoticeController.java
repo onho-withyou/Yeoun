@@ -62,7 +62,7 @@ public class NoticeController {
 	public ResponseEntity<Map<String, String>> notices(@ModelAttribute("noticeDTO") @Valid NoticeDTO noticeDTO, BindingResult bindingResult) {
 		Map<String, String> msg = new HashMap<>();
 		if(bindingResult.hasErrors()) {
-			msg.put("msg", "공지사항 등록에 실패했습니다2222");
+			msg.put("msg", "공지사항 등록에 실패했습니다");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		}
 		
@@ -73,7 +73,6 @@ public class NoticeController {
 			return ResponseEntity.ok(msg);
 		
 		} catch (Exception e) {
-			System.out.println(e);
 			msg.put("msg", "공지사항 등록에 실패했습니다 :" + e.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		}

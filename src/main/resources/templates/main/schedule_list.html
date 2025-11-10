@@ -31,7 +31,7 @@
 							<button class="btn btn-outline-primary" type="submit">Search</button>
 						</div>
 					</form>
-					<button type="button" class="btn btn-primary btn-sm ms-auto" data-bs-toggle="modal" data-bs-target="#addScheduleModal" id="abcd">일정등록</button>
+					<button type="button" class="btn btn-primary btn-sm ms-auto" data-bs-toggle="modal" data-bs-target="#add-schedule-modal" id="abcd">일정등록</button>
 					
 				</div>
 				
@@ -170,7 +170,7 @@
 				</div>
 				<!--/ Basic Bootstrap Table -->
 				<!-- 일정등록 모달 -->
-			    <div class="modal" id="addScheduleModal" tabindex="-1" style="display: none;" aria-hidden="true">
+			    <div class="modal" id="add-schedule-modal" tabindex="-1" style="display: none;" aria-hidden="true">
 					<div class="modal-dialog modal-dialog-centered" role="document">
 						<div class="modal-content">
 							<div class="modal-header">
@@ -178,47 +178,43 @@
 								<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 							</div>
 							<div class="modal-body">
-								<form>
+								<form id="add-schedule-form">
 									<div class="col mb-6">
 										<label for="scheduleTitle" class="form-label">제목</label>
-										<input type="text" id="scheduleTitle" class="form-control"/>
+										<input type="text" id="scheduleTitle" class="form-control" name="scheduleTitle"/>
 									</div>
 									<div class="col mb-6">
 										<label for="scheduleTitle" class="form-label">작성자</label>
-										<input type="text" id="scheduleTitle" class="form-control" value="신필용" readonly/>
+										<input type="text" id="schedule-writer" class="form-control" value="123" name="createdUser" readonly/>
 									</div>
 									<div class="mb-3 mt-3" style="display:flex; gap:8px;">
 										<div>
-											<select id="scheduleType" class="form-select">
+											<select id="schedule-type" class="form-select" name="scheduleType">
 		                                        <option value="company">회사</option>
-		                                        <option value="personal">개인</option>
-		                                        <option value="department">인사</option>
-		                                        <option value="department">개발</option>
-		                                        <option value="department">생산</option>
-		                                        <option value="department">영업</option>
+		                                        <option value="empId">개인</option>
 		                                    </select>
 										</div>
 										<div class="tui-datepicker-input tui-datetime-input tui-has-focus mt-1" style="margin-right: 5px; width: 28%;">
-											<input id="startpicker-input" type="text" aria-label="Date" >
+											<input id="startpicker-input" type="text" aria-label="Date" name="scheduleStart">
 											<span class="tui-ico-date" style="width:15px;"></span>
 											<div id="startpicker-container" style="margin-left: -1px;"></div>
 										</div>
 										<span class="mt-2">~</span>
 										<div class="tui-datepicker-input tui-datetime-input tui-has-focus mt-1" style="margin-right: 5px; width: 28%;">
-											<input id="endpicker-input" type="text" aria-label="Date">
+											<input id="endpicker-input" type="text" aria-label="Date" name="scheduleFinish">
 											<span class="tui-ico-date"></span>
 											<div id="endpicker-container" style="margin-left: -1px;"></div>
 										</div>
-										<input type="checkbox" id="allDayCheckbox" style="margin-bottom: 10px;"/>
-										<label for="allDayCheckbox" style="margin-top: 3px;">종일</label>
+										<input type="checkbox" id="all-day-checkbox" style="margin-bottom: 10px;" name="alldayYN" value="Y"/>
+										<label for="all-day-checkbox" style="margin-top: 3px;">종일</label>
 									</div>
 									<div class="col mb-6">
-										<label for="scheduleTitle" class="form-label">내용</label>
-										<textarea id="scheduleContent" class="form-control" rows="5"></textarea>
+										<label for="schedule-content" class="form-label">내용</label>
+										<textarea id="schedule-content" class="form-control" rows="5" name="scheduleContent"></textarea>
 									</div>
 									
 									<div class="modal-footer mt-3 p-0">
-										<button class="btn btn-primary">등록</button>
+										<button type="submit" id="add-schedule-btn" class="btn btn-primary">등록</button>
 									</div>
 								</form>
 							</div>
@@ -235,46 +231,8 @@
 			<!-- 데이트피커 -->
 			<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.js"></script>
 			
-			<script type="text/javascript">
-				var today = new Date();
-				var picker_list = tui.DatePicker.createRangePicker({
-				    startpicker: {
-				        date: today,
-				        input: '#startpicker-input-list',
-				        container: '#startpicker-container-list'
-				    },
-				    endpicker: {
-				        date: today,
-				        input: '#endpicker-input-list',
-				        container: '#endpicker-container-list'
-				    },
-				    selectableRanges: [
-				        [today, new Date(today.getFullYear() + 1, today.getMonth(), today.getDate())]
-				    ],
-				    format: 'YYYY-MM-dd'
-				});
-				
-				var picker = tui.DatePicker.createRangePicker({
-				    startpicker: {
-				        date: today,
-				        input: '#startpicker-input',
-				        container: '#startpicker-container'
-				    },
-				    endpicker: {
-				        date: today,
-				        input: '#endpicker-input',
-				        container: '#endpicker-container'
-				    },
-				    selectableRanges: [
-				        [today, new Date(today.getFullYear() + 1, today.getMonth(), today.getDate())]
-				    ],
-				    format: 'YYYY-MM-dd HH:mm',
-					timepicker: {
-			            layoutType: 'tab',
-			            inputType: 'spinbox'
-			        }
-				});
-			</script>
+			<script src="/js/main/schedule_list.js"></script>
+			
 	</th:block>
 		</body>
 </th:block>

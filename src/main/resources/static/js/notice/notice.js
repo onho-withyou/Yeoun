@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		})
 		.then(response => {
 			if (!response.ok) throw new Error('등록에 실패했습니다.');
-			return response.json();  // REST컨트롤러 아니므로 JSON 파싱
+			return response.json();  //JSON 파싱
 		})
 		.then(response => { // response가 ok일때
 			alert(response.msg);
