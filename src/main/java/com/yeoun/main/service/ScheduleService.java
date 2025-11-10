@@ -36,10 +36,19 @@ public class ScheduleService {
 	public void createSchedule(@Valid ScheduleDTO scheduleDTO) {
 		
 		scheduleDTO.setCreatedUser(1102L); 
-		
+		if(scheduleDTO.getAlldayYN() != "Y") {
+			scheduleDTO.setAlldayYN("N");
+		}
 		Schedule schedule = scheduleDTO.toEntity();
 		
 		scheduleRepository.save(schedule);
+	}
+
+	public List<ScheduleDTO> getScheduleList(String startDate, String endDate) {
+		
+		List<Schedule> scheduleList = scheduleRepository.findAll();
+		
+		return scheduleList.stream().map(ScheduleDTO::fromEntity).collect(Collectors.toList());
 	}
 
 }

@@ -9,6 +9,10 @@
 				z-index: 10 !important; 
 			}
 	    </style>
+	    <link rel="stylesheet" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css">
+		<link rel="stylesheet" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css">
+	    <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+	    
 	</head>
 	<body>
 		<th:block layout:fragment="content">
@@ -38,99 +42,34 @@
 				<br>
 				<!-- Basic Bootstrap Table -->
 				<div class="card">
-					<p th:text="${name}"></p>
-				    <div class="table-responsive text-nowrap">
-				        <table class="table">
-				            <thead>
-				                <tr>
-				                    <th>시작일</th>
-				                    <th>제목</th>
-				                    <th>작성자</th>
-				                    <th>종류</th>
-				                    <th>상세</th>
-				                </tr>
-				            </thead>
-				            <tbody class="table-border-bottom-0">
-				                <tr style="background-color: #e4bcd5;">
-				                    <td>1</td>
-				                    <td>2025 하반기 주요 감사 일정 안내</td>
-				                    <td>김관리</td>
-				                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-				                    <td>
-				                        <div class="dropdown">
-				                            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#showNotice">
-				                                보기
-				                            </button>
-				                        </div>
-				                    </td>
-				                </tr>
-				                <tr style="background-color: #e4bcd5;">
-				                    <td>2</td>
-				                    <td>10월의 우수 사원</td>
-				                    <td>김관리</td>
-				                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-				                    <td>
-				                        <div class="dropdown">
-				                            <button type="button" class="btn btn-info btn-sm">
-				                                보기
-				                            </button>
-				                        </div>
-				                    </td>
-				                </tr>
-				                <tr style="background-color: #e4bcd5;">
-				                    <td>3</td>
-				                    <td>중앙 엘리베이터 수리 기간</td>
-				                    <td>김관리</td>
-				                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-				                    <td>
-				                        <div class="dropdown">
-				                            <button type="button" class="btn btn-info btn-sm">
-				                                보기
-				                            </button>
-				                        </div>
-				                    </td>
-				                </tr>
-				                <tr>
-				                    <td>11</td>
-				                    <td>2025 중반기 주요 감사 일정 안내</td>
-				                    <td>김관리</td>
-				                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-				                    <td>
-				                        <div class="dropdown">
-				                            <button type="button" class="btn btn-info btn-sm">
-				                                보기
-				                            </button>
-				                        </div>
-				                    </td>
-				                </tr>
-				                <tr>
-				                    <td>12</td>
-				                    <td>7월의 우수 사원</td>
-				                    <td>김관리</td>
-				                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-				                    <td>
-				                        <div class="dropdown">
-				                            <button type="button" class="btn btn-info btn-sm">
-				                                보기
-				                            </button>
-				                        </div>
-				                    </td>
-				                </tr>
-				                <tr>
-				                    <td>13</td>
-				                    <td>급식업체 변경 알림</td>
-				                    <td>김관리</td>
-				                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-				                    <td>
-				                        <div class="dropdown">
-				                            <button type="button" class="btn btn-info btn-sm">
-				                                보기
-				                            </button>
-				                        </div>
-				                    </td>
-				                </tr>
-				            </tbody>
-				        </table>
+				    <div class="table-responsive text-nowrap" id="grid">
+				    
+<!-- 				        <table class="table"> -->
+<!-- 				            <thead> -->
+<!-- 				                <tr> -->
+<!-- 				                    <th>시작일</th> -->
+<!-- 				                    <th>제목</th> -->
+<!-- 				                    <th>작성자</th> -->
+<!-- 				                    <th>종류</th> -->
+<!-- 				                    <th>상세</th> -->
+<!-- 				                </tr> -->
+<!-- 				            </thead> -->
+<!-- 				            <tbody class="table-border-bottom-0"> -->
+<!-- 				                <tr> -->
+<!-- 				                    <td>13</td> -->
+<!-- 				                    <td>급식업체 변경 알림</td> -->
+<!-- 				                    <td>김관리</td> -->
+<!-- 				                    <td><span class="badge bg-label-primary me-1">전체</span></td> -->
+<!-- 				                    <td> -->
+<!-- 				                        <div class="dropdown"> -->
+<!-- 				                            <button type="button" class="btn btn-info btn-sm"> -->
+<!-- 				                                보기 -->
+<!-- 				                            </button> -->
+<!-- 				                        </div> -->
+<!-- 				                    </td> -->
+<!-- 				                </tr> -->
+<!-- 				            </tbody> -->
+<!-- 				        </table> -->
 				    </div>
 				    <div>
 						<div class="layout-demo-info" style="display: flex; justify-content: center;">
@@ -224,12 +163,13 @@
 				<!-- /일정등록모달끝 -->
 			<!-- body 끝 -->	
 			</div>
-			<link rel="stylesheet" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css">
-			<link rel="stylesheet" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css">
+			
 			<!-- 타임피커 -->
 			<script src="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.min.js"></script>
 			<!-- 데이트피커 -->
 			<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.js"></script>
+			<!-- 그리드 -->
+			<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 			
 			<script src="/js/main/schedule_list.js"></script>
 			

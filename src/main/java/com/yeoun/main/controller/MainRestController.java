@@ -3,6 +3,7 @@ package com.yeoun.main.controller;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yeoun.emp.dto.DeptDTO;
+import com.yeoun.main.dto.ScheduleDTO;
 import com.yeoun.main.service.ScheduleService;
 import com.yeoun.notice.dto.NoticeDTO;
 
@@ -23,6 +24,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class MainRestController {
 	private final ScheduleService scheduleService;
 	
+	// 일정목록 조회
+	@GetMapping("")
+	@ResponseBody
+	public ResponseEntity<List<ScheduleDTO>> schedules(@RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate) {
+		
+		List<ScheduleDTO> scheduleDTOList = scheduleService.getScheduleList(startDate, endDate);
+		
+		System.out.println(scheduleDTOList);
+		return ResponseEntity.ok(scheduleDTOList);
+	}
+	
+	
+	// 일정등록 부서목록 조회
 	@GetMapping("/departments")
 	@ResponseBody
 	public ResponseEntity<List<DeptDTO>> departments() {

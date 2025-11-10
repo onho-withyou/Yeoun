@@ -11,12 +11,13 @@ document.addEventListener('DOMContentLoaded', function() {
 	        container: '#startpicker-container-list'
 	    },
 	    endpicker: {
-	        date: today,
+	        date: nextYear,
 	        input: '#endpicker-input-list',
 	        container: '#endpicker-container-list'
 	    },
 	    format: 'YYYY-MM-dd'
 	});
+	
 	// 일정등록 데이트피커 객체 생성
 	var picker = tui.DatePicker.createRangePicker({
 	    startpicker: {
@@ -40,6 +41,41 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 	});
 	
+	// ---------------------------------------------------------------
+	// TUI 그리드 불러오기
+	const startDateEl = document.getElementById('startpicker-input-list');
+	const endDateEl = document.getElementById('endpicker-input-list');
+	
+	getScheduleData();
+	
+	// 시작날자, 끝날자 받아서 data불러오기
+	function getScheduleData(){
+		const startDate = picker_list.getStartDate();
+		const endDate = picker_list.getEndDate();
+		
+		const params = new URLSearchParams({
+			startDate: formatDate(startDate)
+			, endDate: formatDate(endDate)
+		});
+				
+		fetch(`/api/schedules?${params.toString()}`, {method: 'GET'})
+		.then(response => {
+			if (!response.ok) throw new Error(response.text());
+			return response.json();  //JSON 파싱
+		})
+		.then(data => { // response가 ok일때
+			console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+			console.log(data);
+			console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+			initGrid(data);
+	//		location.reload();
+		}).catch(error => {
+			console.error('에러', error)
+			alert("제목, 시작,종료 일시, 내용은 필수입력 사항입니다.");
+		});
+	}
+	
+	// ---------------------------------------------------------------
 	// 일정등록 모달 지정	
 	const addScheduleModal = document.getElementById('add-schedule-modal')
 	// 일정등록 모달 열기 이벤트
@@ -108,16 +144,66 @@ document.addEventListener('DOMContentLoaded', function() {
 		
 });// DOM로드 끝
 
+// 그리드 불러오기 함수
+function initGrid(data) {
+	
+	const grid = new tui.Grid({
+		el: document.getElementById("grid"),
+		editable: true,
+		columns: [
+			{
+				header: '일정시작',
+				name: 'scheduleStart'
+			},
+			{
+				header: '일정제목',
+				name: 'scheduleTitle'
+			},
+			{
+				header: '종류',
+				name: 'scheduleType'
+			},
+			{
+				header: '작성자',
+				name: 'createdUser'
+			},
+			{
+				header: '작성일',
+				name: 'createdDate'
+			},
+		]
+	
+	});
+	
+	grid.resetData(data);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 var today = new Date();
+var nextYear = new Date(today);
+
+nextYear.setFullYear(nextYear.getFullYear() + 1);
 
 function pad(n) {
     return n < 10 ? '0' + n : n;
 }
 
-function formatDate(date) {
+function formatDateTime(date) {
 	var year   = today.getFullYear();
-	var month  = pad(today.getMonth() + 1);
-	var day    = pad(today.getDate());
+	const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  	const day = date.getDate().toString().padStart(2, '0');
 	var hour   = pad(today.getHours());
 	var minute = pad(today.getMinutes());
 
@@ -125,6 +211,16 @@ function formatDate(date) {
 	
 	return formatted;
 }
+
+function formatDate(date) {
+
+		const year = date.getFullYear();
+	const month = (date.getMonth() + 1).toString().padStart(2, '0');
+	const day = date.getDate().toString().padStart(2, '0');
+	return `${year}-${month}-${day}`;
+}
+
+
 
 
 
