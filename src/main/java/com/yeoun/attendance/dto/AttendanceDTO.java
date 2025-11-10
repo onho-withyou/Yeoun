@@ -2,6 +2,7 @@ package com.yeoun.attendance.dto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import org.modelmapper.ModelMapper;
 
@@ -28,10 +29,10 @@ public class AttendanceDTO {
 	private LocalDate workDate; // 근무일자
 	
 	@NotNull(message = "출근시간은 필수 입력값입니다.")
-	private LocalDateTime workIn; // 출근시간
+	private LocalTime workIn; // 출근시간
 	
 	@NotNull(message = "퇴근시간은 필수 입력값입니다.")
-	private LocalDateTime workOut; // 퇴근시간
+	private LocalTime workOut; // 퇴근시간
 	
 	@Min(0)
 	@PositiveOrZero
