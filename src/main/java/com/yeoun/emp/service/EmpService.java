@@ -81,7 +81,7 @@ public class EmpService {
 					  : "ACTIVE");				// 기본 상태
 		emp.setRoleCode(empDTO.getRoleCode() != null
 						? empDTO.getRoleCode()
-						: "ROLE_USER");		// 기본 권한
+						: "ROLE_USER");		    // 기본 권한
 		
 		// 4. FK 준비 (부서/직급)
         Dept dept = deptRepository.findById(empDTO.getDeptId())
