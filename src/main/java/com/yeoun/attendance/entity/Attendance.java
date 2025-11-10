@@ -2,10 +2,14 @@ package com.yeoun.attendance.entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -43,8 +47,14 @@ public class Attendance {
 	@CreatedDate
 	private LocalDate workDate; // 근무일자
 	
-	private LocalDateTime workIn; // 출근시간
-	private LocalDateTime workOut; // 퇴근시간
+	@JsonFormat(pattern = "HH:MM")
+	@DateTimeFormat(pattern = "HH:mm")
+	private LocalTime workIn; // 출근시간
+	
+	@JsonFormat(pattern = "HH:MM")
+	@DateTimeFormat(pattern = "HH:mm")
+	private LocalTime workOut; // 퇴근시간
+	
 	private Integer workDuration; // 근무시간(분단위)
 	private String statusCode; // 근태상태
 	private String remark; // 비고
