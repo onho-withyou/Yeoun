@@ -1,9 +1,15 @@
 package com.yeoun.pay.controller;
 
+import com.yeoun.pay.entity.PayCalcRule;
 import com.yeoun.pay.entity.PayItemMst;
 import com.yeoun.pay.entity.PayRule;
+import com.yeoun.pay.enums.ActiveStatus;
+import com.yeoun.pay.enums.RuleType;
+import com.yeoun.pay.enums.TargetType;
+import com.yeoun.pay.enums.YesNo;
 import com.yeoun.pay.repository.PayCalcRuleRepository;
 import com.yeoun.pay.repository.PayItemMstRepository;
+import com.yeoun.pay.service.PayCalcRuleService;
 import com.yeoun.pay.service.PayRuleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -11,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,6 +29,7 @@ import java.util.stream.Collectors;
 public class PayController {
 
     private final PayRuleService payRuleService;
+    private final PayCalcRuleService payCalcRuleService;
     private final PayItemMstRepository payItemMstRepository;
     private final PayCalcRuleRepository payCalcRuleRepository;
 
@@ -70,20 +78,39 @@ public class PayController {
     /** 급여계산 페이지 */
     @GetMapping("/rule_calc")
     public String calcPage(Model model,
-                           @RequestParam(value="msg", required=false) String msg,
-                           @RequestParam(value="err", required=false) String err) {
+                           @RequestParam(value = "itemCode", required = false) String itemCode,
+                           @RequestParam(value = "msg", required = false) String msg,
+                           @RequestParam(value = "err", required = false) String err) {
+
         model.addAttribute("activeTab", "calc");
-        model.addAttribute("calcRules", payCalcRuleRepository.findAllByOrderByPriorityAsc());
-        
-        // 메시지 및 에러 파라미터 처리 추가
+
+        // ===== 목록 조회 (itemCode 필터 선택적) =====
+        // 서비스 사용 버전 (권장)
+        List<PayCalcRule> calcRules = (itemCode != null && !itemCode.isBlank())
+                ? payCalcRuleService.findByItem(itemCode)
+                : payCalcRuleService.findAllOrderByPriority(); // 아래 주석 참고
+        model.addAttribute("calcRules", calcRules);
+
+        // ===== 메시지 처리 =====
         if (msg != null) model.addAttribute("msg", msg);
         if (err != null) model.addAttribute("err", err);
 
-        // 등록/수정 폼에 필요한 바인딩 객체 추가 (예: 새 계산 규칙 객체)
+        // ===== 등록 폼 바인딩 객체 (기본값 포함) =====
         if (!model.containsAttribute("newCalcRule")) {
-            // PayCalcRule 엔티티가 있다고 가정하고 추가
-            model.addAttribute("newCalcRule", new com.yeoun.pay.entity.PayCalcRule()); 
+            PayCalcRule blank = PayCalcRule.builder()
+                    .status(ActiveStatus.ACTIVE)
+                    .priority(100)
+                    .startDate(LocalDate.now())
+                    .build();
+            model.addAttribute("newCalcRule", blank);
         }
+
+        // ===== 폼 선택 소스 (드롭다운 등) =====
+        model.addAttribute("items", payItemMstRepository.findByUseYnOrderBySortNoAsc(YesNo.Y)); // 활성 항목만
+        model.addAttribute("ruleTypes", RuleType.values());
+        model.addAttribute("targetTypes", TargetType.values());
+        model.addAttribute("statuses", ActiveStatus.values());
+        model.addAttribute("selectedItemCode", itemCode); // 필터 유지용
 
         return "pay/pay_calc";
     }
