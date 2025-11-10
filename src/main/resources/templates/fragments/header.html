@@ -91,7 +91,7 @@
       		const chat = document.getElementById("chat");
           	const nameTag = document.getElementById("name");
         	const loginTag = document.getElementById("login");
-        	   
+
         	const badgePayment = document.getElementById("badge_payment");
         	const badgeBell = document.getElementById("badge_bell");
         	const badgeChat = document.getElementById("badge_chat");
@@ -122,14 +122,38 @@
       		});
     		
     		chat.addEventListener("click",()=>{
-    			if(badgeChat.style.display === 'none')  {
+    	    	 window.open(
+    			    "/messenger/popup",
+    			    "messengerPop",
+    			    "noopener,noreferrer,width=600,height=800,left=200,top=100,resizable=no"
+    			 );
+            	/*const iframe = document.createElement("iframe");
+    			iframe.src = "/messenger/popup";
+    			iframe.style.position = "fixed";
+    			iframe.style.right = "20px";
+    			iframe.style.bottom = "20px";
+    			iframe.style.width = "400px";
+    			iframe.style.height = "600px";
+    			iframe.style.border = "1px solid #ccc";
+    			iframe.style.boxShadow = "0 0 12px rgba(0,0,0,0.2)";
+    			iframe.style.borderRadius = "12px";
+    			iframe.style.zIndex = "9999";
+    			document.body.appendChild(iframe);*/
+    			
+    			/*if(badgeChat.style.display === 'none')  {
           		   	this.chatCount += 1;
           		   	badgeChat.textContent = this.chatCount;
           		   	badgeChat.style.display = 'block';
           		}else {
           			badgeChat.style.display = 'none';
-          		}
+          		}*/
       		});
+    		
+    		window.addEventListener("message", (event) => {
+   			  if (event.data === "closeMessengerFrame") {
+   			    document.querySelector("iframe[src='/messenger/popup']")?.remove();
+   			  }
+   			});
    
            	nameTag.addEventListener("click",function() {
         		if(nameTag.innerText === '이름 (사번)') nameTag.innerText = '사용자 정보';
