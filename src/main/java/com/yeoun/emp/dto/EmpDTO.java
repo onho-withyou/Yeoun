@@ -54,7 +54,6 @@ public class EmpDTO {
 	private String status; 
 	
 	// ERP / MES 구분
-	@NotBlank(message = "소속 종류를 선택해주세요.")
 	private String empType;
 	
 	// 부서 
@@ -68,8 +67,6 @@ public class EmpDTO {
 	private Long photoFileId;  // 사진파일ID (사진 파일 FK)	
 	
 	private String roleCode;  // 역할코드	
-	
-	
 	
 	// -----------------------------------------------------------------------
 	private static ModelMapper modelMapper = new ModelMapper();

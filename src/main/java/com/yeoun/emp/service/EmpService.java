@@ -7,13 +7,16 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
+import com.yeoun.emp.entity.Employment;
 import com.yeoun.emp.entity.Position;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.EmpRepository;
+import com.yeoun.emp.repository.EmploymentRepository;
 import com.yeoun.emp.repository.PositionRepository;
 
 import jakarta.validation.Valid;
@@ -21,18 +24,24 @@ import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
+@Transactional
 public class EmpService {
 	
 	private final EmpRepository empRepository;
 	private final DeptRepository deptRepository;
 	private final PositionRepository positionRepository;
-	
+	private final EmploymentRepository employmentRepository;
 	private final BCryptPasswordEncoder encoder;
 
-	public EmpService(EmpRepository empRepository, BCryptPasswordEncoder encoder, DeptRepository deptRepository, PositionRepository positionRepository) {
+	public EmpService(EmpRepository empRepository,
+					  DeptRepository deptRepository,
+					  PositionRepository positionRepository, 
+					  EmploymentRepository employmentRepository,
+					  BCryptPasswordEncoder encoder) {
 		this.empRepository = empRepository;
 		this.deptRepository = deptRepository;
 		this.positionRepository = positionRepository;
+		this.employmentRepository = employmentRepository;
 		this.encoder = encoder;
 	}
 	
@@ -59,13 +68,31 @@ public class EmpService {
 					  : "ACTIVE");				// 기본 상태
 		emp.setRoleCode(empDTO.getRoleCode() != null
 						? empDTO.getRoleCode()
-						: "USER");				// 기본 권한 (임시)
+						: "ADMIN_USER");		// 기본 권한
+		
+		// 부서/직급 FK 준비
+        Dept dept = deptRepository.findById(empDTO.getDeptId())
+                     .orElseThrow(() -> new IllegalArgumentException("부서 없음: " + empDTO.getDeptId()));
+        Position pos = positionRepository.findById(empDTO.getPosCode())
+                        .orElseThrow(() -> new IllegalArgumentException("직급 없음: " + empDTO.getPosCode()));
 		
 		// 4. DB 저장
-		empRepository.save(emp);
+		empRepository.saveAndFlush(emp);
 		
-		log.info("신규 사원 등록 완료 - 사번: {}, 이름: {}, 이메일: {}",
-				 emp.getEmpId(), emp.getEmpName(), emp.getEmail());
+		// 5. EMPLOYMENT 입사 이력 저장
+		Employment employment = new Employment();
+		employment.setEmp(emp);
+		employment.setDept(dept);
+		employment.setPosition(pos);
+		employment.setStartDate(emp.getHireDate());
+		employment.setEndDate(null);
+		employment.setRemark("입사 등록");
+		
+		// 6. DB 저장
+		employmentRepository.save(employment);
+		
+		log.info("EMP 저장 + EMPLOYMENT 저장 완료 - empId={}, dept={}, pos={}",
+                emp.getEmpId(), dept.getDeptName(), pos.getPosName());
 		
 	}
 
@@ -95,7 +122,5 @@ public class EmpService {
         return positionRepository.findActive();
     }
 
-	
-	
 
 }
