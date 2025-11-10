@@ -1,4 +1,4 @@
-package com.yeoun.emp.repository;
+package com.yeoun.common.repository;
 
 import java.util.List;
 
