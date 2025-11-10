@@ -47,8 +47,8 @@ public class Schedule {
 	@Column(nullable = false)
 	private Long createdUser; // 일정 등록자
 	
-	@Column(nullable = false)
-	private String alldayYN; // 종일일정구분
+	@Column(nullable = false, length = 1)
+	private String alldayYN = "N"; // 종일일정구분
 	
 	@Column(nullable = false)
 	private LocalDateTime scheduleStart; // 일정 시작시간

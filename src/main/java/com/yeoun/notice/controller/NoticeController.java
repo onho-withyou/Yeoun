@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -61,7 +62,7 @@ public class NoticeController {
 	public ResponseEntity<Map<String, String>> notices(@ModelAttribute("noticeDTO") @Valid NoticeDTO noticeDTO, BindingResult bindingResult) {
 		Map<String, String> msg = new HashMap<>();
 		if(bindingResult.hasErrors()) {
-			msg.put("msg", "공지사항 등록에 실패했습니다2222");
+			msg.put("msg", "공지사항 등록에 실패했습니다");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		}
 		
@@ -72,7 +73,6 @@ public class NoticeController {
 			return ResponseEntity.ok(msg);
 		
 		} catch (Exception e) {
-			System.out.println(e);
 			msg.put("msg", "공지사항 등록에 실패했습니다 :" + e.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		}
@@ -89,9 +89,8 @@ public class NoticeController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		}
 		
-		System.out.println(noticeDTO + "이거왜 ?@@@@@@@@@@@@@@@@@");
 		try {
-			// 공지 등록 수행
+			// 공지 수정 수행
 			noticeService.modifyNotice(noticeDTO);
 			msg.put("msg", "공지사항이 수정되었습니다.");
 			return ResponseEntity.ok(msg);
@@ -99,6 +98,23 @@ public class NoticeController {
 		} catch (Exception e) {
 			System.out.println(e);
 			msg.put("msg", "공지사항 수정에 실패했습니다 :" + e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
+		}
+	}
+	
+	//공지사항 삭제 로직
+	@DeleteMapping("/{noticeId}")
+	public ResponseEntity<Map<String, String>> notices( @PathVariable("noticeId")Long noticeId) {
+		Map<String, String> msg = new HashMap<>();
+		try {
+			// 공지 삭제 수행
+			noticeService.deleteNotice(noticeId);
+			msg.put("msg", "공지사항이 삭제되었습니다.");
+			return ResponseEntity.ok(msg);
+			
+		} catch (Exception e) {
+			System.out.println(e);
+			msg.put("msg", "공지사항 삭제에 실패했습니다 :" + e.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		}
 	}

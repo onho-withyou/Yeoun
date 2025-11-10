@@ -46,9 +46,9 @@ public class NoticeService {
 		
 		// 검색어가 존재하면 제목,내용에 포함된 공지사항 조회
 	    if (searchKeyword != null && !searchKeyword.isEmpty()) {
-	    	noticePage = noticeRepository.findByNoticeTitleContainingOrNoticeContentContaining(searchKeyword, searchKeyword, pageRequest);
+	    	noticePage = noticeRepository.searchNotice(searchKeyword, pageRequest);
 	    } else { // 존재하지 않을 시 전체 공지사항 조회
-	    	noticePage = noticeRepository.findAll(pageRequest);
+	    	noticePage = noticeRepository.findByDeleteYN("N", pageRequest);
 	    }
 
 	    return noticePage.map(NoticeDTO::fromEntity);
@@ -89,6 +89,14 @@ public class NoticeService {
 		}
 		notice.setNoticeYN(noticeDTO.getNoticeYN()); // 고정여부 변경값 적용
 		// 트랜잭션이 끝날때 변경사항 자동 적용(더티체킹)
+	}
+	
+	// 공지사항 삭제하기
+	@Transactional
+	public void deleteNotice(Long noticeId) {
+		Notice notice = noticeRepository.findById(noticeId).orElseThrow();
+		
+		notice.setDeleteYN("Y");
 	}
 
 
