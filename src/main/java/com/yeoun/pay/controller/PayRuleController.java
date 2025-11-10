@@ -23,21 +23,6 @@ public class PayRuleController {
     private final PayItemMstRepository payItemMstRepository;
     private final PayCalcRuleRepository payCalcRuleRepository;
 
-//    /** [1] 급여 기준정보 메인 페이지 */
-//    @GetMapping
-//    public String listPage(Model model,
-//                           @RequestParam(value = "msg", required = false) String flashMsg,
-//                           @RequestParam(value = "err", required = false) String flashErr) {
-//        model.addAttribute("rules", payRuleService.findAll());
-//        // 새 등록 폼 바인딩 객체가 없으면 생성 (검증 실패 시 기존 값 유지)
-//        if (!model.containsAttribute("newRule")) {
-//            model.addAttribute("newRule", new PayRule());
-//        }
-//        // 플래시 메시지 전달
-//        if (flashMsg != null) model.addAttribute("msg", flashMsg);
-//        if (flashErr != null) model.addAttribute("err", flashErr);
-//        return "pay/pay_rule";
-//    }
 
     /** [2] 등록 처리 (모달) */
     @PostMapping

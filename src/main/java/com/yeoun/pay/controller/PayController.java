@@ -1,5 +1,6 @@
 package com.yeoun.pay.controller;
 
+import com.yeoun.pay.entity.PayItemMst;
 import com.yeoun.pay.entity.PayRule;
 import com.yeoun.pay.repository.PayCalcRuleRepository;
 import com.yeoun.pay.repository.PayItemMstRepository;
@@ -10,49 +11,80 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Controller
 @RequestMapping("/pay")
-@Log4j2
 @RequiredArgsConstructor
+@Log4j2
 public class PayController {
 
-    // 조회에 필요한 의존성만 주입 (쓰기/검증은 각 도메인 컨트롤러에서)
     private final PayRuleService payRuleService;
     private final PayItemMstRepository payItemMstRepository;
     private final PayCalcRuleRepository payCalcRuleRepository;
 
-    /** 급여 기준정보 허브 페이지 (조회 전용) */
+    /** 급여기준정보 페이지 */
     @GetMapping("/rule")
-    public String ruleHubPage(
-            Model model,
-            @RequestParam(value = "msg", required = false) String msg,
-            @RequestParam(value = "err", required = false) String err
-    ) {
-        // 1) 각 테이블 목록 조회 (연관필요 없음)
-        model.addAttribute("rules",     payRuleService.findAll());
-        model.addAttribute("items",     payItemMstRepository.findAllByOrderBySortNoAsc());
-        model.addAttribute("calcRules", payCalcRuleRepository.findAllByOrderByPriorityAsc());
+    public String rulePage(Model model,
+                           @RequestParam(value="msg", required=false) String msg,
+                           @RequestParam(value="err", required=false) String err) {
+        model.addAttribute("activeTab", "rule");
+        model.addAttribute("rules", payRuleService.findAll());
+        if (!model.containsAttribute("newRule")) model.addAttribute("newRule", new PayRule());
+        if (msg != null) model.addAttribute("msg", msg);
+        if (err != null) model.addAttribute("err", err);
+        return "pay/pay_rule";
+    }
+    
+    // --- 급여항목 페이지 수정 시작 (검색/메시지 처리 포함) ---
+    /** 급여항목 페이지 */
+    @GetMapping("/rule_item")
+    public String itemPage(Model model,
+                           @RequestParam(value = "msg", required = false) String msg,
+                           @RequestParam(value = "err", required = false) String err,
+                           @RequestParam Map<String, String> params) {
 
-        // 2) 신규 등록 폼 바인딩 객체(유효성 실패로 플래시에서 넘어온 게 없을 때만 준비)
-        if (!model.containsAttribute("newRule")) {
-            model.addAttribute("newRule", new PayRule());
+        model.addAttribute("activeTab", "item");
+
+        // 목록(비페이지네이션) — 템플릿의 items 블록과 매칭
+        model.addAttribute("items", payItemMstRepository.findAllByOrderBySortNoAsc());
+
+        // 등록 모달 바인딩 객체 — 템플릿의 th:object="${item}"와 매칭
+        if (!model.containsAttribute("item")) {
+            model.addAttribute("item", new PayItemMst()); // DTO 쓰면 new PayItemForm()으로 교체
         }
 
-        // 3) 플래시 메시지 표시
+        // 검색 파라미터(셀렉트 유지/입력값 유지용)
+        model.addAttribute("params", params);
+
         if (msg != null) model.addAttribute("msg", msg);
         if (err != null) model.addAttribute("err", err);
 
-        return "pay/pay_rule";  // 타임리프 템플릿 하나에서 3 블록 모두 렌더링
+        return "pay/pay_item";
     }
 
-    // 급여 명세서 페이지
-    @GetMapping("/emp_pay")
-    public String empPay() {
-        return "pay/emp_pay";
-    }
+    // --- 급여항목 페이지 수정 끝 ---
 
-    @GetMapping("/payroll_payslip")
-    public String payRunPage() {
-        return "pay/payroll_payslip";
+    /** 급여계산 페이지 */
+    @GetMapping("/rule_calc")
+    public String calcPage(Model model,
+                           @RequestParam(value="msg", required=false) String msg,
+                           @RequestParam(value="err", required=false) String err) {
+        model.addAttribute("activeTab", "calc");
+        model.addAttribute("calcRules", payCalcRuleRepository.findAllByOrderByPriorityAsc());
+        
+        // 메시지 및 에러 파라미터 처리 추가
+        if (msg != null) model.addAttribute("msg", msg);
+        if (err != null) model.addAttribute("err", err);
+
+        // 등록/수정 폼에 필요한 바인딩 객체 추가 (예: 새 계산 규칙 객체)
+        if (!model.containsAttribute("newCalcRule")) {
+            // PayCalcRule 엔티티가 있다고 가정하고 추가
+            model.addAttribute("newCalcRule", new com.yeoun.pay.entity.PayCalcRule()); 
+        }
+
+        return "pay/pay_calc";
     }
 }
