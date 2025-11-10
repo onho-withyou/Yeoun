@@ -2,20 +2,20 @@ package com.yeoun.emp.controller;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.yeoun.emp.dto.EmpDTO;
+import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.entity.Emp;
+import com.yeoun.emp.repository.DeptRepository;
+import com.yeoun.emp.repository.PositionRepository;
 import com.yeoun.emp.service.EmpService;
 
 import jakarta.validation.Valid;
@@ -29,6 +29,8 @@ import lombok.extern.log4j.Log4j2;
 public class EmpController {
 	
 	private final EmpService empService;
+	private final DeptRepository deptRepository;
+	private final PositionRepository positionRepository;
 
 	// =============================================================================================
 	// 뷰페이지로 포워딩 시 입력값 검증으로 활용되는 DTO 객체(빈 객체)를 Model 객체에 담아 함께 전달
@@ -36,6 +38,8 @@ public class EmpController {
 	@GetMapping("/regist")
 	public String registEmp(Model model) {
 		model.addAttribute("empDTO", new EmpDTO());
+		model.addAttribute("deptList", deptRepository.findActive());
+		model.addAttribute("positionList", positionRepository.findActive());
 		return "emp/emp_regist";
 	}
 
@@ -48,13 +52,16 @@ public class EmpController {
 	@PostMapping("/regist")
 	public String regist(@ModelAttribute("empDTO") @Valid EmpDTO empDTO,
 						 BindingResult bindingResult,
-						 RedirectAttributes rttr) {
+						 RedirectAttributes rttr,
+						 Model model) {
 		log.info(">>>>>>>>>>>>>> empDTO : " + empDTO);
 
 		log.info(">>>>>>>>>>>>>> bindingResult.getAllErrors : " + bindingResult.getAllErrors());
 		
 		// 입력값 검증 결과가 true 일 때(검증 오류 발생 시) 다시 입력폼으로 포워딩
 		if(bindingResult.hasErrors()) {
+			model.addAttribute("deptList", empService.getDeptList());
+			model.addAttribute("positionList", empService.getPositionList());
 			return "emp/emp_regist";
 		}
 		
@@ -66,28 +73,15 @@ public class EmpController {
 		
 	}
 	
-	
-
 	// 사원 목록 조회
 	@GetMapping("/list")
 	public String showEmpList(Model model) {
 		
 		// 서비스에서 리스트 가져오기
-		List<Emp> empList = empService.getEmpList();
+		List<EmpListDTO> empList = empService.getEmpList();
 		model.addAttribute("empList", empList);
 		return "emp/emp_list";
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	

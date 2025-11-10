@@ -113,40 +113,45 @@
 			</div>
 	    </div>
 	
-	    <!-- 조직/직무 (현재 DTO에 없음 → 바인딩 보류) -->
+	    <!-- 조직/직무 -->
 	    <div class="card mb-4">
 	      <div class="card-body">
 	        <h5 class="card-title mb-3">조직/직무</h5>
 	
 	        <div class="row g-3">
+	        
+	          <!-- 종류 (ERP / MES) -->
 	          <div class="col-12 col-md-4">
-	            <label class="form-label" for="empType">종류</label>
-	            <select class="form-select" id="empType">
+	            <label class="form-label" for="topDept">종류</label>
+	            <select class="form-select" id="topDept">
 	              <option value="">선택</option>
-	              <option>ERP</option>
-	              <option>MES</option>
-	            </select>
+	              <option th:each="d : ${deptList}" th:if="${d.parentId == null}"
+            			  th:value="${d.deptId}" th:text="${d.deptName}"></option>
+ 				</select>
 	          </div>
+	          
+	          <!-- 부서 -->
 	          <div class="col-12 col-md-4">
-	            <label class="form-label" for="dept">부서</label>
-	            <select class="form-select" id="dept">
+	            <label class="form-label" for="deptId">부서</label>
+	            <select class="form-select" id="deptId" th:field="*{deptId}">
 	              <option value="">선택</option>
-	              <option>개발부</option>
-	              <option>마케팅부</option>
-	              <option>생산부</option>
-	              <option>영업부</option>
-	              <option>인사부</option>
+	              <option th:each="d : ${deptList}" th:if="${d.parentId != null}" 
+	                      th:value="${d.deptId}" th:text="${d.deptName}" 
+	                      th:attr="data-parent=${d.parentId}"></option>
 	            </select>
+	            <div class="text-danger small" th:if="${#fields.hasErrors('deptId')}" th:errors="*{deptId}"></div>
 	          </div>
+	          
+	          <!-- 직급 -->
 	          <div class="col-12 col-md-4">
-	            <label class="form-label" for="position">직급</label>
-	            <select class="form-select" id="position">
+	            <label class="form-label" for="posCode">직급</label>
+	            <select class="form-select" id="posCode" name="posCode" th:field="*{posCode}">
 	              <option value="">선택</option>
-	              <option>대리</option>
-	              <option>과장</option>
-	              <option>차장</option>
+	              <option th:each="p : ${positionList}" th:value="${p.posCode}" th:text="${p.posName}"></option>
 	            </select>
+	            <div class="text-danger small" th:if="${#fields.hasErrors('posCode')}" th:errors="*{posCode}"></div>
 	          </div>
+	          
 	        </div>
 	      </div>
 	    </div>
@@ -193,41 +198,7 @@
 	  </form>
 	</div>
 	
-<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-<script>
-  function btnSearchZip() {
-    new daum.Postcode({
-      oncomplete: function(data) {
-        // 기본 주소(도로명/지번) 선택 타입에 따라 결정
-        var addr = '';             // 최종 주소
-        var extraRoadAddr = '';    // 참고항목 (법정동/건물명 등)
-
-        if (data.userSelectedType === 'R') { // 도로명
-          addr = data.roadAddress;
-
-          // 참고항목 생성
-          if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
-            extraRoadAddr += data.bname;
-          }
-          if (data.buildingName !== '' && data.apartment === 'Y') {
-            extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
-          }
-          if (extraRoadAddr !== '') {
-            addr += ' (' + extraRoadAddr + ')';
-          }
-        } else { // J: 지번주소
-          addr = data.jibunAddress;
-        }
-
-        // 값 세팅
-        document.getElementById('zipcode').value = data.zonecode; // 우편번호
-        document.getElementById('address').value = addr;          // 기본주소
-        document.getElementById('addressDetail').focus();         // 상세주소로 커서 이동
-      }
-    }).open();
-  }
-</script>
-
-	
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js" defer></script>	
+<script src="/js/emp/emp.js"></script>
 </th:block>
 </body>
