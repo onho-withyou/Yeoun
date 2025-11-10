@@ -51,13 +51,16 @@ public class EmpController {
 	@PostMapping("/regist")
 	public String regist(@ModelAttribute("empDTO") @Valid EmpDTO empDTO,
 						 BindingResult bindingResult,
-						 RedirectAttributes rttr) {
+						 RedirectAttributes rttr,
+						 Model model) {
 		log.info(">>>>>>>>>>>>>> empDTO : " + empDTO);
 
 		log.info(">>>>>>>>>>>>>> bindingResult.getAllErrors : " + bindingResult.getAllErrors());
 		
 		// 입력값 검증 결과가 true 일 때(검증 오류 발생 시) 다시 입력폼으로 포워딩
 		if(bindingResult.hasErrors()) {
+			model.addAttribute("deptList", empService.getDeptList());
+			model.addAttribute("positionList", empService.getPositionList());
 			return "emp/emp_regist";
 		}
 		

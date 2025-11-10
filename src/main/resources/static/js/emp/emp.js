@@ -35,7 +35,13 @@
       const prev = deptSel.value;  // 이전 선택 복원용
       resetDept();
 
-      if (!topId) return; // 상위부서 미선택이면 비워둠 (원하면 전체 노출로 변경 가능)
+	  if (!topId) { // 상위부서 미선택이면 전체 노출
+	     allDept.forEach(o => deptSel.appendChild(o.cloneNode(true)));
+	     if ([...deptSel.options].some(o => o.value === prev)) {
+	       deptSel.value = prev;
+	     }
+	     return;
+	  }
 
       allDept
         .filter(o => o.getAttribute('data-parent') === topId)  // data-parent 기준

@@ -9,8 +9,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.yeoun.emp.dto.EmpDTO;
+import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
+import com.yeoun.emp.entity.Position;
+import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.EmpRepository;
+import com.yeoun.emp.repository.PositionRepository;
 
 import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
@@ -20,10 +24,15 @@ import lombok.extern.log4j.Log4j2;
 public class EmpService {
 	
 	private final EmpRepository empRepository;
+	private final DeptRepository deptRepository;
+	private final PositionRepository positionRepository;
+	
 	private final BCryptPasswordEncoder encoder;
 
-	public EmpService(EmpRepository empRepository, BCryptPasswordEncoder encoder) {
+	public EmpService(EmpRepository empRepository, BCryptPasswordEncoder encoder, DeptRepository deptRepository, PositionRepository positionRepository) {
 		this.empRepository = empRepository;
+		this.deptRepository = deptRepository;
+		this.positionRepository = positionRepository;
 		this.encoder = encoder;
 	}
 	
@@ -73,9 +82,18 @@ public class EmpService {
 
 	// 사원 목록 조회
 	public List<Emp> getEmpList() {
-		
 		return empRepository.findAll();
 	}
+
+	// 활성화된 부서 목록 조회
+	public  List<Dept> getDeptList() {
+		return deptRepository.findActive();
+	}
+
+	// 활성화된 직급 목록 조회
+	public List<Position> getPositionList() {
+        return positionRepository.findActive();
+    }
 
 	
 	
