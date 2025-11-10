@@ -41,8 +41,9 @@ public class Notice {
 	@Column(nullable = false)
 	private String noticeContent; // 공지 본문
 	
-	@Column(nullable = false)
-	private String noticeYN; // 공지 상단 배치여부
+	@Column(nullable = false, length = 1)
+	private String noticeYN = "N"; // 공지 상단 배치여부
+
 	
 	@Column(nullable = false)
 	private Long createdUser; // 공지 작성자
@@ -52,6 +53,9 @@ public class Notice {
 	
 	@LastModifiedDate
 	private LocalDateTime updatedDate; // 공지 수정일
+	
+	@Column(nullable = false, length = 1)
+	private String deleteYN = "N"; // 공지 상단 배치여부
 }
 
 

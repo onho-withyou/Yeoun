@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	// 공지사항 조회 모달설정
 	const showNoticeModal = document.getElementById('show-notice');
 	const showNoticeForm = document.getElementById("notice-form-read");
+	const deleteNoticeBtn = document.getElementById('notice-delete');
 	const fixedCheck = document.getElementById('fixed-check') // 체크박스
 	// 공지사항 조회모달 열기 이벤트
 	showNoticeModal.addEventListener('show.bs.modal', function(event){
@@ -53,6 +54,28 @@ document.addEventListener('DOMContentLoaded', function() {
 		})
 		.then(response => {
 			if (!response.ok) throw new Error('수정에 실패했습니다.');
+			return response.json();  // REST컨트롤러 아니므로 JSON 파싱
+		})
+		.then(response => { // response가 ok일때
+			alert(response.msg);
+			location.reload();
+		}).catch(error => {
+			console.error('에러', error)
+			alert("제목, 내용은 필수입력 사항입니다.");
+		});
+	});
+	
+	//공지사항 조회 - 삭제버튼
+	deleteNoticeBtn.addEventListener('click', function(event) {
+		event.preventDefault(); //기본제출 막기
+		
+		alert("정말 삭제하시겠습니까?");
+		
+		fetch('/notices/' + selectedNoticeId, {
+			method: 'DELETE'			
+		})
+		.then(response => {
+			if (!response.ok) throw new Error('삭제에 실패했습니다.');
 			return response.json();  // REST컨트롤러 아니므로 JSON 파싱
 		})
 		.then(response => { // response가 ok일때
