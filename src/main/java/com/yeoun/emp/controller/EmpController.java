@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.yeoun.emp.dto.EmpDTO;
+import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.PositionRepository;
@@ -77,7 +78,7 @@ public class EmpController {
 	public String showEmpList(Model model) {
 		
 		// 서비스에서 리스트 가져오기
-		List<Emp> empList = empService.getEmpList();
+		List<EmpListDTO> empList = empService.getEmpList();
 		model.addAttribute("empList", empList);
 		return "emp/emp_list";
 	}

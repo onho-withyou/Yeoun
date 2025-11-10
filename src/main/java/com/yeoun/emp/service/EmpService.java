@@ -3,13 +3,17 @@ package com.yeoun.emp.service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.emp.dto.EmpDTO;
+import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.entity.Employment;
@@ -106,10 +110,34 @@ public class EmpService {
 		return datePart + randomPart;
 		
 	}
-
+	
+	
+	// ===================================================================================
 	// 사원 목록 조회
-	public List<Emp> getEmpList() {
-		return empRepository.findAll();
+	@Transactional(readOnly = true)
+	public List<EmpListDTO> getEmpList() {
+	    // 1) 전체 사원
+	    List<Emp> emps = empRepository.findAll(); 
+	    // 정렬 원하면: empRepository.findAll(Sort.by(Sort.Direction.DESC, "createdDate"))
+
+	    if (emps.isEmpty()) return List.of();
+
+	    // 2) 현재 이력(END_DATE is null)
+	    List<Employment> currents = employmentRepository.findByEmpInAndEndDateIsNull(emps);
+
+	    // 3) empId -> Employment
+	    Map<String, Employment> byEmpId = currents.stream()
+	        .collect(Collectors.toMap(e -> e.getEmp().getEmpId(), Function.identity(), (a,b)->a));
+
+	    // 4) DTO 변환
+	    return emps.stream()
+	        .map(e -> {
+	            Employment cur = byEmpId.get(e.getEmpId());
+	            String deptName = (cur != null && cur.getDept() != null) ? cur.getDept().getDeptName() : "";
+	            String posName  = (cur != null && cur.getPosition() != null) ? cur.getPosition().getPosName() : "";
+	            return new EmpListDTO(e.getHireDate(), e.getEmpId(), e.getEmpName(), deptName, posName, e.getMobile(), e.getEmail());
+	        })
+	        .toList();
 	}
 
 	// 활성화된 부서 목록 조회
