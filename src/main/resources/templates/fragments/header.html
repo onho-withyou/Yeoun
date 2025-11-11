@@ -13,16 +13,17 @@
               <ul class="navbar-nav flex-row align-items-center ms-auto dropdown">
               	<li class="nav-item lh-1 me-3">
               		<span id="badge_payment" style="
-				        position: absolute;
-					    top: 0px;
-					    right: 310px;
-					    background-color: red;
-					    color: white;
-					    border-radius: 15px;
-					    padding: 3px 6px;
-					    font-size: 10px;
-					    border-color: #FFF;
-				  "		></span>
+				            position: relative;
+						    top: -12px;
+						    left: 45px;
+						    background-color: red;
+						    color: rgb(255, 255, 255);
+						    border-radius: 15px;
+						    padding: 3px 8px;
+						    border-color: rgb(255, 255, 255);
+						    font-size: 12px;
+						    display: none;
+				  	"></span>
                     <i class="icon-base bx bx-folder icon" data-bs-toggle="dropdown" id="payment"></i> 
 				    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
 					  <li><a class="dropdown-item" href="#">Action</a></li>
@@ -34,15 +35,16 @@
                 </li>
               	<li class="nav-item lh-1 me-3"> 
               	<span id="badge_bell" style="
-				        position: absolute;
-					    top: 0px;
-					    right: 265px;
-					    background-color: red;
-					    color: white;
-					    border-radius: 15px;
-					    padding: 3px 6px;
-					    font-size: 10px;
-					    border-color: #FFF;
+				         position: relative;
+						 top: -12px;
+						 left: 45px;
+						 background-color: red;
+						 color: rgb(255, 255, 255);
+						 border-radius: 15px;
+						 padding: 3px 8px;
+						 border-color: rgb(255, 255, 255);
+						 font-size: 12px;
+						 display: none;
 				  "></span>
                    <i class="icon-base bx bx-bell icon" data-bs-toggle="dropdown" id="bell"></i>  
                    <ul class="dropdown-menu">
@@ -55,16 +57,17 @@
                 </li>
               	<li class="nav-item lh-1 me-3">
               		<span id="badge_chat" style="
-				        position: absolute;
-					    top: 0px;
-					    right: 215px;
-					    background-color: red;
-					    color: white;
-					    border-radius: 15px;
-					    padding: 3px 6px;
-					    font-size: 10px;
-					    border-color: #FFF;
-				  "		></span>
+				        position: relative;
+						top: -12px;
+						left: 45px;
+						background-color: blue;
+						color: rgb(255, 255, 255);
+						border-radius: 15px;
+						padding: 3px 8px;
+						border-color: rgb(255, 255, 255);
+						font-size: 12px;
+						display: none;
+				  	"></span>
                    <i class="icon-base bx bx-chat icon" data-bs-toggle="dropdown" id="chat"></i>
                    <ul class="dropdown-menu">
 					  <li><a class="dropdown-item" href="#">점심시간입니다.</a></li>
@@ -104,7 +107,7 @@
     		    if(badgePayment.style.display === 'none'){
     		    	this.pamentCount += 1;
     		    	badgePayment.textContent = this.pamentCount;
-    		    	badgePayment.style.display = 'block';
+    		    	badgePayment.style.display = 'unset';
     		    }else {
     		    	badgePayment.style.display = 'none';
     		    }
@@ -115,7 +118,7 @@
     			if(badgeBell.style.display === 'none'){
        		    	this.bellCount += 1;
        		    	badgeBell.textContent = this.bellCount;
-       		    	badgeBell.style.display = 'block';
+       		    	badgeBell.style.display = '';
        		    }else {
        		    	badgeBell.style.display = 'none';
        		    }
