@@ -5,6 +5,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,9 +14,10 @@ import lombok.Setter;
 @Table(name="APPROVER")
 @Getter
 @Setter
-@EntityListeners(AuditingEntityListener.class) 
+//@EntityListeners(AuditingEntityListener.class) 
 public class approver {
 
+	@Id
 	@Column(name="EMP_ID")
 	private String empId; //결재자 사원 id
 	
@@ -25,6 +27,7 @@ public class approver {
 	@Column(name="APPROVAL_STATUS")
 	private boolean approvalStatus; //결재 상태 y/n
 	
+	@Id
 	@Column(name="APPROVAL_ID")
 	private Long approvalId; //결재서류 id
 	
