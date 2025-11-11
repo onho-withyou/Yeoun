@@ -24,32 +24,31 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 		
 		// 로그인에 사용되어 요청 정보가 HttpServletRequest, 응답 정보가 HttpServletResponse 타입 파라미터로 전달되고
 		// 사용자 인증 정보가 Authentication 타입 파라미터로 전달됨
-		
+		log.info("▶▶▶▶▶▶▶▶▶▶ authentication.getName() : " + authentication.getName()); // 사용자명(username = 현재는 empId 사용)
+		log.info("▶▶▶▶▶▶▶▶▶▶ authentication.getAuthorities() : " + authentication.getAuthorities()); // 사용자 권한 목록 
+		log.info("▶▶▶▶▶▶▶▶▶▶ authentication.getDetails() : " + authentication.getDetails()); // 사용자 IP 주소, 세션 아이디
+		log.info("▶▶▶▶▶▶▶▶▶▶ authentication.getPrincipal() : " + authentication.getPrincipal()); // 인증 객체(UserDetails 또는 상속받은 구현체)
 		// =====================================================================================
-		// 아이디 기억하기 체크박스 체크 시 쿠키 처리
-		// 1) 아이디 기억하기 체크박스 파라미터값 가져오기
+		// 사원번호 저장 체크박스 체크 시 쿠키 처리
+		// 1) 사원번호 저장 체크박스 파라미터값 가져오기
 		String rememberId = request.getParameter("remember-id");
 		log.info("▶▶▶▶▶▶▶▶▶▶ rememberId : " + rememberId); // null 또는 "on"
 		
 		// 2) 쿠키 생성 공통 코드
-		// 2-1) Cookie 객체 생성하여 "remember-id" 라는 이름으로 사용자명(email) 저장
+		// 2-1) Cookie 객체 생성하여 "remember-id" 라는 이름으로 사용자명(empId) 저장
 //				Cookie cookie = new Cookie("remember-id", authentication.getName());
 		// 만약, 한글 등의 값이 포함된 문자열일 경우 인코딩 필요
 		Cookie cookie = new Cookie("remember-id", URLEncoder.encode(authentication.getName(), StandardCharsets.UTF_8));
 		// 2-2) 쿠키 사용 경로 설정
 		cookie.setPath("/"); // 현재 서버 애플리케이션 내에서 모든 경로 상에서 해당 쿠키 사용이 가능하도록 설정
 		
-		// 2-3) 아이디 기억하기 체크박스 값에 따른 처리
+		// 2-3) 사원번호 저장 체크박스 값에 따른 처리
 		if(rememberId != null && rememberId.equals("on")) { // 체크박스 체크 시
  			// 쿠키 정보 설정 => 쿠키 유효기간을 설정하여 쿠키 사용 가능하도록 처리
 			cookie.setMaxAge(60 * 60 * 24 * 7);
-//			cookie.setPath("/");
-//			response.addCookie(cookie);
 		} else { // 체크박스 체크 해제 시
 			// 쿠키 삭제를 위해 유효기간을 0초로 설정 = 클라이언트가 해당 쿠키 정보를 수신하는 "즉시" 쿠키 삭제
 			cookie.setMaxAge(0);
-//			cookie.setPath("/");
-//			response.addCookie(cookie);
 		}
 		
 		// 2-4) 응답 객체에 쿠키 추가
@@ -61,18 +60,4 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 	}
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
 }
