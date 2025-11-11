@@ -96,13 +96,13 @@ public class PayController {
         if (err != null) model.addAttribute("err", err);
 
         // ===== 등록 폼 바인딩 객체 (기본값 포함) =====
-        if (!model.containsAttribute("newCalcRule")) {
+        if (!model.containsAttribute("newCalc")) {
             PayCalcRule blank = PayCalcRule.builder()
                     .status(ActiveStatus.ACTIVE)
                     .priority(100)
                     .startDate(LocalDate.now())
                     .build();
-            model.addAttribute("newCalcRule", blank);
+            model.addAttribute("newCalc", blank);
         }
 
         // ===== 폼 선택 소스 (드롭다운 등) =====

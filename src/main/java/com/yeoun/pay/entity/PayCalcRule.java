@@ -40,6 +40,7 @@ public class PayCalcRule {
  @Comment("규칙ID (PK)")
  private Long ruleId;
 
+ 
  @ManyToOne(fetch = FetchType.LAZY, optional = false)
  @JoinColumn(name = "ITEM_CODE",
          nullable = false,
