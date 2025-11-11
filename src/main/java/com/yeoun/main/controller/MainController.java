@@ -1,5 +1,6 @@
 package com.yeoun.main.controller;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.main.dto.ScheduleDTO;
 import com.yeoun.main.entity.Schedule;
 import com.yeoun.main.service.ScheduleService;

@@ -72,12 +72,7 @@ public class ScheduleService {
 		String myDeptName = myDept.getDeptName();
 		
 		// 일정목록 조회
-		System.out.println("empId : " + empId);
-		System.out.println("myDeptId : " + myDeptId);
-		System.out.println("startDate : " + startDate);
-		System.out.println("endDate : " + endDate);
 		List<Schedule> scheduleList = scheduleRepository.getIndividualSchedule(empId, myDeptId, startDate, endDate);
-		System.out.println(scheduleList);
 		// 일정목록 데이터 변환후 저장할 객체
 		List<Schedule> scheduleList2 = new ArrayList<>();
 
@@ -93,6 +88,8 @@ public class ScheduleService {
 					Dept dept = deptRepository.findById(scheduleType).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 부서입니다."));
 					schedule.setScheduleType(dept.getDeptName());
 				}
+				Emp scheduleEmp = empRepository.findById(schedule.getCreatedUser()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다."));
+				schedule.setCreatedUser(scheduleEmp.getEmpName());
 				scheduleList2.add(schedule);
 			}
 			// 작성자 empId로 이름 조회후 변경 필요

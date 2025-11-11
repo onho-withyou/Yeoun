@@ -7,9 +7,14 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.yeoun.auth.dto.LoginDTO;
+import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
+import com.yeoun.emp.entity.Employment;
+import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.EmpRepository;
+import com.yeoun.emp.repository.EmploymentRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -20,6 +25,8 @@ import lombok.extern.log4j.Log4j2;
 public class CustomUserDetailsService implements UserDetailsService {
 	
 	private final EmpRepository empRepository;
+	private final EmploymentRepository employmentRepository;
+	private final DeptRepository deptRepository;
 
 	// =========================================================================================
 	// 스프링 시큐리티에서 사용자 정보 조회에 사용될 loadUserByUsername() 메서드 오버라이딩
@@ -35,7 +42,16 @@ public class CustomUserDetailsService implements UserDetailsService {
 		// Emp 엔티티 -> LoginDTO 객체로 변환하여 리턴하기
 		ModelMapper modelMapper = new ModelMapper();
 		LoginDTO loginDTO = modelMapper.map(emp, LoginDTO.class);
-
+		
+		// ------------------------------------------------------------------------------------
+		// 사용자의 부서정보를 가져와 loginDTO에 추가해주기
+		Employment employment = employmentRepository.findByEmp(emp).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다!"));
+		Dept dept = employment.getDept();
+		dept = deptRepository.findById(dept.getDeptId()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 부서입니다!"));
+		
+		loginDTO.setDeptId(dept.getDeptId());
+		loginDTO.setDeptName(dept.getDeptName());
+		
 		// 사용자 인증 정보가 저장된 객체(UserDetails 타입) 리턴
 		// UserDetails 의 구현체인 LoginDTO 객체 리턴 시 UserDetails 타입으로 업캐스팅
 		return loginDTO; 
