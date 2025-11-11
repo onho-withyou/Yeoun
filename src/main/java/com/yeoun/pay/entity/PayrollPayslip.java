@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.Comment;
 
+import com.yeoun.pay.enums.CalcStatus;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -60,11 +62,18 @@ public class PayrollPayslip {
 
     @Column(name = "CALC_TYPE", nullable = false, length = 20)
     @Comment("계산유형")
-    @Builder.Default private String calcType = "CALCULATED";
+    @Builder.Default private String calcType = "BATCH ALL";
 
-    @Column(name = "STATUS", nullable = false, length = 20)
+//    @Column(name = "CALC_STATUS", nullable = false, length = 20)
+//    @Comment("계산 상태")
+//    @Builder.Default private String status = "CALCULATED";
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "CALC_STATUS", nullable = false, length = 20)
     @Comment("계산 상태")
-    @Builder.Default private String status = "BATCH ALL";
+    @Builder.Default
+    private CalcStatus status = CalcStatus.CALCULATED;
+
 
     @Column(name = "IS_PARTIAL", nullable = false, length = 1)
     @Comment("부분 정산")
@@ -94,4 +103,6 @@ public class PayrollPayslip {
     @Lob
     @Column(name = "REMARK")
     private String remark;
+
+	
 }

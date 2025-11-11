@@ -15,6 +15,7 @@ import com.yeoun.pay.entity.PayCalcRule;
 import com.yeoun.pay.entity.PayItemMst;
 import com.yeoun.pay.entity.PayRule;
 import com.yeoun.pay.entity.PayrollPayslip;
+import com.yeoun.pay.enums.CalcStatus;
 import com.yeoun.pay.repository.PayCalcRuleRepository;
 import com.yeoun.pay.repository.PayItemMstRepository;
 import com.yeoun.pay.repository.PayRuleRepository;
@@ -55,7 +56,7 @@ public class PayrollCalcService {
         // 상태를 CONFIRMED 로 세팅
         List<PayrollPayslip> slips = payslipRepo.findByPayYymm(yyyymm);
         for (PayrollPayslip s : slips) {
-            s.setStatus("CONFIRMED");
+        	 s.setStatus(CalcStatus.CONFIRMED);
         }
         payslipRepo.saveAll(slips);
         return cnt;
@@ -106,8 +107,8 @@ public class PayrollCalcService {
             slip.setDedAmt(safe(dedAmt));
             slip.setTotAmt(safe(totAmt));
             slip.setNetAmt(safe(netAmt));
-            slip.setCalcType(calcType);
-            slip.setStatus("BATCH ALL");
+            slip.setCalcType("BATCH ALL");
+            slip.setStatus(CalcStatus.CALCULATED);
             slip.setJobId(jobId);
 
             payslipRepo.save(slip);
