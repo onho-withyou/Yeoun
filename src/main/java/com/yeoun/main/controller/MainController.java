@@ -49,25 +49,23 @@ public class MainController {
 		return "/main/schedule_list";
 	}
 	
+	// 일정등록
 	@PostMapping("/schedule")
 	public ResponseEntity<Map<String, String>> postMethodName(@ModelAttribute("scheduleDTO")@Valid ScheduleDTO scheduleDTO, BindingResult bindingResult) {
 		Map<String, String> msg = new HashMap<>();
-		
-		System.out.println("scheduleDTO" + scheduleDTO);
-		
+		// 일정등록 요청 데이터 검증
 		if(bindingResult.hasErrors()) {
-			System.out.println("dddddddddddddddddddd");
 			msg.put("msg", "일정 등록에 실패했습니다.2222222222");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		}
+		// 일정등록 요청 데이터 이상 없을때
+		// 일정등록 요청
 		try {
-			System.out.println(scheduleDTO);
-			
 			scheduleService.createSchedule(scheduleDTO);
 			msg.put("msg", "일정이 등록되었습니다.");
 			return ResponseEntity.ok(msg);
 		
-		} catch (Exception e) {
+		} catch (Exception e) { // 에러발생시 일정등록 실패 메세지전달
 			msg.put("msg", "일정 등록에 실패했습니다 :" + e.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		}

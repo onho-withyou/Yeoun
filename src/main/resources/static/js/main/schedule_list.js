@@ -43,9 +43,6 @@ document.addEventListener('DOMContentLoaded', function() {
 	
 	// ---------------------------------------------------------------
 	// TUI 그리드 불러오기
-	const startDateEl = document.getElementById('startpicker-input-list');
-	const endDateEl = document.getElementById('endpicker-input-list');
-	
 	getScheduleData();
 	
 	// 시작날자, 끝날자 받아서 data불러오기
@@ -64,14 +61,10 @@ document.addEventListener('DOMContentLoaded', function() {
 			return response.json();  //JSON 파싱
 		})
 		.then(data => { // response가 ok일때
-			console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-			console.log(data);
-			console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 			initGrid(data);
-	//		location.reload();
 		}).catch(error => {
 			console.error('에러', error)
-			alert("제목, 시작,종료 일시, 내용은 필수입력 사항입니다.");
+			alert("데이터 조회 실패");
 		});
 	}
 	
@@ -103,8 +96,8 @@ document.addEventListener('DOMContentLoaded', function() {
 		const startpickerInput = document.getElementById('startpicker-input');
 		const endpickerInput = document.getElementById('endpicker-input');
 		
-		startpickerInput.value = formatDate(today);
-		endpickerInput.value = formatDate(today);
+		startpickerInput.value = formatDateTime(today);
+		endpickerInput.value = formatDateTime(today);
 		
 	}); // 일정등록 모달 열기이벤트 끝
 	
@@ -156,29 +149,54 @@ function initGrid(data) {
 		columns: [
 			{
 				header: '일정시작',
-				name: 'scheduleStart'
+				name: 'scheduleStart',
+				sortable: true,
+				filter: {
+					type: 'date', options: {format: 'yyyy.MM.dd'}
+				}
 			},
 			{
 				header: '일정제목',
-				name: 'scheduleTitle'
+				name: 'scheduleTitle',
+				sortable: true,
+				filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
 			},
 			{
 				header: '종류',
-				name: 'scheduleType'
+				name: 'scheduleType',
+				sortable: true,
+				filter: 'select'
 			},
 			{
 				header: '작성자',
-				name: 'createdUser'
+				name: 'createdUser',
+				sortable: true,
+				filter: {
+					type: 'text',
+					operator: 'OR'
+				}
 			},
 			{
 				header: '작성일',
-				name: 'createdDate'
+				name: 'createdDate',
+				sortable: true
 			},
+			{
+				header: ' '
+				, name: "btn"
+				, width: 100 // 너비 설정
+				, align: "center"
+				// formatter 속성에 화살표 함수를 활용하여 원하는 태그를 해당 셀에 삽입 가능(각 셀에 반복 삽입됨)
+//				, formatter: () => "<button type='button' class='btn-detail' >상세정보</button>"
+				, formatter: (cellInfo) => "<button type='button' class='btn-detail' data-row='${cellInfo.rowKey}' >상세정보</button>"
+				
+			}
 		]
 	
 	});
 	
 	grid.resetData(data);
+	grid.sort('scheduleStart', false); // true: 오름차순 false: 내림차순
 }
 
 
