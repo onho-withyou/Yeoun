@@ -17,9 +17,15 @@
 	data-theme="theme-default" data-assets-path="../assets/"
 	data-template="vertical-menu-template-free"
 	xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 <meta charset="utf-8" />
+
+<!-- CSRF 토큰값과 CSRF 헤더명 저장 -->
+<meta name="_csrf_token" th:content="${_csrf.token}">
+<meta name="_csrf_headerName" th:content="${_csrf.headerName}">
+
 <meta name="viewport"
 	content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 

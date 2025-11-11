@@ -11,14 +11,15 @@
 	    </style>
 	    <link rel="stylesheet" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css">
 		<link rel="stylesheet" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css">
+		<link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
 	    <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 	    
 	</head>
 	<body>
 		<th:block layout:fragment="content">
 			<div class="custom-body container-xxl flex-grow-1 container-p-y">
-				<div class="d-flex align-items-center w-100" >
-					<form class="d-flex align-items-center gap-2 flex-grow-1" onsubmit="return false" style="max-width: 30%;">
+				<div class="d-flex align-items-center w-120" >
+					<form class="d-flex align-items-center gap-2 flex-grow-1" id="schedule-search-form" style="max-width: 30%;">
 						<div class="tui-datepicker-input tui-datetime-input tui-has-focus mt-1" style="margin-right: 5px; width: 100%;">
 							<input id="startpicker-input-list" type="text" aria-label="Date" name="startDate">
 							<span class="tui-ico-date" style="width:15px;"></span>
@@ -31,8 +32,7 @@
 							<div id="endpicker-container-list" style="margin-left: -1px;"></div>
 						</div>
 						<div class="d-flex align-items-center">
-							<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" style="min-width: 100%;">
-							<button class="btn btn-outline-primary" type="submit">Search</button>
+							<button class="btn-sm btn-outline-primary" type="submit">조회</button>
 						</div>
 					</form>
 					<button type="button" class="btn btn-primary btn-sm ms-auto" data-bs-toggle="modal" data-bs-target="#add-schedule-modal" id="abcd">일정등록</button>
@@ -170,6 +170,8 @@
 			<!-- 데이트피커 -->
 			<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.js"></script>
 			<!-- 그리드 -->
+			<script src="https://uicdn.toast.com/tui.code-snippet/v1.5.0/tui-code-snippet.js"></script>
+			<script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
 			<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 			
 			<script src="/js/main/schedule_list.js"></script>

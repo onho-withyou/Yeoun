@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -51,17 +52,18 @@ public class MainController {
 	
 	// 일정등록
 	@PostMapping("/schedule")
-	public ResponseEntity<Map<String, String>> postMethodName(@ModelAttribute("scheduleDTO")@Valid ScheduleDTO scheduleDTO, BindingResult bindingResult) {
+	public ResponseEntity<Map<String, String>> postMethodName(@ModelAttribute("scheduleDTO")@Valid ScheduleDTO scheduleDTO, 
+			BindingResult bindingResult, Authentication authentication) {
 		Map<String, String> msg = new HashMap<>();
 		// 일정등록 요청 데이터 검증
 		if(bindingResult.hasErrors()) {
-			msg.put("msg", "일정 등록에 실패했습니다.2222222222");
+			msg.put("msg", "일정 등록에 실패했습니다.");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		}
 		// 일정등록 요청 데이터 이상 없을때
 		// 일정등록 요청
 		try {
-			scheduleService.createSchedule(scheduleDTO);
+			scheduleService.createSchedule(scheduleDTO, authentication);
 			msg.put("msg", "일정이 등록되었습니다.");
 			return ResponseEntity.ok(msg);
 		

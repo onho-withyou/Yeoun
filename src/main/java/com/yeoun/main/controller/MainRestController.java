@@ -9,9 +9,12 @@ import com.yeoun.notice.dto.NoticeDTO;
 
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,10 +30,14 @@ public class MainRestController {
 	// 일정목록 조회
 	@GetMapping("")
 	@ResponseBody
-	public ResponseEntity<List<ScheduleDTO>> schedules(@RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate) {
+	public ResponseEntity<List<ScheduleDTO>> schedules(
+			@RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime startDate
+			, @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime endDate
+			, Authentication authentication) {
 		
-		List<ScheduleDTO> scheduleDTOList = scheduleService.getScheduleList(startDate, endDate);
+		List<ScheduleDTO> scheduleDTOList = scheduleService.getScheduleList(startDate, endDate, authentication);
 		
+//		return ResponseEntity.ok(null);
 		return ResponseEntity.ok(scheduleDTOList);
 	}
 	

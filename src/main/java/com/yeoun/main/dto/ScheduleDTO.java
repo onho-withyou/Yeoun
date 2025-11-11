@@ -30,7 +30,7 @@ public class ScheduleDTO {
 	@NotBlank(message = "일정 종류는 필수 입력값입니다.")
 	private String scheduleType; // 일정 종류
 	
-	private Long createdUser; // 일정 등록자
+	private String createdUser; // 일정 등록자
 	
 	private String alldayYN; // 종일일정구분
 	
