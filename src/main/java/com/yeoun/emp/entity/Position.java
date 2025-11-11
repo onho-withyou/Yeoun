@@ -34,6 +34,10 @@ public class Position {
 	@Column(name = "RANK_ORDER", nullable = false)
 	private Integer rankOrder;
 	
+	// 임원 여부 (이사, 사장 등)
+    @Column(name = "IS_EXECUTIVE", length = 1, nullable = false)
+    private String isExecutive = "N";
+	
 	// 사용여부
 	@Column(name = "USE_YN", length = 1, nullable = false)
     private String useYn = "Y";

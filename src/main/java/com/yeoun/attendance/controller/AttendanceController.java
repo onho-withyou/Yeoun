@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.yeoun.attendance.dto.AccessLogDTO;
 import com.yeoun.attendance.dto.AttendanceDTO;
 import com.yeoun.attendance.dto.WorkPolicyDTO;
 import com.yeoun.attendance.service.AttendanceService;
@@ -42,20 +43,25 @@ public class AttendanceController {
 	@PostMapping("/toggle/{empId}")
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> processAttendance(@PathVariable("empId") String empId) {
+		Map<String, Object> result = new HashMap<>();
 		try {
 			String resultStatus = attendanceService.registAttendance(empId);
 			
-			Map<String, Object> res = new HashMap<String, Object>();
-			res.put("success", true);
-			res.put("status", resultStatus);
+			result.put("success", true);
+			result.put("status", resultStatus);
 			
-			return ResponseEntity.ok(res);
+			return ResponseEntity.ok(result);
 		} catch (NoSuchElementException e) {
 			// 사원 정보가 없을 경우
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+			result.put("success", false);
+			result.put("message", e.getMessage());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
 		} catch (Exception e) {
 			// 그 외의 모든 예외
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+			result.put("success", false);
+			result.put("message", e.getMessage());
+			result.put("error", e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
 		}
 	}
 	
@@ -121,6 +127,15 @@ public class AttendanceController {
 	@GetMapping("/my")
 	public String attendance() {
 		return "attendance/commute";
+	}
+	
+	// 외근 등록
+	@PostMapping("/outwork")
+	public String registOutwork(@ModelAttribute("accessLogDTO") AccessLogDTO accessLogDTO, RedirectAttributes redirectAttributes) {
+		attendanceService.registOutwork(accessLogDTO);
+		redirectAttributes.addFlashAttribute("message", "외근 등록이 완료되었습니다.");
+		
+		return "redirect:/attendance/my";
 	}
 	
 	// 근무정책관리 조회

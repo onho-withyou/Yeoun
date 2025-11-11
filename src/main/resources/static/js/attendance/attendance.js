@@ -3,12 +3,13 @@ async function attendance(empId) {
 	const PROCESS_ATTENDANCE = `/attendance/toggle/${empId}`;
 	const response = await fetch(PROCESS_ATTENDANCE, { method: "POST"});
 	const data = await response.json();
+	console.log(data);
 	
 	return data; // {success: true, status: status} 로 반환
 }
 
 const handleAttendanceToggle = async () => {
-	const result =  await attendance(2510296);
+	const result =  await attendance(2511301);
 	
 	let msg = "";
 	
@@ -19,8 +20,10 @@ const handleAttendanceToggle = async () => {
 	} else if (result.status === "OUT") {
 		document.querySelector("#attendance").innerText = "출근";
 		msg = "퇴근했습니다.";
-	} else if (result.status === "ALREADY_OUT") {
-		msg = "이미 퇴근 처리된 상태입니다.";
+	} else if (result.status === "LATE") {
+		msg = "지각입니다.";
+	} else {
+		msg = "외출입니다";
 	}
 	
 	alert(msg);
