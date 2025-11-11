@@ -36,7 +36,7 @@ public class PayItemMst {
     // 4) 항목그룹 : ALLOWANCE / INCENTIVE / DEDUCTION
     @Enumerated(EnumType.STRING)
     @Column(name = "ITEM_GROUP", length = 20, nullable = false)
-    @Comment("기본급/인센티브/공제액 구분( ALLOWANCE / INCENTIVE / DEDUCTION)")
+    @Comment("기본급/인센티브/공제액 구분( ALLOWANCE / INCENTIVE / DEDUCTION /TAX)")
     private ItemGroup itemGroup;
 
     // 5) 과세여부 : Y / N  (기본 Y)

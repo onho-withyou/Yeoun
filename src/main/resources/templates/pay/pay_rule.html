@@ -9,12 +9,57 @@
     .nowrap{white-space:nowrap}
     .amount{font-variant-numeric:tabular-nums}
     .muted{color:#6b7280}
+
+    /* ===================== 탭 커스텀 ===================== */
+    .pay-tabs {
+      border-bottom: 2px solid #e5e7eb; /* 라인 */
+      margin-bottom: 1.5rem;
+    }
+    .pay-tabs .nav-link {
+      position: relative;
+      color: #6b7280;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px 8px 0 0;
+      transition: all 0.25s ease;
+    }
+    .pay-tabs .nav-link:hover {
+      color: #0d6efd;
+      background: #f1f5ff;
+    }
+    .pay-tabs .nav-link.active {
+      color: #0d6efd;
+      background: #ffffff;
+      box-shadow: 0 -2px 8px rgba(13,110,253,0.1);
+    }
+    .pay-tabs .nav-link.active::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: -2px;
+      height: 3px;
+      background: #0d6efd;
+      border-radius: 2px;
+      animation: underlineIn 0.3s ease forwards;
+    }
+    @keyframes underlineIn {
+      from {width: 0; margin-left: 50%;}
+      to {width: 100%; margin-left: 0;}
+    }
   </style>
-  
+
+  <!-- ===================== 상단 탭 ===================== -->
+<ul class="nav pay-tabs">
+  <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule}"      th:classappend="${activeTab}=='rule' ? 'active'">급여기준정보</a></li>
+  <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule_calc}" th:classappend="${activeTab}=='calc' ? 'active'">급여계산</a></li>
+  <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule_item}" th:classappend="${activeTab}=='item' ? 'active'">급여항목</a></li>
+</ul>
+
+
 
   <div class="container-xxl py-4">
   
-  <!-- 메 세 지 -->
+   <!-- 메 세 지 -->
 <div th:if="${msg}" class="alert alert-success alert-dismissible fade show" role="alert">
   <span th:text="${msg}">성공 메시지</span>
   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -24,9 +69,9 @@
   <span th:text="${err}">에러 메시지</span>
   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
-  
-  
-
+ 
+ 
+ <div th:if="${activeTab}=='rule'">
     <!-- 헤더 -->    
     
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -436,9 +481,11 @@
                       </div>
                     </div>
                   </div>
+					</div>
+					</div>	
+                </div><!-- /tab-content -->
 
-                </div>
-              </div>
+  </div><!-- /container -->
 
               <div class="modal-footer">
                 <button class="btn btn-primary" type="submit">저장</button>
@@ -641,6 +688,29 @@
         location.href = btn.dataset.href;
       }
     });
+    
+    
+ // 활성 탭을 localStorage에 저장/복원
+    (function(){
+      const key = 'payTabs.active';
+      const tabsEl = document.getElementById('payTabs');
+      if(!tabsEl) return;
+
+      // 복원
+      const saved = localStorage.getItem(key);
+      if(saved){
+        const trigger = document.querySelector(`[data-bs-target="${saved}"]`);
+        if(trigger){
+          const tab = new bootstrap.Tab(trigger);
+          tab.show();
+        }
+      }
+      // 저장
+      tabsEl.addEventListener('shown.bs.tab', function(e){
+        const target = e.target?.getAttribute('data-bs-target');
+        if(target){ localStorage.setItem(key, target); }
+      });
+    })();
   </script>
 
 </th:block>

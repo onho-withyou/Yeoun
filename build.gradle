@@ -45,9 +45,9 @@ dependencies {
 	
 	// --------------------------------------------
 	// 스프링시큐리티 의존성 추가
-//	implementation 'org.springframework.boot:spring-boot-starter-security'
-//	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-//	testImplementation 'org.springframework.security:spring-security-test'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+	testImplementation 'org.springframework.security:spring-security-test'
 	
 	// 서로 다른 클래스(객체)간의 변환을 지원해주는 의존성 추가
 	// https://mvnrepository.com/artifact/org.modelmapper/modelmapper
