@@ -110,6 +110,13 @@
 		</div>
 	</div>
 	<th:block layout:fragment="myScript">
+		<script>
+			const message = "[[${message}]]";
+			
+			if (message) {
+				alert(message);
+			}
+		</script>
 		<script src="/js/attendance/attendance.js"></script>
 	</th:block>
 </body>
