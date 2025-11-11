@@ -13,7 +13,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.yeoun.auth.entity.Role;
 import com.yeoun.auth.repository.RoleRepository;
 import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpListDTO;
@@ -39,8 +38,6 @@ public class EmpService {
 	private final DeptRepository deptRepository;
 	private final PositionRepository positionRepository;
 	private final EmploymentRepository employmentRepository;
-	private final RoleRepository roleRepository;
-	private final EmpRoleRepository empRoleRepository;
 	private final BCryptPasswordEncoder encoder;
 
 	public EmpService(EmpRepository empRepository,
@@ -54,8 +51,6 @@ public class EmpService {
 		this.deptRepository = deptRepository;
 		this.positionRepository = positionRepository;
 		this.employmentRepository = employmentRepository;
-		this.roleRepository = roleRepository;
-		this.empRoleRepository = empRoleRepository;
 		this.encoder = encoder;
 	}
 	
@@ -90,15 +85,7 @@ public class EmpService {
 		// 5. EMP 저장
 		empRepository.saveAndFlush(emp);
 		
-		// 6. 권한 매핑
-		// 기본 권한: ROLE_USER (또는 empDTO에서 선택한 ROLE)
-	    Role defaultRole = roleRepository.findById(emp.getRoleCode())
-	            .orElseThrow(() -> new IllegalArgumentException("ROLE 없음: " + emp.getRoleCode()));
-
-	    EmpRole empRole = new EmpRole(emp, defaultRole);
-	    empRoleRepository.save(empRole);
-		
-		// 7. EMPLOYMENT 입사 이력 저장
+		// 6. EMPLOYMENT 입사 이력 저장
 		Employment employment = new Employment();
 		employment.setEmp(emp);
 		employment.setDept(dept);
@@ -107,11 +94,11 @@ public class EmpService {
 		employment.setEndDate(null);
 		employment.setRemark("입사 등록");
 		
-		// 8. DB 저장
+		// 7. Employment 저장
 		employmentRepository.save(employment);
 		
-	    log.info("EMP + EMP_ROLE + EMPLOYMENT 저장 완료 - empId={}, role={}, dept={}, pos={}",
-	            emp.getEmpId(), defaultRole.getRoleCode(), dept.getDeptName(), pos.getPosName());
+		log.info("EMP + EMPLOYMENT 저장 완료 - empId={}, dept={}, pos={}",
+	            emp.getEmpId(), dept.getDeptName(), pos.getPosName());
 		
 	}
 
