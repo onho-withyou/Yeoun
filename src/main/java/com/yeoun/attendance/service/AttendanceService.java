@@ -9,10 +9,12 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.yeoun.attendance.dto.AccessLogDTO;
 import com.yeoun.attendance.dto.AttendanceDTO;
 import com.yeoun.attendance.dto.WorkPolicyDTO;
 import com.yeoun.attendance.entity.Attendance;
 import com.yeoun.attendance.entity.WorkPolicy;
+import com.yeoun.attendance.repository.AccessLogRepository;
 import com.yeoun.attendance.repository.AttendanceRepository;
 import com.yeoun.attendance.repository.WorkPolicyRepository;
 import com.yeoun.emp.dto.EmpDTO;
@@ -28,6 +30,7 @@ import lombok.extern.log4j.Log4j2;
 public class AttendanceService {
 	private final AttendanceRepository attendanceRepository;
 	private final WorkPolicyRepository workPolicyRepository;
+	private final AccessLogRepository accessLogRepository;
 	private final EmpRepository empRepository;
 
 	// 출/퇴근 등록
@@ -156,6 +159,11 @@ public class AttendanceService {
 		attendance.setWorkDuration(
 				(int) ChronoUnit.MINUTES.between(attendance.getWorkIn(), attendance.getWorkOut()));
 		
+	}
+
+	// 외근 등록
+	public void registOutwork(AccessLogDTO accessLogDTO) {
+		accessLogRepository.save(accessLogDTO.toEntity());
 	}
 
 }

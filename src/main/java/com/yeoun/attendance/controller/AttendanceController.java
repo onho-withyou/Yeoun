@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.yeoun.attendance.dto.AccessLogDTO;
 import com.yeoun.attendance.dto.AttendanceDTO;
 import com.yeoun.attendance.dto.WorkPolicyDTO;
 import com.yeoun.attendance.service.AttendanceService;
@@ -121,6 +122,15 @@ public class AttendanceController {
 	@GetMapping("/my")
 	public String attendance() {
 		return "attendance/commute";
+	}
+	
+	// 외근 등록
+	@PostMapping("/outwork")
+	public String registOutwork(@ModelAttribute("accessLogDTO") AccessLogDTO accessLogDTO, RedirectAttributes redirectAttributes) {
+		attendanceService.registOutwork(accessLogDTO);
+		redirectAttributes.addAttribute("message", "외근 등록이 완료되었습니다.");
+		
+		return "redirect:/attendance/my";
 	}
 	
 	// 근무정책관리 조회
