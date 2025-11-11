@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import com.mysql.cj.log.Log;
@@ -62,13 +63,13 @@ public class NoticeService {
 	}
 	
 	//공지사항 등록하기
-	public void createNotice(NoticeDTO noticeDTO) {
+	public void createNotice(NoticeDTO noticeDTO, Authentication authentication) {
 		
 		if(noticeDTO.getNoticeYN() == null) {
 			noticeDTO.setNoticeYN("N");
 		}
 		
-		noticeDTO.setCreatedUser(1102L);
+		noticeDTO.setCreatedUser(authentication.getName());
 
 		Notice notice = noticeDTO.toEntity();
 		

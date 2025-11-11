@@ -9,6 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.yeoun.emp.entity.EmpRole;
+import com.yeoun.emp.repository.EmpRepository;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -25,6 +26,13 @@ public class LoginDTO implements UserDetails {
 	private String empPwd;
 	
 	private List<EmpRole> empRoles;
+	
+	// --------------------------------
+	// 필요 정보 추가
+	private String empName; // 직원이름
+	private String deptId; // 직원 부서ID
+	private String deptName;// 직원 부서명
+	// ------------------------------
 	
 	// ---------------------------------------------------
 	// 필수 오버라이딩 메서드

@@ -46,7 +46,7 @@ public class Notice {
 
 	
 	@Column(nullable = false)
-	private Long createdUser; // 공지 작성자
+	private String createdUser; // 공지 작성자
 	
 	@CreatedDate
 	private LocalDateTime createdDate; // 공지 작성일

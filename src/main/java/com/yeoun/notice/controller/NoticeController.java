@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -59,7 +60,8 @@ public class NoticeController {
 	
 	//공지사항 등록 로직
 	@PostMapping("")
-	public ResponseEntity<Map<String, String>> notices(@ModelAttribute("noticeDTO") @Valid NoticeDTO noticeDTO, BindingResult bindingResult) {
+	public ResponseEntity<Map<String, String>> notices(@ModelAttribute("noticeDTO") @Valid NoticeDTO noticeDTO, 
+			BindingResult bindingResult, Authentication authentication) {
 		Map<String, String> msg = new HashMap<>();
 		if(bindingResult.hasErrors()) {
 			msg.put("msg", "공지사항 등록에 실패했습니다");
@@ -68,7 +70,7 @@ public class NoticeController {
 		
 		try {
 			// 공지 등록 수행
-			noticeService.createNotice(noticeDTO);
+			noticeService.createNotice(noticeDTO, authentication);
 			msg.put("msg", "공지사항이 등록되었습니다.");
 			return ResponseEntity.ok(msg);
 		

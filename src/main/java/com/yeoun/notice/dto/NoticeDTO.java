@@ -20,7 +20,7 @@ public class NoticeDTO {
 	@NotNull(message = "내용은 필수 입력 사항입니다.")
 	private String noticeContent;
 	private String noticeYN;
-	private Long createdUser;
+	private String createdUser;
 	private LocalDateTime createdDate;
 	private LocalDateTime updatedDate;
 	

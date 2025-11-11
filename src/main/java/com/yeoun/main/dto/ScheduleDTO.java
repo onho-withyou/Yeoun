@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.yeoun.main.entity.Schedule;
 
 import jakarta.validation.constraints.NotBlank;
@@ -28,20 +30,24 @@ public class ScheduleDTO {
 	@NotBlank(message = "일정 종류는 필수 입력값입니다.")
 	private String scheduleType; // 일정 종류
 	
-	private Long createdUser; // 일정 등록자
+	private String createdUser; // 일정 등록자
 	
 	private String alldayYN; // 종일일정구분
 	
 	@NotNull(message = "일정 시작시간은 필수 입력값입니다.")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+	@JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
 	private LocalDateTime scheduleStart; // 일정 시작시간
 	
 	@NotNull(message = "일정 마감시간은 필수 입력값입니다.")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+	@JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
 	private LocalDateTime scheduleFinish; // 일정 마치는시간
 	
+	@JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
 	private LocalDateTime createdDate; // 등록 일시
 	
+	@JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
 	private LocalDateTime updatedDate; // 수정 일시
 	
 	
