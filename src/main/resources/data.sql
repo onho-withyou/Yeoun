@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+INSERT INTO emp(gender, hire_date, emp_id, created_date, last_login, photo_file_id, post_code, status, rrn, mobile, role_code, emp_name, email, address1, address2, emp_pwd) VALUES (
+	'M', '25/11/09', '2511301', '25/11/10 11:16:22.030042000', '', '', '28562', 'ACTIVE', '', '010-1234-2222', 'USER', '홍길동', 'hong@hong.com', '광주 동구 2순환로 575 (지산동)', '2', '$2a$10$j1X19qACsW1Yh0F0gG4meu.JMoxuTjZf46xW.i4aC2NkfvyWyM7v6'
+);
+=======
 -- 부서 DEPT
 INSERT INTO DEPT (DEPT_ID, DEPT_NAME, PARENT_ID, USE_YN, CREATED_DATE) VALUES ('DEP000', 'ERP', NULL, 'Y', SYSDATE);
 INSERT INTO DEPT (DEPT_ID, DEPT_NAME, PARENT_ID, USE_YN, CREATED_DATE) VALUES ('DEP100', 'MES', NULL, 'Y', SYSDATE);
@@ -20,3 +25,4 @@ INSERT INTO POSITION (POS_CODE, POS_NAME, RANK_ORDER, USE_YN, CREATED_DATE) VALU
 INSERT INTO ROLE (ROLE_CODE, ROLE_NAME, ROLE_DESC, USE_YN, CREATED_DATE) VALUES ('ROLE_ADMIN',      '전체 관리자', '시스템 전역 관리자', 'Y', SYSDATE);
 INSERT INTO ROLE (ROLE_CODE, ROLE_NAME, ROLE_DESC, USE_YN, CREATED_DATE) VALUES ('ROLE_ADMIN_SUB',  '부서 관리자', '부서 단위 관리자(부서장)', 'Y', SYSDATE);
 INSERT INTO ROLE (ROLE_CODE, ROLE_NAME, ROLE_DESC, USE_YN, CREATED_DATE) VALUES ('ROLE_USER',       '일반 사용자', '기본 사용자 권한', 'Y', SYSDATE);
+>>>>>>> refs/remotes/origin/develop
