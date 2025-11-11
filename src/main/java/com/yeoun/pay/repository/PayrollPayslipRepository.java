@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.yeoun.pay.entity.PayrollPayslip;
+import com.yeoun.pay.enums.CalcStatus;
 
 public interface PayrollPayslipRepository extends JpaRepository<PayrollPayslip, Long> {
     
@@ -36,5 +37,10 @@ public interface PayrollPayslipRepository extends JpaRepository<PayrollPayslip, 
     @Query("SELECT COALESCE(SUM(p.netAmt), 0) FROM PayrollPayslip p WHERE p.payYymm = :payYymm")
     BigDecimal sumNetByYymm(@Param("payYymm") String payYymm);
 
-	List<PayrollPayslip> findByPayYymm(String yyyymm);
+	List<PayrollPayslip> findByPayYymm(String yyyymm);	
+
+//	List<PayrollPayslip> findByPayYymmAndCalcStatusOrderByEmpIdAsc(String yyyymm, CalcStatus calculated);
+	
+	List<PayrollPayslip> findByPayYymmAndStatusOrderByEmpIdAsc(String payYymm, CalcStatus status);
+
 }
