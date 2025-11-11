@@ -34,7 +34,13 @@ public class MainController {
 	
 	// 메인페이지 맵핑
 	@GetMapping("")
-	public String Main() {
+	public String Main(Authentication authentication) {
+		LoginDTO loginDTO = (LoginDTO)authentication.getPrincipal();
+		
+		loginDTO.getEmpName();
+		loginDTO.getDeptId();
+		loginDTO.getDeptName();
+		
 		return "/main/main";
 	}
 	

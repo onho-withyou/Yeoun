@@ -80,13 +80,170 @@ document.addEventListener('DOMContentLoaded', function() {
 	}
 	
 	// ---------------------------------------------------------------
-	// 일정등록 모달 지정	
-	const addScheduleModal = document.getElementById('add-schedule-modal')
-	// 일정등록 모달 열기 이벤트
-	addScheduleModal.addEventListener('show.bs.modal', function(event){
-		// 폼 초기화
-		const addScheduleForm = document.getElementById('add-schedule-form');
-		addScheduleForm.reset();
+	// 일정등록 버튼이벤트
+	document.getElementById('add-schedule').addEventListener('click', () => {
+		openModal('add');
+	})
+	
+	
+	//일정등록 모달 등록버튼 이벤트
+	const addScheduleForm = document.getElementById('add-schedule-form')
+	const addScheduleBtn = document.getElementById('add-schedule-btn');
+	
+	addScheduleForm.addEventListener('submit', function(event) {
+		event.preventDefault(); // 기본제출 막기
+		
+		fetch('/main/schedule', {
+			method: 'POST'
+			, headers: {
+				[csrfHeaderName]: csrfToken
+			}
+			, body: new FormData(addScheduleForm)
+		})
+		.then(response => {
+			if (!response.ok) {
+				throw new Error(response.msg);
+			}
+			return response.json();  //JSON 파싱
+		})
+		.then(response => { // response가 ok일때
+			alert(response.msg);
+			location.reload();
+		}).catch(error => {
+			alert("제목, 시작,종료 일시, 내용은 필수입력 사항입니다.");
+		});
+	}); // 일정등록함수 끝
+	
+	
+	
+	
+		
+});// DOM로드 끝
+
+let grid = null;
+// 그리드 불러오기 함수
+function initGrid(data) {
+	const Pagination = tui.Pagination;
+	if(!grid){
+		grid = new tui.Grid({
+			el: document.getElementById("grid"),
+			editable: true,
+			columns: [
+				{
+					header: '일정제목',
+					name: 'scheduleTitle',
+					sortable: true,
+					width: 150,
+					filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
+				},
+				{
+					header: '종류',
+					name: 'scheduleType',
+					sortable: true,
+					width: 70,
+					filter: 'select'
+				},
+				{
+					header: '일정시작',
+					name: 'scheduleStart',
+					sortable: true,
+					width:130,
+					filter: {
+						type: 'date', options: {format: 'yyyy.MM.dd'}
+					}
+				},
+				{
+					header: '일정마감',
+					name: 'scheduleFinish',
+					sortable: true,
+					width:130,
+					filter: {
+						type: 'date', options: {format: 'yyyy.MM.dd'}
+					}
+				},
+				{
+					header: '작성자',
+					name: 'createdUser',
+					sortable: true,
+					width: 70,
+					filter: {
+						type: 'text',
+						operator: 'OR'
+					}
+				},
+				{
+					header: '내용',
+					name: 'scheduleContent',
+					sortable: true,
+					filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
+				},
+				{
+					header: ' '
+					, name: "btn"
+					, width: 100 // 너비 설정
+					, align: "center"
+					// formatter 속성에 화살표 함수를 활용하여 원하는 태그를 해당 셀에 삽입 가능(각 셀에 반복 삽입됨)
+	//				, formatter: () => "<button type='button' class='btn-detail' >상세정보</button>"
+					, formatter: (cellInfo) => "<button type='button' class='btn-detail' data-row='${cellInfo.rowKey}' >상세정보</button>"
+				}
+			],
+			rowHeaders: ['rowNum'],
+			pageOptions: {
+				useClient: true,
+				perPage: 5
+			}
+		});
+		grid.resetData(data);
+		grid.sort('scheduleStart', true); // true: 오름차순 false: 내림차순
+	} else {
+		grid.resetData(data);
+		grid.sort('scheduleStart', true); // true: 오름차순 false: 내림차순
+	}
+	
+	// 상세보기 버튼 이벤트
+	grid.on("click", (event) => {
+		if(event.columnName == "btn") {
+			const rowData = grid.getRow(event.rowKey);
+			const scheduleId = rowData.scheduleId;
+			
+			openModal("edit", rowData);
+			
+		}
+	});
+}
+
+
+// 모달열기함수
+function openModal(mode, data = null) {
+	const modal = new bootstrap.Modal(document.getElementById('add-schedule-modal'));
+	const form = document.getElementById('add-schedule-form');
+	const modalTitle = document.getElementById('modalCenterTitle');
+	const deleteBtn = document.getElementById('delete-schedule-btn');
+	const submitBtn = document.getElementById('add-schedule-btn');
+	const select = document.getElementById('schedule-type');
+	const createdUser = document.getElementById('schedule-writer')
+	const startpickerInput = document.getElementById('startpicker-input');
+	const endpickerInput = document.getElementById('endpicker-input');
+	
+	if(mode === 'add') {
+		modalTitle.textContent = '일정등록';
+		deleteBtn.classList.add('d-none');
+	    submitBtn.textContent = '등록';
+		form.reset();
+		//셀렉트박스 초기화
+		select.innerHTML = '';
+		
+		const option1 = document.createElement('option');
+		option1.value = 'company';
+		option1.text = '회사'
+		select.appendChild(option1);
+		
+		const option2 = document.createElement('option');
+		option2.value = 'private'
+		option2.text = '개인'
+		select.appendChild(option2);
+		
+		select.value = 'company';
 		
 		// 부서 목록 조회 
 		fetch('/api/schedules/departments')
@@ -102,129 +259,60 @@ document.addEventListener('DOMContentLoaded', function() {
 		            option.text = department.deptName; // 옵션명
 		            select.appendChild(option);
 		        });
-	    });
-		
-		const startpickerInput = document.getElementById('startpicker-input');
-		const endpickerInput = document.getElementById('endpicker-input');
-		
-		startpickerInput.value = formatDateTime(today);
-		endpickerInput.value = formatDateTime(endDate);
-		
-	}); // 일정등록 모달 열기이벤트 끝
-	
-	//일정등록 모달 등록버튼 이벤트
-	const addScheduleForm = document.getElementById('add-schedule-form')
-	const addScheduleBtn = document.getElementById('add-schedule-btn');
-	addScheduleForm.addEventListener('submit', function(event) {
-		event.preventDefault(); // 기본제출 막기
-		
-		fetch('/main/schedule', {
-			method: 'POST'
-			, headers: {
-//				'Content-Type': 'application/json',
-				[csrfHeaderName]: csrfToken
-			}
-			, body: new FormData(addScheduleForm)
-		})
-		.then(response => {
-//			if (!response.ok) throw new Error('등록에 실패했습니다.');
-			if (!response.ok) {
-				console.log("에러", response.msg)
-				throw new Error(response.msg);
-			}
-			return response.json();  //JSON 파싱
-		})
-		.then(response => { // response가 ok일때
-			alert(response.msg);
-			location.reload();
-		}).catch(error => {
-			console.error('에러', error)
-			alert("제목, 시작,종료 일시, 내용은 필수입력 사항입니다.");
 		});
-	});
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+		// 날짜 초기값
+		startpickerInput.value = formatDateTime(today);
+		endpickerInput.value = formatDateTime(today);
+		// 종일 체크 해제
+		form.alldayYN.checked = false;
+
+	} else if (mode === 'edit' && data) {
+		modalTitle.textContent = '일정조회';
+		deleteBtn.classList.remove('d-none');
+	    submitBtn.textContent = '수정';
+		form.scheduleTitle.value = data.scheduleTitle || '';
+		form.createdUser.value = data.createdUser || '';
+		//셀렉트박스 초기화
+		select.innerHTML = '';
 		
-});// DOM로드 끝
+		const option1 = document.createElement('option');
+		option1.value = 'company';
+		option1.text = '회사'
+		select.appendChild(option1);
 
-let grid = null;
-// 그리드 불러오기 함수
-function initGrid(data) {
-	const Pagination = tui.Pagination;
-	if(!grid){
-	grid = new tui.Grid({
-					el: document.getElementById("grid"),
-					editable: true,
-					columns: [
-						{
-							header: '일정시작',
-							name: 'scheduleStart',
-							sortable: true,
-							filter: {
-								type: 'date', options: {format: 'yyyy.MM.dd'}
-							}
-						},
-						{
-							header: '일정제목',
-							name: 'scheduleTitle',
-							sortable: true,
-							filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
-						},
-						{
-							header: '종류',
-							name: 'scheduleType',
-							sortable: true,
-							filter: 'select'
-						},
-						{
-							header: '작성자',
-							name: 'createdUser',
-							sortable: true,
-							filter: {
-								type: 'text',
-								operator: 'OR'
-							}
-						},
-						{
-							header: '내용',
-							name: 'scheduleContent',
-							sortable: true,
-							filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
-						},
-						{
-							header: ' '
-							, name: "btn"
-							, width: 100 // 너비 설정
-							, align: "center"
-							// formatter 속성에 화살표 함수를 활용하여 원하는 태그를 해당 셀에 삽입 가능(각 셀에 반복 삽입됨)
-			//				, formatter: () => "<button type='button' class='btn-detail' >상세정보</button>"
-							, formatter: (cellInfo) => "<button type='button' class='btn-detail' data-row='${cellInfo.rowKey}' >상세정보</button>"
-						}
-					],
-					rowHeaders: ['rowNum'],
-					pageOptions: {
-						useClient: true,
-						perPage: 5
+		const option2 = document.createElement('option');
+		option2.value = 'private'
+		option2.text = '개인'
+		select.appendChild(option2);
+		
+		// 부서 목록 조회 
+		fetch('/api/schedules/departments')
+		    .then(response => response.json())
+		    .then(data => {
+				// 셀릭트박스
+		        const select = document.getElementById('schedule-type');
+				
+				// 셀렉트박스에 부서목록 추가
+		        data.forEach(department => {
+		            const option = document.createElement('option');
+		            option.value = department.deptId
+		            option.text = department.deptName; // 옵션명
+					if(department.deptId === data.scheduleType) {
+						option.selected = true;
 					}
-				});
-		grid.resetData(data);
-		grid.sort('scheduleStart', true); // true: 오름차순 false: 내림차순
-	} else {
-		grid.resetData(data);
-		grid.sort('scheduleStart', true); // true: 오름차순 false: 내림차순
+		            select.appendChild(option);
+		        });
+		});
+		// 날짜 초기값
+		startpickerInput.value = data.scheduleStart || '';
+		endpickerInput.value = data.scheduleFinish || '';
+		// 종일 체크 해제
+		form.alldayYN.checked = data.alldayYN === 'Y';
+		form.scheduleContent.value = data.scheduleContent || '';
 	}
-}
-
-
-
+	
+	modal.show();
+} // 모달열기 함수 끝
 
 
 

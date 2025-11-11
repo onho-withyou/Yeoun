@@ -35,7 +35,7 @@
 							<button class="btn-sm btn-outline-primary" type="submit">조회</button>
 						</div>
 					</form>
-					<button type="button" class="btn btn-primary btn-sm ms-auto" data-bs-toggle="modal" data-bs-target="#add-schedule-modal" id="abcd">일정등록</button>
+					<button type="button" class="btn btn-primary btn-sm ms-auto" id="add-schedule">일정등록</button>
 					
 				</div>
 				
@@ -62,7 +62,8 @@
 									</div>
 									<div class="col mb-6">
 										<label for="scheduleTitle" class="form-label">작성자</label>
-										<input type="text" id="schedule-writer" class="form-control" value="123" name="createdUser" readonly/>
+										<input type="text" id="schedule-writer" class="form-control" 
+											th:value="${#authentication.principal.empName}" name="createdUser" readonly/>
 									</div>
 									<div class="mb-3 mt-3" style="display:flex; gap:8px;">
 										<div>
@@ -91,6 +92,7 @@
 									</div>
 									
 									<div class="modal-footer mt-3 p-0">
+										<button type="button" id="delete-schedule-btn" class="btn btn-outline-danger d-none">삭제</button>
 										<button type="submit" id="add-schedule-btn" class="btn btn-primary">등록</button>
 									</div>
 								</form>
