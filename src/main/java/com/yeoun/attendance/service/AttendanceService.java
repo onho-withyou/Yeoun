@@ -9,15 +9,19 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.yeoun.attendance.dto.AccessLogDTO;
 import com.yeoun.attendance.dto.AttendanceDTO;
 import com.yeoun.attendance.dto.WorkPolicyDTO;
+import com.yeoun.attendance.entity.AccessLog;
 import com.yeoun.attendance.entity.Attendance;
 import com.yeoun.attendance.entity.WorkPolicy;
+import com.yeoun.attendance.repository.AccessLogRepository;
 import com.yeoun.attendance.repository.AttendanceRepository;
 import com.yeoun.attendance.repository.WorkPolicyRepository;
 import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.repository.EmpRepository;
 
+import groovyjarjarantlr4.v4.parse.GrammarTreeVisitor.locals_return;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -28,42 +32,44 @@ import lombok.extern.log4j.Log4j2;
 public class AttendanceService {
 	private final AttendanceRepository attendanceRepository;
 	private final WorkPolicyRepository workPolicyRepository;
+	private final AccessLogRepository accessLogRepository;
 	private final EmpRepository empRepository;
 
 	// 출/퇴근 등록
 	@Transactional
 	public String registAttendance(String empId) {
 		LocalDate today = LocalDate.now();
+		LocalTime now = LocalTime.now();
+		
+		// 근무정책 조회
+		WorkPolicy workPolicy = workPolicyRepository.findFirstByOrderByIdAsc()
+				.orElseThrow(() -> new NoSuchElementException("등록된 근무정책이 없습니다."));
 		
 		// 오늘자 출퇴근 기록 조회
-		Optional<Attendance> optionalAttendance  = attendanceRepository.findByEmpIdAndWorkDate(empId, today);
+		Attendance attendance  = attendanceRepository.findByEmpIdAndWorkDate(empId, today).orElse(null);
+		// 오늘자 외근 기록 조회
+		AccessLog accessLog = accessLogRepository.findByEmpIdAndAccessDate(empId, today).orElse(null);
 		
-		if (optionalAttendance.isEmpty()) {
-			// 출근 기록이 없을 경우 엔티티 새로 생성
-			Attendance attendance = new Attendance();
-			attendance.setEmpId(empId);
-			attendance.setWorkDate(today);
-			attendance.setWorkIn(LocalTime.now());
-			attendance.setStatusCode("IN");
-			attendanceRepository.save(attendance);
-			
-			return "IN";
-		} else {
-			// 출근 기록이 있는 경우 퇴근 처리
-			Attendance attendance = optionalAttendance.get();
-			
-			if (attendance.getWorkOut() == null) {
-				attendance.setWorkOut(LocalTime.now());
-				attendance.setWorkDuration(
-							(int) ChronoUnit.MINUTES.between(attendance.getWorkIn(), attendance.getWorkOut())
-				);
-				attendanceRepository.save(attendance);
-				
-				return "OUT";
-			} else {
-				return "ALREADY_OUT";
-			}
-		} 
+		if (attendance == null) {
+			// 출근 기록이 없으면 새로 생성
+			Attendance newAttendance = Attendance.createForWorkIn(empId,
+                    today,
+                    now,
+                    LocalTime.parse(workPolicy.getInTime()),
+                    workPolicy.getLateLimit(),
+                    accessLog);
+			 attendanceRepository.save(newAttendance);
+			 return newAttendance.getStatusCode();
+		}
+		
+		// 이미 출근 기록이 있으면 퇴근 처리
+		if (attendance.isAlreadyOut()) {
+			return "ALREADY_OUT";
+		}
+		
+		attendance.recordWorkOut(now, LocalTime.parse(workPolicy.getOutTime()), accessLog);
+		
+		return "OUT";
 	}
 	
 	// 출/퇴근 수기 등록
@@ -71,27 +77,17 @@ public class AttendanceService {
 	public void registAttendance(AttendanceDTO attendanceDTO) {
 		LocalDate today = LocalDate.now();
 		
-		// 오늘자 출퇴근 기록 조회
-		Optional<Attendance> optionalAttendance  = attendanceRepository.findByEmpIdAndWorkDate(attendanceDTO.getEmpId(), today);
-				
-		if (optionalAttendance.isEmpty()) {
-			// 출근 기록이 없을 경우 엔티티 새로 생성
-			Attendance attendance = new Attendance();
-			attendance.setEmpId(attendanceDTO.getEmpId());
-			attendance.setWorkDate(today);
-			attendance.setWorkIn(attendanceDTO.getWorkIn());
-			attendance.setWorkOut(attendanceDTO.getWorkOut());
-			attendance.setStatusCode(attendanceDTO.getStatusCode());
-			
-			if (attendance.getWorkIn() != null && attendance.getWorkOut() != null) {
-				attendance.setWorkDuration(
-						(int) ChronoUnit.MINUTES.between(attendance.getWorkIn(), attendance.getWorkOut()));
-			}
-			
-			attendanceRepository.save(attendance);
-		} else if (optionalAttendance.isPresent()) {
+		// 출근 기록 있는지 확인
+		boolean exists = attendanceRepository.existsByEmpIdAndWorkDate(attendanceDTO.getEmpId(), today);
+		
+		if (exists) {
 			throw new IllegalStateException("이미 오늘 출근 기록이 존재합니다.");
 		}
+		
+		Attendance attendance  = Attendance.createAttendance(attendanceDTO.getEmpId(), today, attendanceDTO.getWorkIn(), 
+				attendanceDTO.getWorkOut(), attendanceDTO.getStatusCode());
+		
+		attendanceRepository.save(attendance);
 	}
 	
 	// 근무정책 조회
@@ -112,12 +108,7 @@ public class AttendanceService {
 			// optional이 존재하면 변경된 부분 업데이트
 			if (optional.isPresent()) {
 				WorkPolicy policy = optional.get();
-				policy.setInTime(workPolicyDTO.getInTime());
-				policy.setOutTime(workPolicyDTO.getOutTime());
-				policy.setLunchIn(workPolicyDTO.getLunchIn());
-				policy.setLunchOut(workPolicyDTO.getLunchOut());
-				policy.setLateLimit(workPolicyDTO.getLateLimit());
-				policy.setAnnualBasis(workPolicyDTO.getAnnualBasis());
+				policy.changePolicy(workPolicyDTO);
 				
 				return "근무 정책이 수정되었습니다.";
 			} else {
@@ -144,18 +135,19 @@ public class AttendanceService {
 								   .orElseThrow(() -> new NoSuchElementException("출/퇴근 정보가 없습니다."));
 	}
 
-	@Transactional
 	// 출퇴근 수정
+	@Transactional
 	public void modifyAttendance(Long attendanceId, AttendanceDTO attendanceDTO) {
 		Attendance attendance = attendanceRepository.findById(attendanceId)
 				.orElseThrow(() -> new NoSuchElementException("해당 출퇴근 기록을 찾을 수 없습니다."));
 		
-		attendance.setWorkIn(attendanceDTO.getWorkIn());
-		attendance.setWorkOut(attendanceDTO.getWorkOut());
-		attendance.setStatusCode(attendanceDTO.getStatusCode());
-		attendance.setWorkDuration(
-				(int) ChronoUnit.MINUTES.between(attendance.getWorkIn(), attendance.getWorkOut()));
-		
+		attendance.modifyAttendance(attendanceDTO.getWorkIn(), attendanceDTO.getWorkOut(), attendanceDTO.getStatusCode());
+	}
+
+	// 외근 등록
+	@Transactional
+	public void registOutwork(AccessLogDTO accessLogDTO) {
+		accessLogRepository.save(accessLogDTO.toEntity());
 	}
 
 }
