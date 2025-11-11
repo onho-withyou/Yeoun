@@ -452,41 +452,46 @@
       data: [
         {
           label: '인사팀',
-          data: [{ label: '한가인', value: '한가인' ,selected: false}, 
+          data: [{ label: '한가인', value: '한가인'}, 
         	  	{ label: '정지훈', value: '정지훈' ,selected: true }]
         },
         {
           label: '개발팀',
           data: [
-            { label: '이정현', value: '이정현',selected: false },
-            { label: '마이클', value: '마이클',selected: false },
-            { label: '기안', value: '기안',selected: false},
-            { label: '이지영', value: '이지영',selected: false},
-            { label: '박지운', value: '박지운',selected: false }
+            { label: '이정현', value: '이정현'},
+            { label: '마이클', value: '마이클'},
+            { label: '기안', value: '기안'},
+            { label: '이지영', value: '이지영'},
+            { label: '박지운', value: '박지운'}
           ]
         }
       ]
     });
 
-    this.count = 1;
+    this.count = 0;
+    this.num = 1;
     function print(type, text) {
     
-      resultDiv.innerHTML +='<div style="border:1px solid black;border-radius: 13px;width: 165px;background-color: rgb(65, 166, 126); height: 100px;padding: 6px;margin: 5px;">'
-      						+ this.count++ + '차 결재권한자 :' + text 
-      						+ '</div>';
+      		resultDiv.innerHTML +='<div onclick="approvalNo('+ (this.num++)+','+ "'"+text + "'" +')"'
+      						+'style="border:1px solid black;border-radius: 13px;width: 165px;background-color: rgb(65, 166, 126); height: 100px;padding: 6px;margin: 5px;">'
+      						+ (++this.count) + '차 결재권한자 : ' + text 
+    						+ '</div>';
+    	
     } 
     
-    console.log("selectBox",selectBox.select);
-    console.log("selectBox",selectBox.getItem);
-    console.log("selectBox.getSelectedItem()",selectBox.getSelectedItem());
-    console.log("selectBox.getSelectedItem().getLabel()",selectBox.getSelectedItem().getLabel());
-    
-    selectBox.on('change', function(ev) {
-    	if(this.count < 4){
-      		print(ev.type, ev.curr.getLabel());
+	function approvalNo(num,text){
+	   //해당태그 클릭시 알림창 띄우기
+    	alert(num + "차 결재권한자"+ text);
+    } 
+    selectBox.on('close',(ev)=>{
+    	
+    	let selectlabel = selectBox.getSelectedItem().label;
+    	if(selectlabel != null && this.count < 3){
+    		print(ev.type, selectlabel);
     	}
     });
-
+   	//리셋버튼 만들기 하다가잠
+    
 	//에디터
 	 const editor = new toastui.Editor({
 	  el: document.querySelector('#editor'),
