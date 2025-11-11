@@ -5,11 +5,11 @@
 	<th:block layout:fragment="content">
 		<div class="custom-body container-xxl flex-grow-1 container-p-y">
 			<div class="d-flex justify-content-between">
-			<form class="d-flex" onsubmit="return false" style="max-width: 300px;">
-				<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+			<form class="d-flex" style="max-width: 300px;"> 
+				<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="searchKeyword" th:value="${searchKeyword}">
 				<button class="btn btn-outline-primary" type="submit">Search</button>
 			</form>
-			<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createNotice">글쓰기</button>
+			<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#create-notice">글쓰기</button>
 			</div>
 			<br>
 			<!-- Basic Bootstrap Table -->
@@ -18,92 +18,31 @@
 			        <table class="table">
 			            <thead>
 			                <tr>
-			                    <th>번호</th>
-			                    <th>제목</th>
-			                    <th>작성자</th>
-			                    <th>대상</th>
-			                    <th>상세</th>
+			                    <th data-key="noticeId" onclick="allineTable(this)" style="width:1%;">번호</th>
+			                    <th data-key="noticeTitle" onclick="allineTable(this)"style="width:30%;">제목</th>
+			                    <th data-key="createdUser" onclick="allineTable(this)" style="width:5%;">작성자</th>
+			                    <th data-key="createdDate" onclick="allineTable(this)" style="width:5%;">등록일</th>
+			                    <th data-key="updatedDate" onclick="allineTable(this)"style="width:5%;">수정일</th>
+			                    <th style="width:5%;">상세</th>
 			                </tr>
 			            </thead>
 			            <tbody class="table-border-bottom-0">
-			                <tr style="background-color: #e4bcd5;">
-			                    <td>1</td>
-			                    <td>2025 하반기 주요 감사 일정 안내</td>
-			                    <td>김관리</td>
-			                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-			                    <td>
-			                        <div class="dropdown">
-			                            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#showNotice">
+			            	<th:block th:each="notice : ${noticeDTOList}">
+				                <tr th:style="${notice.noticeYN == 'Y'} ? 'background-color: #008dff1a;' : ''">
+				                	<td th:text="${notice.noticeId}"></td>
+				                	<td th:text="${notice.noticeTitle}"></td>
+				                	<td th:text="${notice.createdUser}"></td>
+				                	<!-- 로컬데이트타임은 #temporals.format사용 -->
+									<td th:text="${#temporals.format(notice.createdDate, 'yyyy-MM-dd HH:mm')}"></td>
+									<td th:text="${#temporals.format(notice.updatedDate, 'yyyy-MM-dd HH:mm')}"></td>
+				                	<td>
+			                            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#show-notice"
+			                            	th:data-notice-id = "*{notice.noticeId}">
 			                                보기
 			                            </button>
-			                        </div>
-			                    </td>
-			                </tr>
-			                <tr style="background-color: #e4bcd5;">
-			                    <td>2</td>
-			                    <td>10월의 우수 사원</td>
-			                    <td>김관리</td>
-			                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-			                    <td>
-			                        <div class="dropdown">
-			                            <button type="button" class="btn btn-info btn-sm">
-			                                보기
-			                            </button>
-			                        </div>
-			                    </td>
-			                </tr>
-			                <tr style="background-color: #e4bcd5;">
-			                    <td>3</td>
-			                    <td>중앙 엘리베이터 수리 기간</td>
-			                    <td>김관리</td>
-			                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-			                    <td>
-			                        <div class="dropdown">
-			                            <button type="button" class="btn btn-info btn-sm">
-			                                보기
-			                            </button>
-			                        </div>
-			                    </td>
-			                </tr>
-			                <tr>
-			                    <td>11</td>
-			                    <td>2025 중반기 주요 감사 일정 안내</td>
-			                    <td>김관리</td>
-			                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-			                    <td>
-			                        <div class="dropdown">
-			                            <button type="button" class="btn btn-info btn-sm">
-			                                보기
-			                            </button>
-			                        </div>
-			                    </td>
-			                </tr>
-			                <tr>
-			                    <td>12</td>
-			                    <td>7월의 우수 사원</td>
-			                    <td>김관리</td>
-			                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-			                    <td>
-			                        <div class="dropdown">
-			                            <button type="button" class="btn btn-info btn-sm">
-			                                보기
-			                            </button>
-			                        </div>
-			                    </td>
-			                </tr>
-			                <tr>
-			                    <td>13</td>
-			                    <td>급식업체 변경 알림</td>
-			                    <td>김관리</td>
-			                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-			                    <td>
-			                        <div class="dropdown">
-			                            <button type="button" class="btn btn-info btn-sm">
-			                                보기
-			                            </button>
-			                        </div>
-			                    </td>
-			                </tr>
+				                	</td>
+				                </tr>
+			                </th:block>
 			            </tbody>
 			        </table>
 			    </div>
@@ -111,32 +50,24 @@
 					<div class="layout-demo-info" style="display: flex; justify-content: center;">
 						<nav aria-label="Page navigation" >
 							<ul class="pagination ">
-								<li class="page-item first">
-									<a class="page-link" href="javascript:void(0);"><i class="tf-icon bx bx-chevrons-left"></i></a>
+								<li class="page-item first" th:classappend="${currentPage == 0} ? 'disabled'">
+									<a class="page-link" th:href="@{/notices(page=0, searchKeyword=${searchKeyword}, orderKey=${orderKey}, orderMethod=${orderMethod})}"><i class="tf-icon bx bx-chevrons-left"></i></a>
 								</li>
-								<li class="page-item prev">
-									<a class="page-link" href="javascript:void(0);"><i class="tf-icon bx bx-chevron-left"></i></a>
+								<li class="page-item prev" th:classappend="${currentPage == 0} ? 'disabled'">
+									<a class="page-link" th:href="@{/notices(page=${currentPage - 1}, searchKeyword=${searchKeyword}, orderKey=${orderKey}, orderMethod=${orderMethod})}"><i class="tf-icon bx bx-chevron-left"></i></a>
 								</li>
-								<li class="page-item">
-									<a class="page-link" href="javascript:void(0);">1</a>
+								<!-- 앞뒤로 2페이지씩 보이기 -->
+								<li class="page-item"
+								    th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+								    th:if="${i >= currentPage - 2 and i <= currentPage + 2}"
+								    th:classappend="${i == currentPage} ? 'active'">
+								    <a class="page-link" th:href="@{/notices(page=${i}, searchKeyword=${searchKeyword}, orderKey=${orderKey}, orderMethod=${orderMethod})}" th:text="${i + 1}"></a>
 								</li>
-								<li class="page-item">
-									<a class="page-link" href="javascript:void(0);">2</a>
+								<li class="page-item next" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+									<a class="page-link" th:href="@{/notices(page=${currentPage + 1}, searchKeyword=${searchKeyword}, orderKey=${orderKey}, orderMethod=${orderMethod})}"><i class="tf-icon bx bx-chevron-right"></i></a>
 								</li>
-								<li class="page-item active">
-									<a class="page-link" href="javascript:void(0);">3</a>
-								</li>
-								<li class="page-item">
-									<a class="page-link" href="javascript:void(0);">4</a>
-								</li>
-								<li class="page-item">
-									<a class="page-link" href="javascript:void(0);">5</a>
-								</li>
-								<li class="page-item next">
-									<a class="page-link" href="javascript:void(0);"><i class="tf-icon bx bx-chevron-right"></i></a>
-								</li>
-								<li class="page-item last">
-									<a class="page-link" href="javascript:void(0);"><i class="tf-icon bx bx-chevrons-right"></i></a>
+								<li class="page-item last" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+									<a class="page-link" th:href="@{/notices(page=${totalPages - 1}, searchKeyword=${searchKeyword}, orderKey=${orderKey}, orderMethod=${orderMethod})}"><i class="tf-icon bx bx-chevrons-right"></i></a>
 								</li>
 							</ul>
 						</nav>
@@ -148,7 +79,7 @@
 			<!-- 모달구역 -->
 			
 			<!-- 공지쓰기모달 -->
-			<div class="modal fade" id="createNotice" tabindex="-1" style="display: none;" aria-hidden="true">
+			<div class="modal fade" id="create-notice" tabindex="-1" style="display: none;" aria-hidden="true">
 				<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
 					<div class="modal-content">
 						<!-- 모달 제목 -->
@@ -160,14 +91,14 @@
 						</div>
 						<!-- 모달 본문 -->
 						<div class="modal-body">
-							<form id="noticeForm">
+							<form id="notice-write-form" action="/notices" method="post">
 								<div class="mb-3" style="display:flex; gap:8px;">
-								    <input type="text" class="form-control" id="notice-title-write" placeholder="제목" style="flex:1;">
+								    <input type="text" class="form-control" id="notice-title-write" name="noticeTitle" placeholder="제목" style="flex:1;">
 								    <label class="form-check-label" for="fixedCheck">고정</label>
-								    <input class="form-check-input" type="checkbox" value="" id="fixedCheck" checked="">
+								    <input class="form-check-input" type="checkbox" name="noticeYN" value="Y">
 								</div>
 							    <div class="mb-3">
-							        <textarea id="notice-content-write" class="form-control" rows="10" placeholder="공지사항 내용 작성"></textarea>
+							        <textarea id="notice-content-write" name="noticeContent" class="form-control" rows="10" placeholder="공지사항 내용 작성"></textarea>
 							    </div>
 							    <div>
 									<label for="formFileDisabled" class="form-label">파일 첨부</label>
@@ -181,7 +112,7 @@
 									닫기
 								</font></font>
 							</button>
-							<button type="submit" class="btn btn-primary" form="noticeForm">
+							<button type="submit" class="btn btn-primary" form="notice-write-form">
 								<font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">글 쓰기</font></font>
 							</button>
 						</div>
@@ -191,7 +122,7 @@
 			<!-- /공지쓰기모달 -->
 			
 			<!-- 공지조회모달 -->
-			<div class="modal fade" id="showNotice" tabindex="-1" style="display: none;" aria-hidden="true">
+			<div class="modal fade" id="show-notice" tabindex="-1" style="display: none;" aria-hidden="true">
 				<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
 					<div class="modal-content">
 						<!-- 모달 제목 -->
@@ -203,7 +134,7 @@
 						</div>
 						<!-- 모달 본문 -->
 						<div class="modal-body">
-							<form id="noticeForm">
+							<form id="notice-form-read" action="" >
 	<!-- 							<div class="mb-3"> -->
 	<!-- 								<label for="defaultSelect" class="form-label">Default select</label> -->
 	<!-- 								<select id="defaultSelect" class="form-select"> -->
@@ -214,16 +145,21 @@
 	<!-- 								</select> -->
 	<!-- 							</div> -->
 								<div class="mb-3" style="display:flex; gap:8px;">
-								    <input type="text" class="form-control" id="notice-title-read" placeholder="제목" style="flex:1;">
-								    <label class="form-check-label" for="fixedCheck">고정</label>
-								    <input class="form-check-input" type="checkbox" value="" id="fixedCheck" checked="">
+								    <input type="hidden" class="form-control" id="notice-id-read">
+								    <input type="text" class="form-control" id="notice-title-read" name="noticeTitle" placeholder="제목" style="flex:1;">
+								    <label class="form-check-label" for="fixed-check">고정</label>
+								    <input class="form-check-input" type="checkbox" value="Y" id="fixed-check" name="noticeYN" onchange="toggleValue(this)">
 								</div>
 								<div class="mb-3" style="display:flex; gap:2px;">
-									<p class="" style="flex:1;">인사 신필용</p>
-									<p class="" style="flex:1;">2024-10-01 14:30</p>
+									<p class="" style="flex:1;" >등록자 : </p>
+									<p class="" style="flex:1;" id="notice-writer-read">인사 신필용</p>
+									<p class="" style="flex:1;" >등록일 : </p>
+									<p class="" style="flex:1;"id="notice-createdDate-read">2024-10-01 14:30</p>
+									<p class="" style="flex:1;" >수정일 : </p>
+									<p class="" style="flex:1;"id="notice-updatedDate-read">2024-10-01 14:30</p>
 								</div>
 							    <div class="mb-3">
-							        <textarea id="notice-content-read" class="form-control" rows="10" placeholder="공지사항 내용 작성"></textarea>
+							        <textarea id="notice-content-read" class="form-control" rows="10" placeholder="공지사항 내용 작성" name="noticeContent"></textarea>
 							    </div>
 							    <div>
 									<label for="formFileDisabled" class="form-label">파일 첨부</label>
@@ -237,7 +173,12 @@
 									닫기
 								</font></font>
 							</button>
-							<button type="button" class="btn btn-primary" id="notice-modify">
+							<button type="button" class="btn btn-danger btn-outline-secondary" data-bs-dismiss="modal" id="notice-delete">
+								<font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">
+									삭제
+								</font></font>
+							</button>
+							<button type="submit" class="btn btn-primary" id="notice-modify" form="notice-form-read">
 								<font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">
 								수정</font></font>
 							</button>
@@ -248,5 +189,6 @@
 			<!-- /공지조회모달 -->
 		<!-- body 끝 -->	
 		</div>
+		<script src="/js/notice/notice.js"></script>
 	</th:block>
 </body>

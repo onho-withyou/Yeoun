@@ -3,10 +3,12 @@ package com.yeoun.main.dto;
 import java.time.LocalDateTime;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import com.yeoun.main.entity.Schedule;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -30,10 +32,12 @@ public class ScheduleDTO {
 	
 	private String alldayYN; // 종일일정구분
 	
-	@NotBlank(message = "일정 시작시간은 필수 입력값입니다.")
+	@NotNull(message = "일정 시작시간은 필수 입력값입니다.")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
 	private LocalDateTime scheduleStart; // 일정 시작시간
 	
-	@NotBlank(message = "일정 마감시간은 필수 입력값입니다.")
+	@NotNull(message = "일정 마감시간은 필수 입력값입니다.")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
 	private LocalDateTime scheduleFinish; // 일정 마치는시간
 	
 	private LocalDateTime createdDate; // 등록 일시

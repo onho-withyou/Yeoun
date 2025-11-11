@@ -2,10 +2,15 @@ package com.yeoun.attendance.entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,7 +20,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -30,6 +37,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 public class Attendance {
 	@Id 
@@ -43,8 +51,14 @@ public class Attendance {
 	@CreatedDate
 	private LocalDate workDate; // 근무일자
 	
-	private LocalDateTime workIn; // 출근시간
-	private LocalDateTime workOut; // 퇴근시간
+	@JsonFormat(pattern = "HH:MM")
+	@DateTimeFormat(pattern = "HH:mm")
+	private LocalTime workIn; // 출근시간
+	
+	@JsonFormat(pattern = "HH:MM")
+	@DateTimeFormat(pattern = "HH:mm")
+	private LocalTime workOut; // 퇴근시간
+	
 	private Integer workDuration; // 근무시간(분단위)
 	private String statusCode; // 근태상태
 	private String remark; // 비고
@@ -60,6 +74,97 @@ public class Attendance {
 	
 	@LastModifiedDate
 	private LocalDateTime updatedDate; // 수정일자
+	
+	// 수기로 출퇴근 등록
+	public static Attendance createAttendance(String empId, LocalDate date, 
+			LocalTime workIn, LocalTime workOut, String statusCode) {
+		Attendance attendance = new Attendance();
+		
+		attendance.empId = empId;
+		attendance.workDate = date;
+		attendance.workIn = workIn;
+		attendance.workOut = workOut;
+		attendance.statusCode = statusCode;
+		attendance.updateDuration();
+		
+		return attendance;
+	}
+	
+	// 자동 출근 (출퇴근 버튼 찍었을 경우)
+	public static Attendance createForWorkIn(String empId, LocalDate date, LocalTime now, 
+			LocalTime standardIn, int lateLimit, AccessLog accessLog) {
+		Attendance attendance = new Attendance();
+
+		attendance.empId = empId;
+		attendance.workDate = date;
+		
+		// 외근 여부 확인
+		if (accessLog != null && "OUTWORK".equalsIgnoreCase(accessLog.getAccessType())) {
+			LocalTime outTime = accessLog.getOutTime();
+			
+			// 외근 시작 시간이 출근 기준 시간 + 지각 유예 시간보다 빠르면 정상 출근 인정
+			if (outTime != null && !outTime.isAfter(standardIn.plusMinutes(lateLimit))) {
+				attendance.statusCode = "IN";
+				attendance.workIn = outTime;
+			} else { // 외근 기준 이후면 지각 처리
+				attendance.statusCode = "LATE";
+				attendance.workIn = (outTime != null) ? outTime : now;
+			}
+			attendance.remark = accessLog.getReason();
+		} else {
+			 attendance.statusCode = now.isAfter(standardIn.plusMinutes(lateLimit)) ? "LATE" : "IN";
+			 attendance.workIn = now;
+		}
+		
+		 return attendance;
+	}
+	
+	// 퇴근 처리
+	public void recordWorkOut(LocalTime now, LocalTime standardOut, AccessLog accessLog) {
+		LocalTime  outTime = null;
+		
+		if (!now.isBefore(standardOut)) {
+			outTime = now; // 퇴근 시간은 기준 시간 이후 실제 퇴근 버튼 누른 시점
+		}
+		
+//		if (accessLog != null && "OUTWORK".equalsIgnoreCase(accessLog.getAccessType())) {
+//			LocalTime returnTime = accessLog.getReturnTime();
+//			
+//			if (returnTime != null && !returnTime.isBefore(standardOut)) {
+//				outTime = returnTime;
+//			}
+//		}
+		
+	    if (outTime != null) {
+	        this.workOut = outTime;
+	        updateDuration();
+	    }
+		
+//		this.workOut = outTime; // 퇴근 시간을 외근 복귀 시간으로 변경
+//		updateDuration();
+	}
+	
+	// 근무시간 계산
+	private void updateDuration() {
+		if (this.workIn != null && this.workOut != null) {
+			this.workDuration = (int) ChronoUnit.MINUTES.between(this.workIn, this.workOut);
+		} else {
+			this.workDuration = 0;
+		}
+	}
+	
+	// 근태 수정 로직
+	public void modifyAttendance(LocalTime workIn, LocalTime workOut, String statusCode) {
+		this.workIn = workIn;
+		this.workOut = workOut;
+		this.statusCode = statusCode;
+		updateDuration();
+	}
+	
+	// 퇴근 중복 방지 체크
+	public boolean isAlreadyOut() {
+		return this.workOut != null;
+	}
 }
 
 

@@ -65,36 +65,43 @@
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
-						<form>
+						<form th:action="@{/attendance/outwork}" method="post">
 							<div class="col mb-6">
-								<label for="empId" class="form-label">사원번호</label>
-								<input type="text" id="empId" class="form-control"/>
+								<label for="nameWithTitle" class="form-label">사원번호</label>
+								<div class="input-group">
+									<input type="text" id="nameWithTitle" class="form-control" name="empId"/>
+									<button type="button" class="btn btn-primary" th:onclick="searchEmp()">조회</button>
+								</div>
 							</div>
 							<div class="col mb-6">
-								<label for="empName" class="form-label">이름</label>
-								<input type="text" id="empName" class="form-control"/>
+								<label for="inTime" class="form-label">사원이름</label>
+								<input type="text" id="empName" class="form-control" disabled/>
 							</div>
 							<div class="col mb-6">
 								<label for="inTime" class="form-label">근무날짜</label>
-								<input type="date" id="inTime" class="form-control"/>
+								<input type="date" id="inTime" class="form-control" name="accessDate"/>
 							</div>
 							<div class="col mb-6">
 								<label class="form-label">근무유형</label>
-								<select class="form-select">
+								<select class="form-select" name="accessType">
 									<option value="">선택</option>
-									<option value="">외근</option>
+									<option value="OUTWORK">외근</option>
 								</select>
 							</div>
 							<div class="col mb-6">
+								<label for="endTime" class="form-label">외근 사유</label>
+								<textarea rows="2" cols="10" class="form-control" name="reason"></textarea>
+							</div>
+							<div class="col mb-6">
 								<label for="endTime" class="form-label">근무 시작시간</label>
-								<input type="time" id="endTime" class="form-control"/>
+								<input type="time" id="outTime" class="form-control" name="outTime"/>
 							</div>
 							<div class="col mb-6">
 								<label for="endTime" class="form-label">근무 종료시간</label>
-								<input type="time" id="endTime" class="form-control"/>
+								<input type="time" id="returnTime" class="form-control" name="returnTime"/>
 							</div>
 							<div class="modal-footer mt-3 p-0">
-								<button class="btn btn-primary">등록</button>
+								<button type="submit" class="btn btn-primary">등록</button>
 							</div>
 						</form>
 					</div>
@@ -102,5 +109,15 @@
 			</div>
 		</div>
 	</div>
+	<th:block layout:fragment="myScript">
+		<script>
+			const message = "[[${message}]]";
+			
+			if (message) {
+				alert(message);
+			}
+		</script>
+		<script src="/js/attendance/attendance.js"></script>
+	</th:block>
 </body>
 </th:block>

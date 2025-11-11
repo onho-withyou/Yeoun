@@ -37,24 +37,26 @@
   --bs-black-rgb: 67, 89, 113;
   --bs-body-color-rgb: 105, 122, 141;
   --bs-body-bg-rgb: 245, 245, 249;
+  /*폰트 테마 설정*/
   --bs-font-sans-serif: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   --bs-font-monospace: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
-  --bs-header-font-size: 18px;
-  --bs-menubar-font-size: 0.9375rem;
-  --bs-menubar-menu-font-size: 1rem;
-  --bs-root-font-size: 16px;
-  --bs-body-font-size: 0.9375rem;
-  --bs-body-font-family: var(--bs-font-sans-serif);
+  --bs-header-font-size: 18px;/*헤더 폰트크기*/
+  --bs-menubar-font-size: 0.9375rem;/*메뉴바 폰트크기*/
+  --bs-menubar-menu-font-size: 1rem;/*메뉴바 서브 폰트크기*/
+  --bs-root-font-size: 16px;/*메뉴바 넓이 변경*/
+  --bs-body-font-size: 0.9375rem;/*본문,푸터 글자크기 변경*/
+  --bs-body-font-family: var(--bs-font-sans-serif); /*폰트 테마 설정 매핑*/
   --bs-body-font-weight: 400;
-  --bs-body-line-height: 1.53;
-  --bs-body-color: #697a8d;
-  --bs-body-bg: white;
-  --bs-body-bg-out: #F5f5f9;
-  --bs-big-menu-btn: rgba(105, 108, 255, 0.16);
-  --bs-big-menu-color: #696cff;
+  --bs-body-line-height: 1.53;/*메뉴바, 본문 아래위 글자간격 조정*/
+  --bs-body-color: #697a8d;/*헤더,메뉴바,본문 폰트 색상*/
+  --bs-body-bg: white;/*헤더,메뉴바,본문 배경색*/
+  --bs-body-bg-out: #F5f5f9;/*본문밖 밖 배경색*/
+  --bs-big-menu-btn: rgba(105, 108, 255, 0.16);/*데쉬보드 색상*/
+  --bs-big-menu-color: #696cff;/*데쉬보드 글자색*/
 }
-
+/*custom_bg.js 파일에서 color-theme를 원하는 색으로 설정후 복붙으로 사용가능 
+ * 폰트 @import는 theme-default.css파일에 있음 */
 :root[color-theme='dark'] {
   --bs-blue: #007bff;
   --bs-indigo: #6610f2;
@@ -93,23 +95,25 @@
   --bs-black-rgb: 67, 89, 113;
   --bs-body-color-rgb: 105, 122, 141;
   --bs-body-bg-rgb: 245, 245, 249;
+  /*폰트 테마 설정*/
   --bs-font-sans-serif: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;/*원하는 글꼴로 변경*/
   --bs-font-monospace: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
-  --bs-header-font-size: 25px;
-  --bs-menubar-font-size: 25px;
-  --bs-menubar-sub-font-size: 22px;
-  --bs-root-font-size: 16px;
-  --bs-body-font-size: 16px;
-  --bs-body-font-family: var(--bs-font-sans-serif);
-  --bs-body-font-weight: 9900;
-  --bs-body-line-height: 1.53;
-  --bs-body-color: #45ADFE;/*파랑색*/
-  --bs-body-bg: rgb(68, 68, 78);/*다크*/
-  --bs-body-bg-out: #666;
+  --bs-header-font-size: 25px;/*헤더 폰트크기*/
+  --bs-menubar-font-size: 25px;/*메뉴바 폰트크기*/
+  --bs-menubar-sub-font-size: 22px;/*메뉴바 서브 폰트크기*/
+  --bs-root-font-size: 16px;/*메뉴바 넓이 변경*/
+  --bs-body-font-size: 16px;/*본문,푸터 글자크기 변경*/
+  --bs-body-font-family: var(--bs-font-sans-serif);/*폰트 테마 설정*/
+  --bs-body-font-weight: 9900;/**/
+  --bs-body-line-height: 1.53;/*메뉴바, 본문 아래위 글자간격 조정*/
+  --bs-body-color: #45ADFE;/*헤더,메뉴바,본문 폰트 색상*/
+  --bs-body-bg: rgb(68, 68, 78);/*헤더,메뉴바,본문 배경색*/
+  --bs-body-bg-out: #666;/*본문밖 밖 배경색*/
   --bs-big-menu-btn: rgb(113, 90, 90);/*데쉬보드 색상*/
   --bs-big-menu-color: #FFF;/*데쉬보드 글자색*/
 }
+
 :root[color-theme='green'] {
   --bs-blue: #007bff;
   --bs-indigo: #6610f2;
@@ -148,20 +152,21 @@
   --bs-black-rgb: 67, 89, 113;
   --bs-body-color-rgb: 105, 122, 141;
   --bs-body-bg-rgb: 245, 245, 249;
+  /*폰트 테마 설정*/
   --bs-font-sans-serif: "Paperozi", -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;/*원하는 글꼴로 변경*/
   --bs-font-monospace: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
-  --bs-header-font-size: 25px;
-  --bs-menubar-font-size: 25px;
-  --bs-menubar-sub-font-size: 22px;
-  --bs-root-font-size: 16px;
-  --bs-body-font-size: 16px;
-  --bs-body-font-family: var(--bs-font-sans-serif);
+  --bs-header-font-size: 25px;/*헤더 폰트크기*/
+  --bs-menubar-font-size: 25px;/*메뉴바 폰트 크기*/
+  --bs-menubar-sub-font-size: 22px;/*메뉴바 서브 폰트크기*/
+  --bs-root-font-size: 16px;/*메뉴바 넓이 변경*/
+  --bs-body-font-size: 16px;/*본문,푸터 글자크기 변경*/
+  --bs-body-font-family: var(--bs-font-sans-serif);/*폰트 테마 설정*/
   --bs-body-font-weight: 9900;
-  --bs-body-line-height: 1.53;
-  --bs-body-color: #FFF;
-  --bs-body-bg: rgb(101, 140, 88);
-  --bs-body-bg-out: rgb(187, 200, 99);
+  --bs-body-line-height: 1.53;/*메뉴바, 본문 아래위 글자간격 조정*/
+  --bs-body-color: #FFF;/*헤더,메뉴바,본문 폰트 색상*/
+  --bs-body-bg: rgb(101, 140, 88);/*헤더,메뉴바,본문 배경색*/
+  --bs-body-bg-out: rgb(187, 200, 99);/*본문밖 밖 배경색*/
   --bs-big-menu-btn: rgb(113, 90, 90);/*데쉬보드 색상*/
   --bs-big-menu-color: #FFF;/*데쉬보드 글자색*/
 }
@@ -3209,7 +3214,7 @@ textarea.form-control-lg {
   width: 100%;
   padding: 0.532rem 1.25rem;
   clear: both;
-  font-weight: 400;
+  font-weight: 500;
   color: #697a8d;
   text-align: inherit;
   white-space: nowrap;

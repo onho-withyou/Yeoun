@@ -1,0 +1,209 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
+
+  <th:block layout:fragment="content">
+
+    <div class="container-xxl py-4">
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-primary fw-bold">급여 계산 및 확정</h1>
+      </div>
+
+      <!-- 1. 급여 계산 및 시뮬레이션 -->
+      <section class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h3 class="h5 mb-3 border-start ps-2">1. 급여 계산 및 시뮬레이션</h3>
+          <p class="text-secondary">
+            설정된 기준에 따라 자동으로 <strong>급여 총액</strong> 및 <strong>공제액</strong>을 계산하고, 결과를 시뮬레이션 및 검토할 수 있습니다.
+          </p>
+
+          <!-- 조건 선택 -->
+          <div class="row g-3 align-items-center mb-3">
+            <div class="col-auto">
+              <label for="calc_month" class="col-form-label fw-semibold">계산 대상 월</label>
+            </div>
+            <div class="col-auto">
+              <!-- months: ["202509","202510","202511", ...] 식의 리스트라고 가정 -->
+              <select id="calc_month" class="form-select form-select-sm">
+                <option th:each="m : ${months}"
+                        th:value="${m}"
+                        th:selected="${m==yyyymm}"
+                        th:text="${#strings.substring(m,0,4)} + '년 ' + ${#strings.substring(m,4,6)} + '월'">
+                </option>
+
+                <!-- months 를 전달하지 못한 경우를 위한 안전장치 -->
+                <option th:if="${months == null}" th:value="${yyyymm}" th:text="${yyyymm}">선택월</option>
+              </select>
+            </div>
+
+            <div class="col-auto">
+              <label class="col-form-label fw-semibold">계산 유형</label>
+            </div>
+            <div class="col-auto">
+              <select id="calc_type" class="form-select form-select-sm">
+                <option value="all">일괄 계산 (전 사원)</option>
+                <option value="individual" disabled>개별 계산 (준비중)</option>
+                <option value="mid_join_leave" disabled>중도 입/퇴사자 일할 정산 (준비중)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 액션 버튼 -->
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            <form th:action="@{/pay/calc/simulate}" method="post" class="d-inline"
+                  onsubmit="this.yyyymm.value=document.getElementById('calc_month').value;">
+              <input type="hidden" name="yyyymm" th:value="${yyyymm}">
+              <input type="hidden" name="overwrite" value="true">
+              <button class="btn btn-warning" type="submit" id="btnSim">계산 시뮬레이션 (가계산)</button>
+            </form>
+
+            <form th:action="@{/pay/calc/confirm}" method="post" class="d-inline"
+                  onsubmit="this.yyyymm.value=document.getElementById('calc_month').value;">
+              <input type="hidden" name="yyyymm" th:value="${yyyymm}">
+              <input type="hidden" name="overwrite" value="true">
+              <button class="btn btn-success" type="submit"
+                      th:disabled="${!status.calculated}"
+                      id="btnConfirm">계산 결과 확정</button>
+            </form>
+          </div>
+
+          <!-- 결과 상태 -->
+          <div id="statusBox"
+               class="alert d-flex justify-content-between align-items-center"
+               th:classappend="${status.calculated} ? ' alert-success' : ' alert-warning'">
+            <div>
+              선택 월(<span id="statMonth" th:text="${yyyymm}">YYYYMM</span>) 계산 상태:
+              <strong id="statCalc" th:text="${status.calculated} ? '계산 완료' : '미계산'">미계산</strong>
+              <span class="ms-2 badge bg-secondary" id="statCount" th:text="|건수 ${status.count}|">건수 0</span>
+            </div>
+            <div>
+              총지급:
+              <span class="text-primary fw-bold" id="statTot"
+                    th:text="${#numbers.formatInteger(status.totalAmt,0)}">0</span> 원
+              · 공제:
+              <span class="text-danger fw-bold ms-1" id="statDed"
+                    th:text="${#numbers.formatInteger(status.dedAmt,0)}">0</span> 원
+              · 실수령:
+              <span class="fw-bold ms-1" id="statNet"
+                    th:text="${#numbers.formatInteger(status.netAmt,0)}">0</span> 원
+            </div>
+          </div>
+
+          <!-- 표: 실제 DB에서 읽어온 slips 리스트 렌더링 -->
+          <h6 class="fw-semibold mt-3">계산 결과 검토</h6>
+          <div class="table-responsive" style="max-height:320px;">
+            <table class="table table-sm table-hover table-striped align-middle">
+              <thead class="table-light sticky-top">
+                <tr class="text-center">
+                  <th>사번</th><th>이름</th><th>부서</th>
+                  <th>기본급</th><th>지급액</th><th>공제액</th><th>총지급</th><th>실수령액</th><th>상태</th>
+                </tr>
+              </thead>
+              <tbody class="text-center">
+                <!-- slips: List<PayrollPayslip> + (선택) 이름 join 했으면 s.empName 사용 -->
+                <tr th:each="s : ${slips}">
+                  <td th:text="${s.empId}">1001</td>
+                  <td th:text="${s.empName} ?: ''">홍길동</td>
+                  <td th:text="${s.deptId}">경영지원팀</td>
+                  <td th:text="${#numbers.formatInteger(s.baseAmt,0)}">0</td>
+                  <td th:text="${#numbers.formatInteger(s.alwAmt,0)}">0</td>
+                  <td th:text="${#numbers.formatInteger(s.dedAmt,0)}">0</td>
+                  <td th:text="${#numbers.formatInteger(s.totAmt,0)}">0</td>
+                  <td th:text="${#numbers.formatInteger(s.netAmt,0)}">0</td>
+                  <td>
+                    <span class="badge"
+                          th:classappend="${s.status}=='CONFIRMED' ? ' bg-success' : ' bg-secondary'"
+                          th:text="${s.status}">BATCH ALL</span>
+                  </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(slips)}">
+                  <td colspan="9" class="text-muted py-4">표시할 데이터가 없습니다.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. 급여 명세서 관리 -->
+      <section class="card shadow-sm">
+        <div class="card-body">
+          <h3 class="h5 mb-3 border-start ps-2">2. 급여 명세서 관리</h3>
+          <p class="text-secondary">
+            확정된 급여 계산 결과를 바탕으로 <strong>월별 급여 명세서</strong>를 사원별로 자동 생성하고 PDF 파일로 제공합니다.
+          </p>
+
+          <div class="row g-3 align-items-center mb-3">
+            <div class="col-auto">
+              <label for="payroll_month" class="col-form-label fw-semibold">명세서 생성 월</label>
+            </div>
+            <div class="col-auto">
+              <select id="payroll_month" class="form-select form-select-sm">
+                <option th:each="m : ${months}"
+                        th:value="${m}"
+                        th:selected="${m==yyyymm}"
+                        th:text="${#strings.substring(m,0,4)} + '년 ' + ${#strings.substring(m,4,6)} + '월'">
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-success">명세서 일괄 생성</button>
+            <button type="button" class="btn btn-outline-secondary">생성 현황 확인</button>
+            <button type="button" class="btn btn-outline-secondary">명세서 PDF 일괄 다운로드</button>
+          </div>
+
+          <p class="text-muted mt-3 mb-0">* 명세서는 생성 즉시 사원 포털에서 조회 가능합니다.</p>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      // 월 변경 시 페이지 리다이렉트
+      const monthSel = document.getElementById('calc_month');
+      if (monthSel) {
+        monthSel.addEventListener('change', (e) => {
+          const mm = e.target.value;
+          location.href = '/pay/calc?yyyymm=' + mm;
+        });
+      }
+
+      // 시뮬레이션/확정 후 상태 박스를 빠르게 동기화하고 싶다면 사용:
+      async function refreshStatus(mm) {
+        try {
+          const res = await fetch(`/pay/calc/status?yyyymm=${mm}`, { headers: { 'Accept':'application/json' }});
+          if (!res.ok) return;
+          const s = await res.json();
+
+          // 숫자 포맷 간단 처리
+          const fmt = (n)=> (n ?? 0).toLocaleString();
+
+          document.getElementById('statMonth').textContent = mm;
+          document.getElementById('statCalc').textContent  = s.calculated ? '계산 완료' : '미계산';
+          document.getElementById('statCount').textContent = `건수 ${s.count}`;
+          document.getElementById('statTot').textContent   = fmt(s.totalAmt);
+          document.getElementById('statDed').textContent   = fmt(s.dedAmt);
+          document.getElementById('statNet').textContent   = fmt(s.netAmt);
+
+          const box = document.getElementById('statusBox');
+          box.classList.remove('alert-success','alert-warning');
+          box.classList.add(s.calculated ? 'alert-success' : 'alert-warning');
+
+          // 확정 버튼 활성/비활성
+          const btnConfirm = document.getElementById('btnConfirm');
+          if (btnConfirm) btnConfirm.disabled = !s.calculated;
+        } catch(e) {
+          console.warn('status refresh failed', e);
+        }
+      }
+
+      // 페이지 진입 시 현재 월로 상태 동기화 (서버 렌더 값과 차이 없겠지만 안전용)
+      (function(){
+        const mm = document.getElementById('calc_month')?.value;
+        if (mm) refreshStatus(mm);
+      })();
+    </script>
+
+  </th:block>
+</th:block>

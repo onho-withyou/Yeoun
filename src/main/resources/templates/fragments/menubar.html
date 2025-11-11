@@ -13,23 +13,16 @@
             <li class="menu-item" id="main">
                 <a href="/main" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                    <div data-i18n="Analytics">Main</div>
+                    <div data-i18n="Main">Main</div>
                 </a>
             </li>
             <!-- 공지사항 -->
             <li class="menu-item" id="notice" >
-                <a href="/notice" class="menu-link">
+                <a href="/notices" class="menu-link">
                     <i class="fa-solid fa-bullhorn"></i> 
                     <div data-i18n="Analytics">공지사항</div>
                 </a>
             </li>
-<!--             <li class="menu-item active"> -->
-<!--               <a href="index.html" class="menu-link"> -->
-<!--                 <i class="menu-icon tf-icons bx bx-home-circle"></i> -->
-<!--                 <div data-i18n="Analytics">미리보기</div> -->
-<!--               </a> -->
-<!--             </li> -->
-
             <li class="menu-header small text-uppercase">
               <!-- <span class="menu-header-text">ERP</span> -->
             </li>
@@ -120,7 +113,7 @@
                         </a>
                     </li>
                     <li class="menu-item">
-                         <a th:href="@{/pay/payroll_payslip}" class="menu-link">
+                         <a th:href="@{/pay/calc}" class="menu-link">
                             <div data-i18n="Menu2" class="menu-link-sub">급여계산</div>
                         </a>
                     </li>
@@ -132,7 +125,7 @@
                 </ul>
             </li>
             <li class="menu-item">
-                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <a href="/setting/setting_doc" class="menu-link">
                     <div data-i18n="Setting" class="menu-link-sub">Setting</div>
                 </a>
                 <ul class="menu-sub">

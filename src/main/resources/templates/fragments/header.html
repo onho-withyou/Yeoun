@@ -1,6 +1,10 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:fragment="nav">
+	<head>
+	<style>
+	</style>
+	</head>
 		<nav
             class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
             id="layout-navbar"
@@ -8,6 +12,18 @@
             <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
               <ul class="navbar-nav flex-row align-items-center ms-auto dropdown">
               	<li class="nav-item lh-1 me-3">
+              		<span id="badge_payment" style="
+				            position: relative;
+						    top: -12px;
+						    left: 45px;
+						    background-color: red;
+						    color: rgb(255, 255, 255);
+						    border-radius: 15px;
+						    padding: 3px 8px;
+						    border-color: rgb(255, 255, 255);
+						    font-size: 12px;
+						    display: none;
+				  	"></span>
                     <i class="icon-base bx bx-folder icon" data-bs-toggle="dropdown" id="payment"></i> 
 				    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
 					  <li><a class="dropdown-item" href="#">Action</a></li>
@@ -18,8 +34,20 @@
 					</ul>
                 </li>
               	<li class="nav-item lh-1 me-3"> 
+              	<span id="badge_bell" style="
+				         position: relative;
+						 top: -12px;
+						 left: 45px;
+						 background-color: red;
+						 color: rgb(255, 255, 255);
+						 border-radius: 15px;
+						 padding: 3px 8px;
+						 border-color: rgb(255, 255, 255);
+						 font-size: 12px;
+						 display: none;
+				  "></span>
                    <i class="icon-base bx bx-bell icon" data-bs-toggle="dropdown" id="bell"></i>  
-                   <ul class="dropdown-menu dropdown-menu-dark">
+                   <ul class="dropdown-menu">
 					  <li><a class="dropdown-item" href="#">bell</a></li>
 					  <li><a class="dropdown-item" href="#">알림</a></li>
 					  <li><a class="dropdown-item" href="#">공지사항</a></li>
@@ -28,6 +56,18 @@
 					</ul>
                 </li>
               	<li class="nav-item lh-1 me-3">
+              		<span id="badge_chat" style="
+				        position: relative;
+						top: -12px;
+						left: 45px;
+						background-color: blue;
+						color: rgb(255, 255, 255);
+						border-radius: 15px;
+						padding: 3px 8px;
+						border-color: rgb(255, 255, 255);
+						font-size: 12px;
+						display: none;
+				  	"></span>
                    <i class="icon-base bx bx-chat icon" data-bs-toggle="dropdown" id="chat"></i>
                    <ul class="dropdown-menu">
 					  <li><a class="dropdown-item" href="#">점심시간입니다.</a></li>
@@ -47,26 +87,76 @@
             </div>
           </nav>
 		  <script>
+			//Resources
+		  
          	const payment = document.getElementById("payment");
       		const bell = document.getElementById("bell");
       		const chat = document.getElementById("chat");
           	const nameTag = document.getElementById("name");
         	const loginTag = document.getElementById("login");
-        	   
-    		payment.addEventListener("click",function(){
-          		if(payment.src.match("payment-doc.png")) payment.src ="/icon/payment-doc-ring.png";
-          		else payment.src ="/icon/payment-doc.png";
+
+        	const badgePayment = document.getElementById("badge_payment");
+        	const badgeBell = document.getElementById("badge_bell");
+        	const badgeChat = document.getElementById("badge_chat");
+            this.pamentCount = 0;
+            this.bellCount = 0;
+            this.chatCount = 0;
+
+    		payment.addEventListener("click",()=>{
+    			
+    		    if(badgePayment.style.display === 'none'){
+    		    	this.pamentCount += 1;
+    		    	badgePayment.textContent = this.pamentCount;
+    		    	badgePayment.style.display = 'unset';
+    		    }else {
+    		    	badgePayment.style.display = 'none';
+    		    }
+    		});
+
+    		
+    		bell.addEventListener("click",()=>{
+    			if(badgeBell.style.display === 'none'){
+       		    	this.bellCount += 1;
+       		    	badgeBell.textContent = this.bellCount;
+       		    	badgeBell.style.display = 'block';
+       		    }else {
+       		    	badgeBell.style.display = 'none';
+       		    }
       		});
     		
-    		bell.addEventListener("click",function(){
-    			if(bell.src.match("bell.png")) bell.src ="/icon/bell-ring.png";
-          		else bell.src ="/icon/bell.png";
+    		chat.addEventListener("click",()=>{
+    	    	 window.open(
+    			    "/messenger/popup",
+    			    "messengerPop",
+    			    "noopener,noreferrer,width=600,height=800,left=200,top=100,resizable=no"
+    			 );
+            	/*const iframe = document.createElement("iframe");
+    			iframe.src = "/messenger/popup";
+    			iframe.style.position = "fixed";
+    			iframe.style.right = "20px";
+    			iframe.style.bottom = "20px";
+    			iframe.style.width = "400px";
+    			iframe.style.height = "600px";
+    			iframe.style.border = "1px solid #ccc";
+    			iframe.style.boxShadow = "0 0 12px rgba(0,0,0,0.2)";
+    			iframe.style.borderRadius = "12px";
+    			iframe.style.zIndex = "9999";
+    			document.body.appendChild(iframe);*/
+    			
+    			/*if(badgeChat.style.display === 'none')  {
+          		   	this.chatCount += 1;
+          		   	badgeChat.textContent = this.chatCount;
+          		   	badgeChat.style.display = 'block';
+          		}else {
+          			badgeChat.style.display = 'none';
+          		}*/
       		});
     		
-    		chat.addEventListener("click",function(){
-      			if(chat.src.match("chat.png")) chat.src ="/icon/chat-ring.png";
-      			else chat.src ="/icon/chat.png";
-      		});
+    		window.addEventListener("message", (event) => {
+   			  if (event.data === "closeMessengerFrame") {
+   			    document.querySelector("iframe[src='/messenger/popup']")?.remove();
+   			  }
+   			});
    
            	nameTag.addEventListener("click",function() {
         		if(nameTag.innerText === '이름 (사번)') nameTag.innerText = '사용자 정보';

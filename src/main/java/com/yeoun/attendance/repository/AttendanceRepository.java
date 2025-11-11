@@ -12,4 +12,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 	// 사원 ID 및 현재 날짜 기준으로 출/퇴근 데이터 조회
 	Optional<Attendance> findByEmpIdAndWorkDate(String empId, LocalDate now);
 
+	// 출근 기록 있는지 확인
+	boolean existsByEmpIdAndWorkDate(String empId, LocalDate today);
+
 }
