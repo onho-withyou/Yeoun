@@ -9,6 +9,7 @@ import lombok.*;
 import org.hibernate.annotations.*;
 
 import com.yeoun.pay.enums.ActiveStatus;
+import com.yeoun.pay.enums.CalcMethod;
 import com.yeoun.pay.enums.RuleType;
 import com.yeoun.pay.enums.TargetType;
 
@@ -52,6 +53,11 @@ public class PayCalcRule {
  @Column(name = "RULE_TYPE", length = 10, nullable = false)
  @Comment("규칙 타입: AMT/RATE/FORMULA")
  private RuleType ruleType;
+ 
+ @Enumerated(EnumType.STRING)
+ @Column(name = "CALC_METHOD", length = 12, nullable = false)
+ @Comment("계산 타입: FIXED / RATE / FORMULA / EXTERNAL")
+ private CalcMethod calcMethod; 
 
  @Column(name = "START_DATE")
  @Comment("적용 시작일")
@@ -90,4 +96,19 @@ public class PayCalcRule {
  @ColumnDefault("'ACTIVE'")
  @Comment("사용 상태: ACTIVE/INACTIVE")
  private ActiveStatus status;
+
+//급여 계산용
+public BigDecimal getAmount() {
+  return this.valueNum;
+}
+
+public BigDecimal getRate() {
+  return this.valueNum;
+}
+
+public String getExpr() {
+  return this.calcFormula;
+}
+
+ 
 }
