@@ -84,10 +84,10 @@
                   <td th:text="${c.ruleId}">1</td>
                   <!-- ✅ itemCode 표시 수정 -->
                   <td class="fw-semibold" th:text="${c.item != null ? c.item.itemCode : ''}">ITEM001</td>
-                  <td th:text="${c.ruleType}">AMT</td>
+                  <td th:text="${c.ruleType.label}"></td>
                   <td th:text="${#temporals.format(c.startDate,'yyyy-MM-dd')}"></td>
                   <td th:text="${c.endDate != null ? #temporals.format(c.endDate,'yyyy-MM-dd') : ''}"></td>
-                  <td th:text="${c.targetType}">EMP</td>
+                  <td th:text="${c.targetType.label}"></td>
                   <td th:text="${c.targetCode}">M2-1</td>
                   <td class="text-end amount">
                     <span th:if="${c.ruleType?.name()=='AMT'}"
@@ -108,11 +108,14 @@
                             data-bs-toggle="modal"
                             th:attr="data-bs-target=${'#calcEditModal-' + c.ruleId}">수정</button>
                     
-                   <form th:action="@{'/pay/rule_calc/' + ${c.ruleId}}" method="post" style="display:inline;"
-				      onsubmit="return confirm('규칙 No. ' + '[[${c.ruleId}]]' + '을(를) 정말로 삭제하시겠습니까?');">
-				    <input type="hidden" name="_method" value="DELETE">
-				    <button class="btn btn-sm btn-outline-danger" type="submit">삭제</button>
+                   <form th:action="@{'/pay/rule_calc/' + ${c.ruleId}}"
+				      method="post"
+				      style="display:inline;"
+				      th:onsubmit="|return confirm('규칙 No. ' + '${c.ruleId}' + '을(를) 정말로 삭제하시겠습니까?');|">
+				  <input type="hidden" name="_method" value="DELETE">
+				  <button class="btn btn-sm btn-outline-danger" type="submit">삭제</button>
 					</form>
+
                   </td>
                     
                 </tr>
@@ -191,7 +194,8 @@
                 <div class="col-md-4">
                   <label class="form-label">대상구분</label>
                   <select class="form-select" th:field="*{targetType}">
-                    <option value="">(선택)</option>
+                    <option value="">(선택)</option>                    
+                    <option value="ALL">전체</option>
                     <option value="EMP">사원</option>
                     <option value="DEPT">부서</option>
                     <option value="GRADE">직책</option>
@@ -290,6 +294,7 @@
                     <label class="form-label">대상구분</label>
                     <select name="targetType" class="form-select">
                       <option value=""></option>
+                      <option value="ALL"   th:selected="${c.targetType?.name()=='ALL'}">전체</option>
                       <option value="EMP"   th:selected="${c.targetType?.name()=='EMP'}">사원</option>
                       <option value="DEPT"  th:selected="${c.targetType?.name()=='DEPT'}">부서</option>
                       <option value="GRADE" th:selected="${c.targetType?.name()=='GRADE'}">직책</option>
@@ -326,112 +331,137 @@
       </div>
     </div>
 
+
+
+<script>
+  /* ===== 공통 유틸 ===== */
+  const onlyDigitsDot = (s)=> (s||'').replace(/[^\d.]/g,'');
+  const onlyDigits    = (s)=> (s||'').replace(/[^\d]/g,'');
+  const formatAmount  = (v)=> (v===''||v==null) ? '' : Number(v).toLocaleString('ko-KR');
+  const parseAmount   = (v)=> Number(onlyDigits(v));
+
+  /* ===== 보이기/숨기기 보강 함수 (class + hidden + style.display 동시 처리) ===== */
+  function showEl(el){
+    if(!el) return;
+    el.classList.remove('d-none');
+    el.hidden = false;
+    el.style.display = ''; // bootstrap col은 기본 block이 아님, 원래 흐름 사용
+  }
+  function hideEl(el){
+    if(!el) return;
+    el.classList.add('d-none');
+    el.hidden = true;
+    el.style.display = 'none';
+  }
+
+  /* ===== 생성 모달 (등록) ===== */
+  (function initCreate(){
+    const modal = document.getElementById('calcCreateModal');
+    if(!modal) return;
+
+    const form       = document.getElementById('calc-create-form');
+    // thymeleaf가 name="ruleType" 로 출력되긴 하지만 안전하게 이중 선택자
+    const typeSel    = modal.querySelector('select[name="ruleType"], select[th\\:field="*{ruleType}"]');
+    const valueBox   = modal.querySelector('.create-value');
+    const formulaBox = modal.querySelector('.create-formula');
+    const startEl    = modal.querySelector('input[name="startDate"]');
+    const endEl      = modal.querySelector('input[name="endDate"]');
+
+    function syncCreateFields(){
+      const t = typeSel?.value || '';
+      if(t === 'FORMULA'){ hideEl(valueBox); showEl(formulaBox); }
+      else { hideEl(formulaBox); showEl(valueBox); }
+    }
+
+    // 초기 동기화 + 변경 시 토글
+    syncCreateFields();
+    typeSel?.addEventListener('change', syncCreateFields);
+
+    // 입력 보정 & 날짜 min
+    modal.addEventListener('input', (e)=>{
+      if(e.target.matches('.amount-input')){
+        if(typeSel?.value === 'AMT') e.target.value = formatAmount(parseAmount(e.target.value));
+        else                         e.target.value = onlyDigitsDot(e.target.value); // RATE
+      }
+      if(e.target.name==='startDate' || e.target.name==='endDate'){
+        if(startEl?.value && endEl) endEl.min = startEl.value;
+      }
+    });
+
+    // 제출 직전 정규화/검증
+    form?.addEventListener('submit', (e)=>{
+      const t = typeSel?.value;
+      const v = form.querySelector('input[name="valueNum"], .amount-input');
+
+      if(v){
+        if(t==='AMT')  v.value = onlyDigits(v.value);    // 콤마 제거
+        if(t==='RATE') v.value = onlyDigitsDot(v.value); // 숫자+점
+      }
+      if(startEl?.value && endEl?.value && endEl.value < startEl.value){
+        e.preventDefault(); e.stopPropagation();
+        endEl.setCustomValidity('종료일은 시작일 이후여야 합니다');
+      } else {
+        endEl?.setCustomValidity('');
+      }
+      if(!form.checkValidity()){
+        e.preventDefault(); e.stopPropagation();
+        form.classList.add('was-validated');
+      }
+    });
+  })();
+
+  /* ===== 수정 모달 (여러 개) ===== */
+  document.addEventListener('shown.bs.modal', (evt)=>{
+    const m = evt.target;
+    if(!m.classList.contains('modal')) return;
+
+    const typeSel    = m.querySelector('select[name="ruleType"], select[th\\:field="*{ruleType}"]');
+    const valueBox   = m.querySelector('.edit-value');
+    const formulaBox = m.querySelector('.edit-formula');
+    const startEl    = m.querySelector('input[name="startDate"]');
+    const endEl      = m.querySelector('input[name="endDate"]');
+
+    function syncEditFields(){
+      if(!typeSel) return;
+      if(typeSel.value==='FORMULA'){ hideEl(valueBox); showEl(formulaBox); }
+      else { hideEl(formulaBox); showEl(valueBox); }
+    }
+
+    // 모달 열릴 때 1회 + 변경 시
+    syncEditFields();
+    typeSel?.addEventListener('change', syncEditFields);
+
+    m.addEventListener('input', (e)=>{
+      if(e.target.matches('.amount-input')){
+        if(typeSel?.value==='AMT') e.target.value = formatAmount(parseAmount(e.target.value));
+        else                       e.target.value = onlyDigitsDot(e.target.value);
+      }
+      if(e.target.name==='startDate' || e.target.name==='endDate'){
+        if(startEl?.value && endEl) endEl.min = startEl.value;
+      }
+    });
+
+    const editForm = m.querySelector('form');
+    editForm?.addEventListener('submit', (e)=>{
+      const v = editForm.querySelector('input[name="valueNum"], .amount-input');
+      if(v){
+        if(typeSel?.value==='AMT')  v.value = onlyDigits(v.value);
+        if(typeSel?.value==='RATE') v.value = onlyDigitsDot(v.value);
+      }
+      if(startEl?.value && endEl?.value && endEl.value < startEl.value){
+        e.preventDefault(); e.stopPropagation();
+        endEl.setCustomValidity('종료일은 시작일 이후여야 합니다');
+      } else {
+        endEl?.setCustomValidity('');
+      }
+      if(!editForm.checkValidity()){
+        e.preventDefault(); e.stopPropagation();
+        editForm.classList.add('was-validated');
+      }
+    });
+  });
+</script>
   </th:block> <!-- /content -->
 
-  <!-- 페이지 전용 스크립트: 레이아웃의 myScript 슬롯에 꽂힘 -->
-  <th:block layout:fragment="myScript">
-    <script>
-      function onlyDigitsDot(str){ return (str||'').replace(/[^\d.]/g,''); }
-      function onlyDigits(str){ return (str||'').replace(/[^\d]/g,''); }
-      function formatAmount(v){ if(v===''||v==null) return ''; return Number(v).toLocaleString('ko-KR'); }
-      function parseAmount(v){ return Number(onlyDigits(v)); }
-
-      const createModal = document.getElementById('calcCreateModal');
-      if(createModal){
-        const form = document.getElementById('calc-create-form');
-        const typeSel = createModal.querySelector('[name="ruleType"]');
-        const valueBox = createModal.querySelector('.create-value');
-        const formulaBox = createModal.querySelector('.create-formula');
-        const endEl = createModal.querySelector('[name="endDate"]');
-        const startEl = createModal.querySelector('[name="startDate"]');
-
-        typeSel.addEventListener('change', () => {
-          const t = typeSel.value;
-          if(t === 'FORMULA'){ valueBox.classList.add('d-none'); formulaBox.classList.remove('d-none'); }
-          else { formulaBox.classList.add('d-none'); valueBox.classList.remove('d-none'); }
-        });
-
-        createModal.addEventListener('input', e=>{
-          if(e.target.matches('.amount-input')){
-            if(typeSel.value==='AMT'){ e.target.value = formatAmount(parseAmount(e.target.value)); }
-            else { e.target.value = onlyDigitsDot(e.target.value); }
-          }
-          if(e.target.name==='startDate' || e.target.name==='endDate'){
-            if(startEl.value){ endEl.min = startEl.value; }
-          }
-        });
-
-        form.addEventListener('submit', e=>{
-          const t = typeSel.value;
-          const v = form.querySelector('.amount-input');
-          if(v){
-            if(t==='AMT'){ v.value = onlyDigits(v.value); }
-            else if(t==='RATE'){ v.value = onlyDigitsDot(v.value); }
-          }
-          if(!form.checkValidity()){
-            e.preventDefault(); e.stopPropagation();
-            form.classList.add('was-validated');
-          }
-          if(startEl.value && endEl.value && endEl.value < startEl.value){
-            e.preventDefault(); e.stopPropagation();
-            endEl.setCustomValidity('종료일은 시작일 이후여야 합니다');
-            form.classList.add('was-validated');
-          }else{
-            endEl.setCustomValidity('');
-          }
-        });
-      }
-
-      document.addEventListener('shown.bs.modal', (evt)=>{
-        const m = evt.target;
-        if(!m.classList.contains('modal')) return;
-
-        const typeSel = m.querySelector('select[name="ruleType"]');
-        const valueBox = m.querySelector('.edit-value');
-        const formulaBox = m.querySelector('.edit-formula');
-        const startEl = m.querySelector('input[name="startDate"]');
-        const endEl = m.querySelector('input[name="endDate"]');
-
-        if(typeSel){
-          const sync = ()=>{
-            if(typeSel.value==='FORMULA'){ valueBox?.classList.add('d-none'); formulaBox?.classList.remove('d-none'); }
-            else { formulaBox?.classList.add('d-none'); valueBox?.classList.remove('d-none'); }
-          };
-          sync();
-          typeSel.addEventListener('change', sync);
-        }
-
-        m.addEventListener('input', (e)=>{
-          if(e.target.matches('.amount-input')){
-            if(typeSel?.value==='AMT'){ e.target.value = formatAmount(parseAmount(e.target.value)); }
-            else { e.target.value = onlyDigitsDot(e.target.value); }
-          }
-          if(e.target.name==='startDate' || e.target.name==='endDate'){
-            if(startEl && startEl.value && endEl){ endEl.min = startEl.value; }
-          }
-        });
-      });
-      
-   // 모든 폼 제출 시 숫자 정규화(특히 수정 모달)
-      document.addEventListener('submit', (e) => {
-        const form = e.target;
-        // 계산규칙 생성/수정 폼만 타겟팅
-        if (!form.matches('#calc-create-form') && !form.closest('.modal')) return;
-
-        const typeSel = form.querySelector('select[name="ruleType"]');
-        const v = form.querySelector('input[name="valueNum"]');
-        if (!typeSel || !v) return;
-
-        // 제출 직전에 서버가 파싱 가능한 형태로 정규화
-        if (typeSel.value === 'AMT') {
-          // 금액: 숫자만 남김 (콤마 제거)
-          v.value = (v.value || '').replace(/[^\d]/g, '');
-        } else if (typeSel.value === 'RATE') {
-          // 비율: 숫자와 점만 허용
-          v.value = (v.value || '').replace(/[^0-9.]/g, '');
-        }
-      });
-    </script>
-  </th:block>
-
 </th:block>
+
