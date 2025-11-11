@@ -56,6 +56,8 @@ public class PayCalcRuleService {
     /** [D] 삭제 */
     public void delete(Long ruleId) {
         payCalcRuleRepository.deleteById(ruleId);
+        
+        
     }
 
     /* ==================== 내부 검증/도우미 ==================== */
@@ -143,5 +145,9 @@ public class PayCalcRuleService {
     public List<PayCalcRule> findAllOrderByPriority() {
         return payCalcRuleRepository.findAllByOrderByPriorityAsc();
     }
+
+	
+
+
 
 }

@@ -21,14 +21,16 @@ public interface PayCalcRuleRepository extends JpaRepository<PayCalcRule, Long> 
     @Query("""
         select r
           from PayCalcRule r
-         where r.item.itemCode = :itemCode
-           and coalesce(r.targetType, 'ALL') = coalesce(:targetType, 'ALL')
-           and coalesce(r.targetCode, '')   = :targetCode
+         where r.item.itemCode = :itemCode          
+          
+           and (:targetType IS NULL OR r.targetType = :targetType)           
+         
+           and coalesce(r.targetCode, '') = :targetCode
         """)
     List<PayCalcRule> findForOverlapCheck(@Param("itemCode") String itemCode,
                                           @Param("targetType") TargetType targetType,
                                           @Param("targetCode") String targetCode);
 
-		
-	List<PayCalcRule> findAllByOrderByPriorityAsc();
+    
+    List<PayCalcRule> findAllByOrderByPriorityAsc();
 }
