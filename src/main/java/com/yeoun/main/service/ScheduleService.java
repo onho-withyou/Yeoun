@@ -35,7 +35,8 @@ public class ScheduleService {
 	// 일정 등록로직
 	public void createSchedule(@Valid ScheduleDTO scheduleDTO) {
 		
-		scheduleDTO.setCreatedUser(1102L); 
+		scheduleDTO.setCreatedUser(1102L);
+		
 		if(scheduleDTO.getAlldayYN() != "Y") {
 			scheduleDTO.setAlldayYN("N");
 		}

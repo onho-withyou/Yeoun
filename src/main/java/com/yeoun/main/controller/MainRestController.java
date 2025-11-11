@@ -31,7 +31,6 @@ public class MainRestController {
 		
 		List<ScheduleDTO> scheduleDTOList = scheduleService.getScheduleList(startDate, endDate);
 		
-		System.out.println(scheduleDTOList);
 		return ResponseEntity.ok(scheduleDTOList);
 	}
 	

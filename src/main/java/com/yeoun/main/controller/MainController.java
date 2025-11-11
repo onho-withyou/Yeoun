@@ -52,11 +52,17 @@ public class MainController {
 	@PostMapping("/schedule")
 	public ResponseEntity<Map<String, String>> postMethodName(@ModelAttribute("scheduleDTO")@Valid ScheduleDTO scheduleDTO, BindingResult bindingResult) {
 		Map<String, String> msg = new HashMap<>();
+		
+		System.out.println("scheduleDTO" + scheduleDTO);
+		
 		if(bindingResult.hasErrors()) {
+			System.out.println("dddddddddddddddddddd");
 			msg.put("msg", "일정 등록에 실패했습니다.2222222222");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		}
 		try {
+			System.out.println(scheduleDTO);
+			
 			scheduleService.createSchedule(scheduleDTO);
 			msg.put("msg", "일정이 등록되었습니다.");
 			return ResponseEntity.ok(msg);
