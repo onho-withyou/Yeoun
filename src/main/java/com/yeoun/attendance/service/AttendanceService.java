@@ -115,12 +115,7 @@ public class AttendanceService {
 			// optional이 존재하면 변경된 부분 업데이트
 			if (optional.isPresent()) {
 				WorkPolicy policy = optional.get();
-				policy.setInTime(workPolicyDTO.getInTime());
-				policy.setOutTime(workPolicyDTO.getOutTime());
-				policy.setLunchIn(workPolicyDTO.getLunchIn());
-				policy.setLunchOut(workPolicyDTO.getLunchOut());
-				policy.setLateLimit(workPolicyDTO.getLateLimit());
-				policy.setAnnualBasis(workPolicyDTO.getAnnualBasis());
+				policy.changePolicy(workPolicyDTO);
 				
 				return "근무 정책이 수정되었습니다.";
 			} else {

@@ -6,6 +6,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.yeoun.attendance.dto.WorkPolicyDTO;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -58,4 +60,14 @@ public class WorkPolicy {
 	
 	@LastModifiedDate
 	private LocalDate updatedDate;
+
+	// 근무정책 변경
+	public void changePolicy(WorkPolicyDTO workPolicyDTO) {
+		this.inTime = workPolicyDTO.getInTime();
+		this.outTime = workPolicyDTO.getOutTime();
+		this.lunchIn = workPolicyDTO.getLunchIn();
+		this.lunchOut = workPolicyDTO.getLunchOut();
+		this.lateLimit = workPolicyDTO.getLateLimit();
+		this.annualBasis = workPolicyDTO.getAnnualBasis();
+	}
 }
