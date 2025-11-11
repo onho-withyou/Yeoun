@@ -1,6 +1,6 @@
 package com.yeoun.emp.entity;
 
-import com.yeoun.common.entity.Role;
+import com.yeoun.auth.entity.Role;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
