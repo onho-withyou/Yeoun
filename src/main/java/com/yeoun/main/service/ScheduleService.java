@@ -11,10 +11,8 @@ import org.springframework.stereotype.Service;
 import com.yeoun.emp.dto.DeptDTO;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
-import com.yeoun.emp.entity.Employment;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.EmpRepository;
-import com.yeoun.emp.repository.EmploymentRepository;
 import com.yeoun.main.dto.ScheduleDTO;
 import com.yeoun.main.entity.Schedule;
 import com.yeoun.main.repository.ScheduleRepository;
@@ -30,7 +28,6 @@ public class ScheduleService {
 	private final ScheduleRepository scheduleRepository;
 	private final DeptRepository deptRepository;
 	private final EmpRepository empRepository;
-	private final EmploymentRepository employmentRepository;
 	// --------------------------------------------------
 	
 	//일정 등록모달 부서리스트 가져오기
@@ -65,10 +62,7 @@ public class ScheduleService {
 		String empId = authentication.getName();
 		// empId로 로그인한 emp엔티티 정보 조회
 		Emp emp = empRepository.findById(empId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다.111"));
-		
-		Employment employment = employmentRepository.findByEmp(emp).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다."));
-		
-		Dept myDept = employment.getDept();
+		Dept myDept = emp.getDept();
 		String myDeptId = myDept.getDeptId();
 		String myDeptName = myDept.getDeptName();
 		
@@ -81,7 +75,7 @@ public class ScheduleService {
 		if(!scheduleList.isEmpty()) {
 			for(Schedule schedule : scheduleList) {
 				String scheduleType = schedule.getScheduleType();
-				if(scheduleType.equals("company")) { // 스케줄종류의 값에따라 보여줄 데이터로 변환
+				if(scheduleType.equals("company")) {
 					schedule.setScheduleType("회사");
 				} else if(scheduleType.equals(authentication.getName())) {
 					schedule.setScheduleType("개인");
@@ -93,6 +87,7 @@ public class ScheduleService {
 				schedule.setCreatedUser(scheduleEmp.getEmpName());
 				scheduleList2.add(schedule);
 			}
+			// 작성자 empId로 이름 조회후 변경 필요
 			
 		}
 		
@@ -125,6 +120,7 @@ public class ScheduleService {
 		Schedule schedule = scheduleRepository.findById(scheduleDTO.getScheduleId()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 일정입니다."));
 		schedule.changeSchedule(scheduleDTO);
 	}
+
 
 }
 

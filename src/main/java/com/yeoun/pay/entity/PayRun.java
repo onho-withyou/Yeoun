@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.Comment;
 
+import com.yeoun.pay.enums.CalcStatus;
 import com.yeoun.pay.enums.CalcType;
-import com.yeoun.pay.enums.RunStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -59,7 +59,7 @@ public class PayRun {
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS", length = 20, nullable = false)
     @Comment("계산 상태: SIMULATED(시뮬레이션), CALCULATED(계산 완료), CONFIRMED(확정), CANCELLED(취소)")
-    private RunStatus status;
+    private CalcStatus status;
 
     // 요청자 (EMPLOYEE FK 예정)
     @Column(name = "REQ_USER", columnDefinition = "NUMBER(18)")
@@ -84,7 +84,7 @@ public class PayRun {
     @PrePersist
     public void prePersist() {
         if (this.calcType == null) this.calcType = CalcType.BATCH_ALL;
-        if (this.status == null) this.status = RunStatus.SIMULATED;
+        if (this.status == null) this.status =CalcStatus.SIMULATED;
         if (this.startedDate == null) this.startedDate = LocalDateTime.now();
     }
 }
