@@ -1,5 +1,11 @@
 @charset "UTF-8";
 
+/* 정보 필수 기입 */
+.form-label.required::after {
+  content: " *";
+  color: var(--bs-danger);
+}
+
 /* 폰트 */
 :root{
   --bs-font-sans-serif: "Noto Sans KR","Public Sans",system-ui,-apple-system,
