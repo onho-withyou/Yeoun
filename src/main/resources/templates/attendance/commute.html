@@ -6,6 +6,7 @@
 <body>
 	<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
 		<h3>나의 출퇴근 현황</h3>
+		<h4 th:text="${#authentication.name}"></h4>
 		<div class="d-flex justify-content-between">
 			<div class="row flex-nowrap">
 				<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0">
