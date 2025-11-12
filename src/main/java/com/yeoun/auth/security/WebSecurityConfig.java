@@ -10,7 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-//@EnableWebSecurity	// 스프링 시큐리티 기능 설정 클래스로 지정
+@EnableWebSecurity	// 스프링 시큐리티 기능 설정 클래스로 지정
 public class WebSecurityConfig {
 	
 	// 시큐리티 정보 조회에 사용할 서비스 클래스 주입
@@ -39,7 +39,7 @@ public class WebSecurityConfig {
 					.requestMatchers("/assets/**", "/css/**", "/custom_bg/**", "/icon/**", "/js/**").permitAll()
 					
 					// 공개 페이지
-					.requestMatchers("/", "/main", "/login", "/logout", "/emp", "/emp/**").permitAll()
+					.requestMatchers("/", "/main", "/login", "/logout").permitAll()
 				
 //					// HR/인사 화면: URL은 “로그인만” 통과 → 세부 권한은 메소드 보안에서
 //				    .requestMatchers("/emp/**").authenticated()
@@ -69,7 +69,7 @@ public class WebSecurityConfig {
 				.rememberMe(rememberMeCustormizer -> rememberMeCustormizer
 						.rememberMeParameter("remember-me") // 자동 로그인 수행을 위한 체크박스 파라미터명 지정(체크 여부 자동으로 판별)
 						.key("my-fixed-secret-key") // 서버 재시작해도 이전 로그인에서 사용했던 키 동일하게 사용
-						.tokenValiditySeconds(60 * 60 * 24) // 자동 로그인 토큰 유효기간 설정(기본값 14일 => 1일로 변경)
+						.tokenValiditySeconds(60 * 60 * 24 * 30) // 자동 로그인 토큰 유효기간 설정(30일)
 				)
 				.build();
     }
