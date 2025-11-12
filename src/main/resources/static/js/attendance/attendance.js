@@ -60,7 +60,7 @@ const searchEmp = async () => {
 			empName.value = data.empName;
 		}
 	} catch (error) {
-		console.erro("사원 조회 중 오류 : " , error);
+		console.error("사원 조회 중 오류 : " , error);
 		alert("사원 조회 중 오류가 발생했습니다.");
 	}
 }
@@ -105,7 +105,7 @@ const openModal = async (mode, attendanceId = null) => {
 		document.querySelector("select[name='statusCode']").value = data.statusCode;
 	} else { // 등록 모드
 		modalTitle.textContent = "출/퇴근 등록";
-		saveBtn.textContent = "등록";attendance
+		saveBtn.textContent = "등록";
 		resetModal(); // 모달 초기화
 	}
 	modalInstance.show();
@@ -120,13 +120,16 @@ const saveAttendance = async () => {
 	const statusCode = document.querySelector("select[name='statusCode']").value;
 	
 	const url = currentMode === "edit" ? `/attendance/${currentAttendanceId}` : "/attendance";
-	const method = currentMode === "edit" ? "PUT" : "POST";
+	const method = currentMode === "edit" ? "PATCH" : "POST";
 	
 	try {
 		const response = await fetch(url, {
 			method,
-			headers: {"Content-Type": "application/json" },
-			body: JSON.stringify({empId, workIn, workOut, statusCode})
+			headers: {
+				[csrfHeader]: csrfToken, 
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({empId, workIn, workOut, statusCode}),
 		});
 		
 		if (!response.ok) {
