@@ -180,7 +180,7 @@ body {
   background-color: #fff !important;
   border-bottom: 1px solid #d9dee3 !important;
   text-align: center !important;
-  padding: 0.625rem 1.25rem !important;
+/*   padding: 0.625rem 1.25rem !important; */
 }
 
 /* 짝수 줄 배경 (Bootstrap의 striped 효과) */
