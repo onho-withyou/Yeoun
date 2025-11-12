@@ -18,7 +18,6 @@ async function attendance(empId) {
 }
 
 const handleAttendanceToggle = async (empId) => {
-//	console.log(empId);
 	const result =  await attendance(empId);
 	
 	let msg = "";

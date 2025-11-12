@@ -4,8 +4,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -88,6 +90,14 @@ public class AttendanceService {
 				attendanceDTO.getWorkOut(), attendanceDTO.getStatusCode());
 		
 		attendanceRepository.save(attendance);
+	}
+	
+	// 개인 출퇴근 기록
+	public List<AttendanceDTO> getMyAttendanceList(String empId, LocalDate startDate, LocalDate endDate) {
+		return attendanceRepository.findByEmpIdAndWorkDateBetween(empId, startDate, endDate)
+				.stream()
+				.map(AttendanceDTO::fromEntity)
+				.collect(Collectors.toList());
 	}
 	
 	// 근무정책 조회
