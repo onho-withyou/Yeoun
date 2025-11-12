@@ -39,7 +39,7 @@ public class WebSecurityConfig {
 					.requestMatchers("/assets/**", "/css/**", "/custom_bg/**", "/icon/**", "/js/**").permitAll()
 					
 					// 공개 페이지
-					.requestMatchers("/", "/main", "/login", "/logout", "/emp").permitAll()
+					.requestMatchers("/", "/main", "/login", "/logout", "/emp", "/emp/**").permitAll()
 				
 //					// HR/인사 화면: URL은 “로그인만” 통과 → 세부 권한은 메소드 보안에서
 //				    .requestMatchers("/emp/**").authenticated()
