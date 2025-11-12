@@ -5,10 +5,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.yeoun.emp.dto.DeptDTO;
 import com.yeoun.main.dto.ScheduleDTO;
 import com.yeoun.main.service.ScheduleService;
-import com.yeoun.notice.dto.NoticeDTO;
 
 import lombok.RequiredArgsConstructor;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -16,6 +16,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -33,12 +34,21 @@ public class MainRestController {
 	public ResponseEntity<List<ScheduleDTO>> schedules(
 			@RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime startDate
 			, @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime endDate
-			, Authentication authentication) {
-		
+			, Authentication authentication, Principal principal) {
 		List<ScheduleDTO> scheduleDTOList = scheduleService.getScheduleList(startDate, endDate, authentication);
 		
 //		return ResponseEntity.ok(null);
 		return ResponseEntity.ok(scheduleDTOList);
+	}
+	
+	// 단일 일정 조회
+	@GetMapping("/{scheduleId}")
+	@ResponseBody
+	public ResponseEntity<ScheduleDTO> schedules(@PathVariable("scheduleId")String scheduleId) {
+		Long scheduleIdl = Long.parseLong(scheduleId); 
+		ScheduleDTO scheduleDTO = scheduleService.getSchedule(scheduleIdl);
+		
+		return ResponseEntity.ok(scheduleDTO);
 	}
 	
 	

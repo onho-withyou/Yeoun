@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.Comment;
 
+import com.yeoun.emp.entity.Emp;
 import com.yeoun.pay.enums.CalcStatus;
 
 import jakarta.persistence.*;
@@ -21,13 +22,19 @@ import lombok.*;
 public class PayrollPayslip {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "PAYSLIP_ID", nullable = false)
-    @Comment("급여명세서 고유 ID")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PAYROLL_PAYSLIP")
+    @SequenceGenerator(name = "SEQ_PAYROLL_PAYSLIP", sequenceName = "SEQ_PAYROLL_PAYSLIP_ID", allocationSize = 1)
+    @Column(name = "PAYSLIP_ID")
     private Long payslipId;
+
 
     @Column(name = "EMP_ID", nullable = false, length = 20)
     private String empId;
+    
+    @Transient
+    public String getEmpName() {
+        return null; 
+    }
 
     @Column(name = "DEPT_ID", length = 20)
     private String deptId;
@@ -49,11 +56,11 @@ public class PayrollPayslip {
     @Builder.Default private BigDecimal incAmt = BigDecimal.ZERO;
 
     @Column(name = "DED_AMT", nullable = false, precision = 15, scale = 2)
-    @Comment("총 지급 금액")
+    @Comment("총 공제 금액")
     @Builder.Default private BigDecimal dedAmt = BigDecimal.ZERO;
 
     @Column(name = "TOT_AMT", nullable = false, precision = 15, scale = 2)
-    @Comment("총 공제 금액 ")
+    @Comment("총 지급 금액 ")
     @Builder.Default private BigDecimal totAmt = BigDecimal.ZERO;
 
     @Column(name = "NET_AMT", nullable = false, precision = 15, scale = 2)
@@ -64,15 +71,11 @@ public class PayrollPayslip {
     @Comment("계산유형")
     @Builder.Default private String calcType = "BATCH ALL";
 
-//    @Column(name = "CALC_STATUS", nullable = false, length = 20)
-//    @Comment("계산 상태")
-//    @Builder.Default private String status = "CALCULATED";
-    
-    @Enumerated(EnumType.STRING)
+   @Enumerated(EnumType.STRING)
     @Column(name = "CALC_STATUS", nullable = false, length = 20)
     @Comment("계산 상태")
     @Builder.Default
-    private CalcStatus status = CalcStatus.CALCULATED;
+    private CalcStatus calcStatus = CalcStatus.READY;
 
 
     @Column(name = "IS_PARTIAL", nullable = false, length = 1)
@@ -85,11 +88,11 @@ public class PayrollPayslip {
 
     @Column(name = "CONFIRM_USER", length = 20)
     @Comment("확정자")
-    private String confirmBy;
+    private String confirmUser;
 
     @Column(name = "CONFIRM_DATE")
     @Comment("확정일시")
-    private LocalDateTime confirmDt;
+    private LocalDateTime confirmDate;
 
     @Column(name = "PDF_PATH", length = 255)
     private String pdfPath;

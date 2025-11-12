@@ -6,6 +6,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.yeoun.main.dto.ScheduleDTO;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -61,4 +63,13 @@ public class Schedule {
 	
 	@LastModifiedDate
 	private LocalDateTime updatedDate; // 수정 일시
+	
+	public void changeSchedule(ScheduleDTO scheduleDTO) {
+		this.scheduleTitle = scheduleDTO.getScheduleTitle();
+		this.scheduleContent = scheduleDTO.getScheduleContent();
+		this.scheduleType = scheduleDTO.getScheduleType();
+		this.alldayYN = scheduleDTO.getAlldayYN();
+		this.scheduleStart = scheduleDTO.getScheduleStart();
+		this.scheduleFinish = scheduleDTO.getScheduleFinish();
+	}
 }
