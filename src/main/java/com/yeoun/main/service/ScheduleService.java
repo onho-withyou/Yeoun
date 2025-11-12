@@ -118,6 +118,13 @@ public class ScheduleService {
 		Schedule schedule = scheduleRepository.findById(scheduleDTO.getScheduleId()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 일정입니다."));
 		schedule.changeSchedule(scheduleDTO);
 	}
+	
+	//일정 정보 삭제
+	@Transactional
+	public void deleteSchedule(@Valid ScheduleDTO scheduleDTO, Authentication authentication) {
+		Schedule schedule = scheduleDTO.toEntity();
+		scheduleRepository.delete(schedule);
+	}
 
 
 }

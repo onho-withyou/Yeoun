@@ -8,6 +8,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.yeoun.emp.dto.EmpDTO;
+import com.yeoun.emp.entity.Dept;
+import com.yeoun.emp.entity.Emp;
 import com.yeoun.main.entity.Schedule;
 
 import jakarta.validation.constraints.NotBlank;
@@ -59,8 +61,39 @@ public class ScheduleDTO {
 	// ----------------------------------------------------------
 	private static ModelMapper modelMapper = new ModelMapper();
 	
+//	public Schedule toEntity() {
+//		Schedule schedule = new Schedule();
+//		return modelMapper.map(this,  Schedule.class);
+//	}
+	
 	public Schedule toEntity() {
-		return modelMapper.map(this,  Schedule.class);
+		if (this == null) return null;
+
+	    Schedule schedule = new Schedule();
+	    schedule.setScheduleId(this.getScheduleId());
+	    schedule.setScheduleTitle(this.getScheduleTitle());
+	    schedule.setScheduleContent(this.getScheduleContent());
+	    schedule.setScheduleType(this.getScheduleType());
+	    schedule.setAlldayYN(this.getAlldayYN());
+	    schedule.setScheduleStart(this.getScheduleStart());
+	    schedule.setScheduleFinish(this.getScheduleFinish());
+	    schedule.setCreatedDate(this.getCreatedDate());
+	    schedule.setUpdatedDate(this.getUpdatedDate());
+
+	    // 연관관계: Emp, Dept는 식별자만 연결(간단 버전)
+	    if (this.getCreatedUser() != null) {
+	        Emp emp = new Emp();
+	        emp.setEmpId(this.getCreatedUser());
+
+	        if (this.getDeptId() != null) {
+	            Dept dept = new Dept();
+	            dept.setDeptId(this.getDeptId());
+	            emp.setDept(dept);
+	        }
+	        schedule.setEmp(emp);
+	    }
+
+	    return schedule;
 	}
 	
 //	public static ScheduleDTO fromEntity(Schedule schedule) {

@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	})
 	
 	
-	//일정등록 모달 등록버튼 이벤트
+	//일정등록 모달 등록, 수정버튼 이벤트
 	const addScheduleForm = document.getElementById('add-schedule-form')
 	const addScheduleBtn = document.getElementById('add-schedule-btn');
 	
@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			if(confirm("수정하시겠습니까?")){
 				// 수정일때는 scheduleId 포함해서 보내기
 				addScheduleForm.scheduleId.setAttribute('name', 'scheduleId');
-				console.log("ddddddd");
+				
 				fetch('/main/schedule', {
 					method: 'PATCH'
 					, headers: {
@@ -153,7 +153,33 @@ document.addEventListener('DOMContentLoaded', function() {
 			}
 		}
 		
-	}); // 일정등록함수 끝
+	}); // 일정등록, 수정함수 끝
+	
+	// 일정조회 - 삭제버튼 이벤트
+	document.getElementById('delete-schedule-btn').addEventListener('click', function () {
+		//삭제요청보내기
+		fetch('/main/schedule', {
+			method: 'DELETE'
+			, headers: {
+				[csrfHeaderName]: csrfToken
+			}
+			, body: new FormData(addScheduleForm)
+		})
+		.then(response => {
+			if (!response.ok) {
+				throw new Error(response.msg);
+			}
+			return response.json();  //JSON 파싱
+		})
+		.then(response => { // response가 ok일때
+			alert(response.msg);
+			location.reload();
+		}).catch(error => {
+			alert("삭제에 실패하였습니다.");
+		});
+		
+		
+	}); //일정조회 - 삭제 버튼 이벤트 끝
 	
 	
 	
@@ -290,6 +316,7 @@ function openModal(mode, data = null) {
 			if (el.tagName === 'SELECT' || el.type === 'checkbox') {
 		        el.disabled = false;
 		    }
+			createdUserName.readOnly = true;
 		});
 		
 		sp.enable && sp.enable();
@@ -419,6 +446,7 @@ function openModal(mode, data = null) {
 				if (el.tagName === 'SELECT' || el.type === 'checkbox') {
 		            el.disabled = false;
 		        }
+				createdUserName.readOnly = true;
 		    });
 		}
 	}
