@@ -79,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			return response.json();  //JSON 파싱
 		})
 		.then(data => { // response가 ok일때
+			console.log(data);
 			initGrid(data);
 		}).catch(error => {
 			console.error('에러', error)
@@ -123,7 +124,6 @@ document.addEventListener('DOMContentLoaded', function() {
 				location.reload();
 			}).catch(error => {
 				alert("제목, 시작,종료 일시, 내용은 필수입력 사항입니다.");
-				location.reload();
 			});
 		} else if(addScheduleBtn.value == 'edit') {
 
@@ -149,7 +149,6 @@ document.addEventListener('DOMContentLoaded', function() {
 					location.reload();
 				}).catch(error => {
 					alert("수정에 실패하였습니다.");
-					location.reload();
 				});
 			}
 		}
@@ -205,7 +204,7 @@ function initGrid(data) {
 				},
 				{
 					header: '작성자',
-					name: 'createdUser',
+					name: 'empName',
 					sortable: true,
 					width: 70,
 					filter: {
@@ -279,6 +278,18 @@ function openModal(mode, data = null) {
 	const createdUserName = document.getElementById('createdUserName');
 	
 	if(mode === 'add') {
+		deleteBtn.disabled = false;
+		submitBtn.disabled = false;
+		Array.from(form.elements).forEach(el => {
+		    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+		        el.readOnly = false;
+		    } else if (el.tagName === 'SELECT' || el.type === 'checkbox') {
+		        el.disabled = false;
+		    }
+		});
+		
+//		picker.disable();
+		
 		modalTitle.textContent = '일정등록';
 		deleteBtn.classList.add('d-none');
 	    submitBtn.textContent = '등록';
@@ -321,6 +332,36 @@ function openModal(mode, data = null) {
 		form.alldayYN.checked = false;
 
 	} else if (mode === 'edit' && data) {
+		if (data.createdUser !== currentUserId) {
+		    // 권한 없음: 삭제, 수정 버튼 비활성화
+		    deleteBtn.disabled = true;
+		    submitBtn.disabled = true;
+			// 데이트피커 황성화
+			picker('option', 'disabled', false);
+		    // 폼 전체의 인풋/셀렉트/체크박스 등을 읽기 전용으로 만들기
+		    Array.from(form.elements).forEach(el => {
+		        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+		            el.readOnly = true;
+		        } else if (el.tagName === 'SELECT' || el.type === 'checkbox') {
+		            el.disabled = true;
+		        }
+		    });
+		} else {
+		    // 권한 있는 사용자에게는 모든 기능 활성화
+		    deleteBtn.disabled = false;
+		    submitBtn.disabled = false;
+			
+			//데이트피커 비활성화
+			picker('option', 'disabled', true);
+			
+		    Array.from(form.elements).forEach(el => {
+		        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+		            el.readOnly = false;
+		        } else if (el.tagName === 'SELECT' || el.type === 'checkbox') {
+		            el.disabled = false;
+		        }
+		    });
+		}
 		
 		modalTitle.textContent = '일정조회';
 		deleteBtn.classList.remove('d-none');
