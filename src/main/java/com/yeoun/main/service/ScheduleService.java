@@ -11,15 +11,14 @@ import org.springframework.stereotype.Service;
 import com.yeoun.emp.dto.DeptDTO;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
-import com.yeoun.emp.entity.Employment;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.EmpRepository;
-import com.yeoun.emp.repository.EmploymentRepository;
 import com.yeoun.main.dto.ScheduleDTO;
 import com.yeoun.main.entity.Schedule;
 import com.yeoun.main.repository.ScheduleRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -29,7 +28,6 @@ public class ScheduleService {
 	private final ScheduleRepository scheduleRepository;
 	private final DeptRepository deptRepository;
 	private final EmpRepository empRepository;
-	private final EmploymentRepository employmentRepository;
 	// --------------------------------------------------
 	
 	//일정 등록모달 부서리스트 가져오기
@@ -64,10 +62,7 @@ public class ScheduleService {
 		String empId = authentication.getName();
 		// empId로 로그인한 emp엔티티 정보 조회
 		Emp emp = empRepository.findById(empId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다.111"));
-		
-		Employment employment = employmentRepository.findByEmp(emp).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다."));
-		
-		Dept myDept = employment.getDept();
+		Dept myDept = emp.getDept();
 		String myDeptId = myDept.getDeptId();
 		String myDeptName = myDept.getDeptName();
 		
@@ -98,6 +93,34 @@ public class ScheduleService {
 		
 		return scheduleList2.stream().map(ScheduleDTO::fromEntity).collect(Collectors.toList());
 	}
+	
+	//단일 일정 조회
+	public ScheduleDTO getSchedule(Long scheduleId) {
+		Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 일정입니다."));
+		
+		return ScheduleDTO.fromEntity(schedule);
+	}
+
+	//일정 정보 수정
+	@Transactional
+	public void modifySchedule(@Valid ScheduleDTO scheduleDTO, Authentication authentication) {
+		// 수정된 정보 db저장값으로 변경
+		String scheduleType = scheduleDTO.getScheduleType();
+
+		if(scheduleType.equals("private")) { // 넘어온 type이 private일때 접속직원번호로 변경
+			scheduleDTO.setScheduleType(authentication.getName());
+		}
+		
+		String alldayYN = scheduleDTO.getAlldayYN();
+		if(alldayYN == null || alldayYN == "") {
+			scheduleDTO.setAlldayYN("N");
+		}
+		
+		// 입력된 스케줄id로 기존 스케줄로우 정보 받아오기
+		Schedule schedule = scheduleRepository.findById(scheduleDTO.getScheduleId()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 일정입니다."));
+		schedule.changeSchedule(scheduleDTO);
+	}
+
 
 }
 

@@ -16,14 +16,19 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	Optional<Emp> findByEmpId(String empId);
 	
 	// 사원번호 + 역할
-	@Query("SELECT DISTINCT e FROM Emp e"
-			+ " JOIN FETCH e.empRoles er"
-			+ " JOIN FETCH er.role r"
-			+ " WHERE e.empId = :empId")
-	Optional<Emp> findByEmpIdWithRoles(@Param("empId") String empId);
+	@Query("""
+			  SELECT e
+			  FROM Emp e
+			    LEFT JOIN FETCH e.dept d
+			    LEFT JOIN FETCH e.empRoles er
+			    LEFT JOIN FETCH er.role r
+			  WHERE e.empId = :empId
+			""")
+	Optional<Emp> findByEmpIdWithDeptAndRoles(@Param("empId") String empId);
 	
-//	// 사원번호 중복 확인
-//	boolean existsByEmpId(String empId);
+	// 사원번호 중복 확인
+	boolean existsByEmpId(String candidate);
+	
 //	// 이메일 중복 확인
 //	boolean existsByEmail(String email);
 

@@ -1,5 +1,11 @@
 @charset "UTF-8";
 
+/* 정보 필수 기입 */
+.form-label.required::after {
+  content: " *";
+  color: var(--bs-danger);
+}
+
 /* 폰트 */
 :root{
   --bs-font-sans-serif: "Noto Sans KR","Public Sans",system-ui,-apple-system,
@@ -136,4 +142,64 @@ body {
 .side-div {
 	display: flex;
 	padding-left: 10% !important;
+}
+
+/* 토스트 테이블 css 수정 */
+.tui-grid-container {
+  border: 1px solid #d9dee3 !important;
+  border-radius: 0.375rem !important; /* Bootstrap의 rounded 스타일 */
+  box-shadow: 0 2px 6px rgba(67, 89, 113, 0.1) !important;
+  background-color: #fff !important;
+  color: #435971 !important;
+}
+
+/* 헤더 영역 (날짜, 출근시간 등) */
+.tui-grid-header-area {
+  background-color: #fcfdfd !important;
+  border-bottom: 1px solid #d9dee3 !important;
+}
+
+/* 헤더 셀 */
+.tui-grid-table thead th {
+  background-color: #fcfdfd !important;
+  color: #435971 !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #d9dee3 !important; /* ✅ 하단 선만 */
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+/* 본문 셀 */
+.tui-grid-table td {
+  color: #697a8d !important;
+  font-size: 0.9rem !important;
+  background-color: #fff !important;
+  border-bottom: 1px solid #d9dee3 !important;
+  text-align: center !important;
+  padding: 0.625rem 1.25rem !important;
+}
+
+/* 짝수 줄 배경 (Bootstrap의 striped 효과) */
+/* .tui-grid-table tbody tr:nth-of-type(odd) td { */
+/*   background-color: #f9fafb !important; */
+/* } */
+
+/* hover 효과 */
+.tui-grid-row-hover td {
+  background-color: rgba(67, 89, 113, 0.06) !important;
+}
+
+/* 선택된 행 (focus) */
+.tui-grid-row-selected td {
+  background-color: rgba(67, 89, 113, 0.1) !important;
+}
+
+/* 스크롤바 영역도 자연스럽게 */
+.tui-grid-border-line-top,
+.tui-grid-border-line-bottom {
+  border-color: #d9dee3 !important;
 }
