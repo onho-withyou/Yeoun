@@ -37,9 +37,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(empId + " : 사원 조회 실패!"));
 		log.info("◆◆◆◆◆◆◆◆◆◆◆◆◆ 사용자 정보 : " + emp);
 		
-		// -------------- 수정 중
+		// ModelMapper 설정(STRICT) + 모호 필드 명시 매핑
 		ModelMapper modelMapper = new ModelMapper();
-		
 		modelMapper.getConfiguration()
         .setMatchingStrategy(MatchingStrategies.STRICT) // 모호성 줄이기
         .setSkipNullEnabled(true);
@@ -54,31 +53,17 @@ public class CustomUserDetailsService implements UserDetailsService {
 		
 		LoginDTO loginDTO = modelMapper.map(emp, LoginDTO.class);
 		
-		// ✅ 부서정보: Employment 경유 없이 Emp에서 바로
+		// 부서정보: Emp에서 바로
 		Dept dept = emp.getDept();
 		if (dept != null) {
 		    loginDTO.setDeptId(dept.getDeptId());
 		    loginDTO.setDeptName(dept.getDeptName());
 		}
 
-		// ✅ 권한 리스트: LoginDTO.getAuthorities()에서 사용하므로 그대로 세팅
+		// 권한 리스트: LoginDTO.getAuthorities()에서 사용하므로 그대로 세팅
 		loginDTO.setEmpRoles(emp.getEmpRoles());
-
-
-		//-------------- 수정 중
 		
-		// Emp 엔티티 -> LoginDTO 객체로 변환하여 리턴하기
-//		ModelMapper modelMapper = new ModelMapper();
-//		LoginDTO loginDTO = modelMapper.map(emp, LoginDTO.class);
-		
-		// ------------------------------------------------------------------------------------
-		// 사용자의 부서정보를 가져와 loginDTO에 추가해주기
-//		Employment employment = employmentRepository.findByEmp(emp).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다!"));
-//		Dept dept = employment.getDept();
-//		dept = deptRepository.findById(dept.getDeptId()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 부서입니다!"));
-//		
-//		loginDTO.setDeptId(dept.getDeptId());
-//		loginDTO.setDeptName(dept.getDeptName());
+		log.info("◆◆◆◆◆◆◆◆◆◆◆◆◆ 로그인 결과 LoginDTO : {}", loginDTO);
 		
 		// 사용자 인증 정보가 저장된 객체(UserDetails 타입) 리턴
 		// UserDetails 의 구현체인 LoginDTO 객체 리턴 시 UserDetails 타입으로 업캐스팅

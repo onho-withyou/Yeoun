@@ -77,15 +77,41 @@
 					  <li><a class="dropdown-item" href="#">헤이즐럿라떼요</a></li>
 					</ul>
                 </li>
-                <li class="nav-item lh-1 me-3">
-                    <a class="nav-font-size" id="name">이름 (사번)</a>
-                </li>
-                <li class="nav-item lh-1 me-3">
-                    <a class="nav-font-size" id="login">login</a>
-                </li>
+                <!-- 이름(사번): 클릭 불가 -->
+				<li class="nav-item lh-1 me-3">
+				  <span class="nav-font-size" id="user-label">
+				    <span sec:authorize="isAuthenticated()">
+				      <span sec:authentication="principal.empName"></span>
+				      (<span sec:authentication="principal.empId"></span>)
+				    </span>
+				    <span sec:authorize="!isAuthenticated()">이름 (사번)</span>
+				  </span>
+				</li>
+				
+				<!-- 로그인/로그아웃: 필요할 때만 보이게, 서로 다른 id 사용 -->
+				<li class="nav-item lh-1 me-3">
+				  <a class="nav-font-size" id="logout-link" th:href="@{/logout}" sec:authorize="isAuthenticated()">logout</a>
+				  <a class="nav-font-size" id="login-link"  th:href="@{/login}"  sec:authorize="!isAuthenticated()">login</a>
+				</li>
+
               </ul>
             </div>
           </nav>
+		
+		<form th:action="@{/logout}" method="post" id="hiddenLogoutForm" style="display:none">
+		  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+		</form>
+		
+		<script>
+		  document.getElementById('logout-link')?.addEventListener('click', function (e) {
+		    e.preventDefault(); // a 태그의 기본 이동 막기 (GET /logout 방지)
+		    if (confirm('로그아웃 하시겠습니까?')) {
+		      document.getElementById('hiddenLogoutForm').submit(); // POST /logout
+		    }
+		  });
+		</script>
+		
+	
 		  <script>
 			//Resources
 		  
@@ -126,8 +152,8 @@
     		
     		chat.addEventListener("click",()=>{
     	    	 window.open(
-    			    "/messenger/popup",
-    			    "messengerPop",
+    			    "/messenger/list",
+    			    "messenger",
     			    "noopener,noreferrer,width=600,height=800,left=200,top=100,resizable=no"
     			 );
             	/*const iframe = document.createElement("iframe");

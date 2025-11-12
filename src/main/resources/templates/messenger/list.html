@@ -53,8 +53,8 @@
     </div>
       <div class="main-header" id="header-title">친구 목록</div>
 
-      <div class="panel-body" id="friends-panel">
-        <div class="friend-item" data-friend="beate">
+      <div class="panel-body" id="friends-panel" th:each = "friend : ${friends}">
+        <div class="friend-item"><!--  data-friend="beate" -->
            <div class="profile-wrapper">
             <img class="rounded-circle shadow avatar-sm me-3" 
                 src="https://user-images.githubusercontent.com/35243461/168796884-ee3aafb6-8083-48ec-9cfb-51b95eae08fe.jpg">

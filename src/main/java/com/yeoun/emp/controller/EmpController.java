@@ -7,8 +7,10 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.yeoun.common.service.CommonCodeService;
@@ -16,17 +18,20 @@ import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.DeptRepository;
+import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.emp.repository.PositionRepository;
 import com.yeoun.emp.service.EmpService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @Controller
 @RequestMapping("/emp")
-@RequiredArgsConstructor
 @Log4j2
+@RequiredArgsConstructor
 public class EmpController {
 	
 	private final EmpService empService;
@@ -76,14 +81,27 @@ public class EmpController {
 		
 	}
 	
-	// 사원 목록 조회 
-//	@GetMapping("/list")
-//	public String showEmpList(Model model) {
-//		
-//		// 서비스에서 리스트 가져오기
-//		List<EmpListDTO> empList = empService.getEmpList();
-//		model.addAttribute("empList", empList);
-//		return "emp/emp_list";
+	// ====================================================================================
+	// 사원 목록 조회
+	@GetMapping("/list")
+	public String getEmpListForm() {
+		log.info("▶ 사원목록 페이지 요청");
+		return "/emp/emp_list";
+	}
+	
+	// AJAX 데이터 로딩
+	@ResponseBody
+	@GetMapping("/list/data")
+	public List<EmpListDTO> getEmpList() {
+		log.info("▶ 사원목록 데이터 요청 (JSON)");
+		return empService.getEmpList();
+	}
+	
+	// ====================================================================================
+	// 사원 정보 상세 조회
+//	@GetMapping("/detail/{empId}")
+//	public EmpDTO getEmpDetail(@PathVariable("empId") String empId) {
+//		return empService.getEmpDetail(empId);
 //	}
 	
 	

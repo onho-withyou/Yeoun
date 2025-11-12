@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -15,9 +14,9 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,7 +28,9 @@ import com.yeoun.attendance.dto.AttendanceDTO;
 import com.yeoun.attendance.dto.WorkPolicyDTO;
 import com.yeoun.attendance.service.AttendanceService;
 import com.yeoun.auth.dto.LoginDTO;
-import com.yeoun.emp.dto.EmpDTO;
+import com.yeoun.common.dto.CommonCodeDTO;
+import com.yeoun.common.service.CommonCodeService;
+import com.yeoun.emp.dto.EmpListDTO;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,7 @@ import lombok.extern.log4j.Log4j2;
 public class AttendanceController {
 	
 	private final AttendanceService attendanceService;
+	private final CommonCodeService commonCodeService;
 	
 	// 출/퇴근 입력
 	@PostMapping("/toggle/{empId}")
@@ -79,10 +81,9 @@ public class AttendanceController {
 	@GetMapping("/search")
 	public ResponseEntity<?> empInfo(@RequestParam("empId") String empId) {
 		try {
-			EmpDTO emp = attendanceService.getEmp(empId);
-//			log.info(">>>>>>>>>>>>>>>>>>> emp : " + emp);
+			EmpListDTO empListDTO = attendanceService.getEmp(empId);
 			
-			return ResponseEntity.ok(emp);
+			return ResponseEntity.ok(empListDTO);
 		} catch (NoSuchElementException e) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND)
 								 .body(Map.of("message", e.getMessage()));
@@ -95,7 +96,7 @@ public class AttendanceController {
 		try {
 			attendanceService.registAttendance(attendanceDTO);
 			return ResponseEntity.status(HttpStatus.CREATED)
-					.body(Map.of("message", "출퇴근 등록 완료"));
+					.body(Map.of("message", "등록 완료"));
 		} catch (IllegalStateException e) {
 			return ResponseEntity.status(HttpStatus.CONFLICT)
 					.body(Map.of("message", e.getMessage()));
@@ -115,7 +116,7 @@ public class AttendanceController {
 	}
 	
 	// 출/퇴근 수정
-	@PutMapping("/{attendanceId}")
+	@PatchMapping("/{attendanceId}")
 	public ResponseEntity<Map<String, String>> modifyAttendance(@PathVariable("attendanceId") Long attendanceId, 
 			@RequestBody AttendanceDTO attendanceDTO) {
 		try {
@@ -163,7 +164,13 @@ public class AttendanceController {
 	@GetMapping("/policy")
 	public String policyForm(Model model) {
 		WorkPolicyDTO workPolicyDTO = attendanceService.getWorkPolicy();
+		// 공통코드 테이블에서 연차 산정 기준 조회
+		List<CommonCodeDTO> commonCodeDTO = commonCodeService.getAnnualBasis("ANNUAL_BASIS");
+		
 		model.addAttribute("workPolicyDTO", workPolicyDTO);
+		model.addAttribute("commonCodeDTO", commonCodeDTO);
+		
+		log.info(">>>>>>>>>>>>>> commonCodeDTO : " + commonCodeDTO);
 		
 		return "attendance/policy";
 	}

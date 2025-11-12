@@ -36,7 +36,6 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 		
 		// 2) 쿠키 생성 공통 코드
 		// 2-1) Cookie 객체 생성하여 "remember-id" 라는 이름으로 사용자명(empId) 저장
-//				Cookie cookie = new Cookie("remember-id", authentication.getName());
 		// 만약, 한글 등의 값이 포함된 문자열일 경우 인코딩 필요
 		Cookie cookie = new Cookie("remember-id", URLEncoder.encode(authentication.getName(), StandardCharsets.UTF_8));
 		// 2-2) 쿠키 사용 경로 설정

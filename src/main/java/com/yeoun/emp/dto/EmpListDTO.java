@@ -15,6 +15,7 @@ public class EmpListDTO {
     private String empName;
     private String deptName; // 현재 부서명
     private String posName;  // 현재 직급명
+    private Integer rankOrder;  // 직급 서열
     private String mobile;
     private String email;
 
