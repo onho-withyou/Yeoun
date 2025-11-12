@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Log4j2 로그 설정 -->
+<Configuration>
+	<!-- 각 로그에서 사용할 속성값 설정 -->
+	<Properties>
+		<!-- 로그 출력 패턴을 쉽게 관리 가능하도록 별도의 속성으로 선언 => ${} 형식으로 참조 가능 -->
+<!-- 		<Property name="LAYOUT_PATTERN">%d{yyyy-MM-dd HH:mm:ss} %-5p: [%c] %m%n</Property> -->
+		<!--  로그 패턴에 컬러링 추가 -->
+		<!--  컬러링 대상을 %style{} 블록으로 감싸고, 블록 뒤에 {컬러코드명} 추가(컬러코드명은 ANSI 표준 컬러명 사용) -->
+<!-- 		<Property name="LAYOUT_PATTERN">%d{yyyy-MM-dd HH:mm:ss} %style{%-5p}{RED}: %style{[%c]}{CYAN} %m%n</Property> -->
+		<!-- => 컬러링을 적용하려면 해당 로그 패턴에 disableAnsi="false" 와 noConsoleNoAnsi="false" 추가  -->
+
+		<Property name="LAYOUT_PATTERN">
+			%d{yyyy-MM-dd HH:mm:ss} %highlight{{%-5p}}: %style{[%c]}{CYAN} %m%n
+		</Property>
+	</Properties>
+	
+	<!-- 로그 설정 - Appenders, Loggers 설정 -->
+	<!-- 1. Appenders : 로그 메세지 형식 설정 -->
+	<Appenders>
+		<!-- 1) <Console> : 콘솔에 출력할 로그 메세지 형식 설정 -->
+		<Console name="console" target="SYSTEM_OUT">
+			<!--  로그 출력 형식 지정 -->
+			<!-- 1) 심각도5글자 좌측정렬(%-5p): 패키지 및 클래스명(%c) - 로그메세지(%m%n) -->
+<!-- 			<PatternLayout pattern="%-5p: %c - %m%n" /> -->
+			<!-- 2) 날짜 및 시각(%d{yyyy-MM-dd HH:mm:ss}) 추가 및 클래스명 브라켓[]으로 감싸기-->
+<!-- 			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p: [%c] %m%n"/> -->
+			<!-- 참고) <Properties> 에서 지정한 속성을 패턴으로 적용 : name 속성값으로 <Property> 태그의 pattern 속성값으로 ${}지정 -->
+<!-- 			<PatternLayout pattern="${LAYOUT_PATTERN}" disableAnsi="false" noConsoleNoAnsi="false"/> -->
+			<PatternLayout pattern="${LAYOUT_PATTERN}" disableAnsi="false" noConsoleNoAnsi="false"/>
+		</Console>
+		<!-- 2) <RollingFile> : 로그 파일 출력 설정 -->
+	</Appenders>
+	
+	<!-- 2. Loggers : 로그 출력할 대상 설정 -->
+	<!-- 각 로거에 심각도 범위 지정(level 속성 활용) : TRACE < DEBUG < INFO < WARN <ERROR < FATAL -->
+	<!-- => 참고) level 속성값을 "OFF" 로 지정 시 해당 로그 끄기 -->
+	<!-- 각각의 로거 태그 내에 <AppenderRef> 태그 사용하여 로그 출력할 어펜더 지정 -->
+	<Loggers>
+		<!-- Root 로거 : 기본 시스템 로그 및 사용자 출력 로그 모두 담당 -->
+        <Root level="INFO">
+            <AppenderRef ref="console"/>
+        </Root>
+        
+        <!-- Logger 로거 : 개발자가 지정한 대상의 로그 처리 담당 -->
+        <!-- Logger 태그 name 속성으로 대상 패키지 또는 클래스 지정, level 속성으로 심각도, additivity 로 중복 로그 표시 여부 설정 -->
+        <!-- 현재 프로젝트 내의 특정 패키지(시스템 패키지 or 사용자 패키지)에 대한 로그 설정 -->
+        <Logger name="com.itwillbs.test5" level="INFO" additivity="false">
+        	<AppenderRef ref="console"/>
+        </Logger>
+
+		<!-- 스프링 시큐리티 패키지 전용 로거 => 디버깅을 위한 DEBUG 레벨로 출력(시큐리티 필터링 현황 등 확인 가능) -->
+<!--         <Logger name="org.springframework.security" level="DEBUG" additivity="false"> -->
+        <Logger name="org.springframework.security" level="OFF" additivity="false">
+        	<AppenderRef ref="console"/>
+        </Logger>
+        
+        
+	</Loggers>
+</Configuration>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
