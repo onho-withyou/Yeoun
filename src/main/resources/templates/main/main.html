@@ -39,7 +39,7 @@
 		            <!-- 프로필 -->
 		            <section class="panel" style="border: solid; color: red; min-height:30%">
 		                <h1>신필용</h1>
-		                <button class="btn btn-primary" onclick="handleAttendanceToggle()" id="attendance">출근</button>
+		                <button class="btn btn-primary" th:attr="data-emp-id=${#authentication.name}" onclick="handleAttendanceToggle(this.dataset.empId)" id="attendance">출근</button>
 		                <button class="btn btn-primary">출입</button>
 		            </section>
 		            <!-- 공지목록 -->

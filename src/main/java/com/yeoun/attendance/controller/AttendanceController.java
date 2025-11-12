@@ -1,12 +1,15 @@
 package com.yeoun.attendance.controller;
 
+import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,6 +28,7 @@ import com.yeoun.attendance.dto.AccessLogDTO;
 import com.yeoun.attendance.dto.AttendanceDTO;
 import com.yeoun.attendance.dto.WorkPolicyDTO;
 import com.yeoun.attendance.service.AttendanceService;
+import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.emp.dto.EmpDTO;
 
 import jakarta.validation.Valid;
@@ -122,11 +126,28 @@ public class AttendanceController {
 					.body(Map.of("message", e.getMessage()));
 		}
 	}
+	@GetMapping("/my")
+	public String attendanceMyPage() {
+	    return "attendance/commute";
+	}
 	
 	// 개인 출/퇴근 현황 페이지
-	@GetMapping("/my")
-	public String attendance() {
-		return "attendance/commute";
+	@GetMapping("/my/data")
+	@ResponseBody
+	public ResponseEntity<List<AttendanceDTO>> attendanceList(
+			@AuthenticationPrincipal LoginDTO loginDTO, 
+			@RequestParam(required = false, name = "startDate") String startDate,  
+			@RequestParam(required = false, name = "endDate") String endDate) {
+		
+		LocalDate start = (startDate != null) ? LocalDate.parse(startDate) : LocalDate.now().withDayOfMonth(1);
+		LocalDate end = (endDate != null) ? LocalDate.parse(endDate) : LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
+		
+		try {
+			List<AttendanceDTO> list = attendanceService.getMyAttendanceList(loginDTO.getEmpId(), start, end);
+			return ResponseEntity.ok(list);
+		} catch(NoSuchElementException  e) {
+			return null;
+		}
 	}
 	
 	// 외근 등록
