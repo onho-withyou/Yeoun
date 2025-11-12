@@ -1,7 +1,3 @@
-INSERT INTO emp(gender, hire_date, emp_id, created_date, last_login, photo_file_id, post_code, status, rrn, mobile, role_code, emp_name, email, address1, address2, emp_pwd) VALUES (
-	'M', '25/11/09', '2511301', '25/11/10 11:16:22.030042000', '', '', '28562', 'ACTIVE', '', '010-1234-2222', 'USER', '홍길동', 'hong@hong.com', '광주 동구 2순환로 575 (지산동)', '2', '$2a$10$j1X19qACsW1Yh0F0gG4meu.JMoxuTjZf46xW.i4aC2NkfvyWyM7v6'
-);
-
 -- 부서 DEPT
 INSERT INTO DEPT (DEPT_ID, DEPT_NAME, PARENT_ID, HEAD_EMP_ID, USE_YN, CREATED_DATE, DEPT_ABBR)
 VALUES ('DEP000', 'ERP본부', NULL, NULL, 'Y', SYSDATE, 'ERP');
@@ -39,3 +35,26 @@ INSERT INTO ROLE (ROLE_CODE, ROLE_NAME, ROLE_DESC, USE_YN, CREATED_DATE)
 VALUES ('ROLE_ADMIN',     '전체 관리자', '시스템 전역 접근 가능(임원/관리자)', 'Y', SYSDATE);
 INSERT INTO ROLE (ROLE_CODE, ROLE_NAME, ROLE_DESC, USE_YN, CREATED_DATE)
 VALUES ('ROLE_ADMIN_SUB', '부서 관리자', '부서 단위 관리 권한(자동 부서장)', 'Y', SYSDATE);
+
+-- 근무 정책
+INSERT INTO work_policy (id, in_time, out_time, lunch_in, lunch_out, late_limit, annual_basis, created_date) 
+VALUES (1, '09:00', '18:00', '12:00', '13:00', 5, 'FY', SYSDATE);
+
+-- 공통 코드 연차 기준
+INSERT INTO COMMON_CODE (
+    CODE_ID, CODE_NAME, CODE_SEQ, CODE_DESC, LEVEL_NO, USE_YN, SYS_TYPE, CREATED_USER, CREATED_DATE
+) VALUES (
+    'ANNUAL_BASIS', '연차 기준', 1, '연차 산정 기준 구분 그룹', 1, 'Y', 'COMMON', 'SYSTEM', SYSDATE
+);
+
+INSERT INTO COMMON_CODE (
+    CODE_ID, PARENT_CODE_ID, CODE_NAME, CODE_SEQ, CODE_DESC, LEVEL_NO, USE_YN, SYS_TYPE, CREATED_USER, CREATED_DATE
+) VALUES (
+    'FY', 'ANNUAL_BASIS', '회계연도 기준', 1, '회계연도를 기준으로 연차를 산정', 2, 'Y', 'COMMON', 'SYSTEM', SYSDATE
+);
+
+INSERT INTO COMMON_CODE (
+    CODE_ID, PARENT_CODE_ID, CODE_NAME, CODE_SEQ, CODE_DESC, LEVEL_NO, USE_YN, SYS_TYPE, CREATED_USER, CREATED_DATE
+) VALUES (
+    'JOIN', 'ANNUAL_BASIS', '입사일 기준', 2, '입사일을 기준으로 연차를 산정', 2, 'Y', 'COMMON', 'SYSTEM', SYSDATE
+);
