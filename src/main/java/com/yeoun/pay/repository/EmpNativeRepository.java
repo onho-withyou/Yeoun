@@ -13,35 +13,35 @@ public interface EmpNativeRepository extends JpaRepository<Emp, String> {
 
     @Query(value = """
         SELECT
-            e.EMP_ID                AS empId,
-            em.DEPT_ID              AS deptId,
-            TO_NUMBER(0)         AS baseSalary
-        FROM EMP e
-        LEFT JOIN EMPLOYMENT em
-               ON em.EMP_ID = e.EMP_ID
-              AND em.END_DATE IS NULL
-        WHERE (:status IS NULL OR e.STATUS = :status)
-        ORDER BY e.EMP_ID
+            e.EMP_ID    AS empId,
+            e.DEPT_ID   AS deptId,
+            TO_NUMBER(0) AS baseSalary
+          FROM EMP e
+          JOIN DEPT d
+            ON d.DEPT_ID = e.DEPT_ID
+           AND d.USE_YN = 'Y'
+         WHERE (:status IS NULL OR e.STATUS = :status)
+         ORDER BY e.EMP_ID
         """, nativeQuery = true)
     List<EmpForPayrollProjection> findEmpForPayrollByStatus(@Param("status") String status);
 
     @Query(value = """
         SELECT
-            e.EMP_ID                AS empId,
-            em.DEPT_ID              AS deptId,
-            TO_NUMBER(0)         AS baseSalary
-        FROM EMP e
-        LEFT JOIN EMPLOYMENT em
-               ON em.EMP_ID = e.EMP_ID
-              AND em.END_DATE IS NULL
-        WHERE (:status IS NULL OR e.STATUS = :status)
+            e.EMP_ID    AS empId,
+            e.DEPT_ID   AS deptId,
+            TO_NUMBER(0) AS baseSalary
+          FROM EMP e
+          JOIN DEPT d
+            ON d.DEPT_ID = e.DEPT_ID
+           AND d.USE_YN = 'Y'
+         WHERE (:status IS NULL OR e.STATUS = :status)
         """,
         countQuery = """
         SELECT COUNT(1)
           FROM EMP e
-          LEFT JOIN EMPLOYMENT em
-                 ON em.EMP_ID = e.EMP_ID
-                AND em.END_DATE IS NULL
+          JOIN DEPT d
+            ON d.DEPT_ID = e.DEPT_ID
+           AND d.USE_YN = 'Y'
          WHERE (:status IS NULL OR e.STATUS = :status)
         """,
         nativeQuery = true)
