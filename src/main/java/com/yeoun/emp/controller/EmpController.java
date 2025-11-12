@@ -77,14 +77,14 @@ public class EmpController {
 	}
 	
 	// 사원 목록 조회
-	@GetMapping("/list")
-	public String showEmpList(Model model) {
-		
-		// 서비스에서 리스트 가져오기
-		List<EmpListDTO> empList = empService.getEmpList();
-		model.addAttribute("empList", empList);
-		return "emp/emp_list";
-	}
+//	@GetMapping("/list")
+//	public String showEmpList(Model model) {
+//		
+//		// 서비스에서 리스트 가져오기
+//		List<EmpListDTO> empList = empService.getEmpList();
+//		model.addAttribute("empList", empList);
+//		return "emp/emp_list";
+//	}
 	
 	
 	

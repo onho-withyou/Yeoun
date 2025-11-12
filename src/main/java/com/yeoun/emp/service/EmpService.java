@@ -21,13 +21,11 @@ import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.entity.EmpBank;
 import com.yeoun.emp.entity.EmpRole;
-import com.yeoun.emp.entity.Employment;
 import com.yeoun.emp.entity.Position;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.EmpBankRepository;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.emp.repository.EmpRoleRepository;
-import com.yeoun.emp.repository.EmploymentRepository;
 import com.yeoun.emp.repository.PositionRepository;
 
 import lombok.extern.log4j.Log4j2;
@@ -40,7 +38,6 @@ public class EmpService {
 	private final EmpRepository empRepository;
 	private final DeptRepository deptRepository;
 	private final PositionRepository positionRepository;
-	private final EmploymentRepository employmentRepository;
 	private final EmpBankRepository empBankRepository;
 	private final CommonCodeRepository commonCodeRepository;
 	private final BCryptPasswordEncoder encoder;
@@ -48,7 +45,6 @@ public class EmpService {
 	public EmpService(EmpRepository empRepository,
 					  DeptRepository deptRepository,
 					  PositionRepository positionRepository, 
-					  EmploymentRepository employmentRepository,
 					  RoleRepository roleRepository,
 					  EmpRoleRepository empRoleRepository,
 					  EmpBankRepository empBankRepository,
@@ -57,7 +53,6 @@ public class EmpService {
 		this.empRepository = empRepository;
 		this.deptRepository = deptRepository;
 		this.positionRepository = positionRepository;
-		this.employmentRepository = employmentRepository;
 		this.empBankRepository = empBankRepository;
 		this.commonCodeRepository = commonCodeRepository;
 		this.encoder = encoder;
@@ -182,31 +177,31 @@ public class EmpService {
 	
 	// ===================================================================================
 	// 사원 목록 조회
-	@Transactional(readOnly = true)
-	public List<EmpListDTO> getEmpList() {
-	    // 1) 전체 사원
-	    List<Emp> emps = empRepository.findAll(); 
-	    // 정렬 원하면: empRepository.findAll(Sort.by(Sort.Direction.DESC, "createdDate"))
-
-	    if (emps.isEmpty()) return List.of();
-
-	    // 2) 현재 이력(END_DATE is null)
-	    List<Employment> currents = employmentRepository.findByEmpInAndEndDateIsNull(emps);
-
-	    // 3) empId -> Employment
-	    Map<String, Employment> byEmpId = currents.stream()
-	        .collect(Collectors.toMap(e -> e.getEmp().getEmpId(), Function.identity(), (a,b)->a));
-
-	    // 4) DTO 변환
-	    return emps.stream()
-	        .map(e -> {
-	            Employment cur = byEmpId.get(e.getEmpId());
-	            String deptName = (cur != null && cur.getDept() != null) ? cur.getDept().getDeptName() : "";
-	            String posName  = (cur != null && cur.getPosition() != null) ? cur.getPosition().getPosName() : "";
-	            return new EmpListDTO(e.getHireDate(), e.getEmpId(), e.getEmpName(), deptName, posName, e.getMobile(), e.getEmail());
-	        })
-	        .toList();
-	}
+//	@Transactional(readOnly = true)
+//	public List<EmpListDTO> getEmpList() {
+//	    // 1) 전체 사원
+//	    List<Emp> emps = empRepository.findAll(); 
+//	    // 정렬 원하면: empRepository.findAll(Sort.by(Sort.Direction.DESC, "createdDate"))
+//
+//	    if (emps.isEmpty()) return List.of();
+//
+//	    // 2) 현재 이력(END_DATE is null)
+//	    List<Employment> currents = employmentRepository.findByEmpInAndEndDateIsNull(emps);
+//
+//	    // 3) empId -> Employment
+//	    Map<String, Employment> byEmpId = currents.stream()
+//	        .collect(Collectors.toMap(e -> e.getEmp().getEmpId(), Function.identity(), (a,b)->a));
+//
+//	    // 4) DTO 변환
+//	    return emps.stream()
+//	        .map(e -> {
+//	            Employment cur = byEmpId.get(e.getEmpId());
+//	            String deptName = (cur != null && cur.getDept() != null) ? cur.getDept().getDeptName() : "";
+//	            String posName  = (cur != null && cur.getPosition() != null) ? cur.getPosition().getPosName() : "";
+//	            return new EmpListDTO(e.getHireDate(), e.getEmpId(), e.getEmpName(), deptName, posName, e.getMobile(), e.getEmail());
+//	        })
+//	        .toList();
+//	}
 	
 	
 	// ==============================================================================

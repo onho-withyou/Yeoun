@@ -10,10 +10,8 @@ import org.springframework.stereotype.Service;
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
-import com.yeoun.emp.entity.Employment;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.EmpRepository;
-import com.yeoun.emp.repository.EmploymentRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +24,6 @@ import lombok.extern.log4j.Log4j2;
 public class CustomUserDetailsService implements UserDetailsService {
 	
 	private final EmpRepository empRepository;
-	private final EmploymentRepository employmentRepository;
 	private final DeptRepository deptRepository;
 
 	// =========================================================================================
