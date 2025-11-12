@@ -118,6 +118,7 @@ public class EmpDTO {
 	// -----------------------------------------------------------------------
 	private static ModelMapper modelMapper = new ModelMapper();
 	
+	
 	// ModelMapper 객체의 map() 메서드를 활용하여 객체 변환 수행
 	// 1) EmpDTO -> Emp(엔티티) 타입으로 변환하는 toEntity() 메서드 정의
 	public Emp toEntity() {

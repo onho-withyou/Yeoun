@@ -79,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			return response.json();  //JSON 파싱
 		})
 		.then(data => { // response가 ok일때
+			console.log(data);
 			initGrid(data);
 		}).catch(error => {
 			console.error('에러', error)
@@ -93,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	})
 	
 	
-	//일정등록 모달 등록버튼 이벤트
+	//일정등록 모달 등록, 수정버튼 이벤트
 	const addScheduleForm = document.getElementById('add-schedule-form')
 	const addScheduleBtn = document.getElementById('add-schedule-btn');
 	
@@ -123,14 +124,13 @@ document.addEventListener('DOMContentLoaded', function() {
 				location.reload();
 			}).catch(error => {
 				alert("제목, 시작,종료 일시, 내용은 필수입력 사항입니다.");
-				location.reload();
 			});
 		} else if(addScheduleBtn.value == 'edit') {
 
 			if(confirm("수정하시겠습니까?")){
 				// 수정일때는 scheduleId 포함해서 보내기
 				addScheduleForm.scheduleId.setAttribute('name', 'scheduleId');
-				console.log("ddddddd");
+				
 				fetch('/main/schedule', {
 					method: 'PATCH'
 					, headers: {
@@ -149,12 +149,37 @@ document.addEventListener('DOMContentLoaded', function() {
 					location.reload();
 				}).catch(error => {
 					alert("수정에 실패하였습니다.");
-					location.reload();
 				});
 			}
 		}
 		
-	}); // 일정등록함수 끝
+	}); // 일정등록, 수정함수 끝
+	
+	// 일정조회 - 삭제버튼 이벤트
+	document.getElementById('delete-schedule-btn').addEventListener('click', function () {
+		//삭제요청보내기
+		fetch('/main/schedule', {
+			method: 'DELETE'
+			, headers: {
+				[csrfHeaderName]: csrfToken
+			}
+			, body: new FormData(addScheduleForm)
+		})
+		.then(response => {
+			if (!response.ok) {
+				throw new Error(response.msg);
+			}
+			return response.json();  //JSON 파싱
+		})
+		.then(response => { // response가 ok일때
+			alert(response.msg);
+			location.reload();
+		}).catch(error => {
+			alert("삭제에 실패하였습니다.");
+		});
+		
+		
+	}); //일정조회 - 삭제 버튼 이벤트 끝
 	
 	
 	
@@ -205,7 +230,7 @@ function initGrid(data) {
 				},
 				{
 					header: '작성자',
-					name: 'createdUser',
+					name: 'empName',
 					sortable: true,
 					width: 70,
 					filter: {
@@ -278,7 +303,25 @@ function openModal(mode, data = null) {
 	const schedueId = document.getElementById('schedule-id');
 	const createdUserName = document.getElementById('createdUserName');
 	
+	const sp = picker.getStartpicker(); 
+	const ep = picker.getEndpicker();
+	
 	if(mode === 'add') {
+		deleteBtn.disabled = false;
+		submitBtn.disabled = false;
+		Array.from(form.elements).forEach(el => {
+		    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+		        el.readOnly = false;
+		    } 
+			if (el.tagName === 'SELECT' || el.type === 'checkbox') {
+		        el.disabled = false;
+		    }
+			createdUserName.readOnly = true;
+		});
+		
+		sp.enable && sp.enable();
+		ep.enable && ep.enable();
+		
 		modalTitle.textContent = '일정등록';
 		deleteBtn.classList.add('d-none');
 	    submitBtn.textContent = '등록';
@@ -321,6 +364,7 @@ function openModal(mode, data = null) {
 		form.alldayYN.checked = false;
 
 	} else if (mode === 'edit' && data) {
+		console.log(data);
 		
 		modalTitle.textContent = '일정조회';
 		deleteBtn.classList.remove('d-none');
@@ -328,6 +372,7 @@ function openModal(mode, data = null) {
 		submitBtn.value ='edit';
 		form.scheduleId.value = data.scheduleId || '';
 		form.scheduleTitle.value = data.scheduleTitle || '';
+		createdUserName.value = data.empName || '';
 		form.createdUser.value = data.createdUser || '';
 		//셀렉트박스 초기화
 		select.innerHTML = '';
@@ -366,6 +411,44 @@ function openModal(mode, data = null) {
 		// 종일 체크 해제
 		form.alldayYN.checked = data.alldayYN === 'Y';
 		form.scheduleContent.value = data.scheduleContent || '';
+		
+		if (data.createdUser !== currentUserId) {
+		    // 권한 없음: 삭제, 수정 버튼 비활성화
+		    deleteBtn.disabled = true;
+		    submitBtn.disabled = true;
+			// 데이트피커 비활성화
+			sp.enable && sp.disable();
+			ep.enable && ep.disable();
+
+			
+		    // 폼 전체의 인풋/셀렉트/체크박스 등을 읽기 전용으로 만들기
+		    Array.from(form.elements).forEach(el => {
+		        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+		            el.readOnly = true;
+		        }
+				if (el.tagName === 'SELECT' || el.type === 'checkbox') {
+		            el.disabled = true;
+		        }
+		    });
+		} else {
+		    // 권한 있는 사용자에게는 모든 기능 활성화
+		    deleteBtn.disabled = false;
+		    submitBtn.disabled = false;
+			
+			//데이트피커 비활성화
+			sp.enable && sp.enable();
+			ep.enable && ep.enable();
+			
+		    Array.from(form.elements).forEach(el => {
+		        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+		            el.readOnly = false;
+		        } 
+				if (el.tagName === 'SELECT' || el.type === 'checkbox') {
+		            el.disabled = false;
+		        }
+				createdUserName.readOnly = true;
+		    });
+		}
 	}
 	
 	modal.show();

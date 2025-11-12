@@ -43,7 +43,7 @@ public class ScheduleService {
 	public void createSchedule(@Valid ScheduleDTO scheduleDTO, Authentication authentication) {
 		
 		scheduleDTO.setCreatedUser(authentication.getName()); // 회원번호 입력
-		
+		Emp emp = empRepository.findById(scheduleDTO.getCreatedUser()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다.111"));
 		if(!scheduleDTO.getAlldayYN().equals("Y")) {
 			scheduleDTO.setAlldayYN("N"); // 종일 체크 없을경우 N으로 값변경
 		}
@@ -53,6 +53,7 @@ public class ScheduleService {
 		}
 		
 		Schedule schedule = scheduleDTO.toEntity();
+		schedule.setEmp(emp);
 		
 		scheduleRepository.save(schedule);
 	}
@@ -62,9 +63,8 @@ public class ScheduleService {
 		String empId = authentication.getName();
 		// empId로 로그인한 emp엔티티 정보 조회
 		Emp emp = empRepository.findById(empId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다.111"));
-		Dept myDept = emp.getDept();
-		String myDeptId = myDept.getDeptId();
-		String myDeptName = myDept.getDeptName();
+		String myDeptId = emp.getDept().getDeptId();
+		String myDeptName = emp.getDept().getDeptName();
 		
 		// 일정목록 조회
 		List<Schedule> scheduleList = scheduleRepository.getIndividualSchedule(empId, myDeptId, startDate, endDate);
@@ -83,12 +83,10 @@ public class ScheduleService {
 					Dept dept = deptRepository.findById(scheduleType).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 부서입니다."));
 					schedule.setScheduleType(dept.getDeptName());
 				}
-				Emp scheduleEmp = empRepository.findById(schedule.getCreatedUser()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다."));
-				schedule.setCreatedUser(scheduleEmp.getEmpName());
+//				Emp scheduleEmp = empRepository.findById(schedule.getCreatedUser()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다."));
+//				schedule.setCreatedUser(scheduleEmp.getEmpName());
 				scheduleList2.add(schedule);
 			}
-			// 작성자 empId로 이름 조회후 변경 필요
-			
 		}
 		
 		return scheduleList2.stream().map(ScheduleDTO::fromEntity).collect(Collectors.toList());
@@ -119,6 +117,13 @@ public class ScheduleService {
 		// 입력된 스케줄id로 기존 스케줄로우 정보 받아오기
 		Schedule schedule = scheduleRepository.findById(scheduleDTO.getScheduleId()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 일정입니다."));
 		schedule.changeSchedule(scheduleDTO);
+	}
+	
+	//일정 정보 삭제
+	@Transactional
+	public void deleteSchedule(@Valid ScheduleDTO scheduleDTO, Authentication authentication) {
+		Schedule schedule = scheduleDTO.toEntity();
+		scheduleRepository.delete(schedule);
 	}
 
 

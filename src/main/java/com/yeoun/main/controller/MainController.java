@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -92,6 +93,31 @@ public class MainController {
 		
 		} catch (Exception e) { // 에러발생시 일정등록 실패 메세지전달
 			msg.put("msg", "일정 수정에 실패했습니다 :" + e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
+		}
+	}
+	
+	// 일정삭제
+	@DeleteMapping("/schedule")
+	public ResponseEntity<Map<String, String>> deleteSchedule(@ModelAttribute("scheduleDTO")@Valid ScheduleDTO scheduleDTO, 
+			BindingResult bindingResult, Authentication authentication) {
+		Map<String, String> msg = new HashMap<>();
+		System.out.println(scheduleDTO);
+		
+		// 일정수정 요청 데이터 검증
+		if(bindingResult.hasErrors()) {
+			msg.put("msg", "일정 삭제에 실패했습니다.");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
+		}
+		// 일정수정 요청 데이터 이상 없을때
+		// 일정수정 요청
+		try {
+			scheduleService.deleteSchedule(scheduleDTO, authentication);
+			msg.put("msg", "일정이 삭제되었습니다.");
+			return ResponseEntity.ok(msg);
+			
+		} catch (Exception e) { // 에러발생시 일정등록 실패 메세지전달
+			msg.put("msg", "일정 삭제에 실패했습니다 :" + e.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		}
 	}
