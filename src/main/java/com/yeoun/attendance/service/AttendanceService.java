@@ -140,6 +140,7 @@ public class AttendanceService {
 						            emp.getEmpName(),
 						            emp.getDept().getDeptName(),
 						            emp.getPosition().getPosName(),
+						            emp.getPosition().getRankOrder(),
 						            emp.getMobile(),
 						            emp.getEmail()
 						        ))
