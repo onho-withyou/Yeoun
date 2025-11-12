@@ -1,16 +1,11 @@
 package com.yeoun.notice.service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import com.mysql.cj.log.Log;
 import com.yeoun.notice.dto.NoticeDTO;
 import com.yeoun.notice.entity.Notice;
 import com.yeoun.notice.repository.NoticeRepository;
