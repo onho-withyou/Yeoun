@@ -121,27 +121,12 @@ public class Attendance {
 	
 	// 퇴근 처리
 	public void recordWorkOut(LocalTime now, LocalTime standardOut, AccessLog accessLog) {
-		LocalTime  outTime = null;
-		
-		if (!now.isBefore(standardOut)) {
-			outTime = now; // 퇴근 시간은 기준 시간 이후 실제 퇴근 버튼 누른 시점
-		}
-		
-//		if (accessLog != null && "OUTWORK".equalsIgnoreCase(accessLog.getAccessType())) {
-//			LocalTime returnTime = accessLog.getReturnTime();
-//			
-//			if (returnTime != null && !returnTime.isBefore(standardOut)) {
-//				outTime = returnTime;
-//			}
-//		}
+		LocalTime  outTime = now;
 		
 	    if (outTime != null) {
 	        this.workOut = outTime;
 	        updateDuration();
 	    }
-		
-//		this.workOut = outTime; // 퇴근 시간을 외근 복귀 시간으로 변경
-//		updateDuration();
 	}
 	
 	// 근무시간 계산
