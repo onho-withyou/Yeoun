@@ -62,7 +62,7 @@ public class WebSecurityConfig {
 				// ---------- 로그아웃 처리 설정 ---------
 				.logout(logout -> logout
 					.logoutUrl("/logout") // 로그아웃 요청 URL 지정(주의! POST 방식 요청으로 취급함)
-					.logoutSuccessUrl("/login") // 로그아웃 성공 후 리디렉션 할 URL 지정
+					.logoutSuccessUrl("/login?logout") // 로그아웃 성공 후 리디렉션 할 URL 지정
 					.permitAll()
 				)
 				// ---------- 자동 로그인 처리 설정 ----------
