@@ -22,8 +22,9 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 			+ " WHERE e.empId = :empId")
 	Optional<Emp> findByEmpIdWithRoles(@Param("empId") String empId);
 	
-//	// 사원번호 중복 확인
-//	boolean existsByEmpId(String empId);
+	// 사원번호 중복 확인
+	boolean existsByEmpId(String candidate);
+	
 //	// 이메일 중복 확인
 //	boolean existsByEmail(String email);
 

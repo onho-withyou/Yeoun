@@ -14,14 +14,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.auth.repository.RoleRepository;
+import com.yeoun.common.repository.CommonCodeRepository;
 import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
+import com.yeoun.emp.entity.EmpBank;
 import com.yeoun.emp.entity.EmpRole;
 import com.yeoun.emp.entity.Employment;
 import com.yeoun.emp.entity.Position;
 import com.yeoun.emp.repository.DeptRepository;
+import com.yeoun.emp.repository.EmpBankRepository;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.emp.repository.EmpRoleRepository;
 import com.yeoun.emp.repository.EmploymentRepository;
@@ -38,6 +41,8 @@ public class EmpService {
 	private final DeptRepository deptRepository;
 	private final PositionRepository positionRepository;
 	private final EmploymentRepository employmentRepository;
+	private final EmpBankRepository empBankRepository;
+	private final CommonCodeRepository commonCodeRepository;
 	private final BCryptPasswordEncoder encoder;
 
 	public EmpService(EmpRepository empRepository,
@@ -46,11 +51,15 @@ public class EmpService {
 					  EmploymentRepository employmentRepository,
 					  RoleRepository roleRepository,
 					  EmpRoleRepository empRoleRepository,
+					  EmpBankRepository empBankRepository,
+					  CommonCodeRepository commonCodeRepository,
 					  BCryptPasswordEncoder encoder) {
 		this.empRepository = empRepository;
 		this.deptRepository = deptRepository;
 		this.positionRepository = positionRepository;
 		this.employmentRepository = employmentRepository;
+		this.empBankRepository = empBankRepository;
+		this.commonCodeRepository = commonCodeRepository;
 		this.encoder = encoder;
 	}
 	
@@ -58,10 +67,17 @@ public class EmpService {
 	// 사원 등록 요청
 	// 1) 사번은 서비스에서 자동 생성 (입사일 기반 + 3자리 난수)
 	// 2) 비밀번호 초기값 1234를 BCrypt로 암호화 저장
+	@Transactional
 	public void registEmp(EmpDTO empDTO) {
 		
-		// 1. 사원번호 자동 생성
-		String empId = generateEmpId(empDTO.getHireDate());
+		// 0. 사원번호 자동 생성 (충돌 방지: 재시도 3회)
+		String empId = generateEmpId(empDTO.getHireDate(), 3);
+		
+		// 1. FK 준비 (부서/직급)
+        Dept dept = deptRepository.findById(empDTO.getDeptId())
+                     .orElseThrow(() -> new IllegalArgumentException("부서 없음: " + empDTO.getDeptId()));
+        Position pos = positionRepository.findById(empDTO.getPosCode())
+                        .orElseThrow(() -> new IllegalArgumentException("직급 없음: " + empDTO.getPosCode()));
 		
 		// 2. DTO -> Entity 변환
 		Emp emp = empDTO.toEntity();
@@ -75,17 +91,11 @@ public class EmpService {
 		emp.setStatus(empDTO.getStatus() != null
 					  ? empDTO.getStatus()
 					  : "ACTIVE");				// 기본 상태
-
-		// 4. FK 준비 (부서/직급)
-        Dept dept = deptRepository.findById(empDTO.getDeptId())
-                     .orElseThrow(() -> new IllegalArgumentException("부서 없음: " + empDTO.getDeptId()));
-        Position pos = positionRepository.findById(empDTO.getPosCode())
-                        .orElseThrow(() -> new IllegalArgumentException("직급 없음: " + empDTO.getPosCode()));
 		
-		// 5. EMP 저장
+		// 4. EMP 저장
 		empRepository.saveAndFlush(emp);
 		
-		// 6. EMPLOYMENT 입사 이력 저장
+		// 5. EMPLOYMENT 입사 이력 저장
 		Employment employment = new Employment();
 		employment.setEmp(emp);
 		employment.setDept(dept);
@@ -94,23 +104,35 @@ public class EmpService {
 		employment.setEndDate(null);
 		employment.setRemark("입사 등록");
 		
-		// 7. Employment 저장
+		// 6. Employment 저장
 		employmentRepository.save(employment);
 		
-		log.info("EMP + EMPLOYMENT 저장 완료 - empId={}, dept={}, pos={}",
+		// 7. EMP_BANK 급여 정보 저장
+		EmpBank bank = new EmpBank();
+		bank.setEmpId(emp.getEmpId());
+		bank.setBankCode(empDTO.getBankCode());
+		bank.setAccountNo(empDTO.getAccountNo());
+		bank.setHolder(empDTO.getHolder());
+		bank.setFileId(empDTO.getFileId());
+		empBankRepository.save(bank);
+		
+		log.info("EMP 등록 완료: empId={}, dept={}, pos={}",
 	            emp.getEmpId(), dept.getDeptName(), pos.getPosName());
 		
 	}
 
 	// 사원번호 생성 로직
-	private String generateEmpId(LocalDate hireDate) {
-		
+	private String generateEmpId(LocalDate hireDate, int maxRetry) {
 		LocalDate base = (hireDate != null) ? hireDate : LocalDate.now();
-		String datePart = base.format(DateTimeFormatter.ofPattern("yyMM"));
-		String randomPart = String.format("%03d", ThreadLocalRandom.current().nextInt(1000));
-		
-		return datePart + randomPart;
-		
+        String datePart = base.format(DateTimeFormatter.ofPattern("yyMM"));
+        
+        for (int i = 0; i < maxRetry; i++) {
+            String randomPart = String.format("%03d", ThreadLocalRandom.current().nextInt(1000));
+            String candidate = datePart + randomPart;
+            boolean exists = empRepository.existsByEmpId(candidate);
+            if (!exists) return candidate;
+        }
+        throw new IllegalStateException("사번 생성 충돌: 재시도 초과");
 	}
 	
 	
