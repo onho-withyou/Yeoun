@@ -33,4 +33,18 @@ public interface PayRuleRepository extends JpaRepository<PayRule, Long> {
 					          @Param("newEnd")    LocalDate newEnd,
 					          @Param("maxDate")   LocalDate maxDate,
 					          @Param("excludeId") Long excludeId);
+    
+    /** 
+     *  활성 상태이면서 현재 기준일(asOf)이 유효기간(start~end)에 포함되는 규칙만 조회
+     */
+    @Query("""
+    select p
+      from PayRule p
+     where p.status = :status
+       and p.startDate <= :asOf
+       and (p.endDate is null or p.endDate >= :asOf)
+     order by p.startDate desc, p.id desc
+    """)
+    List<PayRule> findActiveValidRules(@Param("status") ActiveStatus status,
+                                       @Param("asOf") LocalDate asOf);
 }
