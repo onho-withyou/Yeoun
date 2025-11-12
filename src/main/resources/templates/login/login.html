@@ -71,5 +71,9 @@
 		  </div>
 		</div>
 
+		<th:block th:if="${param.logout}">
+		  <script>alert('로그아웃 되었습니다.');</script>
+		</th:block>
+
 </body>
 </html>

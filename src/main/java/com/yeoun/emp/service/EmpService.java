@@ -39,7 +39,6 @@ public class EmpService {
 	private final DeptRepository deptRepository;
 	private final PositionRepository positionRepository;
 	private final EmpBankRepository empBankRepository;
-	private final CommonCodeRepository commonCodeRepository;
 	private final BCryptPasswordEncoder encoder;
 
 	public EmpService(EmpRepository empRepository,
@@ -54,10 +53,10 @@ public class EmpService {
 		this.deptRepository = deptRepository;
 		this.positionRepository = positionRepository;
 		this.empBankRepository = empBankRepository;
-		this.commonCodeRepository = commonCodeRepository;
 		this.encoder = encoder;
 	}
 	
+	// 사원 신규 등록
 	@Transactional
 	public void registEmp(EmpDTO empDTO) {
 
@@ -78,8 +77,6 @@ public class EmpService {
 	    emp.setEmpPwd(encoder.encode("1234"));             // 초기 비밀번호
 	    emp.setHireDate(empDTO.getHireDate() != null ? empDTO.getHireDate() : LocalDate.now());
 	    emp.setStatus(empDTO.getStatus() != null ? empDTO.getStatus() : "ACTIVE");
-
-	    // 🔴 중요: 이제 EMP가 FK를 직접 가짐
 	    emp.setDept(dept);
 	    emp.setPosition(position);
 
@@ -101,65 +98,6 @@ public class EmpService {
 	            emp.getEmpId(), dept.getDeptName(), position.getPosName());
 	}
 
-	
-	// ======================================================
-	// 사원 등록 요청
-	// 1) 사번은 서비스에서 자동 생성 (입사일 기반 + 3자리 난수)
-	// 2) 비밀번호 초기값 1234를 BCrypt로 암호화 저장
-//	@Transactional
-//	public void registEmp(EmpDTO empDTO) {
-//		
-//		// 0. 사원번호 자동 생성 (충돌 방지: 재시도 3회)
-//		String empId = generateEmpId(empDTO.getHireDate(), 3);
-//		
-//		// 1. FK 준비 (부서/직급)
-//        Dept dept = deptRepository.findById(empDTO.getDeptId())
-//                     .orElseThrow(() -> new IllegalArgumentException("부서 없음: " + empDTO.getDeptId()));
-//        Position pos = positionRepository.findById(empDTO.getPosCode())
-//                        .orElseThrow(() -> new IllegalArgumentException("직급 없음: " + empDTO.getPosCode()));
-//		
-//		// 2. DTO -> Entity 변환
-//		Emp emp = empDTO.toEntity();
-//		
-//		// 3. 서비스에서 세팅해야 하는 값
-//		emp.setEmpId(empId);					// 자동 사번
-//		emp.setEmpPwd(encoder.encode("1234"));	// 초기 비밀번호 암호화
-//		emp.setHireDate(empDTO.getHireDate() != null
-//						? empDTO.getHireDate()
-//						: LocalDate.now());		// 기본 입사일
-//		emp.setStatus(empDTO.getStatus() != null
-//					  ? empDTO.getStatus()
-//					  : "ACTIVE");				// 기본 상태
-//		
-//		// 4. EMP 저장
-//		empRepository.saveAndFlush(emp);
-//		
-//		// 5. EMPLOYMENT 입사 이력 저장
-//		Employment employment = new Employment();
-//		employment.setEmp(emp);
-//		employment.setDept(dept);
-//		employment.setPosition(pos);
-//		employment.setStartDate(emp.getHireDate());
-//		employment.setEndDate(null);
-//		employment.setRemark("입사 등록");
-//		
-//		// 6. Employment 저장
-//		employmentRepository.save(employment);
-//		
-//		// 7. EMP_BANK 급여 정보 저장
-//		EmpBank bank = new EmpBank();
-//		bank.setEmpId(emp.getEmpId());
-//		bank.setBankCode(empDTO.getBankCode());
-//		bank.setAccountNo(empDTO.getAccountNo());
-//		bank.setHolder(empDTO.getHolder());
-//		bank.setFileId(empDTO.getFileId());
-//		empBankRepository.save(bank);
-//		
-//		log.info("EMP 등록 완료: empId={}, dept={}, pos={}",
-//	            emp.getEmpId(), dept.getDeptName(), pos.getPosName());
-//		
-//	}
-
 	// 사원번호 생성 로직
 	private String generateEmpId(LocalDate hireDate, int maxRetry) {
 		LocalDate base = (hireDate != null) ? hireDate : LocalDate.now();
@@ -174,35 +112,24 @@ public class EmpService {
         throw new IllegalStateException("사번 생성 충돌: 재시도 초과");
 	}
 	
+	// 활성화된 부서 목록 조회
+	public  List<Dept> getDeptList() {
+		return deptRepository.findActive();
+	}
+
+	// 활성화된 직급 목록 조회
+	public List<Position> getPositionList() {
+        return positionRepository.findActive();
+    }
 	
-	// ===================================================================================
+	// =============================================================================
 	// 사원 목록 조회
-//	@Transactional(readOnly = true)
-//	public List<EmpListDTO> getEmpList() {
-//	    // 1) 전체 사원
-//	    List<Emp> emps = empRepository.findAll(); 
-//	    // 정렬 원하면: empRepository.findAll(Sort.by(Sort.Direction.DESC, "createdDate"))
-//
-//	    if (emps.isEmpty()) return List.of();
-//
-//	    // 2) 현재 이력(END_DATE is null)
-//	    List<Employment> currents = employmentRepository.findByEmpInAndEndDateIsNull(emps);
-//
-//	    // 3) empId -> Employment
-//	    Map<String, Employment> byEmpId = currents.stream()
-//	        .collect(Collectors.toMap(e -> e.getEmp().getEmpId(), Function.identity(), (a,b)->a));
-//
-//	    // 4) DTO 변환
-//	    return emps.stream()
-//	        .map(e -> {
-//	            Employment cur = byEmpId.get(e.getEmpId());
-//	            String deptName = (cur != null && cur.getDept() != null) ? cur.getDept().getDeptName() : "";
-//	            String posName  = (cur != null && cur.getPosition() != null) ? cur.getPosition().getPosName() : "";
-//	            return new EmpListDTO(e.getHireDate(), e.getEmpId(), e.getEmpName(), deptName, posName, e.getMobile(), e.getEmail());
-//	        })
-//	        .toList();
-//	}
-	
+	public List<EmpListDTO> getEmpList() {
+		log.info("▶ 사원 목록 조회 시작");
+		List<Emp> empList = empRepository.findAll();
+		
+		return empRepository.findAllForList();
+	}
 	
 	// ==============================================================================
 	// 사원 정보 조회
@@ -216,20 +143,23 @@ public class EmpService {
 			String code = (er.getRole() != null) ? er.getRole().getRoleCode() : "NULL";
 	        log.info(">>> Role: {}", code);
 		}
-		// ---------------------------------------------------------------------------------------------------------
+		// --------------------------------------------------------------------------
 		// Emp 엔티티 -> EmpDTO 객체로 변환하여 리턴
 		return EmpDTO.fromEntity(emp);
 	}
+	
+	// =============================================
+	// 사원 정보 상세 조회
+//	public EmpDTO getEmpDetail(String empId) {
+//		
+//		// 사원 엔티티 조회
+//		Emp emp = empRepository.findByEmpId(empId)
+//					.orElseThrow(() -> new IllegalArgumentException("사원 없음: " + empId));
+//		
+//		// Emp 엔티티 -> EmpDTO 객체로 변환하여 리턴
+//		return EmpDTO.fromEntity(emp);
+//	}
 
-	// 활성화된 부서 목록 조회
-	public  List<Dept> getDeptList() {
-		return deptRepository.findActive();
-	}
-
-	// 활성화된 직급 목록 조회
-	public List<Position> getPositionList() {
-        return positionRepository.findActive();
-    }
 
 
 }

@@ -75,15 +75,15 @@ public class Emp {
 	@Column(name = "HIRE_DATE")
 	private LocalDate hireDate;	
 	
-  // 부서ID (FK: DEPT.DEPT_ID)
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "DEPT_ID", nullable = false)
-  private Dept dept;
+    // 부서ID (FK: DEPT.DEPT_ID)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "DEPT_ID", nullable = false)
+    private Dept dept;
   
-  // 직급코드 (FK: POSITION.POS_CODE)
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "POS_CODE", nullable = false, referencedColumnName = "POS_CODE")
-  private Position position;
+    // 직급코드 (FK: POSITION.POS_CODE)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "POS_CODE", nullable = false, referencedColumnName = "POS_CODE")
+    private Position position;
 	
 	// 재직 상태
 	@Column(name = "STATUS", nullable = false, length = 10)
