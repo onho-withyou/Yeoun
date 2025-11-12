@@ -9,10 +9,12 @@ import com.yeoun.messenger.repository.MsgStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
 public class MsgStatusDTO {
 		private String empId;					// 사원 ID (EMP의 EMP_ID FK)
 		private String avlbStat;				// 가용상태
@@ -24,6 +26,10 @@ public class MsgStatusDTO {
 		private String onlineYn;				// 접속 여부
 		private LocalDateTime lastLogin;		// 마지막 접속시간
 		private String remark;					// 비고
+		
+		private String empName;					// 사원 이름 (추가필드)
+		private String deptName;				// 부서 이름 (추가필드)
+		private String posName;					// 직무 이름 (추가필드)
 		
 		
 		// ===========================================================

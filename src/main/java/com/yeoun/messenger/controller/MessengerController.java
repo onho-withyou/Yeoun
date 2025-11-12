@@ -38,6 +38,7 @@ public class MessengerController {
 		List<MsgStatusDTO> msgStatusDTOList = messengerService.selectUsers(loginDTO.getUsername());
 		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> username : " + loginDTO.getUsername());
 		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> list : " + msgStatusDTOList);
+		model.addAttribute("friends", msgStatusDTOList);
 		return "/messenger/list";
 	}
 	
