@@ -33,6 +33,14 @@ public class EmpDTO {
     @NotBlank(message = "연락처는 필수입니다.")
     @Pattern(regexp = "^010-\\d{4}-\\d{4}$", message = "연락처 형식은 010-0000-0000 입니다.")
 	private String mobile;  // 연락처		
+    
+    // 주민번호 
+    @Pattern(
+      regexp = "^(\\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01]))-[1-4]\\d{6}$",
+      message = "주민등록번호 형식은 000000-0000000 입니다."
+    )
+    private String rrn;
+
 	
 	@NotBlank(message = "이메일은 필수 입력값입니다!")
 	@Email(message = "이메일 형식에 맞게 입력해 주세요!")
