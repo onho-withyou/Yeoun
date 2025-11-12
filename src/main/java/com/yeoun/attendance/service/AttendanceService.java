@@ -21,6 +21,7 @@ import com.yeoun.attendance.repository.AccessLogRepository;
 import com.yeoun.attendance.repository.AttendanceRepository;
 import com.yeoun.attendance.repository.WorkPolicyRepository;
 import com.yeoun.emp.dto.EmpDTO;
+import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.repository.EmpRepository;
 
 import groovyjarjarantlr4.v4.parse.GrammarTreeVisitor.locals_return;
@@ -86,10 +87,9 @@ public class AttendanceService {
 			throw new IllegalStateException("이미 오늘 출근 기록이 존재합니다.");
 		}
 		
-		Attendance attendance  = Attendance.createAttendance(attendanceDTO.getEmpId(), today, attendanceDTO.getWorkIn(), 
-				attendanceDTO.getWorkOut(), attendanceDTO.getStatusCode());
+		attendanceDTO.setWorkDate(today);
 		
-		attendanceRepository.save(attendance);
+		attendanceRepository.save(attendanceDTO.toEntity());
 	}
 	
 	// 개인 출퇴근 기록
@@ -132,9 +132,17 @@ public class AttendanceService {
 	}
 
 	// 사원 아이디로 사원 조회
-	public EmpDTO getEmp(String empId) {
+	public EmpListDTO getEmp(String empId) {
 		return empRepository.findById(empId)
-							.map(emp -> EmpDTO.fromEntity(emp))
+							.map(emp -> new EmpListDTO(
+						            emp.getHireDate(),
+						            emp.getEmpId(),
+						            emp.getEmpName(),
+						            emp.getDept().getDeptName(),
+						            emp.getPosition().getPosName(),
+						            emp.getMobile(),
+						            emp.getEmail()
+						        ))
 							.orElseThrow(() -> new NoSuchElementException(empId + "에 해당하는 사원이 없습니다."));
 	}
 
