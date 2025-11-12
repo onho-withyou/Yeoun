@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.yeoun.common.service.CommonCodeService;
@@ -25,8 +26,8 @@ import lombok.extern.log4j.Log4j2;
 
 @Controller
 @RequestMapping("/emp")
-@RequiredArgsConstructor
 @Log4j2
+@RequiredArgsConstructor
 public class EmpController {
 	
 	private final EmpService empService;
@@ -76,16 +77,21 @@ public class EmpController {
 		
 	}
 	
-	// 사원 목록 조회 
-//	@GetMapping("/list")
-//	public String showEmpList(Model model) {
-//		
-//		// 서비스에서 리스트 가져오기
-//		List<EmpListDTO> empList = empService.getEmpList();
-//		model.addAttribute("empList", empList);
-//		return "emp/emp_list";
-//	}
+	// ====================================================================================
+	// 사원 목록 조회
+	@GetMapping("/list")
+	public String getEmpListForm() {
+		log.info("▶ 사원목록 페이지 요청");
+		return "/emp/emp_list";
+	}
 	
+	// AJAX 데이터 로딩
+	@ResponseBody
+	@GetMapping("/list/data")
+	public List<EmpListDTO> getEmpList() {
+		log.info("▶ 사원목록 데이터 요청 (JSON)");
+		return empService.getEmpList();
+	}
 	
 	
 	
