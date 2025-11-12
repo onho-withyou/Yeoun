@@ -22,9 +22,9 @@ public class PayrollCalcQueryService {
     
     public List<PayrollPayslip> findForView(String yyyymm) {
         List<PayrollPayslip> confirmed =
-            payslipRepo.findByPayYymmAndStatusOrderByEmpIdAsc(yyyymm, CalcStatus.CALCULATED);
+            payslipRepo.findByPayYymmAndCalcStatusOrderByEmpIdAsc(yyyymm, CalcStatus.CALCULATED);
         if (!confirmed.isEmpty()) return confirmed;
-        return payslipRepo.findByPayYymmAndStatusOrderByEmpIdAsc(yyyymm, CalcStatus.SIMULATED);
+        return payslipRepo.findByPayYymmAndCalcStatusOrderByEmpIdAsc(yyyymm, CalcStatus.SIMULATED);
     }
 
 

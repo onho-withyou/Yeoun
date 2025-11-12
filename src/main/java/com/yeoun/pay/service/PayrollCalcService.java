@@ -2,6 +2,7 @@ package com.yeoun.pay.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -21,8 +22,11 @@ import com.yeoun.pay.repository.PayItemMstRepository;
 import com.yeoun.pay.repository.PayRuleRepository;
 import com.yeoun.pay.repository.PayrollPayslipRepository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
 import static com.yeoun.pay.enums.CalcMethod.*;
 
 @Service
@@ -34,93 +38,127 @@ public class PayrollCalcService {
     private final PayRuleRepository payRuleRepo;
     private final PayItemMstRepository itemRepo;
     private final PayCalcRuleRepository calcRuleRepo;
-    private final EmployeeQueryPort employeePort; // 어댑터가 구현해서 주입
+    private final EmployeeQueryPort employeePort;
+
+    @PersistenceContext
+    private EntityManager em;
 
     /** 외부(인사)조회 포트 */
     public static interface EmployeeQueryPort {
         List<SimpleEmp> findActiveEmployees();
     }
+
     /** 급여에 필요한 최소 필드 */
     public record SimpleEmp(String empId, String deptId, BigDecimal baseSalary) {}
 
-    /** 가계산(시뮬레이션) */
+    /* ========================= 시뮬레이션 ========================= */
     @Transactional
     public int simulateMonthly(String yyyymm, boolean overwrite) {
-        return runMonthlyBatch(yyyymm, overwrite, null, true);
-    }
-
-    /** 확정 */
-    @Transactional
-    public int confirmMonthly(String yyyymm, boolean overwrite) {
-        int cnt = runMonthlyBatch(yyyymm, overwrite, null, false);
-        // 상태를 CONFIRMED 로 세팅
-        List<PayrollPayslip> slips = payslipRepo.findByPayYymm(yyyymm);
-        for (PayrollPayslip s : slips) {
-        	 s.setStatus(CalcStatus.CONFIRMED);
-        }
-        payslipRepo.saveAll(slips);
+        log.info("[SIMULATE] {}월 급여 시뮬레이션 시작 (overwrite={})", yyyymm, overwrite);
+        int cnt = runMonthlyBatch(yyyymm, overwrite, null, true);
+        log.info("[SIMULATE] {}월 시뮬레이션 완료: {}건 반영", yyyymm, cnt);
         return cnt;
     }
 
-    /** 월 일괄 계산 */
+    /* ========================= 월 확정(전체) ========================= */
+    @Transactional
+    public int confirmMonthly(String yyyymm, boolean overwrite, String userId) {
+        log.info("[CONFIRM] {}월 급여 확정 처리 시작 (overwrite={})", yyyymm, overwrite);
+
+        int calcCnt = runMonthlyBatch(yyyymm, overwrite, null, false);
+        int upd = payslipRepo.confirmMonth(yyyymm, CalcStatus.CONFIRMED, optUser(userId), LocalDateTime.now());
+        log.info("[CONFIRM] {}월 확정 완료: 계산 {}건, 확정 {}건", yyyymm, calcCnt, upd);
+        return upd;
+    }
+
+    /* ========================= 공통 월 일괄 계산 ========================= */
     @Transactional
     public int runMonthlyBatch(String payYymm, boolean overwrite, Long jobId, boolean simulated) {
-        final String calcType = simulated ? "SIMULATED" : "CALCULATED";
+        final CalcStatus status = simulated ? CalcStatus.SIMULATED : CalcStatus.CALCULATED;
+        log.info("[{}] 급여 일괄 계산 시작 (overwrite={}, simulated={})", payYymm, overwrite, simulated);
 
-        // 기준/항목/규칙 로딩
+        // 1. 규칙 조회
+        log.info("단계1: 규칙 조회 시작");
         List<PayRule> rules     = payRuleRepo.findAll();
         List<PayItemMst> items  = itemRepo.findAll();
         List<PayCalcRule> crules= calcRuleRepo.findAll();
+        log.info("단계2: 규칙 조회 완료 (rules={}, items={}, calcRules={})", rules.size(), items.size(), crules.size());
 
-        // ★★★ NPE 방지: null → 빈 리스트로
+        // 2. 활성 사원 조회
         List<SimpleEmp> employees =
-                Optional.ofNullable(employeePort.findActiveEmployees())
-                        .orElse(Collections.emptyList());
-
+                Optional.ofNullable(employeePort.findActiveEmployees()).orElse(Collections.emptyList());
+        log.info("단계3: 활성 사원 {}명 조회", employees.size());
         if (employees.isEmpty()) {
-            log.warn("runMonthlyBatch: active employee list is empty. yyyymm={}, simulated={}", payYymm, simulated);
-            return 0; // 정책에 맞게 0건 처리
+            log.warn("[{}] 활성 사원 없음 → 계산 중단", payYymm);
+            return 0;
         }
 
-        int count = 0;
+        int successCount = 0;
+
+        // 3. 사원별 급여 계산
         for (SimpleEmp emp : employees) {
+            try {
+                log.info("단계4: [{}] 사번 계산 시작", emp.empId());
 
-            if (!overwrite && payslipRepo.existsByPayYymmAndEmpId(payYymm, emp.empId())) {
-                log.info("SKIP exists payslip: {} {}", payYymm, emp.empId());
-                continue;
+                // overwrite가 false면 기존 건 스킵
+                if (!overwrite && payslipRepo.existsByPayYymmAndEmpId(payYymm, emp.empId())) {
+                    log.debug("SKIP: {} / {}", payYymm, emp.empId());
+                    continue;
+                }
+
+                BigDecimal baseAmt = calcBase(emp, rules, items, crules);
+                BigDecimal alwAmt  = calcAllowances(emp, rules, items, crules, baseAmt);
+                BigDecimal dedAmt  = calcDeductions(emp, rules, items, crules, baseAmt, alwAmt);
+                BigDecimal totAmt  = baseAmt.add(alwAmt);
+                BigDecimal netAmt  = totAmt.subtract(dedAmt);
+
+                // 🔸 기존 명세 존재 여부 체크
+                PayrollPayslip existing = payslipRepo.findByPayYymmAndEmpId(payYymm, emp.empId()).orElse(null);
+                boolean isNew = (existing == null);
+
+                PayrollPayslip slip = isNew ? new PayrollPayslip() : existing;
+
+                // 필드 설정
+                slip.setPayYymm(payYymm);
+                slip.setEmpId(emp.empId());
+                slip.setDeptId(emp.deptId());
+                slip.setBaseAmt(safe(baseAmt));
+                slip.setAlwAmt(safe(alwAmt));
+                slip.setDedAmt(safe(dedAmt));
+                slip.setTotAmt(safe(totAmt));
+                slip.setNetAmt(safe(netAmt));
+                slip.setCalcType(simulated ? "SIMULATED" : "BATCH ALL");
+                slip.setCalcStatus(status);
+                slip.setJobId(jobId);
+                slip.setCalcDt(LocalDateTime.now());
+
+                // 신규일 경우 insert
+                if (isNew) {
+                    log.info("✅ 신규 insert 시도: empId={}, payYymm={}", emp.empId(), payYymm);
+                    em.persist(slip);
+                    em.flush();
+                    log.info("✅ insert 완료 → payslipId={}", slip.getPayslipId());
+                } else {
+                    log.info("▶ 기존 update 시도: empId={}, payslipId={}", emp.empId(), slip.getPayslipId());
+                    em.merge(slip);
+                    em.flush();
+                    log.info("▶ update 완료");
+                }
+
+                successCount++;
+
+            } catch (Exception e) {
+                log.error("❌ [{}] 급여 계산 실패: {}", emp.empId(), e.getMessage(), e);
             }
-
-            BigDecimal baseAmt = calcBase(emp, rules, items, crules);
-            BigDecimal alwAmt  = calcAllowances(emp, rules, items, crules, baseAmt);
-            BigDecimal dedAmt  = calcDeductions(emp, rules, items, crules, baseAmt, alwAmt);
-            BigDecimal totAmt  = baseAmt.add(alwAmt);
-            BigDecimal netAmt  = totAmt.subtract(dedAmt);
-
-            PayrollPayslip slip = payslipRepo.findByPayYymmAndEmpId(payYymm, emp.empId())
-                    .orElseGet(PayrollPayslip::new);
-
-            slip.setPayYymm(payYymm);
-            slip.setEmpId(emp.empId());
-            slip.setDeptId(emp.deptId());
-            slip.setBaseAmt(safe(baseAmt));
-            slip.setAlwAmt(safe(alwAmt));
-            slip.setDedAmt(safe(dedAmt));
-            slip.setTotAmt(safe(totAmt));
-            slip.setNetAmt(safe(netAmt));
-            slip.setCalcType("BATCH ALL");
-            slip.setStatus(CalcStatus.CALCULATED);
-            slip.setJobId(jobId);
-
-            payslipRepo.save(slip);
-            count++;
         }
-        return count;
+
+        log.info("[{}] 급여계산 완료: 총 {}건 처리 (상태={})", payYymm, successCount, status);
+        return successCount;
     }
 
-    /* ================= 세부 계산 ================= */
-
+    /* ========================= 계산 서브루틴 ========================= */
     private BigDecimal calcBase(SimpleEmp emp, List<PayRule> rules, List<PayItemMst> items, List<PayCalcRule> crules) {
-        return n(emp.baseSalary()); // 최소동작: 사원 기본급
+        return n(emp.baseSalary());
     }
 
     private BigDecimal calcAllowances(SimpleEmp emp, List<PayRule> rules, List<PayItemMst> items,
@@ -142,13 +180,10 @@ public class PayrollCalcService {
 
     private BigDecimal calcDeductions(SimpleEmp emp, List<PayRule> rules, List<PayItemMst> items,
                                       List<PayCalcRule> crules, BigDecimal baseAmt, BigDecimal alwAmt) {
-
         BigDecimal sum   = BigDecimal.ZERO;
         BigDecimal total = baseAmt.add(alwAmt);
-
         for (PayCalcRule r : crules) {
             if (!"DEDUCTION".equalsIgnoreCase(r.getRuleType().name())) continue;
-
             BigDecimal val = switch (r.getCalcMethod()) {
                 case FIXED    -> n(r.getAmount());
                 case RATE     -> total.multiply(n(r.getRate()))
@@ -156,11 +191,6 @@ public class PayrollCalcService {
                 case FORMULA  -> formula(r.getExpr(), baseAmt, alwAmt, sum);
                 case EXTERNAL -> externalAmount(emp, r, baseAmt, alwAmt, sum);
             };
-
-            String item = r.getItem().getItemCode();
-            if ("NPS".equalsIgnoreCase(item) || "HEALTH".equalsIgnoreCase(item) || "EI".equalsIgnoreCase(item)) {
-                val = val.setScale(0, RoundingMode.HALF_UP); // 원단위 반올림
-            }
             sum = sum.add(val);
         }
         return sum;
@@ -168,7 +198,7 @@ public class PayrollCalcService {
 
     private BigDecimal externalAmount(SimpleEmp emp, PayCalcRule r,
                                       BigDecimal baseAmt, BigDecimal alwAmt, BigDecimal dedSum) {
-        return BigDecimal.ZERO; // TODO 연동시 교체
+        return BigDecimal.ZERO; // TODO: 외부 HR 연동 시 구현
     }
 
     private BigDecimal formula(String expr, BigDecimal base, BigDecimal alw, BigDecimal ded) {
@@ -179,7 +209,7 @@ public class PayrollCalcService {
                        .replace("DED",  ded.toPlainString())
                        .replace("%", "*0.01");
         try {
-            return new java.math.BigDecimal(
+            return new BigDecimal(
                     new javax.script.ScriptEngineManager()
                             .getEngineByName("JavaScript").eval(s).toString()
             ).setScale(2, RoundingMode.HALF_UP);
@@ -194,5 +224,9 @@ public class PayrollCalcService {
 
     public static String currentYymm() {
         return LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
+    }
+
+    private static String optUser(String userId){
+        return (userId == null || userId.isBlank()) ? "SYSTEM" : userId;
     }
 }
