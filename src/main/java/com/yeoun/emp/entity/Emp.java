@@ -14,7 +14,10 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -71,6 +74,16 @@ public class Emp {
 	// 입사일 (DATE -> LocalDate)
 	@Column(name = "HIRE_DATE")
 	private LocalDate hireDate;	
+	
+  // 부서ID (FK: DEPT.DEPT_ID)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "DEPT_ID", nullable = false)
+  private Dept dept;
+  
+  // 직급코드 (FK: POSITION.POS_CODE)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "POS_CODE", nullable = false, referencedColumnName = "POS_CODE")
+  private Position position;
 	
 	// 재직 상태
 	@Column(name = "STATUS", nullable = false, length = 10)

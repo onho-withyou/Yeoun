@@ -63,63 +63,107 @@ public class EmpService {
 		this.encoder = encoder;
 	}
 	
+	@Transactional
+	public void registEmp(EmpDTO empDTO) {
+
+	    // 0) 사번 자동 생성 (충돌 방지 재시도)
+	    String empId = generateEmpId(empDTO.getHireDate(), 3);
+
+	    // 1) FK 로드 (부서/직급) - NOT NULL 보장
+	    Dept dept = deptRepository.findById(empDTO.getDeptId())
+	            .orElseThrow(() -> new IllegalArgumentException("부서 없음: " + empDTO.getDeptId()));
+	    Position position = positionRepository.findById(empDTO.getPosCode())
+	            .orElseThrow(() -> new IllegalArgumentException("직급 없음: " + empDTO.getPosCode()));
+
+	    // 2) DTO -> Entity
+	    Emp emp = empDTO.toEntity();
+
+	    // 3) 서비스에서 세팅해야 하는 값들
+	    emp.setEmpId(empId);                               // 자동 사번
+	    emp.setEmpPwd(encoder.encode("1234"));             // 초기 비밀번호
+	    emp.setHireDate(empDTO.getHireDate() != null ? empDTO.getHireDate() : LocalDate.now());
+	    emp.setStatus(empDTO.getStatus() != null ? empDTO.getStatus() : "ACTIVE");
+
+	    // 🔴 중요: 이제 EMP가 FK를 직접 가짐
+	    emp.setDept(dept);
+	    emp.setPosition(position);
+
+	    // 4) EMP 저장
+	    empRepository.saveAndFlush(emp);
+
+	    // 5) 급여계좌(EMP_BANK) 저장 (선택값 없으면 스킵)
+	    if (empDTO.getBankCode() != null && empDTO.getAccountNo() != null) {
+	        EmpBank bank = new EmpBank();
+	        bank.setEmpId(emp.getEmpId());
+	        bank.setBankCode(empDTO.getBankCode());
+	        bank.setAccountNo(empDTO.getAccountNo());
+	        bank.setHolder(empDTO.getHolder());
+	        bank.setFileId(empDTO.getFileId());
+	        empBankRepository.save(bank);
+	    }
+
+	    log.info("EMP 등록 완료: empId={}, dept={}, pos={}",
+	            emp.getEmpId(), dept.getDeptName(), position.getPosName());
+	}
+
+	
 	// ======================================================
 	// 사원 등록 요청
 	// 1) 사번은 서비스에서 자동 생성 (입사일 기반 + 3자리 난수)
 	// 2) 비밀번호 초기값 1234를 BCrypt로 암호화 저장
-	@Transactional
-	public void registEmp(EmpDTO empDTO) {
-		
-		// 0. 사원번호 자동 생성 (충돌 방지: 재시도 3회)
-		String empId = generateEmpId(empDTO.getHireDate(), 3);
-		
-		// 1. FK 준비 (부서/직급)
-        Dept dept = deptRepository.findById(empDTO.getDeptId())
-                     .orElseThrow(() -> new IllegalArgumentException("부서 없음: " + empDTO.getDeptId()));
-        Position pos = positionRepository.findById(empDTO.getPosCode())
-                        .orElseThrow(() -> new IllegalArgumentException("직급 없음: " + empDTO.getPosCode()));
-		
-		// 2. DTO -> Entity 변환
-		Emp emp = empDTO.toEntity();
-		
-		// 3. 서비스에서 세팅해야 하는 값
-		emp.setEmpId(empId);					// 자동 사번
-		emp.setEmpPwd(encoder.encode("1234"));	// 초기 비밀번호 암호화
-		emp.setHireDate(empDTO.getHireDate() != null
-						? empDTO.getHireDate()
-						: LocalDate.now());		// 기본 입사일
-		emp.setStatus(empDTO.getStatus() != null
-					  ? empDTO.getStatus()
-					  : "ACTIVE");				// 기본 상태
-		
-		// 4. EMP 저장
-		empRepository.saveAndFlush(emp);
-		
-		// 5. EMPLOYMENT 입사 이력 저장
-		Employment employment = new Employment();
-		employment.setEmp(emp);
-		employment.setDept(dept);
-		employment.setPosition(pos);
-		employment.setStartDate(emp.getHireDate());
-		employment.setEndDate(null);
-		employment.setRemark("입사 등록");
-		
-		// 6. Employment 저장
-		employmentRepository.save(employment);
-		
-		// 7. EMP_BANK 급여 정보 저장
-		EmpBank bank = new EmpBank();
-		bank.setEmpId(emp.getEmpId());
-		bank.setBankCode(empDTO.getBankCode());
-		bank.setAccountNo(empDTO.getAccountNo());
-		bank.setHolder(empDTO.getHolder());
-		bank.setFileId(empDTO.getFileId());
-		empBankRepository.save(bank);
-		
-		log.info("EMP 등록 완료: empId={}, dept={}, pos={}",
-	            emp.getEmpId(), dept.getDeptName(), pos.getPosName());
-		
-	}
+//	@Transactional
+//	public void registEmp(EmpDTO empDTO) {
+//		
+//		// 0. 사원번호 자동 생성 (충돌 방지: 재시도 3회)
+//		String empId = generateEmpId(empDTO.getHireDate(), 3);
+//		
+//		// 1. FK 준비 (부서/직급)
+//        Dept dept = deptRepository.findById(empDTO.getDeptId())
+//                     .orElseThrow(() -> new IllegalArgumentException("부서 없음: " + empDTO.getDeptId()));
+//        Position pos = positionRepository.findById(empDTO.getPosCode())
+//                        .orElseThrow(() -> new IllegalArgumentException("직급 없음: " + empDTO.getPosCode()));
+//		
+//		// 2. DTO -> Entity 변환
+//		Emp emp = empDTO.toEntity();
+//		
+//		// 3. 서비스에서 세팅해야 하는 값
+//		emp.setEmpId(empId);					// 자동 사번
+//		emp.setEmpPwd(encoder.encode("1234"));	// 초기 비밀번호 암호화
+//		emp.setHireDate(empDTO.getHireDate() != null
+//						? empDTO.getHireDate()
+//						: LocalDate.now());		// 기본 입사일
+//		emp.setStatus(empDTO.getStatus() != null
+//					  ? empDTO.getStatus()
+//					  : "ACTIVE");				// 기본 상태
+//		
+//		// 4. EMP 저장
+//		empRepository.saveAndFlush(emp);
+//		
+//		// 5. EMPLOYMENT 입사 이력 저장
+//		Employment employment = new Employment();
+//		employment.setEmp(emp);
+//		employment.setDept(dept);
+//		employment.setPosition(pos);
+//		employment.setStartDate(emp.getHireDate());
+//		employment.setEndDate(null);
+//		employment.setRemark("입사 등록");
+//		
+//		// 6. Employment 저장
+//		employmentRepository.save(employment);
+//		
+//		// 7. EMP_BANK 급여 정보 저장
+//		EmpBank bank = new EmpBank();
+//		bank.setEmpId(emp.getEmpId());
+//		bank.setBankCode(empDTO.getBankCode());
+//		bank.setAccountNo(empDTO.getAccountNo());
+//		bank.setHolder(empDTO.getHolder());
+//		bank.setFileId(empDTO.getFileId());
+//		empBankRepository.save(bank);
+//		
+//		log.info("EMP 등록 완료: empId={}, dept={}, pos={}",
+//	            emp.getEmpId(), dept.getDeptName(), pos.getPosName());
+//		
+//	}
 
 	// 사원번호 생성 로직
 	private String generateEmpId(LocalDate hireDate, int maxRetry) {
