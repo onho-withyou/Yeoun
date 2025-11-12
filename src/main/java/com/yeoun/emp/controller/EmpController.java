@@ -76,7 +76,7 @@ public class EmpController {
 		
 	}
 	
-	// 사원 목록 조회
+	// 사원 목록 조회 
 //	@GetMapping("/list")
 //	public String showEmpList(Model model) {
 //		
