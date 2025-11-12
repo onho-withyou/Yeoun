@@ -99,10 +99,10 @@ public class EmpController {
 	
 	// ====================================================================================
 	// 사원 정보 상세 조회
-	@GetMapping("/detail/{empId}")
-	public EmpDTO getEmpDetail(@PathVariable("empId") String empId) {
-		return empService.getEmpDetail(empId);
-	}
+//	@GetMapping("/detail/{empId}")
+//	public EmpDTO getEmpDetail(@PathVariable("empId") String empId) {
+//		return empService.getEmpDetail(empId);
+//	}
 	
 	
 	

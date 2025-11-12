@@ -56,6 +56,7 @@ public class EmpService {
 		this.encoder = encoder;
 	}
 	
+	// 사원 신규 등록
 	@Transactional
 	public void registEmp(EmpDTO empDTO) {
 
@@ -111,6 +112,16 @@ public class EmpService {
         throw new IllegalStateException("사번 생성 충돌: 재시도 초과");
 	}
 	
+	// 활성화된 부서 목록 조회
+	public  List<Dept> getDeptList() {
+		return deptRepository.findActive();
+	}
+
+	// 활성화된 직급 목록 조회
+	public List<Position> getPositionList() {
+        return positionRepository.findActive();
+    }
+	
 	// =============================================================================
 	// 사원 목록 조회
 	public List<EmpListDTO> getEmpList() {
@@ -119,7 +130,6 @@ public class EmpService {
 		
 		return empRepository.findAllForList();
 	}
-
 	
 	// ==============================================================================
 	// 사원 정보 조회
@@ -133,21 +143,22 @@ public class EmpService {
 			String code = (er.getRole() != null) ? er.getRole().getRoleCode() : "NULL";
 	        log.info(">>> Role: {}", code);
 		}
-		// ---------------------------------------------------------------------------------------------------------
+		// --------------------------------------------------------------------------
 		// Emp 엔티티 -> EmpDTO 객체로 변환하여 리턴
 		return EmpDTO.fromEntity(emp);
 	}
-
-	// 활성화된 부서 목록 조회
-	public  List<Dept> getDeptList() {
-		return deptRepository.findActive();
-	}
-
-	// 활성화된 직급 목록 조회
-	public List<Position> getPositionList() {
-        return positionRepository.findActive();
-    }
-
+	
+	// =============================================
+	// 사원 정보 상세 조회
+//	public EmpDTO getEmpDetail(String empId) {
+//		
+//		// 사원 엔티티 조회
+//		Emp emp = empRepository.findByEmpId(empId)
+//					.orElseThrow(() -> new IllegalArgumentException("사원 없음: " + empId));
+//		
+//		// Emp 엔티티 -> EmpDTO 객체로 변환하여 리턴
+//		return EmpDTO.fromEntity(emp);
+//	}
 
 
 

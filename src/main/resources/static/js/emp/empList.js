@@ -1,32 +1,24 @@
 // empList.js 
 // 사원 목록 테이블 그리드
 
-  // 전역 상태
-  let empGrid = null;        // 그리드 인스턴스
-  let originalRows = [];     // 정렬 해제 시 복원할 원본 데이터
-  let empDetailModal;
-  
-  document.addEventListener('DOMContentLoaded', () => {
-	
-	const modalEl = document.getElementById('empDetailModal');
-	empDetailModal = bootstrap.Modal.getOrCreateInstance(modalEl);
-	
-	initEmpListPage();
-  });
-  
-  // 데이터 로드 → 그리드 생성
-  function initEmpListPage() {
-    fetch('/emp/list/data', { credentials: 'same-origin' })
-      .then(res => res.json())
-      .then(data => {
-        originalRows = Array.isArray(data) ? data.slice() : []; // 원본 백업
-        buildEmpGrid(originalRows); // rows로 넘김
-      })
-      .catch(() => alert('사원 목록 요청 실패!'));
-  }
+  let empGrid = null;
+  let empDetailModal = null;
 
+  document.addEventListener('DOMContentLoaded', () => {
+    empDetailModal = new bootstrap.Modal(document.getElementById('empDetailModal'));
+    loadEmpList();
+  });
+ 
+  // 사원 목록 가져오기
+  function loadEmpList() {
+    fetch('/emp/list/data')
+      .then(res => res.json())
+      .then(rows => makeGrid(rows))
+      .catch(() => alert('사원 목록 불러오기 실패'));
+  }
+	
   // Toast Grid 생성 함수
-  function buildEmpGrid(rows) {
+  function makeGrid(rows) {
 	  empGrid = new tui.Grid({
       el: document.getElementById('grid'), // grid가 들어갈 div
       bodyHeight: 540,                     // 표 높이
@@ -48,7 +40,7 @@
           name: 'btn',
           width: 110,
           align: 'center',
-          formatter: () => "<button type='button' class='btn btn-info btn-sm btn-open-modal'>상세</button>"
+          formatter: () => "<button type='button' class='btn btn-info btn-sm'>상세</button>"
         }
       ],
     });
@@ -56,13 +48,38 @@
     // JSON 데이터 삽입
     empGrid.resetData(rows);
 	
-	// 그리드 생성 직후에 클릭 핸들러 등록
-    empGrid.on('click', (ev) => {
-      if (ev.columnName !== 'btn') return;
-      // 필요하면 여기서 fetch로 상세정보 불러온 뒤 모달 바디에 채우기
-      empDetailModal.show();
-    });
-	  
-  }
-  
-  
+	// 버튼 클릭 시 상세조회
+	  empGrid.on('click', ev => {
+	    if (ev.columnName !== 'btn') return;
+	    const row = empGrid.getRow(ev.rowKey);
+		if (!row || !row.empId) return;
+	    showEmpDetail(row.empId);
+	  });
+	}
+
+	// 사원 상세보기
+	function showEmpDetail(empId) {
+	  fetch(`/emp/detail/${empId}`)
+	    .then(res => res.json())
+	    .then(d => {
+	      // 간단히 값 채우기
+	      document.getElementById('d-empName').textContent = d.empName;
+	      document.getElementById('d-empId').textContent = d.empId;
+	      document.getElementById('d-deptName').textContent = d.deptName;
+	      document.getElementById('d-posName').textContent = d.posName;
+	      document.getElementById('d-gender').textContent = d.gender;
+	      document.getElementById('d-hireDate').textContent = d.hireDate;
+	      document.getElementById('d-mobile').textContent = d.mobile;
+	      document.getElementById('d-email').textContent = d.email;
+	      document.getElementById('d-address').textContent = d.address;
+	      document.getElementById('d-rrn').textContent = d.rrnMasked;
+	      document.getElementById('d-bank').textContent = d.bankInfo;
+
+	      const photo = document.getElementById('d-photo');
+		  photo.onerror = () => { photo.src = '/img/default-profile.png'; };
+	      photo.src = d.photoPath || '/img/default-profile.png';
+
+	      empDetailModal.show();
+	    })
+	    .catch(() => alert('상세정보 불러오기 실패'));
+	}
