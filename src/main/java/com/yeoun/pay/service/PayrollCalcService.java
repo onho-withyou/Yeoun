@@ -157,9 +157,19 @@ public class PayrollCalcService {
     }
 
     /* ========================= 계산 서브루틴 ========================= */
+    /** 기본급 계산 (모든 사원이 PAY_RULE.BASE_AMT 기준) */
     private BigDecimal calcBase(SimpleEmp emp, List<PayRule> rules, List<PayItemMst> items, List<PayCalcRule> crules) {
-        return n(emp.baseSalary());
+        // PAY_RULE 테이블에서 BASE_AMT 값만 가져오기
+        BigDecimal base = rules.stream()
+                .map(PayRule::getBaseAmt)
+                .filter(a -> a != null)
+                .findFirst()
+                .orElse(BigDecimal.ZERO);
+
+        log.info("▶ 기본급 조회: empId={}, baseAmt={}", emp.empId(), base);
+        return base.setScale(2, RoundingMode.HALF_UP);
     }
+
 
     private BigDecimal calcAllowances(SimpleEmp emp, List<PayRule> rules, List<PayItemMst> items,
                                       List<PayCalcRule> crules, BigDecimal baseAmt) {

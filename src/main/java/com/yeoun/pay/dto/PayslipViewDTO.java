@@ -20,5 +20,6 @@ public class PayslipViewDTO {
     private BigDecimal alwAmt;
     private BigDecimal dedAmt;
     private BigDecimal netAmt;
+    private BigDecimal totAmt;
     private CalcStatus calcStatus;
 }

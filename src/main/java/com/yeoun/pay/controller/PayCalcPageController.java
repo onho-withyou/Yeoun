@@ -2,6 +2,7 @@
 package com.yeoun.pay.controller;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.yeoun.pay.dto.PayCalcStatusDTO;
+import com.yeoun.pay.dto.PayslipViewDTO;
 import com.yeoun.pay.service.PayCalcStatusService;
 import com.yeoun.pay.service.PayrollCalcQueryService;
 import com.yeoun.pay.service.PayrollCalcService;
@@ -46,19 +48,19 @@ public class PayCalcPageController {
     public String page(@RequestParam(name = "yyyymm", required = false) String yyyymm,
                        Model model) {
 
-        // ① 파라미터 없으면 현재 년월로 기본 설정
+        // ① 파라미터 없으면 현재 년월 기본 설정
         String mm = (yyyymm == null || yyyymm.isBlank())
                 ? PayrollCalcService.currentYymm() : yyyymm;
 
-        // ② 급여 명세서 리스트 조회
-        var slips = querySvc.findForView(mm);
+        // ② 급여 명세서 리스트 조회 (DTO 기반)
+        List<PayslipViewDTO> slips = querySvc.findForView(mm);
 
         // ③ 합계 계산 (지급/공제/실수령)
         var totals = querySvc.totals(slips);
 
         // ④ 화면 모델 바인딩
         model.addAttribute("yyyymm", mm);
-        model.addAttribute("status", statusSvc.getStatus(mm)); // 현재 월의 계산상태 (CalcStatus)
+        model.addAttribute("status", statusSvc.getStatus(mm)); // 현재 월의 계산상태
         model.addAttribute("slips", slips);
         model.addAttribute("sumPay", totals[0]);
         model.addAttribute("sumDed", totals[1]);
@@ -67,6 +69,7 @@ public class PayCalcPageController {
         // ⑤ Thymeleaf 템플릿 반환
         return "pay/pay_calc_run";
     }
+
 
     /**
      * [POST] 가계산 실행 (시뮬레이션)

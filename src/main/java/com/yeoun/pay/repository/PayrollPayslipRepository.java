@@ -78,18 +78,53 @@ public interface PayrollPayslipRepository extends JpaRepository<PayrollPayslip, 
 
 
     /* ✅ 사원이름 + 부서명 포함 조회용 (DTO 매핑) */
+    @Query(value = """
+    		SELECT
+    		    p.PAYSLIP_ID AS payslipId,
+    		    p.PAY_YYMM AS payYymm,
+    		    p.EMP_ID AS empId,
+    		    e.EMP_NAME AS empName,
+    		    p.DEPT_ID AS deptId,
+    		    d.DEPT_NAME AS deptName,
+    		    p.BASE_AMT AS baseAmt,
+    		    p.ALW_AMT AS alwAmt,
+    		    p.DED_AMT AS dedAmt,
+    		    p.NET_AMT AS netAmt,
+    		    p.CALC_STATUS AS calcStatus
+    		FROM PAYROLL_PAYSLIP p
+    		LEFT JOIN EMP e ON e.EMP_ID = p.EMP_ID
+    		LEFT JOIN DEPT d ON d.DEPT_ID = p.DEPT_ID
+    		WHERE p.PAY_YYMM = :payYymm
+    		ORDER BY e.EMP_ID
+    		""", nativeQuery = true)
+    		List<PayslipViewDTO> findPayslipsWithEmpAndDept(@Param("payYymm") String payYymm);
+    
     @Query("""
     	    SELECT new com.yeoun.pay.dto.PayslipViewDTO(
-    	        p.payslipId, p.payYymm, p.empId, e.empName, p.deptId, d.deptName,
-    	        p.baseAmt, p.alwAmt, p.dedAmt, p.netAmt, p.calcStatus
+    	        p.payslipId,
+    	        p.payYymm,
+    	        p.empId,
+    	        e.empName,
+    	        p.deptId,
+    	        d.deptName,
+    	        p.baseAmt,
+    	        p.alwAmt,
+    	        p.dedAmt,
+    	        p.netAmt,
+    	        p.totAmt,
+    	        p.calcStatus
     	    )
     	    FROM PayrollPayslip p
     	    LEFT JOIN Emp e ON e.empId = p.empId
     	    LEFT JOIN Dept d ON d.deptId = p.deptId
     	    WHERE p.payYymm = :payYymm
+    	      AND p.calcStatus = :status
     	    ORDER BY e.empId
     	""")
-    	List<PayslipViewDTO> findPayslipsWithEmpAndDept(@Param("payYymm") String payYymm);
+    	List<PayslipViewDTO> findPayslipsWithEmpAndDept(
+    	        @Param("payYymm") String payYymm,
+    	        @Param("status") CalcStatus status
+    	);
 
 
 }
