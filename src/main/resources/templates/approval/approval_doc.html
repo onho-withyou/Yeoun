@@ -221,11 +221,14 @@
 <!-- 		        <div id="container"></div> -->
 		          <div id="select-box" style="width: 200px"></div>
 		        </h5>
-     				<div id="result" style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
+     				<div id="approvar" style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
      				</div>	
      				
      				<!-- 전결자 클릭시 추가 태그 -->
+     				
 			      	<div id="jeongyeolja" style="display:none;border:1px solid red;">
+			      	
+						<div id="jeongyeolja-content">
 						  <label class="form-check-label" for="radioDefault1">
 						    없음 : 
 						  </label>
@@ -249,6 +252,7 @@
 							  <option name="emp_id" value="정지훈">정지훈</option>
 							  <option name="emp_id" value="박영진">박영진</option> 
 							</select>
+						</div>
 					</div>
 	     				
 		        <div id="editor" style="border: 1px solid black;;"></div>
@@ -256,7 +260,7 @@
 		      <div class="modal-footer">
 		      	<div>
 			     	<button type="button" class="btn btn-primary">첨부파일</button>
-			      	<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#jeongyeolja-modal">결재확인</button>
+			      	<button type="button" class="btn btn-primary">결재확인</button>
 			    </div>
 		      	<hr>
 		      	<button type="button" class="btn btn-primary">인쇄</button>
@@ -475,7 +479,7 @@
 	document.getElementById("today-date").textContent = formattedDate;
 
 	//셀렉트박스
-	var resultDiv = document.querySelector('#result');
+	var approvarDiv = document.querySelector('#approvar');
     var selectBox = new tui.SelectBox('#select-box', {
       data: [
         {
@@ -497,32 +501,54 @@
     });
 
     this.count = 0;
-    this.num = 1;
+    this.num = 0;
     function print(type, text) {
-    
-      		resultDiv.innerHTML +='<button onclick="approvalNo('+ (this.num++)+','+ "'"+text + "'" +')"'
-      						+'style="border:1px solid black;border-radius: 13px;width: 165px;background-color: rgb(65, 166, 126); height: 100px;padding: 6px;margin: 5px;">'
-      						+ (++this.count) + '차 결재권한자 : ' + text 
-    						+ '</button>';
-    	
+		// 결재권한자변경 div 버튼 생성
+    	approvarDiv.innerHTML +='<div class="btn btn-success"'
+      						+'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
+      						+'<p class="btn-close" onclick="approvarDivclose(this)" style="float:right;margin-right: 8px;z-index:9999999;">&times;</p>'
+      						+'<p onclick="approvalNo('+ (++this.num)+','+ "'"+text + "'" +')" style="margin-top:50px;height: 129px;">'+(++this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
+    						+'</div>';
+    	 
     } 
     
-	var jeongyeoljaDiv = document.querySelector('#jeongyeolja');
+	let jeongyeoljaDiv = document.querySelector('#jeongyeolja');
+	let jeongyeoljaContent = document.querySelector("#jeongyeolja-content");
+	let approvarDivClose = document.getElementById("approvarDiv-close");
+	
+	
 
+	
+	//결재권한자 버튼 클릭시 결재권한자변경 div 태그 생성
 	function approvalNo(num,text){
-	   //해당태그 클릭시 알림창 띄우기
-//     	alert(num + "차 결재권한자"+ text);
-// 	   docment.getElementById("emp_id").option[].value;
-	   jeongyeoljaDiv.style.display = 'block';
-	   jeongyeoljaDiv.innerHTML += '<h5>'+num + "차 결재권한자 : "+ text +" 변경"+'</h5>'
-	   							+'<>'
+	   //해당태그 클릭시 전결자 div 나오기
+	   	 jeongyeoljaDiv.innerHTML = '<button onClick="approvarDivclose(this)" class="btn-close" style="float:right;margin-right: 8px;"></button>'
+	   		 			+ '<h5>'+num + "차 결재권한자 : "+ text +" 변경"+'</h5>';
+			jeongyeoljaDiv.innerHTML += jeongyeoljaContent.innerHTML;	
+	   
+	   	 if(jeongyeoljaDiv.style.display === 'none'){
+	  	 jeongyeoljaDiv.style.display = 'block';  
+	   	  						  
+	   }	
 	   
 
     } 
+	
+	//결재권한자,결재권한자변경(전결자) 닫기버튼
+	function approvarDivclose(buttonDiv){
+		const divElement = buttonDiv.parentNode; // 버튼의 부모인 div를 찾음
+		jeongyeoljaDiv.style.display = 'none';
+	    if (buttonDiv.parentElement.id === '' ) {//결재권한자
+	        divElement.remove(); //자신의 div 제거
+	        this.count = 0; //카운트초기화
+	        this.num = 0;
+	    }
+	    	
+	}
     selectBox.on('close',(ev)=>{
     	
     	let selectlabel = selectBox.getSelectedItem().label;
-    	if(selectlabel != null && this.count < 3){
+    	if(selectlabel != null && this.count < 3){//셀렉트 라벨선택시 3번까지만셈
     		print(ev.type, selectlabel);
     	}
     });
