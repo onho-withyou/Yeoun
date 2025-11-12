@@ -56,11 +56,11 @@ public class PayrollPayslip {
     @Builder.Default private BigDecimal incAmt = BigDecimal.ZERO;
 
     @Column(name = "DED_AMT", nullable = false, precision = 15, scale = 2)
-    @Comment("총 지급 금액")
+    @Comment("총 공제 금액")
     @Builder.Default private BigDecimal dedAmt = BigDecimal.ZERO;
 
     @Column(name = "TOT_AMT", nullable = false, precision = 15, scale = 2)
-    @Comment("총 공제 금액 ")
+    @Comment("총 지급 금액 ")
     @Builder.Default private BigDecimal totAmt = BigDecimal.ZERO;
 
     @Column(name = "NET_AMT", nullable = false, precision = 15, scale = 2)

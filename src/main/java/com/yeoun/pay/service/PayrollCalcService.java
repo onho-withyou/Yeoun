@@ -16,6 +16,7 @@ import com.yeoun.pay.entity.PayCalcRule;
 import com.yeoun.pay.entity.PayItemMst;
 import com.yeoun.pay.entity.PayRule;
 import com.yeoun.pay.entity.PayrollPayslip;
+import com.yeoun.pay.enums.ActiveStatus;
 import com.yeoun.pay.enums.CalcStatus;
 import com.yeoun.pay.repository.PayCalcRuleRepository;
 import com.yeoun.pay.repository.PayItemMstRepository;
@@ -59,6 +60,8 @@ public class PayrollCalcService {
         log.info("[SIMULATE] {}월 시뮬레이션 완료: {}건 반영", yyyymm, cnt);
         return cnt;
     }
+    
+    
 
     /* ========================= 월 확정(전체) ========================= */
     @Transactional
@@ -79,10 +82,10 @@ public class PayrollCalcService {
 
         // 1. 규칙 조회
         log.info("단계1: 규칙 조회 시작");
-        List<PayRule> rules     = payRuleRepo.findAll();
+        List<PayRule> rules = payRuleRepo.findActiveValidRules(ActiveStatus.ACTIVE, LocalDate.now());
         List<PayItemMst> items  = itemRepo.findAll();
-        List<PayCalcRule> crules= calcRuleRepo.findAll();
-        log.info("단계2: 규칙 조회 완료 (rules={}, items={}, calcRules={})", rules.size(), items.size(), crules.size());
+        List<PayCalcRule> crules = calcRuleRepo.findAll();
+    log.info("단계2: 규칙 조회 완료 (rules={}, items={}, calcRules={})", rules.size(), items.size(), crules.size());
 
         // 2. 활성 사원 조회
         List<SimpleEmp> employees =
@@ -157,86 +160,92 @@ public class PayrollCalcService {
     }
 
     /* ========================= 계산 서브루틴 ========================= */
-    /** 기본급 계산 (모든 사원이 PAY_RULE.BASE_AMT 기준) */
-    private BigDecimal calcBase(SimpleEmp emp, List<PayRule> rules, List<PayItemMst> items, List<PayCalcRule> crules) {
-        // PAY_RULE 테이블에서 BASE_AMT 값만 가져오기
-        BigDecimal base = rules.stream()
-                .map(PayRule::getBaseAmt)
-                .filter(a -> a != null)
-                .findFirst()
-                .orElse(BigDecimal.ZERO);
 
+    /** [1] 기본급 계산: PAY_RULE.BASE_AMT */
+    private BigDecimal calcBase(SimpleEmp emp, List<PayRule> rules, List<PayItemMst> items, List<PayCalcRule> crules) {
+        PayRule rule = rules.stream().findFirst().orElse(null);
+        if (rule == null) return BigDecimal.ZERO;
+
+        BigDecimal base = n(rule.getBaseAmt());
         log.info("▶ 기본급 조회: empId={}, baseAmt={}", emp.empId(), base);
         return base.setScale(2, RoundingMode.HALF_UP);
     }
 
 
+    /** [2] 수당 계산: PAY_RULE.MEAL_AMT, TRANS_AMT 포함 */
     private BigDecimal calcAllowances(SimpleEmp emp, List<PayRule> rules, List<PayItemMst> items,
                                       List<PayCalcRule> crules, BigDecimal baseAmt) {
-        BigDecimal sum = BigDecimal.ZERO;
-        for (PayCalcRule r : crules) {
-            if (!"ALLOWANCE".equalsIgnoreCase(r.getRuleType().name())) continue;
-            BigDecimal val = switch (r.getCalcMethod()) {
-                case FIXED    -> n(r.getAmount());
-                case RATE     -> baseAmt.multiply(n(r.getRate()))
-                                        .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
-                case FORMULA  -> formula(r.getExpr(), baseAmt, sum, BigDecimal.ZERO);
-                case EXTERNAL -> externalAmount(emp, r, baseAmt, sum, BigDecimal.ZERO);
-            };
-            sum = sum.add(val);
-        }
-        return sum;
+
+        PayRule rule = rules.stream().findFirst().orElse(null);
+        if (rule == null) return BigDecimal.ZERO;
+
+        // DB의 Double 컬럼을 BigDecimal로 변환
+        BigDecimal meal = BigDecimal.valueOf(Optional.ofNullable(rule.getMealAmt()).orElse(0.0));
+        BigDecimal trans = BigDecimal.valueOf(Optional.ofNullable(rule.getTransAmt()).orElse(0.0));
+
+        BigDecimal totalAllow = meal.add(trans);
+        log.info("▶ 수당 계산: empId={}, meal={}, trans={}, totalAllow={}", emp.empId(), meal, trans, totalAllow);
+
+        return totalAllow.setScale(2, RoundingMode.HALF_UP);
     }
 
+
+    /** [3] 공제 계산: PAY_RULE.PEN_RATE, HLTH_RATE, EMP_RATE, TAX_RATE 기준 */
     private BigDecimal calcDeductions(SimpleEmp emp, List<PayRule> rules, List<PayItemMst> items,
                                       List<PayCalcRule> crules, BigDecimal baseAmt, BigDecimal alwAmt) {
-        BigDecimal sum   = BigDecimal.ZERO;
+
+        PayRule rule = rules.stream().findFirst().orElse(null);
+        if (rule == null) return BigDecimal.ZERO;
+
         BigDecimal total = baseAmt.add(alwAmt);
-        for (PayCalcRule r : crules) {
-            if (!"DEDUCTION".equalsIgnoreCase(r.getRuleType().name())) continue;
-            BigDecimal val = switch (r.getCalcMethod()) {
-                case FIXED    -> n(r.getAmount());
-                case RATE     -> total.multiply(n(r.getRate()))
-                                      .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
-                case FORMULA  -> formula(r.getExpr(), baseAmt, alwAmt, sum);
-                case EXTERNAL -> externalAmount(emp, r, baseAmt, alwAmt, sum);
-            };
-            sum = sum.add(val);
-        }
-        return sum;
+
+        // Double → BigDecimal 변환
+        BigDecimal penRate  = BigDecimal.valueOf(Optional.ofNullable(rule.getPenRate()).orElse(0.0));
+        BigDecimal hlthRate = BigDecimal.valueOf(Optional.ofNullable(rule.getHlthRate()).orElse(0.0));
+        BigDecimal empRate  = BigDecimal.valueOf(Optional.ofNullable(rule.getEmpRate()).orElse(0.0));
+        BigDecimal taxRate  = BigDecimal.valueOf(Optional.ofNullable(rule.getTaxRate()).orElse(0.0));
+
+        // 총 공제 = (총지급액 × 각 요율)
+        BigDecimal penDed  = total.multiply(penRate);
+        BigDecimal hlthDed = total.multiply(hlthRate);
+        BigDecimal empDed  = total.multiply(empRate);
+        BigDecimal taxDed  = total.multiply(taxRate);
+
+        BigDecimal totalDed = penDed.add(hlthDed).add(empDed).add(taxDed);
+
+        log.info("▶ 공제 계산: empId={}, total={}, 연금={}, 건보={}, 고용={}, 소득세={}, totalDed={}",
+                emp.empId(), total, penDed, hlthDed, empDed, taxDed, totalDed);
+
+        return totalDed.setScale(2, RoundingMode.HALF_UP);
+    }
+    
+    
+ // ========================= 유틸 메서드 ========================= //
+    /** BigDecimal null-safe 변환 */
+    private static BigDecimal n(BigDecimal v) {
+        return (v == null) ? BigDecimal.ZERO : v;
     }
 
-    private BigDecimal externalAmount(SimpleEmp emp, PayCalcRule r,
-                                      BigDecimal baseAmt, BigDecimal alwAmt, BigDecimal dedSum) {
-        return BigDecimal.ZERO; // TODO: 외부 HR 연동 시 구현
+    /** 금액 반올림 (소수점 2자리) */
+    private static BigDecimal safe(BigDecimal v) {
+        return n(v).setScale(2, RoundingMode.HALF_UP);
     }
 
-    private BigDecimal formula(String expr, BigDecimal base, BigDecimal alw, BigDecimal ded) {
-        if (expr == null || expr.isBlank()) return BigDecimal.ZERO;
-        String s = expr.toUpperCase()
-                       .replace("BASE", base.toPlainString())
-                       .replace("ALW",  alw.toPlainString())
-                       .replace("DED",  ded.toPlainString())
-                       .replace("%", "*0.01");
-        try {
-            return new BigDecimal(
-                    new javax.script.ScriptEngineManager()
-                            .getEngineByName("JavaScript").eval(s).toString()
-            ).setScale(2, RoundingMode.HALF_UP);
-        } catch (Exception e) {
-            log.warn("FORMULA eval error: {} -> 0", expr, e);
-            return BigDecimal.ZERO;
-        }
+    /** 사용자 ID 기본값 처리 */
+    private static String optUser(String userId) {
+        return (userId == null || userId.isBlank()) ? "SYSTEM" : userId;
     }
 
-    private static BigDecimal n(BigDecimal v){ return v==null?BigDecimal.ZERO:v; }
-    private static BigDecimal safe(BigDecimal v){ return n(v).setScale(2, RoundingMode.HALF_UP); }
-
+    /** 현재 년월(yyyyMM) 반환 */
     public static String currentYymm() {
         return LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
     }
 
-    private static String optUser(String userId){
-        return (userId == null || userId.isBlank()) ? "SYSTEM" : userId;
-    }
+	public int simulateMonthly(String yyyymm, String calcType, boolean overwrite) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+
 }
