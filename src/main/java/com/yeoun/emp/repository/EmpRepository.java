@@ -40,6 +40,7 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	            e.empName,
 	            d.deptName,
 	            p.posName,
+	            p.rankOrder,
 	            e.mobile,
 	            e.email
 	        )
