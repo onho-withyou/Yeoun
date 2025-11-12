@@ -4,12 +4,17 @@
   // 전역 상태
   let empGrid = null;        // 그리드 인스턴스
   let originalRows = [];     // 정렬 해제 시 복원할 원본 데이터
+  let empDetailModal;
   
-  // 1️. DOM 로드 후 올바른 함수 호출
-  document.addEventListener('DOMContentLoaded', initEmpListPage);
-
-  // ======================================
-  // 2️. 데이터 로드 → 그리드 생성
+  document.addEventListener('DOMContentLoaded', () => {
+	
+	const modalEl = document.getElementById('empDetailModal');
+	empDetailModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+	
+	initEmpListPage();
+  });
+  
+  // 데이터 로드 → 그리드 생성
   function initEmpListPage() {
     fetch('/emp/list/data', { credentials: 'same-origin' })
       .then(res => res.json())
@@ -20,8 +25,7 @@
       .catch(() => alert('사원 목록 요청 실패!'));
   }
 
-  // ======================================
-  // 3️. Toast Grid 생성 함수
+  // Toast Grid 생성 함수
   function buildEmpGrid(rows) {
 	  empGrid = new tui.Grid({
       el: document.getElementById('grid'), // grid가 들어갈 div
@@ -44,19 +48,21 @@
           name: 'btn',
           width: 110,
           align: 'center',
-          formatter: () => "<button type='button' class='btn btn-info btn-sm'>상세</button>"
+          formatter: () => "<button type='button' class='btn btn-info btn-sm btn-open-modal'>상세</button>"
         }
       ],
     });
 
     // JSON 데이터 삽입
     empGrid.resetData(rows);
-    
-    // 버튼 클릭 이벤트
+	
+	// 그리드 생성 직후에 클릭 핸들러 등록
     empGrid.on('click', (ev) => {
       if (ev.columnName !== 'btn') return;
-      const row = empGrid.getRow(ev.rowKey);
-      if (row?.empId) location.href = '/emp/detail/' + row.empId;
+      // 필요하면 여기서 fetch로 상세정보 불러온 뒤 모달 바디에 채우기
+      empDetailModal.show();
     });
-    
+	  
   }
+  
+  
