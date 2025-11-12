@@ -20,6 +20,7 @@ import com.yeoun.main.entity.Schedule;
 import com.yeoun.main.repository.ScheduleRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -80,7 +81,7 @@ public class ScheduleService {
 		if(!scheduleList.isEmpty()) {
 			for(Schedule schedule : scheduleList) {
 				String scheduleType = schedule.getScheduleType();
-				if(scheduleType.equals("company")) {
+				if(scheduleType.equals("company")) { // 스케줄종류의 값에따라 보여줄 데이터로 변환
 					schedule.setScheduleType("회사");
 				} else if(scheduleType.equals(authentication.getName())) {
 					schedule.setScheduleType("개인");
@@ -92,11 +93,37 @@ public class ScheduleService {
 				schedule.setCreatedUser(scheduleEmp.getEmpName());
 				scheduleList2.add(schedule);
 			}
-			// 작성자 empId로 이름 조회후 변경 필요
 			
 		}
 		
 		return scheduleList2.stream().map(ScheduleDTO::fromEntity).collect(Collectors.toList());
+	}
+	
+	//단일 일정 조회
+	public ScheduleDTO getSchedule(Long scheduleId) {
+		Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 일정입니다."));
+		
+		return ScheduleDTO.fromEntity(schedule);
+	}
+
+	//일정 정보 수정
+	@Transactional
+	public void modifySchedule(@Valid ScheduleDTO scheduleDTO, Authentication authentication) {
+		// 수정된 정보 db저장값으로 변경
+		String scheduleType = scheduleDTO.getScheduleType();
+
+		if(scheduleType.equals("private")) { // 넘어온 type이 private일때 접속직원번호로 변경
+			scheduleDTO.setScheduleType(authentication.getName());
+		}
+		
+		String alldayYN = scheduleDTO.getAlldayYN();
+		if(alldayYN == null || alldayYN == "") {
+			scheduleDTO.setAlldayYN("N");
+		}
+		
+		// 입력된 스케줄id로 기존 스케줄로우 정보 받아오기
+		Schedule schedule = scheduleRepository.findById(scheduleDTO.getScheduleId()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 일정입니다."));
+		schedule.changeSchedule(scheduleDTO);
 	}
 
 }
