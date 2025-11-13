@@ -16,6 +16,13 @@ document.addEventListener('DOMContentLoaded', function() {
 	const modifyNoticeBtn = document.getElementById('notice-modify');
 	const fixedCheck = document.getElementById('fixed-check') // 체크박스
 	
+	const orderKey = getUrlParameter('orderKey');
+	const orderMethod = getUrlParameter('orderMethod') || 'asc';
+	if (!orderKey) return;
+	
+	const activeTh = document.querySelector(`th[data-key="${orderKey}"]`);
+	updateSortUI(activeTh, orderKey, orderMethod);
+	
 	// 공지사항 조회모달 열기 이벤트
 	showNoticeModal.addEventListener('show.bs.modal', function(event){
 		const button = event.relatedTarget;
@@ -257,6 +264,10 @@ function allineTable(thElement) {
 		// 새 오더메서드 방법 변경
         newOrderMethod = (currentOrderMethod === 'asc') ? 'desc' : 'asc';
     }
+	
+	//아이콘 변경
+	updateSortUI(thElement, key, newOrderMethod);
+	
 	//현재 검색 타입, 검색어 존재하면 유지 없으면 널스트링
     const searchKeyword = getUrlParameter('searchKeyword') || '';
     const page = getUrlParameter('page') || '';
@@ -269,3 +280,48 @@ function allineTable(thElement) {
 	// 이동요청
 	window.location.href = url;
 }
+
+// 정렬버튼 아이콘 변경
+function updateSortUI(activeTh, activeKey, newOrderMethod) {
+	// 전체 초기화
+	document.querySelectorAll('th .sort-icon').forEach(icon => {
+		icon.className = 'sort-icon fa-solid fa-sort';
+		const th = icon.closest('th');
+		if(th) th.setAttribute('aria-sort', 'none');
+	});
+	
+	// 클릭된 헤더 상태 변경
+	if(!activeTh) return;
+	const icon = activeTh.querySelector('.sort-icon');
+	if(!icon) return;
+	
+	if(activeKey == activeTh.getAttribute('data-key')) {
+		// asc와 desc 에 따라 아이콘 갱신
+		const isAsc = newOrderMethod === 'asc';
+		icon.className = isAsc
+			? 'sort-icon fa-solid fa-sort-up'
+			: 'sort-icon fa-solid fa-sort-down';
+//		activeTh.setAttribute('aria-sort', isAsc ? 'ascending' : 'descending');
+	} else {
+		// 정렬 대상이 아니면 중립
+		icon.className = 'sort-icon fa-solid fa-sort';
+		activeTh.setAttribute('aria-sort', 'none');
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
