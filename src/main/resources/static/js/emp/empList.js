@@ -21,7 +21,7 @@
   function makeGrid(rows) {
 	  empGrid = new tui.Grid({
       el: document.getElementById('grid'), // grid가 들어갈 div
-      bodyHeight: 540,                     // 표 높이
+//      bodyHeight: 540,                     // 표 높이
       rowHeaders: [],                      // 왼쪽 번호/체크박스 없음
       scrollX: true,                       // 가로 스크롤
       scrollY: true,                       // 세로 스크롤

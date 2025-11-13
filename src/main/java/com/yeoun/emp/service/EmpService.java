@@ -1,6 +1,7 @@
 package com.yeoun.emp.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,8 @@ import com.yeoun.emp.repository.EmpBankRepository;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.emp.repository.EmpRoleRepository;
 import com.yeoun.emp.repository.PositionRepository;
+import com.yeoun.messenger.repository.MsgStatus;
+import com.yeoun.messenger.repository.MsgStatusRepository;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -39,6 +42,7 @@ public class EmpService {
 	private final DeptRepository deptRepository;
 	private final PositionRepository positionRepository;
 	private final EmpBankRepository empBankRepository;
+	private final MsgStatusRepository msgStatusRepository;
 	private final BCryptPasswordEncoder encoder;
 
 	public EmpService(EmpRepository empRepository,
@@ -48,11 +52,13 @@ public class EmpService {
 					  EmpRoleRepository empRoleRepository,
 					  EmpBankRepository empBankRepository,
 					  CommonCodeRepository commonCodeRepository,
+					  MsgStatusRepository msgStatusRepository,
 					  BCryptPasswordEncoder encoder) {
 		this.empRepository = empRepository;
 		this.deptRepository = deptRepository;
 		this.positionRepository = positionRepository;
 		this.empBankRepository = empBankRepository;
+		this.msgStatusRepository = msgStatusRepository;
 		this.encoder = encoder;
 	}
 	
@@ -82,8 +88,21 @@ public class EmpService {
 
 	    // 4) EMP 저장
 	    empRepository.saveAndFlush(emp);
+	    
+	    // 5) 메신저 상태(MSG_STATUS) 저장
+	    MsgStatus status = new MsgStatus();
+	    
+	    status.setEmpId(empId);
+	    status.setAvlbStat("ONLINE");
+	    status.setAvlbUpdated(LocalDateTime.now());
+	    status.setAutoWorkStat("IN");
+	    status.setWorkStatUpdated(LocalDateTime.now());
+	    status.setWorkStatSource("AUTO");
+	    status.setOnlineYn("N");
+	    
+	    msgStatusRepository.save(status);
 
-	    // 5) 급여계좌(EMP_BANK) 저장 (선택값 없으면 스킵)
+	    // 6) 급여계좌(EMP_BANK) 저장 (선택값 없으면 스킵)
 	    if (empDTO.getBankCode() != null && empDTO.getAccountNo() != null) {
 	        EmpBank bank = new EmpBank();
 	        bank.setEmpId(emp.getEmpId());
