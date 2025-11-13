@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.yeoun.auth.repository.RoleRepository;
 import com.yeoun.common.repository.CommonCodeRepository;
 import com.yeoun.emp.dto.EmpDTO;
+import com.yeoun.emp.dto.EmpDetailDTO;
 import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
@@ -31,6 +32,7 @@ import com.yeoun.emp.repository.PositionRepository;
 import com.yeoun.messenger.repository.MsgStatus;
 import com.yeoun.messenger.repository.MsgStatusRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.log4j.Log4j2;
 
 @Service
@@ -166,18 +168,78 @@ public class EmpService {
 		// Emp 엔티티 -> EmpDTO 객체로 변환하여 리턴
 		return EmpDTO.fromEntity(emp);
 	}
-	
+
 	// =============================================
 	// 사원 정보 상세 조회
-//	public EmpDTO getEmpDetail(String empId) {
-//		
-//		// 사원 엔티티 조회
-//		Emp emp = empRepository.findByEmpId(empId)
-//					.orElseThrow(() -> new IllegalArgumentException("사원 없음: " + empId));
-//		
-//		// Emp 엔티티 -> EmpDTO 객체로 변환하여 리턴
-//		return EmpDTO.fromEntity(emp);
-//	}
+	public EmpDetailDTO getEmpDetail(String empId) {
+		
+		Emp emp = empRepository.findById(empId)
+	            .orElseThrow(() -> new EntityNotFoundException("사원 없음: " + empId));
+
+		String address = buildAddress(emp);
+	    String rrnMasked = maskRrn(emp.getRrn());
+	    String bankInfo = buildBankInfo(emp);   // "국민은행 (123456-12-123456)"
+	    String photoPath = buildPhotoPath(emp); // null일 수도 있음
+
+
+	    return new EmpDetailDTO(
+	            emp.getEmpId(),
+	            emp.getEmpName(),
+	            emp.getDept().getDeptName(),
+	            emp.getPosition().getPosName(),
+	            emp.getGender(),
+	            emp.getHireDate() != null ? emp.getHireDate().toString() : "",
+	            emp.getMobile(),
+	            emp.getEmail(),
+	            buildAddress(emp),
+	            rrnMasked,
+	            bankInfo,
+	            photoPath
+	    );
+	}
+	
+	// 상세주소 없는 경우 대비
+	private String buildAddress(Emp emp) {
+	    String addr1 = emp.getAddress1();
+	    String addr2 = emp.getAddress2();
+
+	    if (addr2 == null) addr2 = "";
+
+	    return (addr1 + " " + addr2).trim();
+	}
+	
+	private String maskRrn(String rrn) {
+	    if (rrn == null || rrn.length() < 6) return "";
+	    // 예: 000421-3******
+	    return rrn.substring(0, 8) + "******";
+	}
+
+	// 급여계좌 문자열 조합
+	private String buildBankInfo(Emp emp) {
+
+	    return empBankRepository.findTopByEmpIdOrderByCreatedDateDesc(emp.getEmpId())
+	            .map(bank -> {
+	            	String bankName = bank.getBank().getCodeName();   // ← 은행명
+	            	String account = bank.getAccountNo();             // 계좌번호
+	            	String holder  = bank.getHolder();     
+
+	            	// 두 줄 구조로 리턴
+	                return bankName + " (" + account + ")\n예금주: " + holder;
+	            })
+	            .orElse("");
+	}
+
+	// 프로필 사진 경로 생성 (추후 수정 예정)
+	private String buildPhotoPath(Emp emp) {
+	    Long photoFileId = emp.getPhotoFileId(); // Long 타입
+
+	    if (photoFileId == null) {
+	        return null; // 사진 없음 → JS에서 기본 이미지 처리
+	    }
+	    return "/files/photo/" + photoFileId;
+	}
+
+	
 
 
 

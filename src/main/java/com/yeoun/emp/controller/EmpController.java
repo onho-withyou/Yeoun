@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.yeoun.common.service.CommonCodeService;
 import com.yeoun.emp.dto.EmpDTO;
+import com.yeoun.emp.dto.EmpDetailDTO;
 import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.DeptRepository;
@@ -99,10 +100,11 @@ public class EmpController {
 	
 	// ====================================================================================
 	// 사원 정보 상세 조회
-//	@GetMapping("/detail/{empId}")
-//	public EmpDTO getEmpDetail(@PathVariable("empId") String empId) {
-//		return empService.getEmpDetail(empId);
-//	}
+	@ResponseBody
+	@GetMapping("/detail/{empId}")
+	public EmpDetailDTO getEmpDetail(@PathVariable("empId") String empId) {
+		return empService.getEmpDetail(empId);
+	}
 	
 	
 	
