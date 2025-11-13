@@ -39,17 +39,7 @@
 					</div>
 					<div class="modal-body">
 						<form th:action="@{/attendance/outwork}" method="post">
-							<div class="col mb-6">
-								<label for="nameWithTitle" class="form-label">사원번호</label>
-								<div class="input-group">
-									<input type="text" id="nameWithTitle" class="form-control" name="empId"/>
-									<button type="button" class="btn btn-primary" th:onclick="searchEmp()">조회</button>
-								</div>
-							</div>
-							<div class="col mb-6">
-								<label for="inTime" class="form-label">사원이름</label>
-								<input type="text" id="empName" class="form-control" disabled/>
-							</div>
+							<input type="hidden" th:value="${#authentication.name}" name="empId"/>
 							<div class="col mb-6">
 								<label for="inTime" class="form-label">근무날짜</label>
 								<input type="date" id="inTime" class="form-control" name="accessDate"/>

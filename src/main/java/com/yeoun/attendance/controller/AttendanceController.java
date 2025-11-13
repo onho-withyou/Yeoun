@@ -77,6 +77,22 @@ public class AttendanceController {
 		return "attendance/commute_admin";
 	}
 	
+	// 부서장 또는 관리자가 확인하는 근태현황
+	@GetMapping("/list/data")
+	@ResponseBody
+	public ResponseEntity<List<AttendanceDTO>> attendanceAdminList(
+			@AuthenticationPrincipal LoginDTO loginDTO, 
+			@RequestParam(required = false, name = "startDate") String startDate,  
+			@RequestParam(required = false, name = "endDate") String endDate) {
+		
+		LocalDate start = (startDate != null) ? LocalDate.parse(startDate) : LocalDate.now().withDayOfMonth(1);
+		LocalDate end = (endDate != null) ? LocalDate.parse(endDate) : LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
+		
+		List<AttendanceDTO> attendanceList = attendanceService.getAttendanceListByRole(loginDTO, start, end);;
+		
+		return ResponseEntity.ok(attendanceList);
+	}
+	
 	// 사원번호 조회
 	@GetMapping("/search")
 	public ResponseEntity<?> empInfo(@RequestParam("empId") String empId) {
