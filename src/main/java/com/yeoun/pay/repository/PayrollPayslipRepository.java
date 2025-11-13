@@ -95,4 +95,7 @@ public interface PayrollPayslipRepository extends JpaRepository<PayrollPayslip, 
     	        @Param("payYymm") String payYymm,
     	        @Param("status") String status);
 
+    
+    
+    
 }

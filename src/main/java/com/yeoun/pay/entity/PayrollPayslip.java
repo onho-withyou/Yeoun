@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.Comment;
 
+import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.pay.enums.CalcStatus;
 
@@ -33,11 +34,33 @@ public class PayrollPayslip {
     
     @Transient
     public String getEmpName() {
-        return null; 
+        return (emp != null ? emp.getEmpName() : null);
     }
+
 
     @Column(name = "DEPT_ID", length = 20)
     private String deptId;
+    
+    /* ===== 사원/부서 조인 객체 ===== */
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "EMP_ID",
+            referencedColumnName = "EMP_ID",
+            insertable = false,
+            updatable = false
+    )
+    private Emp emp;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "DEPT_ID",
+            referencedColumnName = "DEPT_ID",
+            insertable = false,
+            updatable = false
+    )
+    private Dept dept;    
+    
 
     @Column(name = "PAY_YYMM", nullable = false, length = 6)
     @Comment("급여 기준월YYYYMM")

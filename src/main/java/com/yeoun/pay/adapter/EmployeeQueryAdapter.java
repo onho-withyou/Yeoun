@@ -22,8 +22,10 @@ public class EmployeeQueryAdapter implements EmployeeQueryPort {
 
     @Override
     public List<PayrollCalcService.SimpleEmp> findActiveEmployees() {
-        var rows = repo.findEmpForPayrollByStatus("ACTIVE");   // 'Y' 말고 'ACTIVE'
+
+        var rows = repo.findEmpForPayrollByStatus("ACTIVE");
         if (rows == null || rows.isEmpty()) return List.of();
+
         return rows.stream()
             .map(r -> new PayrollCalcService.SimpleEmp(
                     r.getEmpId(),
@@ -31,4 +33,18 @@ public class EmployeeQueryAdapter implements EmployeeQueryPort {
                     r.getBaseSalary() == null ? BigDecimal.ZERO : r.getBaseSalary()))
             .toList();
     }
+
+    /** 🆕 추가해야 하는 메서드 */
+    @Override
+    public String getEmpName(String empId) {
+        return repo.findEmpNameById(empId)
+                .orElse(null);
+    }
+ 
+    @Override
+    public String getDeptName(String empId) {
+        return repo.findDeptNameById(empId)
+                   .orElse(null);
+    }
+
 }

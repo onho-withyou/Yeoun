@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.yeoun.pay.dto.PayCalcStatusDTO;
+import com.yeoun.pay.dto.PayslipDetailDTO;
 import com.yeoun.pay.dto.PayslipViewDTO;
 import com.yeoun.pay.repository.PayrollPayslipRepository;
 import com.yeoun.pay.service.PayCalcStatusService;
@@ -31,7 +32,9 @@ public class PayCalcPageController {
     private final PayrollCalcService payrollCalcService;  // 급여 계산 로직
     private final PayrollCalcQueryService querySvc;       // 조회용 서비스
     private final PayrollPayslipRepository payslipRepo;   // 명세서 Repository
-
+    private final PayrollCalcQueryService payrollCalcQueryService;
+   
+    
 
     /** ✅ AJAX 상태 조회 (JSON) */
     @GetMapping("/status")
@@ -43,28 +46,25 @@ public class PayCalcPageController {
 
     /** ✅ [GET] 급여 계산 메인 페이지 */
     @GetMapping
-    public String page(@RequestParam(name = "yyyymm", required = false) String yyyymm,
+    public String page(@RequestParam(name="yyyymm", required=false) String yyyymm,
                        Model model) {
 
-        // ① 파라미터 없으면 현재 년월 기본값
         String mm = (yyyymm == null || yyyymm.isBlank())
-                ? PayrollCalcService.currentYymm() : yyyymm;
+                ? PayrollCalcService.currentYymm()
+                : yyyymm;
 
-        // ② 급여 명세서 조회
         List<PayslipViewDTO> slips = querySvc.findForView(mm);
 
-        // ③ 합계 계산
         var totals = querySvc.totals(slips);
 
-        // ④ 모델 바인딩
         model.addAttribute("yyyymm", mm);
-        model.addAttribute("status", statusSvc.getStatus(mm));
+        model.addAttribute("status", statusSvc.getStatus(mm)); // ✔ 정상 작동!
         model.addAttribute("slips", slips);
         model.addAttribute("sumPay", totals[0]);
         model.addAttribute("sumDed", totals[1]);
         model.addAttribute("sumNet", totals[2]);
 
-        return "pay/pay_calc_run"; // ✅ 통일된 뷰 반환
+        return "pay/pay_calc_run";
     }
 
 
@@ -92,6 +92,16 @@ public class PayCalcPageController {
         ra.addFlashAttribute("msg", "급여 확정 완료: " + yyyymm + " (" + cnt + "건)");
 
         return "redirect:/pay/calc?yyyymm=" + yyyymm;
+    }
+
+    /** 급여 상세 조회 (AJAX) */
+    @GetMapping("/detail")
+    @ResponseBody
+    public PayslipDetailDTO getPayslipDetail(
+            @RequestParam("yyyymm") String yyyymm,
+            @RequestParam("empId") String empId) {
+
+        return payrollCalcQueryService.getPayslipDetail(yyyymm, empId);
     }
 
 }

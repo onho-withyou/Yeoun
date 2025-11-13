@@ -164,7 +164,21 @@
       width: 130,
       cellRenderer: params => renderStatusBadge(params.value),
       cellStyle: { textAlign: 'center' }
-    }
+    },    
+    {
+    	  headerName: "상세",
+    	  width: 120,
+    	  cellRenderer: params => {
+    		    return `
+    		      <button class="btn btn-sm btn-outline-primary"
+    		              onclick="openDetail('${params.data.empId}')">
+    		        상세보기
+    		      </button>`;
+    		},
+
+    	  cellStyle: { textAlign: 'center' }
+    	}
+
   ];
 
   // 🔹 Grid 옵션
@@ -206,10 +220,184 @@
     const gridDiv = document.querySelector('#payslipGrid');
     new agGrid.Grid(gridDiv, gridOptions);
   });
+  
+  async function openDetail(empId) {
+	    const mm = document.getElementById('calc_month').value;
+
+	    try {
+	        const res = await fetch(`/pay/calc/detail?yyyymm=${mm}&empId=${empId}`);
+	        const data = await res.json();
+
+	        // ====== 기본 정보 ======
+	        document.getElementById("d-empId").innerText = data.empId ?? "";
+	        document.getElementById("d-empName").innerText = data.empName ?? "";
+	        document.getElementById("d-deptName").innerText = data.deptName ?? "";
+
+	        document.getElementById("d-baseAmt").innerText = numberFormat(data.baseAmt);
+	        document.getElementById("d-alwAmt").innerText = numberFormat(data.alwAmt);
+	        document.getElementById("d-dedAmt").innerText = numberFormat(data.dedAmt);
+	        document.getElementById("d-netAmt").innerText = numberFormat(data.netAmt);
+
+	        // ====== 지급 / 공제 ======
+	        const payBody = document.getElementById("payItemsBody");
+	        const dedBody = document.getElementById("dedItemsBody");
+
+	        payBody.innerHTML = "";
+	        dedBody.innerHTML = "";
+
+	        let payCount = 0;
+	        let dedCount = 0;
+
+	        (data.payItems ?? []).forEach(it => {
+	            payBody.innerHTML += `
+	                <tr>
+	                    <td>${it.itemName}</td>
+	                    <td class="text-end">${numberFormat(it.amount)}</td>
+	                    <td class="text-center">${it.remark ?? ''}</td>
+	                </tr>
+	            `;
+	            payCount++;
+	        });
+
+	        (data.dedItems ?? []).forEach(it => {
+	            dedBody.innerHTML += `
+	                <tr>
+	                    <td>${it.itemName}</td>
+	                    <td class="text-end">${numberFormat(it.amount)}</td>
+	                    <td class="text-center">${it.remark ?? ''}</td>
+	                </tr>
+	            `;
+	            dedCount++;
+	        });
+
+	        document.getElementById("payCount").innerText = payCount + "건";
+	        document.getElementById("dedCount").innerText = dedCount + "건";
+
+	        new bootstrap.Modal(document.getElementById("detailModal")).show();
+
+	    } catch (err) {
+	        alert("상세조회 실패: " + err);
+	    }
+	}
+
+	function numberFormat(num) {
+	    if (num == null) return "0 원";
+	    return Number(num).toLocaleString() + " 원";
+	}
+
+
+
 /*]]>*/
 </script>
+<!-- ===================== 급여 상세 모달 ===================== -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content rounded-4 shadow">
 
-          
+      <div class="modal-header border-0">
+        <h4 class="modal-title fw-bold text-primary">급여 상세 내역</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- 상단 기본 정보 -->
+        <div class="p-4 rounded-4 mb-4" style="background:#f8f9fa;">
+          <div class="row g-3">
+
+            <div class="col-md-4">
+              <div class="small text-secondary">사번</div>
+              <div class="fw-bold fs-5" id="d-empId"></div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="small text-secondary">이름</div>
+              <div class="fw-bold fs-5" id="d-empName"></div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="small text-secondary">부서</div>
+              <div class="fw-bold fs-5" id="d-deptName"></div>
+            </div>
+
+          </div>
+
+          <hr>
+
+          <div class="row text-center">
+            <div class="col">
+              <div class="small text-secondary">기본급</div>
+              <div class="fw-bold fs-5" id="d-baseAmt"></div>
+            </div>
+            <div class="col">
+              <div class="small text-secondary">수당 합계</div>
+              <div class="fw-bold fs-5" id="d-alwAmt"></div>
+            </div>
+            <div class="col">
+              <div class="small text-secondary">공제 합계</div>
+              <div class="fw-bold fs-5 text-danger" id="d-dedAmt"></div>
+            </div>
+            <div class="col">
+              <div class="small text-secondary">실수령액</div>
+              <div class="fw-bold fs-5 text-primary" id="d-netAmt"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 지급 / 공제 영역 -->
+        <div class="row g-4">
+
+          <!-- 🔵 지급 항목 -->
+          <div class="col-md-6">
+            <div class="rounded-4 border shadow-sm p-3">
+              <div class="d-flex justify-content-between mb-3">
+                <h5 class="fw-bold text-primary mb-0">지급 항목</h5>
+                <span class="small text-secondary" id="payCount"></span>
+              </div>
+
+              <table class="table align-middle" style="background:#fdfdfd;">
+                <thead class="table-light">
+                  <tr>
+                    <th>항목명</th>
+                    <th class="text-end">금액</th>                   
+                  </tr>
+                </thead>
+                <tbody id="payItemsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 🔴 공제 항목 -->
+          <div class="col-md-6">
+            <div class="rounded-4 border shadow-sm p-3">
+              <div class="d-flex justify-content-between mb-3">
+                <h5 class="fw-bold text-danger mb-0">공제 항목</h5>
+                <span class="small text-secondary" id="dedCount"></span>
+              </div>
+
+              <table class="table align-middle" style="background:#fdfdfd;">
+                <thead class="table-light">
+                  <tr>
+                    <th>항목명</th>
+                    <th class="text-end">금액</th>                    
+                  </tr>
+                </thead>
+                <tbody id="dedItemsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="modal-footer border-0">
+        <button class="btn btn-secondary px-4" data-bs-dismiss="modal">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
       <!-- 2. 급여 명세서 관리 -->
       <section class="card shadow-sm">
@@ -298,6 +486,9 @@
 
   monthSelect.addEventListener("change", applyCalcParams);
   typeSelect.addEventListener("change", applyCalcParams);
+  
+ 
+
 </script>
 
 
