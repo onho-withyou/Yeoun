@@ -166,7 +166,19 @@ public class AttendanceService {
 	// 외근 등록
 	@Transactional
 	public void registOutwork(AccessLogDTO accessLogDTO) {
-		accessLogRepository.save(accessLogDTO.toEntity());
+		String empId = accessLogDTO.getEmpId();
+		LocalDate workDate = accessLogDTO.getAccessDate();
+		LocalTime outTime= accessLogDTO.getOutTime();
+		
+		Attendance attendance = attendanceRepository.findByEmpIdAndWorkDate(empId, workDate)
+			    .orElseThrow(() -> new NoSuchElementException("출근 기록이 없습니다."));
+	
+		WorkPolicy workPolicy = workPolicyRepository.findFirstByOrderByIdAsc()
+				.orElseThrow(() -> new NoSuchElementException("근무정책이 없습니다."));
+		
+		AccessLog accessLog = accessLogRepository.save(accessLogDTO.toEntity());
+		
+		attendance.markAsInByOutwork(outTime, workPolicy, accessLog.getReason());
 	}
 
 }

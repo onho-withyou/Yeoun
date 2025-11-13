@@ -12,5 +12,4 @@ public interface CommonCodeRepository extends JpaRepository<CommonCode, String> 
 	
 	// 특정 코드 그룹의 하위 코드 목록 조회
 	List<CommonCode> findByParentCodeIdAndUseYnOrderByCodeSeq(String parentCodeId, String useYn);
-
 }

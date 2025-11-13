@@ -150,6 +150,16 @@ public class Attendance {
 	public boolean isAlreadyOut() {
 		return this.workOut != null;
 	}
+
+	// 외근 등록 후 데이터 변경
+	public void markAsInByOutwork(LocalTime outTime, WorkPolicy workPolicy, String reason) {
+		LocalTime standardIn = LocalTime.parse(workPolicy.getInTime());
+		int lateLimit = workPolicy.getLateLimit();
+		
+		this.statusCode = (outTime.isAfter(standardIn.plusMinutes(lateLimit))) ? "LATE" : "IN";
+		this.workIn = outTime;
+		this.remark = reason;
+	}
 }
 
 
