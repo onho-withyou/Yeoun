@@ -19,5 +19,6 @@ public class EmpDetailDTO {
     private String rrnMasked;
     private String bankInfo;
     private String photoPath;
+    
 
 }

@@ -239,6 +239,37 @@ public class EmpService {
 	    return "/files/photo/" + photoFileId;
 	}
 
+	// =============================================================================
+	// 사원 정보 수정
+	@Transactional(readOnly = true)
+	public EmpDTO getEmpForEdit(String empId) {
+		log.info("====== getEmpForEdit 시작: empId={}", empId);
+		
+	    Emp emp = empRepository.findById(empId)
+	        .orElseThrow(() -> new EntityNotFoundException("사원 없음: " + empId));
+	    
+	    log.info("====== emp 조회 완료: {}", emp);
+	    log.info("====== emp.getDept(): {}", emp.getDept());
+	    log.info("====== emp.getPosition(): {}", emp.getPosition());
+	    
+	    EmpDTO empDTO = new EmpDTO();
+	    empDTO.setEmpId(emp.getEmpId());
+	    empDTO.setEmpName(emp.getEmpName());
+	    empDTO.setGender(emp.getGender());
+	    empDTO.setRrn(emp.getRrn());
+	    empDTO.setHireDate(emp.getHireDate());
+	    empDTO.setStatus(emp.getStatus());
+	    empDTO.setEmail(emp.getEmail());
+	    empDTO.setMobile(emp.getMobile());
+	    empDTO.setPostCode(emp.getPostCode());
+	    empDTO.setAddress1(emp.getAddress1());
+	    empDTO.setAddress2(emp.getAddress2());
+	    empDTO.setDeptId(emp.getDept().getDeptId());
+	    empDTO.setPosCode(emp.getPosition().getPosCode());
+	    
+	    return empDTO;
+	}
+
 	
 
 

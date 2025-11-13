@@ -46,10 +46,13 @@ public class EmpController {
 	@GetMapping("/regist")
 	public String registEmp(Model model) {
 		model.addAttribute("empDTO", new EmpDTO());
+		model.addAttribute("mode", "create");
+		
 		model.addAttribute("bankList", commonCodeService.getBankList());
 		model.addAttribute("deptList", deptRepository.findActive());
 		model.addAttribute("positionList", positionRepository.findActive());
-		return "emp/emp_regist";
+		
+		return "emp/emp_form";
 	}
 
 	// POST 방식으로 요청되는 "/regist" 요청 매핑
@@ -71,7 +74,7 @@ public class EmpController {
 		if(bindingResult.hasErrors()) {
 			model.addAttribute("deptList", empService.getDeptList());
 			model.addAttribute("positionList", empService.getPositionList());
-			return "emp/emp_regist";
+			return "emp/emp_form";
 		}
 		
 		// EmpService - registEmp() 메서드 호출하여 사원 등록 처리 요청
@@ -105,6 +108,43 @@ public class EmpController {
 	public EmpDetailDTO getEmpDetail(@PathVariable("empId") String empId) {
 		return empService.getEmpDetail(empId);
 	}
+	
+	// ====================================================================================
+	// 사원 정보 수정
+	@GetMapping("/edit/{empId}")
+	public String editEmp(@PathVariable("empId") String empId, Model model) {
+		
+		log.info("====== 수정 폼 요청: empId={}", empId);
+		
+		// 수정용 DTO 조회
+		try {
+	    EmpDTO empDTO = empService.getEmpForEdit(empId);
+	    
+	    log.info("====== empDTO 세팅 완료: {}", empDTO);
+	    
+		// 공통 모델 세팅
+		model.addAttribute("empDTO", new EmpDTO());
+		model.addAttribute("mode", "edit");
+		
+		model.addAttribute("bankList", commonCodeService.getBankList());
+		model.addAttribute("deptList", deptRepository.findActive());
+		model.addAttribute("positionList", positionRepository.findActive());
+		
+		log.info("====== Model 세팅 완료");
+		
+		 } catch (Exception e) {
+		        log.error("====== 수정 폼 로딩 실패: {}", e.getMessage(), e);
+		        throw e;
+	    }
+		
+		// 상태 셀렉트용 공통코드 (재직/휴직/퇴직 등) 
+		// 추후 추가
+		model.addAttribute("statusList", List.of("ACTIVE", "LEAVE", "RESIGNED"));
+		
+		return "emp/emp_form";
+	}
+	
+	
 	
 	
 	
