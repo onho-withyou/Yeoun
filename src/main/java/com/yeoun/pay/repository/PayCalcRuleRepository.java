@@ -2,11 +2,14 @@ package com.yeoun.pay.repository;
 
 import com.yeoun.pay.entity.PayCalcRule;
 import com.yeoun.pay.enums.TargetType;
+import com.yeoun.pay.service.PayrollCalcService.SimpleEmp;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 public interface PayCalcRuleRepository extends JpaRepository<PayCalcRule, Long> {
@@ -43,4 +46,6 @@ public interface PayCalcRuleRepository extends JpaRepository<PayCalcRule, Long> 
         """, nativeQuery = true)
     List<PayCalcRule> findActiveByItemAndDate(@Param("itemCode") String itemCode,
                                               @Param("asOf") LocalDate asOf);
+
+
 }

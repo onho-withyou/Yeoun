@@ -164,7 +164,21 @@
       width: 130,
       cellRenderer: params => renderStatusBadge(params.value),
       cellStyle: { textAlign: 'center' }
-    }
+    },    
+    {
+    	  headerName: "상세",
+    	  width: 120,
+    	  cellRenderer: params => {
+    		    return `
+    		      <button class="btn btn-sm btn-outline-primary"
+    		              onclick="openDetail('${params.data.empId}')">
+    		        상세보기
+    		      </button>`;
+    		},
+
+    	  cellStyle: { textAlign: 'center' }
+    	}
+
   ];
 
   // 🔹 Grid 옵션
@@ -206,10 +220,149 @@
     const gridDiv = document.querySelector('#payslipGrid');
     new agGrid.Grid(gridDiv, gridOptions);
   });
+  
+  async function openDetail(empId) {
+	    const mm = document.getElementById('calc_month').value;
+
+	    try {
+	        const res = await fetch(`/pay/calc/detail?yyyymm=${mm}&empId=${empId}`);
+	        const data = await res.json();
+
+	        // 기본 정보
+	        document.getElementById("d-empId").innerText = data.empId ?? "";
+	        document.getElementById("d-empName").innerText = data.empName ?? "";
+	        document.getElementById("d-deptName").innerText = data.deptName ?? "";
+
+	        document.getElementById("d-baseAmt").innerText = (data.baseAmt ?? 0).toLocaleString()+" 원";
+	        document.getElementById("d-alwAmt").innerText  = (data.alwAmt ?? 0).toLocaleString()+" 원";
+	        document.getElementById("d-dedAmt").innerText  = (data.dedAmt ?? 0).toLocaleString()+" 원";
+	        document.getElementById("d-netAmt").innerText  = (data.netAmt ?? 0).toLocaleString()+" 원";
+
+	        // 테이블 초기화
+	        const alwBody = document.getElementById("detail-items-alw");
+	        const dedBody = document.getElementById("detail-items-ded");
+
+	        alwBody.innerHTML = "";
+	        dedBody.innerHTML = "";
+
+	        // 지급 / 공제 구분
+	        (data.items ?? []).forEach(it => {
+	            const html = `
+	              <tr>
+	                <td>${it.itemName}</td>
+	                <td class="text-end">${Number(it.amount).toLocaleString()} 원</td>
+	              </tr>`;
+
+	            if (it.type === 'EARNING' || it.type === 'ALW' || it.type === 'ALLOWANCE') {
+	                alwBody.innerHTML += html;
+	            } else {
+	                dedBody.innerHTML += html;
+	            }
+	        });
+
+	        // 모달 오픈
+	        const modal = new bootstrap.Modal(document.getElementById("detailModal"));
+	        modal.show();
+
+	    } catch (err) {
+	        alert("상세 내역 조회 실패: " + err);
+	    }
+	}
+
+
+
 /*]]>*/
 </script>
+<!-- ===================== 급여 상세 모달 (신규 디자인) ===================== -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content rounded-4 shadow-lg border-0">
 
-          
+      <div class="modal-header border-0">
+        <h4 class="modal-title fw-bold text-primary">급여 상세 내역</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body px-4 pb-4">
+
+        <!-- 상단 정보 박스 -->
+        <div class="p-4 rounded-4 mb-4" style="background:#f8f9fa;">
+          <div class="row g-3">
+            
+            <div class="col-md-6">
+              <strong class="text-secondary small">사번</strong><br>
+              <span id="d-empId" class="fs-5 fw-semibold"></span>
+            </div>
+
+            <div class="col-md-6">
+              <strong class="text-secondary small">이름</strong><br>
+              <span id="d-empName" class="fs-5 fw-semibold"></span>
+            </div>
+
+            <div class="col-md-6">
+              <strong class="text-secondary small">부서</strong><br>
+              <span id="d-deptName" class="fs-5 fw-semibold"></span>
+            </div>
+
+          </div>
+          <hr>
+          <div class="row g-3">
+            <div class="col-md-3"><strong>기본급:</strong> <span id="d-baseAmt"></span></div>
+            <div class="col-md-3"><strong>수당 합계:</strong> <span id="d-alwAmt"></span></div>
+            <div class="col-md-3"><strong>공제 합계:</strong> <span id="d-dedAmt"></span></div>
+            <div class="col-md-3"><strong>실수령액:</strong> <span id="d-netAmt"></span></div>
+          </div>
+        </div>
+
+        <!-- 지급 / 공제 항목 2단 구성 -->
+        <div class="row g-4">
+
+          <!-- 지급 항목 -->
+          <div class="col-md-6">
+            <div class="p-3 border rounded-3 shadow-sm">
+              <h5 class="fw-bold text-primary mb-3">지급 항목</h5>
+
+              <table class="table table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>항목명</th>
+                    <th class="text-end">금액</th>
+                  </tr>
+                </thead>
+                <tbody id="detail-items-alw"></tbody>
+              </table>
+
+            </div>
+          </div>
+
+          <!-- 공제 항목 -->
+          <div class="col-md-6">
+            <div class="p-3 border rounded-3 shadow-sm">
+              <h5 class="fw-bold text-danger mb-3">공제 항목</h5>
+
+              <table class="table table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>항목명</th>
+                    <th class="text-end">금액</th>
+                  </tr>
+                </thead>
+                <tbody id="detail-items-ded"></tbody>
+              </table>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary rounded-3 px-4" data-bs-dismiss="modal">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
       <!-- 2. 급여 명세서 관리 -->
       <section class="card shadow-sm">
@@ -298,6 +451,9 @@
 
   monthSelect.addEventListener("change", applyCalcParams);
   typeSelect.addEventListener("change", applyCalcParams);
+  
+ 
+
 </script>
 
 
