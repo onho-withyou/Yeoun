@@ -10,6 +10,7 @@
 		   ms.MANUAL_WORK_STAT,
 		   ms.WORK_STAT_SOURCE,
 		   ms.ONLINE_YN,
+		   ms.MSG_PROFILE,
 		   d.DEPT_NAME,
 		   p.POS_NAME
 	FROM MSG_STATUS ms
@@ -17,6 +18,7 @@
 	JOIN DEPT d		ON e.DEPT_ID = d.DEPT_ID
 	JOIN POSITION p	ON e.POS_CODE = p.POS_CODE
 	WHERE ms.EMP_ID != #{id}
+	ORDER BY e.EMP_NAME ASC
 </select>
 
 </mapper>

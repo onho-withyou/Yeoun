@@ -47,41 +47,37 @@
     </div>
     <div class="chat-search px-3 py-2">
           <div class="input-group">
-            <input type="text" class="form-control" placeholder="Search conversation">
+            <input type="text" class="form-control" placeholder="이름/부서로 검색">
             <span class="input-group-text"><i class="las la-search drop-shadow fs-5"></i></span>
           </div>
     </div>
       <div class="main-header" id="header-title">친구 목록</div>
 
-      <div class="panel-body" id="friends-panel" th:each = "friend : ${friends}">
-        <div class="friend-item"><!--  data-friend="beate" -->
-           <div class="profile-wrapper">
-            <img class="rounded-circle shadow avatar-sm me-3" 
-                src="https://user-images.githubusercontent.com/35243461/168796884-ee3aafb6-8083-48ec-9cfb-51b95eae08fe.jpg">
-            <span class="status-dot online"></span> <!-- ✅ 상태 표시 추가 -->
+      <div class="panel-body" id="friends-panel">
+        <div class="friend-item"  th:each="friend : ${friends}"><!--  data-friend="beate" -->
+           <div class="profile-wrapper me-2">
+            <img class="rounded-circle"
+                 th:src="|@{/img/msg_img_}${friend.msgProfile}.png|">
+            <span class="status-dot" th:data-status="${friend.status}"></span> <!-- ✅ 상태 표시 추가 -->
           </div>
           <div>
-            <p class="mb-0 fw-bold">Beate Lemoine</p>
-            <small class="text-muted">오늘 저녁에 볼까?</small>
+            <p class="mb-0 fw-bold" th:text="${friend.empName}"></p>
+            <small class="text-muted" th:text="|${friend.deptName} / ${friend.posName} |"></small>
           </div>
-        </div>
-        <div class="friend-item" data-friend="emily">
-          <img src="https://user-images.githubusercontent.com/35243461/168796884-ee3aafb6-8083-48ec-9cfb-51b95eae08fe.jpg">
-          <div>
-            <p class="mb-0 fw-bold">Emily Woods</p>
-            <small class="text-muted">회의 준비 끝났어?</small>
-          </div>
+          <i class="bi bi-star star-btn"
+             th:data-id="${friend.empId}">
+          </i>
         </div>
       </div>
 
       <div class="panel-body d-none" id="chats-panel">
         <div class="chat-item" data-friend="beate">
           <img src="https://user-images.githubusercontent.com/35243461/168796877-f6c8819a-5d6e-4b2a-bd56-04963639239b.jpg">
-        <div>
-          <p class="mb-0 fw-bold">Beate Lemoine</p>
-          <small class="text-muted">오늘 저녁에 볼까?</small>
-        </div>
-        <span class="badge-unread">2</span>
+          <div>
+            <p class="mb-0 fw-bold">Beate Lemoine</p>
+            <small class="text-muted">오늘 저녁에 볼까?</small>
+          </div>
+          <span class="badge-unread">2</span>
         </div>
         <div class="chat-item" data-friend="emily">
           <img src="https://user-images.githubusercontent.com/35243461/168796884-ee3aafb6-8083-48ec-9cfb-51b95eae08fe.jpg">
@@ -103,6 +99,35 @@
     const chatsPanel = document.getElementById('chats-panel');
     const headerTitle = document.getElementById('header-title');
     const popup = document.getElementById('go-popup');
+    const searchInput = document.querySelector('.chat-search input');
+
+
+    // 각 친구의 상태를 읽어오는 js
+    document.querySelectorAll('.friend-item').forEach(item => {
+      const dot = item.querySelector('.status-dot');
+      const status = dot.dataset.status;   // == friend.status 값 ("ONLINE","OFFLINE","AWAY","BUSY")
+      //console.log("status", status);
+      switch (status) {
+        case "ONLINE":           // 온라인
+          dot.classList.add("online");
+          break;
+
+        case "OFFLINE":           // 오프라인
+          dot.classList.add("offline");
+          break;
+
+        case "AWAY":        // 자리비움
+          dot.classList.add("away");
+          break;
+
+        case "BUSY":        // 다른 용무중
+          dot.classList.add("busy");
+          break;
+
+        default:
+          dot.classList.add("offline");
+      }
+    });
 
 
     // 탭 전환
@@ -112,6 +137,9 @@
       friendsPanel.classList.remove('d-none');
       chatsPanel.classList.add('d-none');
       headerTitle.textContent = '친구 목록';
+      // 🔥 검색창 리셋 + placeholder 변경
+      searchInput.value = '';
+      searchInput.placeholder = '이름/부서로 검색';
     });
 
     tabChats.addEventListener('click', () => {
@@ -120,11 +148,14 @@
       friendsPanel.classList.add('d-none');
       chatsPanel.classList.remove('d-none');
       headerTitle.textContent = '대화 목록';
+      // 🔥 검색창 리셋 + placeholder 변경
+      searchInput.value = '';
+      searchInput.placeholder = '대화 상대/내용 검색';
     });
 
     // 친구나 대화 클릭 시 새 창 열기
     document.querySelectorAll('.friend-item, .chat-item').forEach(item => {
-      item.addEventListener('click', () => {
+      item.addEventListener('dblclick', () => {
         const name = item.querySelector('p').textContent;
         window.open('chat',
           '_blank',
@@ -159,6 +190,26 @@
 	document.addEventListener("click", () => {
 	  window.focus();
 	});
+
+    /* 즐겨찾기 핸들러 */
+    document.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (!e.target.classList.contains("star-btn")) return;
+
+      // 별 토글
+      e.target.classList.toggle("active");
+      e.target.classList.toggle("bi-star");
+      e.target.classList.toggle("bi-star-fill");
+
+      const friendItem = e.target.closest(".friend-item");
+      const container = document.querySelector("#friends-panel");
+
+      // active면 위로 이동
+      if (e.target.classList.contains("active")) {
+        container.prepend(friendItem);
+      }
+    });
+
 
   </script>
 </body>

@@ -258,7 +258,7 @@ a.btn i, button.btn i {
 }
 
 .chat-search .input-group-text, .chat-search input {
-  font-size: 14px;
+  font-size: 16px;
   box-shadow: unset !important;
   border-width: initial;
   border-style: initial;
@@ -808,7 +808,7 @@ img.shadow {
   border-radius: 50%;
   border: 2px solid #fff;
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.15);
-  transform: translate(-80%, -30%); /* ✅ 프사와 살짝 겹치게 */
+  transform: translate(-10%, -30%); /* ✅ 프사와 살짝 겹치게 */
 }
 
 /* 상태별 색상 */
@@ -911,4 +911,22 @@ img.shadow {
   justify-content: flex-end;
   color: #eee;
 }
- 
+
+
+/* 즐겨찾기 */
+.star-btn {
+  position: absolute;
+  right: 0;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.star-btn.active {
+  color: #f1c40f; /* Bootstrap text-warning과 비슷한 색 */
+}
+
+/* placeholder 글씨크기 조정 */
+.chat-search .form-control::-webkit-input-placeholder {
+  font-size: 16px;
+}

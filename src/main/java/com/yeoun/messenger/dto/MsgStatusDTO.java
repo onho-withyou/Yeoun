@@ -2,9 +2,11 @@ package com.yeoun.messenger.dto;
 
 import java.time.LocalDateTime;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.modelmapper.ModelMapper;
 
-import com.yeoun.messenger.repository.MsgStatus;
+import com.yeoun.messenger.entity.MsgStatus;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,11 +27,15 @@ public class MsgStatusDTO {
 		private String workStatSource;			// 근무상태 변경주체
 		private String onlineYn;				// 접속 여부
 		private LocalDateTime lastLogin;		// 마지막 접속시간
+		@Min(1) @Max(5)
+		private Integer msgProfile;				// 프로필 사진 번호
 		private String remark;					// 비고
 		
 		private String empName;					// 사원 이름 (추가필드)
 		private String deptName;				// 부서 이름 (추가필드)
 		private String posName;					// 직무 이름 (추가필드)
+
+		private String status;					// 상태 표시용 (뷰페이지용 추가필드)
 		
 		
 		// ===========================================================

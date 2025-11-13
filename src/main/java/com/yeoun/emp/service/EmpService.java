@@ -4,10 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -29,7 +26,7 @@ import com.yeoun.emp.repository.EmpBankRepository;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.emp.repository.EmpRoleRepository;
 import com.yeoun.emp.repository.PositionRepository;
-import com.yeoun.messenger.repository.MsgStatus;
+import com.yeoun.messenger.entity.MsgStatus;
 import com.yeoun.messenger.repository.MsgStatusRepository;
 
 import jakarta.persistence.EntityNotFoundException;
