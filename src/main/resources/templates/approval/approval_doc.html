@@ -23,7 +23,7 @@
 			<div class="d-flex" style="height: 38.94px;">
 	            <div class="mb-6 mb-0">
 	            	<select class="form-select" onchange="draftValFn(this)">
-	            		<option selected>기안서</option>
+	            		<option value="기안서" selected>기안서</option>
 	            		<option name="draft" value="휴가(연차)신청서">휴가(연차)신청서</option>
 						<option name="draft" value="인사발령신청서">인사발령신청서</option>
 						<option name="draft" value="지출결의서">지출결의서</option>
@@ -31,7 +31,7 @@
 	            	</select>
 	            </div>
 	            <div class="d-flex justify-content-end" style="margin-left: 5px;">
-						<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#approval-modal" style="width: 71px;">
+						<button onclick="defaultPrint()" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#approval-modal" style="width: 71px;">
 						작성
 						</button>
 		        </div>
@@ -221,12 +221,13 @@
 <!-- 		        <div id="container"></div> -->
 		          <div id="select-box" style="width: 200px"></div>
 		        </h5>
-     				<div id="approvar" style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
+     				<div id="approvar" onload="defaultPrint()" style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
+     				   
      				</div>	
      				
      				<!-- 전결자 클릭시 추가 태그 -->
      				
-			      	<div id="jeongyeolja" style="display:none;border:1px solid red;">
+			      	<div id="jeongyeolja" style="display:none;border:1px solid red;border-radius: 6px;padding: 12px;">
 			      	
 						<div id="jeongyeolja-content">
 						  <label class="form-check-label" for="radioDefault1">
@@ -473,7 +474,6 @@
 	let date = today.getDate();  // 날짜
 	let day = today.getDay();  // 요일
 
-	// 3. 원하는 형식으로 문자열 만들기
 	const formattedDate = `${year}년 ${month}월 ${date}일`;
 
 	document.getElementById("today-date").textContent = formattedDate;
@@ -499,31 +499,42 @@
         }
       ]
     });
-
-    this.count = 0;
-    this.num = 0;
-    function print(type, text) {
-		// 결재권한자변경 div 버튼 생성
-    	approvarDiv.innerHTML +='<div class="btn btn-success"'
-      						+'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
-      						+'<p class="btn-close" onclick="approvarDivclose(this)" style="float:right;margin-right: 8px;z-index:9999999;">&times;</p>'
-      						+'<p onclick="approvalNo('+ (++this.num)+','+ "'"+text + "'" +')" style="margin-top:50px;height: 129px;">'+(++this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
-    						+'</div>';
-    	 
-    } 
-    
 	let jeongyeoljaDiv = document.querySelector('#jeongyeolja');
 	let jeongyeoljaContent = document.querySelector("#jeongyeolja-content");
 	let approvarDivClose = document.getElementById("approvarDiv-close");
 	
+    this.count = 0; //결재권한자 label count
+    let defalutApprovarArr = ["d-이사랑","d-미미미누","d-김경란"];
+    let approvarArr = [];//결재권한자 배열 
 	
+    function defaultPrint(){
+    	if(this.count === 0){
+	    	for(var i=0;i<defalutApprovarArr.length;i++){
+	    		
+		    	print("defalut",defalutApprovarArr[i]);
+    			approvarArr.push(defalutApprovarArr[i]);
+	    	}
+    	}
+    }
+    function print(type, text) {
+		// 결재권한자변경 div 버튼 생성
+    	if(this.count < 3){
+		this.count++;
+    	approvarDiv.innerHTML +='<div class="btn btn-success"'
+      						+'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
+      						+'<p onclick="approvarDivclose(this,' + "'"+ type + "'"+ ','+ count +')" style="float:right;margin-right: 8px;">&times;</p>'
+      						+'<p onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
+    						+'</div>';
+    	}
+    } 
+    
 
 	
 	//결재권한자 버튼 클릭시 결재권한자변경 div 태그 생성
-	function approvalNo(num,text){
+	function approvalNo(count,text){
 	   //해당태그 클릭시 전결자 div 나오기
-	   	 jeongyeoljaDiv.innerHTML = '<button onClick="approvarDivclose(this)" class="btn-close" style="float:right;margin-right: 8px;"></button>'
-	   		 			+ '<h5>'+num + "차 결재권한자 : "+ text +" 변경"+'</h5>';
+	   	 jeongyeoljaDiv.innerHTML = '<button onClick="approvarDivclose(this,"change",'+ count +')" class="btn-close" style="float:right;margin-right: 8px;"></button>'
+	   		 			+ '<h5>'+ count + "차 결재권한자 : "+ text +" 변경"+'</h5>';
 			jeongyeoljaDiv.innerHTML += jeongyeoljaContent.innerHTML;	
 	   
 	   	 if(jeongyeoljaDiv.style.display === 'none'){
@@ -535,23 +546,36 @@
     } 
 	
 	//결재권한자,결재권한자변경(전결자) 닫기버튼
-	function approvarDivclose(buttonDiv){
+	function approvarDivclose(buttonDiv,type,count){
 		const divElement = buttonDiv.parentNode; // 버튼의 부모인 div를 찾음
-		jeongyeoljaDiv.style.display = 'none';
-	    if (buttonDiv.parentElement.id === '' ) {//결재권한자
+		
+		//defalut 태그 닫기 버튼시 
+		if (buttonDiv.parentElement.id === '' || type === 'defalut') {//결재권한자
 	        divElement.remove(); //자신의 div 제거
-	        this.count = 0; //카운트초기화
-	        this.num = 0;
+	        
+	        if(divElement.innerText !== null){ //defalut 태그가 있을때
+	        	approvarArr = approvarArr.filter((ev) => ev !== defalutApprovarArr[count-1]);	
+	        }
+			approvarArr = approvarArr.filter((ev) => ev !== count);
+			this.count = count-1; //제거 라벨 카운트 원상복기
 	    }
-	    	
+		
+		jeongyeoljaDiv.style.display = 'none';
+		
+		if(approvarArr.length === 0){
+    		this.count = 0;
+    		
+    	}	
 	}
+	//셀렉트박스 닫힐때
     selectBox.on('close',(ev)=>{
     	
     	let selectlabel = selectBox.getSelectedItem().label;
-    	if(selectlabel != null && this.count < 3){//셀렉트 라벨선택시 3번까지만셈
+    	if(selectlabel != null && approvarArr.length < 3){//셀렉트 라벨선택시 3번까지만셈
     		print(ev.type, selectlabel);
+    		approvarArr.push(this.count);
     	}
-    });
+    })
    	//리셋버튼 만들기 하다가잠
     
 	//에디터
