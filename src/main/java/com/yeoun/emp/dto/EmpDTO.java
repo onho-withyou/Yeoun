@@ -27,6 +27,8 @@ public class EmpDTO {
 	// 기본정보
 	// ========================
 	
+	private String empId;
+	
 	// 이름
 	@NotBlank(message = "이름은 필수 입력값입니다!")
 	@Length(min = 2, max = 20, message = "이름은 2 ~ 20자리 입니다.")

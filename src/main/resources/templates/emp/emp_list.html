@@ -41,8 +41,8 @@
       
       <!-- 사원 상세 정보 모달 -->
 		<div class="modal fade" id="empDetailModal" tabindex="-1" aria-hidden="true">
-		  <!-- ✅ modal-xl : 더 넓은 폭 / centered : 수직 중앙 -->
-		  <div class="modal-dialog modal-xl modal-dialog-centered">
+		  <!-- modal-xl : 더 넓은 폭 / centered : 수직 중앙 -->
+		  <div class="modal-dialog modal-dialog-centered emp-detail-modal">
 		  <div class="modal-content">
 		    <div class="modal-header">
 		      <h5 class="modal-title fw-bold">사원 상세</h5>
@@ -53,111 +53,103 @@
 		      <div class="container-fluid">
 		        <div class="row g-4">
 		          
-		          <!-- 왼쪽: 핵심 정보 -->
-		          <div class="col-lg-8">
-		            <!-- 섹션: 기본 정보 -->
-		            <div class="mb-3">
-		              <div class="d-flex align-items-center mb-2">
-		                <span class="fw-semibold me-2">기본 정보</span>
-		                <div class="flex-grow-1 border-top"></div>
-		              </div>
-		              <div class="row gy-2 gx-3">
-		                <div class="col-md-6">
-		                  <div class="text-secondary small">이름</div>
-		                  <div id="d-empName" class="fw-semibold fs-6">—</div>
-		                </div>
-		                <div class="col-md-6">
-		                  <div class="text-secondary small">사번</div>
-		                  <div id="d-empId" class="fw-semibold fs-6">—</div>
-		                </div>
-		                <div class="col-md-6">
-		                  <div class="text-secondary small">부서</div>
-		                  <div id="d-deptName">—</div>
-		                </div>
-		                <div class="col-md-6">
-		                  <div class="text-secondary small">직급</div>
-		                  <div id="d-posName">—</div>
-		                </div>
-		                <div class="col-md-6">
-		                  <div class="text-secondary small">성별</div>
-		                  <div id="d-gender">—</div>
-		                </div>
-		                <div class="col-md-6">
-		                  <div class="text-secondary small">입사일</div>
-		                  <div id="d-hireDate">—</div>
-		                </div>
-		              </div>
-		            </div>
-		
-		            <!-- 섹션: 연락/계정 -->
-		            <div class="mb-3">
-		              <div class="d-flex align-items-center mb-2">
-		                <span class="fw-semibold me-2">연락/계정</span>
-		                <div class="flex-grow-1 border-top"></div>
-		              </div>
-		              <div class="row gy-2 gx-3">
-		                <div class="col-md-6">
-		                  <div class="text-secondary small">연락처</div>
-		                  <div id="d-mobile">—</div>
-		                </div>
-		                <div class="col-md-6">
-		                  <div class="text-secondary small">이메일</div>
-		                  <div id="d-email">—</div>
-		                </div>
-		                <div class="col-12">
-		                  <div class="text-secondary small">주소</div>
-		                  <div id="d-address">—</div>
-		                </div>
-		              </div>
-		            </div>
-		
-		            <!-- 섹션: 민감정보(마스킹) -->
-		            <div class="mb-1">
-		              <div class="d-flex align-items-center mb-2">
-		                <span class="fw-semibold me-2">민감 정보(마스킹)</span>
-		                <div class="flex-grow-1 border-top"></div>
-		              </div>
-		              <div class="row gy-2 gx-3">
-		                <div class="col-md-6">
-		                  <div class="text-secondary small">주민등록번호</div>
-		                  <div id="d-rrn" class="text-body">—</div>
-		                </div>
-		                <div class="col-md-6">
-		                  <div class="text-secondary small">급여통장</div>
-		                  <div id="d-bank" class="text-body">—</div>
-		                </div>
-		              </div>
-		              <div class="text-muted small mt-2">
-		                ※ 주민등록번호/계좌는 마스킹 상태로만 노출됩니다.
-		              </div>
-		            </div>
-		          </div>
-		
-		          <!-- 오른쪽: 프로필 카드 -->
-		          <div class="col-lg-4">
-		            <div class="card shadow-sm border-0">
-		              <div class="card-body">
-		                <div class="d-flex flex-column align-items-center">
-		                  <img id="d-photo" src="/img/default-profile.png" alt="사원 사진"
-		                       class="rounded mb-3"
-		                       style="width:140px;height:140px;object-fit:cover;">
-		                  <div class="text-center">
-		                    <div id="d-empName2" class="fw-semibold fs-5">—</div>
-		                    <div class="text-secondary" id="d-deptPos">—</div>
-		                  </div>
-		                </div>
-		                <hr>
-		                <div class="small">
-		                  <div class="d-flex justify-content-between">
-		                    <span class="text-secondary">사번</span><span id="d-empId2" class="fw-semibold">—</span>
-		                  </div>
-		                  <div class="d-flex justify-content-between">
-		                    <span class="text-secondary">입사</span><span id="d-hireDate2">—</span>
-		                  </div>
-		                </div>
-		              </div>
-		            </div>
-		          </div>
+				<!-- 왼쪽: 핵심 정보 -->
+				<div class="col-lg-12">
+				  <!-- 섹션: 기본 정보 -->
+				  <div class="mb-3">
+				    <div class="d-flex align-items-center mb-2">
+				      <span class="fw-semibold me-2">기본 정보</span>
+				      <div class="flex-grow-1 border-top"></div>
+				    </div>
+				
+				    <!-- 사진 + 텍스트 묶음 -->
+				    <div class="d-flex align-items-start gap-4">
+				      <!-- 프로필 사진 -->
+				      <div class="flex-shrink-0">
+				        <img id="d-photo"
+				             src="/img/default-profile.png"
+				             alt="프로필 사진"
+				             class="rounded"
+				             style="width: 120px; height: 120px; object-fit: cover;">
+				      </div>
+				
+				      <!-- 기본 정보 텍스트 -->
+				      <div class="flex-grow-1">
+				        <div class="row gy-2 gx-3">
+				          <div class="col-md-6">
+				            <div class="text-secondary small">이름</div>
+				            <div id="d-empName" class="fw-semibold fs-6">—</div>
+				          </div>
+				          <div class="col-md-6">
+				            <div class="text-secondary small">사번</div>
+				            <div id="d-empId" class="fw-semibold fs-6">—</div>
+				          </div>
+				          <div class="col-md-6">
+				            <div class="text-secondary small">부서</div>
+				            <div id="d-deptName">—</div>
+				          </div>
+				          <div class="col-md-6">
+				            <div class="text-secondary small">직급</div>
+				            <div id="d-posName">—</div>
+				          </div>
+				          <div class="col-md-6">
+				            <div class="text-secondary small">성별</div>
+				            <div id="d-gender">—</div>
+				          </div>
+				          <div class="col-md-6">
+				            <div class="text-secondary small">입사일</div>
+				            <div id="d-hireDate">—</div>
+				          </div>
+				        </div>
+				      </div>
+				    </div>
+				    <!-- /사진 + 텍스트 묶음 -->
+				  </div>
+				
+				  <!-- 섹션: 연락/계정 -->
+				  <div class="mb-3">
+				    <div class="d-flex align-items-center mb-2">
+				      <span class="fw-semibold me-2">연락/계정</span>
+				      <div class="flex-grow-1 border-top"></div>
+				    </div>
+				    <div class="row gy-2 gx-3">
+				      <div class="col-md-6">
+				        <div class="text-secondary small">연락처</div>
+				        <div id="d-mobile">—</div>
+				      </div>
+				      <div class="col-md-6">
+				        <div class="text-secondary small">이메일</div>
+				        <div id="d-email">—</div>
+				      </div>
+				      <div class="col-12">
+				        <div class="text-secondary small">주소</div>
+				        <div id="d-address">—</div>
+				      </div>
+				    </div>
+				  </div>
+				
+				  <!-- 섹션: 민감정보(마스킹) -->
+				  <div class="mb-1">
+				    <div class="d-flex align-items-center mb-2">
+				      <span class="fw-semibold me-2">민감 정보(마스킹)</span>
+				      <div class="flex-grow-1 border-top"></div>
+				    </div>
+				    <div class="row gy-2 gx-3">
+				      <div class="col-md-6">
+				        <div class="text-secondary small">주민등록번호</div>
+				        <div id="d-rrn" class="text-body">—</div>
+				      </div>
+				      <div class="col-md-6">
+				        <div class="text-secondary small">급여통장</div>
+				        <div id="d-bank" class="text-body" style="white-space: pre-line;">—</div>
+				      </div>
+				    </div>
+				    <div class="text-muted small mt-2">
+				      ※ 주민등록번호/계좌는 마스킹 상태로만 노출됩니다.
+				    </div>
+				  </div>
+				</div>
+
 		
 		        </div><!-- /row -->
 		      </div><!-- /container-fluid -->
@@ -167,10 +159,10 @@
 		      <button type="button" class="btn btn-primary" id="editBtn">수정</button>
 		      <button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
 		    </div>
+		    
 		  </div>
 		</div>
 	  </div>
-
 
       <!-- 그리드 DOM 반드시 포함 -->
       <div id="grid" style="height:600px;"></div>

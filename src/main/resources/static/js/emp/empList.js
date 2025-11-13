@@ -3,6 +3,7 @@
 
   let empGrid = null;
   let empDetailModal = null;
+  let currentEmpId = null;
 
   document.addEventListener('DOMContentLoaded', () => {
     empDetailModal = new bootstrap.Modal(document.getElementById('empDetailModal'));
@@ -21,7 +22,7 @@
   function makeGrid(rows) {
 	  empGrid = new tui.Grid({
       el: document.getElementById('grid'), // grid가 들어갈 div
-      bodyHeight: 540,                     // 표 높이
+//      bodyHeight: 540,                     // 표 높이
       rowHeaders: [],                      // 왼쪽 번호/체크박스 없음
       scrollX: true,                       // 가로 스크롤
       scrollY: true,                       // 세로 스크롤
@@ -59,6 +60,8 @@
 
 	// 사원 상세보기
 	function showEmpDetail(empId) {
+	  currentEmpId = empId;	
+		
 	  fetch(`/emp/detail/${empId}`)
 	    .then(res => res.json())
 	    .then(d => {
@@ -83,3 +86,9 @@
 	    })
 	    .catch(() => alert('상세정보 불러오기 실패'));
 	}
+	
+	// 수정 버튼 클릭 시 등록화면(수정모드)으로 이동
+	document.getElementById('editBtn').addEventListener('click', () => {
+	  if (!currentEmpId) return;
+	  window.location.href = `/emp/edit/${currentEmpId}`;
+	});

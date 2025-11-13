@@ -1,6 +1,7 @@
 package com.yeoun.emp.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.yeoun.auth.repository.RoleRepository;
 import com.yeoun.common.repository.CommonCodeRepository;
 import com.yeoun.emp.dto.EmpDTO;
+import com.yeoun.emp.dto.EmpDetailDTO;
 import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
@@ -27,7 +29,10 @@ import com.yeoun.emp.repository.EmpBankRepository;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.emp.repository.EmpRoleRepository;
 import com.yeoun.emp.repository.PositionRepository;
+import com.yeoun.messenger.repository.MsgStatus;
+import com.yeoun.messenger.repository.MsgStatusRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.log4j.Log4j2;
 
 @Service
@@ -39,6 +44,7 @@ public class EmpService {
 	private final DeptRepository deptRepository;
 	private final PositionRepository positionRepository;
 	private final EmpBankRepository empBankRepository;
+	private final MsgStatusRepository msgStatusRepository;
 	private final BCryptPasswordEncoder encoder;
 
 	public EmpService(EmpRepository empRepository,
@@ -48,11 +54,13 @@ public class EmpService {
 					  EmpRoleRepository empRoleRepository,
 					  EmpBankRepository empBankRepository,
 					  CommonCodeRepository commonCodeRepository,
+					  MsgStatusRepository msgStatusRepository,
 					  BCryptPasswordEncoder encoder) {
 		this.empRepository = empRepository;
 		this.deptRepository = deptRepository;
 		this.positionRepository = positionRepository;
 		this.empBankRepository = empBankRepository;
+		this.msgStatusRepository = msgStatusRepository;
 		this.encoder = encoder;
 	}
 	
@@ -82,8 +90,21 @@ public class EmpService {
 
 	    // 4) EMP 저장
 	    empRepository.saveAndFlush(emp);
+	    
+	    // 5) 메신저 상태(MSG_STATUS) 저장
+	    MsgStatus status = new MsgStatus();
+	    
+	    status.setEmpId(empId);
+	    status.setAvlbStat("ONLINE");
+	    status.setAvlbUpdated(LocalDateTime.now());
+	    status.setAutoWorkStat("IN");
+	    status.setWorkStatUpdated(LocalDateTime.now());
+	    status.setWorkStatSource("AUTO");
+	    status.setOnlineYn("N");
+	    
+	    msgStatusRepository.save(status);
 
-	    // 5) 급여계좌(EMP_BANK) 저장 (선택값 없으면 스킵)
+	    // 6) 급여계좌(EMP_BANK) 저장 (선택값 없으면 스킵)
 	    if (empDTO.getBankCode() != null && empDTO.getAccountNo() != null) {
 	        EmpBank bank = new EmpBank();
 	        bank.setEmpId(emp.getEmpId());
@@ -147,18 +168,109 @@ public class EmpService {
 		// Emp 엔티티 -> EmpDTO 객체로 변환하여 리턴
 		return EmpDTO.fromEntity(emp);
 	}
-	
+
 	// =============================================
 	// 사원 정보 상세 조회
-//	public EmpDTO getEmpDetail(String empId) {
-//		
-//		// 사원 엔티티 조회
-//		Emp emp = empRepository.findByEmpId(empId)
-//					.orElseThrow(() -> new IllegalArgumentException("사원 없음: " + empId));
-//		
-//		// Emp 엔티티 -> EmpDTO 객체로 변환하여 리턴
-//		return EmpDTO.fromEntity(emp);
-//	}
+	public EmpDetailDTO getEmpDetail(String empId) {
+		
+		Emp emp = empRepository.findById(empId)
+	            .orElseThrow(() -> new EntityNotFoundException("사원 없음: " + empId));
+
+		String address = buildAddress(emp);
+	    String rrnMasked = maskRrn(emp.getRrn());
+	    String bankInfo = buildBankInfo(emp);   // "국민은행 (123456-12-123456)"
+	    String photoPath = buildPhotoPath(emp); // null일 수도 있음
+
+
+	    return new EmpDetailDTO(
+	            emp.getEmpId(),
+	            emp.getEmpName(),
+	            emp.getDept().getDeptName(),
+	            emp.getPosition().getPosName(),
+	            emp.getGender(),
+	            emp.getHireDate() != null ? emp.getHireDate().toString() : "",
+	            emp.getMobile(),
+	            emp.getEmail(),
+	            buildAddress(emp),
+	            rrnMasked,
+	            bankInfo,
+	            photoPath
+	    );
+	}
+	
+	// 상세주소 없는 경우 대비
+	private String buildAddress(Emp emp) {
+	    String addr1 = emp.getAddress1();
+	    String addr2 = emp.getAddress2();
+
+	    if (addr2 == null) addr2 = "";
+
+	    return (addr1 + " " + addr2).trim();
+	}
+	
+	private String maskRrn(String rrn) {
+	    if (rrn == null || rrn.length() < 6) return "";
+	    // 예: 000421-3******
+	    return rrn.substring(0, 8) + "******";
+	}
+
+	// 급여계좌 문자열 조합
+	private String buildBankInfo(Emp emp) {
+
+	    return empBankRepository.findTopByEmpIdOrderByCreatedDateDesc(emp.getEmpId())
+	            .map(bank -> {
+	            	String bankName = bank.getBank().getCodeName();   // ← 은행명
+	            	String account = bank.getAccountNo();             // 계좌번호
+	            	String holder  = bank.getHolder();     
+
+	            	// 두 줄 구조로 리턴
+	                return bankName + " (" + account + ")\n예금주: " + holder;
+	            })
+	            .orElse("");
+	}
+
+	// 프로필 사진 경로 생성 (추후 수정 예정)
+	private String buildPhotoPath(Emp emp) {
+	    Long photoFileId = emp.getPhotoFileId(); // Long 타입
+
+	    if (photoFileId == null) {
+	        return null; // 사진 없음 → JS에서 기본 이미지 처리
+	    }
+	    return "/files/photo/" + photoFileId;
+	}
+
+	// =============================================================================
+	// 사원 정보 수정
+	@Transactional(readOnly = true)
+	public EmpDTO getEmpForEdit(String empId) {
+		log.info("====== getEmpForEdit 시작: empId={}", empId);
+		
+	    Emp emp = empRepository.findById(empId)
+	        .orElseThrow(() -> new EntityNotFoundException("사원 없음: " + empId));
+	    
+	    log.info("====== emp 조회 완료: {}", emp);
+	    log.info("====== emp.getDept(): {}", emp.getDept());
+	    log.info("====== emp.getPosition(): {}", emp.getPosition());
+	    
+	    EmpDTO empDTO = new EmpDTO();
+	    empDTO.setEmpId(emp.getEmpId());
+	    empDTO.setEmpName(emp.getEmpName());
+	    empDTO.setGender(emp.getGender());
+	    empDTO.setRrn(emp.getRrn());
+	    empDTO.setHireDate(emp.getHireDate());
+	    empDTO.setStatus(emp.getStatus());
+	    empDTO.setEmail(emp.getEmail());
+	    empDTO.setMobile(emp.getMobile());
+	    empDTO.setPostCode(emp.getPostCode());
+	    empDTO.setAddress1(emp.getAddress1());
+	    empDTO.setAddress2(emp.getAddress2());
+	    empDTO.setDeptId(emp.getDept().getDeptId());
+	    empDTO.setPosCode(emp.getPosition().getPosCode());
+	    
+	    return empDTO;
+	}
+
+	
 
 
 
