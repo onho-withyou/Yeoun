@@ -4,6 +4,10 @@ import java.time.LocalDateTime;
 
 import org.modelmapper.ModelMapper;
 
+import com.yeoun.emp.entity.Dept;
+import com.yeoun.emp.entity.Emp;
+import com.yeoun.main.dto.ScheduleDTO;
+import com.yeoun.main.entity.Schedule;
 import com.yeoun.notice.entity.Notice;
 
 import jakarta.validation.constraints.NotNull;
@@ -24,13 +28,40 @@ public class NoticeDTO {
 	private LocalDateTime createdDate;
 	private LocalDateTime updatedDate;
 	
+	private String empId;
+	private String empName;
+	private String deptId;
+	private String deptName;
+	
 	private static ModelMapper modelMapper = new ModelMapper();
 	
 	public Notice toEntity() {
-		return modelMapper.map(this,  Notice.class);
+		Notice notice = modelMapper.map(this,  Notice.class);
+		
+		if( this.getCreatedUser() != null) {
+			Emp emp = new Emp();
+			emp.setEmpId(this.getCreatedUser());
+			
+			if(this.getDeptId() != null) {
+				Dept dept = new Dept();
+				dept.setDeptId(this.getDeptId());
+				emp.setDept(dept);
+			}
+			notice.setEmp(emp);
+		}
+		return notice;
 	}
 	
 	public static NoticeDTO fromEntity(Notice notice) {
-		return modelMapper.map(notice, NoticeDTO.class);
+		NoticeDTO noticeDTO = modelMapper.map(notice, NoticeDTO.class);
+		noticeDTO.createdUser = notice.getEmp().getEmpId();
+		noticeDTO.empId = notice.getEmp().getEmpId();
+		noticeDTO.empName = notice.getEmp().getEmpName();
+		noticeDTO.deptId = notice.getEmp().getDept().getDeptId();
+		noticeDTO.deptName = notice.getEmp().getDept().getDeptName();
+		
+		return noticeDTO;
 	}
+
+	
 }
