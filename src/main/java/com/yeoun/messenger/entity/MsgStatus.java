@@ -1,8 +1,9 @@
-package com.yeoun.messenger.repository;
+package com.yeoun.messenger.entity;
 
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.DynamicInsert;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
@@ -56,6 +57,10 @@ public class MsgStatus {
 	// 마지막 접속시간
 	@Column
 	private LocalDateTime lastLogin;
+
+	// 프로필 사진
+	@Column(nullable = false)
+	private Integer msgProfile;
 	
 	// 비고
 	@Column(length = 255)
