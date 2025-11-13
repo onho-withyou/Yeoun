@@ -122,13 +122,31 @@ public class PayrollCalcService {
                 }
 
                 /* =====================================================
-                 *  🔥 지급/공제 항목 저장 (EMP_PAY_ITEM) — 핵심 추가 부분
+                 *  🔥 지급/공제 항목 저장 (EMP_PAY_ITEM) — 상세항목 저장
                  * ===================================================== */
                 empPayItemRepo.deleteByPayslipPayslipId(slip.getPayslipId());
 
                 int sort = 1;
+                
+             // ==================== 급여 규칙 찾기 ====================
+                PayRule rule = rules.stream().findFirst().orElse(null);
+                if (rule == null) {
+                    log.warn("적용 가능한 PayRule 없음 → {}", emp.empId());
+                    continue;
+                }
 
-                // 지급 - 기본급
+                // ========= 공통 계산 =========
+                BigDecimal total = baseAmt.add(alwAmt);
+
+                BigDecimal penRate  = BigDecimal.valueOf(rule.getPenRate());
+                BigDecimal hlthRate = BigDecimal.valueOf(rule.getHlthRate());
+                BigDecimal empRate  = BigDecimal.valueOf(rule.getEmpRate());
+                BigDecimal taxRate  = BigDecimal.valueOf(rule.getTaxRate());
+
+
+                // ========= 지급항목 저장 =========
+
+                // 지급: 기본급
                 empPayItemRepo.save(EmpPayItem.builder()
                         .payslip(slip)
                         .itemType("ALW")
@@ -138,25 +156,106 @@ public class PayrollCalcService {
                         .sortNo(sort++)
                         .build());
 
-                // 지급 - 수당 합계
+                // 지급: 식대
+                BigDecimal mealAmt = BigDecimal.valueOf(rule.getMealAmt() == null ? 0.0 : rule.getMealAmt());
                 empPayItemRepo.save(EmpPayItem.builder()
                         .payslip(slip)
                         .itemType("ALW")
-                        .itemCode("ALLOW")
-                        .itemName("수당 합계")
-                        .amount(alwAmt)
+                        .itemCode("MEAL")
+                        .itemName("식대")
+                        .amount(mealAmt)
                         .sortNo(sort++)
                         .build());
 
-                // 공제 - 총 공제
+                // 지급: 교통비
+                BigDecimal transAmt = BigDecimal.valueOf(rule.getTransAmt() == null ? 0.0 : rule.getTransAmt());
+                empPayItemRepo.save(EmpPayItem.builder()
+                        .payslip(slip)
+                        .itemType("ALW")
+                        .itemCode("TRANS")
+                        .itemName("교통비")
+                        .amount(transAmt)
+                        .sortNo(sort++)
+                        .build());
+
+                // 지급 합계
+//                empPayItemRepo.save(EmpPayItem.builder()
+//                        .payslip(slip)
+//                        .itemType("ALW")
+//                        .itemCode("ALW_SUM")
+//                        .itemName("수당 합계")
+//                        .amount(alwAmt)
+//                        .sortNo(sort++)
+//                        .build());
+
+
+                // ========= 공제항목 저장 =========
+
+                // 국민연금
+                BigDecimal pension = total.multiply(penRate).setScale(0, RoundingMode.DOWN);
                 empPayItemRepo.save(EmpPayItem.builder()
                         .payslip(slip)
                         .itemType("DED")
-                        .itemCode("DEDUCT")
-                        .itemName("공제 합계")
-                        .amount(dedAmt)
+                        .itemCode("PENSION")
+                        .itemName("국민연금")
+                        .amount(pension)
                         .sortNo(sort++)
                         .build());
+
+                // 건강보험
+                BigDecimal health = total.multiply(hlthRate).setScale(0, RoundingMode.DOWN);
+                empPayItemRepo.save(EmpPayItem.builder()
+                        .payslip(slip)
+                        .itemType("DED")
+                        .itemCode("HEALTH")
+                        .itemName("건강보험")
+                        .amount(health)
+                        .sortNo(sort++)
+                        .build());
+
+                // 고용보험
+                BigDecimal empIns = total.multiply(empRate).setScale(0, RoundingMode.DOWN);
+                empPayItemRepo.save(EmpPayItem.builder()
+                        .payslip(slip)
+                        .itemType("DED")
+                        .itemCode("EMPLOY")
+                        .itemName("고용보험")
+                        .amount(empIns)
+                        .sortNo(sort++)
+                        .build());
+
+                // 소득세
+                BigDecimal incomeTax = total.multiply(taxRate).setScale(0, RoundingMode.DOWN);
+                empPayItemRepo.save(EmpPayItem.builder()
+                        .payslip(slip)
+                        .itemType("DED")
+                        .itemCode("TAX")
+                        .itemName("소득세")
+                        .amount(incomeTax)
+                        .sortNo(sort++)
+                        .build());
+
+                // 지방소득세(소득세 10%)
+//                BigDecimal localTax = incomeTax.divide(BigDecimal.TEN, 0, RoundingMode.DOWN);
+//                empPayItemRepo.save(EmpPayItem.builder()
+//                        .payslip(slip)
+//                        .itemType("DED")
+//                        .itemCode("LOCAL_TAX")
+//                        .itemName("지방소득세")
+//                        .amount(localTax)
+//                        .sortNo(sort++)
+//                        .build());
+
+             // 공제 합계
+//                empPayItemRepo.save(EmpPayItem.builder()
+//                        .payslip(slip)
+//                        .itemType("DED")
+//                        .itemCode("DED_SUM")
+//                        .itemName("공제 합계")
+//                        .amount(dedAmt)
+//                        .sortNo(sort++)
+//                        .build());
+
 
                 count++;
 

@@ -34,8 +34,9 @@ public class PayrollPayslip {
     
     @Transient
     public String getEmpName() {
-        return null; 
+        return (emp != null ? emp.getEmpName() : null);
     }
+
 
     @Column(name = "DEPT_ID", length = 20)
     private String deptId;

@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.yeoun.pay.dto.PayslipDetailDTO;
+import com.yeoun.pay.dto.PayslipItemDTO;
 import com.yeoun.pay.dto.PayslipViewDTO;
 import com.yeoun.pay.entity.EmpPayItem;
 import com.yeoun.pay.entity.PayrollPayslip;
@@ -21,7 +22,8 @@ public class PayrollCalcQueryService {
     private final PayrollPayslipRepository payslipRepo;
     private final EmpPayItemRepository empPayItemRepo;
 
-    /** 화면 표시용 급여명세서 조회 (상태 구분 없이 전부 조회) */
+
+    /** 화면 표시용 급여명세서 조회 */
     public List<PayslipViewDTO> findForView(String yyyymm) {
         return payslipRepo.findPayslipsWithEmpAndDept(yyyymm, null);
     }
@@ -32,49 +34,74 @@ public class PayrollCalcQueryService {
         for (PayslipViewDTO p : list) {
             totPay += n(p.getTotAmt());
             totDed += n(p.getDedAmt());
-            net    += n(p.getNetAmt());
+            net += n(p.getNetAmt());
         }
         return new long[]{totPay, totDed, net};
     }
 
-    /** BigDecimal → long 변환 (null 안전 처리) */
+    /** BigDecimal → long 변환 */
     private long n(BigDecimal v) {
         return (v == null) ? 0L : v.longValue();
     }
 
-    /** 급여내역 상세보기 */
+
+    /** ============================================================
+     *  급여내역 상세보기
+     * ============================================================ */
     public PayslipDetailDTO getPayslipDetail(String yyyymm, String empId) {
 
-        // 1) 해당 월/사원의 급여 결과 조회
-        PayrollPayslip slip = payslipRepo
+        // 1) PAYROLL_PAYSLIP 조회
+        PayrollPayslip payslip = payslipRepo
                 .findByPayYymmAndEmpId(yyyymm, empId)
-                .orElseThrow(() -> new RuntimeException("데이터 없음"));
+                .orElseThrow(() -> new IllegalArgumentException("명세서 없음"));
 
-        // 2) 급여 항목 상세 목록 조회
-        List<EmpPayItem> items =
-                empPayItemRepo.findByPayslipPayslipIdOrderBySortNo(slip.getPayslipId());
+        Long payslipId = payslip.getPayslipId();
 
-        // 3) DTO 변환
-        List<PayslipDetailDTO.Item> itemDtos = items.stream()
-                .map(r -> PayslipDetailDTO.Item.builder()
-                        .itemName(r.getItemName())
-                        .amount(r.getAmount())
-                        .type(r.getItemType())  // <-- 여기 수정 (name() 제거)
-                        .build()
-                )
+
+        // 2) 상세항목 전체 조회
+        List<EmpPayItem> allItems = empPayItemRepo
+                .findByPayslipPayslipIdOrderBySortNo(payslipId);
+
+
+        // 3) 지급 항목(ALW)
+        List<PayslipItemDTO> payItems = allItems.stream()
+                .filter(i -> "ALW".equals(i.getItemType()))
+                .map(i -> new PayslipItemDTO(
+                        i.getItemName(),
+                        i.getAmount(),
+                        i.getSortNo()
+                ))
                 .toList();
 
 
-        // 4) 최종 DTO 반환
+        // 4) 공제 항목(DED)
+        List<PayslipItemDTO> dedItems = allItems.stream()
+                .filter(i -> "DED".equals(i.getItemType()))
+                .map(i -> new PayslipItemDTO(
+                        i.getItemName(),
+                        i.getAmount(),
+                        i.getSortNo()
+                ))
+                .toList();
+
+
+        // 5) 최종 DTO 반환
         return PayslipDetailDTO.builder()
-                .empId(slip.getEmpId())
-                .empName(slip.getEmpName())
-                .deptName(slip.getDeptId())
-                .baseAmt(slip.getBaseAmt())
-                .alwAmt(slip.getAlwAmt())
-                .dedAmt(slip.getDedAmt())
-                .netAmt(slip.getNetAmt())
-                .items(itemDtos)
+                .empId(payslip.getEmpId())
+                .empName(payslip.getEmpName())  
+                .deptId(payslip.getDeptId())
+                .deptName(payslip.getDept() != null ? payslip.getDept().getDeptName() : null)
+
+                .baseAmt(payslip.getBaseAmt())
+                .alwAmt(payslip.getAlwAmt())
+                .incAmt(payslip.getIncAmt())
+                .dedAmt(payslip.getDedAmt())
+                .totAmt(payslip.getTotAmt())
+                .netAmt(payslip.getNetAmt())
+
+                .payItems(payItems)
+                .dedItems(dedItems)
                 .build();
     }
+
 }
