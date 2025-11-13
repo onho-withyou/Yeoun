@@ -37,7 +37,7 @@ public class NoticeController {
 	@GetMapping("")
 	public String notices(Model model,
 			@RequestParam(defaultValue = "0", name = "page")int page,
-		    @RequestParam(defaultValue = "2", name = "size")int size,
+		    @RequestParam(defaultValue = "10", name = "size")int size,
 		    @RequestParam(defaultValue = "", name = "searchKeyword")String searchKeyword,
 		    @RequestParam(defaultValue = "updatedDate", name = "orderKey")String orderKey,
 		    @RequestParam(defaultValue = "", name = "orderMethod")String orderMethod) {
@@ -51,6 +51,7 @@ public class NoticeController {
 	    model.addAttribute("orderKey", orderKey);
 	    model.addAttribute("orderMethod", orderMethod);
 	    
+	    System.out.println("노티스페이지" + noticePage.getContent());
 		return "/notice/notice";
 	}
 	
@@ -59,6 +60,7 @@ public class NoticeController {
 	public ResponseEntity<Map<String, String>> notices(@ModelAttribute("noticeDTO") @Valid NoticeDTO noticeDTO, 
 			BindingResult bindingResult, Authentication authentication) {
 		Map<String, String> msg = new HashMap<>();
+//		System.out.println("noticeDTO : " + noticeDTO);
 		if(bindingResult.hasErrors()) {
 			msg.put("msg", "공지사항 등록에 실패했습니다");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);

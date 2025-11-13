@@ -47,9 +47,9 @@ public class NoticeService {
 	}
 	
 	// 공지상세 조회하기
-	public NoticeDTO findById(Long noticeId) {
+	public NoticeDTO getOneNotice(Long noticeId) {
 		Notice notice = noticeRepository.findById(noticeId).orElse(null);
-				
+		
 		return NoticeDTO.fromEntity(notice);
 	}
 	
