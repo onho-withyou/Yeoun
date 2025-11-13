@@ -47,6 +47,10 @@ public class AttendanceDTO {
 	private String updatedUser; // 수정자
 	private LocalDateTime updatedDate; // 수정일자
 	
+	private String deptName; // 부서이름
+	private String posName; // 직급명
+	private String empName; // 직원 이름
+	
 	// -----------------------------------
 	// DTO <-> Entity 변환
 	private static ModelMapper modelMapper = new ModelMapper();
@@ -57,7 +61,31 @@ public class AttendanceDTO {
 	}
 	
 	// DTO 타입으로 변환
-	public static AttendanceDTO fromEntity(Attendance attendance) {
-		return modelMapper.map(attendance, AttendanceDTO.class);
+//	public static AttendanceDTO fromEntity(Attendance attendance) {
+//		return modelMapper.map(attendance, AttendanceDTO.class);
+//	}
+	
+	public static AttendanceDTO fromEntity(Attendance a) {
+	    AttendanceDTO dto = new AttendanceDTO();
+	    dto.setId(a.getId());
+	    dto.setEmpId(a.getEmp().getEmpId());
+	    dto.setEmpName(a.getEmp().getEmpName());
+	    dto.setWorkDate(a.getWorkDate());
+	    dto.setWorkIn(a.getWorkIn());
+	    dto.setWorkOut(a.getWorkOut());
+	    dto.setWorkDuration(a.getWorkDuration());
+	    dto.setStatusCode(a.getStatusCode());
+	    dto.setRemark(a.getRemark());
+	    dto.setCreatedUser(a.getCreatedUser());
+	    dto.setCreatedDate(a.getCreatedDate());
+	    dto.setUpdatedUser(a.getUpdatedUser());
+	    dto.setUpdatedDate(a.getUpdatedDate());
+
+	    if (a.getEmp() != null) {
+	        dto.setDeptName(a.getEmp().getDept().getDeptName());
+	        dto.setPosName(a.getEmp().getPosition().getPosName());
+	    }
+
+	    return dto;
 	}
 }

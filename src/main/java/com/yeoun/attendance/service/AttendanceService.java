@@ -1,14 +1,14 @@
 package com.yeoun.attendance.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.h2.engine.Role;
 import org.springframework.stereotype.Service;
 
 import com.yeoun.attendance.dto.AccessLogDTO;
@@ -20,11 +20,11 @@ import com.yeoun.attendance.entity.WorkPolicy;
 import com.yeoun.attendance.repository.AccessLogRepository;
 import com.yeoun.attendance.repository.AttendanceRepository;
 import com.yeoun.attendance.repository.WorkPolicyRepository;
-import com.yeoun.emp.dto.EmpDTO;
+import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.emp.dto.EmpListDTO;
+import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
 
-import groovyjarjarantlr4.v4.parse.GrammarTreeVisitor.locals_return;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -49,13 +49,17 @@ public class AttendanceService {
 				.orElseThrow(() -> new NoSuchElementException("등록된 근무정책이 없습니다."));
 		
 		// 오늘자 출퇴근 기록 조회
-		Attendance attendance  = attendanceRepository.findByEmpIdAndWorkDate(empId, today).orElse(null);
+		Attendance attendance  = attendanceRepository.findByEmp_EmpIdAndWorkDate(empId, today).orElse(null);
 		// 오늘자 외근 기록 조회
 		AccessLog accessLog = accessLogRepository.findByEmpIdAndAccessDate(empId, today).orElse(null);
 		
+		// 직원 조회
+		Emp emp = empRepository.findById(empId)
+				.orElseThrow(() -> new NoSuchElementException("사원을 찾을 수 없습니다."));
+		
 		if (attendance == null) {
 			// 출근 기록이 없으면 새로 생성
-			Attendance newAttendance = Attendance.createForWorkIn(empId,
+			Attendance newAttendance = Attendance.createForWorkIn(emp,
                     today,
                     now,
                     LocalTime.parse(workPolicy.getInTime()),
@@ -81,21 +85,49 @@ public class AttendanceService {
 		LocalDate today = LocalDate.now();
 		
 		// 출근 기록 있는지 확인
-		boolean exists = attendanceRepository.existsByEmpIdAndWorkDate(attendanceDTO.getEmpId(), today);
+		boolean exists = attendanceRepository.existsByEmp_EmpIdAndWorkDate(attendanceDTO.getEmpId(), today);
 		
 		if (exists) {
 			throw new IllegalStateException("이미 오늘 출근 기록이 존재합니다.");
 		}
 		
+		// 직원 조회
+		Emp emp = empRepository.findById(attendanceDTO.getEmpId())
+				.orElseThrow(() -> new NoSuchElementException("사원을 찾을 수 없습니다."));
+		
 		attendanceDTO.setWorkDate(today);
 		
-		attendanceRepository.save(attendanceDTO.toEntity());
+		Attendance newAttendance = Attendance.createAttendance(attendanceDTO, emp);
+		
+		attendanceRepository.save(newAttendance);
 	}
 	
 	// 개인 출퇴근 기록
 	public List<AttendanceDTO> getMyAttendanceList(String empId, LocalDate startDate, LocalDate endDate) {
-		return attendanceRepository.findByEmpIdAndWorkDateBetween(empId, startDate, endDate)
+		return attendanceRepository.findByEmp_EmpIdAndWorkDateBetween(empId, startDate, endDate)
 				.stream()
+				.map(AttendanceDTO::fromEntity)
+				.collect(Collectors.toList());
+	}
+	
+	// 부서장 또는 관리자가 확인하는 근태현황
+	public List<AttendanceDTO> getAttendanceListByRole(LoginDTO loginDTO, LocalDate startDate, LocalDate endDate) {
+		String deptId = loginDTO.getDeptId();
+		List<String> roles = loginDTO.getAuthorities().stream()
+				.map(authority -> authority.getAuthority())
+				.collect(Collectors.toList());
+		
+		List<Attendance> attendanceList = new ArrayList();
+		
+		if (roles.contains("ROLE_ADMIN")) {
+			// 관리자의 경우 전체 직원 조회
+			attendanceList = attendanceRepository.findByWorkDateBetween(startDate, endDate);
+		} else if (roles.contains("ROLE_ADMIN_SUB")) {
+			// 부서장의 본인 부서에 대해서 조회
+			attendanceList = attendanceRepository.findByEmp_Dept_DeptIdAndWorkDateBetween(deptId, startDate, endDate);
+		}
+		
+		return attendanceList.stream()
 				.map(AttendanceDTO::fromEntity)
 				.collect(Collectors.toList());
 	}
@@ -170,7 +202,7 @@ public class AttendanceService {
 		LocalDate workDate = accessLogDTO.getAccessDate();
 		LocalTime outTime= accessLogDTO.getOutTime();
 		
-		Attendance attendance = attendanceRepository.findByEmpIdAndWorkDate(empId, workDate)
+		Attendance attendance = attendanceRepository.findByEmp_EmpIdAndWorkDate(empId, workDate)
 			    .orElseThrow(() -> new NoSuchElementException("출근 기록이 없습니다."));
 	
 		WorkPolicy workPolicy = workPolicyRepository.findFirstByOrderByIdAsc()

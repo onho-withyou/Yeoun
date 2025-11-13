@@ -11,13 +11,18 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.yeoun.attendance.dto.AttendanceDTO;
+import com.yeoun.emp.entity.Emp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -44,8 +49,9 @@ public class Attendance {
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "ATTENDANCE_SEQ_GENERATOR")
 	private Long id;
 	
-	@Column(nullable = false, length = 7)
-	private String empId; // 출근한 사원 번호
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "EMP_ID", nullable = false)
+	private Emp emp; // 출근한 사원 번호
 	
 	@Column(nullable = false)
 	@CreatedDate
@@ -76,26 +82,25 @@ public class Attendance {
 	private LocalDateTime updatedDate; // 수정일자
 	
 	// 수기로 출퇴근 등록
-	public static Attendance createAttendance(String empId, LocalDate date, 
-			LocalTime workIn, LocalTime workOut, String statusCode) {
+	public static Attendance createAttendance(AttendanceDTO attendanceDTO, Emp emp) {
 		Attendance attendance = new Attendance();
 		
-		attendance.empId = empId;
-		attendance.workDate = date;
-		attendance.workIn = workIn;
-		attendance.workOut = workOut;
-		attendance.statusCode = statusCode;
+		attendance.emp = emp;
+		attendance.workDate = attendanceDTO.getWorkDate();
+		attendance.workIn = attendanceDTO.getWorkIn();
+		attendance.workOut = attendanceDTO.getWorkOut();
+		attendance.statusCode = attendanceDTO.getStatusCode();
 		attendance.updateDuration();
 		
 		return attendance;
 	}
 	
 	// 자동 출근 (출퇴근 버튼 찍었을 경우)
-	public static Attendance createForWorkIn(String empId, LocalDate date, LocalTime now, 
+	public static Attendance createForWorkIn(Emp emp, LocalDate date, LocalTime now, 
 			LocalTime standardIn, int lateLimit, AccessLog accessLog) {
 		Attendance attendance = new Attendance();
 
-		attendance.empId = empId;
+		attendance.emp = emp;
 		attendance.workDate = date;
 		
 		// 외근 여부 확인
