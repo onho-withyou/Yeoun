@@ -40,6 +40,8 @@ public class WorkPolicyDTO {
 	@NotNull
 	private String annualBasis; // 연차 기준 설정 (회계연도 / 입사일 기준)
 	
+	private String annualBasisName; 
+	
 	// --------------------------------------------------
 	// 유효성 검사
 	@AssertTrue(message = "퇴근 시간은 출근 시간보다 늦어야 합니다.")

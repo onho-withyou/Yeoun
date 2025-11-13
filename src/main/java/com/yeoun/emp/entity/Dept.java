@@ -14,7 +14,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
+@Entity(name = "Dept")
 @Table(name = "DEPT")
 @Getter
 @Setter
@@ -37,6 +37,10 @@ public class Dept {
 	// 부서장ID
 	@Column(name = "HEAD_EMP_ID", length = 7)
 	private String headEmpId;
+	
+	// 부서 약어 (ERP, HR, DEV 등)
+    @Column(name = "DEPT_ABBR", length = 20)
+    private String deptAbbr;
 	
 	// 사용여부
 	@Column(name = "USE_YN", length = 1, nullable = false)

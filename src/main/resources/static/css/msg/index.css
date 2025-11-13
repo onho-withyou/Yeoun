@@ -1,0 +1,43 @@
+
+/*** index ***/
+
+.status-bar {
+  background: #f8f9fb;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 10px 18px;
+}
+
+.status-indicator {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #4CAF50;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.status-text {
+  font-weight: 500;
+  color: #333;
+  margin-right: 16px;
+}
+
+.status-select {
+  border: none;
+  background: #fff;
+  border-radius: 6px;
+  font-size: 14px;
+  padding: 4px 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.chat.chat-panel .left-chat-message:hover .msg-time,
+.chat.chat-panel .right-chat-message:hover .msg-time {
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+.right-chat-message:hover .msg-time,
+.right-chat-message:hover .msg-time i {
+  opacity: 1;
+}

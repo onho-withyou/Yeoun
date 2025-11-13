@@ -1,8 +1,8 @@
 // src/main/java/com/yeoun/pay/dto/PayRunDTO.java
 package com.yeoun.pay.dto;
 
+import com.yeoun.pay.enums.CalcStatus;
 import com.yeoun.pay.enums.CalcType;
-import com.yeoun.pay.enums.RunStatus;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
@@ -19,7 +19,7 @@ public class PayRunDTO {
     private CalcType calcType;
 
     @NotNull(message = "상태(STATUS)는 필수입니다.")
-    private RunStatus status;
+    private CalcStatus status;
 
     @NotNull(message = "요청자(REQ_USER)는 필수입니다.")
     @Positive(message = "요청자(REQ_USER)는 양수여야 합니다.")

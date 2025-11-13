@@ -1,14 +1,24 @@
+// 메타 태그에서 CSRF 값 가져오기
+const csrfToken = document.querySelector('meta[name="_csrf_token"]').getAttribute('content');
+const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]').getAttribute('content');
+
 // 출/퇴근 버튼 클릭 시 사원번호를 전달해서 출/퇴근 기록 요청
 async function attendance(empId) {
 	const PROCESS_ATTENDANCE = `/attendance/toggle/${empId}`;
-	const response = await fetch(PROCESS_ATTENDANCE, { method: "POST"});
+	const response = await fetch(PROCESS_ATTENDANCE, { 
+		method: "POST",
+		headers: {
+			[csrfHeader]: csrfToken, 
+			"Content-Type": "application/json"
+		}
+	});
 	const data = await response.json();
 	
 	return data; // {success: true, status: status} 로 반환
 }
 
-const handleAttendanceToggle = async () => {
-	const result =  await attendance(1);
+const handleAttendanceToggle = async (empId) => {
+	const result =  await attendance(empId);
 	
 	let msg = "";
 	
@@ -19,16 +29,16 @@ const handleAttendanceToggle = async () => {
 	} else if (result.status === "OUT") {
 		document.querySelector("#attendance").innerText = "출근";
 		msg = "퇴근했습니다.";
-	} else if (result.status === "ALREADY_OUT") {
-		msg = "이미 퇴근 처리된 상태입니다.";
+	} else if (result.status === "LATE") {
+		msg = "지각입니다.";
+	} else {
+		msg = "외출입니다";
 	}
 	
 	alert(msg);
 }
 
-// 2511584
 // 사원번호로 사원 조회
-
 const searchEmp = async () => {
 	const empId = document.querySelector("#nameWithTitle").value;
 	const empName = document.querySelector("#empName");
@@ -50,8 +60,99 @@ const searchEmp = async () => {
 			empName.value = data.empName;
 		}
 	} catch (error) {
-		console.erro("사원 조회 중 오류 : " , error);
+		console.error("사원 조회 중 오류 : " , error);
 		alert("사원 조회 중 오류가 발생했습니다.");
 	}
 }
 
+let currentMode = "regist";
+let currentAttendanceId = null;
+
+// 출퇴근 수기 등록 및 수정 모달
+const openModal = async (mode, attendanceId = null) => {
+	const modalTitle = document.querySelector("#modalCenterTitle");
+	const saveBtn = document.querySelector("#saveBtn");
+	const modalElement = document.querySelector("#modalCenter");
+	const modalInstance = new bootstrap.Modal(modalElement);
+	
+	currentMode = mode; // 현재 모드 저장
+	currentAttendanceId = attendanceId; // 수정 모드일 경우 id가 들어와서 저장
+	
+	const ATTENDANCE_DETAIL_URL = `/attendance/${attendanceId}`;
+	
+	if (mode === "edit" && attendanceId) { 	// 수정 버튼 클릭 시 동작
+		modalTitle.textContent = "출/퇴근 수정";
+		saveBtn.textContent = "수정";
+		
+		
+		// 선택한 데이터 불러오기
+		const response = await fetch(ATTENDANCE_DETAIL_URL);
+		const data = await response.json();
+		
+		document.querySelector("#nameWithTitle").value = data.empId;
+		
+		// 사원번호로 이름 조회 로직
+		await searchEmp();
+		
+		if (data.workIn != null) {
+			document.querySelector("#inTime").value = data.workIn.slice(0, 5);
+		}
+		
+		if (data.workOut != null) {
+			document.querySelector("#endTime").value = data.workOut.slice(0, 5);
+		}
+		
+		document.querySelector("select[name='statusCode']").value = data.statusCode;
+	} else { // 등록 모드
+		modalTitle.textContent = "출/퇴근 등록";
+		saveBtn.textContent = "등록";
+		resetModal(); // 모달 초기화
+	}
+	modalInstance.show();
+}
+
+
+// 등록 및 수정 공용 함수 
+const saveAttendance = async () => {
+	const empId = document.querySelector("#nameWithTitle").value;
+	const workIn = document.querySelector("#inTime").value;
+	const workOut = document.querySelector("#endTime").value;
+	const statusCode = document.querySelector("select[name='statusCode']").value;
+	
+	const url = currentMode === "edit" ? `/attendance/${currentAttendanceId}` : "/attendance";
+	const method = currentMode === "edit" ? "PATCH" : "POST";
+	
+	try {
+		const response = await fetch(url, {
+			method,
+			headers: {
+				[csrfHeader]: csrfToken, 
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({empId, workIn, workOut, statusCode}),
+		});
+		
+		if (!response.ok) {
+			const errorData = await response.json();
+			throw new Error(errorData.message || "요청 처리 중 오류가 발생했습니다.");
+		}
+		
+		// 정상 응답일 경우
+		const result = await response.json();
+		alert(result.message || "정상적으로 처리되었습니다.");
+	
+		location.reload();
+	} catch (error) {
+		console.error("에러 : " + error);
+		alert(error.message || "서버와 통신 중 오류가 발생했습니다.");
+	}
+}
+
+// 모달 초기화
+function resetModal() {
+	document.querySelector("#nameWithTitle").value = "";
+	document.querySelector("#empName").value = "";
+	document.querySelector("#inTime").value = "";
+	document.querySelector("#endTime").value = "";
+	document.querySelector("select[name='statusCode']").value = "";
+}

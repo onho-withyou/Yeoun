@@ -1,5 +1,6 @@
 package com.yeoun.pay.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -46,7 +47,7 @@ public class PayRule {
     @Column(name = "BASE_AMT", columnDefinition = "NUMBER(15,2)")
     @ColumnDefault("0")
     @Comment("기본금: 사원 급여 산정 시 기준금액 또는 직급별 표준값")
-    private Double baseAmt;
+    private BigDecimal baseAmt;
 
     @Column(name = "MEAL_AMT", columnDefinition = "NUMBER(15,2)")
     @ColumnDefault("0")
@@ -108,7 +109,7 @@ public class PayRule {
     @Builder
     public PayRule(LocalDate startDate,
                    LocalDate endDate,
-                   Double baseAmt,
+                   BigDecimal baseAmt,
                    Double mealAmt,
                    Double transAmt,
                    Double penRate,

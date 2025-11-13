@@ -1,6 +1,8 @@
 package com.yeoun.emp.dto;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collector;
 
 import org.hibernate.validator.constraints.Length;
 import org.modelmapper.ModelMapper;
@@ -20,50 +22,102 @@ import lombok.ToString;
 @Setter
 @ToString
 public class EmpDTO {
-
+	
+	// ========================
+	// 기본정보
+	// ========================
+	
+	// 이름
 	@NotBlank(message = "이름은 필수 입력값입니다!")
 	@Length(min = 2, max = 20, message = "이름은 2 ~ 20자리 입니다.")
-	private String empName;  // 이름			
+	private String empName;  			
 	
+	// 성별
 	@NotBlank(message = "성별을 선택해주세요.")
     @Pattern(regexp = "M|F", message = "성별은 M 또는 F만 가능합니다.")
-	private String gender;  // 성별 
-	
-	// 연락처: 공백불가 + 형식(010-0000-0000)
-    @NotBlank(message = "연락처는 필수입니다.")
-    @Pattern(regexp = "^010-\\d{4}-\\d{4}$", message = "연락처 형식은 010-0000-0000 입니다.")
-	private String mobile;  // 연락처		
-	
-	@NotBlank(message = "이메일은 필수 입력값입니다!")
-	@Email(message = "이메일 형식에 맞게 입력해 주세요!")
-	private String email;  // 이메일		
-	
-	@NotBlank(message = "우편번호는 필수 입력값입니다!") 
-	private String postCode;  // 우편번호 	
-	
-	@NotBlank(message = "기본 주소는 필수 입력값입니다!")
-	private String address1;  // 기본주소 	
-	private String address2;  // 상세주소 	
-	
+	private String gender;  
+    
+    // 주민번호 
+    @Pattern(
+      regexp = "^(\\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01]))-[1-4]\\d{6}$",
+      message = "주민등록번호 형식은 000000-0000000 입니다."
+    )
+    private String rrn;
+    
 	// 입사일: 필수 + 과거/오늘
     @NotNull(message = "입사일은 필수입니다.")
     @PastOrPresent(message = "입사일은 오늘 또는 과거 날짜만 가능합니다.")
 	private LocalDate hireDate;  // 입사일 (엔티티 생성 시 자동 등록)	
+    
+    // 사진파일ID (사진 파일 FK)	
+    private Long photoFileId;  
+    
+	// ========================
+	// 연락/계정
+	// ========================
+
+    // 이메일
+    @NotBlank(message = "이메일은 필수 입력값입니다!")
+    @Email(message = "이메일 형식에 맞게 입력해 주세요!")
+    private String email;  		
+    
+    // 연락처
+    @NotBlank(message = "연락처는 필수입니다.")
+    @Pattern(regexp = "^010-\\d{4}-\\d{4}$", message = "연락처 형식은 010-0000-0000 입니다.")
+    private String mobile; 	
 	
-	private String status;  // 재직 상태		
+    // 주소 (우편번호 / 기본주소 + 상세주소)
+	@NotBlank(message = "우편번호는 필수 입력값입니다!") 
+	private String postCode; 
 	
-	// 부서 / 직급
-//    private String deptId;
-//    private String positionId;
+	@NotBlank(message = "기본 주소는 필수 입력값입니다!")
+	private String address1;  	
+	private String address2;   	
 	
-	private Long photoFileId;  // 사진파일ID (사진 파일 FK)	
+	// ========================
+	// 조직/직무
+	// ========================
+	
+	// ERP / MES 구분
+	private String empType;
+	
+	// 부서 
+	@NotBlank(message = "부서를 선택해주세요.")
+    private String deptId;
+	
+	// 직급
+	@NotBlank(message = "직급을 선택해주세요.")
+    private String posCode;
+	
+    // 재직 상태		
+	private String status; 
 	
 	private String roleCode;  // 역할코드	
 	
-	
+	// ========================
+	// 급여통장 정보
+	// ========================
+
+	// 은행 코드 (예: BANK_004)
+	@NotBlank(message = "은행을 선택해주세요.")
+	private String bankCode;  
+
+	// 계좌번호
+	@NotBlank(message = "계좌번호를 입력해주세요.")
+	@Pattern(regexp = "^[0-9\\-]{6,20}$", message = "계좌번호 형식이 올바르지 않습니다.")
+	private String accountNo;  
+
+	// 예금주명
+	@NotBlank(message = "예금주명을 입력해주세요.")
+	private String holder; 
+
+	// 통장 사본 파일 ID (선택)
+	private Long fileId;  
+
 	
 	// -----------------------------------------------------------------------
 	private static ModelMapper modelMapper = new ModelMapper();
+	
 	
 	// ModelMapper 객체의 map() 메서드를 활용하여 객체 변환 수행
 	// 1) EmpDTO -> Emp(엔티티) 타입으로 변환하는 toEntity() 메서드 정의
@@ -75,20 +129,6 @@ public class EmpDTO {
 	public static EmpDTO fromEntity(Emp emp) {
 		return modelMapper.map(emp, EmpDTO.class);
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	
 }

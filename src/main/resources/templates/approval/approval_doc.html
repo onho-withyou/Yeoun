@@ -12,6 +12,9 @@
 <script src="https://uicdn.toast.com/select-box/latest/toastui-select-box.js"></script>
 
 </head>
+<style>
+	
+</style>
 <body>
 <th:block layout:fragment="content">
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
@@ -28,7 +31,7 @@
 	            	</select>
 	            </div>
 	            <div class="d-flex justify-content-end" style="margin-left: 5px;">
-						<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop" style="width: 71px;">
+						<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#approval-modal" style="width: 71px;">
 						작성
 						</button>
 		        </div>
@@ -90,10 +93,10 @@
 			</div>
 		</div>
 		<!-- 모달 -->
-		<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal fade" id="approval-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
 		    <div class="modal-content">
-		      <div class="modal-header">
+		      <div class="modal-header" data-draggable="true">
 		        <h3 class="modal-title" id="Drafting">기안서 작성</h3>
 		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		      </div>
@@ -217,27 +220,42 @@
 		        <h5 class="d-flex">결재권한자: 
 <!-- 		        <div id="container"></div> -->
 		          <div id="select-box" style="width: 200px"></div>
-     				<div id="result"><b>Result of events</b><br></div>
-		        	<div class="mb-6 mb-0">
-		            	<select class="form-select" data-mdb-select-init multiple size="1">
-		            	<optgroup label="인사팀">
-						  <option value="0">홍길동</option>
-						  <option value="1">이정현</option>
-						  <option value="2">강동원</option>
-						  <option value="3">원빈</option>
-					    </optgroup>
-						<optgroup label="개발팀">
-						    <option value="4">권지용</option>
-						    <option value="5">한가인</option>
-						    <option value="6">정지훈</option>
-						  </optgroup>
-						</select> 
+		        </h5>
+     				<div id="approvar" style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
+     				</div>	
+     				
+     				<!-- 전결자 클릭시 추가 태그 -->
+     				
+			      	<div id="jeongyeolja" style="display:none;border:1px solid red;">
+			      	
+						<div id="jeongyeolja-content">
+						  <label class="form-check-label" for="radioDefault1">
+						    없음 : 
+						  </label>
+						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault1">
+						  <label class="form-check-label" for="radioDefault1">
+						    전결 : 
+						  </label>
+						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault1">
+						  <label class="form-check-label" for="radioDefault2">
+						    대결 : 
+						  </label>
+						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault2" checked>
+						  <label class="form-check-label" for="radioDefault2">
+						    선결 : 
+						  </label>
+						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault2" checked>
+							<label>전결자 지정 :</label>
+							<select id="emp_id" class="form-select" aria-label="Default select example">
+							  <option selected>인사테이블에서 이름 사원번호 가져오기</option>
+							  <option name="emp_id" value="박다정">박다정</option>
+							  <option name="emp_id" value="정지훈">정지훈</option>
+							  <option name="emp_id" value="박영진">박영진</option> 
+							</select>
+						</div>
 					</div>
-				</h5>      
-				<h5>결재권한자 순서모양: div 태그로만들기<h5>
-		        
+	     				
 		        <div id="editor" style="border: 1px solid black;;"></div>
-		        
 		      </div>
 		      <div class="modal-footer">
 		      	<div>
@@ -249,12 +267,14 @@
 		        <button type="button" class="btn btn-primary">저장</button>
 		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
 		      </div>
-		    </div>
-		  </div>
+	
+		</div>
+			
+		
+	    </div>
 	</div>
 	</div>
-	
-	
+
 </th:block>
 	
 </body>
@@ -459,35 +479,81 @@
 	document.getElementById("today-date").textContent = formattedDate;
 
 	//셀렉트박스
-	var resultDiv = document.querySelector('#result');
+	var approvarDiv = document.querySelector('#approvar');
     var selectBox = new tui.SelectBox('#select-box', {
       data: [
         {
-          label: 'Fruits',
-          data: [{ label: 'Apple', value: 'apple' }, 
-        	  	{ label: 'Banana', value: 'banana' }]
+          label: '인사팀',
+          data: [{ label: '한가인', value: '한가인'}, 
+        	  	{ label: '정지훈', value: '정지훈' ,selected: true }]
         },
         {
-          label: 'Colors',
+          label: '개발팀',
           data: [
-            { label: 'Red', value: 'red' },
-            { label: 'Yellow', value: 'yellow' },
-            { label: 'Green', value: 'green'},
-            { label: 'Blue', value: 'blue'},
-            { label: 'Purple', value: 'purple' }
+            { label: '이정현', value: '이정현'},
+            { label: '마이클', value: '마이클'},
+            { label: '기안', value: '기안'},
+            { label: '이지영', value: '이지영'},
+            { label: '박지운', value: '박지운'}
           ]
         }
       ]
     });
 
+    this.count = 0;
+    this.num = 0;
     function print(type, text) {
-      resultDiv.innerHTML += type + ': ' + text + '<br>';
-    }
+		// 결재권한자변경 div 버튼 생성
+    	approvarDiv.innerHTML +='<div class="btn btn-success"'
+      						+'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
+      						+'<p class="btn-close" onclick="approvarDivclose(this)" style="float:right;margin-right: 8px;z-index:9999999;">&times;</p>'
+      						+'<p onclick="approvalNo('+ (++this.num)+','+ "'"+text + "'" +')" style="margin-top:50px;height: 129px;">'+(++this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
+    						+'</div>';
+    	 
+    } 
+    
+	let jeongyeoljaDiv = document.querySelector('#jeongyeolja');
+	let jeongyeoljaContent = document.querySelector("#jeongyeolja-content");
+	let approvarDivClose = document.getElementById("approvarDiv-close");
+	
+	
 
-    selectBox.on('change', function(ev) {
-      print(ev.type,ev.curr.getLabel());
+	
+	//결재권한자 버튼 클릭시 결재권한자변경 div 태그 생성
+	function approvalNo(num,text){
+	   //해당태그 클릭시 전결자 div 나오기
+	   	 jeongyeoljaDiv.innerHTML = '<button onClick="approvarDivclose(this)" class="btn-close" style="float:right;margin-right: 8px;"></button>'
+	   		 			+ '<h5>'+num + "차 결재권한자 : "+ text +" 변경"+'</h5>';
+			jeongyeoljaDiv.innerHTML += jeongyeoljaContent.innerHTML;	
+	   
+	   	 if(jeongyeoljaDiv.style.display === 'none'){
+	  	 jeongyeoljaDiv.style.display = 'block';  
+	   	  						  
+	   }	
+	   
+
+    } 
+	
+	//결재권한자,결재권한자변경(전결자) 닫기버튼
+	function approvarDivclose(buttonDiv){
+		const divElement = buttonDiv.parentNode; // 버튼의 부모인 div를 찾음
+		jeongyeoljaDiv.style.display = 'none';
+	    if (buttonDiv.parentElement.id === '' ) {//결재권한자
+	        divElement.remove(); //자신의 div 제거
+	        this.count = 0; //카운트초기화
+	        this.num = 0;
+	    }
+	    	
+	}
+    selectBox.on('close',(ev)=>{
+    	
+    	let selectlabel = selectBox.getSelectedItem().label;
+    	if(selectlabel != null && this.count < 3){//셀렉트 라벨선택시 3번까지만셈
+    		print(ev.type, selectlabel);
+    	}
     });
-
+   	//리셋버튼 만들기 하다가잠
+    
 	//에디터
 	 const editor = new toastui.Editor({
 	  el: document.querySelector('#editor'),
@@ -497,7 +563,38 @@
 	});
 	
 	editor.getMarkdown();
-	    
+	
+	//모달 움직이게 하기
+	const modalHeader = document.querySelector(".modal-header");
+	const modalDialog = document.querySelector(".modal-dialog");
+	let isDragging = false;
+	let mouseOffset = { x: 0, y: 0 };
+	let dialogOffset = { left: 0, right: 0 };
+	
+	modalHeader.addEventListener("mousedown", function (event) {
+	  isDragging = true;
+	  mouseOffset = { x: event.clientX, y: event.clientY };
+	  dialogOffset = {
+	    left: modalDialog.style.left === '' ? 0 : Number(modalDialog.style.left.replace('px', '')),
+	    right: modalDialog.style.top === '' ? 0 : Number(modalDialog.style.top.replace('px', ''))
+	  }
+	});
+	
+	document.addEventListener("mousemove", function (event) {
+	  if (!isDragging) {
+	    return;
+	  }
+	  let newX = event.clientX - mouseOffset.x;
+	  let newY = event.clientY - mouseOffset.y;
+	
+	  modalDialog.style.left = `${dialogOffset.left + newX}px`
+	  modalDialog.style.top = `${dialogOffset.right + newY}px`
+	});
+	
+	document.addEventListener("mouseup", function () {
+	  isDragging = false;
+	});
+	 
 </script>
 </th:block>
 
