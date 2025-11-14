@@ -27,7 +27,9 @@
 	                        </div>
 	                        <!-- 달력날짜 -->
 		                    <div class="calendar-date text-center flex-grow-1">
+		                    	<button class="btn-outline-primary" id="prevMonth">◀</button>
 		                    	<span id="calendar-date"></span>
+		                    	<button class="btn-outline-primary" id="nextMonth">▶</button>
 		                    </div>
 							<!-- 3. 체크박스 필터 (하단) -->
 			                <div class="filter-section d-flex gap-2 justify-content-end" style="display: flex; gap: 10px;">
@@ -68,8 +70,8 @@
 	            		<button class="btn btn-primary ">출입</button>
 	            	</div>
 	                <!-- 1. 데이트피커 (중앙) -->
-	                <div class="mb-3 align-items-center" style="min-height: 350px; position: absolute; top: 80px; left: 15px; right: 15px;">
-	                    <div id="tui-datepicker" style="margin-top: -1px;" class="mb-4 w-100" ></div>
+	                <div class="mb-3 align-items-center" style="position: absolute; top: 80px; left: 15px; right: 15px;">
+	                    <div id="tui-datepicker" style="margin-top: -1px; height:50px;" class="mb-2" ></div>
 	                </div>
 
 	            </div>

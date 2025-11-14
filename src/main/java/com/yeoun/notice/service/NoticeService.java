@@ -29,11 +29,7 @@ public class NoticeService {
 		Sort.Order dynamicOrder = new Sort.Order(direction, orderKey);
 		
 		// 기본 정렬 기준(고정여부, 수정일 내림차순) + 동적정렬기준 해서 정렬객체 생성
-	    Sort sort = Sort.by(
-            Sort.Order.desc("noticeYN"),
-//            Sort.Order.desc("updatedDate"),
-            dynamicOrder
-        );
+	    Sort sort = Sort.by(Sort.Order.desc("noticeYN"), dynamicOrder);
 		
 		// 페이징과 정렬을 포함하는 PageRequest 생성
 		PageRequest pageRequest = PageRequest.of(page, size, sort);
@@ -51,9 +47,9 @@ public class NoticeService {
 	}
 	
 	// 공지상세 조회하기
-	public NoticeDTO findById(Long noticeId) {
+	public NoticeDTO getOneNotice(Long noticeId) {
 		Notice notice = noticeRepository.findById(noticeId).orElse(null);
-				
+		
 		return NoticeDTO.fromEntity(notice);
 	}
 	

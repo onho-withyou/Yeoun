@@ -41,14 +41,16 @@ public class ScheduleService {
 	
 	// 일정 등록로직
 	public void createSchedule(@Valid ScheduleDTO scheduleDTO, Authentication authentication) {
-		
 		scheduleDTO.setCreatedUser(authentication.getName()); // 회원번호 입력
+		
 		Emp emp = empRepository.findById(scheduleDTO.getCreatedUser()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다.111"));
-		if(!scheduleDTO.getAlldayYN().equals("Y")) {
+		
+		if(!"Y".equals(scheduleDTO.getAlldayYN())) {
+			System.out.println(scheduleDTO.getAlldayYN());
 			scheduleDTO.setAlldayYN("N"); // 종일 체크 없을경우 N으로 값변경
 		}
 		
-		if(scheduleDTO.getScheduleType().equals("private")) {
+		if("private".equals(scheduleDTO.getScheduleType())) {
 			scheduleDTO.setScheduleType(authentication.getName()); // 일정타입이 개인일경우 회원번호 입력
 		}
 		
@@ -66,8 +68,10 @@ public class ScheduleService {
 		String myDeptId = emp.getDept().getDeptId();
 		String myDeptName = emp.getDept().getDeptName();
 		
+	    LocalDateTime startOfDay = startDate.with(java.time.LocalTime.MIN);//해당일자의 00시00분00초  
+	    LocalDateTime endOfDay   = endDate.with(java.time.LocalTime.MAX);//해당일자의 23시59분59초
 		// 일정목록 조회
-		List<Schedule> scheduleList = scheduleRepository.getIndividualSchedule(empId, myDeptId, startDate, endDate);
+		List<Schedule> scheduleList = scheduleRepository.getIndividualSchedule(empId, myDeptId, startOfDay, endOfDay);
 		// 일정목록 데이터 변환후 저장할 객체
 		List<Schedule> scheduleList2 = new ArrayList<>();
 
@@ -75,16 +79,15 @@ public class ScheduleService {
 		if(!scheduleList.isEmpty()) {
 			for(Schedule schedule : scheduleList) {
 				String scheduleType = schedule.getScheduleType();
-				if(scheduleType.equals("company")) {
+				
+				if("company".equals(scheduleType)) {
 					schedule.setScheduleType("회사");
-				} else if(scheduleType.equals(authentication.getName())) {
+				} else if(empId.equals(scheduleType)) {
 					schedule.setScheduleType("개인");
 				} else {
 					Dept dept = deptRepository.findById(scheduleType).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 부서입니다."));
 					schedule.setScheduleType(dept.getDeptName());
 				}
-//				Emp scheduleEmp = empRepository.findById(schedule.getCreatedUser()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다."));
-//				schedule.setCreatedUser(scheduleEmp.getEmpName());
 				scheduleList2.add(schedule);
 			}
 		}
@@ -105,7 +108,7 @@ public class ScheduleService {
 		// 수정된 정보 db저장값으로 변경
 		String scheduleType = scheduleDTO.getScheduleType();
 
-		if(scheduleType.equals("private")) { // 넘어온 type이 private일때 접속직원번호로 변경
+		if("private".equals(scheduleType)) { // 넘어온 type이 private일때 접속직원번호로 변경
 			scheduleDTO.setScheduleType(authentication.getName());
 		}
 		

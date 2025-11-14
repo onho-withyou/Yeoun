@@ -16,7 +16,8 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 	@Query("""
 			select s
 			from Schedule s
-			where s.scheduleFinish between :startDate and :endDate
+			where s.scheduleStart <= :endDate
+				and s.scheduleFinish >= :startDate
 				and s.scheduleType in ('company', :empId, :myDeptId)
 			order by s.scheduleStart asc
 			""")

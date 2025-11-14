@@ -51,7 +51,7 @@
 
 		<!-- 스프링 시큐리티 패키지 전용 로거 => 디버깅을 위한 DEBUG 레벨로 출력(시큐리티 필터링 현황 등 확인 가능) -->
 <!--         <Logger name="org.springframework.security" level="DEBUG" additivity="false"> -->
-        <Logger name="org.springframework.security" level="OFF" additivity="false">
+        <Logger name="org.springframework.security" level="INFO" additivity="false">
         	<AppenderRef ref="console"/>
         </Logger>
         

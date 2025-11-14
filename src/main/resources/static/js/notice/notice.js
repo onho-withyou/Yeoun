@@ -1,13 +1,28 @@
 /**
 	공지사항 JavaScript 
 **/
+const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
+const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
+
+const currentUserId = document.getElementById('currentUserId')?.value;
+const currentUserName = document.getElementById('currentUserName')?.value;
+
 document.addEventListener('DOMContentLoaded', function() {
 	let selectedNoticeId = null;
 	// 공지사항 조회 모달설정
 	const showNoticeModal = document.getElementById('show-notice');
 	const showNoticeForm = document.getElementById("notice-form-read");
 	const deleteNoticeBtn = document.getElementById('notice-delete');
+	const modifyNoticeBtn = document.getElementById('notice-modify');
 	const fixedCheck = document.getElementById('fixed-check') // 체크박스
+	
+	const orderKey = getUrlParameter('orderKey');
+	const orderMethod = getUrlParameter('orderMethod') || 'asc';
+	if (!orderKey) return;
+	
+	const activeTh = document.querySelector(`th[data-key="${orderKey}"]`);
+	updateSortUI(activeTh, orderKey, orderMethod);
+	
 	// 공지사항 조회모달 열기 이벤트
 	showNoticeModal.addEventListener('show.bs.modal', function(event){
 		const button = event.relatedTarget;
@@ -24,8 +39,12 @@ document.addEventListener('DOMContentLoaded', function() {
 				// 날짜 문자열을 Date 객체로 변환
 				const createdDate = new Date(data.createdDate);
 				const updatedDate = new Date(data.updatedDate);
+				const createdUser = data.createdUser;
+				const createdUserName = data.empName;
+				const deptName = data.deptName;
 				
 				document.getElementById('notice-id-read').value = data.noticeId;
+				document.getElementById('notice-createdUser-read').value = createdUser;
 				document.getElementById('notice-title-read').value = data.noticeTitle;
 				if(data.noticeYN === 'Y') {
 					fixedCheck.checked = true;
@@ -34,15 +53,43 @@ document.addEventListener('DOMContentLoaded', function() {
 					fixedCheck.checked = false;
 					fixedCheck.value = "N";
 				}
-				document.getElementById('notice-writer-read').textContent = data.createdUser;
+				document.getElementById('notice-writer-read').textContent = `(${deptName})${createdUserName}`
 				document.getElementById('notice-createdDate-read').textContent = formatDate(createdDate);
 				document.getElementById('notice-updatedDate-read').textContent = formatDate(updatedDate);
 				document.getElementById('notice-content-read').textContent = data.noticeContent;
 				document.getElementById('notice-modify').add = data.noticeContent;
-		    	
+				
+				initReadModal(data.createdUser);
 			})
 			.catch(error => console.error('Error:', error));
 	});
+	
+	function initReadModal(createdUser) {
+		if(currentUserId == createdUser) { // 로그인직원과 글쓴이가 동일인물
+			Array.from(showNoticeForm.elements).forEach(el => {
+				if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+					el.readOnly = false;
+				}
+				if(el.tagName === 'SELECT' || el.tagName === 'checkbox' || el.type === 'file'){
+					el.disabled = false;
+				}
+			});
+			deleteNoticeBtn.disabled = false;
+			modifyNoticeBtn.disabled = false;
+		} else if(currentUserId != createdUser) { //일치하지 않을떄 수정,삭제 불가능
+			Array.from(showNoticeForm.elements).forEach(el => {	
+				if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+					el.readOnly = true;
+				}
+				if(el.tagName === 'SELECT' || el.type === 'checkbox' || el.type === 'file'){
+					el.disabled = true;
+				}
+			});
+			deleteNoticeBtn.disabled = true;
+			modifyNoticeBtn.disabled = true;
+		}
+	}
+	
 	
 	//공지사항 조회 - 수정버튼
 	showNoticeForm.addEventListener('submit', function(event) {
@@ -50,6 +97,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		
 		fetch('/notices/' + selectedNoticeId, {
 			method: 'PATCH'
+			, headers: {
+				[csrfHeaderName]: csrfToken
+			}
 			, body: new FormData(showNoticeForm)
 		})
 		.then(response => {
@@ -72,7 +122,10 @@ document.addEventListener('DOMContentLoaded', function() {
 		alert("정말 삭제하시겠습니까?");
 		
 		fetch('/notices/' + selectedNoticeId, {
-			method: 'DELETE'			
+			method: 'DELETE'
+			, headers: {
+				[csrfHeaderName]: csrfToken
+			}			
 		})
 		.then(response => {
 			if (!response.ok) throw new Error('삭제에 실패했습니다.');
@@ -102,6 +155,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		
 		fetch('/notices', {
 			method: 'POST'
+			, headers: {
+				[csrfHeaderName]: csrfToken
+			}
 			, body: new FormData(createNoticeForm)
 		})
 		.then(response => {
@@ -170,13 +226,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 //공지사항 수정 체크박스 값 변경
 function toggleValue(checkbox){
-	console.log(checkbox.value, "ddddddddddddddddd");
 	if (checkbox.checked) {
 		checkbox.value = "Y";
 	} else {
 		checkbox.value = "N"
 	}
-	console.log(checkbox.value, "eeeeeeeeeeeeeee");
 }
 
 // 포맷 함수 (예: yyyy-MM-dd HH:mm)
@@ -210,6 +264,10 @@ function allineTable(thElement) {
 		// 새 오더메서드 방법 변경
         newOrderMethod = (currentOrderMethod === 'asc') ? 'desc' : 'asc';
     }
+	
+	//아이콘 변경
+	updateSortUI(thElement, key, newOrderMethod);
+	
 	//현재 검색 타입, 검색어 존재하면 유지 없으면 널스트링
     const searchKeyword = getUrlParameter('searchKeyword') || '';
     const page = getUrlParameter('page') || '';
@@ -222,3 +280,48 @@ function allineTable(thElement) {
 	// 이동요청
 	window.location.href = url;
 }
+
+// 정렬버튼 아이콘 변경
+function updateSortUI(activeTh, activeKey, newOrderMethod) {
+	// 전체 초기화
+	document.querySelectorAll('th .sort-icon').forEach(icon => {
+		icon.className = 'sort-icon fa-solid fa-sort';
+		const th = icon.closest('th');
+		if(th) th.setAttribute('aria-sort', 'none');
+	});
+	
+	// 클릭된 헤더 상태 변경
+	if(!activeTh) return;
+	const icon = activeTh.querySelector('.sort-icon');
+	if(!icon) return;
+	
+	if(activeKey == activeTh.getAttribute('data-key')) {
+		// asc와 desc 에 따라 아이콘 갱신
+		const isAsc = newOrderMethod === 'asc';
+		icon.className = isAsc
+			? 'sort-icon fa-solid fa-sort-up'
+			: 'sort-icon fa-solid fa-sort-down';
+//		activeTh.setAttribute('aria-sort', isAsc ? 'ascending' : 'descending');
+	} else {
+		// 정렬 대상이 아니면 중립
+		icon.className = 'sort-icon fa-solid fa-sort';
+		activeTh.setAttribute('aria-sort', 'none');
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
