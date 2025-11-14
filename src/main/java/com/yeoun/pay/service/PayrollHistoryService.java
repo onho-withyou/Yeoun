@@ -1,17 +1,12 @@
 package com.yeoun.pay.service;
 
-import com.yeoun.pay.dto.PayrollHistoryRow;
-import com.yeoun.pay.repository.PayrollHistoryRepository;
 import com.yeoun.pay.dto.PayrollHistoryProjection;
-
-
+import com.yeoun.pay.repository.PayrollHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +15,7 @@ public class PayrollHistoryService {
 
     private final PayrollHistoryRepository repo;
 
-    public List<PayrollHistoryRow> search(
+    public List<PayrollHistoryProjection> search(
             String mode,
             String keyword,
             String deptName,
@@ -28,10 +23,10 @@ public class PayrollHistoryService {
             String month
     ) {
 
-        // 🔹 yymm 조립
         String yymm = null;
-        if (year != null && !year.isBlank()) {
-            yymm = year + (month == null ? "" : month);
+
+        if (year != null && month != null && !year.isEmpty() && !month.isEmpty()) {
+            yymm = year + month;
         }
 
         log.info("=== FINAL SEARCH PARAMS ===");
@@ -40,30 +35,11 @@ public class PayrollHistoryService {
         log.info("deptName = {}", deptName);
         log.info("yymm = {}", yymm);
 
-        List<PayrollHistoryProjection> list;
-
-        switch (mode) {
-            case "emp" -> list = repo.searchByEmp(keyword, yymm);
-            case "dept" -> list = repo.searchByDept(deptName, yymm);
-            case "month" -> list = repo.searchByMonth(yymm);
-            default -> list = List.of();
-        }
-
-        return list.stream()
-                .map(p -> PayrollHistoryRow.builder()
-                        .empId(p.getEmpId())
-                        .empName(p.getEmpName())
-                        .deptName(p.getDeptName())
-                        .payYymm(p.getPayYymm())
-
-                        .baseAmt(p.getBaseAmt())
-                        .alwAmt(p.getAlwAmt())
-                        .dedAmt(p.getDedAmt())
-                        .totAmt(p.getTotAmt())
-                        .netAmt(p.getNetAmt())
-
-                        .calcStatus(p.getCalcStatus())
-                        .build()
-                ).collect(Collectors.toList());
+        return switch (mode) {
+            case "emp" -> repo.searchByEmp(keyword, yymm);
+            case "dept" -> repo.searchByDept(deptName, yymm);
+            case "month" -> repo.searchByMonth(yymm);
+            default -> List.of();
+        };
     }
 }
