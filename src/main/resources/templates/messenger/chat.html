@@ -1,101 +1,198 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Messenger Chat</title>
+  <title>Chat</title>
 
-  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <link rel="stylesheet" th:href="@{/css/msg/chat.css}"/>
+  <link rel="stylesheet" th:href="@{/css/messenger/chat.css}">
 </head>
 
-<body class="d-flex align-items-center justify-content-center vh-100">
+<body>
 
-  <div class="chat-window">
-    <div class="chat-header">
-      <h6 id="friend-name">대화방</h6>
+<div class="chat-window">
+
+  <!-- ======================= 상단바 ======================= -->
+  <div class="chat-header header-purple">
+    <div class="chat-header-left">
+      <i class="bi bi-chevron-left back-btn"></i>
+      <div class="chat-title" th:text="${targetName}">홍길동 대리</div>
     </div>
 
-    <div class="chat-body" id="chat-body">
-      <div class="msg-left">
-        안녕 👋  
-        <div class="msg-time">오전 10:12</div>
-      </div>
-      <div class="msg-right">
-        하이~ 잘 지냈어?  
-        <div class="msg-time"><span>오전 10:13</span> <i class="bi bi-check2"></i></div>
-      </div>
-    </div>
-
-    <div class="chat-footer">
-      <div class="input-row">
-        <textarea id="message" rows="1" placeholder="메시지를 입력하세요..."></textarea>
-        <button id="emoji"><i class="bi bi-emoji-smile"></i></button>
-        <button id="send"><i class="bi bi-send-fill"></i></button>
-      </div>
+    <div class="chat-header-right">
+      <!-- 1:1 채팅 상단 고정용 핀 아이콘 -->
+      <i class="bi bi-pin-angle-fill pin-icon"></i>
     </div>
   </div>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const friend = params.get('friend');
-    const nameElement = document.getElementById('friend-name');
-    if (friend) nameElement.textContent = friend;
+  <!-- ======================= 메시지 영역 ======================= -->
+  <div class="chat-body" id="chat-body">
 
-    const chatBody = document.getElementById('chat-body');
-    const textarea = document.getElementById('message');
-    const sendBtn = document.getElementById('send');
+    <!-- 새 방 안내 -->
+    <div class="new-room-empty" id="new-room-empty">
+      <div class="empty-guide">
+        <span>대화를 시작해보세요.</span>
+      </div>
+    </div>
 
-    // 자동 높이 조절
-    textarea.addEventListener('input', () => {
-      textarea.style.height = 'auto';
-      textarea.style.height = Math.min(textarea.scrollHeight, 130) + 'px';
-    });
+    <!-- ====== 예시 메시지: 개발 중 확인용 (실제에선 타임리프 반복으로 대체) ====== -->
+    <!-- 상대방 메시지 -->
+    <div class="msg-row left">
+      <img src="/images/default_profile.png" class="profile-img" alt="profile">
+      <div class="msg-main">
+        <div class="sender-name">홍길동 대리</div>
+        <div class="msg-bubble msg-left">안녕하세요 :)</div>
+      </div>
+      <div class="msg-time msg-time-left">오후 1:22</div>
+    </div>
 
-    // 시간 포맷 함수
-    function formatTime() {
-      const now = new Date();
-      const h = now.getHours();
-      const m = now.getMinutes().toString().padStart(2, '0');
-      const ampm = h < 12 ? '오전' : '오후';
-      const hour12 = h % 12 || 12;
-      return `${ampm} ${hour12}:${m}`;
-    }
+    <!-- 내 메시지 -->
+    <div class="msg-row right">
+	  <div class="msg-meta">
+	    <span>오후 1:23</span>
+	    <i class="bi bi-check2-all"></i>
+	  </div>
+	  <div class="msg-bubble msg-right">
+	    안녕하세요!
+	  </div>
+	</div>
 
-    // 메시지 전송 기능
-    sendBtn.addEventListener('click', sendMessage);
-    textarea.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
+
+  </div>
+
+  <!-- ======================= 입력 영역 ======================= -->
+  <div class="chat-footer">
+    <textarea id="message" placeholder="메시지를 입력하세요"></textarea>
+    <button id="send" class="send-btn">
+      <i class="bi bi-send-fill"></i>
+    </button>
+  </div>
+
+</div>
+
+<script>
+  const chatBody = document.getElementById('chat-body');
+  const textarea = document.getElementById('message');
+  const sendBtn = document.getElementById('send');
+  const emptyView = document.getElementById('new-room-empty');
+
+  // Thymeleaf에서 내려줄 값
+  let roomId = /*[[${roomId}]]*/ null;
+  let targetEmpId = /*[[${targetEmpId}]]*/ null;
+
+  function isNewRoom() {
+    return roomId === null || roomId === undefined;
+  }
+
+  function hideNewRoomGuide() {
+    if (emptyView) emptyView.style.display = 'none';
+  }
+
+  function formatTime() {
+    const now = new Date();
+    let h = now.getHours();
+    const m = now.getMinutes();
+    const ampm = h >= 12 ? '오후' : '오전';
+    h = h % 12 || 12;
+    return `${ampm} ${h}:${m.toString().padStart(2, '0')}`;
+  }
+
+  // 내 메시지 DOM 생성
+  function appendMyMessage(msg) {
+    hideNewRoomGuide();
+
+    const row = document.createElement('div');
+    row.className = 'msg-row right';
+
+    row.innerHTML = `
+      <div class="msg-time msg-time-right">${formatTime()}</div>
+      <div class="msg-bubble msg-right">
+        ${msg}
+        <i class="bi bi-check2 read-check"></i>
+      </div>
+    `;
+
+    chatBody.appendChild(row);
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    // 체크 → 읽음 표시 바꾸기 (샘플)
+    setTimeout(() => {
+      const icon = row.querySelector('.read-check');
+      if (!icon) return;
+      icon.classList.remove('bi-check2');
+      icon.classList.add('bi-check2-all');
+      icon.style.color = '#6a5acd';
+    }, 1500);
+  }
+
+  // 메시지 전송 로직
+  async function sendMessage() {
+    const msg = textarea.value.trim();
+    if (!msg) return;
+
+    textarea.value = '';
+    // height 초기화 후 다시 input 이벤트에서 재계산
+    textarea.style.height = '40px';
+
+    appendMyMessage(msg);
+
+    if (isNewRoom()) {
+      // 새 방: 방 생성 + 첫 메시지 저장
+      try {
+        const res = await fetch('/api/chat/create-room-and-send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ targetEmpId, message: msg })
+        });
+        const data = await res.json();
+        roomId = data.roomId;
+      } catch (e) {
+        console.error('방 생성 실패:', e);
       }
-    });
-
-    function sendMessage() {
-      const msg = textarea.value.trim();
-      if (!msg) return;
-
-      const wrapper = document.createElement('div');
-      wrapper.classList.add('msg-right');
-      wrapper.innerHTML = `${msg}<div class="msg-time"><span>${formatTime()}</span> <i class="bi bi-check2"></i></div>`;
-      chatBody.appendChild(wrapper);
-
-      textarea.value = '';
-      textarea.style.height = '40px';
-
-      chatBody.scrollTop = chatBody.scrollHeight;
-
-      // 읽음 표시 (2초 뒤)
-      setTimeout(() => {
-        const icon = wrapper.querySelector('.bi-check2');
-        icon.classList.remove('bi-check2');
-        icon.classList.add('bi-check2-all');
-        icon.style.color = '#00e1ff';
-      }, 2000);
+      return;
     }
-  </script>
+
+    // 기존 방: 메시지만 저장
+    try {
+      await fetch(`/api/chat/${roomId}/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+      });
+    } catch (e) {
+      console.error('메시지 전송 실패:', e);
+    }
+  }
+
+  // Enter로 전송
+  textarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  sendBtn.addEventListener('click', sendMessage);
+
+
+//한 줄 높이(px)
+const baseHeight = 40;
+
+textarea.addEventListener("input", function () {
+ this.style.height = baseHeight + "px"; // 무조건 한 줄에서 시작
+
+ const newHeight = this.scrollHeight;
+
+ // scrollHeight가 기본 한 줄을 넘겼을 때만 증가
+ if (newHeight > baseHeight) {
+   this.style.height = Math.min(newHeight, 120) + "px";
+ }
+});
+
+
+</script>
 
 </body>
 </html>
