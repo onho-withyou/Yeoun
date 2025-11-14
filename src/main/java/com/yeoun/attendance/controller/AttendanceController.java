@@ -195,8 +195,6 @@ public class AttendanceController {
 		model.addAttribute("workPolicyDTO", workPolicyDTO);
 		model.addAttribute("commonCodeDTO", commonCodeDTO);
 		
-		log.info(">>>>>>>>>>>>>> commonCodeDTO : " + commonCodeDTO);
-		
 		return "attendance/policy";
 	}
 	

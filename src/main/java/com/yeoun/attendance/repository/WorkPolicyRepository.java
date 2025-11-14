@@ -9,6 +9,6 @@ import com.yeoun.attendance.entity.WorkPolicy;
 
 public interface WorkPolicyRepository extends JpaRepository<WorkPolicy, Long> {
 
-	Optional<WorkPolicy> findFirstByOrderByIdAsc();
+	Optional<WorkPolicy> findFirstByOrderByPolicyIdAsc();
 
 }

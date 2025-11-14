@@ -50,7 +50,7 @@ public class AttendanceService {
 		LocalTime now = LocalTime.now();
 		
 		// 근무정책 조회
-		WorkPolicy workPolicy = workPolicyRepository.findFirstByOrderByIdAsc()
+		WorkPolicy workPolicy = workPolicyRepository.findFirstByOrderByPolicyIdAsc()
 				.orElseThrow(() -> new NoSuchElementException("등록된 근무정책이 없습니다."));
 		
 		// 오늘자 출퇴근 기록 조회
@@ -141,7 +141,7 @@ public class AttendanceService {
 	// 근무정책 조회
 	public WorkPolicyDTO getWorkPolicy() {
 		// DB에 정책이 있으면 DTO로 변환하고 없으면 새 DTO 생성
-		return  workPolicyRepository.findFirstByOrderByIdAsc()
+		return  workPolicyRepository.findFirstByOrderByPolicyIdAsc()
 				.map(workPolicy -> WorkPolicyDTO.fromEntity(workPolicy))
 				.orElseGet(() -> new WorkPolicyDTO());
 	}
@@ -151,7 +151,7 @@ public class AttendanceService {
 	public String registWorkPolicy(WorkPolicyDTO workPolicyDTO) {
 		try {
 			// id를 오름차순으로 정렬해서 첫 번째 row 하나 가져오기
-			Optional<WorkPolicy> optional = workPolicyRepository.findFirstByOrderByIdAsc();
+			Optional<WorkPolicy> optional = workPolicyRepository.findFirstByOrderByPolicyIdAsc();
 			
 			// optional이 존재하면 변경된 부분 업데이트
 			if (optional.isPresent()) {
@@ -226,7 +226,7 @@ public class AttendanceService {
 		Attendance attendance = attendanceRepository.findByEmp_EmpIdAndWorkDate(empId, workDate)
 			    .orElseThrow(() -> new NoSuchElementException("출근 기록이 없습니다."));
 	
-		WorkPolicy workPolicy = workPolicyRepository.findFirstByOrderByIdAsc()
+		WorkPolicy workPolicy = workPolicyRepository.findFirstByOrderByPolicyIdAsc()
 				.orElseThrow(() -> new NoSuchElementException("근무정책이 없습니다."));
 		
 		AccessLog accessLog = accessLogRepository.save(accessLogDTO.toEntity());
