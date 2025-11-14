@@ -20,5 +20,5 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 	
 	// 사원 목록 조회
 	@Query("SELECT m FROM Emp m")
-	public List<Emp> findMembers();
+    List<Emp> findAllMember();
 }
