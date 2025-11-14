@@ -131,7 +131,7 @@
                         <select class="form-select" th:field="*{toDeptId}">
                           <option value="">부서 선택</option>
                           <option th:each="d : ${deptList}"
-          					      th:value="${d.deptName}"
+          					      th:value="${d.deptId}"
        					 	      th:text="${d.deptName}">
   				 		  </option>
                         </select>
@@ -141,7 +141,7 @@
                         <select class="form-select" th:field="*{toPosCode}">
                           <option value="">직급 선택</option>
                           <option th:each="p : ${posList}"
-				                  th:value="${p.posName}"
+				                  th:value="${p.posCode}"
 				                  th:text="${p.posName}">
 				          </option>
                         </select>
@@ -170,7 +170,7 @@
                     <a th:href="@{/hr/actions}" class="btn btn-outline-secondary">
                       취소
                     </a>
-                    <button type="submit" class="btn btn-primary" id="btnSubmit">
+                    <button type="button" class="btn btn-primary" id="btnSubmit">
                       발령 등록
                     </button>
                   </div>

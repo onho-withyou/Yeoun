@@ -2,6 +2,7 @@ package com.yeoun.hr.controller;
 
 import java.util.List;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,7 +30,7 @@ public class HrActionRestController {
 	// 인사 발령 등록
 	@PostMapping("/actions")
 	public Long createHrAction(@RequestBody HrActionRequestDTO dto) {
-		return hrActionService.createAction(dto);
+	    return hrActionService.createAction(dto);
 	}
 	
 	// 발령 화면용 사원 목록

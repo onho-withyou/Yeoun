@@ -2,6 +2,9 @@ package com.yeoun.hr.dto;
 
 import java.time.LocalDate;
 
+import com.yeoun.emp.entity.Emp;
+import com.yeoun.hr.entity.HrAction;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,6 +30,16 @@ public class HrActionRequestDTO {
     // 발령 사유
     private String actionReason; 
     
-    private String approverEmpId; // 결재자 사번
+    // 결재자 사번
+    private String approverEmpId;
+
+    public HrAction toEntity() {
+        HrAction action = new HrAction();
+        action.setActionType(this.actionType);
+        action.setEffectiveDate(this.effectiveDate);
+        action.setActionReason(this.actionReason);
+        action.setStatus("REQ");       
+        return action;
+    }
 
 }
