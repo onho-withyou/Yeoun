@@ -1,0 +1,199 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/layouts/layout.html}">
+<body>
+<th:block layout:fragment="content">
+	<div class="custom-body container-xxl flex-grow-1 container-p-y">
+	
+	<h2>발령 등록</h2>
+
+	  <!-- 발령 등록 폼 -->
+      <form id="hrActionForm" th:object="${hrActionRequestDTO}">
+        <!-- 2. 사원 검색 영역 -->
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="row g-3 align-items-end">
+              <div class="col-md-3">
+                <label class="form-label">부서</label>
+                <select class="form-select" id="searchDept">
+                  <option value="">전체</option>
+                  <!-- 나중에 th:each로 부서 목록 바인딩 -->
+                  <!-- <option th:each="dept : ${deptList}"
+                          th:value="${dept.deptId}"
+                          th:text="${dept.deptName}"></option> -->
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">직급</label>
+                <select class="form-select" id="searchPos">
+                  <option value="">전체</option>
+                  <!-- 직급 목록 바인딩 -->
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">이름 / 사번</label>
+                <input type="text" class="form-control" id="searchKeyword"
+                       placeholder="예) 이름 또는 사원번호">
+              </div>
+              <div class="col-md-2 text-md-end">
+                <button type="button" class="btn btn-primary w-100" id="btnSearchEmp">
+                  검색
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. 사원 목록 + 3-1 선택된 사원 정보 + 4. 발령 정보 입력 -->
+        <div class="row g-3">
+          <!-- 사원 목록 -->
+          <div class="col-12 col-lg-6">
+            <div class="card h-100">
+              <div class="card-header">
+                <strong>사원 목록</strong>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 360px; overflow-y: auto;">
+                  <table class="table table-hover mb-0" id="empTable">
+                    <thead class="table-light">
+                    <tr class="text-center">
+                      <th>사원번호</th>
+                      <th>이름</th>
+                      <th>부서</th>
+                      <th>직급</th>
+                      <th>전화번호</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- 나중에 서버/JS로 바인딩 -->
+                    <!-- 예시용 한 줄 -->
+                    <tr class="text-center">
+                      <td>20240902033</td>
+                      <td>홍길동</td>
+                      <td>개발부</td>
+                      <td>대리</td>
+                      <td>010-1234-5678</td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="p-2 small text-muted">
+                  사원 행을 클릭하면 아래에 선택된 사원 정보가 표시됩니다.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 선택된 사원 정보 + 발령 정보 입력 -->
+          <div class="col-12 col-lg-6">
+            <div class="row g-3">
+
+              <!-- 3-1. 선택된 사원 정보 -->
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-header">
+                    <strong>선택된 사원 정보</strong>
+                  </div>
+                  <div class="card-body">
+                    <div class="row g-2">
+                      <div class="col-6">
+                        <div class="text-secondary small">이름</div>
+                        <div id="sel-emp-name">-</div>
+                      </div>
+                      <div class="col-6">
+                        <div class="text-secondary small">사원번호</div>
+                        <div id="sel-emp-id">-</div>
+                      </div>
+                      <div class="col-6">
+                        <div class="text-secondary small">현재 부서</div>
+                        <div id="sel-emp-dept">-</div>
+                      </div>
+                      <div class="col-6">
+                        <div class="text-secondary small">현재 직급</div>
+                        <div id="sel-emp-pos">-</div>
+                      </div>
+                    </div>
+
+                    <!-- 숨겨진 empId 필드 (나중에 서버로 보낼 값) -->
+                    <input type="hidden" id="empId" th:field="*{empId}">
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4. 발령 정보 입력 -->
+              <div class="col-12">
+                <div class="card h-100">
+                  <div class="card-header">
+                    <strong>발령 정보 입력</strong>
+                  </div>
+                  <div class="card-body">
+                    <div class="row g-3">
+                      <div class="col-md-6">
+                        <label class="form-label required">발령 구분</label>
+                        <select class="form-select" th:field="*{actionType}">
+                          <option value="">발령구분 선택</option>
+                          <!-- 공통코드 바인딩 -->
+                          <!-- <option th:each="code : ${actionTypeList}"
+                                  th:value="${code.code}"
+                                  th:text="${code.name}"></option> -->
+                        </select>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label required">발령 일자</label>
+                        <input type="date" class="form-control"
+                               th:field="*{effectiveDate}">
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label required">발령 부서</label>
+                        <select class="form-select" th:field="*{toDeptId}">
+                          <option value="">부서 선택</option>
+                          <!-- deptList 바인딩 -->
+                        </select>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label required">발령 직급</label>
+                        <select class="form-select" th:field="*{toPosCode}">
+                          <option value="">직급 선택</option>
+                          <!-- positionList 바인딩 -->
+                        </select>
+                      </div>
+
+                      <div class="col-12">
+                        <label class="form-label">발령 사유</label>
+                        <textarea class="form-control" rows="3"
+                                  th:field="*{actionReason}"
+                                  placeholder="최소 10자 이상 입력해주세요."></textarea>
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label">결재자</label>
+                        <select class="form-select" th:field="*{approverEmpId}">
+                          <option value="">결재자 선택</option>
+                          <!-- 결재자 후보 사원 목록 바인딩 -->
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="card-footer d-flex justify-content-end gap-2">
+                    <a th:href="@{/hr/actions}" class="btn btn-outline-secondary">
+                      닫기
+                    </a>
+                    <button type="submit" class="btn btn-primary" id="btnSubmit">
+                      발령 등록
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div><!-- row -->
+
+      </form>
+	</div>
+	
+</th:block>
+</body>
