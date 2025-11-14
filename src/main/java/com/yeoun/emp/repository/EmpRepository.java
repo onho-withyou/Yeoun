@@ -51,6 +51,7 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	    """)
 	List<EmpListDTO> findAllForList();
 
+
 	
 //	// 이메일 중복 확인
 //	boolean existsByEmail(String email);

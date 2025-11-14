@@ -9,7 +9,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-//import org.h2.engine.Role;
 import org.springframework.stereotype.Service;
 
 import com.yeoun.attendance.dto.AccessLogDTO;
