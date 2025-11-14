@@ -22,7 +22,7 @@ import lombok.ToString;
 @ToString
 @Builder
 public class AttendanceDTO {
-	private Long id;
+	private Long attendanceId;
 	
 	@NotNull(message = "사원번호는 필수 입력값입니다")
 	private String empId; // 출근한 사원 번호
@@ -67,33 +67,9 @@ public class AttendanceDTO {
 //		return modelMapper.map(attendance, AttendanceDTO.class);
 //	}
 	
-//	public static AttendanceDTO fromEntity(Attendance attendance) {
-//	    AttendanceDTO dto = new AttendanceDTO();
-//	    dto.setId(attendance.getId());
-//	    dto.setEmpId(attendance.getEmp().getEmpId());
-//	    dto.setEmpName(attendance.getEmp().getEmpName());
-//	    dto.setWorkDate(attendance.getWorkDate());
-//	    dto.setWorkIn(attendance.getWorkIn());
-//	    dto.setWorkOut(attendance.getWorkOut());
-//	    dto.setWorkDuration(attendance.getWorkDuration());
-//	    dto.setStatusCode(attendance.getStatusCode());
-//	    dto.setRemark(attendance.getRemark());
-//	    dto.setCreatedUser(attendance.getCreatedUser());
-//	    dto.setCreatedDate(attendance.getCreatedDate());
-//	    dto.setUpdatedUser(attendance.getUpdatedUser());
-//	    dto.setUpdatedDate(attendance.getUpdatedDate());
-//
-//	    if (attendance.getEmp() != null) {
-//	        dto.setDeptName(attendance.getEmp().getDept().getDeptName());
-//	        dto.setPosName(attendance.getEmp().getPosition().getPosName());
-//	    }
-//
-//	    return dto;
-//	}
-	
 	public static AttendanceDTO fromEntity(Attendance attendance) {
 	    return AttendanceDTO.builder()
-	        .id(attendance.getId())
+	        .attendanceId(attendance.getAttendanceId())
 	        .empId(attendance.getEmp().getEmpId())
 	        .empName(attendance.getEmp().getEmpName())
 	        .workDate(attendance.getWorkDate())

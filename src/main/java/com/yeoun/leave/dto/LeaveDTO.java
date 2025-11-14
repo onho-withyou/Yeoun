@@ -78,7 +78,7 @@ public class LeaveDTO {
 	// DTO 타입으로 변환 
 	public static LeaveDTO fromEntity(AnnualLeave annualLeave) {
 		return LeaveDTO.builder()
-				.id(annualLeave.getId())
+				.id(annualLeave.getLeaveId())
 				.empId(annualLeave.getEmp().getEmpId())
 				.periodStart(annualLeave.getPeriodStart())
 				.periodEnd(annualLeave.getPeriodEnd())

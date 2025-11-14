@@ -47,7 +47,7 @@ import lombok.Setter;
 public class AnnualLeave {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "ANNUAL_LEAVE_SEQ_GENERATOR")
-	private Long id;
+	private Long LeaveId;
 	
 	@OneToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "EMP_ID", nullable = false)
@@ -112,16 +112,18 @@ public class AnnualLeave {
 	// 회계연도 기준 계산
 	private int calculateFiscalBasisAnnual(LocalDate hireDate, LocalDate today) {
 		int year = today.getYear();
-		LocalDate fiscalStart = LocalDate.of(year, 1, 1);
-		// 입사일이 회계연도 시작일보다 언제인지 기준으로 근속연수 계산
-		long years = ChronoUnit.YEARS.between(hireDate, fiscalStart);
+		LocalDate fiscalEnd = LocalDate.of(year, 12, 31);
 		
-		if (years < 1) { // 입사한 해의 연말까지의 근무 개월 수 계산
-			long monthsWorked = ChronoUnit.MONTHS.between(hireDate, LocalDate.of(year, 12, 31));
-			return (int) Math.min(monthsWorked, 11);
-		} else {
-			int extra = (int) ((years -1) / 2);
-			return Math.min(15 + extra, 25); // 입사 후 1년 이상이면 기본 15일 + 근속에 따른 가산 부여
-		}
+		long totalYears = ChronoUnit.YEARS.between(hireDate, today);
+
+	    // 입사 1년 이상인 경우 최소 15일
+	    if (totalYears >= 1) {
+	        int extra = (int) ((totalYears - 1) / 2);
+	        return Math.min(15 + extra, 25);
+	    }
+
+	    // 1년 미만이면 회계연도 기준으로 월별 산정
+	    long monthsWorked = ChronoUnit.MONTHS.between(hireDate, fiscalEnd);
+	    return (int) Math.min(monthsWorked, 11);
 	}
 }

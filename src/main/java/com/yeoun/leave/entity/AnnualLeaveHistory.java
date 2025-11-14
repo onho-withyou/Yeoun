@@ -33,7 +33,7 @@ import lombok.Setter;
 public class AnnualLeaveHistory {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "ANNUAL_LEAVE_HISTORY_SEQ_GENERATOR")
-	private Long id;
+	private Long LeaveHistId;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "EMP_ID", nullable = false)
