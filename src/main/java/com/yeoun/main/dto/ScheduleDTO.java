@@ -61,26 +61,9 @@ public class ScheduleDTO {
 	// ----------------------------------------------------------
 	private static ModelMapper modelMapper = new ModelMapper();
 	
-//	public Schedule toEntity() {
-//		Schedule schedule = new Schedule();
-//		return modelMapper.map(this,  Schedule.class);
-//	}
-	
 	public Schedule toEntity() {
-		if (this == null) return null;
-
-	    Schedule schedule = new Schedule();
-	    schedule.setScheduleId(this.getScheduleId());
-	    schedule.setScheduleTitle(this.getScheduleTitle());
-	    schedule.setScheduleContent(this.getScheduleContent());
-	    schedule.setScheduleType(this.getScheduleType());
-	    schedule.setAlldayYN(this.getAlldayYN());
-	    schedule.setScheduleStart(this.getScheduleStart());
-	    schedule.setScheduleFinish(this.getScheduleFinish());
-	    schedule.setCreatedDate(this.getCreatedDate());
-	    schedule.setUpdatedDate(this.getUpdatedDate());
-
-	    // 연관관계: Emp, Dept는 식별자만 연결(간단 버전)
+		Schedule schedule = modelMapper.map(this,  Schedule.class);
+	    
 	    if (this.getCreatedUser() != null) {
 	        Emp emp = new Emp();
 	        emp.setEmpId(this.getCreatedUser());
@@ -92,30 +75,16 @@ public class ScheduleDTO {
 	        }
 	        schedule.setEmp(emp);
 	    }
-
-	    return schedule;
+		return schedule; 
 	}
 	
-//	public static ScheduleDTO fromEntity(Schedule schedule) {
-//		return modelMapper.map(schedule, ScheduleDTO.class);
-//	}
 	public static ScheduleDTO fromEntity(Schedule schedule) {
-		ScheduleDTO scheduleDTO = new ScheduleDTO();
-		scheduleDTO.setScheduleId(schedule.getScheduleId());
-		scheduleDTO.setScheduleTitle(schedule.getScheduleTitle());
-		scheduleDTO.setScheduleContent(schedule.getScheduleContent());
-		scheduleDTO.setScheduleType(schedule.getScheduleType());
+		ScheduleDTO scheduleDTO = modelMapper.map(schedule, ScheduleDTO.class);
 		scheduleDTO.setCreatedUser(schedule.getEmp().getEmpId());
-		scheduleDTO.setAlldayYN(schedule.getAlldayYN());
-		scheduleDTO.setScheduleStart(schedule.getScheduleStart());
-		scheduleDTO.setScheduleFinish(schedule.getScheduleFinish());
-		scheduleDTO.setCreatedDate(schedule.getCreatedDate());
-		scheduleDTO.setUpdatedDate(schedule.getUpdatedDate());
 		scheduleDTO.setEmpId(schedule.getEmp().getEmpId());
 		scheduleDTO.setEmpName(schedule.getEmp().getEmpName());
 		scheduleDTO.setDeptId(schedule.getEmp().getDept().getDeptId());
 		scheduleDTO.setDeptName(schedule.getEmp().getDept().getDeptName());
-		
 		return scheduleDTO;
 	}
 }

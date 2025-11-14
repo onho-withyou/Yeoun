@@ -59,11 +59,9 @@ public class MsgRoom {
     // 연관관계 매핑
 
     @OneToMany(mappedBy = "roomId")
-    @BatchSize(size = 50)
     private List<MsgRelation> relations = new ArrayList<>();
 
     @OneToMany(mappedBy = "roomId")
-    @BatchSize(size = 50)
     private List<MsgMessage> messages = new ArrayList<>();
 
 }

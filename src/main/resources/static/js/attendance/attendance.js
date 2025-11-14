@@ -134,6 +134,7 @@ const saveAttendance = async () => {
 		
 		if (!response.ok) {
 			const errorData = await response.json();
+			console.log("fadfs")
 			throw new Error(errorData.message || "요청 처리 중 오류가 발생했습니다.");
 		}
 		
@@ -141,7 +142,10 @@ const saveAttendance = async () => {
 		const result = await response.json();
 		alert(result.message || "정상적으로 처리되었습니다.");
 	
-		location.reload();
+		// fetch 응답 전 리로드 되지 않도록 약 0.3초 지연
+		setTimeout(() => {
+			location.reload();
+		}, 300);
 	} catch (error) {
 		console.error("에러 : " + error);
 		alert(error.message || "서버와 통신 중 오류가 발생했습니다.");

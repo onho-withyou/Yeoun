@@ -1,9 +1,7 @@
 package com.yeoun.notice.controller;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -21,13 +19,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.yeoun.notice.dto.NoticeDTO;
-import com.yeoun.notice.entity.Notice;
 import com.yeoun.notice.service.NoticeService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 
 
@@ -41,7 +37,7 @@ public class NoticeController {
 	@GetMapping("")
 	public String notices(Model model,
 			@RequestParam(defaultValue = "0", name = "page")int page,
-		    @RequestParam(defaultValue = "2", name = "size")int size,
+		    @RequestParam(defaultValue = "10", name = "size")int size,
 		    @RequestParam(defaultValue = "", name = "searchKeyword")String searchKeyword,
 		    @RequestParam(defaultValue = "updatedDate", name = "orderKey")String orderKey,
 		    @RequestParam(defaultValue = "", name = "orderMethod")String orderMethod) {
@@ -55,6 +51,7 @@ public class NoticeController {
 	    model.addAttribute("orderKey", orderKey);
 	    model.addAttribute("orderMethod", orderMethod);
 	    
+	    System.out.println("노티스페이지" + noticePage.getContent());
 		return "/notice/notice";
 	}
 	
@@ -63,6 +60,7 @@ public class NoticeController {
 	public ResponseEntity<Map<String, String>> notices(@ModelAttribute("noticeDTO") @Valid NoticeDTO noticeDTO, 
 			BindingResult bindingResult, Authentication authentication) {
 		Map<String, String> msg = new HashMap<>();
+//		System.out.println("noticeDTO : " + noticeDTO);
 		if(bindingResult.hasErrors()) {
 			msg.put("msg", "공지사항 등록에 실패했습니다");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);

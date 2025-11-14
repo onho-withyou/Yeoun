@@ -5,7 +5,9 @@
 	<th:block layout:fragment="content">
 		<div class="custom-body container-xxl flex-grow-1 container-p-y">
 			<div class="d-flex justify-content-between">
-			<form class="d-flex" style="max-width: 300px;"> 
+			<input type="hidden" th:value="${#authentication.name}" id="currentUserId">
+			<input type="hidden" th:value="${#authentication.principal.empName}" id="currentUserName">
+			<form class="d-flex" style="max-width: 300px;">
 				<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="searchKeyword" th:value="${searchKeyword}">
 				<button class="btn btn-outline-primary" type="submit">Search</button>
 			</form>
@@ -18,11 +20,19 @@
 			        <table class="table">
 			            <thead>
 			                <tr>
-			                    <th data-key="noticeId" onclick="allineTable(this)" style="width:1%;">번호</th>
-			                    <th data-key="noticeTitle" onclick="allineTable(this)"style="width:30%;">제목</th>
-			                    <th data-key="createdUser" onclick="allineTable(this)" style="width:5%;">작성자</th>
-			                    <th data-key="createdDate" onclick="allineTable(this)" style="width:5%;">등록일</th>
-			                    <th data-key="updatedDate" onclick="allineTable(this)"style="width:5%;">수정일</th>
+			                    <th data-key="noticeId" onclick="allineTable(this)" style="width:1%;">
+			                    	번호<i id="sort-icon-noticeId" class="fa-solid fa-sort sort-icon"></i>
+			                    </th>
+			                    <th data-key="noticeTitle" onclick="allineTable(this)"style="width:30%;">
+			                    	제목<i id="sort-icon-noticeId" class="fa-solid fa-sort sort-icon"></i>
+			                    </th>
+			                    <th style="width:5%;">작성자</th>
+			                    <th data-key="createdDate" onclick="allineTable(this)" style="width:5%;">
+			                    	등록일<i id="sort-icon-noticeId" class="fa-solid fa-sort sort-icon"></i>
+			                    </th>
+			                    <th data-key="updatedDate" onclick="allineTable(this)"style="width:5%;">
+			                    	수정일<i id="sort-icon-noticeId" class="fa-solid fa-sort sort-icon"></i>
+			                    </th>
 			                    <th style="width:5%;">상세</th>
 			                </tr>
 			            </thead>
@@ -31,7 +41,7 @@
 				                <tr th:style="${notice.noticeYN == 'Y'} ? 'background-color: #008dff1a;' : ''">
 				                	<td th:text="${notice.noticeId}"></td>
 				                	<td th:text="${notice.noticeTitle}"></td>
-				                	<td th:text="${notice.createdUser}"></td>
+				                	<td th:text="${notice.empName}"></td>
 				                	<!-- 로컬데이트타임은 #temporals.format사용 -->
 									<td th:text="${#temporals.format(notice.createdDate, 'yyyy-MM-dd HH:mm')}"></td>
 									<td th:text="${#temporals.format(notice.updatedDate, 'yyyy-MM-dd HH:mm')}"></td>
@@ -135,28 +145,28 @@
 						<!-- 모달 본문 -->
 						<div class="modal-body">
 							<form id="notice-form-read" action="" >
-	<!-- 							<div class="mb-3"> -->
-	<!-- 								<label for="defaultSelect" class="form-label">Default select</label> -->
-	<!-- 								<select id="defaultSelect" class="form-select"> -->
-	<!-- 									<option>Default select</option> -->
-	<!-- 									<option value="1">One</option> -->
-	<!-- 									<option value="2">Two</option> -->
-	<!-- 									<option value="3">Three</option> -->
-	<!-- 								</select> -->
-	<!-- 							</div> -->
 								<div class="mb-3" style="display:flex; gap:8px;">
-								    <input type="hidden" class="form-control" id="notice-id-read">
+								    <input type="hidden" class="form-control" id="notice-id-read" name="noticeId">
+								    <input type="hidden" class="form-control" id="notice-createdUser-read" name="createdUser">
 								    <input type="text" class="form-control" id="notice-title-read" name="noticeTitle" placeholder="제목" style="flex:1;">
 								    <label class="form-check-label" for="fixed-check">고정</label>
 								    <input class="form-check-input" type="checkbox" value="Y" id="fixed-check" name="noticeYN" onchange="toggleValue(this)">
 								</div>
-								<div class="mb-3" style="display:flex; gap:2px;">
-									<p class="" style="flex:1;" >등록자 : </p>
-									<p class="" style="flex:1;" id="notice-writer-read">인사 신필용</p>
-									<p class="" style="flex:1;" >등록일 : </p>
-									<p class="" style="flex:1;"id="notice-createdDate-read">2024-10-01 14:30</p>
-									<p class="" style="flex:1;" >수정일 : </p>
-									<p class="" style="flex:1;"id="notice-updatedDate-read">2024-10-01 14:30</p>
+								<div class="d-flex align-items-center mb-3 justify-content-between">
+									<div class="d-flex ">
+										<span class="" >등록자 : </span>
+										<span class="ml-2" id="notice-writer-read">인사 신필용</span>
+									</div>
+									<div class="d-flex ml-auto">
+									    <div class="d-flex mr-3">
+									      <span>등록일 : </span>
+									      <span id="notice-createdDate-read" class="ml-2">2024-10-01 14:30</span>
+									    </div>
+									    <div class="d-flex">
+									      <span>수정일 : </span>
+									      <span id="notice-updatedDate-read" class="ml-2">2024-10-01 14:30</span>
+									    </div>
+									</div>
 								</div>
 							    <div class="mb-3">
 							        <textarea id="notice-content-read" class="form-control" rows="10" placeholder="공지사항 내용 작성" name="noticeContent"></textarea>

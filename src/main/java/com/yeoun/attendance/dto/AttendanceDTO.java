@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -19,8 +20,9 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@Builder
 public class AttendanceDTO {
-	private Long id;
+	private Long attendanceId;
 	
 	@NotNull(message = "사원번호는 필수 입력값입니다")
 	private String empId; // 출근한 사원 번호
@@ -65,27 +67,23 @@ public class AttendanceDTO {
 //		return modelMapper.map(attendance, AttendanceDTO.class);
 //	}
 	
-	public static AttendanceDTO fromEntity(Attendance a) {
-	    AttendanceDTO dto = new AttendanceDTO();
-	    dto.setId(a.getId());
-	    dto.setEmpId(a.getEmp().getEmpId());
-	    dto.setEmpName(a.getEmp().getEmpName());
-	    dto.setWorkDate(a.getWorkDate());
-	    dto.setWorkIn(a.getWorkIn());
-	    dto.setWorkOut(a.getWorkOut());
-	    dto.setWorkDuration(a.getWorkDuration());
-	    dto.setStatusCode(a.getStatusCode());
-	    dto.setRemark(a.getRemark());
-	    dto.setCreatedUser(a.getCreatedUser());
-	    dto.setCreatedDate(a.getCreatedDate());
-	    dto.setUpdatedUser(a.getUpdatedUser());
-	    dto.setUpdatedDate(a.getUpdatedDate());
-
-	    if (a.getEmp() != null) {
-	        dto.setDeptName(a.getEmp().getDept().getDeptName());
-	        dto.setPosName(a.getEmp().getPosition().getPosName());
-	    }
-
-	    return dto;
+	public static AttendanceDTO fromEntity(Attendance attendance) {
+	    return AttendanceDTO.builder()
+	        .attendanceId(attendance.getAttendanceId())
+	        .empId(attendance.getEmp().getEmpId())
+	        .empName(attendance.getEmp().getEmpName())
+	        .workDate(attendance.getWorkDate())
+	        .workIn(attendance.getWorkIn())
+	        .workOut(attendance.getWorkOut())
+	        .workDuration(attendance.getWorkDuration())
+	        .statusCode(attendance.getStatusCode())
+	        .remark(attendance.getRemark())
+	        .createdUser(attendance.getCreatedUser())
+	        .createdDate(attendance.getCreatedDate())
+	        .updatedUser(attendance.getUpdatedUser())
+	        .updatedDate(attendance.getUpdatedDate())
+	        .deptName(attendance.getEmp().getDept().getDeptName())
+	        .posName(attendance.getEmp().getPosition().getPosName())
+	        .build();
 	}
 }

@@ -98,6 +98,8 @@ public class EmpService {
 	    status.setWorkStatUpdated(LocalDateTime.now());
 	    status.setWorkStatSource("AUTO");
 	    status.setOnlineYn("N");
+	    int randomImg = ThreadLocalRandom.current().nextInt(1, 6);
+	    status.setMsgProfile(randomImg);
 	    
 	    msgStatusRepository.save(status);
 
@@ -240,16 +242,13 @@ public class EmpService {
 	// 사원 정보 수정
 	@Transactional(readOnly = true)
 	public EmpDTO getEmpForEdit(String empId) {
-		log.info("====== getEmpForEdit 시작: empId={}", empId);
 		
 	    Emp emp = empRepository.findById(empId)
 	        .orElseThrow(() -> new EntityNotFoundException("사원 없음: " + empId));
 	    
-	    log.info("====== emp 조회 완료: {}", emp);
-	    log.info("====== emp.getDept(): {}", emp.getDept());
-	    log.info("====== emp.getPosition(): {}", emp.getPosition());
-	    
 	    EmpDTO empDTO = new EmpDTO();
+	    
+	    // 사원 인사 정보 
 	    empDTO.setEmpId(emp.getEmpId());
 	    empDTO.setEmpName(emp.getEmpName());
 	    empDTO.setGender(emp.getGender());
@@ -264,7 +263,50 @@ public class EmpService {
 	    empDTO.setDeptId(emp.getDept().getDeptId());
 	    empDTO.setPosCode(emp.getPosition().getPosCode());
 	    
+	    // 사원 급여정보
+	    empBankRepository.findByEmpId(empId).ifPresent(bank -> {
+	    	empDTO.setBankCode(bank.getBankCode());
+	    	empDTO.setAccountNo(bank.getAccountNo());
+	    	empDTO.setHolder(bank.getHolder());
+    	});
+	    
 	    return empDTO;
+	}
+
+	@Transactional
+	public void updateEmp(EmpDTO empDTO) {
+		
+		Emp emp = empRepository.findById(empDTO.getEmpId())
+		            .orElseThrow(() -> new IllegalArgumentException("사원 없음"));
+
+		    // 변경 가능한 필드만 업데이트
+		    emp.setEmpName(empDTO.getEmpName());
+		    emp.setMobile(empDTO.getMobile());
+		    emp.setEmail(empDTO.getEmail());
+		    emp.setStatus(empDTO.getStatus());
+		    emp.setPostCode(empDTO.getPostCode());
+		    emp.setAddress1(empDTO.getAddress1());
+		    emp.setAddress2(empDTO.getAddress2());
+		    
+		    // === 급여계좌 업데이트 ===
+		    if (empDTO.getBankCode() != null && empDTO.getAccountNo() != null) {
+		        EmpBank empBank = empBankRepository.findByEmpId(emp.getEmpId())
+		                .orElseGet(() -> {
+		                    EmpBank bank = new EmpBank();
+		                    bank.setEmpId(emp.getEmpId());
+		                    return bank;
+		                });
+
+		        empBank.setBankCode(empDTO.getBankCode());
+		        empBank.setAccountNo(empDTO.getAccountNo());
+		        empBank.setHolder(empDTO.getHolder());
+		        empBank.setFileId(empDTO.getFileId());
+
+		        empBankRepository.save(empBank);
+		    }
+		    
+		    // 추후 사진 추가
+		
 	}
 
 	

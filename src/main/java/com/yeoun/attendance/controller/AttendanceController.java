@@ -108,9 +108,9 @@ public class AttendanceController {
 	
 	// 관리자 출/퇴근 수기 등록
 	@PostMapping
-	public ResponseEntity<Map<String, String>> registAttendance(@RequestBody AttendanceDTO attendanceDTO) {
+	public ResponseEntity<Map<String, String>> registAttendance(@RequestBody AttendanceDTO attendanceDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
 		try {
-			attendanceService.registAttendance(attendanceDTO);
+			attendanceService.registAttendance(attendanceDTO, loginDTO);
 			return ResponseEntity.status(HttpStatus.CREATED)
 					.body(Map.of("message", "등록 완료"));
 		} catch (IllegalStateException e) {
@@ -133,16 +133,25 @@ public class AttendanceController {
 	
 	// 출/퇴근 수정
 	@PatchMapping("/{attendanceId}")
-	public ResponseEntity<Map<String, String>> modifyAttendance(@PathVariable("attendanceId") Long attendanceId, 
-			@RequestBody AttendanceDTO attendanceDTO) {
+	public ResponseEntity<Map<String, String>> modifyAttendance(
+			@PathVariable("attendanceId") Long attendanceId, 
+			@RequestBody AttendanceDTO attendanceDTO,
+			@AuthenticationPrincipal LoginDTO loginDTO) {
 		try {
-			attendanceService.modifyAttendance(attendanceId, attendanceDTO);
+			attendanceService.modifyAttendance(attendanceId, attendanceDTO, loginDTO);
 			return ResponseEntity.ok(Map.of("message", "출/퇴근 수정 완료"));
 		} catch (NoSuchElementException  e) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND)
 					.body(Map.of("message", e.getMessage()));
+		} catch (IllegalStateException e) {
+			return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", e.getMessage()));
+		} catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "출근 등록 중 오류가 발생했습니다."));
 		}
 	}
+	
 	@GetMapping("/my")
 	public String attendanceMyPage() {
 	    return "attendance/commute";
@@ -185,8 +194,6 @@ public class AttendanceController {
 		
 		model.addAttribute("workPolicyDTO", workPolicyDTO);
 		model.addAttribute("commonCodeDTO", commonCodeDTO);
-		
-		log.info(">>>>>>>>>>>>>> commonCodeDTO : " + commonCodeDTO);
 		
 		return "attendance/policy";
 	}

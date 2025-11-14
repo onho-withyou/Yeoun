@@ -37,7 +37,7 @@ import lombok.ToString;
 public class AccessLog {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "ACCESS_LOG_SEQ_GENERATOR")
-	private Long id;
+	private Long accessId;
 	
 	@Column(nullable = false, length = 7)
 	private String empId; // 외출한 사원 번호
