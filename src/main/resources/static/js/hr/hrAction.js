@@ -43,7 +43,7 @@ function renderEmpTable(empList) {
 		tr.dataset.empId = emp.empId;
 		tr.dataset.empName = emp.empName;
 		tr.dataset.deptName = emp.deptName;
-		tr.dataset.posNaem = emp.posName;
+		tr.dataset.posName = emp.posName;
 		
 		tr.innerHTML = `
 			<td>${emp.empId}</td>
@@ -63,6 +63,52 @@ function renderEmpTable(empList) {
 }
 
 // 3. 사원 선택 시 오른쪽 정보 세팅
+function onSelectEmpRow(row) {
+	const empId = row.dataset.empId;
+	const empName = row.dataset.empName;
+	const deptName = row.dataset.deptName;
+	const posName = row.dataset.posName;
+	
+	// 오른쪽 카드 텍스트 업데이트
+	document.getElementById('sel-emp-id').textContent = empId || '-';
+	document.getElementById('sel-emp-name').textContent = empName || '-';
+	document.getElementById('sel-emp-dept').textContent = deptName || '-';
+	document.getElementById('sel-emp-pos').textContent = posName || '-';
+	
+	// 히든에 값 세팅
+	const empIdInput = document.getElementById('empId');
+	if (empIdInput) {
+		empIdInput.value = empId;
+	}
+	
+	// 선택된 행 하이라이트
+	const tbody = row.parentElement;
+	Array.from(tbody.querySelectorAll('tr')).forEach(tr => tr.classList.remove('table-active'));
+	row.classList.add('table-active');
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

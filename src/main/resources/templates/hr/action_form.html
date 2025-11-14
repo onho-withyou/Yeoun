@@ -18,9 +18,9 @@
                 <select class="form-select" id="searchDept">
                   <option value="">전체</option>
                   <!-- 나중에 th:each로 부서 목록 바인딩 -->
-                  <!-- <option th:each="dept : ${deptList}"
-                          th:value="${dept.deptId}"
-                          th:text="${dept.deptName}"></option> -->
+<!--                   <option th:each="dept : ${deptList}"
+<!--                           th:value="${dept.deptId}" -->
+<!--                           th:text="${dept.deptName}"></option> --> 
                 </select>
               </div>
               <div class="col-md-3">
@@ -53,7 +53,7 @@
                 <strong>사원 목록</strong>
               </div>
               <div class="card-body p-0">
-                <div class="table-responsive" style="max-height: 360px; overflow-y: auto;">
+                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                   <table class="table table-hover mb-0" id="empTable">
                     <thead class="table-light">
                     <tr class="text-center">
@@ -65,14 +65,8 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <!-- 나중에 서버/JS로 바인딩 -->
-                    <!-- 예시용 한 줄 -->
                     <tr class="text-center">
-                      <td>20240902033</td>
-                      <td>홍길동</td>
-                      <td>개발부</td>
-                      <td>대리</td>
-                      <td>010-1234-5678</td>
+                    <!-- JS로 렌더링 -->
                     </tr>
                     </tbody>
                   </table>
@@ -178,7 +172,7 @@
 
                   <div class="card-footer d-flex justify-content-end gap-2">
                     <a th:href="@{/hr/actions}" class="btn btn-outline-secondary">
-                      닫기
+                      취소
                     </a>
                     <button type="submit" class="btn btn-primary" id="btnSubmit">
                       발령 등록
