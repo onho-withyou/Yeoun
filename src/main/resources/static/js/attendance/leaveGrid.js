@@ -2,32 +2,32 @@ const grid = new tui.Grid({
 	el: document.getElementById("grid"),
 	columns: [
 		{
-			header: "날짜",
-			name : "workDate"
+			header: "순서",
+			name : "rowKey"
 		},
 		{
 			header: "연차유형",
-			name : ""
+			name : "leaveType"
 		},
 		{
 			header: "휴가시작일",
-			name : ""
+			name : "startDate"
 		},
 		{
 			header: "휴가종료일",
-			name : ""
+			name : "endDate"
 		},
 		{
 			header: "사용일수",
-			name : ""
+			name : "usedDays"
 		},
 		{
 			header: "사유",
-			name : ""
+			name : "reason"
 		},
 		{
 			header: "승인상태",
-			name : ""
+			name : "apprStatus"
 		},
 	],
 		
