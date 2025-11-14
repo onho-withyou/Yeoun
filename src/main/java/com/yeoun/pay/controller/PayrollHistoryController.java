@@ -3,7 +3,6 @@ package com.yeoun.pay.controller;
 import com.yeoun.pay.service.PayrollHistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -18,21 +17,19 @@ public class PayrollHistoryController {
 
     @GetMapping
     public String historyPage(
-            @RequestParam(defaultValue = "emp") String mode,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String deptName,
 
-            // 사원
-            @RequestParam(required = false) String yearEmp,
-            @RequestParam(required = false) String monthEmp,
+            @RequestParam(name = "mode", defaultValue = "emp") String mode,
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "deptName", required = false) String deptName,
 
-            // 부서
-            @RequestParam(required = false) String yearDept,
-            @RequestParam(required = false) String monthDept,
+            @RequestParam(name = "yearEmp", required = false) String yearEmp,
+            @RequestParam(name = "monthEmp", required = false) String monthEmp,
 
-            // 월별
-            @RequestParam(required = false) String yearMonth,
-            @RequestParam(required = false) String monthMonth,
+            @RequestParam(name = "yearDept", required = false) String yearDept,
+            @RequestParam(name = "monthDept", required = false) String monthDept,
+
+            @RequestParam(name = "yearMonth", required = false) String yearMonth,
+            @RequestParam(name = "monthMonth", required = false) String monthMonth,
 
             Model model
     ) {
