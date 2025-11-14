@@ -189,51 +189,6 @@ function initGrid(data) {
 
 
 
-var today = new Date();
-var nextYear = new Date(today);
-
-nextYear.setFullYear(nextYear.getFullYear() + 1);
-
-function pad(n) {
-    return n < 10 ? '0' + n : n;
-}
-
-function formatDateTime(date) {
-	var year   = date.getFullYear();
-	const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  	const day = date.getDate().toString().padStart(2, '0');
-	var hour   = pad(date.getHours());
-	var minute = pad(date.getMinutes());
-
-	var formatted = year + '-' + month + '-' + day + ' ' + hour + ':' + minute;
-	
-	return formatted;
-}
-
-function formatLocalDateTime(date) {
-	var year   = date.getFullYear();
-	const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  	const day = date.getDate().toString().padStart(2, '0');
-	var hour   = pad(date.getHours());
-	var minute = pad(date.getMinutes());
-	var second = pad(date.getSeconds());
-
-	var formatted = year + '-' + month + '-' + day + 'T' + hour + ':' + minute + ':' + second;
-	
-	return formatted;
-}
-
-function formatDate(date) {
-	const year = date.getFullYear();
-	const month = (date.getMonth() + 1).toString().padStart(2, '0');
-	const day = date.getDate().toString().padStart(2, '0');
-	return `${year}-${month}-${day}`;
-}
-
-
-
-
-
 
 
 

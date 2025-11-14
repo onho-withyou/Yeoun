@@ -9,6 +9,8 @@
 </head>
 <body>
 <th:block layout:fragment="content">
+	<input type="hidden" th:value="${#authentication.name}" id="currentUserId">
+	<input type="hidden" th:value="${#authentication.principal.empName}" id="currentUserName">
 	<!-- custom-body 시작 -->
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
 	    <!-- custom-content -->
@@ -46,8 +48,7 @@
 			                        <label class="form-check-label" for="filter-personal">개인</label>
 			                    </div>
 			                    <div class="form-check">
-				                    <button class="btn btn-outline-primary btn-xs"
-				                            data-bs-toggle="modal" data-bs-target="#addScheduleModal" id="add-schedule-btn">
+				                    <button class="btn btn-outline-primary btn-xs" id="open-add-schedule-modal-btn">
 				                            +
 				                    </button>
 			                    </div>
@@ -80,64 +81,9 @@
 	        </div>
 	    </div>
 	    <!-- /customcontent -->
+		<th:block th:insert="~{main/schedule_modal}"></th:block>
+		<th:block th:insert="~{notice/notice_modal}"></th:block>
 	    
-	    <!-- 일정등록 모달 -->
-	    <div class="modal" id="addScheduleModal" tabindex="-1" style="display: none;" aria-hidden="true">
-			<div class="modal-dialog modal-dialog-centered" role="document">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title" id="modalCenterTitle">일정등록</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-						<form>
-							<div class="col mb-6">
-								<label for="scheduleTitle" class="form-label">제목</label>
-								<input type="text" id="scheduleTitle" class="form-control"/>
-							</div>
-							<div class="col mb-6">
-								<label for="scheduleTitle" class="form-label">작성자</label>
-								<input type="text" id="scheduleTitle" class="form-control" value="신필용" readonly/>
-							</div>
-							<div class="mb-3 mt-3" style="display:flex; gap:8px;">
-								<div>
-									<select id="scheduleType" class="form-select">
-                                        <option value="company">회사</option>
-                                        <option value="personal">개인</option>
-                                        <option value="department">인사</option>
-                                        <option value="department">개발</option>
-                                        <option value="department">생산</option>
-                                        <option value="department">영업</option>
-                                    </select>
-								</div>
-								<div class="tui-datepicker-input tui-datetime-input tui-has-focus mt-1" style="margin-right: 5px; width: 28%;">
-									<input id="startpicker-input" type="text" aria-label="Date" >
-									<span class="tui-ico-date" style="width:15px;"></span>
-									<div id="startpicker-container" style="margin-left: -1px;"></div>
-								</div>
-								<span class="mt-2">~</span>
-								<div class="tui-datepicker-input tui-datetime-input tui-has-focus mt-1" style="margin-right: 5px; width: 28%;">
-									<input id="endpicker-input" type="text" aria-label="Date">
-									<span class="tui-ico-date"></span>
-									<div id="endpicker-container" style="margin-left: -1px;"></div>
-								</div>
-								<input type="checkbox" id="allDayCheckbox" style="margin-bottom: 10px;"/>
-								<label for="allDayCheckbox" style="margin-top: 3px;">종일</label>
-							</div>
-							<div class="col mb-6">
-								<label for="scheduleTitle" class="form-label">내용</label>
-								<textarea id="scheduleContent" class="form-control" rows="5"></textarea>
-							</div>
-							
-							<div class="modal-footer mt-3 p-0">
-								<button class="btn btn-primary">등록</button>
-							</div>
-						</form>
-					</div>
-				</div>
-			</div>
-		</div>
-		<!-- /일정등록모달끝 -->
 	</div>
 	<!-- /custom-body 끝 -->
 	<!-- 타임피커 -->

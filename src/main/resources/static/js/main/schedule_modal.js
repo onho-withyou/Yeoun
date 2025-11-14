@@ -1,5 +1,5 @@
 /**
-	일정게시판 JavaScript 
+	일정 모달 JavaScript 
 **/
 
 let picker = null;
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	        container: '#startpicker-container'
 	    },
 	    endpicker: {
-	        date: today,
+	        date: nextDay,
 	        input: '#endpicker-input',
 	        container: '#endpicker-container'
 	    },
@@ -24,6 +24,14 @@ document.addEventListener('DOMContentLoaded', function() {
             inputType: 'spinbox',
 			showMeridiem: false
         }
+	});
+	
+	const alldayCheck = document.getElementById('all-day-checkbox');
+	
+	//모달 종일 체크박스 체크 이벤트
+	alldayCheck.addEventListener('change', function() {
+		const alldayYN = document.getElementById('all-day-checkbox-value');
+		alldayCheck.checked ? alldayYN.value = "Y" : alldayYN.value = "N"
 	});
 	
 	//일정등록 모달 등록, 수정버튼 이벤트
@@ -55,11 +63,10 @@ document.addEventListener('DOMContentLoaded', function() {
 				alert(response.msg);
 				location.reload();
 			}).catch(error => {
-				console.log(error);
 				alert("제목, 시작,종료 일시, 내용은 필수입력 사항입니다.");
 			});
+			
 		} else if(addScheduleBtn.value == 'edit') {
-
 			if(confirm("수정하시겠습니까?")){
 				// 수정일때는 scheduleId 포함해서 보내기
 				addScheduleForm.scheduleId.setAttribute('name', 'scheduleId');
@@ -85,7 +92,6 @@ document.addEventListener('DOMContentLoaded', function() {
 				});
 			}
 		}
-		
 	}); // 일정등록, 수정함수 끝
 	
 	// 일정조회 - 삭제버튼 이벤트
@@ -110,31 +116,41 @@ document.addEventListener('DOMContentLoaded', function() {
 		}).catch(error => {
 			alert("삭제에 실패하였습니다.");
 		});
-		
-		
 	}); //일정조회 - 삭제 버튼 이벤트 끝
-	
-	
-	
-	
 		
 });// DOM로드 끝
 
+// ----------------------------------------------------------
+// 부서 목록 조회 함수
+function createSelect() {
+	// 셀렉트박스 지정
+    const select = document.getElementById('schedule-type');
+
+	fetch('/api/schedules/departments')
+    .then(response => response.json())
+    .then(data => {
+		// 셀렉트박스에 부서목록 추가
+        data.forEach(department => {
+            const option = document.createElement('option');
+            option.value = department.deptId
+            option.text = department.deptName; // 옵션명
+            select.appendChild(option);
+        });
+	});
+}
 // 모달열기함수
 function openModal(mode, data = null) {
 	const modal = new bootstrap.Modal(document.getElementById('add-schedule-modal'));
-//	const modal = document.getElementById('add-schedule-modal');
-	
 	const form = document.getElementById('add-schedule-form');
 	const modalTitle = document.getElementById('modalCenterTitle');
 	const deleteBtn = document.getElementById('delete-schedule-btn');
 	const submitBtn = document.getElementById('add-schedule-btn');
 	const select = document.getElementById('schedule-type');
-	const createdUser = document.getElementById('schedule-writer')
-	const startpickerInput = document.getElementById('startpicker-input');
-	const endpickerInput = document.getElementById('endpicker-input');
-	const schedueId = document.getElementById('schedule-id');
 	const createdUserName = document.getElementById('createdUserName');
+//	const createdUser = document.getElementById('schedule-writer')
+//	const startpickerInput = document.getElementById('startpicker-input');
+//	const endpickerInput = document.getElementById('endpicker-input');
+//	const schedueId = document.getElementById('schedule-id');
 	
 	const sp = picker.getStartpicker(); 
 	const ep = picker.getEndpicker();
@@ -153,55 +169,47 @@ function openModal(mode, data = null) {
 			createdUserName.readOnly = true;
 		});
 		
-		sp.enable && sp.enable(); //시작날자 선택가능
-		ep.enable && ep.enable(); //종료날자 선택가능
-		
 		modalTitle.textContent = '일정등록';
 		deleteBtn.classList.add('d-none');
 	    submitBtn.textContent = '등록';
 		submitBtn.value ='add';
 		
-		form.reset(); // 폼 입력값 초기화
+//		form.reset(); // 폼 입력값 초기화
+		form.scheduleId.value = '';
+		form.scheduleTitle.value = '';
+		createdUserName.value = currentUserName || '';
+		form.createdUser.value = currentUserId || '';
+		form.scheduleContent.value = '';
+		
+		sp.enable && sp.enable(); //시작날자 선택가능
+		ep.enable && ep.enable(); //종료날자 선택가능
+		
+		// 날짜 초기값
+		picker.setStartDate(new Date(today));
+		picker.setEndDate(new Date(nextDay));
 		
 		//셀렉트박스 초기화
 		select.innerHTML = '';
-		
+		// 셀렉트박스 옵션 디폴트 지정 
 		const option1 = document.createElement('option');
 		option1.value = 'company';
 		option1.text = '회사'
 		select.appendChild(option1);
-		
+
 		const option2 = document.createElement('option');
-		option2.value = 'private'
+		option2.value = currentUserId;
 		option2.text = '개인'
 		select.appendChild(option2);
 		
+		// 셀렉트박스 목록추가
+		createSelect();
+		// 등록모달은 company로 default
 		select.value = 'company';
-		
-		// 부서 목록 조회 
-		fetch('/api/schedules/departments')
-	    .then(response => response.json())
-	    .then(data => {
-			// 셀릭트박스
-	        const select = document.getElementById('schedule-type');
-			
-			// 셀렉트박스에 부서목록 추가
-	        data.forEach(department => {
-	            const option = document.createElement('option');
-	            option.value = department.deptId
-	            option.text = department.deptName; // 옵션명
-	            select.appendChild(option);
-	        });
-		});
-		// 날짜 초기값
-		picker.setStartDate(today);
-		picker.setEndDate(today);
+
 		// 종일 체크 해제
 		form.alldayYN.checked = false;
 
 	} else if (mode === 'edit' && data) {
-		console.log(data);
-		
 		modalTitle.textContent = '일정조회';
 		deleteBtn.classList.remove('d-none');
 	    submitBtn.textContent = '수정';
@@ -213,37 +221,25 @@ function openModal(mode, data = null) {
 		//셀렉트박스 초기화
 		select.innerHTML = '';
 		
+		// 셀렉트박스 옵션 디폴트 지정 
 		const option1 = document.createElement('option');
 		option1.value = 'company';
-		option1.text = '회사';
+		option1.text = '회사'
 		select.appendChild(option1);
 
 		const option2 = document.createElement('option');
-		option2.value = currentUserId;
-		option2.text = '개인';
+		option2.value = data.createdUser;
+		option2.text = '개인'
 		select.appendChild(option2);
 		
-		// 부서 목록 조회 
-		fetch('/api/schedules/departments')
-	    .then(response => response.json())
-	    .then(deptData => {
-			// 셀릭트박스
-	        const select = document.getElementById('schedule-type');
-			
-			// 셀렉트박스에 부서목록 추가
-	        deptData.forEach(department => {
-	            const option = document.createElement('option');
-	            option.value = department.deptId
-	            option.text = department.deptName; // 옵션명
-	            select.appendChild(option);
-	        });
-			select.value = data.scheduleType;
-		});
-		
+		// 셀렉트 목록 추가
+		createSelect();
+		// 조회한 일정의 일정타입으로 지정
+		select.value = data.scheduleType;
 		
 		// 날짜 초기값
 		picker.setStartDate(data.scheduleStart ? new Date(data.scheduleStart) : today);
-		picker.setEndDate(data.scheduleFinish ? new Date(data.scheduleFinish): today);
+		picker.setEndDate(data.scheduleFinish ? new Date(data.scheduleFinish): nextDay);
 		// 종일 체크 해제
 		form.alldayYN.checked = data.alldayYN === 'Y';
 		form.scheduleContent.value = data.scheduleContent || '';
@@ -289,3 +285,46 @@ function openModal(mode, data = null) {
 	
 	modal.show();
 } // 모달열기 함수 끝
+
+var today = new Date();
+var nextDay = new Date();
+var nextYear = new Date(today);
+
+nextYear.setFullYear(nextYear.getFullYear() + 1);
+nextDay.setDate(nextDay.getDate() + 1);
+
+function pad(n) {
+    return n < 10 ? '0' + n : n;
+}
+
+function formatDateTime(date) {
+	var year   = date.getFullYear();
+	const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  	const day = date.getDate().toString().padStart(2, '0');
+	var hour   = pad(date.getHours());
+	var minute = pad(date.getMinutes());
+
+	var formatted = year + '-' + month + '-' + day + ' ' + hour + ':' + minute;
+	
+	return formatted;
+}
+
+function formatLocalDateTime(date) {
+	var year   = date.getFullYear();
+	const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  	const day = date.getDate().toString().padStart(2, '0');
+	var hour   = pad(date.getHours());
+	var minute = pad(date.getMinutes());
+	var second = pad(date.getSeconds());
+
+	var formatted = year + '-' + month + '-' + day + 'T' + hour + ':' + minute + ':' + second;
+	
+	return formatted;
+}
+
+function formatDate(date) {
+	const year = date.getFullYear();
+	const month = (date.getMonth() + 1).toString().padStart(2, '0');
+	const day = date.getDate().toString().padStart(2, '0');
+	return `${year}-${month}-${day}`;
+}

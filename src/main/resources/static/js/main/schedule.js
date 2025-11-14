@@ -1,11 +1,21 @@
 const uri = "https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getHoliDeInfo?Servicekey";
 const myApiKey = "3bb524dc5656794ff51462c21245e81ffd44e902f5c3220a4d89b540465280e9";
 
+const currentUserId = document.getElementById('currentUserId')?.value;
+const currentUserName = document.getElementById('currentUserName')?.value;
+const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
+const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
+
+
 const container = document.getElementById('tui-date-picker');
 const input = document.getElementById('datepicker-input');
 let dateController = null;
 
 let calendar = null; // calendar 객체 선언
+let holidayData = null; // 휴일데이터 저장
+let calendarYear = null; // 현재 날짜 년 저장
+let calendarMonth = null; // 현재 날짜 월 저장
+let scheduleData = null; // 일정 데이터 저장
 let currentDate = null; // 현재날짜 저장
 
 let calendarType = 'month'; //현재 달력 타입 지정
@@ -13,8 +23,6 @@ let calendarType = 'month'; //현재 달력 타입 지정
 const prevMonthBtn = document.getElementById("prevMonth");
 const nextMonthBtn = document.getElementById("nextMonth");
 
-var today = new Date();
-console.log(today);
 // 캘린더위치지정
 const calendarEl = document.getElementById('calendar');
 
@@ -24,11 +32,13 @@ prevMonthBtn.addEventListener('click', function() {
 	updateCurrentDate();
 	dateController.setDate(new Date(currentDate));
 });
+
 nextMonthBtn.addEventListener('click', function() {
 	calendar.next();
 	updateCurrentDate();
 	dateController.setDate(new Date(currentDate));
 });
+
 // 캘린더 생성함수
 function createCalendar() {
 	calendarEl.innerHTML = ""; // 기존 내용 제거
@@ -78,9 +88,11 @@ function updateCurrentDate() {
     
 	if(!calendarYear) { //처음 캘린더 생성
 		calendarYear = year;
+		calendarMonth = month;
 		yearHoliday(year);
 	} else if(calendarYear != year) { // 선택된 년도가 바뀔때
 		calendarYear = year;
+		calendarMonth = month;
 		yearHoliday(year);
 	}
 	currentDateEl.textContent = `${year}년 ${month}월`;
@@ -137,10 +149,12 @@ document.getElementById('type-day').addEventListener('click', function() {
 		]);		
 });
 
+// list 버튼 클릭시 페이지 이동
 document.getElementById('type-list').addEventListener('click', function() {
 	location.href = "/main/schedule"
 });
 
+// 타입에 맞춰 달력 보이기
 function showCalendarView(type) {
     // 달력이 없으면 생성
     if (!calendar) {
@@ -154,46 +168,15 @@ function showCalendarView(type) {
 // ---------------------------------
 // 커스텀 모달 등록 
 function openMyCustomModal(data) {
-	new bootstrap.Modal(document.getElementById('addScheduleModal')).show();
-	openAddScheduleModal();
-		
-	document.getElementById('startpicker-input').value = formatDateToYYYYMMDD(data.start).toString();
-	document.getElementById('endpicker-input').value = formatDateToYYYYMMDD(data.end).toString();
-	document.getElementById('allDayCheckbox').checked = data.isAllDay;
+	//모달열기
+	openModal('add');
+	// data로받아서 등록모달 날짜 지정하기
+	var start = new Date(data.start);
+	var end = new Date(start)
+	end.setDate(start.getDate() + 1);
+	picker.setStartDate(start ? new Date(start) : today);
+	picker.setEndDate(end ? new Date(end): nextDay);
 }
-
-// 일정추가모달 열기 이벤트
-function openAddScheduleModal() {
-	var today = new Date();
-	var picker = tui.DatePicker.createRangePicker({
-	    startpicker: {
-	        date: today,
-	        input: '#startpicker-input',
-	        container: '#startpicker-container'
-	    },
-	    endpicker: {
-	        date: today,
-	        input: '#endpicker-input',
-	        container: '#endpicker-container'
-	    },
-	    selectableRanges: [
-	        [today, new Date(today.getFullYear() + 1, today.getMonth(), today.getDate())]
-	    ],
-	    format: 'YYYY-MM-dd HH:mm',
-		timepicker: {
-            layoutType: 'tab',
-            inputType: 'spinbox'
-        }
-	});
-}
-
-
-
-
-let holidayData = null;
-let calendarYear = null;
-let scheduleData = null;
-
 
 // 휴일정보 받아온후 캘린더에 반영
 function yearHoliday(year){
@@ -279,14 +262,11 @@ function createDatePicker() {
 // ----------------------------------------------------
 
 //일정등록버튼 함수
-document.getElementById('add-schedule-btn').addEventListener('click', function() {
-	openAddScheduleModal()
-	
-	picker.on('change:end', () => {
-	    console.log(123);
-	})
+document.getElementById('open-add-schedule-modal-btn').addEventListener('click', function() {
+	openModal('add');
 });
 
+//달력 타입 검사 함수
 function checkCalendarType() {
 	if(calendarType == 'month') {
 		dateController.close();
@@ -295,11 +275,14 @@ function checkCalendarType() {
 	}
 }
 
+
+//===============================================================
 // DOM LOAD
 document.addEventListener('DOMContentLoaded', function () {
 	
 	createCalendar(); //달력 생성
 	createDatePicker(); // 데이트피커 생성
+	// 달력 타입을 검사하여 데이트피커 보이고 안보이고 판단
 	checkCalendarType();
 	
 	// 스케줄 추가시 커스텀 모달 열기
@@ -309,12 +292,15 @@ document.addEventListener('DOMContentLoaded', function () {
 		formattedStartDate = formatDateToYYYYMMDD(startDate);
 		formattedToday = formatDateToYYYYMMDD(today);
 		
-		if(formattedStartDate < formattedToday){
-			alert("과거 날짜에는 일정을 추가할 수 없습니다.");
-		} else {
-			// 기존 'scheduleDetailClick' 역할
-			openMyCustomModal(event); // event에 정보 있음
-		}
+//		if(formattedStartDate < formattedToday){
+//			alert("과거 날짜에는 일정을 추가할 수 없습니다.");
+//		} else {
+//			// 기존 'scheduleDetailClick' 역할
+//			openMyCustomModal(event); // event에 정보 있음
+//		}
+		//일정등록모달 열기
+		openMyCustomModal(event);
+		// 달력 선택 색 초기화
 		calendar.clearGridSelections();
 	});
 

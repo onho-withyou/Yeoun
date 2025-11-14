@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', function() {
 	const deleteNoticeBtn = document.getElementById('notice-delete');
 	const modifyNoticeBtn = document.getElementById('notice-modify');
 	
-	
 	// 공지사항 조회모달 열기 이벤트
 	showNoticeModal.addEventListener('show.bs.modal', function(event){
 		const button = event.relatedTarget;
