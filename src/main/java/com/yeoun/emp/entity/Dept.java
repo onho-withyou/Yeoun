@@ -32,11 +32,11 @@ public class Dept {
 	
 	// 상위 부서ID (자기참조)
 	@Column(name = "PARENT_ID", length = 10)
-	private String parentId;
+	private String parentDeptId;
 	
 	// 부서장ID
 	@Column(name = "HEAD_EMP_ID", length = 7)
-	private String headEmpId;
+	private String managerEmpId;
 	
 	// 부서 약어 (ERP, HR, DEV 등)
     @Column(name = "DEPT_ABBR", length = 20)

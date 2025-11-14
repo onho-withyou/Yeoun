@@ -43,42 +43,22 @@
 	
 	  <!-- 오른쪽: 인사등록 버튼 -->
 	  <div class="col-12 col-lg-3 d-grid d-lg-flex justify-content-lg-end">
-	    <a href="/emp/register" class="btn btn-primary">발령 등록</a>
+	    <a href="/hr/actions/regist" class="btn btn-primary">발령 등록</a>
 	  </div>
 	</div>
-
 	
 	<br>
 	
-	<!-- Basic Bootstrap Table -->
-	<div class="table-responsive">
-	  <table class="table mb-0">
-	    <thead>
-	      <tr>
-	        <th>No.</th>
-	        <th>사번</th>
-	        <th>성명</th>
-	        <th>발령구분</th>
-	        <th>발령일자</th>
-	        <th>부서 이동</th>
-	        <th>직급 이동</th>
-	      </tr>
-	    </thead>
-	    <tbody>
-	      <tr>
-	      	<td>1</td>
-	      	<td>2503485</td>
-	      	<td>홍길동</td>
-	      	<td>인사부</td>
-	      	<td>대리</td>
-	      	<td>010-1234-5678</td>
-	      	<td>hong@hong.com</td>
-	      </tr>
-	    </tbody>
-	  </table>
-	</div>
-	<!--/ Basic Bootstrap Table -->
+	<div class="card-body p-0">
+	    <div id="empGrid"></div>
+		
+    </div>
 	
 	</div>
+
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css">
+<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+<script src="/js/hr/hrList.js"></script>		
+	
 </th:block>
 </body>

@@ -35,5 +35,10 @@ public class CommonCodeService {
 				.map(CommonCodeDTO::fromEntity)
 				.collect(Collectors.toList());
 	}
+	
+	// 인사 발령 유형 조회
+	public List<CommonCode> getHrActionTypeList() {
+		return commonCodeRepository.findByParentCodeIdAndUseYnOrderByCodeSeq("HR_ACTION_TYPE", "Y");
+	}
 
 }
