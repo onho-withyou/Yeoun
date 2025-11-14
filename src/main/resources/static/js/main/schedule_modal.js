@@ -138,6 +138,7 @@ function createSelect() {
         });
 	});
 }
+
 // 모달열기함수
 function openModal(mode, data = null) {
 	const modal = new bootstrap.Modal(document.getElementById('add-schedule-modal'));
@@ -147,6 +148,7 @@ function openModal(mode, data = null) {
 	const submitBtn = document.getElementById('add-schedule-btn');
 	const select = document.getElementById('schedule-type');
 	const createdUserName = document.getElementById('createdUserName');
+	
 //	const createdUser = document.getElementById('schedule-writer')
 //	const startpickerInput = document.getElementById('startpicker-input');
 //	const endpickerInput = document.getElementById('endpicker-input');
