@@ -84,7 +84,7 @@
 	      document.getElementById('d-empId').textContent = d.empId;
 	      document.getElementById('d-deptName').textContent = d.deptName;
 	      document.getElementById('d-posName').textContent = d.posName;
-	      document.getElementById('d-gender').textContent = d.gender;
+	      document.getElementById('d-gender').textContent = d.gender === 'M' ? '남' : d.gender === 'F' ? '여' : '—';
 	      document.getElementById('d-hireDate').textContent = d.hireDate;
 	      document.getElementById('d-mobile').textContent = d.mobile;
 	      document.getElementById('d-email').textContent = d.email;
