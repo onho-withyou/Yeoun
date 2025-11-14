@@ -98,6 +98,8 @@ public class EmpService {
 	    status.setWorkStatUpdated(LocalDateTime.now());
 	    status.setWorkStatSource("AUTO");
 	    status.setOnlineYn("N");
+	    int randomImg = ThreadLocalRandom.current().nextInt(1, 6);
+	    status.setMsgProfile(randomImg);
 	    
 	    msgStatusRepository.save(status);
 
@@ -240,16 +242,13 @@ public class EmpService {
 	// 사원 정보 수정
 	@Transactional(readOnly = true)
 	public EmpDTO getEmpForEdit(String empId) {
-		log.info("====== getEmpForEdit 시작: empId={}", empId);
 		
 	    Emp emp = empRepository.findById(empId)
 	        .orElseThrow(() -> new EntityNotFoundException("사원 없음: " + empId));
 	    
-	    log.info("====== emp 조회 완료: {}", emp);
-	    log.info("====== emp.getDept(): {}", emp.getDept());
-	    log.info("====== emp.getPosition(): {}", emp.getPosition());
-	    
 	    EmpDTO empDTO = new EmpDTO();
+	    
+	    // 사원 인사 정보 
 	    empDTO.setEmpId(emp.getEmpId());
 	    empDTO.setEmpName(emp.getEmpName());
 	    empDTO.setGender(emp.getGender());
@@ -263,6 +262,13 @@ public class EmpService {
 	    empDTO.setAddress2(emp.getAddress2());
 	    empDTO.setDeptId(emp.getDept().getDeptId());
 	    empDTO.setPosCode(emp.getPosition().getPosCode());
+	    
+	    // 사원 급여정보
+	    empBankRepository.findByEmpId(empId).ifPresent(bank -> {
+	    	empDTO.setBankCode(bank.getBankCode());
+	    	empDTO.setAccountNo(bank.getAccountNo());
+	    	empDTO.setHolder(bank.getHolder());
+    	});
 	    
 	    return empDTO;
 	}

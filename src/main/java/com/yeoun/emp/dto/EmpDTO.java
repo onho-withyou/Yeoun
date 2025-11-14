@@ -49,7 +49,7 @@ public class EmpDTO {
 	// 입사일: 필수 + 과거/오늘
     @NotNull(message = "입사일은 필수입니다.")
     @PastOrPresent(message = "입사일은 오늘 또는 과거 날짜만 가능합니다.")
-	private LocalDate hireDate;  // 입사일 (엔티티 생성 시 자동 등록)	
+	private LocalDate hireDate;  
     
     // 사진파일ID (사진 파일 FK)	
     private Long photoFileId;  

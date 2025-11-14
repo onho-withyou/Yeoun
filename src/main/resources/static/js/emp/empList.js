@@ -7,6 +7,21 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     empDetailModal = new bootstrap.Modal(document.getElementById('empDetailModal'));
+	
+	// 수정 버튼 클릭 이벤트 등록
+	 const editBtn = document.getElementById('editBtn');
+	 if (editBtn) {
+	   editBtn.addEventListener('click', () => {
+	     if (!currentEmpId) {
+	       alert('선택된 사원이 없습니다.');
+	       return;
+	     }
+	     // 수정 화면으로 이동
+	     window.location.href = `/emp/edit/${currentEmpId}`;
+	     // 컨텍스트 경로 있으면: window.location.href = `${window.contextPath}/emp/edit/${currentEmpId}`;
+	   });
+	 }
+	
     loadEmpList();
   });
  
@@ -22,7 +37,6 @@
   function makeGrid(rows) {
 	  empGrid = new tui.Grid({
       el: document.getElementById('grid'), // grid가 들어갈 div
-//      bodyHeight: 540,                     // 표 높이
       rowHeaders: [],                      // 왼쪽 번호/체크박스 없음
       scrollX: true,                       // 가로 스크롤
       scrollY: true,                       // 세로 스크롤
@@ -50,8 +64,8 @@
     empGrid.resetData(rows);
 	
 	// 버튼 클릭 시 상세조회
-	  empGrid.on('click', ev => {
-	    if (ev.columnName !== 'btn') return;
+	empGrid.on('click', ev => {
+		if (ev.columnName !== 'btn') return;
 	    const row = empGrid.getRow(ev.rowKey);
 		if (!row || !row.empId) return;
 	    showEmpDetail(row.empId);
@@ -60,7 +74,7 @@
 
 	// 사원 상세보기
 	function showEmpDetail(empId) {
-	  currentEmpId = empId;	
+	  currentEmpId = empId;	// 수정에 쓸 현재 사번 저장
 		
 	  fetch(`/emp/detail/${empId}`)
 	    .then(res => res.json())
@@ -87,8 +101,3 @@
 	    .catch(() => alert('상세정보 불러오기 실패'));
 	}
 	
-	// 수정 버튼 클릭 시 등록화면(수정모드)으로 이동
-	document.getElementById('editBtn').addEventListener('click', () => {
-	  if (!currentEmpId) return;
-	  window.location.href = `/emp/edit/${currentEmpId}`;
-	});
