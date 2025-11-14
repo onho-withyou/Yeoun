@@ -26,7 +26,7 @@ public class PayRunController {
         String payYymm = (yyyymm == null || yyyymm.isBlank())
                 ? PayrollCalcService.currentYymm() : yyyymm;
 
-        int affected = calcService.runMonthlyBatch(payYymm, overwrite, null, simulate);
+        int affected = calcService.runMonthlyBatch(payYymm, overwrite, null, simulate, null);
         ra.addFlashAttribute("msg", String.format("%s 급여계산 완료: %d건",
                 payYymm, affected));
         return "redirect:/pay/rule"; // 계산 후 돌아갈 화면

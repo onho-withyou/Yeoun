@@ -5,7 +5,6 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,24 +46,40 @@ public class PayrollCalcService {
     @PersistenceContext
     private EntityManager em;
 
-    /* ========================= 시뮬레이션 ========================= */
+    /* =========================전체 시뮬레이션 ========================= */
     @Transactional
     public int simulateMonthly(String yyyymm, boolean overwrite) {
-        return runMonthlyBatch(yyyymm, overwrite, null, true);
+        return runMonthlyBatch(yyyymm, overwrite, null, true , null);
+    }
+    
+    /* ========================= 개별 시뮬레이션 ========================= */
+    @Transactional
+    public int simulateOne(String yyyymm, String empId, boolean overwrite) {
+        return runMonthlyBatch(yyyymm, overwrite, null, true, empId);
     }
 
-    /* ========================= 확정 ========================= */
+    /* =========================전체 확정 ========================= */
     @Transactional
     public int confirmMonthly(String yyyymm, boolean overwrite, String userId) {
-        int calcCnt = runMonthlyBatch(yyyymm, overwrite, null, false);
+        int calcCnt = runMonthlyBatch(yyyymm, overwrite, null, false ,null);
         payslipRepo.confirmMonth(yyyymm, CalcStatus.CONFIRMED, optUser(userId), LocalDateTime.now());
+        return calcCnt;
+    } 
+    
+    /* ========================= 개별 확정 ========================= */
+    @Transactional
+    public int confirmOne(String yyyymm, String empId, boolean overwrite, String userId) {
+        int calcCnt = runMonthlyBatch(yyyymm, overwrite, null, false, empId);
+        // 해당 사원만 확정 처리
+        payslipRepo.confirmOne(yyyymm, empId, CalcStatus.CONFIRMED, optUser(userId), LocalDateTime.now());
         return calcCnt;
     }
 
-    /* ========================= 공통 batch ========================= */
+    /* ========================= 공통 batch (전체/개별 공용) ========================= */
     @Transactional
     public int runMonthlyBatch(String payYymm, boolean overwrite,
-                               Long jobId, boolean simulated) {
+                               Long jobId, boolean simulated,
+                               String targetEmpId) {
 
         final CalcStatus status = simulated ? CalcStatus.SIMULATED : CalcStatus.CALCULATED;
 
@@ -73,28 +88,46 @@ public class PayrollCalcService {
         List<PayCalcRule> calcRules = calcRuleRepo.findAll();
         List<SimpleEmp> employees = employeePort.findActiveEmployees();
 
+        // 🔥 개별 계산인 경우: 해당 사원만 필터링
+        if (targetEmpId != null && !targetEmpId.isBlank()) {
+            employees = employees.stream()
+                    .filter(e -> targetEmpId.equals(e.empId()))
+                    .toList();
+        }
+
         if (employees == null || employees.isEmpty())
             return 0;
 
         int count = 0;
 
+        // 🔥 계산월의 말일
+        LocalDate calcMonthEnd = LocalDate.parse(payYymm + "01", DateTimeFormatter.ofPattern("yyyyMMdd"))
+                .withDayOfMonth(LocalDate.parse(payYymm + "01", DateTimeFormatter.ofPattern("yyyyMMdd")).lengthOfMonth());
+
         for (SimpleEmp emp : employees) {
 
             try {
-                // 이미 데이터 있는데 overwrite=false면 skip
+                // 🔥 입사일 조건 체크: 입사일이 계산월 말일 이후이면 제외
+                if (emp.hireDate() != null && emp.hireDate().isAfter(calcMonthEnd)) {
+                    log.info("입사일로 제외됨 → empId={}, hireDate={}, calcMonthEnd={}",
+                            emp.empId(), emp.hireDate(), calcMonthEnd);
+                    continue;
+                }
+
+                // 이미 계산된 건 skip
                 if (!overwrite && payslipRepo.existsByPayYymmAndEmpId(payYymm, emp.empId()))
                     continue;
 
-                // 금액 계산
+                // ------- 기존 급여 계산 로직 그대로 --------
                 BigDecimal baseAmt = calcBase(emp, rules, items, calcRules);
-                BigDecimal alwAmt = calcAllowances(emp, rules, items, calcRules, baseAmt);
-                BigDecimal dedAmt = calcDeductions(emp, rules, items, calcRules, baseAmt, alwAmt);
+                BigDecimal alwAmt  = calcAllowances(emp, rules, items, calcRules, baseAmt);
+                BigDecimal dedAmt  = calcDeductions(emp, rules, items, calcRules, baseAmt, alwAmt);
 
                 BigDecimal totAmt = baseAmt.add(alwAmt);
                 BigDecimal netAmt = totAmt.subtract(dedAmt);
 
-                // Slip 생성 또는 기존 조회
-                PayrollPayslip slip = payslipRepo.findByPayYymmAndEmpId(payYymm, emp.empId())
+                PayrollPayslip slip = payslipRepo
+                        .findByPayYymmAndEmpId(payYymm, emp.empId())
                         .orElse(new PayrollPayslip());
 
                 boolean isNew = (slip.getPayslipId() == null);
@@ -112,7 +145,6 @@ public class PayrollCalcService {
                 slip.setCalcDt(LocalDateTime.now());
                 slip.setJobId(jobId);
 
-                // 신규 insert
                 if (isNew) {
                     em.persist(slip);
                     em.flush();
@@ -362,7 +394,8 @@ public class PayrollCalcService {
         String getDeptName(String deptId);
     }
 
-    public record SimpleEmp(String empId, String deptId) {}
+    public record SimpleEmp(String empId, String deptId, LocalDate hireDate) {}
+
     
     /** 특정 월 계산 상태 조회 */
     public PayCalcStatusDTO getStatus(String yyyymm) {
@@ -371,6 +404,8 @@ public class PayrollCalcService {
         BigDecimal total = payslipRepo.sumTotalByYymm(yyyymm);
         BigDecimal ded   = payslipRepo.sumDeductByYymm(yyyymm);
         BigDecimal net   = payslipRepo.sumNetByYymm(yyyymm);
+        String calcStatus = payslipRepo.findFirstStatusByYyyymm(yyyymm)
+                .orElse("READY");
 
         boolean calculated = (count > 0);
 
@@ -380,7 +415,8 @@ public class PayrollCalcService {
                 count,
                 total,
                 ded,
-                net
+                net,
+                calcStatus
         );
     }
     

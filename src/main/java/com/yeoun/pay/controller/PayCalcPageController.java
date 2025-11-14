@@ -1,5 +1,8 @@
 package com.yeoun.pay.controller;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
@@ -54,16 +57,26 @@ public class PayCalcPageController {
     public String page(@RequestParam(name="yyyymm", required=false) String yyyymm,
                        Model model) {
 
+        // 선택 월
         String mm = (yyyymm == null || yyyymm.isBlank())
                 ? PayrollCalcService.currentYymm()
                 : yyyymm;
+
+        // 최근 12개월 생성
+        List<String> months = new ArrayList<>();
+        LocalDate now = LocalDate.now();
+        for (int i = 0; i < 12; i++) {
+            LocalDate d = now.minusMonths(i);
+            months.add(d.format(DateTimeFormatter.ofPattern("yyyyMM")));
+        }
 
         List<PayslipViewDTO> slips = querySvc.findForView(mm);
 
         var totals = querySvc.totals(slips);
 
+        model.addAttribute("months", months);  // ⭐ 드롭다운에 전달
         model.addAttribute("yyyymm", mm);
-        model.addAttribute("status", statusSvc.getStatus(mm)); // ✔ 정상 작동!
+        model.addAttribute("status", statusSvc.getStatus(mm));
         model.addAttribute("slips", slips);
         model.addAttribute("sumPay", totals[0]);
         model.addAttribute("sumDed", totals[1]);
@@ -71,6 +84,7 @@ public class PayCalcPageController {
 
         return "pay/pay_calc_run";
     }
+
 
 
     /** ✅ [POST] 가계산 (시뮬레이션) */
@@ -84,9 +98,24 @@ public class PayCalcPageController {
 
         return "redirect:/pay/calc?yyyymm=" + yyyymm; // ✅ 다시 GET으로 리다이렉트
     }
+    
+    /** ✅ [POST] 특정 사원만 가계산 (시뮬레이션) */
+    @PostMapping("/simulateOne")
+    public String simulateOne(@RequestParam(name = "yyyymm") String yyyymm,
+                              @RequestParam(name = "empId") String empId,
+                              @RequestParam(name = "overwrite", defaultValue = "true") boolean overwrite,
+                              RedirectAttributes ra) {
+
+        int cnt = payrollCalcService.simulateOne(yyyymm, empId, overwrite);
+        ra.addFlashAttribute("msg",
+                "사원 " + empId + " 가계산 완료: " + yyyymm + " (" + cnt + "건)");
+
+        return "redirect:/pay/calc?yyyymm=" + yyyymm;
+    }
 
 
-    /** ✅ [POST] 실제 확정 처리 */
+
+    /** ✅ [POST] 전체 확정 처리 */
     @PostMapping("/confirm")
     public String confirm(
             @RequestParam(name = "yyyymm") String yyyymm,
@@ -105,6 +134,24 @@ public class PayCalcPageController {
 
         return "redirect:/pay/calc?yyyymm=" + yyyymm;
     }
+    
+    /** ✅ [POST] 특정 사원만 확정 처리 */
+    @PostMapping("/confirmOne")
+    public String confirmOne(@RequestParam(name = "yyyymm") String yyyymm,
+                             @RequestParam(name = "empId") String empId,
+                             @RequestParam(name = "overwrite", defaultValue = "true") boolean overwrite,
+                             RedirectAttributes ra) {
+
+        // TODO: 나중에 로그인 사용자 이름으로 바꾸고 싶으면 여기서 userName 가져오기
+        String confirmUser = "SYSTEM";
+
+        int cnt = payrollCalcService.confirmOne(yyyymm, empId, overwrite, confirmUser);
+        ra.addFlashAttribute("msg",
+                "사원 " + empId + " 급여 확정 완료: " + yyyymm + " (" + cnt + "건)");
+
+        return "redirect:/pay/calc?yyyymm=" + yyyymm;
+    }
+
 
 
 

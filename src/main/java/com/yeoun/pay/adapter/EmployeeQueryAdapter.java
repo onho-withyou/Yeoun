@@ -29,7 +29,8 @@ public class EmployeeQueryAdapter implements EmployeeQueryPort {
         return rows.stream()
                 .map(r -> new PayrollCalcService.SimpleEmp(
                         r.getEmpId(),
-                        r.getDeptId()
+                        r.getDeptId(),
+                        r.getHireDate()
                 ))
                 .toList();
     }
