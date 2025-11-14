@@ -24,13 +24,13 @@ public class MsgFavorite {
     @MapsId("empId")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "EMP_ID", nullable = false)
-    private Emp emp;
+    private Emp empId;
 
     // FV_USER
     @MapsId("fvUser")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FV_USER", nullable = false)
-    private Emp favoriteUser;
+    private Emp fvUser;
 
     // 추가 일시
     @CreatedDate

@@ -36,6 +36,7 @@ public class MsgStatusDTO {
 		private String posName;					// 직무 이름 (추가필드)
 
 		private String status;					// 상태 표시용 (뷰페이지용 추가필드)
+	    private String favoriteYn;				// 즐겨찾기 여부 (뷰페이지용 추가필드)
 		
 		
 		// ===========================================================
