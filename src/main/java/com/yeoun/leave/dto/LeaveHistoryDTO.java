@@ -14,7 +14,7 @@ import lombok.Setter;
 @Setter
 @ToString
 public class LeaveHistoryDTO {
-	private Long LeaveHistId;
+	private Long leaveHistId;
 	private Long emp_id; // 직원 id
 	private String dept_id; // 부서 Id
 	private Long leave_id; // 연차 Id

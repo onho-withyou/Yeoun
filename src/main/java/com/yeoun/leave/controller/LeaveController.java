@@ -60,7 +60,7 @@ public class LeaveController {
 		LocalDate endOfYear = LocalDate.of(LocalDate.now().getYear(), 12, 31);
 		
 		List<LeaveHistoryDTO> leaveList = leaveService.getMyLeaveList(loginDTO.getEmpId(), startOfYear, endOfYear);
-		log.info(">>>>>>>>>>>>>>>>>> leaveList : " + leaveList);
+		log.info(">>>>>>>>>>>>>>>>>> startOfYear : " + startOfYear);
 		
 		return ResponseEntity.ok(leaveList);
 	}
