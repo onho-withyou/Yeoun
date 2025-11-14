@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.yeoun.pay.entity.PayrollPayslip;
 import com.yeoun.pay.enums.CalcStatus;
+
 import com.yeoun.pay.dto.PayslipViewDTO;
 
 public interface PayrollPayslipRepository extends JpaRepository<PayrollPayslip, Long> {
@@ -105,6 +106,9 @@ public interface PayrollPayslipRepository extends JpaRepository<PayrollPayslip, 
             """,
             nativeQuery = true)
     Optional<String> findFirstStatusByYyyymm(@Param("yyyymm") String yyyymm);
-
+    
     
 }
+
+
+
