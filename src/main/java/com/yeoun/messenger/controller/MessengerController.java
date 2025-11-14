@@ -2,13 +2,18 @@ package com.yeoun.messenger.controller;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.yeoun.auth.dto.LoginDTO;
+import com.yeoun.messenger.dto.MsgFavoriteDTO;
 import com.yeoun.messenger.dto.MsgStatusDTO;
 import com.yeoun.messenger.service.MessengerService;
 
@@ -43,11 +48,31 @@ public class MessengerController {
 	}
 	
 	// ==========================================================================
+	// 친구목록 즐겨찾기 토글
+	@PatchMapping("/favorite/{id}")
+	public ResponseEntity<?> toggleFavorite(Authentication authentication, @PathVariable("id") String id){
+		
+		MsgFavoriteDTO msgFavoriteDTO = new MsgFavoriteDTO();
+		msgFavoriteDTO.setEmpId(((LoginDTO)authentication.getPrincipal()).getUsername());
+		msgFavoriteDTO.setFvUser(id);
+		
+		if (messengerService.searchFavorite(msgFavoriteDTO)) {
+			messengerService.deleteFavorite(msgFavoriteDTO);
+		} else {
+			messengerService.insertFavorite(msgFavoriteDTO);
+		}
+		
+		return ResponseEntity.ok().body("success");
+	}
+	
+	// ==========================================================================
 	// 메신저 팝업 채팅방
 	@GetMapping("/chat")
 	public String chat(Model model) {
 		return "/messenger/chat";
 	}
+	
+
 	
 
 }

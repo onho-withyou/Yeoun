@@ -30,11 +30,13 @@ import com.yeoun.messenger.entity.MsgStatus;
 import com.yeoun.messenger.repository.MsgStatusRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
 @Transactional
+@RequiredArgsConstructor
 public class EmpService {
 	
 	private final EmpRepository empRepository;
@@ -44,23 +46,6 @@ public class EmpService {
 	private final MsgStatusRepository msgStatusRepository;
 	private final BCryptPasswordEncoder encoder;
 
-	public EmpService(EmpRepository empRepository,
-					  DeptRepository deptRepository,
-					  PositionRepository positionRepository, 
-					  RoleRepository roleRepository,
-					  EmpRoleRepository empRoleRepository,
-					  EmpBankRepository empBankRepository,
-					  CommonCodeRepository commonCodeRepository,
-					  MsgStatusRepository msgStatusRepository,
-					  BCryptPasswordEncoder encoder) {
-		this.empRepository = empRepository;
-		this.deptRepository = deptRepository;
-		this.positionRepository = positionRepository;
-		this.empBankRepository = empBankRepository;
-		this.msgStatusRepository = msgStatusRepository;
-		this.encoder = encoder;
-	}
-	
 	// 사원 신규 등록
 	@Transactional
 	public void registEmp(EmpDTO empDTO) {
