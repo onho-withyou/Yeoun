@@ -184,8 +184,8 @@ function yearHoliday(year){
 			return response.json();
 		})
 		.then(data => {
-			holidayData = data.response.body.items.item;
-			const schedule = convertHolidayDataToSchedules(holidayData);
+			const beforeConvert = data.response.body.items.item;
+			holidayData = convertHolidayDataToSchedules(beforeConvert);
 			// 캘린더 템플릿 지정
 			calendar.setOptions({
 //			    template: {
@@ -200,7 +200,7 @@ function yearHoliday(year){
 			// 스케줄 캘린더에 추가
 //			console.log("스케줄데이터", schedule);
 			calendar.clear();
-            calendar.createEvents(schedule);
+            calendar.createEvents(holidayData);
 		})
 		.catch(console.error);
 }
@@ -316,17 +316,20 @@ function getScheduleData(params) {
 	.then(data => { // response가 ok일때
 		console.log(data);
 		// 조회한 월단위 일정을 캘린더 데이터로 변환
-		const monthlySchedule = convertScheduleDataToSchedules(data);
-		if(!calendar) initCalendar();
-		console.log(calendar);
-		console.log(typeof calendar.getEvents);
+		monthlyScheduleData = convertScheduleDataToSchedules(data);
+//		if(!calendar) initCalendar();
+//		conSOLE.LOG(CALENDAR);
+//		CONSOle.log(typeof calendar.getDate());
 		//공휴일로 등록된이벤트 제외하고 삭제
-		calendar.getEvents().forEach(ev => {
-			if(ev.calendarId !== "holiday") {
-				calendar.deleteEvent(ev.id, ev.calendarId);
-			}
-		});
-		calendar.createEvents(monthlySchedule);
+//		calendar.getEvents().forEach(ev => {
+//			if(ev.calendarId !== "holiday") {
+//				calendar.deleteEvent(ev.id, ev.calendarId);
+//			}
+//		});
+	}).then(() => {
+		calendar.clear();
+		calendar.createEvents(holidayData);
+		calendar.createEvents(monthlyScheduleData);
 	}).catch(error => {
 		console.error('에러', error)
 		alert("데이터 조회 실패");
@@ -336,15 +339,19 @@ function getScheduleData(params) {
 function convertScheduleDataToSchedules(monthScheduleData) {
 	return monthScheduleData.map(item => {
 		const isAllday = item.alldayYN == "Y";
+		console.log(isAllday, item);
+		console.log(item.scheduleStart);
+		console.log(item.scheduleFinish);
+		console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@")
 		return {
 			id: String(item.scheduleId),
-			calendarId: getCalendarId(item.scheduleType, item.deptId),
+			calendarId: getCalendarId(item.scheduleType),
 			title: item.scheduleTitle,
 			body: item.scheduleContent || "",
 			start: item.scheduleStart.replace(" ", "T"),
 			end: item.scheduleFinish.replace(" ", "T"),
 			category: isAllday ? "allday" : "time",
-			isAllday
+//			isAllday
 //			raw: { ...item } // 기타등등 넣을정보
 		};
 	});
