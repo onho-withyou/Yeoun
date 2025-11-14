@@ -118,15 +118,12 @@
 		        </h5>
 		        <h5 class="d-flex">결재자명(기안자): 
 		        	<div class="mb-6 mb-0">
-		            	<select class="form-select">
+		            	 <select class="form-select">
 		            		<option selected>인사테이블에서불러오기 이름(사번)</option>
-		            		<option name="emp" value="조주영">조주영</option>
-							<option name="emp" value="신필용">신필용</option>
-							<option name="emp" value="서지원">서지원</option>
-							<option name="emp" value="이아름">이아름</option>
-							<option name="emp" value="이정민">이정민</option>
-							<option name="emp" value="박다정">박다정</option>
-		            	</select>
+		            		 <option th:value="${getEmpList}" th:text="${getEmpList}">     
+							 </option>
+
+		            	</select> 
 	            	</div>
 		        </h5>
 		        <h5 class="d-flex">결재 완료기간: 
