@@ -1,10 +1,46 @@
 // 인사 발령 JS
 
+let originalEmpList = [];
+
 document.addEventListener('DOMContentLoaded', function() {
 	// 페이지 로드되면 사원 목록 불러오기
 	loadEmpListForAction();
+	
+	// 검색 버튼
+	document.getElementById('btnSearchEmp')
+		.addEventListener('click', onSearchEmp);
 });
 
+// 0. 검색 실행 함수
+function onSearchEmp() {
+	
+	const dept = document.getElementById('searchDept').value;
+	const pos = document.getElementById('searchPos').value;
+	const keyword = document.getElementById('searchKeyword').value.trim();
+	
+	let filterd = originalEmpList;
+	
+	// 부서 필터
+	if (dept) {
+		filterd = filterd.filter(emp => emp.deptName === dept);
+	}
+	
+	// 직급 필터
+	if (pos) {
+		filterd = filterd.filter(emp => emp.posName === pos);
+	}
+	
+	// 이름 또는 사번 키워드
+	if (keyword) {
+		const lower = keyword.toLowerCase();
+		filterd = filterd.filter(emp =>
+			emp.empName.toLowerCase().includes(lower) ||
+			emp.empId.includes(keyword)
+		);
+	}
+	
+	renderEmpTable(filterd);
+}
 
 // 1. 사원 목록 불러오기
 function loadEmpListForAction() {
@@ -19,6 +55,7 @@ function loadEmpListForAction() {
 			return res.json();
 		})
 		.then(data => {
+			originalEmpList = data;
 			renderEmpTable(data);
 		})
 		.catch(err => {

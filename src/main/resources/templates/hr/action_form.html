@@ -18,16 +18,20 @@
                 <select class="form-select" id="searchDept">
                   <option value="">전체</option>
                   <!-- 나중에 th:each로 부서 목록 바인딩 -->
-<!--                   <option th:each="dept : ${deptList}"
-<!--                           th:value="${dept.deptId}" -->
-<!--                           th:text="${dept.deptName}"></option> --> 
+                  <option th:each="d : ${deptList}"
+          				  th:value="${d.deptName}"
+       					  th:text="${d.deptName}">
+  				  </option>
                 </select>
               </div>
               <div class="col-md-3">
                 <label class="form-label">직급</label>
                 <select class="form-select" id="searchPos">
                   <option value="">전체</option>
-                  <!-- 직급 목록 바인딩 -->
+				  <option th:each="p : ${posList}"
+				          th:value="${p.posName}"
+				          th:text="${p.posName}">
+				  </option>
                 </select>
               </div>
               <div class="col-md-4">
