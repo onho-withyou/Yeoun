@@ -30,13 +30,11 @@ public class MsgMessage {
     // 채팅방 ID
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ROOM_ID", nullable = false)
-    @BatchSize(size = 50)
     private MsgRoom roomId;
 
     // 보낸사람 ID
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SENDER_ID", nullable = false)
-    @BatchSize(size = 50)
     private Emp senderId;
 
     // 메시지 내용
