@@ -8,7 +8,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.h2.engine.Role;
+//import org.h2.engine.Role;
 import org.springframework.stereotype.Service;
 
 import com.yeoun.attendance.dto.AccessLogDTO;
@@ -79,9 +79,9 @@ public class AttendanceService {
 		return "OUT";
 	}
 	
-	// 출/퇴근 수기 등록
+	// 출퇴근 수기 등록
 	@Transactional
-	public void registAttendance(AttendanceDTO attendanceDTO) {
+	public void registAttendance(AttendanceDTO attendanceDTO, LoginDTO loginDTO) {
 		LocalDate today = LocalDate.now();
 		
 		// 출근 기록 있는지 확인
@@ -96,6 +96,7 @@ public class AttendanceService {
 				.orElseThrow(() -> new NoSuchElementException("사원을 찾을 수 없습니다."));
 		
 		attendanceDTO.setWorkDate(today);
+		attendanceDTO.setCreatedUser(loginDTO.getEmpId());
 		
 		Attendance newAttendance = Attendance.createAttendance(attendanceDTO, emp);
 		
@@ -188,11 +189,16 @@ public class AttendanceService {
 
 	// 출퇴근 수정
 	@Transactional
-	public void modifyAttendance(Long attendanceId, AttendanceDTO attendanceDTO) {
+	public void modifyAttendance(Long attendanceId, AttendanceDTO attendanceDTO, LoginDTO loginDTO) {
 		Attendance attendance = attendanceRepository.findById(attendanceId)
 				.orElseThrow(() -> new NoSuchElementException("해당 출퇴근 기록을 찾을 수 없습니다."));
 		
-		attendance.modifyAttendance(attendanceDTO.getWorkIn(), attendanceDTO.getWorkOut(), attendanceDTO.getStatusCode());
+		LocalTime workIn = attendanceDTO.getWorkIn();
+		LocalTime workOut = attendanceDTO.getWorkOut();
+		String statusCode = attendanceDTO.getStatusCode();
+		String updateUserEmpId = loginDTO.getEmpId();
+		
+		attendance.modifyAttendance(workIn, workOut, statusCode, updateUserEmpId);
 	}
 
 	// 외근 등록

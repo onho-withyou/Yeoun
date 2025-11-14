@@ -90,6 +90,7 @@ public class Attendance {
 		attendance.workIn = attendanceDTO.getWorkIn();
 		attendance.workOut = attendanceDTO.getWorkOut();
 		attendance.statusCode = attendanceDTO.getStatusCode();
+		attendance.createdUser = attendanceDTO.getCreatedUser();
 		attendance.updateDuration();
 		
 		return attendance;
@@ -144,10 +145,11 @@ public class Attendance {
 	}
 	
 	// 근태 수정 로직
-	public void modifyAttendance(LocalTime workIn, LocalTime workOut, String statusCode) {
+	public void modifyAttendance(LocalTime workIn, LocalTime workOut, String statusCode, String updateUserEmpId) {
 		this.workIn = workIn;
 		this.workOut = workOut;
 		this.statusCode = statusCode;
+		this.updatedUser = updateUserEmpId;
 		updateDuration();
 	}
 	
