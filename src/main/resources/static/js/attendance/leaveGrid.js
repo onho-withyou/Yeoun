@@ -77,9 +77,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 	const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
 	const endDate = new Date(year, month, 0).toISOString().split("T")[0];
 	
-	// 날짜 input 기본값 설정
-	document.querySelector("#startDate").value = startDate;
-	document.querySelector("#endDate").value = endDate;
-	
-	await loadAttendanceList(startDate, endDate);
+	await loadLeaveList(startDate, endDate);
 });

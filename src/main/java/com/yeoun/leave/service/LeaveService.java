@@ -13,6 +13,7 @@ import com.yeoun.attendance.repository.WorkPolicyRepository;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.leave.dto.LeaveDTO;
+import com.yeoun.leave.dto.LeaveHistoryDTO;
 import com.yeoun.leave.entity.AnnualLeave;
 import com.yeoun.leave.repository.LeaveHistoryRepository;
 import com.yeoun.leave.repository.LeaveRepository;
@@ -88,12 +89,12 @@ public class LeaveService {
 	}
 	
 	// 개인 연차 현황(리스트)
-//	public List<LeaveDTO> getMyLeaveList(String empId, LocalDate startOfYear, LocalDate endOfYear) {
-//		return historyRepository.findByEmp_EmpIdAndStartDateBetween(empId, startOfYear, endOfYear)
-//				.stream()
-//				.map(leave -> LeaveDTO.fromEntity(leave))
-//				.collect(Collectors.toList());
-//	}
+	public List<LeaveHistoryDTO> getMyLeaveList(String empId, LocalDate startOfYear, LocalDate endOfYear) {
+		return historyRepository.findByEmp_EmpIdAndStartDateBetween(empId, startOfYear, endOfYear)
+				.stream()
+				.map(LeaveHistoryDTO::fromEntity)
+				.collect(Collectors.toList());
+	}
 	
 	// 연차 재계산 (비동기)
 	@Async
