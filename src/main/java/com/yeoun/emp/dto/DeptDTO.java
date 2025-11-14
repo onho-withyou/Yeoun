@@ -33,10 +33,10 @@ public class DeptDTO {
 	private String deptName;
 	
 	// 상위 부서ID (자기참조)
-	private String parentId;
+	private String parentDeptId;
 	
 	// 부서장ID
-	private String headEmpId;
+	private String managerEmpId;
 	
 	// 사용여부
 	private String useYn = "Y";
