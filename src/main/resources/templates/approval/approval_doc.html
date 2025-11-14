@@ -100,6 +100,7 @@
 		        <h3 class="modal-title" id="Drafting">기안서 작성</h3>
 		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		      </div>
+		    <form>
 		      <div class="modal-body">
 		        <h5 class="d-flex">문서 날짜 : <p id="today-date"></p></h5>
 		        <h5 class="d-flex">문서 제목 : 	                 
@@ -118,15 +119,14 @@
 		        </h5>
 		        <h5 class="d-flex">결재자명(기안자): 
 		        	<div class="mb-6 mb-0">
-		            	<select class="form-select">
+		            	 <select class="form-select">
 		            		<option selected>인사테이블에서불러오기 이름(사번)</option>
-		            		<option name="emp" value="조주영">조주영</option>
-							<option name="emp" value="신필용">신필용</option>
-							<option name="emp" value="서지원">서지원</option>
-							<option name="emp" value="이아름">이아름</option>
-							<option name="emp" value="이정민">이정민</option>
-							<option name="emp" value="박다정">박다정</option>
-		            	</select>
+		            		 <option th:each="item, iterStat : ${getEmp}" 
+							 		th:value="${iterStat.index}" 
+							 		th:text="${iterStat.index} + ' : ' + ${item.empName} + '(' + ${item.empId} + ')'">
+							 </option>
+
+		            	</select> 
 	            	</div>
 		        </h5>
 		        <h5 class="d-flex">결재 완료기간: 
@@ -268,7 +268,7 @@
 		        <button type="button" class="btn btn-primary">저장</button>
 		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
 		      </div>
-	
+			</form>
 		</div>
 			
 		
