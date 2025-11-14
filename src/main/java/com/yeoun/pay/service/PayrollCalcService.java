@@ -362,7 +362,7 @@ public class PayrollCalcService {
         String getDeptName(String deptId);
     }
 
-    public record SimpleEmp(String empId, String deptId, BigDecimal baseSalary) {}
+    public record SimpleEmp(String empId, String deptId) {}
     
     /** 특정 월 계산 상태 조회 */
     public PayCalcStatusDTO getStatus(String yyyymm) {

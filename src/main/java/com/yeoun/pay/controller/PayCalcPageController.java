@@ -10,10 +10,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.yeoun.pay.dto.PayCalcStatusDTO;
 import com.yeoun.pay.dto.PayslipDetailDTO;
 import com.yeoun.pay.dto.PayslipViewDTO;
+import com.yeoun.pay.repository.EmpNativeRepository;
 import com.yeoun.pay.repository.PayrollPayslipRepository;
 import com.yeoun.pay.service.PayCalcStatusService;
 import com.yeoun.pay.service.PayrollCalcQueryService;
 import com.yeoun.pay.service.PayrollCalcService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,6 +37,7 @@ public class PayCalcPageController {
     private final PayrollCalcQueryService querySvc;       // 조회용 서비스
     private final PayrollPayslipRepository payslipRepo;   // 명세서 Repository
     private final PayrollCalcQueryService payrollCalcQueryService;
+    private final EmpNativeRepository empNativeRepository;
    
     
 
@@ -88,11 +93,20 @@ public class PayCalcPageController {
             @RequestParam(name = "overwrite", defaultValue = "true") boolean overwrite,
             RedirectAttributes ra) {
 
-        int cnt = payrollCalcService.confirmMonthly(yyyymm, overwrite, "SYSTEM");
-        ra.addFlashAttribute("msg", "급여 확정 완료: " + yyyymm + " (" + cnt + "건)");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String empId = auth.getName();  // 로그인 사번
+
+        // 사번으로 이름 조회
+        String empName = empNativeRepository.findEmpNameByEmpId(empId);
+
+        int cnt = payrollCalcService.confirmMonthly(yyyymm, overwrite, empName);
+
+        ra.addFlashAttribute("msg", empName + " 님이 급여 확정 완료했습니다.");
 
         return "redirect:/pay/calc?yyyymm=" + yyyymm;
     }
+
+
 
     /** 급여 상세 조회 (AJAX) */
     @GetMapping("/detail")
