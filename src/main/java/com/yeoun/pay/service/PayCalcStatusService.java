@@ -22,6 +22,9 @@ public class PayCalcStatusService {
         BigDecimal tot = repo.sumTotalByYymm(yyyymm);
         BigDecimal ded = repo.sumDeductByYymm(yyyymm);
         BigDecimal net = repo.sumNetByYymm(yyyymm);
-        return new PayCalcStatusDTO(yyyymm, done, cnt, tot, ded, net);
+        String calcStatus = repo.findFirstStatusByYyyymm(yyyymm)
+                .orElse("READY");
+        
+        return new PayCalcStatusDTO(yyyymm, done, cnt, tot, ded, net,calcStatus);
     }
 }

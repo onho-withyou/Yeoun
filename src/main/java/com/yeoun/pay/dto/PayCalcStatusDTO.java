@@ -8,5 +8,7 @@ public record PayCalcStatusDTO(
         long count,
         BigDecimal totalAmt,
         BigDecimal dedAmt,
-        BigDecimal netAmt
+        BigDecimal netAmt,
+        String calcStatus
+        
 ) {}
