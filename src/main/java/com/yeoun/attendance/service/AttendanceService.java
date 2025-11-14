@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,9 @@ import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
+import com.yeoun.leave.entity.AnnualLeave;
+import com.yeoun.leave.repository.LeaveRepository;
+import com.yeoun.leave.service.LeaveService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +40,7 @@ public class AttendanceService {
 	private final AttendanceRepository attendanceRepository;
 	private final WorkPolicyRepository workPolicyRepository;
 	private final AccessLogRepository accessLogRepository;
+	private final LeaveService leaveService;
 	private final EmpRepository empRepository;
 
 	// 출/퇴근 등록
@@ -151,7 +156,17 @@ public class AttendanceService {
 			// optional이 존재하면 변경된 부분 업데이트
 			if (optional.isPresent()) {
 				WorkPolicy policy = optional.get();
+				
+				String oldBasis = policy.getAnnualBasis(); // 변경되기 전 연차기준
+				
 				policy.changePolicy(workPolicyDTO);
+				
+				// 연차 기준 변경 확인
+				Boolean isAnnualBasisChanged = !Objects.equals(oldBasis, policy.getAnnualBasis());
+				
+				if (isAnnualBasisChanged) {
+					leaveService.recalculateAllAnnualLeaves(policy);
+				}
 				
 				return "근무 정책이 수정되었습니다.";
 			} else {

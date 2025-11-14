@@ -17,7 +17,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class AccessLogDTO {
-	private Long id;
+	private Long accessId;
 	
 	@NotNull(message = "사원번호는 필수 입력값입니다")
 	private String empId; // 외출한 사원 번호

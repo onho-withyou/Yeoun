@@ -21,7 +21,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "work_policy")
+@Table(name = "WORK_POLICY")
 @SequenceGenerator(
 		name = "WORK_POLICY_SEQ_GENERATOR",
 		sequenceName = "WORK_POLICY_SEQ", 
@@ -35,7 +35,7 @@ import lombok.ToString;
 public class WorkPolicy {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "WORK_POLICY_SEQ_GENERATOR")
-	private Long id;
+	private Long policyId;
 	
 	@Column(nullable = false, length = 5)
 	private String inTime; // 출근 기준 시간
@@ -69,5 +69,6 @@ public class WorkPolicy {
 		this.lunchOut = workPolicyDTO.getLunchOut();
 		this.lateLimit = workPolicyDTO.getLateLimit();
 		this.annualBasis = workPolicyDTO.getAnnualBasis();
+		this.updatedDate = LocalDate.now();
 	}
 }
