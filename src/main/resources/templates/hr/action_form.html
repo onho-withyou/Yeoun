@@ -18,7 +18,6 @@
                 <label class="form-label">부서</label>
                 <select class="form-select" id="searchDept">
                   <option value="">전체</option>
-                  <!-- 나중에 th:each로 부서 목록 바인딩 -->
                   <option th:each="d : ${deptList}"
           				  th:value="${d.deptName}"
        					  th:text="${d.deptName}">
@@ -116,10 +115,9 @@
                         <label class="form-label required">발령 구분</label>
                         <select class="form-select" th:field="*{actionType}">
                           <option value="">발령구분 선택</option>
-                          <!-- 공통코드 바인딩 -->
-                          <!-- <option th:each="code : ${actionTypeList}"
-                                  th:value="${code.code}"
-                                  th:text="${code.name}"></option> -->
+                          <option th:each="code : ${actionTypeList}"
+                                  th:value="${code.codeId}"
+                                  th:text="${code.codeName}"></option>
                         </select>
                       </div>
                       <div class="col-md-6">
@@ -132,14 +130,20 @@
                         <label class="form-label required">발령 부서</label>
                         <select class="form-select" th:field="*{toDeptId}">
                           <option value="">부서 선택</option>
-                          <!-- deptList 바인딩 -->
+                          <option th:each="d : ${deptList}"
+          					      th:value="${d.deptName}"
+       					 	      th:text="${d.deptName}">
+  				 		  </option>
                         </select>
                       </div>
                       <div class="col-md-6">
                         <label class="form-label required">발령 직급</label>
                         <select class="form-select" th:field="*{toPosCode}">
                           <option value="">직급 선택</option>
-                          <!-- positionList 바인딩 -->
+                          <option th:each="p : ${posList}"
+				                  th:value="${p.posName}"
+				                  th:text="${p.posName}">
+				          </option>
                         </select>
                       </div>
 
@@ -152,10 +156,12 @@
 
                       <div class="col-md-6">
                         <label class="form-label">결재자</label>
-                        <select class="form-select" th:field="*{approverEmpId}">
-                          <option value="">결재자 선택</option>
-                          <!-- 결재자 후보 사원 목록 바인딩 -->
-                        </select>
+<!--                         <select class="form-select" th:field="*{approverEmpId}"> -->
+<!--                           <option value="">결재자 선택</option> -->
+<!--                         </select> -->
+						<select class="form-select" th:field="*{approverEmpId}" disabled>
+						  <option value="">(결재 기능 준비 중)</option>
+						</select>
                       </div>
                     </div>
                   </div>
