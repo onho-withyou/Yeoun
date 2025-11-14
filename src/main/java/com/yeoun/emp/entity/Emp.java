@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.yeoun.auth.entity.Role;
+import com.yeoun.leave.entity.AnnualLeave;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -19,6 +20,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -124,5 +126,9 @@ public class Emp {
 		// 사용자 권한 목록 객체(List<EmpRole>)에 1개의 권한이 저장된 EmpRole 엔티티 추가
 		empRoles.add(empRole);
 	}
+	
+	// 연차 테이블과 연동
+	@OneToOne(mappedBy = "emp", cascade = CascadeType.ALL, orphanRemoval = true)
+	private AnnualLeave annualLeave;
 	
 }

@@ -116,8 +116,7 @@ public class EmpDTO {
 	private String holder; 
 
 	// 통장 사본 파일 ID (선택)
-	private Long fileId;  
-
+	private Long fileId; 
 	
 	// -----------------------------------------------------------------------
 	private static ModelMapper modelMapper = new ModelMapper();
