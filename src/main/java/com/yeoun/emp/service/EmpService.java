@@ -273,6 +273,42 @@ public class EmpService {
 	    return empDTO;
 	}
 
+	@Transactional
+	public void updateEmp(EmpDTO empDTO) {
+		
+		Emp emp = empRepository.findById(empDTO.getEmpId())
+		            .orElseThrow(() -> new IllegalArgumentException("사원 없음"));
+
+		    // 변경 가능한 필드만 업데이트
+		    emp.setEmpName(empDTO.getEmpName());
+		    emp.setMobile(empDTO.getMobile());
+		    emp.setEmail(empDTO.getEmail());
+		    emp.setStatus(empDTO.getStatus());
+		    emp.setPostCode(empDTO.getPostCode());
+		    emp.setAddress1(empDTO.getAddress1());
+		    emp.setAddress2(empDTO.getAddress2());
+		    
+		    // === 급여계좌 업데이트 ===
+		    if (empDTO.getBankCode() != null && empDTO.getAccountNo() != null) {
+		        EmpBank empBank = empBankRepository.findByEmpId(emp.getEmpId())
+		                .orElseGet(() -> {
+		                    EmpBank bank = new EmpBank();
+		                    bank.setEmpId(emp.getEmpId());
+		                    return bank;
+		                });
+
+		        empBank.setBankCode(empDTO.getBankCode());
+		        empBank.setAccountNo(empDTO.getAccountNo());
+		        empBank.setHolder(empDTO.getHolder());
+		        empBank.setFileId(empDTO.getFileId());
+
+		        empBankRepository.save(empBank);
+		    }
+		    
+		    // 추후 사진 추가
+		
+	}
+
 	
 
 

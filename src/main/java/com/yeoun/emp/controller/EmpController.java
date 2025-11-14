@@ -126,10 +126,15 @@ public class EmpController {
 		model.addAttribute("positionList", positionRepository.findActive());
 		
 		// 상태 셀렉트용 공통코드 (재직/휴직/퇴직 등) 
-		// 추후 추가
 		model.addAttribute("statusList", List.of("ACTIVE", "LEAVE", "RESIGNED"));
 		
 		return "emp/emp_form";
+	}
+	
+	@PostMapping("/edit")
+	public String updateEmp(@ModelAttribute("empDTO") EmpDTO empDTO) {
+	    empService.updateEmp(empDTO);
+	    return "redirect:/emp/list";  
 	}
 	
 	
