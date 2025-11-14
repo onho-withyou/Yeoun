@@ -69,5 +69,6 @@ public class WorkPolicy {
 		this.lunchOut = workPolicyDTO.getLunchOut();
 		this.lateLimit = workPolicyDTO.getLateLimit();
 		this.annualBasis = workPolicyDTO.getAnnualBasis();
+		this.updatedDate = LocalDate.now();
 	}
 }
