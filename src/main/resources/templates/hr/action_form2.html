@@ -56,14 +56,29 @@
               <div class="card-header">
                 <strong>사원 목록</strong>
               </div>
-              
               <div class="card-body p-0">
-			    <div id="empGrid"></div>
-				
-				<div class="p-2 small text">
-				  ※ 사원 행을 클릭하면 오른쪽에 선택된 사원 정보가 표시됩니다.
-				</div>
-		      </div>
+                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                  <table class="table table-hover mb-0" id="empTable">
+                    <thead class="table-light">
+                    <tr class="text-center">
+                      <th>사원번호</th>
+                      <th>이름</th>
+                      <th>부서</th>
+                      <th>직급</th>
+                      <th>전화번호</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="text-center">
+                    <!-- JS로 렌더링 -->
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="p-2 small text-muted">
+                  사원 행을 클릭하면 아래에 선택된 사원 정보가 표시됩니다.
+                </div>
+              </div>
             </div>
           </div>
 
@@ -178,8 +193,6 @@
       </form>
 	</div>
 	
-<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css">
-<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 <script src="/js/hr/hrAction.js"></script>	
 	
 </th:block>
