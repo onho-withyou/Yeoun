@@ -6,6 +6,7 @@ import java.util.stream.Collector;
 
 import org.hibernate.validator.constraints.Length;
 import org.modelmapper.ModelMapper;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import com.yeoun.emp.entity.Emp;
 
@@ -49,6 +50,7 @@ public class EmpDTO {
 	// 입사일: 필수 + 과거/오늘
     @NotNull(message = "입사일은 필수입니다.")
     @PastOrPresent(message = "입사일은 오늘 또는 과거 날짜만 가능합니다.")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate hireDate;  
     
     // 사진파일ID (사진 파일 FK)	
