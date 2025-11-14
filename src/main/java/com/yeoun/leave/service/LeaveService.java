@@ -3,6 +3,7 @@ package com.yeoun.leave.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.leave.dto.LeaveDTO;
 import com.yeoun.leave.entity.AnnualLeave;
+import com.yeoun.leave.repository.LeaveHistoryRepository;
 import com.yeoun.leave.repository.LeaveRepository;
 import com.yeoun.pay.entity.PayrollPayslip;
 import com.yeoun.pay.repository.PayrollPayslipRepository;
@@ -28,8 +30,9 @@ public class LeaveService {
 	
 	private final EmpRepository empRepository;
 	private final LeaveRepository leaveRepository;
+	private final LeaveHistoryRepository historyRepository;
 	private final WorkPolicyRepository workPolicyRepository;
-	 private final PayrollPayslipRepository payslipRepo;
+	private final PayrollPayslipRepository payslipRepo;
 
 	// 직원 연차 생성
 	@Transactional
@@ -43,7 +46,7 @@ public class LeaveService {
 		}
 		
 		// 근무정책 조회
-		WorkPolicy workPolicy = workPolicyRepository.findFirstByOrderByIdAsc()
+		WorkPolicy workPolicy = workPolicyRepository.findFirstByOrderByPolicyIdAsc()
 				.orElseThrow(() -> new NoSuchElementException("등록된 근무정책이 없습니다."));
 		
 		LocalDate periodStart = emp.getHireDate();
@@ -83,6 +86,14 @@ public class LeaveService {
 		 
 		return leaveDTO;
 	}
+	
+	// 개인 연차 현황(리스트)
+//	public List<LeaveDTO> getMyLeaveList(String empId, LocalDate startOfYear, LocalDate endOfYear) {
+//		return historyRepository.findByEmp_EmpIdAndStartDateBetween(empId, startOfYear, endOfYear)
+//				.stream()
+//				.map(leave -> LeaveDTO.fromEntity(leave))
+//				.collect(Collectors.toList());
+//	}
 	
 	// 연차 재계산 (비동기)
 	@Async
