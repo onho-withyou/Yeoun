@@ -2,6 +2,7 @@
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{/layouts/layout.html}">
 <head>
+<link rel="stylesheet" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css" />
 </head>
 <body>
 	<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
@@ -43,30 +44,6 @@
 		<div class="card mt-4">
 			<div class="table-responsive text-nowrap">
 				<div id="grid"></div>
-				<table class="table">
-					<thead class="table-light">
-						<tr>
-							<th>번호</th>
-							<th>연차유형</th>
-							<th>휴가시작일</th>
-							<th>휴가종료일</th>
-							<th>사용일수</th>
-							<th>사유</th>
-							<th>승인상태</th>
-						</tr>
-					</thead>
-					<tbody class="table-border-bottom-0">
-						<tr>
-							<td>1</td>
-							<td>휴가</td>
-							<td>2025-11-06</td>
-							<td>2025-11-07</td>
-							<td>1일</td>
-							<td>개인사유</td>
-							<td>승인</td>
-						</tr>
-					</tbody>
-				</table>
 			</div>
 		</div>
 		<div class="modal fade" id="modalCenter" tabindex="-1" style="display: none;" aria-hidden="true">
@@ -120,8 +97,9 @@
 				alert(message);
 			}
 		</script>
+		<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.js"></script>
 		<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-		<script src="/js/attendance/leaveGrid.js"></script>
+		<script src="/js/leave/leaveGrid.js"></script>
 	</th:block>
 </body>
 </th:block>
