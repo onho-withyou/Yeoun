@@ -73,22 +73,24 @@
 			</nav>
 			<div class="tab-content" id="nav-tabContent">
 			  <div class="tab-pane fade show active" id="nav-approval" role="tabpanel" aria-labelledby="nav-approval-tab">
-			  	<h2>table1</h2>
+			  	<h2>결재사항</h2>
 			  	<div id="approvalGrid"></div>
 			  </div>
 			  <div class="tab-pane fade active" id="nav-all" role="tabpanel" aria-labelledby="nav-all-tab">
-			  		<h2>table2</h2>
-			  		<div id="grid2"></div>
+			  		<h2>전체결재</h2>
+			  		<div id="allApprovalGrid"></div>
 			  </div>
 			  <div class="tab-pane fade active" id="nav-my" role="tabpanel" aria-labelledby="nav-my-tab">
-			  		<h2>table3</h2>
-			  		<div id="grid3"></div>
+			  		<h2>내 결재목록</h2>
+			  		<div id="myApprovalGrid"></div>
 			  </div>
 			  <div class="tab-pane fade active" id="nav-waiting" role="tabpanel" aria-labelledby="nav-waiting-tab">
-			  		<h2>table4</h2>
+			  		<h2>결재대기</h2>
+					<div id="waitingApprovalGrid"></div>
 			  </div>
 			  <div class="tab-pane fade active" id="nav-done" role="tabpanel" aria-labelledby="nav-done-tab">
-			  		<h2>table5</h2>
+			  		<h2>결재완료</h2>
+					<div id="doneApprovalGrid"></div>
 			  </div>
 			</div>
 		</div>
@@ -273,179 +275,201 @@
 
 <th:block layout:fragment="myScript">
 <script>
+
+
+	//grid - 2.전체결재 - 나와관련된 모든 결재문서
+	window.onload = function() {
+		console.log("페이지가 모두 로드되었습니다!");
+		fetchApprovalDocs().then(data => {
+			console.log(data);
+			grid2.resetData(data);
+		});
+	};
+
+	function fetchApprovalDocs() {
+		return fetch('/approval/approvalDocGrid')
+			.then(response => response.json())
+			.then(data => {
+				
+				let colData = [];
+				let obj = {};
+
+				data.map((item,index) => {
+					obj["row_no"] = item[0];
+					obj["approval_id"]	 = item[1];
+					obj["approval_title"] = item[2];	
+					obj["emp_id"] = item[3];
+					obj["emp_name"] = item[4];
+					obj["dept_id"] = item[5];
+					obj["dept_name"] = item[6];
+					obj["approver"] = item[7];
+					obj["pos_code"] = item[8];
+					obj["pos_name"] = item[9];
+					obj["created_date"] = item[10];
+					obj["finish_date"] = item[11];
+					obj["doc_status"] = item[12];
+					colData.push(obj);
+					obj = {};
+				});
+
+				console.log("objectArray outside map:",colData);
+				
+				return colData;
+			})
+			.catch(error => {
+				console.error('Error fetching approval documents:', error);
+			});
+	}
 	const Grid = tui.Grid;
-	const instance = new Grid({
-		  el: document.getElementById('approvalGrid'), // Container element
+	const grid1 = new Grid({
+		  el: document.getElementById('approvalGrid'), // 결재사항
 		  columns: [
 	
-		    {
-		      header: '결재순번'
-		      ,name: 'row_no'
-		      ,align: 'center'
-		    },
-		    {
-		      header: '문서제목'
-		      ,name: 'document_title'
-		      ,align: 'center'
-		    },
-		    {
-		      header: '기안자'
-		      ,name: 'drafter'
-		      ,align: 'center'
-		    },
-		    {
-		      header: '부서명'
-		      ,name: 'department_name'
-		      ,align: 'center'
-		    },
-		    {
-			  header: '직급'
-			  ,name: 'rank'
-			  ,align: 'center'
-			},
-			{
-			  header: '생성일'
-			  ,name: 'creation_date'
-			  ,align: 'center'
-			},
-			{
-			  header: '결재완료일자'
-			  ,name: 'payment_completion_date'
-			  ,align: 'center'
-			},
-			{
-			  header: '상태'
-			  ,name: 'state'
-			  ,align: 'center'
-			},
-			{
-			  header: '결재여부'
-			  ,name: 'payment_status'
-			  ,align: 'center'
-			},
-			{
-			  header: '상세보기'
-			  ,name: 'view_details'
-			  ,align: 'center'
-
-			}
+		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
+			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
+			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
+			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
+			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
+			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
+			,{header: '상세보기' ,name: 'view_details' ,align: 'center'}
 		  ],
 		  data: [
-		    {
+			{
 		    	row_no: 1,
-				document_title: '지출 결의서',
-				drafter:'',
-				department_name:'',
-				rank:'',
-				creation_date:'',
-				payment_completion_date:'',
-				state:'',
-				payment_status:'',
+				approval_id: 'A-202306-001',
+				approval_title: '지출 결의서',
+				emp_id: '2104502',	
+				emp_name: '이정현',
+				dept_id: 'D-001',
+				dept_name: '개발팀',
+				approver: 'd-이사랑',
+				pos_code: 'P-002',
+				pos_name: '대리',
+				created_date: '2024-06-01',
+				finish_date: '2024-06-05',
+				doc_status: '결재완료',
 				view_details:'<button class="btn btn-primary me-2">상세</button>'
-				
 		    },
 		    {
 		    	row_no: 2,
-				document_title: '휴가(연차)신청서',
-				drafter:'',
-				department_name:'',
-				rank:'',
-				creation_date:'',
-				payment_completion_date:'',
-				state:'',
-				payment_status:'',
+				approval_id: 'A-202306-002',
+				approval_title: '휴가(연차)신청서',
+				emp_id: '2104503',
+				emp_name: '한가인',
+				dept_id: 'D-002',
+				dept_name: '인사팀',
+				approver: 'i-정지훈',
+				pos_code: 'P-003',
+				pos_name: '과장',
+				created_date: '2024-06-02',
+				finish_date: '2024-06-06',
+				doc_status: '결재대기',
 				view_details:'<button class="btn btn-primary me-2">상세</button>'
-				
-		    }
+		    },
 		  ]
 		});
 // 	instance.resetData(newData); // Call API of instance's public method
 	
 // 	Grid.applyTheme('clean'); // Call API of static method
-	
 	const grid2 = new Grid({
-	    el: document.getElementById('grid2'), // 두 번째 컨테이너
+	    el: document.getElementById('allApprovalGrid'), // 전체결재
 	    columns: [
-	    	
-		    {
-		      header: '결재순번'
-		      ,name: 'row_no'
-		      ,align: 'center'
-		    },
-		    {
-		      header: '문서제목'
-		      ,name: 'document_title'
-		      ,align: 'center'
-		    },
-		    {
-		      header: '기안자'
-		      ,name: 'drafter'
-		      ,align: 'center'
-		    },
-		    {
-		      header: '부서명'
-		      ,name: 'department_name'
-		      ,align: 'center'
-		    },
-		    {
-			  header: '직급'
-			  ,name: 'rank'
-			  ,align: 'center'
-			},
-			{
-			  header: '생성일'
-			  ,name: 'creation_date'
-			  ,align: 'center'
-			},
-			{
-			  header: '결재완료일자'
-			  ,name: 'payment_completion_date'
-			  ,align: 'center'
-			},
-			{
-			  header: '상태'
-			  ,name: 'state'
-			  ,align: 'center'
-			},
-			{
-			  header: '결재여부'
-			  ,name: 'payment_status'
-			  ,align: 'center'
-			},
-			{
-			  header: '상세보기'
-			  ,name: 'view_details'
-			  ,align: 'center'
-
-			}
+	
+		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
+			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
+			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
+			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
+			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
+			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
+			,{header: '상세보기' ,name: 'view_details' ,align: 'center'}
 		  ],
 		  data: [
-		    {
-		    	row_no: 1,
-				document_title: '지출 결의서',
-				drafter:'',
-				department_name:'',
-				rank:'',
-				creation_date:'',
-				payment_completion_date:'',
-				state:'',
-				payment_status:'',
-				view_details:'<button class="btn btn-primary me-2">상세</button>'
-				
-		    },
-		    {
-		    	row_no: 2,
-				document_title: '휴가(연차)신청서',
-				drafter:'',
-				department_name:'',
-				rank:'',
-				creation_date:'',
-				payment_completion_date:'',
-				state:'',
-				payment_status:'',
-				view_details:'<button class="btn btn-primary me-2">상세</button>'
-				
-		    }
+		  ]
+	});
+
+	const grid3 = new Grid({
+	    el: document.getElementById('myApprovalGrid'), // 내 결재목록
+	    columns: [
+	
+		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
+			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
+			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
+			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
+			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
+			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
+			,{header: '상세보기' ,name: 'view_details' ,align: 'center'}
+		  ],
+		  data: [
+		    
+		  ]
+	});
+
+	const grid4 = new Grid({
+	    el: document.getElementById('waitingApprovalGrid'), //결재대기
+	    columns: [
+	
+		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
+			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
+			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
+			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
+			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
+			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
+			,{header: '상세보기' ,name: 'view_details' ,align: 'center'}
+		  ],
+		  data: [
+		   
+		  ]
+	});
+
+	const grid5 = new Grid({
+	    el: document.getElementById('doneApprovalGrid'), //결재완료
+	    columns: [
+	
+		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
+			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
+			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
+			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
+			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
+			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
+			,{header: '상세보기' ,name: 'view_details' ,align: 'center'}
+		  ],
+		  data: [
+		  
 		  ]
 	});
 	
@@ -471,7 +495,8 @@
 	//셀렉트박스
 	var approvarDiv = document.querySelector('#approvar');
 	var deptList = "[[${deptList}]]";
-    var selectBox = new tui.SelectBox('#select-box', {
+	console.log("deptList",deptList);
+	var selectBox = new tui.SelectBox('#select-box', {
       data: [
         {
           label: '인사팀',
@@ -614,4 +639,3 @@
 	 
 </script>
 </th:block>
-
