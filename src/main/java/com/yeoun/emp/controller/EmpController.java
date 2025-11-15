@@ -7,28 +7,36 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.yeoun.common.service.CommonCodeService;
 import com.yeoun.emp.dto.EmpDTO;
+import com.yeoun.emp.dto.EmpDetailDTO;
 import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.DeptRepository;
+import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.emp.repository.PositionRepository;
 import com.yeoun.emp.service.EmpService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @Controller
 @RequestMapping("/emp")
-@RequiredArgsConstructor
 @Log4j2
+@RequiredArgsConstructor
 public class EmpController {
 	
 	private final EmpService empService;
+	private final CommonCodeService commonCodeService;
 	private final DeptRepository deptRepository;
 	private final PositionRepository positionRepository;
 
@@ -38,9 +46,13 @@ public class EmpController {
 	@GetMapping("/regist")
 	public String registEmp(Model model) {
 		model.addAttribute("empDTO", new EmpDTO());
+		model.addAttribute("mode", "create");
+		
+		model.addAttribute("bankList", commonCodeService.getBankList());
 		model.addAttribute("deptList", deptRepository.findActive());
 		model.addAttribute("positionList", positionRepository.findActive());
-		return "emp/emp_regist";
+		
+		return "emp/emp_form";
 	}
 
 	// POST 방식으로 요청되는 "/regist" 요청 매핑
@@ -62,7 +74,7 @@ public class EmpController {
 		if(bindingResult.hasErrors()) {
 			model.addAttribute("deptList", empService.getDeptList());
 			model.addAttribute("positionList", empService.getPositionList());
-			return "emp/emp_regist";
+			return "emp/emp_form";
 		}
 		
 		// EmpService - registEmp() 메서드 호출하여 사원 등록 처리 요청
@@ -73,15 +85,59 @@ public class EmpController {
 		
 	}
 	
+	// ====================================================================================
 	// 사원 목록 조회
 	@GetMapping("/list")
-	public String showEmpList(Model model) {
-		
-		// 서비스에서 리스트 가져오기
-		List<EmpListDTO> empList = empService.getEmpList();
-		model.addAttribute("empList", empList);
-		return "emp/emp_list";
+	public String getEmpListForm() {
+		log.info("▶ 사원목록 페이지 요청");
+		return "/emp/emp_list";
 	}
+	
+	// AJAX 데이터 로딩
+	@ResponseBody
+	@GetMapping("/list/data")
+	public List<EmpListDTO> getEmpList() {
+		log.info("▶ 사원목록 데이터 요청 (JSON)");
+		return empService.getEmpList();
+	}
+	
+	// ====================================================================================
+	// 사원 정보 상세 조회
+	@ResponseBody
+	@GetMapping("/detail/{empId}")
+	public EmpDetailDTO getEmpDetail(@PathVariable("empId") String empId) {
+		return empService.getEmpDetail(empId);
+	}
+	
+	// ====================================================================================
+	// 사원 정보 수정
+	@GetMapping("/edit/{empId}")
+	public String editEmp(@PathVariable("empId") String empId, Model model) {
+		
+		// 수정용 DTO 조회
+	    EmpDTO empDTO = empService.getEmpForEdit(empId);
+	    
+		// 공통 모델 세팅
+	    model.addAttribute("empDTO", empDTO);
+		model.addAttribute("mode", "edit");
+		
+		model.addAttribute("bankList", commonCodeService.getBankList());
+		model.addAttribute("deptList", deptRepository.findActive());
+		model.addAttribute("positionList", positionRepository.findActive());
+		
+		// 상태 셀렉트용 공통코드 (재직/휴직/퇴직 등) 
+		model.addAttribute("statusList", List.of("ACTIVE", "LEAVE", "RESIGNED"));
+		
+		return "emp/emp_form";
+	}
+	
+	@PostMapping("/edit")
+	public String updateEmp(@ModelAttribute("empDTO") EmpDTO empDTO) {
+	    empService.updateEmp(empDTO);
+	    return "redirect:/emp/list";  
+	}
+	
+	
 	
 	
 	

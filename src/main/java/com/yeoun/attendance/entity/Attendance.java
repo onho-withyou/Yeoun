@@ -11,13 +11,18 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.yeoun.attendance.dto.AttendanceDTO;
+import com.yeoun.emp.entity.Emp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -42,10 +47,11 @@ import lombok.ToString;
 public class Attendance {
 	@Id 
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "ATTENDANCE_SEQ_GENERATOR")
-	private Long id;
+	private Long attendanceId;
 	
-	@Column(nullable = false, length = 7)
-	private String empId; // 출근한 사원 번호
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "EMP_ID", nullable = false)
+	private Emp emp; // 출근한 사원 번호
 	
 	@Column(nullable = false)
 	@CreatedDate
@@ -76,26 +82,26 @@ public class Attendance {
 	private LocalDateTime updatedDate; // 수정일자
 	
 	// 수기로 출퇴근 등록
-	public static Attendance createAttendance(String empId, LocalDate date, 
-			LocalTime workIn, LocalTime workOut, String statusCode) {
+	public static Attendance createAttendance(AttendanceDTO attendanceDTO, Emp emp) {
 		Attendance attendance = new Attendance();
 		
-		attendance.empId = empId;
-		attendance.workDate = date;
-		attendance.workIn = workIn;
-		attendance.workOut = workOut;
-		attendance.statusCode = statusCode;
+		attendance.emp = emp;
+		attendance.workDate = attendanceDTO.getWorkDate();
+		attendance.workIn = attendanceDTO.getWorkIn();
+		attendance.workOut = attendanceDTO.getWorkOut();
+		attendance.statusCode = attendanceDTO.getStatusCode();
+		attendance.createdUser = attendanceDTO.getCreatedUser();
 		attendance.updateDuration();
 		
 		return attendance;
 	}
 	
 	// 자동 출근 (출퇴근 버튼 찍었을 경우)
-	public static Attendance createForWorkIn(String empId, LocalDate date, LocalTime now, 
+	public static Attendance createForWorkIn(Emp emp, LocalDate date, LocalTime now, 
 			LocalTime standardIn, int lateLimit, AccessLog accessLog) {
 		Attendance attendance = new Attendance();
 
-		attendance.empId = empId;
+		attendance.emp = emp;
 		attendance.workDate = date;
 		
 		// 외근 여부 확인
@@ -121,27 +127,12 @@ public class Attendance {
 	
 	// 퇴근 처리
 	public void recordWorkOut(LocalTime now, LocalTime standardOut, AccessLog accessLog) {
-		LocalTime  outTime = null;
-		
-		if (!now.isBefore(standardOut)) {
-			outTime = now; // 퇴근 시간은 기준 시간 이후 실제 퇴근 버튼 누른 시점
-		}
-		
-//		if (accessLog != null && "OUTWORK".equalsIgnoreCase(accessLog.getAccessType())) {
-//			LocalTime returnTime = accessLog.getReturnTime();
-//			
-//			if (returnTime != null && !returnTime.isBefore(standardOut)) {
-//				outTime = returnTime;
-//			}
-//		}
+		LocalTime  outTime = now;
 		
 	    if (outTime != null) {
 	        this.workOut = outTime;
 	        updateDuration();
 	    }
-		
-//		this.workOut = outTime; // 퇴근 시간을 외근 복귀 시간으로 변경
-//		updateDuration();
 	}
 	
 	// 근무시간 계산
@@ -154,16 +145,27 @@ public class Attendance {
 	}
 	
 	// 근태 수정 로직
-	public void modifyAttendance(LocalTime workIn, LocalTime workOut, String statusCode) {
+	public void modifyAttendance(LocalTime workIn, LocalTime workOut, String statusCode, String updateUserEmpId) {
 		this.workIn = workIn;
 		this.workOut = workOut;
 		this.statusCode = statusCode;
+		this.updatedUser = updateUserEmpId;
 		updateDuration();
 	}
 	
 	// 퇴근 중복 방지 체크
 	public boolean isAlreadyOut() {
 		return this.workOut != null;
+	}
+
+	// 외근 등록 후 데이터 변경
+	public void markAsInByOutwork(LocalTime outTime, WorkPolicy workPolicy, String reason) {
+		LocalTime standardIn = LocalTime.parse(workPolicy.getInTime());
+		int lateLimit = workPolicy.getLateLimit();
+		
+		this.statusCode = (outTime.isAfter(standardIn.plusMinutes(lateLimit))) ? "LATE" : "IN";
+		this.workIn = outTime;
+		this.remark = reason;
 	}
 }
 

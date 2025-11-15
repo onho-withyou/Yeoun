@@ -6,12 +6,17 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.yeoun.emp.entity.Emp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -45,8 +50,9 @@ public class Notice {
 	private String noticeYN = "N"; // 공지 상단 배치여부
 
 	
-	@Column(nullable = false)
-	private Long createdUser; // 공지 작성자
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "CREATED_USER", referencedColumnName = "EMP_ID", nullable = false)
+	private Emp emp;
 	
 	@CreatedDate
 	private LocalDateTime createdDate; // 공지 작성일

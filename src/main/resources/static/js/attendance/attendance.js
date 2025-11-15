@@ -1,15 +1,24 @@
+// 메타 태그에서 CSRF 값 가져오기
+const csrfToken = document.querySelector('meta[name="_csrf_token"]').getAttribute('content');
+const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]').getAttribute('content');
+
 // 출/퇴근 버튼 클릭 시 사원번호를 전달해서 출/퇴근 기록 요청
 async function attendance(empId) {
 	const PROCESS_ATTENDANCE = `/attendance/toggle/${empId}`;
-	const response = await fetch(PROCESS_ATTENDANCE, { method: "POST"});
+	const response = await fetch(PROCESS_ATTENDANCE, { 
+		method: "POST",
+		headers: {
+			[csrfHeader]: csrfToken, 
+			"Content-Type": "application/json"
+		}
+	});
 	const data = await response.json();
-	console.log(data);
 	
 	return data; // {success: true, status: status} 로 반환
 }
 
-const handleAttendanceToggle = async () => {
-	const result =  await attendance(2511301);
+const handleAttendanceToggle = async (empId) => {
+	const result =  await attendance(empId);
 	
 	let msg = "";
 	
@@ -51,7 +60,7 @@ const searchEmp = async () => {
 			empName.value = data.empName;
 		}
 	} catch (error) {
-		console.erro("사원 조회 중 오류 : " , error);
+		console.error("사원 조회 중 오류 : " , error);
 		alert("사원 조회 중 오류가 발생했습니다.");
 	}
 }
@@ -96,7 +105,7 @@ const openModal = async (mode, attendanceId = null) => {
 		document.querySelector("select[name='statusCode']").value = data.statusCode;
 	} else { // 등록 모드
 		modalTitle.textContent = "출/퇴근 등록";
-		saveBtn.textContent = "등록";attendance
+		saveBtn.textContent = "등록";
 		resetModal(); // 모달 초기화
 	}
 	modalInstance.show();
@@ -111,17 +120,21 @@ const saveAttendance = async () => {
 	const statusCode = document.querySelector("select[name='statusCode']").value;
 	
 	const url = currentMode === "edit" ? `/attendance/${currentAttendanceId}` : "/attendance";
-	const method = currentMode === "edit" ? "PUT" : "POST";
+	const method = currentMode === "edit" ? "PATCH" : "POST";
 	
 	try {
 		const response = await fetch(url, {
 			method,
-			headers: {"Content-Type": "application/json" },
-			body: JSON.stringify({empId, workIn, workOut, statusCode})
+			headers: {
+				[csrfHeader]: csrfToken, 
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({empId, workIn, workOut, statusCode}),
 		});
 		
 		if (!response.ok) {
 			const errorData = await response.json();
+			console.log("fadfs")
 			throw new Error(errorData.message || "요청 처리 중 오류가 발생했습니다.");
 		}
 		
@@ -129,7 +142,10 @@ const saveAttendance = async () => {
 		const result = await response.json();
 		alert(result.message || "정상적으로 처리되었습니다.");
 	
-		location.reload();
+		// fetch 응답 전 리로드 되지 않도록 약 0.3초 지연
+		setTimeout(() => {
+			location.reload();
+		}, 300);
 	} catch (error) {
 		console.error("에러 : " + error);
 		alert(error.message || "서버와 통신 중 오류가 발생했습니다.");

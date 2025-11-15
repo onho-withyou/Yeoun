@@ -5,19 +5,20 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.yeoun.main.dto.ScheduleDTO;
-import com.yeoun.main.entity.Schedule;
 import com.yeoun.main.service.ScheduleService;
-import com.yeoun.notice.dto.NoticeDTO;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class MainController {
 	// 메인페이지 맵핑
 	@GetMapping("")
 	public String Main() {
+		
 		return "/main/main";
 	}
 	
@@ -49,26 +51,73 @@ public class MainController {
 		return "/main/schedule_list";
 	}
 	
+	// 일정등록
 	@PostMapping("/schedule")
-	public ResponseEntity<Map<String, String>> postMethodName(@ModelAttribute("scheduleDTO")@Valid ScheduleDTO scheduleDTO, BindingResult bindingResult) {
-		System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@여기 1");
-		System.out.println("DTO : " + scheduleDTO);
+	public ResponseEntity<Map<String, String>> createSchedule(@ModelAttribute("scheduleDTO")@Valid ScheduleDTO scheduleDTO, 
+			BindingResult bindingResult, Authentication authentication) {
 		Map<String, String> msg = new HashMap<>();
+		// 일정등록 요청 데이터 검증
 		if(bindingResult.hasErrors()) {
-			msg.put("msg", "일정 등록에 실패했습니다.2222222222");
+			msg.put("msg", "일정 등록에 실패했습니다.");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		}
-		System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@여기 2");
+		// 일정등록 요청 데이터 이상 없을때
+		// 일정등록 요청
 		try {
-			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@여기 3");
-			scheduleService.createSchedule(scheduleDTO);
-			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@여기 4");
+			scheduleService.createSchedule(scheduleDTO, authentication);
 			msg.put("msg", "일정이 등록되었습니다.");
 			return ResponseEntity.ok(msg);
 		
-		} catch (Exception e) {
-			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@여기 5");
+		} catch (Exception e) { // 에러발생시 일정등록 실패 메세지전달
 			msg.put("msg", "일정 등록에 실패했습니다 :" + e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
+		}
+	}
+	
+	// 일정수정
+	@PatchMapping("/schedule")
+	public ResponseEntity<Map<String, String>> modifySchedule(@ModelAttribute("scheduleDTO")@Valid ScheduleDTO scheduleDTO, 
+			BindingResult bindingResult, Authentication authentication) {
+		Map<String, String> msg = new HashMap<>();
+		// 일정수정 요청 데이터 검증
+		if(bindingResult.hasErrors()) {
+			msg.put("msg", "일정 수정에 실패했습니다.");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
+		}
+		// 일정수정 요청 데이터 이상 없을때
+		// 일정수정 요청
+		try {
+			scheduleService.modifySchedule(scheduleDTO, authentication);
+			msg.put("msg", "일정이 수정되었습니다.");
+			return ResponseEntity.ok(msg);
+		
+		} catch (Exception e) { // 에러발생시 일정등록 실패 메세지전달
+			msg.put("msg", "일정 수정에 실패했습니다 :" + e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
+		}
+	}
+	
+	// 일정삭제
+	@DeleteMapping("/schedule")
+	public ResponseEntity<Map<String, String>> deleteSchedule(@ModelAttribute("scheduleDTO")@Valid ScheduleDTO scheduleDTO, 
+			BindingResult bindingResult, Authentication authentication) {
+		Map<String, String> msg = new HashMap<>();
+		System.out.println(scheduleDTO);
+		
+		// 일정수정 요청 데이터 검증
+		if(bindingResult.hasErrors()) {
+			msg.put("msg", "일정 삭제에 실패했습니다.");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
+		}
+		// 일정수정 요청 데이터 이상 없을때
+		// 일정수정 요청
+		try {
+			scheduleService.deleteSchedule(scheduleDTO, authentication);
+			msg.put("msg", "일정이 삭제되었습니다.");
+			return ResponseEntity.ok(msg);
+			
+		} catch (Exception e) { // 에러발생시 일정등록 실패 메세지전달
+			msg.put("msg", "일정 삭제에 실패했습니다 :" + e.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		}
 	}

@@ -1,0 +1,115 @@
+package com.yeoun.leave.service;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
+
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
+import com.yeoun.attendance.entity.WorkPolicy;
+import com.yeoun.attendance.repository.WorkPolicyRepository;
+import com.yeoun.emp.entity.Emp;
+import com.yeoun.emp.repository.EmpRepository;
+import com.yeoun.leave.dto.LeaveDTO;
+import com.yeoun.leave.entity.AnnualLeave;
+//import com.yeoun.leave.repository.LeaveHistoryRepository;
+import com.yeoun.leave.repository.LeaveRepository;
+import com.yeoun.pay.entity.PayrollPayslip;
+import com.yeoun.pay.repository.PayrollPayslipRepository;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
+@Service
+@RequiredArgsConstructor
+@Log4j2
+public class LeaveService {
+	
+	private final EmpRepository empRepository;
+	private final LeaveRepository leaveRepository;
+//	private final LeaveHistoryRepository historyRepository;
+	private final WorkPolicyRepository workPolicyRepository;
+	private final PayrollPayslipRepository payslipRepo;
+
+	// 직원 연차 생성
+	@Transactional
+	public void createAnnualLeaveForEmp(String empId) {
+		Emp emp = empRepository.findById(empId)
+				.orElseThrow(() -> new NoSuchElementException("사원을 찾을 수 없습니다."));
+		
+		// 연차 생성 되었는지 확인
+		if (leaveRepository.existsByEmp(emp)) {
+			throw new IllegalStateException("이미 연차 데이터가 존재합니다.");
+		}
+		
+		// 근무정책 조회
+		WorkPolicy workPolicy = workPolicyRepository.findFirstByOrderByPolicyIdAsc()
+				.orElseThrow(() -> new NoSuchElementException("등록된 근무정책이 없습니다."));
+		
+		LocalDate periodStart = emp.getHireDate();
+		LocalDate periodend = emp.getHireDate().plusYears(1).minusDays(1);
+		
+		AnnualLeave annualLeave = AnnualLeave.builder()
+				.emp(emp)
+				.periodStart(periodStart)
+				.periodEnd(periodend)
+				.build();
+		
+		// 정책 기준으로 연차 계산
+		annualLeave.updateTotaldays(workPolicy);
+		
+		leaveRepository.save(annualLeave);
+	}
+
+	// 개인 연차 조회
+	public LeaveDTO getAnnualLeave(String empId) {
+		// 연차 정보 가져오기 
+		AnnualLeave annualLeave = leaveRepository.findByEmp_EmpId(empId)
+				.orElseThrow(() -> new NoSuchElementException("해당 사원의 연차 정보를 찾을 수 없습니다."));
+		
+		LocalDate now = LocalDate.now();
+		
+		// 현재 날짜 기준으로 yyyymm 생성
+		String currentDate = String.format("%d%02d", now.getYear(), now.getMonthValue());
+		
+		 PayrollPayslip payslip = payslipRepo
+	                .findByPayYymmAndEmpId(currentDate, empId)
+	                .orElseThrow(() -> new IllegalArgumentException("명세서 없음"));
+		 
+		LeaveDTO leaveDTO = LeaveDTO.fromEntity(annualLeave);
+		
+		// 연차 수당 추계액 계산
+		leaveDTO.calculateAnnualLeaveAllowance(payslip.getBaseAmt(), payslip.getAlwAmt());
+		 
+		return leaveDTO;
+	}
+	
+	// 개인 연차 현황(리스트)
+//	public List<LeaveDTO> getMyLeaveList(String empId, LocalDate startOfYear, LocalDate endOfYear) {
+//		return historyRepository.findByEmp_EmpIdAndStartDateBetween(empId, startOfYear, endOfYear)
+//				.stream()
+//				.map(leave -> LeaveDTO.fromEntity(leave))
+//				.collect(Collectors.toList());
+//	}
+	
+	// 연차 재계산 (비동기)
+	@Async
+	@Transactional
+	public void recalculateAllAnnualLeaves(WorkPolicy workPolicy) {
+		try {
+			// 전체 직원의 연차 가져오기
+			List<AnnualLeave> annualLeaves = leaveRepository.findAll();
+			
+			// 변경된 연차 기준에 맞게 업데이트
+			for (AnnualLeave leave : annualLeaves) {
+				leave.updateTotaldays(workPolicy);
+			}
+		} catch (Exception e) {
+			log.error("연차 계산 중 오류 발생 : " + e.getMessage());
+		}
+	}
+
+}

@@ -9,18 +9,23 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.yeoun.auth.entity.Role;
+import com.yeoun.leave.entity.AnnualLeave;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
+@Entity(name = "Emp")
 @Table(name = "EMP")
 @Getter
 @Setter
@@ -72,6 +77,16 @@ public class Emp {
 	@Column(name = "HIRE_DATE")
 	private LocalDate hireDate;	
 	
+    // 부서ID (FK: DEPT.DEPT_ID)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "DEPT_ID", nullable = false)
+    private Dept dept;
+  
+    // 직급코드 (FK: POSITION.POS_CODE)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "POS_CODE", nullable = false, referencedColumnName = "POS_CODE")
+    private Position position;
+	
 	// 재직 상태
 	@Column(name = "STATUS", nullable = false, length = 10)
 	private String status;		
@@ -112,5 +127,8 @@ public class Emp {
 		empRoles.add(empRole);
 	}
 	
+	// 연차 테이블과 연동
+	@OneToOne(mappedBy = "emp", cascade = CascadeType.ALL, orphanRemoval = true)
+	private AnnualLeave annualLeave;
 	
 }

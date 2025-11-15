@@ -1,12 +1,10 @@
 package com.yeoun.emp.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,134 +12,129 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.auth.repository.RoleRepository;
+import com.yeoun.common.repository.CommonCodeRepository;
 import com.yeoun.emp.dto.EmpDTO;
+import com.yeoun.emp.dto.EmpDetailDTO;
 import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
+import com.yeoun.emp.entity.EmpBank;
 import com.yeoun.emp.entity.EmpRole;
-import com.yeoun.emp.entity.Employment;
 import com.yeoun.emp.entity.Position;
 import com.yeoun.emp.repository.DeptRepository;
+import com.yeoun.emp.repository.EmpBankRepository;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.emp.repository.EmpRoleRepository;
-import com.yeoun.emp.repository.EmploymentRepository;
 import com.yeoun.emp.repository.PositionRepository;
+import com.yeoun.messenger.entity.MsgStatus;
+import com.yeoun.messenger.repository.MsgStatusRepository;
 
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
 @Transactional
+@RequiredArgsConstructor
 public class EmpService {
 	
 	private final EmpRepository empRepository;
 	private final DeptRepository deptRepository;
 	private final PositionRepository positionRepository;
-	private final EmploymentRepository employmentRepository;
+	private final EmpBankRepository empBankRepository;
+	private final MsgStatusRepository msgStatusRepository;
 	private final BCryptPasswordEncoder encoder;
 
-	public EmpService(EmpRepository empRepository,
-					  DeptRepository deptRepository,
-					  PositionRepository positionRepository, 
-					  EmploymentRepository employmentRepository,
-					  RoleRepository roleRepository,
-					  EmpRoleRepository empRoleRepository,
-					  BCryptPasswordEncoder encoder) {
-		this.empRepository = empRepository;
-		this.deptRepository = deptRepository;
-		this.positionRepository = positionRepository;
-		this.employmentRepository = employmentRepository;
-		this.encoder = encoder;
-	}
-	
-	// ======================================================
-	// 사원 등록 요청
-	// 1) 사번은 서비스에서 자동 생성 (입사일 기반 + 3자리 난수)
-	// 2) 비밀번호 초기값 1234를 BCrypt로 암호화 저장
+	// 사원 신규 등록
+	@Transactional
 	public void registEmp(EmpDTO empDTO) {
-		
-		// 1. 사원번호 자동 생성
-		String empId = generateEmpId(empDTO.getHireDate());
-		
-		// 2. DTO -> Entity 변환
-		Emp emp = empDTO.toEntity();
-		
-		// 3. 서비스에서 세팅해야 하는 값
-		emp.setEmpId(empId);					// 자동 사번
-		emp.setEmpPwd(encoder.encode("1234"));	// 초기 비밀번호 암호화
-		emp.setHireDate(empDTO.getHireDate() != null
-						? empDTO.getHireDate()
-						: LocalDate.now());		// 기본 입사일
-		emp.setStatus(empDTO.getStatus() != null
-					  ? empDTO.getStatus()
-					  : "ACTIVE");				// 기본 상태
 
-		// 4. FK 준비 (부서/직급)
-        Dept dept = deptRepository.findById(empDTO.getDeptId())
-                     .orElseThrow(() -> new IllegalArgumentException("부서 없음: " + empDTO.getDeptId()));
-        Position pos = positionRepository.findById(empDTO.getPosCode())
-                        .orElseThrow(() -> new IllegalArgumentException("직급 없음: " + empDTO.getPosCode()));
-		
-		// 5. EMP 저장
-		empRepository.saveAndFlush(emp);
-		
-		// 6. EMPLOYMENT 입사 이력 저장
-		Employment employment = new Employment();
-		employment.setEmp(emp);
-		employment.setDept(dept);
-		employment.setPosition(pos);
-		employment.setStartDate(emp.getHireDate());
-		employment.setEndDate(null);
-		employment.setRemark("입사 등록");
-		
-		// 7. Employment 저장
-		employmentRepository.save(employment);
-		
-		log.info("EMP + EMPLOYMENT 저장 완료 - empId={}, dept={}, pos={}",
-	            emp.getEmpId(), dept.getDeptName(), pos.getPosName());
-		
+	    // 0) 사번 자동 생성 (충돌 방지 재시도)
+	    String empId = generateEmpId(empDTO.getHireDate(), 3);
+
+	    // 1) FK 로드 (부서/직급) - NOT NULL 보장
+	    Dept dept = deptRepository.findById(empDTO.getDeptId())
+	            .orElseThrow(() -> new IllegalArgumentException("부서 없음: " + empDTO.getDeptId()));
+	    Position position = positionRepository.findById(empDTO.getPosCode())
+	            .orElseThrow(() -> new IllegalArgumentException("직급 없음: " + empDTO.getPosCode()));
+
+	    // 2) DTO -> Entity
+	    Emp emp = empDTO.toEntity();
+
+	    // 3) 서비스에서 세팅해야 하는 값들
+	    emp.setEmpId(empId);                               // 자동 사번
+	    emp.setEmpPwd(encoder.encode("1234"));             // 초기 비밀번호
+	    emp.setHireDate(empDTO.getHireDate() != null ? empDTO.getHireDate() : LocalDate.now());
+	    emp.setStatus(empDTO.getStatus() != null ? empDTO.getStatus() : "ACTIVE");
+	    emp.setDept(dept);
+	    emp.setPosition(position);
+
+	    // 4) EMP 저장
+	    empRepository.saveAndFlush(emp);
+	    
+	    // 5) 메신저 상태(MSG_STATUS) 저장
+	    MsgStatus status = new MsgStatus();
+	    
+	    status.setEmpId(empId);
+	    status.setAvlbStat("ONLINE");
+	    status.setAvlbUpdated(LocalDateTime.now());
+	    status.setAutoWorkStat("IN");
+	    status.setWorkStatUpdated(LocalDateTime.now());
+	    status.setWorkStatSource("AUTO");
+	    status.setOnlineYn("N");
+	    int randomImg = ThreadLocalRandom.current().nextInt(1, 6);
+	    status.setMsgProfile(randomImg);
+	    
+	    msgStatusRepository.save(status);
+
+	    // 6) 급여계좌(EMP_BANK) 저장 (선택값 없으면 스킵)
+	    if (empDTO.getBankCode() != null && empDTO.getAccountNo() != null) {
+	        EmpBank bank = new EmpBank();
+	        bank.setEmpId(emp.getEmpId());
+	        bank.setBankCode(empDTO.getBankCode());
+	        bank.setAccountNo(empDTO.getAccountNo());
+	        bank.setHolder(empDTO.getHolder());
+	        bank.setFileId(empDTO.getFileId());
+	        empBankRepository.save(bank);
+	    }
+
+	    log.info("EMP 등록 완료: empId={}, dept={}, pos={}",
+	            emp.getEmpId(), dept.getDeptName(), position.getPosName());
 	}
 
 	// 사원번호 생성 로직
-	private String generateEmpId(LocalDate hireDate) {
-		
+	private String generateEmpId(LocalDate hireDate, int maxRetry) {
 		LocalDate base = (hireDate != null) ? hireDate : LocalDate.now();
-		String datePart = base.format(DateTimeFormatter.ofPattern("yyMM"));
-		String randomPart = String.format("%03d", ThreadLocalRandom.current().nextInt(1000));
-		
-		return datePart + randomPart;
-		
+        String datePart = base.format(DateTimeFormatter.ofPattern("yyMM"));
+        
+        for (int i = 0; i < maxRetry; i++) {
+            String randomPart = String.format("%03d", ThreadLocalRandom.current().nextInt(1000));
+            String candidate = datePart + randomPart;
+            boolean exists = empRepository.existsByEmpId(candidate);
+            if (!exists) return candidate;
+        }
+        throw new IllegalStateException("사번 생성 충돌: 재시도 초과");
 	}
 	
+	// 활성화된 부서 목록 조회
+	public  List<Dept> getDeptList() {
+		return deptRepository.findActive();
+	}
+
+	// 활성화된 직급 목록 조회
+	public List<Position> getPositionList() {
+        return positionRepository.findActive();
+    }
 	
-	// ===================================================================================
+	// =============================================================================
 	// 사원 목록 조회
-	@Transactional(readOnly = true)
 	public List<EmpListDTO> getEmpList() {
-	    // 1) 전체 사원
-	    List<Emp> emps = empRepository.findAll(); 
-	    // 정렬 원하면: empRepository.findAll(Sort.by(Sort.Direction.DESC, "createdDate"))
-
-	    if (emps.isEmpty()) return List.of();
-
-	    // 2) 현재 이력(END_DATE is null)
-	    List<Employment> currents = employmentRepository.findByEmpInAndEndDateIsNull(emps);
-
-	    // 3) empId -> Employment
-	    Map<String, Employment> byEmpId = currents.stream()
-	        .collect(Collectors.toMap(e -> e.getEmp().getEmpId(), Function.identity(), (a,b)->a));
-
-	    // 4) DTO 변환
-	    return emps.stream()
-	        .map(e -> {
-	            Employment cur = byEmpId.get(e.getEmpId());
-	            String deptName = (cur != null && cur.getDept() != null) ? cur.getDept().getDeptName() : "";
-	            String posName  = (cur != null && cur.getPosition() != null) ? cur.getPosition().getPosName() : "";
-	            return new EmpListDTO(e.getHireDate(), e.getEmpId(), e.getEmpName(), deptName, posName, e.getMobile(), e.getEmail());
-	        })
-	        .toList();
+		log.info("▶ 사원 목록 조회 시작");
+		List<Emp> empList = empRepository.findAll();
+		
+		return empRepository.findAllForList();
 	}
-	
 	
 	// ==============================================================================
 	// 사원 정보 조회
@@ -155,20 +148,154 @@ public class EmpService {
 			String code = (er.getRole() != null) ? er.getRole().getRoleCode() : "NULL";
 	        log.info(">>> Role: {}", code);
 		}
-		// ---------------------------------------------------------------------------------------------------------
+		// --------------------------------------------------------------------------
 		// Emp 엔티티 -> EmpDTO 객체로 변환하여 리턴
 		return EmpDTO.fromEntity(emp);
 	}
 
-	// 활성화된 부서 목록 조회
-	public  List<Dept> getDeptList() {
-		return deptRepository.findActive();
+	// =============================================
+	// 사원 정보 상세 조회
+	public EmpDetailDTO getEmpDetail(String empId) {
+		
+		Emp emp = empRepository.findById(empId)
+	            .orElseThrow(() -> new EntityNotFoundException("사원 없음: " + empId));
+
+		String address = buildAddress(emp);
+	    String rrnMasked = maskRrn(emp.getRrn());
+	    String bankInfo = buildBankInfo(emp);   // "국민은행 (123456-12-123456)"
+	    String photoPath = buildPhotoPath(emp); // null일 수도 있음
+
+
+	    return new EmpDetailDTO(
+	            emp.getEmpId(),
+	            emp.getEmpName(),
+	            emp.getDept().getDeptName(),
+	            emp.getPosition().getPosName(),
+	            emp.getGender(),
+	            emp.getHireDate() != null ? emp.getHireDate().toString() : "",
+	            emp.getMobile(),
+	            emp.getEmail(),
+	            buildAddress(emp),
+	            rrnMasked,
+	            bankInfo,
+	            photoPath
+	    );
+	}
+	
+	// 상세주소 없는 경우 대비
+	private String buildAddress(Emp emp) {
+	    String addr1 = emp.getAddress1();
+	    String addr2 = emp.getAddress2();
+
+	    if (addr2 == null) addr2 = "";
+
+	    return (addr1 + " " + addr2).trim();
+	}
+	
+	private String maskRrn(String rrn) {
+	    if (rrn == null || rrn.length() < 6) return "";
+	    // 예: 000421-3******
+	    return rrn.substring(0, 8) + "******";
 	}
 
-	// 활성화된 직급 목록 조회
-	public List<Position> getPositionList() {
-        return positionRepository.findActive();
-    }
+	// 급여계좌 문자열 조합
+	private String buildBankInfo(Emp emp) {
+
+	    return empBankRepository.findTopByEmpIdOrderByCreatedDateDesc(emp.getEmpId())
+	            .map(bank -> {
+	            	String bankName = bank.getBank().getCodeName();   // ← 은행명
+	            	String account = bank.getAccountNo();             // 계좌번호
+	            	String holder  = bank.getHolder();     
+
+	            	// 두 줄 구조로 리턴
+	                return bankName + " (" + account + ")\n예금주: " + holder;
+	            })
+	            .orElse("");
+	}
+
+	// 프로필 사진 경로 생성 (추후 수정 예정)
+	private String buildPhotoPath(Emp emp) {
+	    Long photoFileId = emp.getPhotoFileId(); // Long 타입
+
+	    if (photoFileId == null) {
+	        return null; // 사진 없음 → JS에서 기본 이미지 처리
+	    }
+	    return "/files/photo/" + photoFileId;
+	}
+
+	// =============================================================================
+	// 사원 정보 수정
+	@Transactional(readOnly = true)
+	public EmpDTO getEmpForEdit(String empId) {
+		
+	    Emp emp = empRepository.findById(empId)
+	        .orElseThrow(() -> new EntityNotFoundException("사원 없음: " + empId));
+	    
+	    EmpDTO empDTO = new EmpDTO();
+	    
+	    // 사원 인사 정보 
+	    empDTO.setEmpId(emp.getEmpId());
+	    empDTO.setEmpName(emp.getEmpName());
+	    empDTO.setGender(emp.getGender());
+	    empDTO.setRrn(emp.getRrn());
+	    empDTO.setHireDate(emp.getHireDate());
+	    empDTO.setStatus(emp.getStatus());
+	    empDTO.setEmail(emp.getEmail());
+	    empDTO.setMobile(emp.getMobile());
+	    empDTO.setPostCode(emp.getPostCode());
+	    empDTO.setAddress1(emp.getAddress1());
+	    empDTO.setAddress2(emp.getAddress2());
+	    empDTO.setDeptId(emp.getDept().getDeptId());
+	    empDTO.setPosCode(emp.getPosition().getPosCode());
+	    
+	    // 사원 급여정보
+	    empBankRepository.findByEmpId(empId).ifPresent(bank -> {
+	    	empDTO.setBankCode(bank.getBankCode());
+	    	empDTO.setAccountNo(bank.getAccountNo());
+	    	empDTO.setHolder(bank.getHolder());
+    	});
+	    
+	    return empDTO;
+	}
+
+	@Transactional
+	public void updateEmp(EmpDTO empDTO) {
+		
+		Emp emp = empRepository.findById(empDTO.getEmpId())
+		            .orElseThrow(() -> new IllegalArgumentException("사원 없음"));
+
+		    // 변경 가능한 필드만 업데이트
+		    emp.setEmpName(empDTO.getEmpName());
+		    emp.setMobile(empDTO.getMobile());
+		    emp.setEmail(empDTO.getEmail());
+		    emp.setStatus(empDTO.getStatus());
+		    emp.setPostCode(empDTO.getPostCode());
+		    emp.setAddress1(empDTO.getAddress1());
+		    emp.setAddress2(empDTO.getAddress2());
+		    
+		    // === 급여계좌 업데이트 ===
+		    if (empDTO.getBankCode() != null && empDTO.getAccountNo() != null) {
+		        EmpBank empBank = empBankRepository.findByEmpId(emp.getEmpId())
+		                .orElseGet(() -> {
+		                    EmpBank bank = new EmpBank();
+		                    bank.setEmpId(emp.getEmpId());
+		                    return bank;
+		                });
+
+		        empBank.setBankCode(empDTO.getBankCode());
+		        empBank.setAccountNo(empDTO.getAccountNo());
+		        empBank.setHolder(empDTO.getHolder());
+		        empBank.setFileId(empDTO.getFileId());
+
+		        empBankRepository.save(empBank);
+		    }
+		    
+		    // 추후 사진 추가
+		
+	}
+
+	
+
 
 
 }

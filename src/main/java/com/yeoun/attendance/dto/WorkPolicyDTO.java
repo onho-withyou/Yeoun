@@ -18,7 +18,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class WorkPolicyDTO {
-	private Long id;
+	private Long policyId;
 	
 	@NotNull
 	private String inTime; // 출근 기준 시간
@@ -39,6 +39,8 @@ public class WorkPolicyDTO {
 	
 	@NotNull
 	private String annualBasis; // 연차 기준 설정 (회계연도 / 입사일 기준)
+	
+	private String annualBasisName; 
 	
 	// --------------------------------------------------
 	// 유효성 검사

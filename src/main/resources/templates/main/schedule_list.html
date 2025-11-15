@@ -9,166 +9,49 @@
 				z-index: 10 !important; 
 			}
 	    </style>
+	    <link rel="stylesheet" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css">
+		<link rel="stylesheet" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css">
+		<link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+	    <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+	    
 	</head>
 	<body>
 		<th:block layout:fragment="content">
+		<input type="hidden" th:value="${#authentication.name}" id="currentUserId">
+		<input type="hidden" th:value="${#authentication.principal.empName}" id="currentUserName">
+		
 			<div class="custom-body container-xxl flex-grow-1 container-p-y">
-				<div class="d-flex align-items-center w-100" >
-					<form class="d-flex align-items-center gap-2 flex-grow-1" onsubmit="return false" style="max-width: 30%;">
-						<div class="tui-datepicker-input tui-datetime-input tui-has-focus mt-1" style="margin-right: 5px; width: 100%;">
+				<div class="d-flex align-items-center">
+					<button class="btn-sm btn-outline-primary" type="button" onclick="location.href='/main/calendar'">뒤로</button>
+				</div>
+				<div class="d-flex align-items-center w-120" >
+					<form class="d-flex align-items-center gap-2 flex-grow-1" id="schedule-search-form" style="max-width: 50%;">
+						<div class="tui-datepicker-input tui-datetime-input tui-has-focus mt-1">
 							<input id="startpicker-input-list" type="text" aria-label="Date" name="startDate">
 							<span class="tui-ico-date" style="width:15px;"></span>
 							<div id="startpicker-container-list" style="margin-left: -1px; z-index: 500;"></div>
 						</div>
 						<span class="mt-2">~</span>
-						<div class="tui-datepicker-input tui-datetime-input tui-has-focus mt-1" style="margin-right: 5px; width: 100%;">
+						<div class="tui-datepicker-input tui-datetime-input tui-has-focus mt-1">
 							<input id="endpicker-input-list" type="text" aria-label="Date" name="endDate">
 							<span class="tui-ico-date"></span>
 							<div id="endpicker-container-list" style="margin-left: -1px;"></div>
 						</div>
 						<div class="d-flex align-items-center">
-							<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" style="min-width: 100%;">
-							<button class="btn btn-outline-primary" type="submit">Search</button>
+							<button class="btn-sm btn-outline-primary" type="submit">조회</button>
 						</div>
 					</form>
-					<button type="button" class="btn btn-primary btn-sm ms-auto" data-bs-toggle="modal" data-bs-target="#add-schedule-modal" id="abcd">일정등록</button>
+					<button type="button" class="btn btn-primary btn-sm ms-auto" id="add-schedule">일정등록</button>
 					
 				</div>
 				
 				<br>
 				<!-- Basic Bootstrap Table -->
 				<div class="card">
-					<p th:text="${name}"></p>
-				    <div class="table-responsive text-nowrap">
-				        <table class="table">
-				            <thead>
-				                <tr>
-				                    <th>시작일</th>
-				                    <th>제목</th>
-				                    <th>작성자</th>
-				                    <th>종류</th>
-				                    <th>상세</th>
-				                </tr>
-				            </thead>
-				            <tbody class="table-border-bottom-0">
-				                <tr style="background-color: #e4bcd5;">
-				                    <td>1</td>
-				                    <td>2025 하반기 주요 감사 일정 안내</td>
-				                    <td>김관리</td>
-				                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-				                    <td>
-				                        <div class="dropdown">
-				                            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#showNotice">
-				                                보기
-				                            </button>
-				                        </div>
-				                    </td>
-				                </tr>
-				                <tr style="background-color: #e4bcd5;">
-				                    <td>2</td>
-				                    <td>10월의 우수 사원</td>
-				                    <td>김관리</td>
-				                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-				                    <td>
-				                        <div class="dropdown">
-				                            <button type="button" class="btn btn-info btn-sm">
-				                                보기
-				                            </button>
-				                        </div>
-				                    </td>
-				                </tr>
-				                <tr style="background-color: #e4bcd5;">
-				                    <td>3</td>
-				                    <td>중앙 엘리베이터 수리 기간</td>
-				                    <td>김관리</td>
-				                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-				                    <td>
-				                        <div class="dropdown">
-				                            <button type="button" class="btn btn-info btn-sm">
-				                                보기
-				                            </button>
-				                        </div>
-				                    </td>
-				                </tr>
-				                <tr>
-				                    <td>11</td>
-				                    <td>2025 중반기 주요 감사 일정 안내</td>
-				                    <td>김관리</td>
-				                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-				                    <td>
-				                        <div class="dropdown">
-				                            <button type="button" class="btn btn-info btn-sm">
-				                                보기
-				                            </button>
-				                        </div>
-				                    </td>
-				                </tr>
-				                <tr>
-				                    <td>12</td>
-				                    <td>7월의 우수 사원</td>
-				                    <td>김관리</td>
-				                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-				                    <td>
-				                        <div class="dropdown">
-				                            <button type="button" class="btn btn-info btn-sm">
-				                                보기
-				                            </button>
-				                        </div>
-				                    </td>
-				                </tr>
-				                <tr>
-				                    <td>13</td>
-				                    <td>급식업체 변경 알림</td>
-				                    <td>김관리</td>
-				                    <td><span class="badge bg-label-primary me-1">전체</span></td>
-				                    <td>
-				                        <div class="dropdown">
-				                            <button type="button" class="btn btn-info btn-sm">
-				                                보기
-				                            </button>
-				                        </div>
-				                    </td>
-				                </tr>
-				            </tbody>
-				        </table>
-				    </div>
-				    <div>
-						<div class="layout-demo-info" style="display: flex; justify-content: center;">
-							<nav aria-label="Page navigation" >
-								<ul class="pagination ">
-									<li class="page-item first">
-										<a class="page-link" href="javascript:void(0);"><i class="tf-icon bx bx-chevrons-left"></i></a>
-									</li>
-									<li class="page-item prev">
-										<a class="page-link" href="javascript:void(0);"><i class="tf-icon bx bx-chevron-left"></i></a>
-									</li>
-									<li class="page-item">
-										<a class="page-link" href="javascript:void(0);">1</a>
-									</li>
-									<li class="page-item">
-										<a class="page-link" href="javascript:void(0);">2</a>
-									</li>
-									<li class="page-item active">
-										<a class="page-link" href="javascript:void(0);">3</a>
-									</li>
-									<li class="page-item">
-										<a class="page-link" href="javascript:void(0);">4</a>
-									</li>
-									<li class="page-item">
-										<a class="page-link" href="javascript:void(0);">5</a>
-									</li>
-									<li class="page-item next">
-										<a class="page-link" href="javascript:void(0);"><i class="tf-icon bx bx-chevron-right"></i></a>
-									</li>
-									<li class="page-item last">
-										<a class="page-link" href="javascript:void(0);"><i class="tf-icon bx bx-chevrons-right"></i></a>
-									</li>
-								</ul>
-							</nav>
-						</div>
-				    </div>
+				    <div class="table-responsive text-nowrap" id="grid"></div>
 				</div>
 				<!--/ Basic Bootstrap Table -->
+				
 				<!-- 일정등록 모달 -->
 			    <div class="modal" id="add-schedule-modal" tabindex="-1" style="display: none;" aria-hidden="true">
 					<div class="modal-dialog modal-dialog-centered" role="document">
@@ -180,18 +63,23 @@
 							<div class="modal-body">
 								<form id="add-schedule-form">
 									<div class="col mb-6">
+										<input type="hidden" id="schedule-id" name="scheduleId" value="">
 										<label for="scheduleTitle" class="form-label">제목</label>
 										<input type="text" id="scheduleTitle" class="form-control" name="scheduleTitle"/>
 									</div>
 									<div class="col mb-6">
 										<label for="scheduleTitle" class="form-label">작성자</label>
-										<input type="text" id="schedule-writer" class="form-control" value="123" name="createdUser" readonly/>
+										<input type="text" class="form-control" readonly
+											th:value="${#authentication.principal.empName}" id="createdUserName">
+										
+										<input type="hidden" id="schedule-writer" class="form-control" 
+											th:value="${#authentication.principal.empId}" name="createdUser" readonly/>
 									</div>
 									<div class="mb-3 mt-3" style="display:flex; gap:8px;">
 										<div>
 											<select id="schedule-type" class="form-select" name="scheduleType">
 		                                        <option value="company">회사</option>
-		                                        <option value="empId">개인</option>
+		                                        <option th:value="${#authentication.name}">개인</option>
 		                                    </select>
 										</div>
 										<div class="tui-datepicker-input tui-datetime-input tui-has-focus mt-1" style="margin-right: 5px; width: 28%;">
@@ -214,6 +102,7 @@
 									</div>
 									
 									<div class="modal-footer mt-3 p-0">
+										<button type="button" id="delete-schedule-btn" class="btn btn-outline-danger d-none">삭제</button>
 										<button type="submit" id="add-schedule-btn" class="btn btn-primary">등록</button>
 									</div>
 								</form>
@@ -221,17 +110,25 @@
 						</div>
 					</div>
 				</div>
-				<!-- /일정등록모달끝 -->
+				<!-- 일정등록모달 -->
+<!-- 				<th:block th:insert="~{main/schedule_modal}"></th:block> -->
+				<th:block th:insert="~{main/schedule_modal}"></th:block>
 			<!-- body 끝 -->	
+			
 			</div>
-			<link rel="stylesheet" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css">
-			<link rel="stylesheet" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css">
+			
 			<!-- 타임피커 -->
 			<script src="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.min.js"></script>
 			<!-- 데이트피커 -->
 			<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.js"></script>
+			<!-- 그리드 -->
+			<script src="https://uicdn.toast.com/tui.code-snippet/v1.5.0/tui-code-snippet.js"></script>
+			<script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+			<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 			
+<!-- 			<script src="/js/main/schedule_list_origin.js"></script> -->
 			<script src="/js/main/schedule_list.js"></script>
+			<script src="/js/main/schedule_modal.js"></script>
 			
 	</th:block>
 		</body>

@@ -56,10 +56,10 @@
     // 최초 로드 시: deptId가 이미 선택되어 있으면 그 parent로 topDept 자동 설정
     const selected = deptSel.querySelector('option:checked');
     if (selected && selected.value) {
-      const parentId = selected.getAttribute('data-parent');
-      if (parentId) {
-        topSel.value = parentId;          // 상위부서 자동 지정
-        filterDeptByTop(parentId);        // 하위부서 목록 필터
+      const parentDeptId = selected.getAttribute('data-parent');
+      if (parentDeptId) {
+        topSel.value = parentDeptId;          // 상위부서 자동 지정
+        filterDeptByTop(parentDeptId);        // 하위부서 목록 필터
         deptSel.value = selected.value;   // 선택 복원
         return;
       }
@@ -119,5 +119,59 @@
       }
     }).open();
   };
+  
+  /**
+     * ============================================================
+     * 연락처 자동 하이픈
+     * ============================================================
+     */
+  document.addEventListener("DOMContentLoaded", () => {
+    const phoneInput = document.getElementById("phone");
+    if (!phoneInput) return;
+
+    phoneInput.addEventListener("input", () => {
+      let value = phoneInput.value.replace(/[^0-9]/g, ""); // 숫자만 추출
+
+      // 최대 11자리까지만 유지
+      value = value.substring(0, 11);
+
+      // 하이픈 삽입
+      if (value.length < 4) {
+        phoneInput.value = value;
+      } else if (value.length < 8) {
+        phoneInput.value = `${value.slice(0, 3)}-${value.slice(3)}`;
+      } else {
+        phoneInput.value = `${value.slice(0, 3)}-${value.slice(3, 7)}-${value.slice(7)}`;
+      }
+    });
+  });
+  
+  
+  
+  /**
+     * ============================================================
+     * 주민등록번호
+     * ============================================================
+     */
+  document.addEventListener("DOMContentLoaded", () => {
+    const el = document.getElementById("rrn");
+    if (!el) return;
+
+    el.addEventListener("input", () => {
+      let v = el.value.replace(/\D/g, "");   // 숫자만
+      v = v.slice(0, 13);                    // 최대 13자리(하이픈 제외)
+      if (v.length > 6) v = v.slice(0, 6) + "-" + v.slice(6);
+      el.value = v;                           // ######-####### 형태
+    });
+  });
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
 })();

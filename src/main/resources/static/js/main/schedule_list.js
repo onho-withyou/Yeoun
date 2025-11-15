@@ -1,104 +1,72 @@
 /**
 	일정게시판 JavaScript 
 **/
+
+const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
+const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
+
+const currentUserId = document.getElementById('currentUserId')?.value;
+const currentUserName = document.getElementById('currentUserName')?.value;
+
+let picker_list = null;
+
 document.addEventListener('DOMContentLoaded', function() {
 	
 	//일정목록 데이트피커 객체 생성
-	var picker_list = tui.DatePicker.createRangePicker({
+	picker_list = tui.DatePicker.createRangePicker({
 	    startpicker: {
 	        date: today,
 	        input: '#startpicker-input-list',
 	        container: '#startpicker-container-list'
 	    },
 	    endpicker: {
-	        date: today,
+	        date: nextYear,
 	        input: '#endpicker-input-list',
 	        container: '#endpicker-container-list'
 	    },
 	    format: 'YYYY-MM-dd'
 	});
-	// 일정등록 데이트피커 객체 생성
-	var picker = tui.DatePicker.createRangePicker({
-	    startpicker: {
-	        date: today,
-	        input: '#startpicker-input',
-	        container: '#startpicker-container'
-	    },
-	    endpicker: {
-	        date: today,
-	        input: '#endpicker-input',
-	        container: '#endpicker-container'
-	    },
-	    selectableRanges: [
-	        [today, new Date(today.getFullYear() + 1, today.getMonth(), today.getDate())]
-	    ],
-	    format: 'YYYY-MM-dd HH:mm',
-		timepicker: {
-            layoutType: 'tab',
-            inputType: 'spinbox',
-			showMeridiem: false
-        }
+	
+	// ---------------------------------------------------------------
+	// 초기 TUI 그리드 불러오기
+	getScheduleData();
+	
+	// Search버튼 눌러 그리드 불러오기
+	const searchForm = document.getElementById('schedule-search-form');
+	searchForm.addEventListener('submit', function async (event) {
+		event.preventDefault();
+		getScheduleData();
 	});
 	
-	// 일정등록 모달 지정	
-	const addScheduleModal = document.getElementById('add-schedule-modal')
-	// 일정등록 모달 열기 이벤트
-	addScheduleModal.addEventListener('show.bs.modal', function(event){
-		// 폼 초기화
-		const addScheduleForm = document.getElementById('add-schedule-form');
-		addScheduleForm.reset();
+	// 시작날자, 끝날자 받아서 data불러오기
+	function getScheduleData(){
+		const startDate = picker_list.getStartDate();
+		const endDate = picker_list.getEndDate();
 		
-		// 부서 목록 조회 
-		fetch('/api/schedules/departments')
-		    .then(response => response.json())
-		    .then(data => {
-				// 셀릭트박스
-		        const select = document.getElementById('schedule-type');
+		const params = new URLSearchParams({
+			startDate: formatLocalDateTime(startDate)
+			, endDate: formatLocalDateTime(endDate)
+		});
 				
-				// 셀렉트박스에 부서목록 추가
-		        data.forEach(department => {
-		            const option = document.createElement('option');
-		            option.value = department.deptId
-		            option.text = department.deptName; // 옵션명
-		            select.appendChild(option);
-		        });
-	    });
-		
-		const startpickerInput = document.getElementById('startpicker-input');
-		const endpickerInput = document.getElementById('endpicker-input');
-		
-		startpickerInput.value = formatDate(today);
-		endpickerInput.value = formatDate(today);
-		
-	}); // 일정등록 모달 열기이벤트 끝
-	
-	//일정등록 모달 등록버튼 이벤트
-	const addScheduleForm = document.getElementById('add-schedule-form')
-	const addScheduleBtn = document.getElementById('add-schedule-btn');
-	addScheduleForm.addEventListener('submit', function(event) {
-		event.preventDefault(); // 기본제출 막기
-		
-		fetch('/main/schedule', {
-			method: 'POST'
-			, body: new FormData(addScheduleForm)
-		})
+		fetch(`/api/schedules?${params.toString()}`, {method: 'GET'})
 		.then(response => {
-//			if (!response.ok) throw new Error('등록에 실패했습니다.');
-			if (!response.ok) throw new Error(response.msg);
+			if (!response.ok) throw new Error(response.text());
 			return response.json();  //JSON 파싱
 		})
-		.then(response => { // response가 ok일때
-			alert(response.msg);
-			location.reload();
+		.then(data => { // response가 ok일때
+//			console.log(data);
+			initGrid(data);
 		}).catch(error => {
 			console.error('에러', error)
-			alert("제목, 시작,종료 일시, 내용은 필수입력 사항입니다.");
+			alert("데이터 조회 실패");
 		});
-	});
+	}
 	
-	
-	
-	
+	// ---------------------------------------------------------------
+	// 일정등록 버튼이벤트
+	document.getElementById('add-schedule').addEventListener('click', () => {
+		openModal('add');
+	})
 	
 	
 	
@@ -108,23 +76,161 @@ document.addEventListener('DOMContentLoaded', function() {
 		
 });// DOM로드 끝
 
+let grid = null;
+// 그리드 불러오기 함수
+function initGrid(data) {
+	const Pagination = tui.Pagination;
+	
+	if(!grid){
+		createGrid();
+	} else {
+		grid.destroy();
+		createGrid();
+	}
+	
+	function createGrid() {
+		grid = new tui.Grid({
+			el: document.getElementById("grid"),
+			editable: true,
+			columns: [
+				{
+					header: '일정제목',
+					name: 'scheduleTitle',
+					sortable: true,
+					width: 150,
+					filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
+				},
+				{
+					header: '종류',
+					name: 'scheduleType',
+					sortable: true,
+					width: 70,
+					filter: 'select'
+				},
+				{
+					header: '일정시작',
+					name: 'scheduleStart',
+					sortable: true,
+					width:130,
+					filter: {
+						type: 'date', options: {format: 'yyyy.MM.dd'}
+					}
+				},
+				{
+					header: '일정마감',
+					name: 'scheduleFinish',
+					sortable: true,
+					width:130,
+					filter: {
+						type: 'date', options: {format: 'yyyy.MM.dd'}
+					}
+				},
+				{
+					header: '작성자',
+					name: 'empName',
+					sortable: true,
+					width: 70,
+					filter: {
+						type: 'text',
+						operator: 'OR'
+					}
+				},
+				{
+					header: '내용',
+					name: 'scheduleContent',
+					sortable: true,
+					filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
+				},
+				{
+					header: ' '
+					, name: "btn"
+					, width: 100 // 너비 설정
+					, align: "center"
+					// formatter 속성에 화살표 함수를 활용하여 원하는 태그를 해당 셀에 삽입 가능(각 셀에 반복 삽입됨)
+	//				, formatter: () => "<button type='button' class='btn-detail' >상세정보</button>"
+					, formatter: (cellInfo) => "<button type='button' class='btn-detail' data-row='${cellInfo.rowKey}' >상세정보</button>"
+				}
+			],
+			rowHeaders: ['rowNum'],
+			pageOptions: {
+				useClient: true,
+				perPage: 5
+			}
+		});
+		grid.resetData(data);
+		grid.sort('scheduleStart', true); // true: 오름차순 false: 내림차순
+	}
+	
+	
+	// 상세보기 버튼 이벤트
+	grid.on("click", (event) => {
+		if(event.columnName == "btn") {
+			const rowData = grid.getRow(event.rowKey);
+			const scheduleId = rowData.scheduleId;
+			
+			fetch(`/api/schedules/${scheduleId}`, {method: 'GET'})
+			.then(response => {
+				if (!response.ok) throw new Error(response.text());
+				return response.json();  //JSON 파싱
+			})
+			.then(data => { // response가 ok일때
+				openModal("edit", data);
+			}).catch(error => {
+				console.error('에러', error)
+				alert("데이터 조회 실패");
+			});
+		}
+	});
+}
+
+
+
+
+
+
+
 var today = new Date();
+var nextYear = new Date(today);
+
+nextYear.setFullYear(nextYear.getFullYear() + 1);
 
 function pad(n) {
     return n < 10 ? '0' + n : n;
 }
 
-function formatDate(date) {
-	var year   = today.getFullYear();
-	var month  = pad(today.getMonth() + 1);
-	var day    = pad(today.getDate());
-	var hour   = pad(today.getHours());
-	var minute = pad(today.getMinutes());
+function formatDateTime(date) {
+	var year   = date.getFullYear();
+	const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  	const day = date.getDate().toString().padStart(2, '0');
+	var hour   = pad(date.getHours());
+	var minute = pad(date.getMinutes());
 
 	var formatted = year + '-' + month + '-' + day + ' ' + hour + ':' + minute;
 	
 	return formatted;
 }
+
+function formatLocalDateTime(date) {
+	var year   = date.getFullYear();
+	const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  	const day = date.getDate().toString().padStart(2, '0');
+	var hour   = pad(date.getHours());
+	var minute = pad(date.getMinutes());
+	var second = pad(date.getSeconds());
+
+	var formatted = year + '-' + month + '-' + day + 'T' + hour + ':' + minute + ':' + second;
+	
+	return formatted;
+}
+
+function formatDate(date) {
+	const year = date.getFullYear();
+	const month = (date.getMonth() + 1).toString().padStart(2, '0');
+	const day = date.getDate().toString().padStart(2, '0');
+	return `${year}-${month}-${day}`;
+}
+
+
 
 
 

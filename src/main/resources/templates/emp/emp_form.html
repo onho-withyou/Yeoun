@@ -1,0 +1,222 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/layouts/layout.html}">
+<body>
+<th:block layout:fragment="content">
+	<div class="custom-body container-xxl flex-grow-1 container-p-y">
+	
+	<h2 th:text="${mode == 'edit'} ? '인사 정보 수정' : '인사 신규 등록'">
+	  인사 신규 등록
+	</h2>
+
+	  <form th:action="${mode == 'edit'} ? @{/emp/edit} : @{/emp/regist}" th:object="${empDTO}" method="post" novalidate>
+	
+	    <!-- 상단 2컬럼 카드 -->
+	    <div class="row g-4 mb-5">
+	      <!-- 기본정보 -->
+	      <div class="col-md-6">
+	        <div class="card h-100">
+	          <div class="card-body">
+	            <h5 class="card-title mb-3">기본정보</h5>
+	
+	            <div class="row g-3">
+	              <div class="col-12 col-md-6">
+	                <label class="form-label required" for="empName">이름</label>
+	                <input type="text" class="form-control" id="empName" th:field="*{empName}" placeholder="홍길동">
+	                <div class="text-danger small" th:if="${#fields.hasErrors('empName')}" th:errors="*{empName}"></div>
+				  </div>
+				  
+				  <!-- 사번은 서비스에서 생성됨: 입력받지 않기 or 읽기전용(바인딩X) -->
+	              <div class="col-12 col-md-6">
+	                <label class="form-label" for="empNo">사번</label>
+	                <input type="text" class="form-control" id="empNo" th:field="*{empId}"
+	                       th:placeholder="${mode == 'edit'} ? '' : '자동생성'" readonly>
+	              </div>
+	            </div>
+	
+	            <div class="row g-3 mt-0">
+	              <div class="col-12 col-md-6">
+	                <label class="form-label required" for="gender">성별</label>
+	                <select class="form-select" id="gender" th:field="*{gender}" th:disabled="${mode == 'edit'}">
+	                  <option value="">선택</option>
+	                  <option value="M">남</option>
+	                  <option value="F">여</option>
+	                </select>
+	                <input type="hidden" th:if="${mode == 'edit'}" th:field="*{gender}">
+	                <div class="text-danger small" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></div>
+	              </div>
+	              <div class="col-12 col-md-6">
+	                <label class="form-label required" for="hireDate">입사일</label>
+	                <input type="date" class="form-control" id="hireDate" th:field="*{hireDate}" th:disabled="${mode == 'edit'}">
+	                <input type="hidden" th:if="${mode == 'edit'}" th:field="*{hireDate}">
+	                <div class="text-danger small" th:if="${#fields.hasErrors('hireDate')}" th:errors="*{hireDate}"></div>
+	              </div>
+	            </div>
+	
+	            <div class="row g-3 mt-0">
+	              <div class="col-12 col-md-6">
+	                <label class="form-label required" for="rrn">주민등록번호</label>
+	                <input type="text" class="form-control" id="rrn" th:field="*{rrn}" maxlength="14" 
+	                		placeholder="000000-0000000" autocomplete="off" th:readonly="${mode == 'edit'}">
+	                <div class="text-danger small" th:if="${#fields.hasErrors('rrn')}" th:errors="*{rrn}"></div>
+	              </div>
+	              <div class="col-12 col-md-6">
+	                <label class="form-label required" for="photo">사원 사진</label>
+	                <!-- 파일업로드 아직 미구현: 바인딩X -->
+	                <input type="file" class="form-control" id="photo">
+	              </div>
+	            </div>
+	            
+	            <!-- 상태값: 수정 모드에서만 노출 -->
+				<div class="row g-3 mt-0" th:if="${mode == 'edit'}">
+				  <div class="col-12 col-md-6">
+				    <label class="form-label" for="status">상태</label>
+				    <select class="form-select" id="status" th:field="*{status}">
+				      <option value="ACTIVE">재직</option>
+				      <option value="LEAVE">휴직</option>
+				      <option value="RESIGNED">퇴사</option>
+				    </select>
+				  </div>
+				</div>
+	            
+	            
+	          </div>
+	        </div>
+	      </div>
+	
+	      <!-- 연락/계정 -->
+			<div class="col-md-6">
+			  <div class="card h-100">
+			    <div class="card-body">
+			      <h5 class="card-title mb-3">연락/계정</h5>
+			
+			      <!-- 이메일 / 연락처 -->
+			      <div class="row g-3">
+			        <div class="col-12 col-md-6">
+			          <label class="form-label required" for="email">이메일</label>
+			          <input type="email" class="form-control" id="email" th:field="*{email}" placeholder="name@company.com">
+			          <div class="text-danger small" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+			        </div>
+			        <div class="col-12 col-md-6">
+			          <label class="form-label required" for="phone">연락처</label>
+			          <input type="tel" class="form-control" id="phone" th:field="*{mobile}" placeholder="010-1234-5678" maxlength="13">
+			          <div class="text-danger small" th:if="${#fields.hasErrors('mobile')}" th:errors="*{mobile}"></div>
+			        </div>
+			      </div>
+			
+			      <!-- 주소 -->
+			      <div class="row g-3 mt-0">
+			        <div class="col-12">
+			          <label class="form-label required">주소</label>
+			
+			          <!-- 우편번호 + 검색버튼 -->
+			          <div class="input-group mb-2">
+			          	<input type="text" class="form-control" id="zipcode" th:field="*{postCode}" placeholder="우편번호">
+			            <input class="btn btn-outline-secondary" type="button" onclick="btnSearchZip()" value="우편번호 찾기"><br>
+			          </div>
+			
+			          <!-- 기본주소 -->
+			          <input type="text" class="form-control mb-2" id="address" th:field="*{address1}" placeholder="도로명 주소">
+			          <!-- 상세주소 -->
+			          <input type="text" class="form-control" id="addressDetail" th:field="*{address2}" placeholder="상세 주소">
+					  <div class="text-danger small" th:if="${#fields.hasErrors('postCode')}" th:errors="*{postCode}"></div>
+					  <div class="text-danger small" th:if="${#fields.hasErrors('address1')}" th:errors="*{address1}"></div>
+			        </div>
+			      </div>
+			
+			    </div>
+			  </div>
+			</div>
+	    </div>
+	
+	    <!-- 조직/직무 -->
+	    <div class="card mb-4">
+	      <div class="card-body">
+	        <h5 class="card-title mb-3">조직/직무</h5>
+	
+	        <div class="row g-3">
+	        
+	          <!-- 종류 (ERP / MES) -->
+	          <div class="col-12 col-md-4">
+	            <label class="form-label required" for="topDept">종류</label>
+	            <select class="form-select" id="topDept" th:disabled="${mode == 'edit'}">
+	              <option value="">선택</option>
+	              <option th:each="d : ${deptList}" th:if="${d.parentDeptId == null}"
+            			  th:value="${d.deptId}" th:text="${d.deptName}"></option>
+ 				</select>
+	          </div>
+	          
+	          <!-- 부서 -->
+	          <div class="col-12 col-md-4">
+	            <label class="form-label required" for="deptId">부서</label>
+	            <select class="form-select" id="deptId" th:field="*{deptId}" th:disabled="${mode == 'edit'}">
+	              <option value="">선택</option>
+	              <option th:each="d : ${deptList}" th:if="${d.parentDeptId != null}" 
+	                      th:value="${d.deptId}" th:text="${d.deptName}" 
+	                      th:attr="data-parent=${d.parentDeptId}"></option>
+	            </select>
+	            <input type="hidden" th:if="${mode == 'edit'}" th:field="*{deptId}">
+	            <div class="text-danger small" th:if="${#fields.hasErrors('deptId')}" th:errors="*{deptId}"></div>
+	          </div>
+	          
+	          <!-- 직급 -->
+	          <div class="col-12 col-md-4">
+	            <label class="form-label required" for="posCode">직급</label>
+	            <select class="form-select" id="posCode" name="posCode" th:field="*{posCode}" th:disabled="${mode == 'edit'}">
+	              <option value="">선택</option>
+	              <option th:each="p : ${positionList}" th:value="${p.posCode}" th:text="${p.posName}"></option>
+	            </select>
+	            <input type="hidden" th:if="${mode == 'edit'}" th:field="*{posCode}">
+	            <div class="text-danger small" th:if="${#fields.hasErrors('posCode')}" th:errors="*{posCode}"></div>
+	          </div>
+	          
+	        </div>
+	      </div>
+	    </div>
+	
+	    <!-- 급여통장 정보 -->
+	    <div class="card mb-4">
+	      <div class="card-body">
+	        <h5 class="card-title mb-3">급여통장 정보</h5>
+	
+	        <div class="row g-3">
+	          <div class="col-12 col-md-6">
+	            <label class="form-label required" for="bankCode">은행</label>
+	            <select class="form-select" id="bankCode" name="bankCode" th:field="*{bankCode}" required>
+	              <option value="">선택</option>
+	              <option th:each="b : ${bankList}" th:value="${b.codeId}" th:text="${b.codeName}"></option>
+	            </select>
+	          </div>
+	          
+	          <div class="col-12 col-md-6">
+	            <label class="form-label required" for="accountNo">계좌번호</label>
+	            <input type="text" class="form-control" id="accountNo" name="accountNo" th:field="*{accountNo}" placeholder="123-456-789012">
+	          </div>
+	        </div>
+	
+	        <div class="row g-3 mt-0">
+	          <div class="col-12 col-md-6">
+	            <label class="form-label required" for="holder">예금주</label>
+	            <input type="text" class="form-control" id="holder"  name="holder" th:field="*{holder}" placeholder="홍길동">
+	          </div>
+	          <div class="col-12 col-md-6">
+	            <label class="form-label required" for="fileId">통장사본 첨부</label>
+	            <input type="file" class="form-control" name="fileId" id="fileId">
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+	
+	    <!-- 버튼 (뷰 확인용) -->
+	    <div class="d-flex justify-content-end gap-2">
+	      <a href="/emp/list" class="btn btn-outline-secondary">취소</a>
+	      <button type="submit" class="btn btn-primary" th:text="${mode == 'edit'} ? '수정 완료' : '저장'">저장</button>
+	    </div>
+	  </form>
+	</div>
+	
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js" defer></script>	
+<script src="/js/emp/emp.js"></script>
+
+</th:block>
+</body>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messenger Main</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/messenger/messenger.css}"/>
+  <link rel="stylesheet" th:href="@{/css/messenger/popup.css}"/>
+
+</head>
+
+<body class="d-flex align-items-center justify-content-center vh-100">
+
+  <div class="messenger-container">
+    
+    <!-- 좌측탭 -->
+    <div class="sidebar">
+        
+
+      <div>
+        <i class="bi bi-person-lines-fill active" id="tab-friends"></i>
+        <i class="bi bi-chat-dots" id="tab-chats"></i>
+      </div>
+      <i class="bi bi-gear"></i>
+    </div>
+
+    <!-- 우측 내용 -->
+    <div class="main-panel">
+      <div class="status-bar">
+        <div class="d-flex align-items-center">
+            <div class="status-indicator" id="status-indicator"></div>
+            <span class="status-text" id="status-text">온라인</span>
+
+            <select class="status-select" id="work-status">
+            <option selected>근무 중</option>
+            <option>회의 중</option>
+            <option>식사 중</option>
+            <option>외출 중</option>
+            </select>
+        </div>
+    </div>
+    <div class="chat-search px-3 py-2">
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="이름/부서로 검색">
+            <span class="input-group-text"><i class="las la-search drop-shadow fs-5"></i></span>
+          </div>
+    </div>
+      <div class="main-header" id="header-title">친구 목록</div>
+
+      <div class="panel-body" id="friends-panel">
+        <div class="friend-item"  th:each="friend : ${friends}"><!--  data-friend="beate" -->
+           <div class="profile-wrapper me-2">
+            <img class="rounded-circle"
+                 th:src="|@{/img/msg_img_}${friend.msgProfile}.png|">
+            <span class="status-dot" th:data-status="${friend.status}"></span> <!-- ✅ 상태 표시 추가 -->
+          </div>
+          <div>
+            <p class="mb-0 fw-bold" th:text="${friend.empName}"></p>
+            <small class="text-muted" th:text="|${friend.deptName} / ${friend.posName} |"></small>
+          </div>
+          <i class="star-btn"
+             th:data-id="${friend.empId}"
+             th:classappend="${friend.favoriteYn == 'Y'} ? 'bi-star-fill active' : 'bi-star'">
+          </i>
+        </div>
+      </div>
+
+      <div class="panel-body d-none" id="chats-panel">
+        <div class="chat-item" data-friend="beate">
+          <img src="https://user-images.githubusercontent.com/35243461/168796877-f6c8819a-5d6e-4b2a-bd56-04963639239b.jpg">
+          <div>
+            <p class="mb-0 fw-bold">Beate Lemoine</p>
+            <small class="text-muted">오늘 저녁에 볼까?</small>
+          </div>
+          <span class="badge-unread">2</span>
+        </div>
+        <div class="chat-item" data-friend="emily">
+          <img src="https://user-images.githubusercontent.com/35243461/168796884-ee3aafb6-8083-48ec-9cfb-51b95eae08fe.jpg">
+          <div>
+            <p class="mb-0 fw-bold">Emily Woods</p>
+            <small class="text-muted">회의 준비 끝났어?</small>
+          </div>
+          <span class="badge-unread">1</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script>
+	//==========================
+	//CSRF Token
+	//==========================
+	const csrfToken = "[[${_csrf.token}]]"
+	const csrfHeaderName = "[[${_csrf.headerName}]]"
+  </script>
+  <script th:src="@{/js/messenger/list.js}"></script>
+</body>
+</html>

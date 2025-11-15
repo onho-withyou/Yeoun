@@ -1,15 +1,11 @@
 package com.yeoun.notice.service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import com.mysql.cj.log.Log;
 import com.yeoun.notice.dto.NoticeDTO;
 import com.yeoun.notice.entity.Notice;
 import com.yeoun.notice.repository.NoticeRepository;
@@ -33,11 +29,7 @@ public class NoticeService {
 		Sort.Order dynamicOrder = new Sort.Order(direction, orderKey);
 		
 		// 기본 정렬 기준(고정여부, 수정일 내림차순) + 동적정렬기준 해서 정렬객체 생성
-	    Sort sort = Sort.by(
-            Sort.Order.desc("noticeYN"),
-//            Sort.Order.desc("updatedDate"),
-            dynamicOrder
-        );
+	    Sort sort = Sort.by(Sort.Order.desc("noticeYN"), dynamicOrder);
 		
 		// 페이징과 정렬을 포함하는 PageRequest 생성
 		PageRequest pageRequest = PageRequest.of(page, size, sort);
@@ -55,20 +47,20 @@ public class NoticeService {
 	}
 	
 	// 공지상세 조회하기
-	public NoticeDTO findById(Long noticeId) {
+	public NoticeDTO getOneNotice(Long noticeId) {
 		Notice notice = noticeRepository.findById(noticeId).orElse(null);
-				
+		
 		return NoticeDTO.fromEntity(notice);
 	}
 	
 	//공지사항 등록하기
-	public void createNotice(NoticeDTO noticeDTO) {
+	public void createNotice(NoticeDTO noticeDTO, Authentication authentication) {
 		
 		if(noticeDTO.getNoticeYN() == null) {
 			noticeDTO.setNoticeYN("N");
 		}
 		
-		noticeDTO.setCreatedUser(1102L);
+		noticeDTO.setCreatedUser(authentication.getName());
 
 		Notice notice = noticeDTO.toEntity();
 		

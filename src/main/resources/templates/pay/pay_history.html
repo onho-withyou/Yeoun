@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>급여 이력 조회</title>
+
+    <!-- AG Grid -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-grid.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-alpine.css" />
+
+    <style>
+        .tab-button { padding:10px 15px; border:1px solid #ccc; cursor:pointer; background:#eee; }
+        .tab-button.active { background:white; border-bottom:none; }
+        .tab-content { display:none; padding:15px; border:1px solid #ddd; margin-top:-1px; }
+        .tab-content.active { display:block; }
+    </style>
+</head>
+
+<body>
+
+<h1>💰 급여 이력 조회</h1>
+
+<div class="main-container">
+
+    <!-- 🔥 탭 -->
+    <div class="tab-controls">
+        <button class="tab-button active" data-tab="emp">사원 기준 조회</button>
+        <button class="tab-button" data-tab="dept">부서 기준 조회</button>
+        <button class="tab-button" data-tab="month">월별 통합 조회</button>
+    </div>
+
+    <!-- 🔥 검색 FORM -->
+    <form th:action="@{/pay/history}" method="get">
+
+        <input type="hidden" name="mode" id="mode" th:value="${param.mode != null ? param.mode : 'emp'}">
+
+        <!-- ⭐ 사원 기준 -->
+        <div id="emp" class="tab-content active">
+            <label>사번/사원명:</label>
+            <input type="text" name="keyword" th:value="${param.keyword}">
+
+            <label>연도:</label>
+            <select name="yearEmp">
+                <option value="">전체</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+            </select>
+
+            <label>월:</label>
+            <select name="monthEmp">
+                <option value="">전체</option>
+                <option value="01">1월</option>
+                <option value="02">2월</option>
+                <option value="03">3월</option>
+            </select>
+        </div>
+
+        <!-- ⭐ 부서 기준 -->
+        <div id="dept" class="tab-content">
+            <label>부서명:</label>
+            <input type="text" name="deptName" th:value="${param.deptName}">
+
+            <label>연도:</label>
+            <select name="yearDept">
+                <option value="">전체</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+            </select>
+
+            <label>월:</label>
+            <select name="monthDept">
+                <option value="">전체</option>
+                <option value="01">1월</option>
+                <option value="02">2월</option>
+                <option value="03">3월</option>
+            </select>
+        </div>
+
+        <!-- ⭐ 월별 기준 -->
+        <div id="month" class="tab-content">
+            <label>연도:</label>
+            <select name="yearMonth">
+                <option value="">전체</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+            </select>
+
+            <label>월:</label>
+            <select name="monthMonth">
+                <option value="01">1월</option>
+                <option value="02">2월</option>
+                <option value="03">3월</option>
+            </select>
+        </div>
+
+        <button type="submit">검색</button>
+        <button type="reset" onclick="location.href='/pay/history'">초기화</button>
+    </form>
+
+
+    <!-- 🔥 AG Grid 영역 -->
+    <div id="payslipGrid" class="ag-theme-alpine mt-3"
+         style="height: 420px; width: 100%; margin-top:20px;"></div>
+
+</div>
+
+
+<!-- 🔥 AG Grid Script -->
+<script th:inline="javascript">
+
+/*<![CDATA[*/
+
+const slips = /*[[${slips}]]*/ [];
+
+function numberWithCommas(x) {
+  if (x == null) return '';
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function renderStatusBadge(status) {
+  if (!status) return "";
+  return `<span class="badge bg-info">${status}</span>`;
+}
+
+// 🔹 AG Grid 컬럼 정의
+const columnDefs = [
+  { headerName: "사번", field: "empId", sortable: true, filter: true, width: 120 },
+  { headerName: "이름", field: "empName", sortable: true, filter: true, width: 140 },
+  { headerName: "부서", field: "deptName", sortable: true, filter: true, width: 140 },
+  {
+    headerName: "총지급액", field: "totAmt", width: 140,
+    valueFormatter: p => numberWithCommas(p.value),
+    cellStyle: { textAlign: 'right' }
+  },
+  {
+    headerName: "실수령액", field: "netAmt", width: 140,
+    valueFormatter: p => numberWithCommas(p.value),
+    cellStyle: { fontWeight: "600", textAlign:'right', color:'#0d6efd' }
+  },
+  {
+    headerName: "상태", field: "calcStatus", width:120,
+    cellRenderer: p => renderStatusBadge(p.value),
+    cellStyle: { textAlign: 'center' }
+  }
+];
+
+// 🔹 AG Grid 옵션
+const gridOptions = {
+  columnDefs: columnDefs,
+  rowData: slips,
+  pagination: true,
+  paginationPageSize: 20,
+};
+
+// 🔹 Grid 표시
+document.addEventListener('DOMContentLoaded', () => {
+  const gridDiv = document.querySelector('#payslipGrid');
+  new agGrid.Grid(gridDiv, gridOptions);
+});
+
+/*]]>*/
+
+</script>
+
+
+<!-- 🔥 탭 스크립트 -->
+<script>
+document.querySelectorAll(".tab-button").forEach(btn => {
+    btn.addEventListener("click", () => {
+
+        document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+
+        btn.classList.add("active");
+        document.getElementById(btn.dataset.tab).classList.add("active");
+
+        document.getElementById("mode").value = btn.dataset.tab;
+    });
+});
+</script>
+
+</body>
+</html>

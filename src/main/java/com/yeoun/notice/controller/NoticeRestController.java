@@ -20,12 +20,14 @@ public class NoticeRestController {
     
     @GetMapping("/{noticeId}")
     public ResponseEntity<NoticeDTO> getNotice(@PathVariable("noticeId")Long noticeId) {
-        NoticeDTO notice = noticeService.findById(noticeId);
+        NoticeDTO noticeDTO = noticeService.getOneNotice(noticeId);
         
-        if (notice == null) { //찾는 공지사항이 없을때
+        System.out.println("@@@@@@@@@@@@@@@noticeDTO : " + noticeDTO);
+        
+        if (noticeDTO == null) { //찾는 공지사항이 없을때
             return ResponseEntity.notFound().build();
         }
         
-        return ResponseEntity.ok(notice);
+        return ResponseEntity.ok(noticeDTO);
     }
 }
