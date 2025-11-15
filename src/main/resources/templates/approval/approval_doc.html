@@ -18,10 +18,10 @@
 <body>
 <th:block layout:fragment="content">
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
-		<h2>전자 결재 작성중</h2>
+		<h2>전자 결재</h2>
 			<div class="d-flex justify-content-between">
 			<div class="d-flex" style="height: 38.94px;">
-	            <div class="mb-6 mb-0">
+	            <div class="mb-6 mb-0" style="width: 180px;">
 	            	<select class="form-select" onchange="draftValFn(this)">
 	            		<option value="기안서" selected>기안서</option>
 	            		<option name="draft" value="휴가(연차)신청서">휴가(연차)신청서</option>
@@ -35,7 +35,7 @@
 						작성
 						</button>
 		        </div>
-		        <div class="row flex-nowrap" style="margin-left: 506px;">
+		        <div class="row flex-nowrap" style="margin-left: 389px;">
 					<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
 						<input type="date" name="startDate" class="form-control">
 					</div>
@@ -73,22 +73,24 @@
 			</nav>
 			<div class="tab-content" id="nav-tabContent">
 			  <div class="tab-pane fade show active" id="nav-approval" role="tabpanel" aria-labelledby="nav-approval-tab">
-			  	<h2>table1</h2>
+			  	<h2>결재사항</h2>
 			  	<div id="approvalGrid"></div>
 			  </div>
 			  <div class="tab-pane fade active" id="nav-all" role="tabpanel" aria-labelledby="nav-all-tab">
-			  		<h2>table2</h2>
-			  		<div id="grid2"></div>
+			  		<h2>전체결재</h2>
+			  		<div id="allApprovalGrid"></div>
 			  </div>
 			  <div class="tab-pane fade active" id="nav-my" role="tabpanel" aria-labelledby="nav-my-tab">
-			  		<h2>table3</h2>
-			  		<div id="grid3"></div>
+			  		<h2>내 결재목록</h2>
+			  		<div id="myApprovalGrid"></div>
 			  </div>
 			  <div class="tab-pane fade active" id="nav-waiting" role="tabpanel" aria-labelledby="nav-waiting-tab">
-			  		<h2>table4</h2>
+			  		<h2>결재대기</h2>
+					<div id="waitingApprovalGrid"></div>
 			  </div>
 			  <div class="tab-pane fade active" id="nav-done" role="tabpanel" aria-labelledby="nav-done-tab">
-			  		<h2>table5</h2>
+			  		<h2>결재완료</h2>
+					<div id="doneApprovalGrid"></div>
 			  </div>
 			</div>
 		</div>
@@ -102,11 +104,13 @@
 		      </div>
 		      <div class="modal-body">
 		        <h5 class="d-flex">문서 날짜 : <p id="today-date"></p></h5>
-		        <h5 class="d-flex">문서 제목 : 	                 
-		        	<input class="form-control" type="text" placeholder="문서제목" style="height: 38.94px;">
+		        <h5 class="d-flex">
+					<label class="p-1" style="width: 200px;"> 문서 제목 </label> 	                 
+		        	<input class="form-control" type="text" placeholder="문서제목" style="width:800px;height: 38.94px;">
 		        </h5>
-		        <h5 class="d-flex">양식 종류 : 
-		        	<div class="mb-6 mb-0">
+		        <h5 class="d-flex">
+					<label class="p-1" style="width: 200px;">양식 종류 </label> 
+		        	<div class="mb-6 mb-0" style="width: 344px;">
 		            	<select class="form-select" onchange="draftValFn(this)">
 		            		<option selected>기안서</option>
 		            		<option name="draft" value="휴가(연차)신청서">휴가(연차)신청서</option>
@@ -116,11 +120,12 @@
 		            	</select>
 	            	</div>
 		        </h5>
-		        <h5 class="d-flex">결재자명(기안자): 
-		        	<div class="mb-6 mb-0">
+		        <h5 class="d-flex">
+					<label class="p-1" style="width: 200px;">결재자명(기안자)</label> 
+		        	<div class="mb-6 mb-0" style="width: 344px;">
 		            	 <select class="form-select">
-		            		<option selected>인사테이블에서불러오기 이름(사번)</option>
-		            		 <option th:each="item, iterStat : ${getEmp}" 
+		            		<option selected>이름(사번)</option>
+		            		 <option th:each="item, iterStat : ${empList}" 
 							 		th:value="${iterStat.index}" 
 							 		th:text="${iterStat.index} + ' : ' + ${item.empName} + '(' + ${item.empId} + ')'">
 							 </option>
@@ -128,18 +133,8 @@
 		            	</select> 
 	            	</div>
 		        </h5>
-		        <h5 class="d-flex">결재 완료기간: 
-			        <div class="row flex-nowrap">
-						<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-							<input type="date" name="startDate" class="form-control">
-						</div>
-		                ~
-		                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-			                <input type="date" name="endDate" class="form-control">
-		                </div>
-					</div>
-		        </h5>
-		        <h5 class="d-flex">기간-휴가(연차)신청서 [기본-hidden]
+		        <h5 class="d-flex">
+					<label class="p-1" style="width: 200px;">결재완료기간</label>
 		        	<div class="row flex-nowrap">
 						<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
 							<input type="date" name="startDate" class="form-control">
@@ -150,8 +145,21 @@
 		                </div>
 					</div>
 		        </h5>
-		        <h5 class="d-flex">휴가종류-휴가(연차)신청서 [기본-hidden]
-		        	<div class="mb-6 mb-0">
+		        <h5 class="d-flex">
+					<label class="p-1" style="width: 200px;">기간-휴가(연차)신청서 [기본-hidden]</label>
+		        	<div class="row flex-nowrap">
+						<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+							<input type="date" name="startDate" class="form-control">
+						</div>
+		                ~
+		                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+			                <input type="date" name="endDate" class="form-control">
+		                </div>
+					</div>
+		        </h5>
+		        <h5 class="d-flex">
+					<label class="p-1" style="width: 200px;">휴가종류-휴가(연차)신청서 [기본-hidden]</label>
+		        	<div class="mb-6 mb-0" style="width: 344px;">
 		            	<select class="form-select">
 		            		<option selected></option>
 		            		<option name="leave" value="연차유급휴가">연차유급휴가</option>
@@ -168,60 +176,43 @@
 		            	</select>
 	            	</div>
 		        </h5>
-		        <h5 class="d-flex">발령부서- 인사발령신청서 [기본-hidden]
-		        	<div class="mb-6 mb-0">
+		        <h5 class="d-flex">
+					<label class="p-1" style="width: 200px;">발령부서- 인사발령신청서 [기본-hidden]</label>
+		        	<div class="mb-6 mb-0" style="width: 344px;">
 		            	<select class="form-select">
-		            		<option selected>부서이름 인사정보테이블에서 가져오기</option>
-		            		<option name="transfer" value="기획조정실">기획조정실</option>
-							<option name="transfer" value="경영기획팀">경영기획팀</option>
-							<option name="transfer" value="인사노무팀">인사노무팀</option>
-							<option name="transfer" value="총무팀">총무팀</option>
-							<option name="transfer" value="재무회계팀">재무회계팀</option>
-							<option name="transfer" value="범무감사팀">범무감사팀</option>
-							<option name="transfer" value="비서실">비서실</option>
-							<option name="transfer" value="대외협력팀">대외협력팀</option>
-							<option name="transfer" value="홍보팀">홍보팀</option>
-							<option name="transfer" value="국제협력팀">국제협력팀</option>
-							<option name="transfer" value="고객만족팀(cs팀)">고객만족팀(cs팀)</option>
-							<option name="transfer" value="사업기획팀">사업기획팀</option>
-							<option name="transfer" value="운영지원팀">운영지원팀</option>
-							<option name="transfer" value="사업관리팀">사업관리팀</option>
-							<option name="transfer" value="성과관리팀">성과관리팀</option>
-							<option name="transfer" value="시설관리팀">시설관리팀</option>
-							<option name="transfer" value="연구개발팀">연구개발팀</option>
-							<option name="transfer" value="기술지원팀">기술지원팀</option>
-							<option name="transfer" value="정보화팀/전산팀">정보화팀/전산팀</option>
-							<option name="transfer" value="데이터관리팀">데이터관리팀</option>
-							<option name="transfer" value="감사실">감사실</option>
-							<option name="transfer" value="윤리경영팀">윤리경영팀</option>
-							<option name="transfer" value="내부감사팀">내부감사팀</option>
-							<option name="transfer" value="리스크 관리팀">리스크 관리팀</option>
+		            		<option selected>부서</option>
+							<option th:each="item, iterStat : ${deptList}" 
+							 		th:value="${iterStat.index}" 
+							 		th:text="${iterStat.index} + ' : ' + ${item.deptName} + '(' + ${item.deptId} + ')'">
+							 </option>
 		            	</select>
 	            	</div>
 		        </h5>
-		        <h5 class="d-flex">지출종류 - 지출결의서 [기본-hidden]
-		        	<div class="mb-6 mb-0">
+		        <h5 class="d-flex">
+					<label class="p-1" style="width: 200px;">지출종류 - 지출결의서 [기본-hidden]</label>
+		        	<div class="mb-6 mb-0" style="width: 344px;">
 		            	<select class="form-select">
-		            		<option selected>인사테이블에서불러오기 이름(사번)</option>
+		            		<option selected>지출종류</option>
 		            		<option name="expense" value="고정지출">고정지출</option>
 							<option name="expense" value="변동지출">변동지출</option>
 							<option name="expense" value="비정기지출">비정기지출</option>
 		            	</select>
 	            	</div>
 		        </h5>
-		        <h5>사유내용 -자유양식결재서:[기본-hidden]
+		        <h5>
+					<label class="p-1" style="width: 200px;">사유내용 -자유양식결재서:[기본-hidden]</label>
 		        	<textarea id="notice-content-write" class="form-control" rows="10" placeholder="결재사유내용 작성"></textarea>
 		        </h5>
 		        <h5 class="d-flex">결재권한자 변경:
 		        	<input class="form-check-input" type="checkbox" id="opt-in">
 		        
 		        </h5>
-		        <h5 class="d-flex">결재권한자: 
-<!-- 		        <div id="container"></div> -->
-		          <div id="select-box" style="width: 200px"></div>
+		        <h5 class="d-flex">
+					<label>결재권한자 : </label> 
+		          	<div id="select-box" style="width: 200px"></div>
 		        </h5>
      				<div id="approvar" onload="defaultPrint()" style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
-     				   
+					<!-- 결재권한자 버튼 생성 영역 -->
      				</div>	
      				
      				<!-- 전결자 클릭시 추가 태그 -->
@@ -230,28 +221,31 @@
 			      	
 						<div id="jeongyeolja-content">
 						  <label class="form-check-label" for="radioDefault1">
-						    없음 : 
+						    없음 
 						  </label>
-						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault1">
+						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault1" checked>
 						  <label class="form-check-label" for="radioDefault1">
-						    전결 : 
+						    전결  
 						  </label>
 						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault1">
 						  <label class="form-check-label" for="radioDefault2">
-						    대결 : 
+						    대결  
 						  </label>
-						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault2" checked>
+						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault2">
 						  <label class="form-check-label" for="radioDefault2">
-						    선결 : 
+						    선결  
 						  </label>
-						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault2" checked>
-							<label>전결자 지정 :</label>
+						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault2">
+						  <div>
+						 	<h5>전결자 지정 </h5>
 							<select id="emp_id" class="form-select" aria-label="Default select example">
-							  <option selected>인사테이블에서 이름 사원번호 가져오기</option>
-							  <option name="emp_id" value="박다정">박다정</option>
-							  <option name="emp_id" value="정지훈">정지훈</option>
-							  <option name="emp_id" value="박영진">박영진</option> 
+							  <option selected>이름 사원번호</option>
+							  <option th:each="item, iterStat : ${empList}" 
+							 		th:value="${iterStat.index}" 
+							 		th:text="${iterStat.index} + ' : ' + ${item.empName} + '(' + ${item.empId} + ')'">
+							 </option> 
 							</select>
+						  </div>
 						</div>
 					</div>
 	     				
@@ -281,179 +275,201 @@
 
 <th:block layout:fragment="myScript">
 <script>
+
+
+	//grid - 2.전체결재 - 나와관련된 모든 결재문서
+	window.onload = function() {
+		fetchApprovalDocs().then(data => {
+			console.log(data);
+			grid2.resetData(data);
+		});
+	};
+
+	function fetchApprovalDocs() {
+		return fetch('/approval/approvalDocGrid')
+			.then(response => response.json())
+			.then(data => {
+				
+				let colData = [];
+				let obj = {};
+
+				data.map((item,index) => {
+					obj["row_no"] = item[0]; //결재순번
+					obj["approval_id"]	 = item[1];	//문서id
+					obj["approval_title"] = item[2]; //문서제목	
+					obj["emp_id"] = item[3];	//사원번호
+					obj["emp_name"] = item[4];	//기안자
+					obj["dept_id"] = item[5];	//부서코드
+					obj["dept_name"] = item[6];	//부서명
+					obj["approver"] = item[7];	//결재권한자
+					obj["pos_code"] = item[8];	//직급코드
+					obj["pos_name"] = item[9];	//직급
+					obj["created_date"] = item[10];	//생성일
+					obj["finish_date"] = item[11]; //결재완료일자
+					obj["doc_status"] = item[12]; //상태
+					obj["view_details"] = '<button class="btn btn-primary me-2">상세</button>'; //상세보기
+					colData.push(obj);
+					obj = {};
+				});
+
+				console.log("objectArray outside map:",colData);
+				
+				return colData;
+			})
+			.catch(error => {
+				console.error('Error fetching approval documents:', error);
+			});
+	}
 	const Grid = tui.Grid;
-	const instance = new Grid({
-		  el: document.getElementById('approvalGrid'), // Container element
+	const grid1 = new Grid({
+		  el: document.getElementById('approvalGrid'), // 결재사항
 		  columns: [
 	
-		    {
-		      header: '결재순번'
-		      ,name: 'row_no'
-		      ,align: 'center'
-		    },
-		    {
-		      header: '문서제목'
-		      ,name: 'document_title'
-		      ,align: 'center'
-		    },
-		    {
-		      header: '기안자'
-		      ,name: 'drafter'
-		      ,align: 'center'
-		    },
-		    {
-		      header: '부서명'
-		      ,name: 'department_name'
-		      ,align: 'center'
-		    },
-		    {
-			  header: '직급'
-			  ,name: 'rank'
-			  ,align: 'center'
-			},
-			{
-			  header: '생성일'
-			  ,name: 'creation_date'
-			  ,align: 'center'
-			},
-			{
-			  header: '결재완료일자'
-			  ,name: 'payment_completion_date'
-			  ,align: 'center'
-			},
-			{
-			  header: '상태'
-			  ,name: 'state'
-			  ,align: 'center'
-			},
-			{
-			  header: '결재여부'
-			  ,name: 'payment_status'
-			  ,align: 'center'
-			},
-			{
-			  header: '상세보기'
-			  ,name: 'view_details'
-			  ,align: 'center'
-
-			}
+		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
+			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
+			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
+			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
+			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
+			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
+			,{header: '상세보기' ,name: 'view_details' ,align: 'center'}
 		  ],
 		  data: [
-		    {
+			{
 		    	row_no: 1,
-				document_title: '지출 결의서',
-				drafter:'',
-				department_name:'',
-				rank:'',
-				creation_date:'',
-				payment_completion_date:'',
-				state:'',
-				payment_status:'',
+				approval_id: 'A-202306-001',
+				approval_title: '지출 결의서',
+				emp_id: '2104502',	
+				emp_name: '이정현',
+				dept_id: 'D-001',
+				dept_name: '개발팀',
+				approver: 'd-이사랑',
+				pos_code: 'P-002',
+				pos_name: '대리',
+				created_date: '2024-06-01',
+				finish_date: '2024-06-05',
+				doc_status: '결재완료',
 				view_details:'<button class="btn btn-primary me-2">상세</button>'
-				
 		    },
 		    {
 		    	row_no: 2,
-				document_title: '휴가(연차)신청서',
-				drafter:'',
-				department_name:'',
-				rank:'',
-				creation_date:'',
-				payment_completion_date:'',
-				state:'',
-				payment_status:'',
+				approval_id: 'A-202306-002',
+				approval_title: '휴가(연차)신청서',
+				emp_id: '2104503',
+				emp_name: '한가인',
+				dept_id: 'D-002',
+				dept_name: '인사팀',
+				approver: 'i-정지훈',
+				pos_code: 'P-003',
+				pos_name: '과장',
+				created_date: '2024-06-02',
+				finish_date: '2024-06-06',
+				doc_status: '결재대기',
 				view_details:'<button class="btn btn-primary me-2">상세</button>'
-				
-		    }
+		    },
 		  ]
 		});
 // 	instance.resetData(newData); // Call API of instance's public method
 	
 // 	Grid.applyTheme('clean'); // Call API of static method
-	
 	const grid2 = new Grid({
-	    el: document.getElementById('grid2'), // 두 번째 컨테이너
+	    el: document.getElementById('allApprovalGrid'), // 전체결재
 	    columns: [
-	    	
-		    {
-		      header: '결재순번'
-		      ,name: 'row_no'
-		      ,align: 'center'
-		    },
-		    {
-		      header: '문서제목'
-		      ,name: 'document_title'
-		      ,align: 'center'
-		    },
-		    {
-		      header: '기안자'
-		      ,name: 'drafter'
-		      ,align: 'center'
-		    },
-		    {
-		      header: '부서명'
-		      ,name: 'department_name'
-		      ,align: 'center'
-		    },
-		    {
-			  header: '직급'
-			  ,name: 'rank'
-			  ,align: 'center'
-			},
-			{
-			  header: '생성일'
-			  ,name: 'creation_date'
-			  ,align: 'center'
-			},
-			{
-			  header: '결재완료일자'
-			  ,name: 'payment_completion_date'
-			  ,align: 'center'
-			},
-			{
-			  header: '상태'
-			  ,name: 'state'
-			  ,align: 'center'
-			},
-			{
-			  header: '결재여부'
-			  ,name: 'payment_status'
-			  ,align: 'center'
-			},
-			{
-			  header: '상세보기'
-			  ,name: 'view_details'
-			  ,align: 'center'
-
-			}
+	
+		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
+			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
+			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
+			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
+			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
+			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
+			,{header: '상세보기' ,name: 'view_details' ,align: 'center'}
 		  ],
 		  data: [
-		    {
-		    	row_no: 1,
-				document_title: '지출 결의서',
-				drafter:'',
-				department_name:'',
-				rank:'',
-				creation_date:'',
-				payment_completion_date:'',
-				state:'',
-				payment_status:'',
-				view_details:'<button class="btn btn-primary me-2">상세</button>'
-				
-		    },
-		    {
-		    	row_no: 2,
-				document_title: '휴가(연차)신청서',
-				drafter:'',
-				department_name:'',
-				rank:'',
-				creation_date:'',
-				payment_completion_date:'',
-				state:'',
-				payment_status:'',
-				view_details:'<button class="btn btn-primary me-2">상세</button>'
-				
-		    }
+		  ]
+	});
+
+	const grid3 = new Grid({
+	    el: document.getElementById('myApprovalGrid'), // 내 결재목록
+	    columns: [
+	
+		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
+			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
+			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
+			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
+			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
+			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
+			,{header: '상세보기' ,name: 'view_details' ,align: 'center'}
+		  ],
+		  data: [
+		    
+		  ]
+	});
+
+	const grid4 = new Grid({
+	    el: document.getElementById('waitingApprovalGrid'), //결재대기
+	    columns: [
+	
+		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
+			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
+			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
+			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
+			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
+			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
+			,{header: '상세보기' ,name: 'view_details' ,align: 'center'}
+		  ],
+		  data: [
+		   
+		  ]
+	});
+
+	const grid5 = new Grid({
+	    el: document.getElementById('doneApprovalGrid'), //결재완료
+	    columns: [
+	
+		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
+			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
+			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
+			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
+			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
+			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
+			,{header: '상세보기' ,name: 'view_details' ,align: 'center'}
+		  ],
+		  data: [
+		  
 		  ]
 	});
 	
@@ -478,7 +494,9 @@
 
 	//셀렉트박스
 	var approvarDiv = document.querySelector('#approvar');
-    var selectBox = new tui.SelectBox('#select-box', {
+	var deptList = "[[${deptList}]]";
+	console.log("deptList",deptList);
+	var selectBox = new tui.SelectBox('#select-box', {
       data: [
         {
           label: '인사팀',
@@ -531,14 +549,15 @@
 	//결재권한자 버튼 클릭시 결재권한자변경 div 태그 생성
 	function approvalNo(count,text){
 	   //해당태그 클릭시 전결자 div 나오기
-	   	 jeongyeoljaDiv.innerHTML = '<button onClick="approvarDivclose(this,"change",'+ count +')" class="btn-close" style="float:right;margin-right: 8px;"></button>'
+		let type="change";
+		jeongyeoljaDiv.innerHTML = '<button onClick="approvarDivclose(this,'+ "'"+ type + "'"+','+ count +')" class="btn-close" style="float:right;margin-right: 8px;"></button>'
 	   		 			+ '<h5>'+ count + "차 결재권한자 : "+ text +" 변경"+'</h5>';
-			jeongyeoljaDiv.innerHTML += jeongyeoljaContent.innerHTML;	
+		jeongyeoljaDiv.innerHTML += jeongyeoljaContent.innerHTML;	
 	   
-	   	 if(jeongyeoljaDiv.style.display === 'none'){
-	  	 jeongyeoljaDiv.style.display = 'block';  
+	   	if(jeongyeoljaDiv.style.display === 'none'){
+	  	jeongyeoljaDiv.style.display = 'block';  
 	   	  						  
-	   }	
+	}	
 	   
 
     } 
@@ -547,6 +566,9 @@
 	function approvarDivclose(buttonDiv,type,count){
 		const divElement = buttonDiv.parentNode; // 버튼의 부모인 div를 찾음
 		
+		console.log("type",type);
+		console.log("jeongyeoljaDiv.style.display",jeongyeoljaDiv.style.display);
+		jeongyeoljaDiv.style.display = 'none';
 		//defalut 태그 닫기 버튼시 
 		if (buttonDiv.parentElement.id === '' || type === 'defalut') {//결재권한자
 	        divElement.remove(); //자신의 div 제거
@@ -558,11 +580,9 @@
 			this.count = count-1; //제거 라벨 카운트 원상복기
 	    }
 		
-		jeongyeoljaDiv.style.display = 'none';
 		
 		if(approvarArr.length === 0){
     		this.count = 0;
-    		
     	}	
 	}
 	//셀렉트박스 닫힐때
@@ -573,7 +593,7 @@
     		print(ev.type, selectlabel);
     		approvarArr.push(this.count);
     	}
-    })
+	})
    	//리셋버튼 만들기 하다가잠
     
 	//에디터
@@ -619,4 +639,3 @@
 	 
 </script>
 </th:block>
-

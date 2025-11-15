@@ -35,9 +35,15 @@ public class ApprovalController {
     @GetMapping("/approval_doc")
     public String approvalDoc(Model model) {
 
-		model.addAttribute("getEmp", approvalDocService.getEmp());//결재- 기안자 목록 불러오기
-		
+		model.addAttribute("empList", approvalDocService.getEmp());//결재- 기안자 목록 불러오기
+		model.addAttribute("deptList", approvalDocService.getDept()); //결재- 부서목록 불러오기
 		return "approval/approval_doc";
     }
+	//grid  - 전체결재
+	@ResponseBody
+	@GetMapping("/approvalDocGrid")
+	public List<Object[]> getItemList() {
+		return approvalDocService.getAllApprovalDocs("2104502");
+	}
 	
 }

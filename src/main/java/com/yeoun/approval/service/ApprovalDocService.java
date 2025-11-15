@@ -17,6 +17,7 @@ import com.yeoun.attendance.repository.AttendanceRepository;
 import com.yeoun.attendance.repository.WorkPolicyRepository;
 import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpListDTO;
+import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.entity.EmpRole;
 import com.yeoun.emp.repository.EmpRepository;
@@ -39,6 +40,16 @@ public class ApprovalDocService {
 	public List<Emp> getEmp() {
 		// 사원 목록 조회
 		return approvalDocRepository.findAllMember();
+	}
+	//부서목록조회
+	@Transactional(readOnly = true)
+	public List<Dept> getDept() {
+		return approvalDocRepository.findAllDepartments();
+	}
+	//그리드 - 2.전체결재- 나와관련된 모든 결재문서
+	@Transactional(readOnly = true)	
+	public List<Object[]> getAllApprovalDocs(String empId) {
+		return approvalDocRepository.findAllApprovalDocs(empId);
 	}
 
 }
