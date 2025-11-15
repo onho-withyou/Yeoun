@@ -39,5 +39,11 @@ public class ApprovalController {
 		model.addAttribute("deptList", approvalDocService.getDept()); //결재- 부서목록 불러오기
 		return "approval/approval_doc";
     }
+	//grid  - 전체결재
+	@ResponseBody
+	@GetMapping("/approvalDocGrid")
+	public List<Object[]> getItemList() {
+		return approvalDocService.getAllApprovalDocs("2104502");
+	}
 	
 }

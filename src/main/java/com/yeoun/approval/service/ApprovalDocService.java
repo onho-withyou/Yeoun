@@ -46,5 +46,10 @@ public class ApprovalDocService {
 	public List<Dept> getDept() {
 		return approvalDocRepository.findAllDepartments();
 	}
+	//그리드 - 2.전체결재- 나와관련된 모든 결재문서
+	@Transactional(readOnly = true)	
+	public List<Object[]> getAllApprovalDocs(String empId) {
+		return approvalDocRepository.findAllApprovalDocs(empId);
+	}
 
 }
