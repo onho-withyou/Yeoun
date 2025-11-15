@@ -279,7 +279,6 @@
 
 	//grid - 2.전체결재 - 나와관련된 모든 결재문서
 	window.onload = function() {
-		console.log("페이지가 모두 로드되었습니다!");
 		fetchApprovalDocs().then(data => {
 			console.log(data);
 			grid2.resetData(data);
@@ -295,19 +294,20 @@
 				let obj = {};
 
 				data.map((item,index) => {
-					obj["row_no"] = item[0];
-					obj["approval_id"]	 = item[1];
-					obj["approval_title"] = item[2];	
-					obj["emp_id"] = item[3];
-					obj["emp_name"] = item[4];
-					obj["dept_id"] = item[5];
-					obj["dept_name"] = item[6];
-					obj["approver"] = item[7];
-					obj["pos_code"] = item[8];
-					obj["pos_name"] = item[9];
-					obj["created_date"] = item[10];
-					obj["finish_date"] = item[11];
-					obj["doc_status"] = item[12];
+					obj["row_no"] = item[0]; //결재순번
+					obj["approval_id"]	 = item[1];	//문서id
+					obj["approval_title"] = item[2]; //문서제목	
+					obj["emp_id"] = item[3];	//사원번호
+					obj["emp_name"] = item[4];	//기안자
+					obj["dept_id"] = item[5];	//부서코드
+					obj["dept_name"] = item[6];	//부서명
+					obj["approver"] = item[7];	//결재권한자
+					obj["pos_code"] = item[8];	//직급코드
+					obj["pos_name"] = item[9];	//직급
+					obj["created_date"] = item[10];	//생성일
+					obj["finish_date"] = item[11]; //결재완료일자
+					obj["doc_status"] = item[12]; //상태
+					obj["view_details"] = '<button class="btn btn-primary me-2">상세</button>'; //상세보기
 					colData.push(obj);
 					obj = {};
 				});
