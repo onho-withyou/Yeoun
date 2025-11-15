@@ -18,7 +18,7 @@
 <body>
 <th:block layout:fragment="content">
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
-		<h2>전자 결재 작성중</h2>
+		<h2>전자 결재</h2>
 			<div class="d-flex justify-content-between">
 			<div class="d-flex" style="height: 38.94px;">
 	            <div class="mb-6 mb-0">
@@ -102,11 +102,13 @@
 		      </div>
 		      <div class="modal-body">
 		        <h5 class="d-flex">문서 날짜 : <p id="today-date"></p></h5>
-		        <h5 class="d-flex">문서 제목 : 	                 
-		        	<input class="form-control" type="text" placeholder="문서제목" style="height: 38.94px;">
+		        <h5 class="d-flex">
+					<label class="p-1" style="width: 200px;"> 문서 제목 </label> 	                 
+		        	<input class="form-control" type="text" placeholder="문서제목" style="width:800px;height: 38.94px;">
 		        </h5>
-		        <h5 class="d-flex">양식 종류 : 
-		        	<div class="mb-6 mb-0">
+		        <h5 class="d-flex">
+					<label class="p-1" style="width: 200px;">양식 종류 </label> 
+		        	<div class="mb-6 mb-0" style="width: 344px;">
 		            	<select class="form-select" onchange="draftValFn(this)">
 		            		<option selected>기안서</option>
 		            		<option name="draft" value="휴가(연차)신청서">휴가(연차)신청서</option>
@@ -116,11 +118,12 @@
 		            	</select>
 	            	</div>
 		        </h5>
-		        <h5 class="d-flex">결재자명(기안자): 
-		        	<div class="mb-6 mb-0">
+		        <h5 class="d-flex">
+					<label class="p-1" style="width: 200px;">결재자명(기안자)</label> 
+		        	<div class="mb-6 mb-0" style="width: 344px;">
 		            	 <select class="form-select">
-		            		<option selected>인사테이블에서불러오기 이름(사번)</option>
-		            		 <option th:each="item, iterStat : ${getEmp}" 
+		            		<option selected>이름(사번)</option>
+		            		 <option th:each="item, iterStat : ${empList}" 
 							 		th:value="${iterStat.index}" 
 							 		th:text="${iterStat.index} + ' : ' + ${item.empName} + '(' + ${item.empId} + ')'">
 							 </option>
@@ -128,18 +131,8 @@
 		            	</select> 
 	            	</div>
 		        </h5>
-		        <h5 class="d-flex">결재 완료기간: 
-			        <div class="row flex-nowrap">
-						<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-							<input type="date" name="startDate" class="form-control">
-						</div>
-		                ~
-		                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-			                <input type="date" name="endDate" class="form-control">
-		                </div>
-					</div>
-		        </h5>
-		        <h5 class="d-flex">기간-휴가(연차)신청서 [기본-hidden]
+		        <h5 class="d-flex">
+					<label class="p-1" style="width: 200px;">결재완료기간</label>
 		        	<div class="row flex-nowrap">
 						<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
 							<input type="date" name="startDate" class="form-control">
@@ -150,8 +143,21 @@
 		                </div>
 					</div>
 		        </h5>
-		        <h5 class="d-flex">휴가종류-휴가(연차)신청서 [기본-hidden]
-		        	<div class="mb-6 mb-0">
+		        <h5 class="d-flex">
+					<label class="p-1" style="width: 200px;">기간-휴가(연차)신청서 [기본-hidden]</label>
+		        	<div class="row flex-nowrap">
+						<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+							<input type="date" name="startDate" class="form-control">
+						</div>
+		                ~
+		                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+			                <input type="date" name="endDate" class="form-control">
+		                </div>
+					</div>
+		        </h5>
+		        <h5 class="d-flex">
+					<label class="p-1" style="width: 200px;">휴가종류-휴가(연차)신청서 [기본-hidden]</label>
+		        	<div class="mb-6 mb-0" style="width: 344px;">
 		            	<select class="form-select">
 		            		<option selected></option>
 		            		<option name="leave" value="연차유급휴가">연차유급휴가</option>
@@ -168,60 +174,43 @@
 		            	</select>
 	            	</div>
 		        </h5>
-		        <h5 class="d-flex">발령부서- 인사발령신청서 [기본-hidden]
-		        	<div class="mb-6 mb-0">
+		        <h5 class="d-flex">
+					<label class="p-1" style="width: 200px;">발령부서- 인사발령신청서 [기본-hidden]</label>
+		        	<div class="mb-6 mb-0" style="width: 344px;">
 		            	<select class="form-select">
-		            		<option selected>부서이름 인사정보테이블에서 가져오기</option>
-		            		<option name="transfer" value="기획조정실">기획조정실</option>
-							<option name="transfer" value="경영기획팀">경영기획팀</option>
-							<option name="transfer" value="인사노무팀">인사노무팀</option>
-							<option name="transfer" value="총무팀">총무팀</option>
-							<option name="transfer" value="재무회계팀">재무회계팀</option>
-							<option name="transfer" value="범무감사팀">범무감사팀</option>
-							<option name="transfer" value="비서실">비서실</option>
-							<option name="transfer" value="대외협력팀">대외협력팀</option>
-							<option name="transfer" value="홍보팀">홍보팀</option>
-							<option name="transfer" value="국제협력팀">국제협력팀</option>
-							<option name="transfer" value="고객만족팀(cs팀)">고객만족팀(cs팀)</option>
-							<option name="transfer" value="사업기획팀">사업기획팀</option>
-							<option name="transfer" value="운영지원팀">운영지원팀</option>
-							<option name="transfer" value="사업관리팀">사업관리팀</option>
-							<option name="transfer" value="성과관리팀">성과관리팀</option>
-							<option name="transfer" value="시설관리팀">시설관리팀</option>
-							<option name="transfer" value="연구개발팀">연구개발팀</option>
-							<option name="transfer" value="기술지원팀">기술지원팀</option>
-							<option name="transfer" value="정보화팀/전산팀">정보화팀/전산팀</option>
-							<option name="transfer" value="데이터관리팀">데이터관리팀</option>
-							<option name="transfer" value="감사실">감사실</option>
-							<option name="transfer" value="윤리경영팀">윤리경영팀</option>
-							<option name="transfer" value="내부감사팀">내부감사팀</option>
-							<option name="transfer" value="리스크 관리팀">리스크 관리팀</option>
+		            		<option selected>부서</option>
+							<option th:each="item, iterStat : ${deptList}" 
+							 		th:value="${iterStat.index}" 
+							 		th:text="${iterStat.index} + ' : ' + ${item.deptName} + '(' + ${item.deptId} + ')'">
+							 </option>
 		            	</select>
 	            	</div>
 		        </h5>
-		        <h5 class="d-flex">지출종류 - 지출결의서 [기본-hidden]
-		        	<div class="mb-6 mb-0">
+		        <h5 class="d-flex">
+					<label class="p-1" style="width: 200px;">지출종류 - 지출결의서 [기본-hidden]</label>
+		        	<div class="mb-6 mb-0" style="width: 344px;">
 		            	<select class="form-select">
-		            		<option selected>인사테이블에서불러오기 이름(사번)</option>
+		            		<option selected>지출종류</option>
 		            		<option name="expense" value="고정지출">고정지출</option>
 							<option name="expense" value="변동지출">변동지출</option>
 							<option name="expense" value="비정기지출">비정기지출</option>
 		            	</select>
 	            	</div>
 		        </h5>
-		        <h5>사유내용 -자유양식결재서:[기본-hidden]
+		        <h5>
+					<label class="p-1" style="width: 200px;">사유내용 -자유양식결재서:[기본-hidden]</label>
 		        	<textarea id="notice-content-write" class="form-control" rows="10" placeholder="결재사유내용 작성"></textarea>
 		        </h5>
 		        <h5 class="d-flex">결재권한자 변경:
 		        	<input class="form-check-input" type="checkbox" id="opt-in">
 		        
 		        </h5>
-		        <h5 class="d-flex">결재권한자: 
-<!-- 		        <div id="container"></div> -->
-		          <div id="select-box" style="width: 200px"></div>
+		        <h5 class="d-flex">
+					<label>결재권한자 : </label> 
+		          	<div id="select-box" style="width: 200px"></div>
 		        </h5>
      				<div id="approvar" onload="defaultPrint()" style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
-     				   
+					<!-- 결재권한자 버튼 생성 영역 -->
      				</div>	
      				
      				<!-- 전결자 클릭시 추가 태그 -->
@@ -230,28 +219,31 @@
 			      	
 						<div id="jeongyeolja-content">
 						  <label class="form-check-label" for="radioDefault1">
-						    없음 : 
+						    없음 
 						  </label>
-						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault1">
+						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault1" checked>
 						  <label class="form-check-label" for="radioDefault1">
-						    전결 : 
+						    전결  
 						  </label>
 						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault1">
 						  <label class="form-check-label" for="radioDefault2">
-						    대결 : 
+						    대결  
 						  </label>
-						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault2" checked>
+						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault2">
 						  <label class="form-check-label" for="radioDefault2">
-						    선결 : 
+						    선결  
 						  </label>
-						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault2" checked>
-							<label>전결자 지정 :</label>
+						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault2">
+						  <div>
+						 	<h5>전결자 지정 </h5>
 							<select id="emp_id" class="form-select" aria-label="Default select example">
-							  <option selected>인사테이블에서 이름 사원번호 가져오기</option>
-							  <option name="emp_id" value="박다정">박다정</option>
-							  <option name="emp_id" value="정지훈">정지훈</option>
-							  <option name="emp_id" value="박영진">박영진</option> 
+							  <option selected>이름 사원번호</option>
+							  <option th:each="item, iterStat : ${empList}" 
+							 		th:value="${iterStat.index}" 
+							 		th:text="${iterStat.index} + ' : ' + ${item.empName} + '(' + ${item.empId} + ')'">
+							 </option> 
 							</select>
+						  </div>
 						</div>
 					</div>
 	     				
@@ -531,14 +523,15 @@
 	//결재권한자 버튼 클릭시 결재권한자변경 div 태그 생성
 	function approvalNo(count,text){
 	   //해당태그 클릭시 전결자 div 나오기
-	   	 jeongyeoljaDiv.innerHTML = '<button onClick="approvarDivclose(this,"change",'+ count +')" class="btn-close" style="float:right;margin-right: 8px;"></button>'
+		let type="change";
+		jeongyeoljaDiv.innerHTML = '<button onClick="approvarDivclose(this,'+ "'"+ type + "'"+','+ count +')" class="btn-close" style="float:right;margin-right: 8px;"></button>'
 	   		 			+ '<h5>'+ count + "차 결재권한자 : "+ text +" 변경"+'</h5>';
-			jeongyeoljaDiv.innerHTML += jeongyeoljaContent.innerHTML;	
+		jeongyeoljaDiv.innerHTML += jeongyeoljaContent.innerHTML;	
 	   
-	   	 if(jeongyeoljaDiv.style.display === 'none'){
-	  	 jeongyeoljaDiv.style.display = 'block';  
+	   	if(jeongyeoljaDiv.style.display === 'none'){
+	  	jeongyeoljaDiv.style.display = 'block';  
 	   	  						  
-	   }	
+	}	
 	   
 
     } 
@@ -547,6 +540,9 @@
 	function approvarDivclose(buttonDiv,type,count){
 		const divElement = buttonDiv.parentNode; // 버튼의 부모인 div를 찾음
 		
+		console.log("type",type);
+		console.log("jeongyeoljaDiv.style.display",jeongyeoljaDiv.style.display);
+		jeongyeoljaDiv.style.display = 'none';
 		//defalut 태그 닫기 버튼시 
 		if (buttonDiv.parentElement.id === '' || type === 'defalut') {//결재권한자
 	        divElement.remove(); //자신의 div 제거
@@ -558,11 +554,9 @@
 			this.count = count-1; //제거 라벨 카운트 원상복기
 	    }
 		
-		jeongyeoljaDiv.style.display = 'none';
 		
 		if(approvarArr.length === 0){
     		this.count = 0;
-    		
     	}	
 	}
 	//셀렉트박스 닫힐때
