@@ -21,7 +21,7 @@
 		<h2>전자 결재</h2>
 			<div class="d-flex justify-content-between">
 			<div class="d-flex" style="height: 38.94px;">
-	            <div class="mb-6 mb-0">
+	            <div class="mb-6 mb-0" style="width: 180px;">
 	            	<select class="form-select" onchange="draftValFn(this)">
 	            		<option value="기안서" selected>기안서</option>
 	            		<option name="draft" value="휴가(연차)신청서">휴가(연차)신청서</option>
@@ -35,7 +35,7 @@
 						작성
 						</button>
 		        </div>
-		        <div class="row flex-nowrap" style="margin-left: 506px;">
+		        <div class="row flex-nowrap" style="margin-left: 389px;">
 					<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
 						<input type="date" name="startDate" class="form-control">
 					</div>
@@ -470,6 +470,7 @@
 
 	//셀렉트박스
 	var approvarDiv = document.querySelector('#approvar');
+	var deptList = "[[${deptList}]]";
     var selectBox = new tui.SelectBox('#select-box', {
       data: [
         {
@@ -567,7 +568,7 @@
     		print(ev.type, selectlabel);
     		approvarArr.push(this.count);
     	}
-    })
+	})
    	//리셋버튼 만들기 하다가잠
     
 	//에디터
