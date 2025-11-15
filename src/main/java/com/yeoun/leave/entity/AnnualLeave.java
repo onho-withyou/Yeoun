@@ -126,4 +126,23 @@ public class AnnualLeave {
 	    long monthsWorked = ChronoUnit.MONTHS.between(hireDate, fiscalEnd);
 	    return (int) Math.min(monthsWorked, 11);
 	}
+	
+	// 연차 사용했을 경우
+	public void useAnnual(int useDays) {
+		// 사용 일수가 음수일 경우
+		if (useDays <= 0) {
+			 throw new IllegalArgumentException("사용 일수는 1일 이상이어야 합니다.");
+		}
+		
+		// 기존에 사용한 연차와 총 연차와 비교해서 초과할 경우
+		if (this.usedDays + useDays > this.totalDays) {
+			throw new IllegalArgumentException("사용 가능한 연차를 초과했습니다.");
+		}
+		
+		// 기존 사용한 연차에 더하기
+		this.usedDays += useDays;
+		
+		// 총 연차에서 사용한 연차 빼기
+		this.remainDays = this.totalDays - this.usedDays;
+	}
 }
