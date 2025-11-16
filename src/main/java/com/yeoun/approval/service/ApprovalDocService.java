@@ -61,5 +61,15 @@ public class ApprovalDocService {
 	public List<Object[]> getMyApprovalDocs(String empId) {
 		return approvalDocRepository.findMyApprovalDocs(empId);
 	}
+	//그리드 - 4.결재대기 - 나와관련된 모든 결재문서
+	@Transactional(readOnly = true)
+	public List<Object[]> getWaitingApprovalDocs(String empId) {
+		return approvalDocRepository.findWaitingApprovalDocs(empId);
+	}	
+	//그리드 - 5.결재완료 - 안됨
+	// @Transactional(readOnly = true)		
+	// public List<Object[]> getFinishedApprovalDocs(String empId) {
+	// 	return approvalDocRepository.findFinishedApprovalDocs(empId);
+	// }
 
 }

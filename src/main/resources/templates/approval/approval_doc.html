@@ -279,6 +279,8 @@
 	//grid - 1.결재사항 - 진행해야할 결재만 - 결재권한자만 볼수있음
 	//grid - 2.전체결재 - 나와관련된 모든 결재문서
 	//grid - 3.내 결재목록 - 내가 기안한 문서
+	//grid - 4.결재대기 - 나와관련된 모든 결재대기
+	//grid - 5.결재완료 - 나와 관련된 결재완료한 문서
 	window.onload = function() {
 		fetchPendingApprovalDocs().then(data => {
 			grid1.resetData(data);
@@ -289,8 +291,10 @@
 		fetchMyApprovalDocs().then(data => {
 			grid3.resetData(data);
 		});
-	};
-
+		fetchWaitingApprovalDocs().then(data => {
+			grid4.resetData(data);
+		});
+	}
 	//1. 결재사항 불러오기
 	function fetchPendingApprovalDocs() {
 		return fetch('/approval/pendingApprovalDocGrid')
@@ -299,9 +303,8 @@
 				
 				let colData = [];
 				let obj = {};
-				console.log("grid1 fetch-data----->:",data);
+				// console.log("grid1 fetch-data----->:",data);
 				data.map((item,index) => {
-					console.log("grid1 map-item[12]----->:",item[12]);
 					obj["row_no"] = item[0]; //결재순번
 					obj["approval_id"]	 = item[1];	//문서id
 					obj["approval_title"] = item[2]; //문서제목	
@@ -329,7 +332,6 @@
 				console.error('Error fetching approval documents:', error);
 			});
 	}
-
 	//2. 전체결재 목록 불러오기
 	function fetchApprovalDocs() {
 		return fetch('/approval/approvalDocGrid')
@@ -371,7 +373,44 @@
 		return fetch('/approval/myApprovalDocGrid')
 			.then(response => response.json())
 			.then(data => {
-				console.log("grid3 fetch-data----->:",data);
+				// console.log("grid3 fetch-data----->:",data);
+				let colData = [];
+				let obj = {};
+
+				data.map((item,index) => {
+					obj["row_no"] = item[0]; //결재순번
+					obj["approval_id"]	 = item[1];	//문서id
+					obj["approval_title"] = item[2]; //문서제목	
+					obj["emp_id"] = item[3];	//사원번호
+					obj["emp_name"] = item[4];	//기안자
+					obj["dept_id"] = item[5];	//부서코드
+					obj["dept_name"] = item[6];	//부서명
+					obj["approver"] = item[7];	//결재권한자
+					obj["pos_code"] = item[8];	//직급코드
+					obj["pos_name"] = item[9];	//직급
+					obj["created_date"] = item[10];	//생성일
+					obj["finish_date"] = item[11]; //결재완료일자
+					obj["doc_status"] = item[12]; //상태
+					obj["viewing"] = item[13]; //열람여부
+					obj["view_details"] = '<button class="btn btn-primary me-2">상세</button>'; //상세보기
+					colData.push(obj);
+					obj = {};
+				});
+
+				// console.log("grid3 map------>:",colData);
+				
+				return colData;
+			})
+			.catch(error => {
+				console.error('Error fetching approval documents:', error);
+			});
+	}
+	//4.결재대기 불러오기 -- 1차반려,2차반려,3차반려,1차완료,2차완료,3차완료, 종료
+	function fetchWaitingApprovalDocs() {
+		return fetch('/approval/waitingApprovalDocGrid')
+			.then(response => response.json())
+			.then(data => {
+				console.log("grid4 fetch-data----->:",data);
 				let colData = [];
 				let obj = {};
 
@@ -394,7 +433,43 @@
 					obj = {};
 				});
 
-				console.log("grid3 map------>:",colData);
+				console.log("grid4 map------>:",colData);
+				
+				return colData;
+			})
+			.catch(error => {
+				console.error('Error fetching approval documents:', error);
+			});
+	}
+	//5.결재완료 불러오기-안됨
+	function fetchDoneApprovalDocs() {
+		return fetch('/approval/doneApprovalDocGrid')
+			.then(response => response.json())
+			.then(data => {
+				console.log("grid5 fetch-data----->:",data);
+				let colData = [];
+				let obj = {};
+
+				data.map((item,index) => {
+					obj["row_no"] = item[0]; //결재순번
+					obj["approval_id"]	 = item[1];	//문서id
+					obj["approval_title"] = item[2]; //문서제목	
+					obj["emp_id"] = item[3];	//사원번호
+					obj["emp_name"] = item[4];	//기안자
+					obj["dept_id"] = item[5];	//부서코드
+					obj["dept_name"] = item[6];	//부서명
+					obj["approver"] = item[7];	//결재권한자
+					obj["pos_code"] = item[8];	//직급코드
+					obj["pos_name"] = item[9];	//직급
+					obj["created_date"] = item[10];	//생성일
+					obj["finish_date"] = item[11]; //결재완료일자
+					obj["doc_status"] = item[12]; //상태
+					obj["view_details"] = '<button class="btn btn-primary me-2">상세</button>'; //상세보기
+					colData.push(obj);
+					obj = {};
+				});
+
+				console.log("grid5 map------>:",colData);
 				
 				return colData;
 			})

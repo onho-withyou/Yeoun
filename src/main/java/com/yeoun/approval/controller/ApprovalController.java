@@ -51,11 +51,24 @@ public class ApprovalController {
 	public List<Object[]> getItemList() {
 		return approvalDocService.getAllApprovalDocs("2104502");
 	}
-	//grid - 3.내 결재목록
+	//그리드 - 3.내 결재목록
 	@ResponseBody
 	@GetMapping("/myApprovalDocGrid")
 	public List<Object[]> getMyApprovalDocs() {
 		return approvalDocService.getMyApprovalDocs("2104502");
 	}
+	//그리드 - 4.결재대기
+	@ResponseBody	
+	@GetMapping("/waitingApprovalDocGrid")
+	public List<Object[]> getWaitingApprovalDocs() {
+		return approvalDocService.getWaitingApprovalDocs("2104502");
+	}
+	//그리드 - 5.결재완료 - 안됨
+	// @ResponseBody
+	// @GetMapping("/finishedApprovalDocGrid")
+	// public List<Object[]> getFinishedApprovalDocs() {
+	// 	return approvalDocService.getFinishedApprovalDocs("2505823");
+	// }
+
 	
 }
