@@ -28,9 +28,9 @@
 					<div class="mb-3 mt-3" style="display:flex; gap:8px;">
 						<div>
 							<select id="schedule-type" class="form-select" name="scheduleType">
-	                                     <option value="company">회사</option>
-	                                     <option th:value="${#authentication.name}">개인</option>
-	                                 </select>
+								<option value="company">회사</option>
+								<option th:value="${#authentication.name}">개인</option>
+							</select>
 						</div>
 						<div class="tui-datepicker-input tui-datetime-input tui-has-focus mt-1" style="margin-right: 5px; width: 28%;">
 							<input id="startpicker-input" type="text" aria-label="Date" name="scheduleStart">
@@ -44,7 +44,7 @@
 							<div id="endpicker-container" style="margin-left: -1px;"></div>
 						</div>
 						<input type="checkbox" id="all-day-checkbox" style="margin-bottom: 10px;"/>
-						<input type="hidden" id="all-day-checkbox-value" style="margin-bottom: 10px;" name="alldayYN" value="Y"/>
+						<input type="hidden" id="all-day-checkbox-value" style="margin-bottom: 10px;" name="alldayYN" value="N"/>
 						<label for="all-day-checkbox" style="margin-top: 3px;">종일</label>
 					</div>
 					<div class="col mb-6">

@@ -46,7 +46,7 @@ document.getElementById('open-add-schedule-modal-btn').addEventListener('click',
 });
 
 // 현재 날짜 표시 업데이트 함수
-function updateCurrentDate() {
+async function updateCurrentDate() {
 	// 현재날짜 표시 할 위치 지정
 	const currentDateEl = document.getElementById('calendar-date');
     currentDate = calendar.getDate();
@@ -56,16 +56,18 @@ function updateCurrentDate() {
     const day = currentDate.getDate();
     
 	if(!calendarYear) { //처음 캘린더 생성
-		yearHoliday(year);
+		await yearHoliday(year);
 	} else if(calendarYear != year) { // 선택된 년도가 바뀔때
-		yearHoliday(year);
+		await yearHoliday(year);
 	}
 	
 	dateController.setDate(new Date(currentDate));
 	currentDateEl.textContent = `${year}년 ${month}월`;
+	
 	if(calendarYear != year || calendarMonth != month) {
-		loadMonthSchedule();
+		await loadMonthSchedule();
 	}
+	
 	calendarYear = year;
 	calendarMonth = month;
 }
@@ -82,7 +84,7 @@ document.getElementById('type-month').addEventListener('click', function() {
 	if (!calendar) initCalendar();
     changeCalendarType('month');
 	updateCurrentDate();
-	checkCalendarType();	
+	checkCalendarType();
 });
 
 document.getElementById('type-week').addEventListener('click', function() {
@@ -140,7 +142,20 @@ function initCalendar() {
 		month: {
 	        visibleEventCount: 4  //월타입 달력에 보여줄 스케줄의 최대 개수
 	    },
-		calendars: [  // 달력 카테고리
+		week: {
+		  // 시간 09:00~18:00만
+		  hourStart: 9,
+		  hourEnd: 18, 
+		  taskView: ['milestone'],  
+		  scheduleView: ['allday', 'time']
+		},
+		day: {
+		  hourStart: 9,
+		  hourEnd: 18,
+		  taskView: ['milestone'],
+		  scheduleView: ['allday', 'time']
+		},
+		calendars: [
 		    {
 		        id: 'holiday',
 		        name: '공휴일',
@@ -149,26 +164,47 @@ function initCalendar() {
 		        borderColor: '#e74c3c'
 		    },
 			{
-		      id: 'company',
-		      name: '회사',
-		      backgroundColor: '#00a9ff',
-		      borderColor: '#00a9ff'
-		    },
-		    {
-		      id: 'personal',
-		      name: '개인',
-		      backgroundColor: '#03bd9e',
-		      borderColor: '#03bd9e'
-		    },
-		    {
-		      id: 'department',
-		      name: '부서',
-		      backgroundColor: '#ff5583',
-		      borderColor: '#ff5583'
-		    }
+                id: 'personal',
+                name: '개인',
+                color: '#000',
+                backgroundColor: '#ffbb3b',
+                dragBackgroundColor: 'rgba(255,187,59,0.6)',
+                borderColor: '#111111',
+                isDraggable: false,
+                isResizable: false
+            },
+            {
+                id: 'department',
+                name: '부서',
+                color: '#fff',
+                backgroundColor: '#00a9ff',
+                dragBackgroundColor: 'rgba(0,169,255,0.6)',
+                borderColor: '#111111',
+                isDraggable: false,
+                isResizable: false
+            },
+            {
+                id: 'company',
+                name: '회사',
+                color: '#fff',
+                backgroundColor: '#ff5583',
+                dragBackgroundColor: 'rgba(255,85,131,0.6)',
+                borderColor: '#111111',
+                isDraggable: false,
+                isResizable: false
+            },
+			{
+			    id: 'leave',
+			    name: '연차',
+			    color: '#333',
+			    backgroundColor: '#b7f3c4',           // 초록 계열 예시
+			    dragBackgroundColor: 'rgba(40,167,69,0.6)',
+			    borderColor: '#1e7e34',
+			    isDraggable: false,
+			    isResizable: false
+			}
 		]
 	});
-	
 	// 이전에 선택된 날짜가 있으면 설정
 	if(currentDate) calendar.setDate(currentDate);
 //	yearHoliday(calendar.getDate().getFullYear());
@@ -177,8 +213,8 @@ function initCalendar() {
 }
 
 // 휴일정보 받아온후 캘린더에 반영
-function yearHoliday(year){
-	fetch(`${uri}=${myApiKey}&solYear=${year}&numOfRows=30&pageNo=1&_type=json`)
+async function yearHoliday(year){
+	await fetch(`${uri}=${myApiKey}&solYear=${year}&numOfRows=30&pageNo=1&_type=json`)
 		.then(response => {
 			if (!response.ok) throw new Error('Network response was not ok.');
 			return response.json();
@@ -186,21 +222,10 @@ function yearHoliday(year){
 		.then(data => {
 			const beforeConvert = data.response.body.items.item;
 			holidayData = convertHolidayDataToSchedules(beforeConvert);
-			// 캘린더 템플릿 지정
-			calendar.setOptions({
-//			    template: {
-//			        milestone(event) {
-//			            if (event.isHoliday) {
-//			                return `<span style="color: red;">${event.title}</span>`;
-//			            }
-//			            return `<span>${event.title}</span>`;
-//			        }
-//			    }
-			});
 			// 스케줄 캘린더에 추가
-//			console.log("스케줄데이터", schedule);
-			calendar.clear();
-            calendar.createEvents(holidayData);
+//			console.log("스케줄데이터", holidayData);
+//			calendar.clear();
+//            calendar.createEvents(holidayData);
 		})
 		.catch(console.error);
 }
@@ -231,7 +256,7 @@ function convertHolidayDataToSchedules(holidayData) {
     return holidayData
         .filter(item => item.isHoliday === 'Y')
         .map((item, idx) => ({
-            id: String(idx + 1),
+            id: String("holiday" + idx + 1 ),
             calendarId: 'holiday',
             title: item.dateName,
             category: 'milestone',
@@ -262,27 +287,39 @@ function createDatePicker() {
 	    {
 	    language: 'ko',
 	    date: new Date(),
-		showAlways: true,
-		autoClose: false,
+		showAlways: false,
+		autoClose: true,
 		openers: true,
 		calendar: {
-			showToday : false,
-		}
+			showToday : true,
+		},
+		showToday: true,
+		showJumpButtons: true,
+		type: 'date'
+//		input: {
+//			element: '#tui-datepicker-input',
+//			format: 'yyyy-MM-dd'
+//		}
 	});
 }
+
+
 // ----------------------------------------------------
 
 //달력 타입 검사 함수
 function checkCalendarType() {
 	if(calendarType == 'month') {
-		dateController.close();
+//		dateController.close();
+		console.log("먼쓰");
 	} else {
-		dateController.open();
+//		dateController.open();
+		console.log("먼쓰아님");
 	}
 }
 
+
 //해당월의 달력일정 불러오기
-function loadMonthSchedule() {
+async function loadMonthSchedule() {
 	const loadDate = calendar.getDate();
 	const startDate = new Date(
 		loadDate.getFullYear(),
@@ -301,48 +338,40 @@ function loadMonthSchedule() {
 		, endDate: formatLocalDateTime(endDate)
 	});
 	
-	getScheduleData(params);
-	
+	await getScheduleData(params);
+	await calendar.clear();
+	console.log("클리어");
+	await calendar.createEvents(holidayData);
+	console.log("휴일생성");
+	await calendar.createEvents(monthlyScheduleData);
+	console.log("스케줄생성");
 	
 }
 
 // 현재 달력이 선택한 월의 일정 정보 불러오기
-function getScheduleData(params) {
-	fetch(`/api/schedules?${params.toString()}`, {method: 'GET'})
+async function getScheduleData(params) {
+	await fetch(`/api/schedules?${params.toString()}`, {method: 'GET'})
 	.then(response => {
 		if (!response.ok) throw new Error(response.text());
 		return response.json();  //JSON 파싱
 	})
 	.then(data => { // response가 ok일때
-		console.log(data);
+//		console.log(data);
 		// 조회한 월단위 일정을 캘린더 데이터로 변환
 		monthlyScheduleData = convertScheduleDataToSchedules(data);
-//		if(!calendar) initCalendar();
-//		conSOLE.LOG(CALENDAR);
-//		CONSOle.log(typeof calendar.getDate());
-		//공휴일로 등록된이벤트 제외하고 삭제
-//		calendar.getEvents().forEach(ev => {
-//			if(ev.calendarId !== "holiday") {
-//				calendar.deleteEvent(ev.id, ev.calendarId);
-//			}
-//		});
-	}).then(() => {
-		calendar.clear();
-		calendar.createEvents(holidayData);
-		calendar.createEvents(monthlyScheduleData);
 	}).catch(error => {
 		console.error('에러', error)
-		alert("데이터 조회 실패");
+		alert("일정 데이터 조회 실패");
 	});
 }
 
 function convertScheduleDataToSchedules(monthScheduleData) {
 	return monthScheduleData.map(item => {
 		const isAllday = item.alldayYN == "Y";
-		console.log(isAllday, item);
-		console.log(item.scheduleStart);
-		console.log(item.scheduleFinish);
-		console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@")
+//		console.log(isAllday, item);
+//		console.log(item.scheduleStart);
+//		console.log(item.scheduleFinish);
+//		console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@")
 		return {
 			id: String(item.scheduleId),
 			calendarId: getCalendarId(item.scheduleType),
@@ -351,7 +380,7 @@ function convertScheduleDataToSchedules(monthScheduleData) {
 			start: item.scheduleStart.replace(" ", "T"),
 			end: item.scheduleFinish.replace(" ", "T"),
 			category: isAllday ? "allday" : "time",
-//			isAllday
+			isAllday
 //			raw: { ...item } // 기타등등 넣을정보
 		};
 	});
@@ -390,10 +419,26 @@ document.addEventListener('DOMContentLoaded', function () {
 	// 일정 클릭시 이벤트
 	calendar.on('clickEvent', (eventInfo) => {
 		const event = eventInfo.event;
-		console.log(eventInfo);
-		if (event.calendarId === 'leave') {
+		console.log(event);
+		if (event.calendarId === 'holiday') {
+			alert("휴일입니다.");
+		} else if (event.calendarId === 'leave') {
 //			openMyCustomModal(event);
 			alert("커스텀모달함수등록예정")
+		} else {
+			const scheduleId = event.id;
+			
+			fetch(`/api/schedules/${scheduleId}`, {method: 'GET'})
+			.then(response => {
+				if (!response.ok) throw new Error(response.text());
+				return response.json();  //JSON 파싱
+			})
+			.then(data => { // response가 ok일때
+				openModal("edit", data);
+			}).catch(error => {
+				console.error('에러', error)
+				alert("데이터 조회 실패");
+			});
 		}
 	});
 
@@ -402,13 +447,94 @@ document.addEventListener('DOMContentLoaded', function () {
 		var selectedDate = dateController.getDate();
 		var formattedDate = formatDateToYYYYMMDD(selectedDate);
 		calendar.setDate(formattedDate);
-		console.log("체인지실행")
 		updateCurrentDate();
 	});
 	
+	const calendarDateEl = document.getElementById('calendar-date');
+	
+	calendarDateEl.addEventListener('click', function() {
+		dateController.open();
+	});
+	
+	getLastNoticeList();
+	
+
 });// DOM로드 끝
 
+async function getLastNoticeList() {
+	await fetch(`/api/notices/last-notice`, {method: 'GET'})
+	.then(response => {
+		if (!response.ok) throw new Error(response.text());
+		return response.json();  //JSON 파싱
+	}).then(data => {
+		console.log(data);
+		initNoticeGrid(data);
+	}).catch(error => {
+		console.error('에러', error)
+		alert("공지 데이터 조회 실패");
+	});
+}
+
+let grid = null;
+
+// 그리드 불러오기 함수
+function initNoticeGrid(data) {
+	const Pagination = tui.Pagination;
 	
+	if(!grid){
+		createGrid();
+	} else {
+		grid.destroy();
+		createGrid();
+	}
+	
+	function createGrid() {
+		grid = new tui.Grid({
+			el: document.getElementById("noticeGrid"),
+			editable: true,
+			columns: [
+				{
+					header: '제목',
+					name: 'noticeTitle'
+				},
+//				{
+//					header: '등록일',
+//					name: 'createdDate'
+//				},
+//				{
+//					header: ' '
+//					, name: "btn"
+//					, width: 100 // 너비 설정
+//					, align: "center"
+//					, formatter: (cellInfo) => "<button type='button' class='btn-detail' data-row='${cellInfo.rowKey}' >상세정보</button>"
+//				}
+			],
+			rowHeaders: ['rowNum'],
+		});
+		grid.resetData(data);
+	}
+	
+	
+	// 상세보기 버튼 이벤트
+	grid.on("click", (event) => {
+		if(event.columnName == "btn") {
+			const rowData = grid.getRow(event.rowKey);
+			const scheduleId = rowData.scheduleId;
+			
+			fetch(`/api/schedules/${scheduleId}`, {method: 'GET'})
+			.then(response => {
+				if (!response.ok) throw new Error(response.text());
+				return response.json();  //JSON 파싱
+			})
+			.then(data => { // response가 ok일때
+				openModal("edit", data);
+			}).catch(error => {
+				console.error('에러', error)
+				alert("데이터 조회 실패");
+			});
+		}
+	});
+}
 	
 	
 	
