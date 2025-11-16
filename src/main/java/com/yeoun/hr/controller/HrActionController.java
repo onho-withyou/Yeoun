@@ -17,7 +17,9 @@ import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.PositionRepository;
 import com.yeoun.emp.service.EmpService;
+import com.yeoun.hr.dto.HrActionDTO;
 import com.yeoun.hr.dto.HrActionRequestDTO;
+import com.yeoun.hr.service.HrActionService;
 
 
 @Controller
@@ -27,12 +29,17 @@ import com.yeoun.hr.dto.HrActionRequestDTO;
 public class HrActionController {
 	
 	private final EmpService empService;
+	private final HrActionService hrActionService;
 	private final CommonCodeService commonCodeService;
 	private final DeptRepository deptRepository;
 	
 	// 인사 발령 목록 페이지 이동
 	@GetMapping("/actions")
-	public String getHrActionListPage() {
+	public String getHrActionListPage(Model model) {
+		
+		List<HrActionDTO> hrActionList = hrActionService.getHrActionList();
+		model.addAttribute("hrActionList", hrActionList);
+		
 		return "hr/action_list";
 	}
 	

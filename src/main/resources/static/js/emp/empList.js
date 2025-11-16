@@ -56,7 +56,7 @@
       pageOptions: { useClient: true, perPage: 10 },
       columns: [
         { header: '입사일자', name: 'hireDate', align: 'center', sortable: true },
-        { header: '사번',     name: 'empId',    align: 'center', sortable: true },
+        { header: '사원번호',     name: 'empId',    align: 'center', sortable: true },
         { header: '성명',     name: 'empName',  align: 'center', sortable: true },
         { header: '부서',     name: 'deptName', align: 'center', sortable: true },
         { header: '직급',     name: 'posName',  align: 'center', sortable: true },

@@ -42,50 +42,58 @@ function makeActionGrid(rows) {
 
   hrGrid = new tui.Grid({
     el: document.getElementById('grid'),
-    rowHeaders: [],
+    rowHeaders: ['rowNum'],
     scrollX: true,
     scrollY: true,
-    bodyHeight: 540,  
     pageOptions: {
       useClient: true, 
       perPage: 10
     },
     columns: [
       { 
-        header: '사번',
+        header: '사원번호',
         name: 'empId',
-        align: 'center',
-        sortable: true
-      },
+	    align: 'center'
+	  },
       { 
-        header: '이름',
+        header: '성명',
         name: 'empName',
-        align: 'center',
-        sortable: true
+        align: 'center'
       },
       { 
-        header: '유형',
-        name: 'actionTypeName',   // HrActionListDTO 필드랑 매칭
-        align: 'center',
-        sortable: true
+        header: '발령구분',
+        name: 'actionTypeName',  
+        align: 'center'
       },
       { 
-        header: '부서',
+        header: '발령일자',
+        name: 'effectiveDate',  
+        align: 'center'
+      },
+      { 
+        header: '부서(이전)',
         name: 'fromDeptName',
-        align: 'center',
-        sortable: true
+        align: 'center'
       },
       { 
-        header: '직급',
+        header: '부서(이후)',
+        name: 'toDeptName',
+        align: 'center'
+      },
+      { 
+        header: '직급(이전)',
         name: 'fromPosName',
-        align: 'center',
-        sortable: true
+        align: 'center'
       },
       { 
-        header: '상태',
+        header: '직급(이후)',
+        name: 'toPosName',
+        align: 'center'
+      },
+      { 
+        header: '결재 상태',
         name: 'status',
-        align: 'center',
-        sortable: true
+        align: 'center'
       }
     ],
   });
