@@ -1,197 +1,520 @@
-<!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>급여 이력 조회</title>
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
 
-    <!-- AG Grid -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-grid.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-alpine.css">
-    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
+          
 
-    <style>
-        .tab-button { padding: 10px 15px; border: 1px solid #ccc; cursor: pointer; margin-right: 5px; }
-        .tab-button.active { background-color: #0d6efd; color: white; }
-        .search-box { border:1px solid #ddd; padding:15px; margin-top:15px; border-radius:8px; }
-        #payslipGrid { height: 450px; width: 100%; margin-top: 20px; }
-    </style>
-</head>
+  <th:block layout:fragment="content">
 
-<body>
+    <div class="container-xxl py-4">
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-primary fw-bold">급여 계산 및 확정</h1>
+      </div>
 
-<h1>💰 급여 이력 조회</h1>
+      <!-- 1. 급여 계산 및 시뮬레이션 -->
+      <section class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h3 class="h5 mb-3 border-start ps-2">급여 계산 및 시뮬레이션</h3>
+          
 
-<!-- ===================== 탭 버튼 ===================== -->
-<div>
-    <button class="tab-button" data-mode="emp">사원 기준 조회</button>
-    <button class="tab-button" data-mode="dept">부서 기준 조회</button>
-    <button class="tab-button" data-mode="month">월별 통합 조회</button>
-</div>
+          <!-- 조건 선택 -->
+          <div class="row g-3 align-items-center mb-3">
+            <div class="col-auto">
+              <label for="calc_month" class="col-form-label fw-semibold">계산 대상 월</label>
+            </div>
+            <div class="col-auto">
+              <select id="calc_month" class="form-select form-select-sm">
+                <option th:each="m : ${months}"
+                        th:value="${m}"
+                        th:selected="${m==yyyymm}"
+                        th:text="${#strings.substring(m,0,4)} + '년 ' + ${#strings.substring(m,4,6)} + '월'">
+                </option>
+                <option th:if="${months == null}" th:value="${yyyymm}" th:text="${yyyymm}">선택월</option>
+              </select>
+            </div>
 
+<!--             <div class="col-auto"> -->
+<!--               <label class="col-form-label fw-semibold">계산 유형</label> -->
+<!--             </div> -->
+<!--             <div class="col-auto"> -->
+<!--               <select id="calc_type" class="form-select form-select-sm"> -->
+<!--                 <option value="all">일괄 계산 (전 사원)</option> -->
+<!--                 <option value="individual" disabled>개별 계산 (준비중)</option> -->
+<!--                 <option value="mid_join_leave" disabled>중도 입/퇴사자 일할 정산 (준비중)</option> -->
+<!--               </select> -->
+<!--             </div> -->
+          </div>
 
-<!-- ===================================================== -->
-<!-- 🔥 오직 1개의 FORM 만 사용한다 -->
-<!-- mode 에 따라 내부 input 만 변경된다 -->
-<!-- ===================================================== -->
+          <!-- 액션 버튼 -->
+          <div class="d-flex flex-wrap gap-2 mb-3">
+          <form th:action="@{/pay/calc/simulate}" method="post" class="d-inline">
+			  <input type="hidden" name="yyyymm" id="calcMonth" th:value="${yyyymm}">
+			  <input type="hidden" name="calcType" id="calcType" value="ALL"> <!-- 기본값: 전사원 -->
+			  <input type="hidden" name="overwrite" value="true">
+			
+			  <button type="submit" class="btn btn-warning">
+			    계산 시뮬레이션 (가계산)
+			  </button>
+			</form>
 
-<form method="get" action="/pay/history" id="searchForm">
-
-    <input type="hidden" name="mode" id="modeInput">
-
-    <div id="searchArea" class="search-box">
-        <!-- 여기에 JS가 알맞은 검색폼을 그려넣는다 -->
-    </div>
-
-    <button type="submit">검색</button>
+            <form th:action="@{/pay/calc/confirm}" method="post" class="d-inline">
+			  <input type="hidden" name="yyyymm" id="calcMonthConfirm" th:value="${yyyymm}">
+			  <input type="hidden" name="calcType" id="calcTypeConfirm" value="ALL">
+			  <input type="hidden" name="overwrite" value="true">
+			
+			  <button type="submit" class="btn btn-success">
+			    계산 결과 확정
+			  </button>
 </form>
+          </div>
 
+          <!-- 결과 상태 -->
+          <div id="statusBox"
+               class="alert d-flex justify-content-between align-items-center"
+               th:classappend="${status.calculated} ? ' alert-success' : ' alert-warning'">
+            <div>
+              선택 월(<span id="statMonth" th:text="${yyyymm}">YYYYMM</span>) 계산 상태:
+             <strong id="statCalc"
+					  th:switch="${status.calcStatus}">
+					  <span th:case="'CONFIRMED'">확정 완료</span>
+					  <span th:case="'CALCULATED'">계산 완료</span>
+					  <span th:case="'SIMULATED'">가계산</span>
+					  <span th:case="*">미계산</span>
+					</strong>
+					             
 
-<!-- ===================================================== -->
-<!-- ===================== AG GRID ======================= -->
-<!-- ===================================================== -->
+              <span class="ms-2 badge bg-secondary" id="statCount" th:text="|건수 ${status.count}|">건수 0</span>
+            </div>
+            <div>
+              총지급:
+              <span class="text-primary fw-bold ms-1" id="statTot"
+                    th:text="${#numbers.formatInteger(status.totalAmt,0)}">0</span> 원 
+              · 공제:
+              <span class="text-danger fw-bold ms-1" id="statDed"
+                    th:text="${#numbers.formatInteger(status.dedAmt,0)}">0</span> 원
+              · 실수령:
+              <span class="fw-bold ms-1" id="statNet"
+                    th:text="${#numbers.formatInteger(status.netAmt,0)}">0</span> 원
+            </div>
+          </div>
+         
+  
 
-<div id="payslipGrid" class="ag-theme-alpine"></div>
+<!-- 표: 실제 DB에서 읽어온 slips 리스트 렌더링 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@32.0.2/styles/ag-grid.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@32.0.2/styles/ag-theme-alpine.css">
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@32.0.2/dist/ag-grid-community.min.js"></script>
+
+<h6 class="fw-semibold mt-3">계산 결과 검토</h6>
+
+<!-- 🔹 AG Grid 영역으로 교체 -->
+<div id="payslipGrid" class="ag-theme-alpine mt-3" style="height: 420px; width: 100%; border-radius: 10px;"></div>
 
 <script th:inline="javascript">
 /*<![CDATA[*/
+  // 🔸 Thymeleaf에서 slips 리스트를 JS 객체로 전달
+  const slips = /*[[${slips}]]*/ [];
 
-    /* ==========================
-       초기 값
-    ===========================*/
-    const currentMode = /*[[${mode}]]*/ "emp";
-    const slips = /*[[${slips}]]*/ [];
+  // 🔹 컬럼 정의
+  const columnDefs = [
+    { headerName: "사번", field: "empId", sortable: true, filter: true, width: 120 },
+    { headerName: "이름", field: "empName", sortable: true, filter: true, width: 140 },
+    { headerName: "부서", field: "deptName", sortable: true, filter: true, width: 160 },
+    {
+      headerName: "기본급",
+      field: "baseAmt",
+      valueFormatter: p => numberWithCommas(p.value),
+      type: 'numericColumn',
+      width: 130,
+      cellClass: 'text-end'
+    },
+    {
+      headerName: "수당합계",
+      field: "alwAmt",
+      valueFormatter: p => numberWithCommas(p.value),
+      type: 'numericColumn',
+      width: 130,
+      cellClass: 'text-end'
+    },
+    {
+      headerName: "총지급액",
+      field: "totAmt",
+      valueFormatter: p => numberWithCommas(p.value),
+      type: 'numericColumn',
+      width: 130,
+      cellClass: 'text-end'
+    },
+    {
+      headerName: "공제액",
+      field: "dedAmt",
+      valueFormatter: p => numberWithCommas(p.value),
+      type: 'numericColumn',
+      width: 130,
+      cellClass: 'text-end'
+    },
+    {
+      headerName: "실수령액",
+      field: "netAmt",
+      valueFormatter: p => numberWithCommas(p.value),
+      type: 'numericColumn',
+      width: 140,
+      cellStyle: params => ({
+        color: '#0d6efd',
+        fontWeight: '600',
+        textAlign: 'right'
+      })
+    },
+    {
+      headerName: "상태",
+      field: "calcStatus",
+      width: 130,
+      cellRenderer: params => renderStatusBadge(params.value),
+      cellStyle: { textAlign: 'center' }
+    },    
+    {
+    	  headerName: "상세",
+    	  width: 120,
+    	  cellRenderer: params => {
+    		    return `
+    		      <button class="btn btn-sm btn-outline-primary"
+    		              onclick="openDetail('${params.data.empId}')">
+    		        상세보기
+    		      </button>`;
+    		},
 
-    /* ============================
-       모드별 검색폼 템플릿
-    ============================*/
-    const templates = {
+    	  cellStyle: { textAlign: 'center' }
+    	}
 
-        emp: `
-            <label>사번/사원명</label>
-            <input type="text" name="keyword" value="${"[[${param.keyword}]]"}">
+  ];
 
-            <label>연도</label>
-            <select name="year">
-                <option value="">전체</option>
-                <option value="2025" ${"[[${param.year}]]"==="2025"?"selected":""}>2025</option>
-                <option value="2024" ${"[[${param.year}]]"==="2024"?"selected":""}>2024</option>
-            </select>
+  // 🔹 Grid 옵션
+  const gridOptions = {
+    columnDefs: columnDefs,
+    rowData: slips,
+    defaultColDef: {
+      resizable: true,
+      sortable: true,
+      filter: true,
+      flex: 1,
+      minWidth: 100
+    },
+    pagination: true,
+    paginationPageSize: 10,
+    animateRows: true,
+    rowHeight: 38,
+  };
 
-            <label>월</label>
-            <select name="month">
-                <option value="">전체</option>
-                ${[...Array(12).keys()].map(i=>{
-                    const m = String(i+1).padStart(2,'0');
-                    return `<option value="${m}" ${"[[${param.month}]]"===m?"selected":""}>${i+1}월</option>`;
-                }).join("")}
-            </select>
-        `,
+  // 🔹 숫자 포맷 함수
+  function numberWithCommas(x) {
+    if (x == null) return '';
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
 
-        dept: `
-            <label>부서명</label>
-            <input type="text" name="deptName" value="${"[[${param.deptName}]]"}">
+  // 🔹 상태 뱃지 렌더러
+  function renderStatusBadge(status) {
+    const cls = {
+      CONFIRMED: 'bg-success',
+      CALCULATED: 'bg-info text-dark',
+      SIMULATED: 'bg-warning text-dark',
+      READY: 'bg-secondary'
+    }[status] || 'bg-secondary';
+    return `<span class="badge ${cls} text-uppercase px-2 py-1">${status}</span>`;
+  }
 
-            <label>연도</label>
-            <select name="year">
-                <option value="">전체</option>
-                <option value="2025" ${"[[${param.year}]]"==="2025"?"selected":""}>2025</option>
-                <option value="2024" ${"[[${param.year}]]"==="2024"?"selected":""}>2024</option>
-            </select>
+  // 🔹 Grid 초기화
+  document.addEventListener('DOMContentLoaded', () => {
+    const gridDiv = document.querySelector('#payslipGrid');
+    new agGrid.Grid(gridDiv, gridOptions);
+  });
+  
+  async function openDetail(empId) {
+	    const mm = document.getElementById('calc_month').value;
 
-            <label>월</label>
-            <select name="month">
-                <option value="">전체</option>
-                ${[...Array(12).keys()].map(i=>{
-                    const m = String(i+1).padStart(2,'0');
-                    return `<option value="${m}" ${"[[${param.month}]]"===m?"selected":""}>${i+1}월</option>`;
-                }).join("")}
-            </select>
-        `,
+	    try {
+	        const res = await fetch(`/pay/calc/detail?yyyymm=${mm}&empId=${empId}`);
+	        const data = await res.json();
 
-        month: `
-            <label>연도</label>
-            <select name="year">
-                <option value="">전체</option>
-                <option value="2025" ${"[[${param.year}]]"==="2025"?"selected":""}>2025</option>
-                <option value="2024" ${"[[${param.year}]]"==="2024"?"selected":""}>2024</option>
-            </select>
+	        // ====== 기본 정보 ======
+	        document.getElementById("d-empId").innerText = data.empId ?? "";
+	        document.getElementById("d-empName").innerText = data.empName ?? "";
+	        document.getElementById("d-deptName").innerText = data.deptName ?? "";
 
-            <label>월</label>
-            <select name="month">
-                ${[...Array(12).keys()].map(i=>{
-                    const m = String(i+1).padStart(2,'0');
-                    return `<option value="${m}" ${"[[${param.month}]]"===m?"selected":""}>${i+1}월</option>`;
-                }).join("")}
-            </select>
-        `,
-    };
+	        document.getElementById("d-baseAmt").innerText = numberFormat(data.baseAmt);
+	        document.getElementById("d-alwAmt").innerText = numberFormat(data.alwAmt);
+	        document.getElementById("d-dedAmt").innerText = numberFormat(data.dedAmt);
+	        document.getElementById("d-netAmt").innerText = numberFormat(data.netAmt);
+
+	        // ====== 지급 / 공제 ======
+	        const payBody = document.getElementById("payItemsBody");
+	        const dedBody = document.getElementById("dedItemsBody");
+
+	        payBody.innerHTML = "";
+	        dedBody.innerHTML = "";
+
+	        let payCount = 0;
+	        let dedCount = 0;
+
+	        (data.payItems ?? []).forEach(it => {
+	            payBody.innerHTML += `
+	                <tr>
+	                    <td>${it.itemName}</td>
+	                    <td class="text-end">${numberFormat(it.amount)}</td>
+	                    <td class="text-center">${it.remark ?? ''}</td>
+	                </tr>
+	            `;
+	            payCount++;
+	        });
+
+	        (data.dedItems ?? []).forEach(it => {
+	            dedBody.innerHTML += `
+	                <tr>
+	                    <td>${it.itemName}</td>
+	                    <td class="text-end">${numberFormat(it.amount)}</td>
+	                    <td class="text-center">${it.remark ?? ''}</td>
+	                </tr>
+	            `;
+	            dedCount++;
+	        });
+
+	        document.getElementById("payCount").innerText = payCount + "건";
+	        document.getElementById("dedCount").innerText = dedCount + "건";
+
+	        new bootstrap.Modal(document.getElementById("detailModal")).show();
+
+	    } catch (err) {
+	        alert("상세조회 실패: " + err);
+	    }
+	}
+
+	function numberFormat(num) {
+	    if (num == null) return "0 원";
+	    return Number(num).toLocaleString() + " 원";
+	}
 
 
-    /* ============================
-       탭 클릭 시 폼 변경
-    ============================*/
-    function switchMode(mode) {
-        document.querySelectorAll('.tab-button')
-            .forEach(btn => btn.classList.remove("active"));
-
-        document.querySelector(`[data-mode="${mode}"]`)
-            .classList.add("active");
-
-        document.getElementById("modeInput").value = mode;
-        document.getElementById("searchArea").innerHTML = templates[mode];
-    }
-
-
-    /* ============================
-       페이지 로딩시 모드 적용
-    ============================*/
-    switchMode(currentMode);
-
-
-    /* ============================
-       AG GRID 렌더링
-    ============================*/
-
-    function numberFormat(v){
-        if (!v) return "";
-        return v.toString().replace(/\B(?=(\d{3})+(?!\d))/g,",");
-    }
-
-    const columnDefs = [
-        { headerName:'사번', field:'empId', width:120 },
-        { headerName:'사원명', field:'empName', width:150 },
-        { headerName:'부서명', field:'deptName', width:150 },
-        { headerName:'지급월', field:'payYymm', width:130 },
-
-        { headerName:'기본급', field:'baseAmt', valueFormatter:p=>numberFormat(p.value), width:130 },
-        { headerName:'수당합계', field:'alwAmt', valueFormatter:p=>numberFormat(p.value), width:130 },
-        { headerName:'총지급액', field:'totAmt', valueFormatter:p=>numberFormat(p.value), width:130 },
-        { headerName:'공제액', field:'dedAmt', valueFormatter:p=>numberFormat(p.value), width:130 },
-        { headerName:'실수령액', field:'netAmt', valueFormatter:p=>numberFormat(p.value), width:150 },
-
-        {
-            headerName:'상태', field:'calcStatus', width:120,
-            cellRenderer: p => {
-                if(p.value==='CONFIRMED') return '<span style="color:green;font-weight:700">확정</span>';
-                if(p.value==='CALCULATED') return '<span style="color:blue;font-weight:700">계산완료</span>';
-                return '<span style="color:gray">미계산</span>';
-            }
-        }
-    ];
-
-    new agGrid.Grid(
-        document.getElementById("payslipGrid"),
-        {
-            columnDefs,
-            rowData: slips,
-            pagination: true,
-            paginationPageSize: 20,
-            defaultColDef: { sortable:true, filter:true, resizable:true }
-        }
-    );
 
 /*]]>*/
 </script>
+<!-- ===================== 급여 상세 모달 ===================== -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content rounded-4 shadow">
 
-</body>
-</html>
+      <div class="modal-header border-0">
+        <h4 class="modal-title fw-bold text-primary">급여 상세 내역</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- 상단 기본 정보 -->
+        <div class="p-4 rounded-4 mb-4" style="background:#f8f9fa;">
+          <div class="row g-3">
+
+            <div class="col-md-4">
+              <div class="small text-secondary">사번</div>
+              <div class="fw-bold fs-5" id="d-empId"></div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="small text-secondary">이름</div>
+              <div class="fw-bold fs-5" id="d-empName"></div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="small text-secondary">부서</div>
+              <div class="fw-bold fs-5" id="d-deptName"></div>
+            </div>
+
+          </div>
+
+          <hr>
+
+          <div class="row text-center">
+            <div class="col">
+              <div class="small text-secondary">기본급</div>
+              <div class="fw-bold fs-5" id="d-baseAmt"></div>
+            </div>
+            <div class="col">
+              <div class="small text-secondary">수당 합계</div>
+              <div class="fw-bold fs-5" id="d-alwAmt"></div>
+            </div>
+            <div class="col">
+              <div class="small text-secondary">공제 합계</div>
+              <div class="fw-bold fs-5 text-danger" id="d-dedAmt"></div>
+            </div>
+            <div class="col">
+              <div class="small text-secondary">실수령액</div>
+              <div class="fw-bold fs-5 text-primary" id="d-netAmt"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 지급 / 공제 영역 -->
+        <div class="row g-4">
+
+          <!-- 🔵 지급 항목 -->
+          <div class="col-md-6">
+            <div class="rounded-4 border shadow-sm p-3">
+              <div class="d-flex justify-content-between mb-3">
+                <h5 class="fw-bold text-primary mb-0">지급 항목</h5>
+                <span class="small text-secondary" id="payCount"></span>
+              </div>
+
+              <table class="table align-middle" style="background:#fdfdfd;">
+                <thead class="table-light">
+                  <tr>
+                    <th>항목명</th>
+                    <th class="text-end">금액</th>                   
+                  </tr>
+                </thead>
+                <tbody id="payItemsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 🔴 공제 항목 -->
+          <div class="col-md-6">
+            <div class="rounded-4 border shadow-sm p-3">
+              <div class="d-flex justify-content-between mb-3">
+                <h5 class="fw-bold text-danger mb-0">공제 항목</h5>
+                <span class="small text-secondary" id="dedCount"></span>
+              </div>
+
+              <table class="table align-middle" style="background:#fdfdfd;">
+                <thead class="table-light">
+                  <tr>
+                    <th>항목명</th>
+                    <th class="text-end">금액</th>                    
+                  </tr>
+                </thead>
+                <tbody id="dedItemsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="modal-footer border-0">
+        <button class="btn btn-secondary px-4" data-bs-dismiss="modal">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+      <!-- 2. 급여 명세서 관리 -->
+      <section class="card shadow-sm">
+        <div class="card-body">
+          <h3 class="h5 mb-3 border-start ps-2">급여 명세서 관리</h3>
+          <p class="text-secondary">
+            확정된 급여 계산 결과를 바탕으로 <strong>월별 급여 명세서</strong>를 사원별로 자동 생성하고 PDF 파일로 제공합니다.
+          </p>
+
+          <div class="row g-3 align-items-center mb-3">
+            <div class="col-auto">
+              <label for="payroll_month" class="col-form-label fw-semibold">명세서 생성 월</label>
+            </div>
+            <div class="col-auto">
+              <select id="payroll_month" class="form-select form-select-sm">
+                <option th:each="m : ${months}"
+                        th:value="${m}"
+                        th:selected="${m==yyyymm}"
+                        th:text="${#strings.substring(m,0,4)} + '년 ' + ${#strings.substring(m,4,6)} + '월'">
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-success">명세서 일괄 생성</button>
+            <button type="button" class="btn btn-outline-secondary">생성 현황 확인</button>
+            <button type="button" class="btn btn-outline-secondary">명세서 PDF 일괄 다운로드</button>
+          </div>
+
+          <p class="text-muted mt-3 mb-0">* 명세서는 생성 즉시 사원 포털에서 조회 가능합니다.</p>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const monthSel = document.getElementById('calc_month');
+      if (monthSel) {
+        monthSel.addEventListener('change', (e) => {
+          const mm = e.target.value;
+          location.href = '/pay/calc?yyyymm=' + mm;
+        });
+      }
+
+      // AJAX 상태 동기화 (REST Controller 추가 필요)
+    async function refreshStatus(mm) {
+  try {
+    const res = await fetch(`/pay/calc/status?yyyymm=${mm}`, {
+      headers: { 'Accept':'application/json' }
+    });
+    if (!res.ok) return;
+
+    const s = await res.json();
+    const fmt = (n)=> (n ?? 0).toLocaleString();
+
+    document.getElementById('statMonth').textContent = mm;
+
+  
+    const statusMap = {
+      'CONFIRMED': '확정 완료',
+      'CALCULATED': '계산 완료',
+      'SIMULATED': '가계산 완료',
+      'READY': '미계산'
+    };
+    document.getElementById('statCalc').textContent = statusMap[s.calcStatus] ?? '미계산';
+
+    document.getElementById('statCount').textContent = `건수 ${s.count}`;
+    document.getElementById('statTot').textContent = fmt(s.totalAmt);
+    document.getElementById('statDed').textContent = fmt(s.dedAmt);
+    document.getElementById('statNet').textContent = fmt(s.netAmt);
+
+    const box = document.getElementById('statusBox');
+    box.classList.remove('alert-success','alert-warning');
+
+    // 🔥 CONFIRMED이면 초록색, 나머지는 노란색
+    box.classList.add(s.calcStatus === 'CONFIRMED' ? 'alert-success' : 'alert-warning');
+
+    // 확정 버튼 활성화/비활성 (원하면 규칙 바꿀 수 있음)
+    const btnConfirm = document.getElementById('btnConfirm');
+    if (btnConfirm) btnConfirm.disabled = (s.calcStatus !== 'CALCULATED');
+
+  } catch(e) {
+    console.warn('status refresh failed', e);
+  }
+}
+
+
+      (function(){
+        const mm = document.getElementById('calc_month')?.value;
+        if (mm) refreshStatus(mm);
+      })();
+   
+  // 월/유형 선택박스와 버튼 간 값 동기화
+  const monthSelect = document.getElementById("monthSelect");
+  const typeSelect = document.getElementById("typeSelect");
+
+  function applyCalcParams() {
+    document.getElementById("calcMonth").value = monthSelect.value;
+    document.getElementById("calcMonthConfirm").value = monthSelect.value;
+    document.getElementById("calcType").value = typeSelect.value;
+    document.getElementById("calcTypeConfirm").value = typeSelect.value;
+  }
+
+  monthSelect.addEventListener("change", applyCalcParams);
+  typeSelect.addEventListener("change", applyCalcParams);
+  
+ 
+
+</script>
+
+
+
+  </th:block>
+</th:block>

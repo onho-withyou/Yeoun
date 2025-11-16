@@ -9,7 +9,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.entity.Position;
-import com.yeoun.approval.entity.approvalDoc;
+import com.yeoun.approval.entity.ApprovalDoc;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -97,7 +97,7 @@ public class HrAction {
 	// 결재문서ID
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "APPROVAL_ID")
-	private approvalDoc approvalDoc;
+	private ApprovalDoc approvalDoc;
 	 
 	
 	
