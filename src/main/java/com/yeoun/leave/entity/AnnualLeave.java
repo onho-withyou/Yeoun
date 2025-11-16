@@ -47,7 +47,7 @@ import lombok.Setter;
 public class AnnualLeave {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "ANNUAL_LEAVE_SEQ_GENERATOR")
-	private Long LeaveId;
+	private Long leaveId;
 	
 	@OneToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "EMP_ID", nullable = false)
