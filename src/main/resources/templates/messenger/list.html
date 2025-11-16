@@ -54,11 +54,11 @@
       <div class="main-header" id="header-title">친구 목록</div>
 
       <div class="panel-body" id="friends-panel">
-        <div class="friend-item"  th:each="friend : ${friends}"><!--  data-friend="beate" -->
+        <div class="friend-item"  th:each="friend : ${friends}" th:data-id="${friend.empId}">
            <div class="profile-wrapper me-2">
             <img class="rounded-circle"
                  th:src="|@{/img/msg_img_}${friend.msgProfile}.png|">
-            <span class="status-dot" th:data-status="${friend.status}"></span> <!-- ✅ 상태 표시 추가 -->
+            <span class="status-dot" th:data-status="${friend.status}"></span> <!-- 상태 표시 추가 -->
           </div>
           <div>
             <p class="mb-0 fw-bold" th:text="${friend.empName}"></p>
@@ -72,21 +72,36 @@
       </div>
 
       <div class="panel-body d-none" id="chats-panel">
-        <div class="chat-item" data-friend="beate">
-          <img src="https://user-images.githubusercontent.com/35243461/168796877-f6c8819a-5d6e-4b2a-bd56-04963639239b.jpg">
-          <div>
-            <p class="mb-0 fw-bold">Beate Lemoine</p>
-            <small class="text-muted">오늘 저녁에 볼까?</small>
+        <!-- 1) 대화방 목록 있는 경우 -->
+        <div th:if="${rooms.size() > 0}">
+          <div class="chat-item"
+               th:each="room : ${rooms}"
+               th:data-id="${room.roomId}">
+
+            <img class="rounded-circle"
+                 th:src="|@{/img/msg_img_}${room.profileImg}.png|">
+
+            <div class="chat-center">
+              <p class="chat-title" th:text="${room.groupName}"></p>
+              <p class="chat-last" th:text="${room.lastMessage}"></p>
+            </div>
+
+            <div class="chat-right">
+                <span class="chat-time"
+                      th:text="${#temporals.format(room.lastMessageTime, 'HH:mm')}"></span>
+
+              <span class="badge-unread"
+                    th:if="${room.unreadCount > 0}"
+                    th:text="${room.unreadCount}"></span>
+            </div>
           </div>
-          <span class="badge-unread">2</span>
         </div>
-        <div class="chat-item" data-friend="emily">
-          <img src="https://user-images.githubusercontent.com/35243461/168796884-ee3aafb6-8083-48ec-9cfb-51b95eae08fe.jpg">
-          <div>
-            <p class="mb-0 fw-bold">Emily Woods</p>
-            <small class="text-muted">회의 준비 끝났어?</small>
-          </div>
-          <span class="badge-unread">1</span>
+
+        <!-- 2) 대화방 목록이 아예 없을 때 -->
+        <div th:if="${rooms.size() == 0}" class="empty-chat">
+          <img th:src="@{/img/empty_chat.png}" alt="empty" class="empty-icon">
+          <p class="empty-title">대화방이 없습니다</p>
+          <p class="empty-sub">새로운 대화를 시작해보세요.</p>
         </div>
       </div>
     </div>

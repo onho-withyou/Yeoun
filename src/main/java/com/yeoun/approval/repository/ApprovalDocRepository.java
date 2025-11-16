@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.yeoun.approval.entity.ApprovalDoc;
-import com.yeoun.approval.entity.ApprovalList;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 

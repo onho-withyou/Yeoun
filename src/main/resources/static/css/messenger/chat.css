@@ -146,15 +146,6 @@ body {
   align-self: flex-end;
 }
 
-/* 체크표시 (내 말풍선 오른쪽 안쪽) */
-.read-check {
-  position: absolute;
-  right: -18px;
-  bottom: -1px;
-  font-size: 14px;
-  color: #6a5acd;
-}
-
 /* ========================= 입력 영역 ========================= */
 .chat-footer {
   display: flex;
@@ -241,10 +232,21 @@ body {
   font-size: 11px;
   color: #a091c8;
   margin-right: 4px; /* 말풍선과 적당한 여백 */
+  white-space: nowrap;
+}
+
+/* 체크 아이콘 스타일 */
+.msg-meta i {
+  font-size: 14px;
+  color: #6a5acd;
+  transform: translateY(1px); /* 아이콘이 너무 위에 붙지 않게 */
 }
 
 .msg-row.right {
+  display: flex;
+  flex-direction: row;
   justify-content: flex-end;
   align-items: flex-end;
+  gap: 4px;
 }
 
