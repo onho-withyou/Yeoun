@@ -6,6 +6,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -129,11 +133,21 @@ public class EmpService {
 	
 	// =============================================================================
 	// 사원 목록 조회
-	public List<EmpListDTO> getEmpList() {
-		log.info("▶ 사원 목록 조회 시작");
-		List<Emp> empList = empRepository.findAll();
+	public Page<EmpListDTO> getEmpList(int page, int size, String keyword, String deptId) {
 		
-		return empRepository.findAllForList();
+		// 공백 정리
+        if (keyword != null) {
+            keyword = keyword.trim();
+        }
+        if (deptId != null && deptId.isBlank()) {
+            deptId = null;
+        }
+
+		// 정렬 기준은 입사일 최신순 예시
+	    Pageable pageable = PageRequest.of(page, size,
+	            Sort.by(Sort.Direction.DESC, "hireDate"));
+		
+		return empRepository.searchEmpList(keyword, deptId, pageable);
 	}
 	
 	// ==============================================================================

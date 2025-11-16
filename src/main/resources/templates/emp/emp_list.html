@@ -10,23 +10,27 @@
       <!-- 검색 바 -->
       <div class="row align-items-center g-2 mb-3">
         <div class="col-12 col-lg-9">
-          <form class="row g-2 align-items-center" onsubmit="return false" role="search">
-            <div class="col-12 col-md-auto">
-              <input class="form-control" id="kw" type="search"
-                     placeholder="사번 / 성명 / 부서 / 직급 / 이메일 검색" style="width:280px;">
-            </div>
+        
+          <form class="row g-2 align-items-center" th:action="@{/emp/list}" method="get" role="search">
+          
+          	<!-- 부서 셀렉트 -->
             <div class="col-6 col-md-auto">
-              <select class="form-select" id="deptId">
+              <select class="form-select" id="deptId" name="deptId">
                 <option value="">부서 전체</option>
-                <option>개발부</option>
-                <option>마케팅부</option>
-                <option>생산부</option>
-                <option>영업부</option>
-                <option>인사부</option>
+                <option th:each="d : ${deptList}" th:value="${d.deptId}" th:text="${d.deptName}"
+                        th:selected="${deptId} != null and ${deptId} == ${d.deptId}">
+                </option>
               </select>
             </div>
+            
+            <!-- 키워드 -->
+            <div class="col-12 col-md-auto">
+              <input class="form-control" id="keyword" name="keyword" type="search"
+                     placeholder="사번 / 성명 / 부서 / 직급 / 이메일 검색" style="width:280px;" th:value="${keyword}">
+            </div>
+            
             <div class="col-6 col-md-auto d-grid">
-              <button class="btn btn-outline-primary" id="btnSearch" type="button">Search</button>
+              <button class="btn btn-outline-primary" id="btnSearch" type="button">검색</button>
             </div>
           </form>
         </div>
@@ -166,6 +170,12 @@
       <div class="card-body p-0">
 	    <div id="grid"></div>
       </div>
+      
+      <br>
+      
+      <nav aria-label="사원 목록 페이지네이션">
+		<ul class="pagination justify-content-center" id="empPagination"></ul>
+      </nav>
       
     </div>
 
