@@ -47,6 +47,7 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	        from Emp e
 	        join e.dept d
 	        join e.position p
+	        where e.status = 'ACTIVE'
 	        order by e.empId desc
 	    """)
 	List<EmpListDTO> findAllForList();
