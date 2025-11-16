@@ -88,8 +88,12 @@ public class EmpController {
 	// ====================================================================================
 	// 사원 목록 조회
 	@GetMapping("/list")
-	public String getEmpListForm() {
+	public String getEmpListForm(Model model) {
 		log.info("▶ 사원목록 페이지 요청");
+		
+		List<EmpListDTO> empList = empService.getEmpList();  // ✅ 초기 데이터 조회
+	    model.addAttribute("empList", empList);
+	    
 		return "/emp/emp_list";
 	}
 	

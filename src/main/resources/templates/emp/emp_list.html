@@ -168,8 +168,12 @@
       </div>
       
     </div>
-    
-<!-- JS -->
+
+<!-- 초기 데이터 JS로 넘기기 -->
+<script th:inline="javascript">
+  const initialEmpList = /*[[${empList}]]*/ [];
+</script>    
+
 <script src="/js/emp/empList.js"></script>
 
 </th:block>

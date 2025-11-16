@@ -22,14 +22,26 @@
 	   });
 	 }
 	
-    loadEmpList();
-  });
+   // 1) 서버에서 내려준 initialEmpList로 바로 그리드 만들기
+   if (typeof initialEmpList !== 'undefined') {
+     makeGrid(initialEmpList);
+   } else {
+     // 혹시라도 initialEmpList가 없는 경우에만 Ajax로 로딩
+     loadEmpList();
+   }
+ });
  
   // 사원 목록 가져오기
   function loadEmpList() {
     fetch('/emp/list/data')
       .then(res => res.json())
-      .then(rows => makeGrid(rows))
+      .then(rows => {
+        if (!empGrid) {
+          makeGrid(rows);
+        } else {
+          empGrid.resetData(rows);
+        }
+      })
       .catch(() => alert('사원 목록 불러오기 실패'));
   }
 	
