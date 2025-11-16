@@ -1,9 +1,14 @@
 package com.yeoun.hr.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -86,40 +91,61 @@ public class HrActionService {
     // ==========================
     // 2. 인사 발령 목록
     // ==========================
-    public List<HrActionDTO> getHrActionList() {
+    public Page<HrActionDTO> getHrActionList(int page, int size, String keyword,
+            								 String actionType, String startDate, String endDate) {
 
-        // 1) 인사발령 유형 공통코드 한 번만 조회해서 Map으로 변환
-        Map<String, String> actionTypeMap = commonCodeService.getHrActionTypeList()
-                .stream()
-                .collect(Collectors.toMap(
-                        CommonCode::getCodeId,   // ex) PROMOTION, TRANSFER
-                        CommonCode::getCodeName  // ex) 승진, 전보
-                ));
-
-        // 2) HrAction → HrActionListDTO로 변환하면서 코드명 세팅
-        return hrActionRepository.findAll()
-        		.stream()
-        		.map(a -> {
-        			String typeCode = a.getActionType(); // 예: "PROMOTION"
-                    String typeName = actionTypeMap.getOrDefault(typeCode, typeCode);
-                    
-                return new HrActionDTO(
-                		a.getActionId(),
-                		a.getEmp().getEmpId(),
-                		a.getEmp().getEmpName(),
-                		typeCode,
-                		typeName,
-                		a.getEffectiveDate(),
-                        a.getFromDept() != null ? a.getFromDept().getDeptName() : null,
-                        a.getToDept() != null ? a.getToDept().getDeptName() : null,
-                        a.getFromPosition() != null ? a.getFromPosition().getPosName() : null,
-                        a.getToPosition() != null ? a.getToPosition().getPosName() : null,
-                        a.getStatus(),
-                        a.getCreatedDate()
-            		);
-        		})
-        		.toList();        
-    }
+		// 0) 검색값 정리
+		if (keyword != null) keyword = keyword.trim();
+		if (actionType != null && actionType.isBlank()) actionType = null;
+		
+		LocalDate start = null;
+		LocalDate end = null;
+		if (startDate != null && !startDate.isBlank()) {
+			start = LocalDate.parse(startDate);   // "yyyy-MM-dd" 형식 가정
+		}
+		if (endDate != null && !endDate.isBlank()) {
+			end = LocalDate.parse(endDate);
+		}
+		
+		Pageable pageable = PageRequest.of(page, size,
+										   Sort.by(Sort.Direction.DESC, "effectiveDate")  // 발령일자 최신순
+		);
+		
+		// 1) 인사발령 유형 공통코드 → Map
+		Map<String, String> actionTypeMap = commonCodeService.getHrActionTypeList()
+				.stream()
+				.collect(Collectors.toMap(
+						 CommonCode::getCodeId,   // ex) PROMOTION, TRANSFER
+						 CommonCode::getCodeName  // ex) 승진, 전보
+				));
+		
+		// 2) 조건 + 페이징 걸어서 엔티티 조회
+		Page<HrAction> actionPage =
+				hrActionRepository.searchHrActions(keyword, actionType, start, end, pageable);
+		
+		// 3) Page<HrAction> -> Page<HrActionDTO> 매핑
+		Page<HrActionDTO> dtoPage = actionPage.map(a -> {
+			String typeCode = a.getActionType(); // 예: "PROMOTION"
+			String typeName = actionTypeMap.getOrDefault(typeCode, typeCode);
+		
+			return new HrActionDTO(
+						a.getActionId(),
+						a.getEmp().getEmpId(),
+						a.getEmp().getEmpName(),
+						typeCode,
+						typeName,
+						a.getEffectiveDate(),
+						a.getFromDept() != null ? a.getFromDept().getDeptName() : null,
+						a.getToDept() != null ? a.getToDept().getDeptName() : null,
+						a.getFromPosition() != null ? a.getFromPosition().getPosName() : null,
+						a.getToPosition() != null ? a.getToPosition().getPosName() : null,
+						a.getStatus(),
+						a.getCreatedDate()
+					);
+			});
+		
+			return dtoPage;
+		}
         
         
         

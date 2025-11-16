@@ -23,7 +23,7 @@ import com.yeoun.hr.service.HrActionService;
 
 
 @Controller
-@RequestMapping("/hr")
+@RequestMapping("/hr/actions")
 @RequiredArgsConstructor
 @Log4j2
 public class HrActionController {
@@ -33,19 +33,16 @@ public class HrActionController {
 	private final CommonCodeService commonCodeService;
 	private final DeptRepository deptRepository;
 	
-	// 인사 발령 목록 페이지 이동
-	@GetMapping("/actions")
+	// 인사 발령 메인 페이지 (목록 + 등록 버튼 있는 화면)
+	@GetMapping("")
 	public String getHrActionListPage(Model model) {
-		
-		List<HrActionDTO> hrActionList = hrActionService.getHrActionList();
-		model.addAttribute("hrActionList", hrActionList);
 		
 		return "hr/action_list";
 	}
 	
 	// =====================================================
 	// 인사 발령 등록 페이지 이동
-	@GetMapping("/actions/regist")
+	@GetMapping("/regist")
 	public String getHrActionRegistPage(Model model) {
 		
 		model.addAttribute("hrActionRequestDTO", new HrActionRequestDTO());
