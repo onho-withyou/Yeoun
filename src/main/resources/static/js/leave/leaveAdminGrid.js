@@ -4,8 +4,8 @@ const grid = new tui.Grid({
 		{
 			header: "부서",
 			name : "deptName",
-			formatter: ({ row }) => row.rowKey + 1,
 			sortable: true,
+			filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
 		},
 		{
 			header: "직급",
@@ -71,4 +71,17 @@ async function loadLeaveList(empId = null) {
 	}
 }
 
+// 사원번호 조회 버튼 클릭 이벤트
+document.querySelector("#searchBtn").addEventListener("click", () => {
+	// 입력한 사원 번호
+	let empId = document.querySelector("#searchId").value.trim();
+	
+	if (empId) {
+		loadLeaveList(empId);
+	} else {
+		loadLeaveList();
+	}
+})
+
+// 페이지 로드 시 전체 조회
 loadLeaveList();

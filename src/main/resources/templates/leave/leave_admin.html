@@ -7,14 +7,14 @@
 	<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
 		<h3>사원 연차 현황</h3>
 		<div class="my-0">
-			<form class="d-flex justify-content-end">
+			<div class="d-flex justify-content-end">
 	            <div class="dt-search mb-md-6 mb-2 w-25">
-					<input type="text" placeholder="사원번호" class="form-control"/>
+					<input type="text" placeholder="사원번호" class="form-control" id="searchId"/>
 	            </div>
 	            <div class="mb-6 ms-3 mb-0">
-					<button type="submit" class="btn btn-info">검색</button>
+					<button type="button" class="btn btn-info" id="searchBtn">검색</button>
 	            </div>
-			</form>
+			</div>
 		</div>
 		<div class="card mt-4">
 			<div class="table-responsive text-nowrap">
