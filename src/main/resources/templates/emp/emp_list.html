@@ -1,15 +1,11 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
           layout:decorate="~{/layouts/layout.html}">
-
-  <!-- 하나의 fragment 안에 전부 포함 -->
-  <th:block layout:fragment="content">
-    <!-- CSS -->
-    <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-    <link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css">
-
+<body>
+<th:block layout:fragment="content">
     <div class="custom-body container-xxl flex-grow-1 container-p-y">
-      <h2>사원 목록</h2>
+    
+    <h2>사원 목록</h2>
 
       <!-- 검색 바 -->
       <div class="row align-items-center g-2 mb-3">
@@ -163,15 +159,18 @@
 		  </div>
 		</div>
 	  </div>
+	  
+	  <br>
 
       <!-- 그리드 DOM 반드시 포함 -->
-      <div id="grid" style="height:600px;"></div>
+      <div class="card-body p-0">
+	    <div id="grid"></div>
+      </div>
+      
     </div>
-  </th:block>
-
+    
 <!-- JS -->
-<th:block layout:fragment="myScript">
-    <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
-    <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-	<script src="/js/emp/empList.js"></script>
+<script src="/js/emp/empList.js"></script>
+
 </th:block>
+</body>

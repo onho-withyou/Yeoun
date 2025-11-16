@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.service.EmpService;
+import com.yeoun.hr.dto.HrActionDTO;
 import com.yeoun.hr.dto.HrActionRequestDTO;
 import com.yeoun.hr.service.HrActionService;
 
@@ -27,13 +28,21 @@ public class HrActionRestController {
 	private final HrActionService hrActionService;
 	private final EmpService empService;
 	
+	// 인사 발령 목록
+	@GetMapping("/actions")
+	public List<HrActionDTO> getHrActionList() {
+		return hrActionService.getHrActionList();
+	}
+	
+	
+	// =============================================================
 	// 인사 발령 등록
 	@PostMapping("/actions")
 	public Long createHrAction(@RequestBody HrActionRequestDTO dto) {
 	    return hrActionService.createAction(dto);
 	}
 	
-	// 발령 화면용 사원 목록
+	// 인사 발령 화면용 사원 목록
 	@GetMapping("/employees")
 	public List<EmpListDTO> getEmployeesForAction() {
 		return empService.getEmpList();

@@ -1,17 +1,95 @@
 // hrList.js
 // 인사 발령 목록 그리드
 
+let hrGrid = null;  
+
 document.addEventListener('DOMContentLoaded', () => {
-	
-	loadHrActionList();
-	
+  loadHrActionList();
 });
 
-// 발령 목록 가져오기
+// ===============================
+// 1. 발령 목록 가져오기
+// ===============================
 function loadHrActionList() {
-	
-	fetch('/hr/actions')
-	
+  fetch('/api/hr/actions')
+    .then(res => {
+      console.log('응답 상태:', res.status, res);
+      if (!res.ok) {
+        // 200이 아니면 여기서 일부러 에러 던져서 catch로 보냄
+        throw new Error('HTTP 오류 상태 코드: ' + res.status);
+      }
+      return res.json();
+    })
+    .then(rows => {
+      console.log('받은 데이터:', rows);
+      makeActionGrid(rows);
+    })
+    .catch(err => {
+      console.error('발령 목록 조회 에러:', err);
+      alert('인사 발령 목록 불러오기 실패');
+    });
 }
 
-// Toast Grid 생성 함수
+
+// ===============================
+// 2. Toast Grid 생성 함수
+// ===============================
+function makeActionGrid(rows) {
+  // 이미 그리드가 있으면 파괴 후 재생성 (필요하면)
+  if (hrGrid) {
+    hrGrid.destroy();
+  }
+
+  hrGrid = new tui.Grid({
+    el: document.getElementById('grid'),
+    rowHeaders: [],
+    scrollX: true,
+    scrollY: true,
+    bodyHeight: 540,  
+    pageOptions: {
+      useClient: true, 
+      perPage: 10
+    },
+    columns: [
+      { 
+        header: '사번',
+        name: 'empId',
+        align: 'center',
+        sortable: true
+      },
+      { 
+        header: '이름',
+        name: 'empName',
+        align: 'center',
+        sortable: true
+      },
+      { 
+        header: '유형',
+        name: 'actionTypeName',   // HrActionListDTO 필드랑 매칭
+        align: 'center',
+        sortable: true
+      },
+      { 
+        header: '부서',
+        name: 'fromDeptName',
+        align: 'center',
+        sortable: true
+      },
+      { 
+        header: '직급',
+        name: 'fromPosName',
+        align: 'center',
+        sortable: true
+      },
+      { 
+        header: '상태',
+        name: 'status',
+        align: 'center',
+        sortable: true
+      }
+    ],
+  });
+
+  // JSON 데이터 삽입
+  hrGrid.resetData(rows);
+}
