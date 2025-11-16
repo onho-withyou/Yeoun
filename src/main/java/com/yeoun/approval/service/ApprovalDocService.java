@@ -51,5 +51,10 @@ public class ApprovalDocService {
 	public List<Object[]> getAllApprovalDocs(String empId) {
 		return approvalDocRepository.findAllApprovalDocs(empId);
 	}
+	//그리드 - 3.내결재목록 - 내가 올린결재목록
+	@Transactional(readOnly = true)	
+	public List<Object[]> getMyApprovalDocs(String empId) {
+		return approvalDocRepository.findMyApprovalDocs(empId);
+	}
 
 }

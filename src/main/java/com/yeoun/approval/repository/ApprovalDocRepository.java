@@ -62,6 +62,28 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 	List<Object[]> findAllApprovalDocs(@Param("empId") String empId);
 
 	// 그리드 - 3.내결재목록 - 내가 올린결재목록
+	@Query(value = """
+				SELECT ROWNUM
+      				,ad.approval_id
+      				,ad.approval_title
+      				,ad.emp_id
+      				,e.emp_name
+      				,e.dept_id
+      				,d.dept_name
+      				,ad.approver
+      				,p.pos_code
+      				,p.pos_name
+      				,ad.created_date
+      				,ad.finish_date
+      				,ad.doc_status
+				FROM approval_doc ad, emp e, dept d, position p
+				WHERE ad.emp_id = e.emp_id 
+				AND e.dept_id = d.dept_id
+				AND e.pos_code = p.pos_code
+				AND e.emp_id = :empId;
+				
+				""", nativeQuery = true)
+	List<Object[]> findMyApprovalDocs(@Param("empId") String empId);
 	// 그리드 - 4.결재대기 - 나와관련된 모든 결재대기문서
 	// 그리드 - 5.결재완료 - 결재권한자가 결재를 완료하면 볼수 있음(1차,2차,3차 모든결재 완료시)
 
