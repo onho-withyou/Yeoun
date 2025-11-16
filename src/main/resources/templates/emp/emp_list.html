@@ -11,14 +11,15 @@
       <div class="row align-items-center g-2 mb-3">
         <div class="col-12 col-lg-9">
         
-          <form class="row g-2 align-items-center" th:action="@{/emp/list}" method="get" role="search">
+          <form class="row g-2 align-items-center" th:action="@{/emp}" method="get" role="search">
           
           	<!-- 부서 셀렉트 -->
             <div class="col-6 col-md-auto">
               <select class="form-select" id="deptId" name="deptId">
                 <option value="">부서 전체</option>
                 <option th:each="d : ${deptList}" th:value="${d.deptId}" th:text="${d.deptName}"
-                        th:selected="${deptId} != null and ${deptId} == ${d.deptId}">
+                        th:selected="${deptId} != null and ${deptId} == ${d.deptId}"
+                        th:if="${d.parentDeptId != null}">
                 </option>
               </select>
             </div>

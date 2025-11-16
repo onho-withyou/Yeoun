@@ -32,7 +32,6 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	
 	// 사원번호 중복 확인
 	boolean existsByEmpId(String candidate);
-
 	
 	// 사원 목록 조회
 	@Query("""
@@ -50,17 +49,20 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	          join e.dept d
 	          join e.position p
 	        where
-	          ( :keyword is null or :keyword = '' or
-	            e.empId    like concat('%', :keyword, '%') or
-	            e.empName  like concat('%', :keyword, '%') or
-	            d.deptName like concat('%', :keyword, '%') or
-	            p.posName  like concat('%', :keyword, '%') or
-	            e.email    like concat('%', :keyword, '%')
+	          e.status = 'ACTIVE'
+      	      and ( :keyword is null or :keyword = '' or
+	                e.empId    like concat('%', :keyword, '%') or
+	                e.empName  like concat('%', :keyword, '%') or
+	                d.deptName like concat('%', :keyword, '%') or
+	                p.posName  like concat('%', :keyword, '%') or
+	                e.email    like concat('%', :keyword, '%')
 	          )
 	          and ( :deptId is null or :deptId = '' or d.deptId = :deptId )
 	        """)
 	 Page<EmpListDTO> searchEmpList(@Param("keyword") String keyword,
              @Param("deptId") String deptId,
              Pageable pageable);
+	
+	
 
 }

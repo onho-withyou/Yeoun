@@ -33,6 +33,17 @@ document.addEventListener('DOMContentLoaded', () => {
       loadEmpList(0);   // 검색 시 항상 첫 페이지부터
     });
   }
+  
+  // 엔터 눌렀을 때도 검색 실행
+    const keywordInput = document.getElementById('keyword');
+    if (keywordInput) {
+      keywordInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();   // 폼 submit 막기
+          loadEmpList(0);       // 첫 페이지부터 검색
+        }
+      });
+    }
 
   // 부서 선택 변경 시 자동 검색
   const deptSelect = document.getElementById('deptId');
@@ -51,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
 //  사원 목록 불러오기 (서버 페이징)
 // ================================
 function loadEmpList(page) {
-  const keywordInput = document.getElementById('kw');
+  const keywordInput = document.getElementById('keyword');
   const deptSelect = document.getElementById('deptId');
 
   const keyword = keywordInput ? keywordInput.value : '';
@@ -132,7 +143,7 @@ function renderPagination(totalPages) {
   // 이전
   html += `
     <li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
-      <button class="page-link" type="button" onclick="loadEmpList(${currentPage - 1})">이전</button>
+      <button class="page-link" type="button" onclick="loadEmpList(${currentPage - 1})"><</button>
     </li>
   `;
 
@@ -148,7 +159,7 @@ function renderPagination(totalPages) {
   // 다음
   html += `
     <li class="page-item ${currentPage + 1 >= totalPages ? 'disabled' : ''}">
-      <button class="page-link" type="button" onclick="loadEmpList(${currentPage + 1})">다음</button>
+      <button class="page-link" type="button" onclick="loadEmpList(${currentPage + 1})">></button>
     </li>
   `;
 
