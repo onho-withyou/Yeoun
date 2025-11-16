@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.yeoun.approval.entity.ApprovalDoc;
-import com.yeoun.approval.entity.ApprovalList;
+
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 
@@ -28,6 +28,46 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 	List<Dept> findAllDepartments();
 
 	// 그리드 - 1.결재사항 - 진행해야할 결재만 - 결재권한자만 볼수있음
+	// 열람권한이 있는지에대해생각해보기
+	@Query(value = """
+			SELECT 
+				ROWNUM
+				,ade.approval_id
+				,ade.approval_title
+				,ade.emp_id
+				,ade.emp_name
+				,ade.dept_id
+				,ade.dept_name
+				,ade.approver
+				,e.emp_name AS approvar_name
+				,ade.pos_code
+				,ade.pos_name
+				,ade.created_date
+				,ade.finish_date
+				,ade.doc_status
+			FROM emp e
+					,(SELECT
+						ad.approval_id
+						,ad.approval_title
+						,ad.emp_id
+						,e.emp_name
+						,e.dept_id
+						,d.dept_name
+						,ad.approver
+						,p.pos_code
+						,p.pos_name
+						,ad.created_date
+						,ad.finish_date
+						,ad.doc_status
+					FROM approval_doc ad,emp e,dept d,position p
+					WHERE ad.emp_id = e.emp_id 
+					AND e.dept_id = d.dept_id
+					AND e.pos_code = p.pos_code
+					AND ad.approver = :empId ) ade
+			WHERE ade.approver = e.emp_id	
+				""", nativeQuery = true)
+	List<Object[]> findPendingApprovalDocs(@Param("empId") String empId);
+
 	// 그리드 - 2.전체결재- 나와관련된 모든 결재문서
 	@Query(value = """
 				SELECT  rownum AS rnum
@@ -80,11 +120,12 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 				WHERE ad.emp_id = e.emp_id 
 				AND e.dept_id = d.dept_id
 				AND e.pos_code = p.pos_code
-				AND e.emp_id = :empId;
+				AND e.emp_id = :empId
 				
 				""", nativeQuery = true)
 	List<Object[]> findMyApprovalDocs(@Param("empId") String empId);
 	// 그리드 - 4.결재대기 - 나와관련된 모든 결재대기문서
+
 	// 그리드 - 5.결재완료 - 결재권한자가 결재를 완료하면 볼수 있음(1차,2차,3차 모든결재 완료시)
 
 			

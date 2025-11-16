@@ -46,6 +46,11 @@ public class ApprovalDocService {
 	public List<Dept> getDept() {
 		return approvalDocRepository.findAllDepartments();
 	}
+	//그리드 - 1.결재사항 - 진행해야할 결재만 - 결재권한자만 볼수있음
+	@Transactional(readOnly = true)	
+	public List<Object[]> getPendingApprovalDocs(String empId) {
+		return approvalDocRepository.findPendingApprovalDocs(empId);
+	}
 	//그리드 - 2.전체결재- 나와관련된 모든 결재문서
 	@Transactional(readOnly = true)	
 	public List<Object[]> getAllApprovalDocs(String empId) {
