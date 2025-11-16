@@ -70,33 +70,37 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 
 	// 그리드 - 2.전체결재- 나와관련된 모든 결재문서
 	@Query(value = """
-				SELECT  rownum AS rnum
-						,adr.approval_id AS approvalId
-       					,adr.approval_title AS approvalTitle
-       					,adr.emp_id AS empId
-       					,e.emp_name	AS empName
-       					,e.dept_id	AS deptId
-       					,d.dept_name AS deptName
-       					,adr.approver AS approver
-       					,p.pos_code  AS posCode
-       					,p.pos_name  AS posName
-       					,adr.created_date AS createdDate
-       					,adr.finish_date AS finishDate
-       					,adr.doc_status AS docStatus
+				SELECT rownum
+					,adr.approval_id
+					,adr.approval_title
+					,adr.emp_id
+					,e.emp_name
+					,e.dept_id
+					,d.dept_name
+					,adr.approver
+					,p.pos_code
+					,p.pos_name
+					,adr.created_date
+					,adr.finish_date
+					,adr.doc_status
 				FROM emp e, dept d,position p,
-					( SELECT distinct 
-    					ad.approval_id
-    					,ad.approval_title
-    					,ad.emp_id
-    					,ad.approver
-    					,ad.created_date
-    					,ad.finish_date
-    					,ad.doc_status
-					FROM approval_doc ad,approver ar
-					WHERE (ad.approver = ar.emp_id AND ar.viewing = 'y') OR ad.emp_id = :empId ) adr
+				( SELECT distinct 
+					ad.approval_id
+					,ad.approval_title
+					,ad.emp_id
+					,ad.approver
+					,ad.created_date
+					,ad.finish_date
+					,ad.doc_status
+				FROM approval_doc ad,approver ar
+				WHERE (ad.approver is not null
+					and ad.approver = ar.emp_id 
+					and ar.viewing = 'y'
+					and ar.emp_id= :empId) 
+				OR ad.emp_id= :empId ) adr
 				WHERE e.emp_id = adr.emp_id 
-				AND e.dept_id = d.dept_id
-				AND e.pos_code = p.pos_code
+				and e.dept_id = d.dept_id
+				and e.pos_code = p.pos_code
 				
 				""", nativeQuery = true)	
 	List<Object[]> findAllApprovalDocs(@Param("empId") String empId);
