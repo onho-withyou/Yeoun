@@ -18,34 +18,7 @@
 		</div>
 		<div class="card mt-4">
 			<div class="table-responsive text-nowrap">
-				<table class="table">
-					<thead class="table-light">
-						<tr>
-							<th>부서</th>
-							<th>직급</th>
-							<th>사원번호</th>
-							<th>이름</th>
-							<th>총연차</th>
-							<th>사용연차</th>
-							<th>잔여연차</th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody class="table-border-bottom-0">
-						<tr>
-							<td>관리부</td>
-							<td>사장</td>
-							<td>251106123</td>
-							<td>이재용</td>
-							<td>15</td>
-							<td>10</td>
-							<td>5</td>
-							<td>
-								<button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modalCenter">수정</button>
-							</td>
-						</tr>
-					</tbody>
-				</table>
+			<div id="grid"></div>
 			</div>
 		</div>
 		<div class="modal fade" id="modalCenter" tabindex="-1" style="display: none;" aria-hidden="true">
@@ -91,5 +64,17 @@
 			</div>
 		</div>
 	</div>
+	<th:block layout:fragment="myScript">
+		<script>
+			const message = "[[${message}]]";
+			
+			if (message) {
+				alert(message);
+			}
+		</script>
+		<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.js"></script>
+		<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+		<script src="/js/leave/leaveAdminGrid.js"></script>
+	</th:block>
 </body>
 </th:block>

@@ -60,7 +60,18 @@ public class LeaveController {
 		LocalDate endOfYear = LocalDate.of(LocalDate.now().getYear(), 12, 31);
 		
 		List<LeaveHistoryDTO> leaveList = leaveService.getMyLeaveList(loginDTO.getEmpId(), startOfYear, endOfYear);
-		log.info(">>>>>>>>>>>>>>>>>> startOfYear : " + startOfYear);
+		
+		return ResponseEntity.ok(leaveList);
+	}
+	
+	// 관리자용 연차 현황 (리스트)
+	@GetMapping("/list/data")
+	@ResponseBody
+	public ResponseEntity<List<LeaveDTO>> leaveListAllEmp(@RequestParam(required = false, name = "empId") String empId) {
+		
+		List<LeaveDTO> leaveList = leaveService.getAllLeaveList(empId);
+		
+		log.info(">>>>>>>>>>>>> empId : " + empId);
 		
 		return ResponseEntity.ok(leaveList);
 	}

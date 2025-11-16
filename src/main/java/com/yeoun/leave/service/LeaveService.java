@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
-
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -93,6 +92,17 @@ public class LeaveService {
 		return historyRepository.findAnnualLeaveInYear(empId, startOfYear, endOfYear)
 				.stream()
 				.map(LeaveHistoryDTO::fromEntity)
+				.collect(Collectors.toList());
+	}
+	
+	// 관리자용 연차 현황 (리스트)
+	public List<LeaveDTO> getAllLeaveList(String empId) {
+		List<AnnualLeave> list = leaveRepository.findAllWithEmpInfo(empId);
+		
+		log.info(">>> [Service] list = {}", list);
+		
+		return list.stream()
+				.map(LeaveDTO::fromEntity)
 				.collect(Collectors.toList());
 	}
 	
