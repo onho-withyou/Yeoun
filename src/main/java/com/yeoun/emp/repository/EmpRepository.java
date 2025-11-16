@@ -3,6 +3,8 @@ package com.yeoun.emp.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -30,7 +32,6 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	
 	// 사원번호 중복 확인
 	boolean existsByEmpId(String candidate);
-
 	
 	// 사원 목록 조회
 	@Query("""
@@ -45,15 +46,23 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	            e.email
 	        )
 	        from Emp e
-	        join e.dept d
-	        join e.position p
-	        order by e.empId desc
-	    """)
-	List<EmpListDTO> findAllForList();
-
-
+	          join e.dept d
+	          join e.position p
+	        where
+	          e.status = 'ACTIVE'
+      	      and ( :keyword is null or :keyword = '' or
+	                e.empId    like concat('%', :keyword, '%') or
+	                e.empName  like concat('%', :keyword, '%') or
+	                d.deptName like concat('%', :keyword, '%') or
+	                p.posName  like concat('%', :keyword, '%') or
+	                e.email    like concat('%', :keyword, '%')
+	          )
+	          and ( :deptId is null or :deptId = '' or d.deptId = :deptId )
+	        """)
+	 Page<EmpListDTO> searchEmpList(@Param("keyword") String keyword,
+             @Param("deptId") String deptId,
+             Pageable pageable);
 	
-//	// 이메일 중복 확인
-//	boolean existsByEmail(String email);
+	
 
 }
