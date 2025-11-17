@@ -44,9 +44,7 @@ public class MainController {
 	}
 	
 	@GetMapping("/schedule")
-	public String scheduleList(Model model) {
-		String name = "신필용";
-		model.addAttribute("name", name);
+	public String scheduleList() {
 		
 		return "/main/schedule_list";
 	}

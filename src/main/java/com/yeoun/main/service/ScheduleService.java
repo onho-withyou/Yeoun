@@ -41,18 +41,7 @@ public class ScheduleService {
 	
 	// 일정 등록로직
 	public void createSchedule(@Valid ScheduleDTO scheduleDTO, Authentication authentication) {
-		scheduleDTO.setCreatedUser(authentication.getName()); // 회원번호 입력
-		
 		Emp emp = empRepository.findById(scheduleDTO.getCreatedUser()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다.111"));
-		
-		if(!"Y".equals(scheduleDTO.getAlldayYN())) {
-			System.out.println(scheduleDTO.getAlldayYN());
-			scheduleDTO.setAlldayYN("N"); // 종일 체크 없을경우 N으로 값변경
-		}
-		
-		if("private".equals(scheduleDTO.getScheduleType())) {
-			scheduleDTO.setScheduleType(authentication.getName()); // 일정타입이 개인일경우 회원번호 입력
-		}
 		
 		Schedule schedule = scheduleDTO.toEntity();
 		schedule.setEmp(emp);
@@ -105,18 +94,6 @@ public class ScheduleService {
 	//일정 정보 수정
 	@Transactional
 	public void modifySchedule(@Valid ScheduleDTO scheduleDTO, Authentication authentication) {
-		// 수정된 정보 db저장값으로 변경
-		String scheduleType = scheduleDTO.getScheduleType();
-
-		if("private".equals(scheduleType)) { // 넘어온 type이 private일때 접속직원번호로 변경
-			scheduleDTO.setScheduleType(authentication.getName());
-		}
-		
-		String alldayYN = scheduleDTO.getAlldayYN();
-		if(alldayYN == null || alldayYN == "") {
-			scheduleDTO.setAlldayYN("N");
-		}
-		
 		// 입력된 스케줄id로 기존 스케줄로우 정보 받아오기
 		Schedule schedule = scheduleRepository.findById(scheduleDTO.getScheduleId()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 일정입니다."));
 		schedule.changeSchedule(scheduleDTO);
