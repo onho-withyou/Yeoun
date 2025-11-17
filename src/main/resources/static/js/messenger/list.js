@@ -6,8 +6,8 @@
 // DOM 요소 참조 / 전역 상태
 // ==========================
 const tabFriends		= document.getElementById('tab-friends'); // 친구목록 탭
-const tabChats 		= document.getElementById('tab-chats'); // 대화목록 탭
-const friendsPanel 	= document.getElementById('friends-panel'); // 친구패널
+const tabChats 			= document.getElementById('tab-chats'); // 대화목록 탭
+const friendsPanel 		= document.getElementById('friends-panel'); // 친구패널
 const chatsPanel 		= document.getElementById('chats-panel'); // 대화패널
 const headerTitle 		= document.getElementById('header-title'); // 헤더(친구목록-대화목록 텍스트 전환)
 
@@ -169,15 +169,24 @@ tabChats.addEventListener('click', () => {
 // ==========================
 // 더블클릭 시 채팅창 팝업
 // ==========================
-document.querySelectorAll('.friend-item, .chat-item').forEach(item => {
+document.querySelectorAll('.friend-item').forEach(item => {
   item.addEventListener('dblclick', () => {
-    const name = item.querySelector('p').textContent;
     const targetId = item.dataset.id;
     window.open(
       'target/' + targetId,
       '_blank',
       'width=500,height=700,resizable=no,scrollbars=no');
   });
+});
+
+document.querySelectorAll('.chat-item').forEach(item => {
+	item.addEventListener('dblclick', () => {
+		const roomId = item.dataset.id;
+		window.open(
+			'room/' + roomId,
+			'_blank',
+			'width=500,height=700,resizable=no,scrollbars=no');
+	});
 });
 
 

@@ -76,6 +76,7 @@ public class MessengerController {
 	public String startChat(Authentication authentication, Model model, @PathVariable("id") String id){
 
 		log.info("startChat 진입.......");
+		log.info("id..................." + id);
 
 		// target과의 방 찾기
 		Long roomId = messengerService.searchRoom(authentication.getName(), id);
@@ -83,7 +84,6 @@ public class MessengerController {
 		// 진짜 기존 방을 발견했다면
 		if (roomId != 0)
 			return "redirect:/messenger/room/" + roomId;
-
 		
 		// 첫 대화인 경우
 		model.addAttribute("targetEmpId", id);
@@ -135,12 +135,12 @@ public class MessengerController {
 	// 메신저 팝업 채팅방 - 새로운 방 생성
 	@PostMapping("/chat")
 	public ResponseEntity<?> createRoom(Authentication authentication,
-										@RequestBody RoomCreateRequestDTO roomCreateRequestDTO){
+										@RequestBody RoomCreateRequest roomCreateRequest){
 		String empId = authentication.getName();
 
-		roomCreateRequestDTO.setCreatedUser(empId);
-		roomCreateRequestDTO.getMembers().add(empId);
-		Long roomId = messengerService.createRoom(roomCreateRequestDTO);
+		roomCreateRequest.setCreatedUser(empId);
+		roomCreateRequest.getMembers().add(empId);
+		Long roomId = messengerService.createRoom(roomCreateRequest);
 		return ResponseEntity.ok(Map.of("roomId", roomId));
 	}
 
@@ -156,7 +156,18 @@ public class MessengerController {
 		return ResponseEntity.ok().build();
 	}
 	
-
+	// ==========================================================================
+	// 메시지 읽음 처리
+	@PatchMapping("/chat/{roomId}")
+	public ResponseEntity<?> updateReadMessage(Authentication authentication,
+											@PathVariable("roomId") Long roomId,
+											@RequestBody ReadUpdateRequest readUpdateRequest){
 	
-
+	String empId = authentication.getName();
+	messengerService.updateLastRead(empId, roomId, readUpdateRequest.getLastReadId());
+	
+	return ResponseEntity.ok().build();
+	
+	}
+	
 }
