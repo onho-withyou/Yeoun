@@ -43,13 +43,20 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	            p.posName,
 	            p.rankOrder,
 	            e.mobile,
-	            e.email
+	            e.email,
+	            e.status,
+		        case 
+		            when e.status = 'ACTIVE' then '재직'
+		            when e.status = 'LEAVE'  then '휴직'
+		            when e.status = 'RETIRE' then '퇴직'
+		            else '알수없음'
+		        end
 	        )
 	        from Emp e
 	          join e.dept d
 	          join e.position p
 	        where
-	          e.status = 'ACTIVE'
+	          e.status IN ('ACTIVE', 'LEAVE')
       	      and ( :keyword is null or :keyword = '' or
 	                e.empId    like concat('%', :keyword, '%') or
 	                e.empName  like concat('%', :keyword, '%') or
@@ -60,11 +67,10 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	          and ( :deptId is null or :deptId = '' or d.deptId = :deptId )
 	        """)
 	 Page<EmpListDTO> searchEmpList(@Param("keyword") String keyword,
-             @Param("deptId") String deptId,
-             Pageable pageable);
+						            @Param("deptId") String deptId,
+						            Pageable pageable);
 	
 	
-	// 인사 발령 등록 화면에서 사용되는 사원 목록
 	// 인사 발령 등록 화면에서 사용되는 사원 목록 (DTO 직접 조회)
 	@Query("""
 	    SELECT new com.yeoun.emp.dto.EmpListDTO(
@@ -80,11 +86,15 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	    FROM Emp e
 	    JOIN e.dept d
 	    JOIN e.position p
-	    WHERE (:deptId IS NULL OR d.deptId = :deptId)
+	    WHERE e.status = 'ACTIVE'
+	      AND (:deptId IS NULL OR d.deptId = :deptId)
 	      AND (:posCode IS NULL OR p.posCode = :posCode)
-	      AND (:keyword IS NULL
-	           OR e.empName LIKE %:keyword%
-	           OR e.empId   LIKE %:keyword%)
+	      AND (
+	            :keyword IS NULL
+	            OR :keyword = ''
+	            OR e.empName LIKE concat('%', :keyword, '%')
+	            OR e.empId   LIKE concat('%', :keyword, '%')
+	          )
 	    ORDER BY e.hireDate DESC
 	""")
 	List<EmpListDTO> searchForHrActionDto(
