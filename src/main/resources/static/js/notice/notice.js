@@ -15,12 +15,17 @@ const activeTh = document.querySelector(`th[data-key="${orderKey}"]`);
 document.addEventListener('DOMContentLoaded', function() {
 	updateSortUI(activeTh, orderKey, orderMethod);
 	if (!orderKey) return;
-	
-	
-	
 		
 }); // DOM로드 끝
 
+document.querySelectorAll('button[data-notice-id]').forEach(btn => {
+	btn.addEventListener('click', (event) => {
+		const noticeId = btn.dataset.noticeId;
+		selectedNoticeId = noticeId;
+		const modalEl = document.getElementById('show-notice');
+		new bootstrap.Modal(modalEl).show();
+	})
+});
 
 //파라미터값받아오기
 function getUrlParameter(name) {

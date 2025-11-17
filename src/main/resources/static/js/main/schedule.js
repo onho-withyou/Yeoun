@@ -340,11 +340,11 @@ async function loadMonthSchedule() {
 	
 	await getScheduleData(params);
 	await calendar.clear();
-	console.log("클리어");
+//	console.log("클리어");
 	await calendar.createEvents(holidayData);
-	console.log("휴일생성");
+//	console.log("휴일생성");
 	await calendar.createEvents(monthlyScheduleData);
-	console.log("스케줄생성");
+//	console.log("스케줄생성");
 	
 }
 
@@ -517,22 +517,15 @@ function initNoticeGrid(data) {
 	
 	// 상세보기 버튼 이벤트
 	grid.on("click", (event) => {
-		if(event.columnName == "btn") {
-			const rowData = grid.getRow(event.rowKey);
-			const scheduleId = rowData.scheduleId;
+//		console.log(event);
+		const rowData = grid.getRow(event.rowKey);
+		const noticeId = rowData.noticeId;
+		
+		selectedNoticeId = noticeId;
+		const modalEl = document.getElementById('show-notice');
+		new bootstrap.Modal(modalEl).show();
 			
-			fetch(`/api/schedules/${scheduleId}`, {method: 'GET'})
-			.then(response => {
-				if (!response.ok) throw new Error(response.text());
-				return response.json();  //JSON 파싱
-			})
-			.then(data => { // response가 ok일때
-				openModal("edit", data);
-			}).catch(error => {
-				console.error('에러', error)
-				alert("데이터 조회 실패");
-			});
-		}
+
 	});
 }
 	

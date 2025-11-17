@@ -46,8 +46,7 @@
 									<td th:text="${#temporals.format(notice.createdDate, 'yyyy-MM-dd HH:mm')}"></td>
 									<td th:text="${#temporals.format(notice.updatedDate, 'yyyy-MM-dd HH:mm')}"></td>
 				                	<td>
-			                            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#show-notice"
-			                            	th:data-notice-id = "*{notice.noticeId}">
+			                            <button type="button" class="btn btn-info btn-sm" th:data-notice-id = "*{notice.noticeId}">
 			                                보기
 			                            </button>
 				                	</td>
