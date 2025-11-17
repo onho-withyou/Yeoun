@@ -50,25 +50,30 @@ document.getElementById('open-add-schedule-modal-btn').addEventListener('click',
 async function updateCurrentDate() {
 	// 현재날짜 표시 할 위치 지정
 	const currentDateEl = document.getElementById('calendar-date');
-    currentDate = calendar.getDate();
-    const viewName = calendar.getViewName();
+    // 현재날짜 저장
+	currentDate = calendar.getDate();
+	
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth() + 1;
-    const day = currentDate.getDate();
+
+	// 스케줄러 위 중앙에 현재 날짜 년월 표시
+	currentDateEl.textContent = `${year}년 ${month}월`;
+//    const day = currentDate.getDate();
     
+	//현재 해의 공휴일정보 받아오기
 	if(!calendarYear) { //처음 캘린더 생성
 		await yearHoliday(year);
 	} else if(calendarYear != year) { // 선택된 년도가 바뀔때
 		await yearHoliday(year);
 	}
 	
-//	dateController.setDate(new Date(currentDate));
-	currentDateEl.textContent = `${year}년 ${month}월`;
-	
-	if(calendarYear != year || calendarMonth != month) {
+	// 기존의 년월과 현재 업데이트하는 년월이 다를경우
+	// 그달의 스케줄 정보 불러오기
+	if(calendarYear != year || calendarMonth != month) { 
 		await loadMonthSchedule();
 	}
 	
+	// 바뀐 년월 정보 저장
 	calendarYear = year;
 	calendarMonth = month;
 }
@@ -330,6 +335,7 @@ function checkFilter() {
 
 //해당월의 달력일정 불러오기
 async function loadMonthSchedule() {
+	// 현재 바뀐 날짜 정보에서 그해의 월초, 월말 정보 저장
 	const loadDate = calendar.getDate();
 	const startDate = new Date(
 		loadDate.getFullYear(),
@@ -343,20 +349,22 @@ async function loadMonthSchedule() {
 		0,
 		23, 59, 59, 999
 	);
+	// 그해의 월초, 월말 정보 params에 저장
 	const params = new URLSearchParams({
 		startDate: formatLocalDateTime(startDate)
 		, endDate: formatLocalDateTime(endDate)
 	});
 	
+	// 해당 월초~월말 정보를 가지고 스케줄데이터 가져오기
 	await getScheduleData(params); // 그달의 스케줄 가져오기
 	await getLeaveData(params); // 그달의 연차 데이터 가져오기
 	
+	// 스케줄러 초기화
 	await calendar.clear();
-//	console.log("클리어");
+	// 저장된 그해의 휴일데이터 입력
 	await calendar.createEvents(holidayData);
-//	console.log("휴일생성");
+	// 저장된 그달의 일정데이터 입력
 	await calendar.createEvents(monthlyScheduleData);
-//	console.log("스케줄생성");
 	checkFilter();
 	
 }
