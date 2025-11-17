@@ -151,7 +151,7 @@ function loadPayHistory(page) {
 	});
 
 
-    fetch('/api/pay/history?' + params.toString())
+    fetch('/pay/history/search?' + params.toString())
         .then(res => res.json())
         .then(data => {
             if (!gridApi) {
