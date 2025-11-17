@@ -18,7 +18,7 @@ import lombok.Setter;
 @Getter
 @Setter
 //@EntityListeners(AuditingEntityListener.class) 
-public class approvalDoc {
+public class ApprovalDoc {
 
 	@Id
 	@Column(name="APPROVAL_ID")
@@ -31,7 +31,7 @@ public class approvalDoc {
 	private String empId; //사원번호
 	
 	@Column(name="CREATED_DATE")
-	private LocalDate createDate; //생성일자 -
+	private LocalDate createdDate; //생성일자 -
 	
 	@Column(name="FINISH_DATE")
 	private LocalDate finishDate; //완료예정일자
@@ -43,7 +43,7 @@ public class approvalDoc {
 	private String formType; //양식종류
 	
 	@Column(name="APPROVER")
-	private String approvar; //결재권한자
+	private String approver; //결재권한자
 	
 	@Column(name="START_DATE")
 	private LocalDate startDate; //시작휴가날짜

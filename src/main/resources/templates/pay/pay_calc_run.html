@@ -14,10 +14,8 @@
       <!-- 1. 급여 계산 및 시뮬레이션 -->
       <section class="card shadow-sm mb-4">
         <div class="card-body">
-          <h3 class="h5 mb-3 border-start ps-2">1. 급여 계산 및 시뮬레이션</h3>
-          <p class="text-secondary">
-            설정된 기준에 따라 자동으로 <strong>급여 총액</strong> 및 <strong>공제액</strong>을 계산하고, 결과를 시뮬레이션 및 검토할 수 있습니다.
-          </p>
+          <h3 class="h5 mb-3 border-start ps-2">급여 계산 및 시뮬레이션</h3>
+          
 
           <!-- 조건 선택 -->
           <div class="row g-3 align-items-center mb-3">
@@ -35,16 +33,16 @@
               </select>
             </div>
 
-            <div class="col-auto">
-              <label class="col-form-label fw-semibold">계산 유형</label>
-            </div>
-            <div class="col-auto">
-              <select id="calc_type" class="form-select form-select-sm">
-                <option value="all">일괄 계산 (전 사원)</option>
-                <option value="individual" disabled>개별 계산 (준비중)</option>
-                <option value="mid_join_leave" disabled>중도 입/퇴사자 일할 정산 (준비중)</option>
-              </select>
-            </div>
+<!--             <div class="col-auto"> -->
+<!--               <label class="col-form-label fw-semibold">계산 유형</label> -->
+<!--             </div> -->
+<!--             <div class="col-auto"> -->
+<!--               <select id="calc_type" class="form-select form-select-sm"> -->
+<!--                 <option value="all">일괄 계산 (전 사원)</option> -->
+<!--                 <option value="individual" disabled>개별 계산 (준비중)</option> -->
+<!--                 <option value="mid_join_leave" disabled>중도 입/퇴사자 일할 정산 (준비중)</option> -->
+<!--               </select> -->
+<!--             </div> -->
           </div>
 
           <!-- 액션 버튼 -->
@@ -76,13 +74,21 @@
                th:classappend="${status.calculated} ? ' alert-success' : ' alert-warning'">
             <div>
               선택 월(<span id="statMonth" th:text="${yyyymm}">YYYYMM</span>) 계산 상태:
-              <strong id="statCalc" th:text="${status.calculated} ? '계산 완료' : '미계산'">미계산</strong>
+             <strong id="statCalc"
+					  th:switch="${status.calcStatus}">
+					  <span th:case="'CONFIRMED'">확정 완료</span>
+					  <span th:case="'CALCULATED'">계산 완료</span>
+					  <span th:case="'SIMULATED'">가계산</span>
+					  <span th:case="*">미계산</span>
+					</strong>
+					             
+
               <span class="ms-2 badge bg-secondary" id="statCount" th:text="|건수 ${status.count}|">건수 0</span>
             </div>
             <div>
               총지급:
-              <span class="text-primary fw-bold" id="statTot"
-                    th:text="${#numbers.formatInteger(status.totalAmt,0)}">0</span> 원
+              <span class="text-primary fw-bold ms-1" id="statTot"
+                    th:text="${#numbers.formatInteger(status.totalAmt,0)}">0</span> 원 
               · 공제:
               <span class="text-danger fw-bold ms-1" id="statDed"
                     th:text="${#numbers.formatInteger(status.dedAmt,0)}">0</span> 원
@@ -402,7 +408,7 @@
       <!-- 2. 급여 명세서 관리 -->
       <section class="card shadow-sm">
         <div class="card-body">
-          <h3 class="h5 mb-3 border-start ps-2">2. 급여 명세서 관리</h3>
+          <h3 class="h5 mb-3 border-start ps-2">급여 명세서 관리</h3>
           <p class="text-secondary">
             확정된 급여 계산 결과를 바탕으로 <strong>월별 급여 명세서</strong>를 사원별로 자동 생성하고 PDF 파일로 제공합니다.
           </p>
@@ -443,30 +449,47 @@
       }
 
       // AJAX 상태 동기화 (REST Controller 추가 필요)
-      async function refreshStatus(mm) {
-        try {
-          const res = await fetch(`/pay/calc/status?yyyymm=${mm}`, { headers: { 'Accept':'application/json' }});
-          if (!res.ok) return;
-          const s = await res.json();
-          const fmt = (n)=> (n ?? 0).toLocaleString();
+    async function refreshStatus(mm) {
+  try {
+    const res = await fetch(`/pay/calc/status?yyyymm=${mm}`, {
+      headers: { 'Accept':'application/json' }
+    });
+    if (!res.ok) return;
 
-          document.getElementById('statMonth').textContent = mm;
-          document.getElementById('statCalc').textContent  = s.calculated ? '계산 완료' : '미계산';
-          document.getElementById('statCount').textContent = `건수 ${s.count}`;
-          document.getElementById('statTot').textContent   = fmt(s.totalAmt);
-          document.getElementById('statDed').textContent   = fmt(s.dedAmt);
-          document.getElementById('statNet').textContent   = fmt(s.netAmt);
+    const s = await res.json();
+    const fmt = (n)=> (n ?? 0).toLocaleString();
 
-          const box = document.getElementById('statusBox');
-          box.classList.remove('alert-success','alert-warning');
-          box.classList.add(s.calculated ? 'alert-success' : 'alert-warning');
+    document.getElementById('statMonth').textContent = mm;
 
-          const btnConfirm = document.getElementById('btnConfirm');
-          if (btnConfirm) btnConfirm.disabled = !s.calculated;
-        } catch(e) {
-          console.warn('status refresh failed', e);
-        }
-      }
+  
+    const statusMap = {
+      'CONFIRMED': '확정 완료',
+      'CALCULATED': '계산 완료',
+      'SIMULATED': '가계산 완료',
+      'READY': '미계산'
+    };
+    document.getElementById('statCalc').textContent = statusMap[s.calcStatus] ?? '미계산';
+
+    document.getElementById('statCount').textContent = `건수 ${s.count}`;
+    document.getElementById('statTot').textContent = fmt(s.totalAmt);
+    document.getElementById('statDed').textContent = fmt(s.dedAmt);
+    document.getElementById('statNet').textContent = fmt(s.netAmt);
+
+    const box = document.getElementById('statusBox');
+    box.classList.remove('alert-success','alert-warning');
+
+    // 🔥 CONFIRMED이면 초록색, 나머지는 노란색
+    box.classList.add(s.calcStatus === 'CONFIRMED' ? 'alert-success' : 'alert-warning');
+
+    // 확정 버튼 활성화/비활성 (원하면 규칙 바꿀 수 있음)
+    const btnConfirm = document.getElementById('btnConfirm');
+    if (btnConfirm) btnConfirm.disabled = (s.calcStatus !== 'CALCULATED');
+
+  } catch(e) {
+    console.warn('status refresh failed', e);
+  }
+}
+
 
       (function(){
         const mm = document.getElementById('calc_month')?.value;

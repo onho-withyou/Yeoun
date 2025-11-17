@@ -36,6 +36,70 @@ VALUES ('ROLE_ADMIN',     '전체 관리자', '시스템 전역 접근 가능(�
 INSERT INTO ROLE (ROLE_CODE, ROLE_NAME, ROLE_DESC, USE_YN, CREATED_DATE)
 VALUES ('ROLE_ADMIN_SUB', '부서 관리자', '부서 단위 관리 권한(자동 부서장)', 'Y', SYSDATE);
 
+-- 결재문서 APPROVAL_DOC
+INSERT INTO approval_doc(
+            APPROVAL_ID	  -- 결재 문서ID
+            ,APPROVAL_TITLE	-- 문서제목
+            ,APPROVER	--결재권한자
+            ,CREATED_DATE	--생성일자
+            ,DOC_STATUS	--문서상태--반려,1차완료,2차완료,3차완료
+            ,EMP_ID	--사원번호
+            ,EXPND_TYPE	 --지출종류
+            ,FINISH_DATE --완료 예정일자	
+            ,FORM_TYPE --양식종류
+            ,REASON	--사유
+            ,START_DATE --시작 휴가일자
+            ,END_DATE -- 종료 휴가일자
+            ,TO_DEPT_ID --발령부서
+            )
+VALUES(202511150101,'테스트용 문서제목','2511491',sysdate,'','2511491','고정지출',sysdate,'지출결의서','테스트용입니다.',sysdate,sysdate,'개발부');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
+VALUES(202511150102,'개발부용 테스트 문서제목','',sysdate,'','2103347','변동지출',sysdate,'자유양식결재서','테스트용입니다.',sysdate,sysdate,'마케팅부');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
+VALUES(202511150103,'마케팅부용 테스트 문서제목','',sysdate,'','1907475','변동지출',sysdate,'인사발령신청서','테스트용입니다.',sysdate,sysdate,'생산부');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
+VALUES(202511150104,'생산부용 테스트 문서제목','',sysdate,'','1707923','비정기지출',sysdate,'휴가연차신청서','테스트용입니다.',sysdate,sysdate,'영업부');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
+VALUES(202511150105,'영업부용 테스트 문서제목','',sysdate,'','1209349','고정지출',sysdate,'지출결의서','테스트용입니다.',sysdate,sysdate,'인사부');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
+VALUES(202511150106,'인사부용 테스트 문서제목','',sysdate,'','2511733','고정지출',sysdate,'자유양식결재서','테스트용입니다.',sysdate,sysdate,'ERP본부');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
+VALUES(202511150107,'인사부용 테스트 전도연 문서제목','2401300',sysdate,'','2104502','고정지출',sysdate,'자유양식결재서','테스트용전도연입니다.',sysdate,sysdate,'MES본부');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
+VALUES(202511150108,'인사부용 테스트 전도연2 문서제목','',sysdate,'','2104502','비정기지출',sysdate,'자유양식결재서','테스트용 2 입니다.',sysdate,sysdate,'개발3팀본부');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
+VALUES(202511150109,'인사부용 테스트 전도연3 문서제목','',sysdate,'','2104502','정기지출',sysdate,'자유양식결재서','테스트용 3 입니다.',sysdate,sysdate,'개발2팀본부');
+
+-- 결재권한자
+INSERT INTO approver(
+            emp_id, -- 결재자 사원 id
+            approval_id, -- 결재서류 id
+            approval_status, --결재 상태
+            delegate_status, --전결자 상태
+            order_approvers, --결재순서
+            viewing)  --열람권한
+VALUES('2511491',202511150101,1,'본인','1','Y');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('2511733',202511150101,0,'전결','2','');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('2407628',202511150101,0,'대결','3','');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('2401300',202511150101,0,'선결','','');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('2110664',202511150101,0,'','','');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('0009236',202511150102,0,'','3','');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('1707705',202511150102,0,'','2','');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('1301823',202511150102,0,'','1','');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('2511793',202511150107,0,'','3','');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('2401300',202511150107,0,'','2','y');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('2104502',202511150107,0,'','1','');
+
 -- EMP
 INSERT INTO EMP (EMP_ID, EMP_PWD, EMP_NAME, GENDER, RRN, MOBILE, EMAIL, POST_CODE, ADDRESS1, ADDRESS2, HIRE_DATE, STATUS, PHOTO_FILE_ID, CREATED_DATE, LAST_LOGIN, DEPT_ID, POS_CODE) VALUES ('0009236', '$2a$10$ViLZJqMoejz8sExHrR6ZpeC2QwN4tHfyKBDWj9zMcvTGoGZVmjLeS', '세종대왕', 'M', '800925-5824156', '010-0221-9041', 'sejong@yeoun.com', '36502', '광주광역시 서구 상무중앙로 7 치평동 1201-2', '자이아파트 15층', TO_DATE('2000-09-23', 'YYYY-MM-DD'), 'ACTIVE', NULL, SYSTIMESTAMP, SYSTIMESTAMP, 'DEP001', 'POS007');
 INSERT INTO EMP (EMP_ID, EMP_PWD, EMP_NAME, GENDER, RRN, MOBILE, EMAIL, POST_CODE, ADDRESS1, ADDRESS2, HIRE_DATE, STATUS, PHOTO_FILE_ID, CREATED_DATE, LAST_LOGIN, DEPT_ID, POS_CODE) VALUES ('2506864', '$2a$10$ViLZJqMoejz8sExHrR6ZpeC2QwN4tHfyKBDWj9zMcvTGoGZVmjLeS', '이순신', 'M', '870522-6596249', '010-0241-9698', 'sunny@yeoun.com', '33056', '강원특별자치도 춘천시 중앙로 30 석사동 30-1', '2층', TO_DATE('2025-06-23', 'YYYY-MM-DD'), 'ACTIVE', NULL, SYSTIMESTAMP, SYSTIMESTAMP, 'DEP002', 'POS005');
@@ -87,3 +151,4 @@ INSERT INTO EMP (EMP_ID, EMP_PWD, EMP_NAME, GENDER, RRN, MOBILE, EMAIL, POST_COD
 INSERT INTO EMP (EMP_ID, EMP_PWD, EMP_NAME, GENDER, RRN, MOBILE, EMAIL, POST_CODE, ADDRESS1, ADDRESS2, HIRE_DATE, STATUS, PHOTO_FILE_ID, CREATED_DATE, LAST_LOGIN, DEPT_ID, POS_CODE) VALUES ('1212618', '$2a$10$ViLZJqMoejz8sExHrR6ZpeC2QwN4tHfyKBDWj9zMcvTGoGZVmjLeS', '박지성', 'M', '950203-5197758', '010-0210-2582', 'parkjs@yeoun.com', '48434', '강원특별자치도 춘천시 중앙로 30 석사동 30-1', '102동 1202호', TO_DATE('2012-12-18', 'YYYY-MM-DD'), 'ACTIVE', NULL, SYSTIMESTAMP, SYSTIMESTAMP, 'DEP002', 'POS001');
 INSERT INTO EMP (EMP_ID, EMP_PWD, EMP_NAME, GENDER, RRN, MOBILE, EMAIL, POST_CODE, ADDRESS1, ADDRESS2, HIRE_DATE, STATUS, PHOTO_FILE_ID, CREATED_DATE, LAST_LOGIN, DEPT_ID, POS_CODE) VALUES ('1210571', '$2a$10$ViLZJqMoejz8sExHrR6ZpeC2QwN4tHfyKBDWj9zMcvTGoGZVmjLeS', '김유리', 'F', '970622-5530764', '010-0190-7929', 'yoona93@yeoun.com', '33045', '제주특별자치도 제주시 연삼로 120 연동 1200-2', '꿈에그린 2층', TO_DATE('2012-10-04', 'YYYY-MM-DD'), 'ACTIVE', NULL, SYSTIMESTAMP, SYSTIMESTAMP, 'DEP001', 'POS002');
 INSERT INTO EMP (EMP_ID, EMP_PWD, EMP_NAME, GENDER, RRN, MOBILE, EMAIL, POST_CODE, ADDRESS1, ADDRESS2, HIRE_DATE, STATUS, PHOTO_FILE_ID, CREATED_DATE, LAST_LOGIN, DEPT_ID, POS_CODE) VALUES ('1209349', '$2a$10$ViLZJqMoejz8sExHrR6ZpeC2QwN4tHfyKBDWj9zMcvTGoGZVmjLeS', '김은혜', 'F', '950815-5788637', '010-0223-4674', 'star@yeoun.com', '59978', '대전광역시 유성구 대학로 99 궁동 23-5', 'B동 404호', TO_DATE('2012-09-09', 'YYYY-MM-DD'), 'ACTIVE', NULL, SYSTIMESTAMP, SYSTIMESTAMP, 'DEP004', 'POS001');
+INSERT INTO MSG_STATUS (EMP_ID, AVLB_STAT,AVLB_UPDATED,AUTO_WORK_STAT,MANUAL_WORK_STAT,WORK_STAT_UPDATED,WORK_STAT_SOURCE,ONLINE_YN,LAST_LOGIN,MSG_PROFILE,REMARK) VALUES ('2511027','ONLINE', SYSDATE, 'IN', NULL, SYSDATE, 'SYSTEM', 'Y', SYSDATE, 1, NULL);

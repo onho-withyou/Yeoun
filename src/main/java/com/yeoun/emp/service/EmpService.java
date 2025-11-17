@@ -6,6 +6,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,11 +34,13 @@ import com.yeoun.messenger.entity.MsgStatus;
 import com.yeoun.messenger.repository.MsgStatusRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
 @Transactional
+@RequiredArgsConstructor
 public class EmpService {
 	
 	private final EmpRepository empRepository;
@@ -44,23 +50,6 @@ public class EmpService {
 	private final MsgStatusRepository msgStatusRepository;
 	private final BCryptPasswordEncoder encoder;
 
-	public EmpService(EmpRepository empRepository,
-					  DeptRepository deptRepository,
-					  PositionRepository positionRepository, 
-					  RoleRepository roleRepository,
-					  EmpRoleRepository empRoleRepository,
-					  EmpBankRepository empBankRepository,
-					  CommonCodeRepository commonCodeRepository,
-					  MsgStatusRepository msgStatusRepository,
-					  BCryptPasswordEncoder encoder) {
-		this.empRepository = empRepository;
-		this.deptRepository = deptRepository;
-		this.positionRepository = positionRepository;
-		this.empBankRepository = empBankRepository;
-		this.msgStatusRepository = msgStatusRepository;
-		this.encoder = encoder;
-	}
-	
 	// 사원 신규 등록
 	@Transactional
 	public void registEmp(EmpDTO empDTO) {
@@ -98,6 +87,8 @@ public class EmpService {
 	    status.setWorkStatUpdated(LocalDateTime.now());
 	    status.setWorkStatSource("AUTO");
 	    status.setOnlineYn("N");
+	    int randomImg = ThreadLocalRandom.current().nextInt(1, 6);
+	    status.setMsgProfile(randomImg);
 	    
 	    msgStatusRepository.save(status);
 
@@ -141,13 +132,34 @@ public class EmpService {
     }
 	
 	// =============================================================================
-	// 사원 목록 조회
-	public List<EmpListDTO> getEmpList() {
-		log.info("▶ 사원 목록 조회 시작");
-		List<Emp> empList = empRepository.findAll();
+	// 사원 목록 조회 (검색 + 페이징 포함)
+	public Page<EmpListDTO> getEmpList(int page, int size, String keyword, String deptId) {
 		
-		return empRepository.findAllForList();
+		// 공백 정리
+        if (keyword != null) {
+            keyword = keyword.trim();
+        }
+        if (deptId != null && deptId.isBlank()) {
+            deptId = null;
+        }
+
+		// 정렬 기준은 입사일 최신순 예시
+	    Pageable pageable = PageRequest.of(page, size,
+	            Sort.by(Sort.Direction.DESC, "hireDate"));
+		
+		return empRepository.searchEmpList(keyword, deptId, pageable);
 	}
+	
+	// 인사발령 화면에서 쓰는 전체 사원 목록 (페이징 없음)
+	public List<EmpListDTO> getEmpList() {
+	    Page<EmpListDTO> page = empRepository.searchEmpList(
+	            "",            		// keyword 없음
+	            null,          		// deptId 필터 없음
+	            Pageable.unpaged()  // 페이징 안 걸기
+	    );
+	    return page.getContent();   // List<EmpListDTO> 리턴
+	}
+
 	
 	// ==============================================================================
 	// 사원 정보 조회
@@ -240,16 +252,13 @@ public class EmpService {
 	// 사원 정보 수정
 	@Transactional(readOnly = true)
 	public EmpDTO getEmpForEdit(String empId) {
-		log.info("====== getEmpForEdit 시작: empId={}", empId);
 		
 	    Emp emp = empRepository.findById(empId)
 	        .orElseThrow(() -> new EntityNotFoundException("사원 없음: " + empId));
 	    
-	    log.info("====== emp 조회 완료: {}", emp);
-	    log.info("====== emp.getDept(): {}", emp.getDept());
-	    log.info("====== emp.getPosition(): {}", emp.getPosition());
-	    
 	    EmpDTO empDTO = new EmpDTO();
+	    
+	    // 사원 인사 정보 
 	    empDTO.setEmpId(emp.getEmpId());
 	    empDTO.setEmpName(emp.getEmpName());
 	    empDTO.setGender(emp.getGender());
@@ -264,7 +273,50 @@ public class EmpService {
 	    empDTO.setDeptId(emp.getDept().getDeptId());
 	    empDTO.setPosCode(emp.getPosition().getPosCode());
 	    
+	    // 사원 급여정보
+	    empBankRepository.findByEmpId(empId).ifPresent(bank -> {
+	    	empDTO.setBankCode(bank.getBankCode());
+	    	empDTO.setAccountNo(bank.getAccountNo());
+	    	empDTO.setHolder(bank.getHolder());
+    	});
+	    
 	    return empDTO;
+	}
+
+	@Transactional
+	public void updateEmp(EmpDTO empDTO) {
+		
+		Emp emp = empRepository.findById(empDTO.getEmpId())
+		            .orElseThrow(() -> new IllegalArgumentException("사원 없음"));
+
+		    // 변경 가능한 필드만 업데이트
+		    emp.setEmpName(empDTO.getEmpName());
+		    emp.setMobile(empDTO.getMobile());
+		    emp.setEmail(empDTO.getEmail());
+		    emp.setStatus(empDTO.getStatus());
+		    emp.setPostCode(empDTO.getPostCode());
+		    emp.setAddress1(empDTO.getAddress1());
+		    emp.setAddress2(empDTO.getAddress2());
+		    
+		    // === 급여계좌 업데이트 ===
+		    if (empDTO.getBankCode() != null && empDTO.getAccountNo() != null) {
+		        EmpBank empBank = empBankRepository.findByEmpId(emp.getEmpId())
+		                .orElseGet(() -> {
+		                    EmpBank bank = new EmpBank();
+		                    bank.setEmpId(emp.getEmpId());
+		                    return bank;
+		                });
+
+		        empBank.setBankCode(empDTO.getBankCode());
+		        empBank.setAccountNo(empDTO.getAccountNo());
+		        empBank.setHolder(empDTO.getHolder());
+		        empBank.setFileId(empDTO.getFileId());
+
+		        empBankRepository.save(empBank);
+		    }
+		    
+		    // 추후 사진 추가
+		
 	}
 
 	

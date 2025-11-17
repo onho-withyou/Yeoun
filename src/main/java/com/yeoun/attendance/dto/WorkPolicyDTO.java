@@ -18,7 +18,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class WorkPolicyDTO {
-	private Long id;
+	private Long policyId;
 	
 	@NotNull
 	private String inTime; // 출근 기준 시간

@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.yeoun.auth.entity.Role;
+import com.yeoun.leave.entity.AnnualLeave;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -19,6 +20,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -125,5 +127,8 @@ public class Emp {
 		empRoles.add(empRole);
 	}
 	
+	// 연차 테이블과 연동
+	@OneToOne(mappedBy = "emp", cascade = CascadeType.ALL, orphanRemoval = true)
+	private AnnualLeave annualLeave;
 	
 }

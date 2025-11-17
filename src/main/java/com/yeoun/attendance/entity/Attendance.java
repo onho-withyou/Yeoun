@@ -47,7 +47,7 @@ import lombok.ToString;
 public class Attendance {
 	@Id 
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "ATTENDANCE_SEQ_GENERATOR")
-	private Long id;
+	private Long attendanceId;
 	
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "EMP_ID", nullable = false)

@@ -1,15 +1,22 @@
 package com.yeoun.messenger.controller;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import com.yeoun.emp.repository.EmpRepository;
+import com.yeoun.messenger.dto.*;
+import com.yeoun.messenger.entity.MsgMessage;
+import com.yeoun.messenger.repository.MsgMessageRepository;
+import com.yeoun.messenger.repository.MsgStatusRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import com.yeoun.auth.dto.LoginDTO;
-import com.yeoun.messenger.dto.MsgStatusDTO;
 import com.yeoun.messenger.service.MessengerService;
 
 import lombok.RequiredArgsConstructor;
@@ -22,7 +29,10 @@ import lombok.extern.log4j.Log4j2;
 public class MessengerController {
 	
 	private final MessengerService messengerService;
-	
+	private final MsgMessageRepository msgMessageRepository;
+	private final MsgStatusRepository msgStatusRepository;
+	private final EmpRepository empRepository;
+
 	// ==========================================================================
 	// 메신저 큰 화면 (보류)
 	@GetMapping(value = {"/", "/index"})
@@ -35,19 +45,118 @@ public class MessengerController {
 	@GetMapping("/list")
 	public String list(Authentication authentication, Model model) {
 		LoginDTO loginDTO = (LoginDTO)authentication.getPrincipal();
-		List<MsgStatusDTO> msgStatusDTOList = messengerService.selectUsers(loginDTO.getUsername());
-		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> username : " + loginDTO.getUsername());
-		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> list : " + msgStatusDTOList);
+		List<MsgStatusDTO> msgStatusDTOList = messengerService.getUsers(loginDTO.getUsername());
+		List<MsgRoomDTO> msgRoomsDTOList = messengerService.getChatRooms(loginDTO.getUsername());
 		model.addAttribute("friends", msgStatusDTOList);
+		model.addAttribute("rooms", msgRoomsDTOList);
 		return "/messenger/list";
 	}
 	
 	// ==========================================================================
-	// 메신저 팝업 채팅방
-	@GetMapping("/chat")
-	public String chat(Model model) {
+	// 친구목록 즐겨찾기 토글
+	@PatchMapping("/favorite/{id}")
+	public ResponseEntity<?> toggleFavorite(Authentication authentication, @PathVariable("id") String id){
+		
+		MsgFavoriteDTO msgFavoriteDTO = new MsgFavoriteDTO();
+		msgFavoriteDTO.setEmpId(((LoginDTO)authentication.getPrincipal()).getUsername());
+		msgFavoriteDTO.setFvUser(id);
+		
+		if (messengerService.searchFavorite(msgFavoriteDTO)) {
+			messengerService.deleteFavorite(msgFavoriteDTO);
+		} else {
+			messengerService.createFavorite(msgFavoriteDTO);
+		}
+		
+		return ResponseEntity.ok().body("success");
+	}
+	
+	// ==========================================================================
+	// 메신저 팝업 채팅방 - 대상 선택 진입
+	@GetMapping("/target/{id}")
+	public String startChat(Authentication authentication, Model model, @PathVariable("id") String id){
+
+		log.info("startChat 진입.......");
+
+		// target과의 방 찾기
+		Long roomId = messengerService.searchRoom(authentication.getName(), id);
+
+		// 진짜 기존 방을 발견했다면
+		if (roomId != 0)
+			return "redirect:/messenger/room/" + roomId;
+
+		
+		// 첫 대화인 경우
+		model.addAttribute("targetEmpId", id);
+		model.addAttribute("groupYn", "N");
+		model.addAttribute("targetName", empRepository.findById(id).get().getEmpName());
+		//model.addAttribute("targetPos", empRepository.findById(id).get().get());
+		log.info(">>>>>>>>>>>>>>> chat controller... : " + roomId);
 		return "/messenger/chat";
 	}
+
+	// ==========================================================================
+	// 메신저 팝업 채팅방 - 방 선택 진입
+	@GetMapping("/room/{id}")
+	public String openRoom(Authentication authentication, Model model, @PathVariable("id") Long id){
+
+		// 1) 엔티티 리스트 가져오기
+		List<MsgMessage> entityList =
+				msgMessageRepository.findByRoomId_RoomIdOrderBySentDate(id);
+
+		// 2) DTO 리스트 변환
+		List<MsgMessageDTO> dtoList = new ArrayList<>();
+		for (MsgMessage msg : entityList) {
+			MsgMessageDTO dto = MsgMessageDTO.fromEntity(msg);
+
+			String senderId = msg.getSenderId().getEmpId();
+
+			// MsgStatus에서 프로필 조회
+			Integer profile = msgStatusRepository.findById(senderId)
+					.orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다"))
+					.getMsgProfile();
+
+			dto.setSenderId(senderId);
+			dto.setSenderName(msg.getSenderId().getEmpName());
+			dto.setSenderProfile(profile);
+
+			dtoList.add(dto);
+		}
+
+		// 3) 모델에 담기
+		model.addAttribute("roomId", id);
+		model.addAttribute("msgList", dtoList);
+		//model.addAttribute("targetEmpId", id);
+		model.addAttribute("groupYn", "N");
+		//model.addAttribute("targetPos", empRepository.findById(id).get().getPosition());
+		return "/messenger/chat";
+	}
+
+	// ==========================================================================
+	// 메신저 팝업 채팅방 - 새로운 방 생성
+	@PostMapping("/chat")
+	public ResponseEntity<?> createRoom(Authentication authentication,
+										@RequestBody RoomCreateRequestDTO roomCreateRequestDTO){
+		String empId = authentication.getName();
+
+		roomCreateRequestDTO.setCreatedUser(empId);
+		roomCreateRequestDTO.getMembers().add(empId);
+		Long roomId = messengerService.createRoom(roomCreateRequestDTO);
+		return ResponseEntity.ok(Map.of("roomId", roomId));
+	}
+
+	// ==========================================================================
+	// 메신저 팝업 채팅방 - 기존 방에 메시지 전송
+	@PostMapping("/chat/{id}")
+	public ResponseEntity<?> sendMessage(Authentication authentication,
+										 @PathVariable("id") Long id,
+										 @RequestBody MsgMessageDTO msgMessageDTO){
+		msgMessageDTO.setRoomId(id);
+		msgMessageDTO.setSenderId(authentication.getName());
+		messengerService.sendMessage(msgMessageDTO);
+		return ResponseEntity.ok().build();
+	}
+	
+
 	
 
 }

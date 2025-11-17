@@ -56,10 +56,10 @@
     // 최초 로드 시: deptId가 이미 선택되어 있으면 그 parent로 topDept 자동 설정
     const selected = deptSel.querySelector('option:checked');
     if (selected && selected.value) {
-      const parentId = selected.getAttribute('data-parent');
-      if (parentId) {
-        topSel.value = parentId;          // 상위부서 자동 지정
-        filterDeptByTop(parentId);        // 하위부서 목록 필터
+      const parentDeptId = selected.getAttribute('data-parent');
+      if (parentDeptId) {
+        topSel.value = parentDeptId;          // 상위부서 자동 지정
+        filterDeptByTop(parentDeptId);        // 하위부서 목록 필터
         deptSel.value = selected.value;   // 선택 복원
         return;
       }
