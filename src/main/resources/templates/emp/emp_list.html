@@ -1,10 +1,15 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
           layout:decorate="~{/layouts/layout.html}">
+          
+
 <body>
 <th:block layout:fragment="content">
     <div class="custom-body container-xxl flex-grow-1 container-p-y">
     
+	<!-- 메시지 출력 -->
+	<div id="empMsgHolder" th:if="${msg}" th:data-msg="${msg}"></div>
+	
     <h2>사원 목록</h2>
 
       <!-- 검색 바 -->
@@ -18,7 +23,7 @@
               <select class="form-select" id="deptId" name="deptId">
                 <option value="">부서 전체</option>
                 <option th:each="d : ${deptList}" th:value="${d.deptId}" th:text="${d.deptName}"
-                        th:selected="${deptId} != null and ${deptId} == ${d.deptId}"
+                        th:selected="${deptId != null and deptId == d.deptId}"
                         th:if="${d.parentDeptId != null}">
                 </option>
               </select>
