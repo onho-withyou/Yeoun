@@ -96,37 +96,39 @@ document.addEventListener('DOMContentLoaded', function() {
 	
 	// 일정조회 - 삭제버튼 이벤트
 	document.getElementById('delete-schedule-btn').addEventListener('click', function () {
-		//삭제요청보내기
-		fetch('/main/schedule', {
-			method: 'DELETE'
-			, headers: {
-				[csrfHeaderName]: csrfToken
-			}
-			, body: new FormData(addScheduleForm)
-		})
-		.then(response => {
-			if (!response.ok) {
-				throw new Error(response.msg);
-			}
-			return response.json();  //JSON 파싱
-		})
-		.then(response => { // response가 ok일때
-			alert(response.msg);
-			location.reload();
-		}).catch(error => {
-			alert("삭제에 실패하였습니다.");
-		});
+		if(confirm("삭제하시겠습니까 ?")) {
+			//삭제요청보내기
+			fetch('/main/schedule', {
+				method: 'DELETE'
+				, headers: {
+					[csrfHeaderName]: csrfToken
+				}
+				, body: new FormData(addScheduleForm)
+			})
+			.then(response => {
+				if (!response.ok) {
+					throw new Error(response.msg);
+				}
+				return response.json();  //JSON 파싱
+			})
+			.then(response => { // response가 ok일때
+				alert(response.msg);
+				location.reload();
+			}).catch(error => {
+				alert("삭제에 실패하였습니다.");
+			});
+		}
 	}); //일정조회 - 삭제 버튼 이벤트 끝
 		
 });// DOM로드 끝
 
 // ----------------------------------------------------------
 // 부서 목록 조회 함수
-function createSelect() {
+async function createSelect() {
 	// 셀렉트박스 지정
     const select = document.getElementById('schedule-type');
 
-	fetch('/api/schedules/departments')
+	await fetch('/api/schedules/departments')
     .then(response => response.json())
     .then(data => {
 		// 셀렉트박스에 부서목록 추가
@@ -140,7 +142,7 @@ function createSelect() {
 }
 
 // 모달열기함수
-function openModal(mode, data = null) {
+async function openModal(mode, data = null) {
 	const modal = new bootstrap.Modal(document.getElementById('add-schedule-modal'));
 	const form = document.getElementById('add-schedule-form');
 	const modalTitle = document.getElementById('modalCenterTitle');
@@ -204,7 +206,7 @@ function openModal(mode, data = null) {
 		select.appendChild(option2);
 		
 		// 셀렉트박스 목록추가
-		createSelect();
+		await createSelect();
 		// 등록모달은 company로 default
 		select.value = 'company';
 
@@ -235,8 +237,9 @@ function openModal(mode, data = null) {
 		select.appendChild(option2);
 		
 		// 셀렉트 목록 추가
-		createSelect();
+		await createSelect();
 		// 조회한 일정의 일정타입으로 지정
+//		console.log(data.scheduleType);
 		select.value = data.scheduleType;
 		
 		// 날짜 초기값
