@@ -153,14 +153,14 @@ public class EmpService {
 	// 인사발령 화면에서 쓰는 전체 사원 목록
 	public List<EmpListDTO> getEmpListForHrAction(String deptId, String posCode, String keyword) {
 
-	    if (keyword != null) keyword = keyword.trim();
-	    if (keyword != null && keyword.isBlank()) keyword = null;
-
-	    List<Emp> emps = empRepository.searchForHrAction(deptId, posCode, keyword);
-
-	    return emps.stream()
-	            .map(EmpListDTO::fromEntity)
-	            .toList();
+		if (keyword != null) {
+	        keyword = keyword.trim();
+	        if (keyword.isBlank()) keyword = null;
+	    }
+	    if (deptId != null && deptId.isBlank()) deptId = null;
+	    if (posCode != null && posCode.isBlank()) posCode = null;
+	    
+	    return empRepository.searchForHrActionDto(deptId, posCode, keyword);
 	}
 
 	// ==============================================================================

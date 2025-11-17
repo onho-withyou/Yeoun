@@ -65,19 +65,33 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	
 	
 	// 인사 발령 등록 화면에서 사용되는 사원 목록
+	// 인사 발령 등록 화면에서 사용되는 사원 목록 (DTO 직접 조회)
 	@Query("""
-		    SELECT e
-		      FROM Emp e
-		     WHERE (:deptId IS NULL OR e.dept.deptId = :deptId)
-		       AND (:posCode IS NULL OR e.position.posCode = :posCode)
-		       AND (:keyword IS NULL
-		            OR e.empName LIKE %:keyword%
-		            OR e.empId   LIKE %:keyword%)
-		     ORDER BY e.hireDate DESC
-		""")
-	List<Emp> searchForHrAction(@Param("deptId") String deptId,
-	                            @Param("posCode") String posCode,
-	                            @Param("keyword") String keyword);
+	    SELECT new com.yeoun.emp.dto.EmpListDTO(
+	        e.hireDate,
+	        e.empId,
+	        e.empName,
+	        d.deptName,
+	        p.posName,
+	        p.rankOrder,
+	        e.mobile,
+	        e.email
+	    )
+	    FROM Emp e
+	    JOIN e.dept d
+	    JOIN e.position p
+	    WHERE (:deptId IS NULL OR d.deptId = :deptId)
+	      AND (:posCode IS NULL OR p.posCode = :posCode)
+	      AND (:keyword IS NULL
+	           OR e.empName LIKE %:keyword%
+	           OR e.empId   LIKE %:keyword%)
+	    ORDER BY e.hireDate DESC
+	""")
+	List<EmpListDTO> searchForHrActionDto(
+	        @Param("deptId") String deptId,
+	        @Param("posCode") String posCode,
+	        @Param("keyword") String keyword);
+
 
 	
 	
