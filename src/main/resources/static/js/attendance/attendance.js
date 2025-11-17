@@ -134,7 +134,6 @@ const saveAttendance = async () => {
 		
 		if (!response.ok) {
 			const errorData = await response.json();
-			console.log("fadfs")
 			throw new Error(errorData.message || "요청 처리 중 오류가 발생했습니다.");
 		}
 		

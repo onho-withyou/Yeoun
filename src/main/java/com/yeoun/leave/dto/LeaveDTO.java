@@ -77,7 +77,7 @@ public class LeaveDTO {
 	
 	// DTO 타입으로 변환 
 	public static LeaveDTO fromEntity(AnnualLeave annualLeave) {
-		return LeaveDTO.builder()
+		LeaveDTO.LeaveDTOBuilder builder = LeaveDTO.builder()
 				.id(annualLeave.getLeaveId())
 				.empId(annualLeave.getEmp().getEmpId())
 				.periodStart(annualLeave.getPeriodStart())
@@ -88,7 +88,21 @@ public class LeaveDTO {
 				.remainDays(annualLeave.getRemainDays())
 				.updatedUser(annualLeave.getUpdatedUser())
 				.updatedDate(annualLeave.getUpdatedDate())
-				.reason(annualLeave.getReason())
-				.build();
+				.reason(annualLeave.getReason());
+		
+		// 직원 이름, 부서명, 직위는 emp에 데이터가 있을 때 적용
+		if (annualLeave.getEmp() != null) {
+			builder.empName(annualLeave.getEmp().getEmpName());
+			
+			if (annualLeave.getEmp().getDept() != null) {
+				builder.deptName(annualLeave.getEmp().getDept().getDeptName());
+			}
+			
+			if (annualLeave.getEmp().getPosition() != null) {
+				builder.posName(annualLeave.getEmp().getPosition().getPosName());
+			}
+		}
+		
+		return builder.build();
 	}
 }
