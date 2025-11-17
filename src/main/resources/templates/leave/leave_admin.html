@@ -29,10 +29,10 @@
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
-						<form>
+						<div>
 							<div class="col mb-6">
 								<label for="currentLeave" class="form-label">현재 보유 연차</label>
-								<input type="text" id="currentLeave" class="form-control mb-2" value="15" readonly/>
+								<input type="text" id="currentLeave" class="form-control mb-2" readonly/>
 							</div>
 							<div class="col mb-6">
 								<label class="form-label">증감유형</label>
@@ -56,9 +56,9 @@
 								<input type="text" id="reason" class="form-control" required/>
 							</div>
 							<div class="modal-footer mt-3 p-0">
-								<button class="btn btn-warning">수정</button>
+								<button class="btn btn-warning" id="modifyBtn">수정</button>
 							</div>
-						</form>
+						</div>
 					</div>
 				</div>
 			</div>

@@ -2,12 +2,17 @@ package com.yeoun.leave.controller;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -16,6 +21,7 @@ import com.yeoun.attendance.controller.AttendanceController;
 import com.yeoun.attendance.service.AttendanceService;
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.common.service.CommonCodeService;
+import com.yeoun.leave.dto.LeaveChangeRequestDTO;
 import com.yeoun.leave.dto.LeaveDTO;
 import com.yeoun.leave.dto.LeaveHistoryDTO;
 import com.yeoun.leave.service.LeaveService;
@@ -71,8 +77,32 @@ public class LeaveController {
 		
 		List<LeaveDTO> leaveList = leaveService.getAllLeaveList(empId);
 		
-		log.info(">>>>>>>>>>>>> empId : " + empId);
-		
 		return ResponseEntity.ok(leaveList);
+	}
+	
+	// 연차 조회(개별)
+	@GetMapping("/{leaveId}")
+	@ResponseBody
+	public ResponseEntity<LeaveDTO> leaveDetailInfo(@PathVariable("leaveId") Long leaveId) {
+		
+		LeaveDTO leaveDTO = leaveService.getLeaveDetail(leaveId);
+		
+		return ResponseEntity.ok(leaveDTO);
+	}
+	
+	// 연차 수정
+	@PostMapping("/{leaveId}")
+	public ResponseEntity<Map<String, String>> modifyLeave(
+			@PathVariable("leaveId") Long leaveId, 
+			@AuthenticationPrincipal LoginDTO loginDTO,
+			@RequestBody LeaveChangeRequestDTO leaveChangeRequestDTO) {
+		
+		try {
+			leaveService.modifyLeave(loginDTO, leaveChangeRequestDTO, leaveId);
+			return ResponseEntity.ok(Map.of("message", "연차 수정 완료"));
+		} catch (Exception e) {
+			 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                    .body(Map.of("message", "연차 수정 시 오류가 발생했습니다."));
+		}
 	}
 }

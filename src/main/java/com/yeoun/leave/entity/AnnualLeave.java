@@ -10,6 +10,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.yeoun.attendance.entity.WorkPolicy;
 import com.yeoun.emp.entity.Emp;
+import com.yeoun.leave.dto.LeaveChangeRequestDTO;
 
 import groovy.transform.ToString;
 import jakarta.persistence.CascadeType;
@@ -144,5 +145,19 @@ public class AnnualLeave {
 		
 		// 총 연차에서 사용한 연차 빼기
 		this.remainDays = this.totalDays - this.usedDays;
+	}
+	
+	// 연차 수정했을 경우
+	public void modifyAnnual(String userId, LeaveChangeRequestDTO leaveChangeRequestDTO) {
+		// 증감에 따라 총 연차 수정
+		if (leaveChangeRequestDTO.getChangeType().equals("increase")) {
+			this.totalDays += leaveChangeRequestDTO.getChangeDays();
+		} else {
+			this.totalDays -= leaveChangeRequestDTO.getChangeDays();
+		}
+		
+		this.updatedUser = userId;
+		this.updatedDate = LocalDateTime.now();
+		this.reason = leaveChangeRequestDTO.getReason();
 	}
 }

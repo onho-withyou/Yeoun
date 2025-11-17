@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 
 import com.yeoun.attendance.entity.WorkPolicy;
 import com.yeoun.attendance.repository.WorkPolicyRepository;
+import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
+import com.yeoun.leave.dto.LeaveChangeRequestDTO;
 import com.yeoun.leave.dto.LeaveDTO;
 import com.yeoun.leave.dto.LeaveHistoryDTO;
 import com.yeoun.leave.entity.AnnualLeave;
@@ -99,8 +101,6 @@ public class LeaveService {
 	public List<LeaveDTO> getAllLeaveList(String empId) {
 		List<AnnualLeave> list = leaveRepository.findAllWithEmpInfo(empId);
 		
-		log.info(">>> [Service] list = {}", list);
-		
 		return list.stream()
 				.map(LeaveDTO::fromEntity)
 				.collect(Collectors.toList());
@@ -123,4 +123,20 @@ public class LeaveService {
 		}
 	}
 
+	// 연차 개별 조회
+	public LeaveDTO getLeaveDetail(Long leaveId) {
+		AnnualLeave annualLeave = leaveRepository.findById(leaveId)
+				.orElseThrow(() -> new NoSuchElementException("조회된 연차가 없습니다."));
+		
+		return LeaveDTO.fromEntity(annualLeave);
+	}
+
+	// 연차 수정
+	@Transactional
+	public void modifyLeave(LoginDTO loginDTO, LeaveChangeRequestDTO leaveChangeRequestDTO, Long leaveId) {
+		AnnualLeave annualLeave = leaveRepository.findById(leaveId)
+				.orElseThrow(() -> new NoSuchElementException("조회된 연차가 없습니다."));
+		
+		annualLeave.modifyAnnual(loginDTO.getEmpId(), leaveChangeRequestDTO);
+	}
 }
