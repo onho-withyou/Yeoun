@@ -45,18 +45,17 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	            e.mobile,
 	            e.email,
 	            e.status,
-		        case 
-		            when e.status = 'ACTIVE' then '재직'
-		            when e.status = 'LEAVE'  then '휴직'
-		            when e.status = 'RETIRE' then '퇴직'
-		            else '알수없음'
-		        end
+		        cc.codeName
 	        )
 	        from Emp e
 	          join e.dept d
 	          join e.position p
+	          left join CommonCode cc
+	          	on cc.codeId = e.status
+	          	and cc.parent.codeId = 'EMP_STATUS'
+	          	and cc.useYn = 'Y'
 	        where
-	          e.status IN ('ACTIVE', 'LEAVE')
+	          (e.status is null or e.status in ('ACTIVE', 'LEAVE', 'RETIRE'))
       	      and ( :keyword is null or :keyword = '' or
 	                e.empId    like concat('%', :keyword, '%') or
 	                e.empName  like concat('%', :keyword, '%') or
@@ -65,6 +64,9 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	                e.email    like concat('%', :keyword, '%')
 	          )
 	          and ( :deptId is null or :deptId = '' or d.deptId = :deptId )
+            order by
+			  cc.codeSeq asc,
+			  e.hireDate desc
 	        """)
 	 Page<EmpListDTO> searchEmpList(@Param("keyword") String keyword,
 						            @Param("deptId") String deptId,
