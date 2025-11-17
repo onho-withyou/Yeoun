@@ -317,6 +317,15 @@ function checkCalendarType() {
 	}
 }
 
+function checkFilter() {
+	const companyFilter = document.getElementById('filter-company')
+	const departmentFilter = document.getElementById('filter-department')
+	const personalFilter = document.getElementById('filter-personal')
+	
+	companyFilter.checked ? calendar.setCalendarVisibility('company', true) : calendar.setCalendarVisibility('company', false);
+	departmentFilter.checked ? calendar.setCalendarVisibility('department', true) : calendar.setCalendarVisibility('department', false);
+	personalFilter.checked ? calendar.setCalendarVisibility('personal', true) : calendar.setCalendarVisibility('personal', false);
+}
 
 //해당월의 달력일정 불러오기
 async function loadMonthSchedule() {
@@ -345,6 +354,7 @@ async function loadMonthSchedule() {
 //	console.log("휴일생성");
 	await calendar.createEvents(monthlyScheduleData);
 //	console.log("스케줄생성");
+	checkFilter();
 	
 }
 
@@ -450,6 +460,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		updateCurrentDate();
 	});
 	
+	// 캘린더 날짜 클릭하여 데이트피커열기
 	const calendarDateEl = document.getElementById('calendar-date');
 	
 	calendarDateEl.addEventListener('click', function() {
@@ -457,6 +468,12 @@ document.addEventListener('DOMContentLoaded', function () {
 	});
 	
 	getLastNoticeList();
+	
+	document.querySelectorAll('input.calendar-filter').forEach((checkbox) => {
+		checkbox.addEventListener('change', (event) => {
+			checkFilter();
+		});
+	});
 	
 
 });// DOM로드 끝
