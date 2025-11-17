@@ -1,33 +1,47 @@
 const grid = new tui.Grid({
 	el: document.getElementById("grid"),
+	language: 'ko',
 	columns: [
 		{
-			header: "날짜",
-			name : "workDate"
+			header: "순서",
+			name : "rowKey",
+			formatter: ({ row }) => row.rowKey + 1,
+			sortable: true,
 		},
 		{
 			header: "연차유형",
-			name : ""
+			name : "leaveType",
+			filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
 		},
 		{
 			header: "휴가시작일",
-			name : ""
+			name : "startDate",
+			sortable: true,
+			filter: {
+				type: 'date', options: {format: 'yyyy-MM-dd'}
+			}
 		},
 		{
 			header: "휴가종료일",
-			name : ""
+			name : "endDate",
+			sortable: true,
+			filter: {
+				type: 'date', options: {format: 'yyyy-MM-dd'}
+			}
 		},
 		{
 			header: "사용일수",
-			name : ""
+			name : "usedDays"
 		},
 		{
 			header: "사유",
-			name : ""
+			name : "reason"
 		},
 		{
 			header: "승인상태",
-			name : ""
+			name : "apprStatus",
+			sortable: true,
+			filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
 		},
 	],
 		
@@ -45,20 +59,25 @@ async function loadLeaveList(startDate, endDate) {
 		
 		let data = await res.json();
 		
-		console.log(data);
+		// 연차유형 변환
+		const leaveTypeMap = {
+			ANNUAL: "연차",
+			HALF: "반차",
+			SICK: "병가",
+		};
 		
-//		const statusMap = {
-//			IN: "출근",
-//			LATE: "지각",
-//			OFF: "휴무",
-//			OUTWORK: "외근"
-//		};
+		// 승인상태 변환
+		const apprStatusMap = {
+			APPROVED: "승인",
+			REJECTED: "반려",
+		};
 		
 		// 상태값이 영어로 들어오는 것을 한글로 변환해서 기존 data에 덮어씌움
-//		data = data.map(item => ({
-//			...item,
-//			statusCode: statusMap[item.statusCode] || item.statusCode
-//		}));
+		data = data.map(item => ({
+			...item,
+			leaveType: leaveTypeMap[item.leaveType] || item.leaveType,
+			apprStatus: apprStatusMap[item.apprStatus] || item.apprStatus,
+		}));
 		
 		grid.resetData(data);
 	} catch(error) {
@@ -77,9 +96,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 	const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
 	const endDate = new Date(year, month, 0).toISOString().split("T")[0];
 	
-	// 날짜 input 기본값 설정
-	document.querySelector("#startDate").value = startDate;
-	document.querySelector("#endDate").value = endDate;
-	
-	await loadAttendanceList(startDate, endDate);
+	await loadLeaveList(startDate, endDate);
 });

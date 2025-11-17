@@ -1,11 +1,14 @@
 package com.yeoun.pay.controller;
 
+import com.yeoun.pay.dto.PayrollHistoryProjection;
 import com.yeoun.pay.service.PayrollHistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/pay/history")
@@ -15,43 +18,22 @@ public class PayrollHistoryController {
 
     private final PayrollHistoryService service;
 
+    /** 화면 이동 */
     @GetMapping
-    public String historyPage(
+    public String page() {
+        return "pay/pay_history";
+    }
 
-            @RequestParam(name = "mode", defaultValue = "emp") String mode,
+    /** 검색 API (JSON 반환) */
+    @GetMapping("/search")
+    @ResponseBody
+    public List<PayrollHistoryProjection> search(
+            @RequestParam(name = "mode") String mode,
             @RequestParam(name = "keyword", required = false) String keyword,
             @RequestParam(name = "deptName", required = false) String deptName,
-
-            @RequestParam(name = "yearEmp", required = false) String yearEmp,
-            @RequestParam(name = "monthEmp", required = false) String monthEmp,
-
-            @RequestParam(name = "yearDept", required = false) String yearDept,
-            @RequestParam(name = "monthDept", required = false) String monthDept,
-
-            @RequestParam(name = "yearMonth", required = false) String yearMonth,
-            @RequestParam(name = "monthMonth", required = false) String monthMonth,
-
-            Model model
+            @RequestParam(name = "year", required = false) String year,
+            @RequestParam(name = "month", required = false) String month
     ) {
-
-        String year = null, month = null;
-
-        if (mode.equals("emp")) {
-            year = yearEmp;
-            month = monthEmp;
-        } else if (mode.equals("dept")) {
-            year = yearDept;
-            month = monthDept;
-        } else if (mode.equals("month")) {
-            year = yearMonth;
-            month = monthMonth;
-        }
-
-        model.addAttribute("slips",
-                service.search(mode, keyword, deptName, year, month));
-
-        model.addAttribute("mode", mode);
-
-        return "pay/pay_history";
+        return service.search(mode, keyword, deptName, year, month);
     }
 }

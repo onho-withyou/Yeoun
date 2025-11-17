@@ -10,6 +10,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.yeoun.attendance.entity.WorkPolicy;
 import com.yeoun.emp.entity.Emp;
+import com.yeoun.leave.dto.LeaveChangeRequestDTO;
 
 import groovy.transform.ToString;
 import jakarta.persistence.CascadeType;
@@ -47,7 +48,7 @@ import lombok.Setter;
 public class AnnualLeave {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "ANNUAL_LEAVE_SEQ_GENERATOR")
-	private Long LeaveId;
+	private Long leaveId;
 	
 	@OneToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "EMP_ID", nullable = false)
@@ -125,5 +126,38 @@ public class AnnualLeave {
 	    // 1년 미만이면 회계연도 기준으로 월별 산정
 	    long monthsWorked = ChronoUnit.MONTHS.between(hireDate, fiscalEnd);
 	    return (int) Math.min(monthsWorked, 11);
+	}
+	
+	// 연차 사용했을 경우
+	public void useAnnual(int useDays) {
+		// 사용 일수가 음수일 경우
+		if (useDays <= 0) {
+			 throw new IllegalArgumentException("사용 일수는 1일 이상이어야 합니다.");
+		}
+		
+		// 기존에 사용한 연차와 총 연차와 비교해서 초과할 경우
+		if (this.usedDays + useDays > this.totalDays) {
+			throw new IllegalArgumentException("사용 가능한 연차를 초과했습니다.");
+		}
+		
+		// 기존 사용한 연차에 더하기
+		this.usedDays += useDays;
+		
+		// 총 연차에서 사용한 연차 빼기
+		this.remainDays = this.totalDays - this.usedDays;
+	}
+	
+	// 연차 수정했을 경우
+	public void modifyAnnual(String userId, LeaveChangeRequestDTO leaveChangeRequestDTO) {
+		// 증감에 따라 총 연차 수정
+		if (leaveChangeRequestDTO.getChangeType().equals("increase")) {
+			this.totalDays += leaveChangeRequestDTO.getChangeDays();
+		} else {
+			this.totalDays -= leaveChangeRequestDTO.getChangeDays();
+		}
+		
+		this.updatedUser = userId;
+		this.updatedDate = LocalDateTime.now();
+		this.reason = leaveChangeRequestDTO.getReason();
 	}
 }

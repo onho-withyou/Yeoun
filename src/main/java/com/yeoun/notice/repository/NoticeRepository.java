@@ -1,5 +1,7 @@
 package com.yeoun.notice.repository;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,5 +28,6 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 	
 	// 검색어가 없을때 리스트불러오기
 	Page<Notice> findByDeleteYN(String yn, Pageable pageable);
+	
 
 }

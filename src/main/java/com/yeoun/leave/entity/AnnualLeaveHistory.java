@@ -16,7 +16,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
@@ -30,10 +33,11 @@ import lombok.Setter;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AnnualLeaveHistory {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "ANNUAL_LEAVE_HISTORY_SEQ_GENERATOR")
-	private Long LeaveHistId;
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "ANNUAL_LEAVE_HISTORY_GENERATOR")
+	private Long leaveHistId;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "EMP_ID", nullable = false)
@@ -63,7 +67,26 @@ public class AnnualLeaveHistory {
 	private String reason; // 연차 사용 이유
 	
 	@Column(nullable = false)
-	private String apprStatus; // 결재 상태 (승인/반려) / (APPROVED / REJECTED)
+	private String apprStatus = "REJECTED"; // 결재 상태 (승인/반려) / (APPROVED / REJECTED)
 	
 	private Long paymentId; // 결재문서 Id
+	
+	@Builder
+	public AnnualLeaveHistory(Emp emp, AnnualLeave annualLeave, String leaveType, LocalDate startDate,
+			LocalDate endDate, int usedDays, String reason, Long paymentId) {
+		this.emp = emp;
+		this.annualLeave = annualLeave;
+		this.leaveType = leaveType;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.usedDays = usedDays;
+		this.reason = reason;
+		this.apprStatus = "REJECTED";
+		this.paymentId = paymentId;
+	}
+	
+	// 결재 상태가 변경되었을 때 사용
+	public void changeApprStatus(String status) {
+		this.apprStatus = status;
+	}
 }

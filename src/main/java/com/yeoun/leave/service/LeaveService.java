@@ -4,17 +4,19 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
-
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.yeoun.attendance.entity.WorkPolicy;
 import com.yeoun.attendance.repository.WorkPolicyRepository;
+import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
+import com.yeoun.leave.dto.LeaveChangeRequestDTO;
 import com.yeoun.leave.dto.LeaveDTO;
+import com.yeoun.leave.dto.LeaveHistoryDTO;
 import com.yeoun.leave.entity.AnnualLeave;
-//import com.yeoun.leave.repository.LeaveHistoryRepository;
+import com.yeoun.leave.repository.LeaveHistoryRepository;
 import com.yeoun.leave.repository.LeaveRepository;
 import com.yeoun.pay.entity.PayrollPayslip;
 import com.yeoun.pay.repository.PayrollPayslipRepository;
@@ -30,7 +32,7 @@ public class LeaveService {
 	
 	private final EmpRepository empRepository;
 	private final LeaveRepository leaveRepository;
-//	private final LeaveHistoryRepository historyRepository;
+	private final LeaveHistoryRepository historyRepository;
 	private final WorkPolicyRepository workPolicyRepository;
 	private final PayrollPayslipRepository payslipRepo;
 
@@ -88,12 +90,21 @@ public class LeaveService {
 	}
 	
 	// 개인 연차 현황(리스트)
-//	public List<LeaveDTO> getMyLeaveList(String empId, LocalDate startOfYear, LocalDate endOfYear) {
-//		return historyRepository.findByEmp_EmpIdAndStartDateBetween(empId, startOfYear, endOfYear)
-//				.stream()
-//				.map(leave -> LeaveDTO.fromEntity(leave))
-//				.collect(Collectors.toList());
-//	}
+	public List<LeaveHistoryDTO> getMyLeaveList(String empId, LocalDate startOfYear, LocalDate endOfYear) {
+		return historyRepository.findAnnualLeaveInYear(empId, startOfYear, endOfYear)
+				.stream()
+				.map(LeaveHistoryDTO::fromEntity)
+				.collect(Collectors.toList());
+	}
+	
+	// 관리자용 연차 현황 (리스트)
+	public List<LeaveDTO> getAllLeaveList(String empId) {
+		List<AnnualLeave> list = leaveRepository.findAllWithEmpInfo(empId);
+		
+		return list.stream()
+				.map(LeaveDTO::fromEntity)
+				.collect(Collectors.toList());
+	}
 	
 	// 연차 재계산 (비동기)
 	@Async
@@ -112,4 +123,20 @@ public class LeaveService {
 		}
 	}
 
+	// 연차 개별 조회
+	public LeaveDTO getLeaveDetail(Long leaveId) {
+		AnnualLeave annualLeave = leaveRepository.findById(leaveId)
+				.orElseThrow(() -> new NoSuchElementException("조회된 연차가 없습니다."));
+		
+		return LeaveDTO.fromEntity(annualLeave);
+	}
+
+	// 연차 수정
+	@Transactional
+	public void modifyLeave(LoginDTO loginDTO, LeaveChangeRequestDTO leaveChangeRequestDTO, Long leaveId) {
+		AnnualLeave annualLeave = leaveRepository.findById(leaveId)
+				.orElseThrow(() -> new NoSuchElementException("조회된 연차가 없습니다."));
+		
+		annualLeave.modifyAnnual(loginDTO.getEmpId(), leaveChangeRequestDTO);
+	}
 }

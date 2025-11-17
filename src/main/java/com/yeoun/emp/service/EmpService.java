@@ -6,6 +6,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -128,14 +132,37 @@ public class EmpService {
     }
 	
 	// =============================================================================
-	// 사원 목록 조회
-	public List<EmpListDTO> getEmpList() {
-		log.info("▶ 사원 목록 조회 시작");
-		List<Emp> empList = empRepository.findAll();
+	// 사원 목록 조회 (검색 + 페이징 포함)
+	public Page<EmpListDTO> getEmpList(int page, int size, String keyword, String deptId) {
 		
-		return empRepository.findAllForList();
+		// 공백 정리
+        if (keyword != null) {
+            keyword = keyword.trim();
+        }
+        if (deptId != null && deptId.isBlank()) {
+            deptId = null;
+        }
+
+		// 정렬 기준은 입사일 최신순 예시
+	    Pageable pageable = PageRequest.of(page, size,
+	            Sort.by(Sort.Direction.DESC, "hireDate"));
+		
+		return empRepository.searchEmpList(keyword, deptId, pageable);
 	}
 	
+	// 인사발령 화면에서 쓰는 전체 사원 목록
+	public List<EmpListDTO> getEmpListForHrAction(String deptId, String posCode, String keyword) {
+
+		if (keyword != null) {
+	        keyword = keyword.trim();
+	        if (keyword.isBlank()) keyword = null;
+	    }
+	    if (deptId != null && deptId.isBlank()) deptId = null;
+	    if (posCode != null && posCode.isBlank()) posCode = null;
+	    
+	    return empRepository.searchForHrActionDto(deptId, posCode, keyword);
+	}
+
 	// ==============================================================================
 	// 사원 정보 조회
 	@Transactional(readOnly = true)

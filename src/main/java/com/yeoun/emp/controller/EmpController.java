@@ -2,6 +2,7 @@ package com.yeoun.emp.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,6 +18,7 @@ import com.yeoun.common.service.CommonCodeService;
 import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpDetailDTO;
 import com.yeoun.emp.dto.EmpListDTO;
+import com.yeoun.emp.dto.EmpPageResponse;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.EmpRepository;
@@ -81,25 +83,50 @@ public class EmpController {
 		empService.registEmp(empDTO);
 		
 		rttr.addFlashAttribute("msg", "사원 등록이 완료되었습니다.");
-		return "redirect:/emp/list";
+		return "redirect:/emp";
 		
 	}
 	
 	// ====================================================================================
-	// 사원 목록 조회
-	@GetMapping("/list")
-	public String getEmpListForm() {
-		log.info("▶ 사원목록 페이지 요청");
+	// 사원 메인 페이지 (현황 + 등록 버튼 있는 화면)
+	@GetMapping("")
+	public String empMainPage(Model model,
+							  @RequestParam(value = "msg", required = false) String msg,
+							  @RequestParam(value = "keyword", required = false) String keyword,
+							  @RequestParam(value = "deptId", required = false) String deptId) {
+		
+	    // 부서 셀렉트 옵션용
+	    model.addAttribute("deptList", deptRepository.findActive());
+	    
+	    // 메시지가 있으면 모델에 담기
+	    if (msg != null && !msg.isBlank()) {
+	        model.addAttribute("msg", msg);
+	    }
+	    
+	    model.addAttribute("keyword", keyword);
+	    model.addAttribute("deptId", deptId);
+        
 		return "/emp/emp_list";
 	}
 	
-	// AJAX 데이터 로딩
+	// AJAX 데이터 로딩 + 검색 + 페이징
 	@ResponseBody
-	@GetMapping("/list/data")
-	public List<EmpListDTO> getEmpList() {
-		log.info("▶ 사원목록 데이터 요청 (JSON)");
-		return empService.getEmpList();
+	@GetMapping("/data")
+	public EmpPageResponse getEmpList (@RequestParam(defaultValue = "0", name = "page") int page,
+									   @RequestParam(defaultValue = "10", name = "size") int size,
+									   @RequestParam(defaultValue = "", name = "keyword") String keyword,
+									   @RequestParam(required = false, name = "deptId") String deptId) {
+		
+		// 서비스에서 Page<EmpListDTO> 받아오기
+		Page<EmpListDTO> empPage = empService.getEmpList(page, size, keyword, deptId);
+		
+		return new EmpPageResponse(empPage.getContent(),
+								   empPage.getNumber(),
+								   empPage.getSize(),
+								   empPage.getTotalElements(),
+								   empPage.getTotalPages());
 	}
+	
 	
 	// ====================================================================================
 	// 사원 정보 상세 조회
@@ -132,9 +159,10 @@ public class EmpController {
 	}
 	
 	@PostMapping("/edit")
-	public String updateEmp(@ModelAttribute("empDTO") EmpDTO empDTO) {
+	public String updateEmp(@ModelAttribute("empDTO") EmpDTO empDTO, RedirectAttributes rttr) {
 	    empService.updateEmp(empDTO);
-	    return "redirect:/emp/list";  
+	    rttr.addAttribute("msg", "정보 수정이 완료되었습니다.");
+	    return "redirect:/emp";  
 	}
 	
 	

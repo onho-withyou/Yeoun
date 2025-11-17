@@ -5,59 +5,60 @@
 <th:block layout:fragment="content">
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
 	
-	<h2>인사 발령 목록</h2>
+	<h2>인사 발령 목록 (결재 승인 완료된 것만?)</h2>
 	
-	<!-- 한 줄 + 반응형 -->
-	<div class="row align-items-center g-2">
-	  <!-- 왼쪽: 검색 폼 -->
-	  <div class="col-12 col-lg-9">
-	    <form class="row g-2 align-items-center" onsubmit="return false" role="search">
+	<div class="row g-2 align-items-center">
+
+	  <!-- 검색 조건들 묶음 -->
+	  <div class="col-12 col-lg-auto d-flex flex-wrap align-items-center gap-2">
 	
-	      <!-- 입력창 -->
-	      <div class="col-12 col-md-auto">
-	        <input class="form-control"
-	               type="search"
-	               placeholder="사번 / 성명 / 부서 / 직급 / 이메일 검색"
-	               aria-label="Search"
-	               style="width: 280px;">
-	      </div>
+	    <!-- 발령 구분 -->
+	    <select class="form-select" id="actionType" name="actionType" style="width: 130px;">
+	      <option value="">발령 구분</option>
+	      <option value="PROMOTION">승진</option>
+	      <option value="TRANSFER">전보</option>
+	    </select>
 	
-	      <!-- 셀렉트 -->
-	      <div class="col-6 col-md-auto">
-	        <select class="form-select">
-	          <option>부서 전체</option>
-	          <option>개발부</option>
-	          <option>마케팅부</option>
-	          <option>생산부</option>
-	          <option>영업부</option>
-	          <option>인사부</option>
-	        </select>
-	      </div>
+	    <!-- 날짜 -->
+	    <div class="d-flex align-items-center gap-2">
+	      <input type="date" class="form-control" id="startDate" style="width: 140px;">
+	      <span>~</span>
+	      <input type="date" class="form-control" id="endDate" style="width: 140px;">
+	    </div>
 	
-	      <!-- 검색 버튼 -->
-	      <div class="col-6 col-md-auto d-grid">
-	        <button class="btn btn-outline-primary" type="submit">Search</button>
-	      </div>
-	    </form>
+	    <!-- 키워드 -->
+	    <input type="text" class="form-control"
+	           placeholder="이름 또는 사원번호"
+	           id="keyword" style="width: 200px;">
+	
+	    <!-- 조회 버튼 -->
+	    <button class="btn btn-outline-primary" id="btnSearch">검색</button>
 	  </div>
 	
-	  <!-- 오른쪽: 인사등록 버튼 -->
-	  <div class="col-12 col-lg-3 d-grid d-lg-flex justify-content-lg-end">
-	    <a href="/hr/actions/regist" class="btn btn-primary">발령 등록</a>
+	  <!-- 오른쪽: 발령 등록 버튼 -->
+	  <div class="col-12 col-lg d-flex justify-content-lg-end">
+	    <a href="/hr/actions/regist" class="btn btn-primary">
+	      발령 등록
+	    </a>
 	  </div>
-	</div>
-	
-	<br>
-	
-	<div class="card-body p-0">
-	    <div id="empGrid"></div>
-		
-    </div>
 	
 	</div>
 
-<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css">
-<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+	<br>
+	
+	<div class="card-body p-0">
+	    <div id="grid"></div>
+    </div>
+    
+    <br>
+    
+    <nav aria-label="인사 발령 페이지네이션">
+	  <ul class="pagination justify-content-center" id="hrPagination"></ul>
+	</nav>
+    
+	
+	</div>
+
 <script src="/js/hr/hrList.js"></script>		
 	
 </th:block>

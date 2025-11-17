@@ -10,7 +10,7 @@
     .amount{font-variant-numeric:tabular-nums}
     .muted{color:#6b7280}
 
-    /* ===================== 탭 커스텀 (급여기준정보 스타일 동일) ===================== */
+    /* ===================== 탭 커스텀 ===================== */
     .pay-tabs {
       border-bottom: 2px solid #e5e7eb;
       margin-bottom: 1.5rem;
@@ -38,24 +38,23 @@
     .badge-gray { background:#f3f4f6; color:#6b7280; }
   </style>
 
-   <!-- ===================== 상단 탭 ===================== -->
-<ul class="nav pay-tabs">
-  <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule}"      th:classappend="${activeTab}=='rule' ? 'active'">급여기준정보</a></li>
-  <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule_calc}" th:classappend="${activeTab}=='calc' ? 'active'">급여계산</a></li>
-  <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule_item}" th:classappend="${activeTab}=='item' ? 'active'">급여항목</a></li>
-</ul>
-
+  <!-- ===================== 상단 탭 ===================== -->
+  <ul class="nav pay-tabs">
+    <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule}"      th:classappend="${activeTab}=='rule' ? 'active'">급여기준정보</a></li>
+    <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule_calc}" th:classappend="${activeTab}=='calc' ? 'active'">급여계산</a></li>
+    <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule_item}" th:classappend="${activeTab}=='item' ? 'active'">급여항목</a></li>
+  </ul>
 
   <div class="container-xxl py-4">
 
     <!-- 메시지 -->
-    <div th:if="${msg}" class="alert alert-success alert-dismissible fade show" role="alert">
-      <span th:text="${msg}">성공 메시지</span>
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div th:if="${msg}" class="alert alert-success alert-dismissible fade show">
+      <span th:text="${msg}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    <div th:if="${err}" class="alert alert-danger alert-dismissible fade show" role="alert">
-      <span th:text="${err}">에러 메시지</span>
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div th:if="${err}" class="alert alert-danger alert-dismissible fade show">
+      <span th:text="${err}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
     <!-- 헤더 -->
@@ -63,55 +62,6 @@
       <h1 class="fw-bold text-primary mb-0">급여 항목</h1>
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createItemModal">등록</button>
     </div>
-
-    <!-- 검색/필터 (기준정보와 톤 맞춤) -->
-<!--     <div class="card border-0 shadow-sm mb-3"> -->
-<!--       <div class="card-body"> -->
-<!--         <form class="row g-3 align-items-end" th:action="@{/pay/rule_item}" method="get"> -->
-<!--           <div class="col-md-2"> -->
-<!--             <label class="form-label">유형</label> -->
-<!--             <select class="form-select" name="itemType"> -->
-<!--               <option value="">전체</option> -->
-<!--               <option value="EARNING" th:selected="${params?.itemType=='EARNING'}">EARNING(지급)</option> -->
-<!--               <option value="DEDUCTION" th:selected="${params?.itemType=='DEDUCTION'}">DEDUCTION(공제)</option> -->
-<!--             </select> -->
-<!--           </div> -->
-<!--           <div class="col-md-2"> -->
-<!--             <label class="form-label">그룹</label> -->
-<!--             <select class="form-select" name="itemGroup"> -->
-<!--               <option value="">전체</option> -->
-<!--               <option value="BASE" th:selected="${params?.itemGroup=='BASE'}">BASE</option> -->
-<!--               <option value="ALLOWANCE" th:selected="${params?.itemGroup=='ALLOWANCE'}">ALLOWANCE</option> -->
-<!--               <option value="INCENTIVE" th:selected="${params?.itemGroup=='INCENTIVE'}">INCENTIVE</option> -->
-<!--               <option value="DEDUCTION" th:selected="${params?.itemGroup=='DEDUCTION'}">DEDUCTION</option> -->
-<!--             </select> -->
-<!--           </div> -->
-<!--           <div class="col-md-2"> -->
-<!--             <label class="form-label">과세</label> -->
-<!--             <select class="form-select" name="taxable"> -->
-<!--               <option value="">전체</option> -->
-<!--               <option value="Y" th:selected="${params?.taxable=='Y'}">Y</option> -->
-<!--               <option value="N" th:selected="${params?.taxable=='N'}">N</option> -->
-<!--             </select> -->
-<!--           </div> -->
-<!--           <div class="col-md-2"> -->
-<!--             <label class="form-label">사용여부</label> -->
-<!--             <select class="form-select" name="useYn"> -->
-<!--               <option value="">전체</option> -->
-<!--               <option value="Y" th:selected="${params?.useYn=='Y'}">사용</option> -->
-<!--               <option value="N" th:selected="${params?.useYn=='N'}">중지</option> -->
-<!--             </select> -->
-<!--           </div> -->
-<!--           <div class="col-md-3"> -->
-<!--             <label class="form-label">검색(코드/명칭)</label> -->
-<!--             <input type="text" class="form-control" name="q" th:value="${params?.q}"> -->
-<!--           </div> -->
-<!--           <div class="col-md-1 d-grid"> -->
-<!--             <button class="btn btn-outline-primary">검색</button> -->
-<!--           </div> -->
-<!--         </form> -->
-<!--       </div> -->
-<!--     </div> -->
 
     <!-- 목록 -->
     <div class="card border-0 shadow-sm">
@@ -121,7 +71,7 @@
           등록된 급여 항목이 없습니다.
         </div>
 
-        <!-- 1) 리스트(Collection) -->
+        <!-- 리스트 -->
         <div th:if="${items!=null}" class="table-responsive">
           <table class="table table-sm align-middle">
             <thead class="table-light">
@@ -140,20 +90,22 @@
             </thead>
             <tbody>
               <tr th:each="it : ${items}">
-                <td class="fw-semibold" th:text="${it.itemCode}">BASE</td>
-                <td th:text="${it.itemName}">기본급</td>
-                <td><span class="badge badge-gray" th:text="${it.itemType}">EARNING</span></td>
-                <td><span class="badge badge-soft" th:text="${it.itemGroup}">BASE</span></td>
+                <td class="fw-semibold" th:text="${it.itemCode}"></td>
+                <td th:text="${it.itemName}"></td>
+                <td><span class="badge badge-gray" th:text="${it.itemType}"></span></td>
+                <td><span class="badge badge-soft" th:text="${it.itemGroup}"></span></td>
                 <td>
                   <span class="badge"
                         th:classappend="${it.taxable=='Y'} ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'"
-                        th:text="${it.taxable}">Y</span>
+                        th:text="${it.taxable}"></span>
                 </td>
-                <td><span class="badge bg-secondary-subtle text-secondary" th:text="${it.calcMethod}">FIXED</span></td>
-                <td class="text-end" th:text="${it.sortNo}">10</td>
-                <td><span class="badge"
-			        th:classappend="${it.useYn.name() == 'Y'} ? 'bg-primary' : 'bg-secondary'"
-			        th:text="${it.useYn.name() == 'Y' ? '사용' : '중지'}">사용</span></td>
+                <td><span class="badge bg-secondary-subtle text-secondary" th:text="${it.calcMethod}"></span></td>
+                <td class="text-end" th:text="${it.sortNo}"></td>
+                <td>
+                  <span class="badge"
+                        th:classappend="${it.useYn.name() == 'Y'} ? 'bg-primary' : 'bg-secondary'"
+                        th:text="${it.useYn.name() == 'Y' ? '사용' : '중지'}"></span>
+                </td>
                 <td class="text-truncate" style="max-width:240px" th:text="${it.remark}"></td>
                 <td class="text-end">
                   <button class="btn btn-sm btn-outline-primary"
@@ -166,7 +118,7 @@
               </tr>
             </tbody>
           </table>
-        </div>      
+        </div>
 
       </div>
     </div>
@@ -288,8 +240,7 @@
                   </div>
                   <div class="col-md-4">
                     <label class="form-label">항목그룹</label>
-                    <select name="itemGroup" class="form-select" required>
-                      <option value="BASE" th:selected="${it.itemGroup=='BASE'}">BASE</option>
+                    <select name="itemGroup" class="form-select" required>                      
                       <option value="ALLOWANCE" th:selected="${it.itemGroup=='ALLOWANCE'}">ALLOWANCE</option>
                       <option value="INCENTIVE" th:selected="${it.itemGroup=='INCENTIVE'}">INCENTIVE</option>
                       <option value="DEDUCTION" th:selected="${it.itemGroup=='DEDUCTION'}">DEDUCTION</option>
@@ -343,39 +294,9 @@
 
   </div><!-- /container-xxl -->
 
-  <!-- 스크립트: 코드 대문자/공백제거, 폼 검증 & 모달 자동 오픈(기준정보 페이지와 동일 톤) -->
-  <script th:inline="javascript">
-    // 항목코드 대문자/공백제거
-    document.addEventListener('input', function(e){
-      if(e.target.matches('#createItemModal input[name="itemCode"]')){
-        e.target.value = e.target.value.replace(/\s+/g,'').toUpperCase();
-      }
-    });
+ <!-- 외부 JS 파일 로드 -->
+  <script src="/js/pay/pay_item.js"></script>
 
-    // 부트스트랩 폼 검증
-    document.addEventListener('submit', function(e){
-      const form = e.target.closest('form.needs-validation');
-      if(!form) return;
-      if(!form.checkValidity()){
-        e.preventDefault(); e.stopPropagation();
-        form.classList.add('was-validated');
-      }
-    }, true);
-
-    // 플래시로 전달된 모달 오픈 신호 처리
-    const openCreate = /*[[${openItemCreate}]]*/ false;
-    const openEditId = /*[[${openItemEdit}]]*/ null;
-    document.addEventListener('DOMContentLoaded', ()=>{
-      if (openCreate) {
-        const m = document.getElementById('createItemModal');
-        if (m) new bootstrap.Modal(m).show();
-      }
-      if (openEditId) {
-        const el = document.getElementById('editItemModal-' + openEditId);
-        if (el) new bootstrap.Modal(el).show();
-      }
-    });
-  </script>
 
 </th:block>
 </th:block>

@@ -2,6 +2,7 @@
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{/layouts/layout.html}">
 <head>
+<link rel="stylesheet" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css" />
 </head>
 <body>
 	<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
@@ -20,7 +21,7 @@
 					<h5 class="card-title text-center text-capitalize mb-1">사용 연차</h5>
 				</div>
 				<div class="d-flex justify-content-center mb-3">
-					<h4 th:text="|${leaveDTO.usedDays}일|">5일</h4>
+					<h4 th:text="|${leaveDTO.usedDays}일|"></h4>
 				</div>
 			</div>
 			<div class="col-xl mb-md-0 px-3 ms-2 card border rounded shadow-none">
@@ -28,7 +29,7 @@
 					<h5 class="card-title text-center text-capitalize mb-1">잔여 연차</h5>
 				</div>
 				<div class="d-flex justify-content-center mb-3">
-					<h4 th:text="|${leaveDTO.remainDays}일|">10일</h4>
+					<h4 th:text="|${leaveDTO.remainDays}일|"></h4>
 				</div>
 			</div>
 			<div class="col-xl mb-md-0 px-3 ms-2 card border rounded shadow-none">
@@ -36,37 +37,13 @@
 					<h5 class="card-title text-center text-capitalize mb-1">연차 수당 추계액</h5>
 				</div>
 				<div class="d-flex justify-content-center mb-3">
-					<h4 th:text="|₩${leaveDTO.leaveAllowanceAmount}|">₩500,000</h4>
+					<h4 th:text="|₩${leaveDTO.leaveAllowanceAmount}|"></h4>
 				</div>
 			</div>
 		</div>
 		<div class="card mt-4">
 			<div class="table-responsive text-nowrap">
 				<div id="grid"></div>
-				<table class="table">
-					<thead class="table-light">
-						<tr>
-							<th>번호</th>
-							<th>연차유형</th>
-							<th>휴가시작일</th>
-							<th>휴가종료일</th>
-							<th>사용일수</th>
-							<th>사유</th>
-							<th>승인상태</th>
-						</tr>
-					</thead>
-					<tbody class="table-border-bottom-0">
-						<tr>
-							<td>1</td>
-							<td>휴가</td>
-							<td>2025-11-06</td>
-							<td>2025-11-07</td>
-							<td>1일</td>
-							<td>개인사유</td>
-							<td>승인</td>
-						</tr>
-					</tbody>
-				</table>
 			</div>
 		</div>
 		<div class="modal fade" id="modalCenter" tabindex="-1" style="display: none;" aria-hidden="true">
@@ -112,5 +89,17 @@
 			</div>
 		</div>
 	</div>
+	<th:block layout:fragment="myScript">
+		<script>
+			const message = "[[${message}]]";
+			
+			if (message) {
+				alert(message);
+			}
+		</script>
+		<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.js"></script>
+		<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+		<script src="/js/leave/leaveGrid.js"></script>
+	</th:block>
 </body>
 </th:block>

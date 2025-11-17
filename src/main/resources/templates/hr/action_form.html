@@ -19,7 +19,7 @@
                 <select class="form-select" id="searchDept">
                   <option value="">전체</option>
                   <option th:each="d : ${deptList}"
-          				  th:value="${d.deptName}"
+          				  th:value="${d.deptId}"
        					  th:text="${d.deptName}">
   				  </option>
                 </select>
@@ -29,7 +29,7 @@
                 <select class="form-select" id="searchPos">
                   <option value="">전체</option>
 				  <option th:each="p : ${posList}"
-				          th:value="${p.posName}"
+				          th:value="${p.posCode}"
 				          th:text="${p.posName}">
 				  </option>
                 </select>
@@ -40,7 +40,7 @@
                        placeholder="예) 이름 또는 사원번호">
               </div>
               <div class="col-md-2 text-md-end">
-                <button type="button" class="btn btn-primary w-100" id="btnSearchEmp">
+                <button type="button" class="btn btn-outline-primary w-100" id="btnSearchEmp">
                   검색
                 </button>
               </div>
@@ -185,8 +185,6 @@
       </form>
 	</div>
 	
-<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css">
-<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 <script src="/js/hr/hrAction.js"></script>	
 	
 </th:block>

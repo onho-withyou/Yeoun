@@ -1,0 +1,115 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:fragment="notice_modal">
+			
+<!-- 공지쓰기모달 -->
+<div class="modal fade" id="create-notice" tabindex="-1" style="display: none;" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+		<div class="modal-content">
+			<!-- 모달 제목 -->
+			<div class="modal-header">
+				<h5 class="modal-title" id="modalCenterTitle"><font dir="auto" style="vertical-align: inherit;">
+					<font dir="auto" style="vertical-align: inherit;">공지사항 쓰기</font></font>
+				</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫다"></button>
+			</div>
+			<!-- 모달 본문 -->
+			<div class="modal-body">
+				<form id="notice-write-form" action="/notices" method="post">
+					<div class="mb-3" style="display:flex; gap:8px;">
+					    <input type="text" class="form-control" id="notice-title-write" name="noticeTitle" placeholder="제목" style="flex:1;">
+					    <label class="form-check-label" for="fixedCheck">고정</label>
+					    <input class="form-check-input" type="checkbox" name="noticeYN" value="Y">
+					</div>
+				    <div class="mb-3">
+				        <textarea id="notice-content-write" name="noticeContent" class="form-control" rows="10" placeholder="공지사항 내용 작성"></textarea>
+				    </div>
+				    <div>
+						<label for="formFileDisabled" class="form-label">파일 첨부</label>
+						<input class="form-control" type="file" id="notice-files-write" multiple>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+					<font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">
+						닫기
+					</font></font>
+				</button>
+				<button type="submit" class="btn btn-primary" form="notice-write-form">
+					<font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">글 쓰기</font></font>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /공지쓰기모달 -->
+
+<!-- 공지조회모달 -->
+<div class="modal fade" id="show-notice" tabindex="-1" style="display: none;" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+		<div class="modal-content">
+			<!-- 모달 제목 -->
+			<div class="modal-header">
+				<h5 class="modal-title" id="modalCenterTitle"><font dir="auto" style="vertical-align: inherit;">
+					<font dir="auto" style="vertical-align: inherit;">공지사항 조회</font></font>
+				</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫다"></button>
+			</div>
+			<!-- 모달 본문 -->
+			<div class="modal-body">
+				<form id="notice-form-read" action="" >
+					<div class="mb-3" style="display:flex; gap:8px;">
+					    <input type="hidden" class="form-control" id="notice-id-read" name="noticeId">
+					    <input type="hidden" class="form-control" id="notice-createdUser-read" name="createdUser">
+					    <input type="text" class="form-control" id="notice-title-read" name="noticeTitle" placeholder="제목" style="flex:1;">
+					    <label class="form-check-label" for="fixed-check">고정</label>
+					    <input class="form-check-input" type="checkbox" value="Y" id="fixed-check" name="noticeYN" onchange="toggleValue(this)">
+					</div>
+					<div class="d-flex align-items-center mb-3 justify-content-between">
+						<div class="d-flex ">
+							<span class="" >등록자 : </span>
+							<span class="ml-2" id="notice-writer-read">인사 신필용</span>
+						</div>
+						<div class="d-flex ml-auto">
+						    <div class="d-flex mr-3">
+						      <span>등록일 : </span>
+						      <span id="notice-createdDate-read" class="ml-2">2024-10-01 14:30</span>
+						    </div>
+						    <div class="d-flex">
+						      <span>수정일 : </span>
+						      <span id="notice-updatedDate-read" class="ml-2">2024-10-01 14:30</span>
+						    </div>
+						</div>
+					</div>
+				    <div class="mb-3">
+				        <textarea id="notice-content-read" class="form-control" rows="10" placeholder="공지사항 내용 작성" name="noticeContent"></textarea>
+				    </div>
+				    <div>
+						<label for="formFileDisabled" class="form-label">파일 첨부</label>
+						<input class="form-control" type="file" id="formFileDisabled" multiple>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+					<font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">
+						닫기
+					</font></font>
+				</button>
+				<button type="button" class="btn btn-danger btn-outline-secondary" data-bs-dismiss="modal" id="notice-delete">
+					<font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">
+						삭제
+					</font></font>
+				</button>
+				<button type="submit" class="btn btn-primary" id="notice-modify" form="notice-form-read">
+					<font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">
+					수정</font></font>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script src="/js/notice/notice_modal.js"></script>
+<!-- /공지조회모달 -->
