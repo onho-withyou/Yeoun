@@ -212,15 +212,15 @@
 		  columns: [
 	
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
-			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
 			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
-			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자id' ,name: 'approver' ,align: 'center'}
 			,{header: '결재권한자 이름' ,name: 'approver_name' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
 			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
@@ -239,14 +239,14 @@
 	    columns: [
 	
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
-			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
 			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
-			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
 			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
@@ -264,14 +264,14 @@
 	    columns: [
 	
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
-			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
 			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
-			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
 			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
@@ -289,14 +289,14 @@
 	    columns: [
 	
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
-			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
 			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
-			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
 			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
@@ -314,14 +314,14 @@
 	    columns: [
 	
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
-			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
 			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
-			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
 			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
@@ -376,7 +376,7 @@
         }
       ]
     });
-	
+
 	let jeongyeoljaDiv = document.querySelector('#jeongyeolja');
 	let jeongyeoljaContent = document.querySelector("#jeongyeolja-content");
 	let approvarDivClose = document.getElementById("approvarDiv-close");
