@@ -72,7 +72,10 @@ VALUES(202511150109,'인사부용 테스트 전도연3 문서제목','',sysdate,
 INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
 VALUES(202511150110,'영업부 김구1 문서제목 테스트','1306178',sysdate,'1차대기','2505823','비정기지출',sysdate,'자유양식결재서','테스트용 김구1 입니다.',sysdate,sysdate,'개발2팀본부');
 INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
-VALUES(202511150111,'영업부 김구2 문서제목 테스트','1306178',sysdate,'종료','2505823','고정지출',sysdate,'지출결의서','테스트용 김구2 종료 입니다.',sysdate,sysdate,'개발2팀본부');
+VALUES(202511150111,'영업부 김구2 문서제목 테스트','1306178',sysdate,'완료','2505823','고정지출',sysdate,'지출결의서','테스트용 김구2 종료 입니다.',sysdate,sysdate,'개발2팀본부');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
+VALUES(202511150112,'영업부 김구3 문서제목 테스트','',sysdate,'완료','2505823','비정지출',sysdate,'지출결의서','테스트용 김구3 종료 입니다.',sysdate,sysdate,'개발2팀본부');
+
 
 
 

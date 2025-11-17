@@ -193,7 +193,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 						WHERE (ad.doc_status = '완료'
 						AND ad.approval_id = ar.approval_id 
 						AND ar.emp_id = :empId
-						AND ar.viewing = 'y')			--결재권한자인가?문서작성자인가?,
+						AND ar.viewing = 'y')
 						OR(ad.doc_status = '완료' and ad.emp_id = :empId)) adr
 			WHERE e.emp_id = adr.emp_id
 			AND e.dept_id = d.dept_id

@@ -17,7 +17,7 @@ import lombok.Setter;
 @Table(name="APPROVAL_DOC")
 @Getter
 @Setter
-//@EntityListeners(AuditingEntityListener.class) 
+@EntityListeners(AuditingEntityListener.class) 
 public class ApprovalDoc {
 
 	@Id
