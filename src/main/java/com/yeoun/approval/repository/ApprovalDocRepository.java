@@ -154,7 +154,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 							,ad.doc_status
 							,ar.viewing
 					FROM approval_doc ad,approver ar
-					WHERE ad.doc_status NOT LIKE '%종료%' -- 문서 종료가 아니고
+					WHERE ad.doc_status != '완료' -- 문서 완료가 아니고
 					AND ad.approval_id = ar.approval_id  -- 문서id가 일치하며
 					AND (ar.viewing ='y' OR ad.emp_id = :empId )  --결재문서의 열람권한이있다. or 문서 작성자다.
 					AND ar.emp_id = :empId ) adr
@@ -166,15 +166,40 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 	List<Object[]> findWaitingApprovalDocs(@Param("empId") String empId);		
 
 	// 그리드 - 5.결재완료 - 결재권한자가 결재를 완료하면 볼수 있음(1차,2차,3차 모든결재 완료시)
-	//안됨 보완필요
-	// @Query(value = """
-	// 	SELECT *
-	// 	FROM approval_doc ad,approver ar
-	// 	WHERE ad.doc_status = '종료' -- 종료된        
-	// 	AND ((ar.viewing = 'y' AND ar.emp_id = :empId) 
-	// 	OR ad.emp_id = :empId ) --결재권한자인가?문서작성자인가?,
-	// """, nativeQuery = true)
-	// List<Object[]> findFinishedApprovalDocs(@Param("empId") String empId);
+	 @Query(value = """
+			SELECT  ROWNUM
+			        ,adr.approval_id
+			        ,adr.approval_title
+			        ,adr.emp_id
+			        ,e.emp_name
+			        ,e.dept_id
+			        ,d.dept_name
+			        ,adr.approver
+			        ,p.pos_code
+			        ,p.pos_name
+			        ,adr.created_date
+			        ,adr.finish_date
+			        ,adr.doc_status
+			FROM emp e,dept d,position p,
+						(SELECT distinct ad.approval_id
+						        ,ad.approval_title
+						        ,ad.approver
+						        ,ad.emp_id
+						        ,ad.form_type
+						        ,ad.created_date
+						        ,ad.finish_date
+						        ,ad.doc_status
+						FROM approval_doc ad,approver ar
+						WHERE (ad.doc_status = '완료'
+						AND ad.approval_id = ar.approval_id 
+						AND ar.emp_id = :empId
+						AND ar.viewing = 'y')			--결재권한자인가?문서작성자인가?,
+						OR(ad.doc_status = '완료' and ad.emp_id = :empId)) adr
+			WHERE e.emp_id = adr.emp_id
+			AND e.dept_id = d.dept_id
+			AND e.pos_code = p.pos_code
+	 """, nativeQuery = true)
+	 List<Object[]> findFinishedApprovalDocs(@Param("empId") String empId);
 			
 
 

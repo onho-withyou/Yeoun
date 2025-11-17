@@ -66,10 +66,10 @@ public class ApprovalDocService {
 	public List<Object[]> getWaitingApprovalDocs(String empId) {
 		return approvalDocRepository.findWaitingApprovalDocs(empId);
 	}	
-	//그리드 - 5.결재완료 - 안됨
-	// @Transactional(readOnly = true)		
-	// public List<Object[]> getFinishedApprovalDocs(String empId) {
-	// 	return approvalDocRepository.findFinishedApprovalDocs(empId);
-	// }
+	//그리드 - 5.결재완료 - 결재권한자가 결재를 완료하면 볼수 있음(1차,2차,3차 모든결재 완료시)
+	 @Transactional(readOnly = true)		
+	 public List<Object[]> getFinishedApprovalDocs(String empId) {
+	 	return approvalDocRepository.findFinishedApprovalDocs(empId);
+	 }
 
 }

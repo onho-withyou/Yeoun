@@ -63,12 +63,12 @@ public class ApprovalController {
 	public List<Object[]> getWaitingApprovalDocs() {
 		return approvalDocService.getWaitingApprovalDocs("2104502");
 	}
-	//그리드 - 5.결재완료 - 안됨
-	// @ResponseBody
-	// @GetMapping("/finishedApprovalDocGrid")
-	// public List<Object[]> getFinishedApprovalDocs() {
-	// 	return approvalDocService.getFinishedApprovalDocs("2505823");
-	// }
+	//그리드 - 5.결재완료
+	 @ResponseBody
+	 @GetMapping("/finishedApprovalDocGrid")
+	 public List<Object[]> getFinishedApprovalDocs() {
+	 	return approvalDocService.getFinishedApprovalDocs("2505823");
+	 }
 
 	
 }
