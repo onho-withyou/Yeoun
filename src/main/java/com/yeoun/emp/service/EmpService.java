@@ -150,17 +150,19 @@ public class EmpService {
 		return empRepository.searchEmpList(keyword, deptId, pageable);
 	}
 	
-	// 인사발령 화면에서 쓰는 전체 사원 목록 (페이징 없음)
-	public List<EmpListDTO> getEmpList() {
-	    Page<EmpListDTO> page = empRepository.searchEmpList(
-	            "",            		// keyword 없음
-	            null,          		// deptId 필터 없음
-	            Pageable.unpaged()  // 페이징 안 걸기
-	    );
-	    return page.getContent();   // List<EmpListDTO> 리턴
+	// 인사발령 화면에서 쓰는 전체 사원 목록
+	public List<EmpListDTO> getEmpListForHrAction(String deptId, String posCode, String keyword) {
+
+	    if (keyword != null) keyword = keyword.trim();
+	    if (keyword != null && keyword.isBlank()) keyword = null;
+
+	    List<Emp> emps = empRepository.searchForHrAction(deptId, posCode, keyword);
+
+	    return emps.stream()
+	            .map(EmpListDTO::fromEntity)
+	            .toList();
 	}
 
-	
 	// ==============================================================================
 	// 사원 정보 조회
 	@Transactional(readOnly = true)

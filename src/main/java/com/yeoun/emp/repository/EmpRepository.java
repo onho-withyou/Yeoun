@@ -64,5 +64,22 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
              Pageable pageable);
 	
 	
+	// 인사 발령 등록 화면에서 사용되는 사원 목록
+	@Query("""
+		    SELECT e
+		      FROM Emp e
+		     WHERE (:deptId IS NULL OR e.dept.deptId = :deptId)
+		       AND (:posCode IS NULL OR e.position.posCode = :posCode)
+		       AND (:keyword IS NULL
+		            OR e.empName LIKE %:keyword%
+		            OR e.empId   LIKE %:keyword%)
+		     ORDER BY e.hireDate DESC
+		""")
+	List<Emp> searchForHrAction(@Param("deptId") String deptId,
+	                            @Param("posCode") String posCode,
+	                            @Param("keyword") String keyword);
+
+	
+	
 
 }
