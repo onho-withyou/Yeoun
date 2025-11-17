@@ -1,26 +1,67 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{/layouts/layout.html}">
-	
-  <link rel="icon" href="img/logo.png">
-  <link rel="stylesheet" href="css/jquery.orgchart.css">
-  <link rel="stylesheet" href="css/style.css">
-  <style type="text/css">
-    .spinner {
-      line-height: 420px;
-    }
-    .spinner::before {
-      width: 72px;
-      height: 72px;
-      border-radius: 36px;
-    }
-  </style>
-	
-<body>
-<th:block layout:fragment="content">
-	<div class="custom-body container-xxl flex-grow-1 container-p-y">
-	<h2>조직도</h2>
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
 
-	</div>
+  <!-- 1) head: OrgChart CSS -->
+  <th:block layout:fragment="head">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/orgchart/3.8.0/css/jquery.orgchart.min.css">
+
+    <style>
+      .orgchart .node,
+      .orgchart .title,
+      .orgchart .content {
+        background-image: none !important;
+        background-color: #ffffff !important;
+      }
+      .orgchart .node {
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 8px !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      }
+      #chart-container {
+        width: 100%;
+        min-height: 400px;
+        padding: 24px 16px;
+      }
+    </style>
+  </th:block>
+
+  <!-- 2) content: DOM -->
+  <th:block layout:fragment="content">
+    <div class="custom-body container-xxl flex-grow-1 container-p-y">
+      <h2>조직도</h2>
+      <div id="chart-container"></div>
+    </div>
+  </th:block>
+
+  <!-- 3) myScript: CDN 플러그인 + 초기화 코드 -->
+  <th:block layout:fragment="myScript">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/orgchart/3.8.0/js/jquery.orgchart.min.js"></script>
+    <script>
+      $(function () {
+        const orgData = {
+          name: '대표이사',
+          title: 'CEO',
+          children: [
+            { name: '김개발', title: '개발팀장' },
+            {
+              name: '박인사', title: '인사팀장',
+              children: [
+                { name: '이사원', title: '인사담당' },
+                { name: '최사원', title: '채용담당' }
+              ]
+            },
+            { name: '정영업', title: '영업팀장' }
+          ]
+        };
+
+        $('#chart-container').orgchart({
+          data: orgData,
+          nodeContent: 'title'
+        });
+      });
+    </script>
+  </th:block>
+
 </th:block>
-</body>
