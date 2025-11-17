@@ -17,28 +17,32 @@ import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.PositionRepository;
 import com.yeoun.emp.service.EmpService;
+import com.yeoun.hr.dto.HrActionDTO;
 import com.yeoun.hr.dto.HrActionRequestDTO;
+import com.yeoun.hr.service.HrActionService;
 
 
 @Controller
-@RequestMapping("/hr")
+@RequestMapping("/hr/actions")
 @RequiredArgsConstructor
 @Log4j2
 public class HrActionController {
 	
 	private final EmpService empService;
+	private final HrActionService hrActionService;
 	private final CommonCodeService commonCodeService;
 	private final DeptRepository deptRepository;
 	
-	// 인사 발령 목록 페이지 이동
-	@GetMapping("/actions")
-	public String getHrActionListPage() {
+	// 인사 발령 메인 페이지 (목록 + 등록 버튼 있는 화면)
+	@GetMapping("")
+	public String getHrActionListPage(Model model) {
+		
 		return "hr/action_list";
 	}
 	
 	// =====================================================
 	// 인사 발령 등록 페이지 이동
-	@GetMapping("/actions/regist")
+	@GetMapping("/regist")
 	public String getHrActionRegistPage(Model model) {
 		
 		model.addAttribute("hrActionRequestDTO", new HrActionRequestDTO());

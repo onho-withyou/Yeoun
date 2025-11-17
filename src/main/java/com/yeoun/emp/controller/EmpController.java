@@ -2,6 +2,7 @@ package com.yeoun.emp.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,6 +18,7 @@ import com.yeoun.common.service.CommonCodeService;
 import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpDetailDTO;
 import com.yeoun.emp.dto.EmpListDTO;
+import com.yeoun.emp.dto.EmpPageResponse;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.EmpRepository;
@@ -86,20 +88,38 @@ public class EmpController {
 	}
 	
 	// ====================================================================================
-	// 사원 목록 조회
-	@GetMapping("/list")
-	public String getEmpListForm() {
-		log.info("▶ 사원목록 페이지 요청");
+	// 사원 메인 페이지 (현황 + 등록 버튼 있는 화면)
+	@GetMapping("")
+	public String empMainPage(Model model) {
+		
+	    // 부서 셀렉트 옵션용
+	    model.addAttribute("deptList", deptRepository.findActive());
+	    
+	    // 초기 검색값 (원하면 "" 기본값 세팅)
+        model.addAttribute("keyword", "");
+        model.addAttribute("deptId", null);
+	    
 		return "/emp/emp_list";
 	}
 	
-	// AJAX 데이터 로딩
+	// AJAX 데이터 로딩 + 검색 + 페이징
 	@ResponseBody
-	@GetMapping("/list/data")
-	public List<EmpListDTO> getEmpList() {
-		log.info("▶ 사원목록 데이터 요청 (JSON)");
-		return empService.getEmpList();
+	@GetMapping("/data")
+	public EmpPageResponse getEmpList (@RequestParam(defaultValue = "0", name = "page") int page,
+									   @RequestParam(defaultValue = "10", name = "size") int size,
+									   @RequestParam(defaultValue = "", name = "keyword") String keyword,
+									   @RequestParam(required = false, name = "deptId") String deptId) {
+		
+		// 서비스에서 Page<EmpListDTO> 받아오기
+		Page<EmpListDTO> empPage = empService.getEmpList(page, size, keyword, deptId);
+		
+		return new EmpPageResponse(empPage.getContent(),
+								   empPage.getNumber(),
+								   empPage.getSize(),
+								   empPage.getTotalElements(),
+								   empPage.getTotalPages());
 	}
+	
 	
 	// ====================================================================================
 	// 사원 정보 상세 조회

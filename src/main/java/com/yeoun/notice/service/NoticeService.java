@@ -1,5 +1,7 @@
 package com.yeoun.notice.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -90,6 +92,7 @@ public class NoticeService {
 		
 		notice.setDeleteYN("Y");
 	}
+	
 
 
 }

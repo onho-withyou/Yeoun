@@ -6,13 +6,13 @@
 // DOM 요소 참조 / 전역 상태
 // ==========================
 const tabFriends		= document.getElementById('tab-friends'); // 친구목록 탭
-const tabChats 			= document.getElementById('tab-chats'); // 대화목록 탭
-const friendsPanel 		= document.getElementById('friends-panel'); // 친구패널
+const tabChats 		= document.getElementById('tab-chats'); // 대화목록 탭
+const friendsPanel 	= document.getElementById('friends-panel'); // 친구패널
 const chatsPanel 		= document.getElementById('chats-panel'); // 대화패널
 const headerTitle 		= document.getElementById('header-title'); // 헤더(친구목록-대화목록 텍스트 전환)
 
-const searchInput		= document.querySelector('.chat-search input'); // 검색창
-const searchButton		= document.querySelector('.chat-search span'); // 검색버튼
+const searchInput		    = document.querySelector('.chat-search input'); // 검색창
+const searchButton		    = document.querySelector('.chat-search span'); // 검색버튼
 
 const statusIndicator	= document.getElementById('status-indicator');	// 내 상태
 const statusText		= document.getElementById('status-text'); // 내 상태 텍스트
@@ -100,7 +100,7 @@ searchInput.addEventListener('keydown', (event) => {
 	}
 });
 
-//돋보기 클릭: 대화 모드일 때만 검색
+// 돋보기 클릭: 대화 모드일 때만 검색
 searchButton.addEventListener('click', () => {
 	if (currentMode === 'chat') {
  		filterChats();
@@ -172,8 +172,9 @@ tabChats.addEventListener('click', () => {
 document.querySelectorAll('.friend-item, .chat-item').forEach(item => {
   item.addEventListener('dblclick', () => {
     const name = item.querySelector('p').textContent;
+    const targetId = item.dataset.id;
     window.open(
-      'chat',
+      'target/' + targetId,
       '_blank',
       'width=500,height=700,resizable=no,scrollbars=no');
   });
@@ -183,19 +184,62 @@ document.querySelectorAll('.friend-item, .chat-item').forEach(item => {
 // ==========================
 // 상태 토글
 // ==========================
+
 let statuses = [
-  { color: '#4CAF50', text: '온라인' },
-  { color: '#FFC107', text: '자리비움' },
-  { color: '#F44336', text: '다른 용무중' }
+    { color: '#4CAF50', text: '온라인' },
+    { color: '#FFC107', text: '자리비움' },
+    { color: '#F44336', text: '다른 용무중' }
 ];
 
 let current = 0;
+let manuallySet = false;  // 수동 상태 변경 여부
 
+// =====================
+// 수동 상태 변경
+// =====================
 statusIndicator.addEventListener('click', () => {
-  current = (current + 1) % statuses.length;
-  statusIndicator.style.backgroundColor = statuses[current].color;
-  statusText.textContent = statuses[current].text;
+    manuallySet = true; // 자동 변경 잠시 차단
+
+    current = (current + 1) % statuses.length;
+    statusIndicator.style.backgroundColor = statuses[current].color;
+    statusText.textContent = statuses[current].text;
 });
+
+
+// =====================
+// 자동 자리비움
+// =====================
+let idleTime = 0;
+let autoAwayTime = 30 * 1000; // 30초
+
+setInterval(() => {
+    idleTime += 1000;
+
+    // 수동 상태일 때는 자동 자리비움 X
+    if (manuallySet) return;
+
+    if (idleTime >= autoAwayTime) {
+        statusIndicator.style.backgroundColor = '#FFC107';
+        statusText.textContent = '자리비움';
+    }
+}, 1000);
+
+
+// =====================
+// 사용자 활동 감지 → 자동 ONLINE
+// =====================
+['mousemove', 'keydown', 'click', 'scroll'].forEach(evt => {
+    document.addEventListener(evt, () => {
+        idleTime = 0;
+
+        // 수동 상태면 자동복귀 금지
+        if (manuallySet) return;
+
+        statusIndicator.style.backgroundColor = '#4CAF50';
+        statusText.textContent = '온라인';
+    });
+});
+
 
 
 // ==========================
