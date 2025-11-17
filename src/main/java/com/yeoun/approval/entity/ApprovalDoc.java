@@ -31,7 +31,7 @@ public class ApprovalDoc {
 	private String empId; //사원번호
 	
 	@Column(name="CREATED_DATE")
-	private LocalDate createdDate; //생성일자 -
+	private LocalDate createdDate; //생성일자 
 	
 	@Column(name="FINISH_DATE")
 	private LocalDate finishDate; //완료예정일자
