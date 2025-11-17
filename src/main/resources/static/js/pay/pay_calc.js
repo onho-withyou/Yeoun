@@ -1,29 +1,22 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  /* ===== 공통 유틸 ===== */
-  const onlyDigitsDot = (s)=> (s||'').replace(/[^\d.]/g,'');
-  const onlyDigits    = (s)=> (s||'').replace(/[^\d]/g,'');
-  const formatAmount  = (v)=> (v===''||v==null) ? '' : Number(v).toLocaleString('ko-KR');
+  /* =====================================================
+      공통 유틸
+  ===================================================== */
+  const onlyDigits    = (s)=> (s||'').replace(/[^\d]/g,'');           // 정수
+  const onlyDigitsDot = (s)=> (s||'').replace(/[^\d.]/g,'');         // 소수점 허용
+  const formatAmount  = (v)=> (v==''||v==null) ? '' : Number(v).toLocaleString('ko-KR');
   const parseAmount   = (v)=> Number(onlyDigits(v));
 
-  /* ===== show/hide ===== */
-  const showEl = (el)=>{
-    if(!el) return;
-    el.classList.remove("d-none");
-    el.hidden = false;
-    el.style.display = "";
-  };
-  const hideEl = (el)=>{
-    if(!el) return;
-    el.classList.add("d-none");
-    el.hidden = true;
-    el.style.display = "none";
-  };
+  const showEl = (el)=>{ if(el) { el.classList.remove("d-none"); el.hidden=false; el.style.display=""; } };
+  const hideEl = (el)=>{ if(el) { el.classList.add("d-none"); el.hidden=true; el.style.display="none"; } };
 
-  /* ============================
-     [등록] 모달 초기화
-     ============================ */
+
+  /* =====================================================
+      [등록] 모달 처리
+  ===================================================== */
   const createModal = document.getElementById("calcCreateModal");
+
   if(createModal){
     const form       = document.getElementById("calc-create-form");
     const typeSel    = createModal.querySelector('select[name="ruleType"]');
@@ -31,9 +24,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const formulaBox = createModal.querySelector(".create-formula");
     const startEl    = createModal.querySelector('input[name="startDate"]');
     const endEl      = createModal.querySelector('input[name="endDate"]');
+    const valueNumEl = createModal.querySelector('input[name="valueNum"]');
 
+    /** RULE_TYPE 에 맞춰 보여줄 영역 전환 */
     function syncCreateFields(){
-      const t = typeSel?.value;
+      const t = typeSel.value;
       if(t === "FORMULA"){
         hideEl(valueBox);
         showEl(formulaBox);
@@ -44,12 +39,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     syncCreateFields();
-    typeSel?.addEventListener("change", syncCreateFields);
 
-    // 입력 처리
+    typeSel.addEventListener("change", ()=>{
+      syncCreateFields();
+      if(valueNumEl){
+        valueNumEl.value = "";
+        valueNumEl.dispatchEvent(new Event("input"));
+      }
+    });
+
+    /* 입력 이벤트 */
     createModal.addEventListener("input", (e)=>{
       if(e.target.matches(".amount-input")){
-        if(typeSel?.value === "AMT"){
+        const type = typeSel.value;
+        if(type === "AMT"){
           e.target.value = formatAmount(parseAmount(e.target.value));
         } else {
           e.target.value = onlyDigitsDot(e.target.value);
@@ -57,28 +60,28 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if(e.target.name === "startDate" || e.target.name === "endDate"){
-        if(startEl?.value && endEl){
+        if(startEl.value){
           endEl.min = startEl.value;
         }
       }
     });
 
-    // submit 시 처리
-    form?.addEventListener("submit", (e)=>{
-      const t = typeSel?.value;
-      const v = form.querySelector('input[name="valueNum"], .amount-input');
 
-      if(v){
-        if(t === "AMT")  v.value = onlyDigits(v.value);
-        if(t === "RATE") v.value = onlyDigitsDot(v.value);
+    /* 제출 처리 */
+    form.addEventListener("submit", (e)=>{
+      const type = typeSel.value;
+
+      if(valueNumEl){
+        if(type === "AMT")  valueNumEl.value = onlyDigits(valueNumEl.value);
+        if(type === "RATE") valueNumEl.value = onlyDigitsDot(valueNumEl.value);
       }
 
-      if(startEl?.value && endEl?.value && endEl.value < startEl.value){
+      if(startEl.value && endEl.value && endEl.value < startEl.value){
         e.preventDefault();
         e.stopPropagation();
         endEl.setCustomValidity("종료일은 시작일 이후여야 합니다.");
       } else {
-        endEl?.setCustomValidity("");
+        endEl.setCustomValidity("");
       }
 
       if(!form.checkValidity()){
@@ -89,9 +92,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* ============================
-     [수정] 모달 초기화 (여러 개)
-     ============================ */
+
+
+  /* =====================================================
+      [수정] 모달 처리 (여러 개)
+  ===================================================== */
   document.addEventListener("shown.bs.modal", (evt)=>{
     const modal = evt.target;
     if(!modal.classList.contains("modal")) return;
@@ -101,9 +106,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const formulaBox = modal.querySelector(".edit-formula");
     const startEl    = modal.querySelector('input[name="startDate"]');
     const endEl      = modal.querySelector('input[name="endDate"]');
+    const valueNumEl = modal.querySelector('input[name="valueNum"]');
 
     function syncEditFields(){
-      const t = typeSel?.value;
+      const t = typeSel.value;
       if(t === "FORMULA"){
         hideEl(valueBox);
         showEl(formulaBox);
@@ -114,11 +120,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     syncEditFields();
-    typeSel?.addEventListener("change", syncEditFields);
 
+    /* RULE_TYPE 변경 시 valueNum 필드 초기화 */
+    typeSel.addEventListener("change", ()=>{
+      syncEditFields();
+      if(valueNumEl){
+        valueNumEl.value = "";
+        valueNumEl.dispatchEvent(new Event("input"));
+      }
+    });
+
+    /* 입력 이벤트 */
     modal.addEventListener("input", (e)=>{
       if(e.target.matches(".amount-input")){
-        if(typeSel?.value === "AMT"){
+        const t = typeSel.value;
+        if(t === "AMT"){
           e.target.value = formatAmount(parseAmount(e.target.value));
         } else {
           e.target.value = onlyDigitsDot(e.target.value);
@@ -126,22 +142,25 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if(e.target.name === "startDate" || e.target.name === "endDate"){
-        if(startEl?.value && endEl){
+        if(startEl.value){
           endEl.min = startEl.value;
         }
       }
     });
 
+
+    /* 제출 처리 */
     const editForm = modal.querySelector("form");
-    editForm?.addEventListener("submit", (e)=>{
-      const v = editForm.querySelector('input[name="valueNum"], .amount-input');
+    editForm.addEventListener("submit", (e)=>{
+      const type = typeSel.value;
+      const v = modal.querySelector('input[name="valueNum"]');   // 정확한 선택자
 
       if(v){
-        if(typeSel?.value === "AMT")  v.value = onlyDigits(v.value);
-        if(typeSel?.value === "RATE") v.value = onlyDigitsDot(v.value);
+        if(type === "AMT")  v.value = onlyDigits(v.value);
+        if(type === "RATE") v.value = onlyDigitsDot(v.value);
       }
 
-      if(startEl?.value && endEl?.value && endEl.value < startEl.value){
+      if(startEl.value && endEl.value && endEl.value < startEl.value){
         e.preventDefault();
         e.stopPropagation();
         endEl.setCustomValidity("종료일은 시작일 이후여야 합니다.");
@@ -155,6 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
         editForm.classList.add("was-validated");
       }
     });
+
   });
 
 });

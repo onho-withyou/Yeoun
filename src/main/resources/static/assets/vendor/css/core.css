@@ -3430,7 +3430,7 @@ textarea.form-control-lg {
 .nav-tabs .nav-link.active,
 .nav-tabs .nav-item.show .nav-link {
   color: #697a8d;
-  background-color: #5f6126;/*탭 색상변경*/
+  background-color: aliceblue;/*탭 색상변경*/
   border-color: #fff;
 }
 .nav-tabs .dropdown-menu {
