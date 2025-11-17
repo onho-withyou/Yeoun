@@ -35,7 +35,8 @@ public interface LeaveHistoryRepository extends JpaRepository<AnnualLeaveHistory
 			SELECT h
 			FROM AnnualLeaveHistory h
 			WHERE (h.emp.empId = :empId or h.emp.dept.deptId = :deptId)
-			  AND ( h.startDate  <= :endDate AND h.endDate >= :startDate)
+			  AND (h.startDate  <= :endDate AND h.endDate >= :startDate)
+			  AND (h.apprStatus = 'APPROVED')
 			""")
 	List<AnnualLeaveHistory> findLeaveHistorySchedule(
 			@Param("startDate")LocalDate  startDate

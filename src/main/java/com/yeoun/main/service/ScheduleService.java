@@ -122,10 +122,6 @@ public class ScheduleService {
 		
 		LocalDate startDate = startDateTime.toLocalDate();
 		LocalDate endDate = endDateTime.toLocalDate();
-		System.out.println(startDate);
-		System.out.println(endDate);
-		System.out.println(deptId);
-		System.out.println(empId);
 		
 		List<AnnualLeaveHistory> leaveHistoryList = leaveHistoryRepository.findLeaveHistorySchedule(startDate, endDate, empId, deptId);
 		

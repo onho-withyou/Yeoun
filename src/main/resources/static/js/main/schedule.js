@@ -131,7 +131,8 @@ function showCalendarView(type) {
 // 캘린더 생성함수
 function initCalendar() {
 	calendarEl.innerHTML = ""; // 기존 내용 제거
-	
+	console.log('window.Calendar:', window.Calendar);
+	console.log('window.tui:', window.tui);
 	// 만약 이미 달력이 있으면 제거
 	if (calendar) {
 	    calendar.destroy();
@@ -141,6 +142,26 @@ function initCalendar() {
 	// 캘린더 객체 생성
 	calendar = new tui.Calendar(calendarEl, {
 	    defaultView: 'month',
+		template: {
+		    milestone(schedule) {
+		        if (schedule.calendarId == 'leave' && schedule.raw && Array.isArray(schedule.raw.leaves)) {
+					const namesArr = schedule.raw.leaves.map(leave => leave.emp_name);
+					const firstName = namesArr[0] || '';
+					const leaveCount = schedule.raw.leaves.length;
+					
+					if(schedule.raw.leaves.length > 1) {
+			            return `<span style="font-size:10px; color:#1e7e34;">
+			                👤${firstName} 외 ${leaveCount - 1}명
+			            </span>`;
+					} else if(schedule.raw.leaves.length = 1) {
+						return `<span style="font-size:13px; color:#1e7e34;">
+			                👤${firstName}
+			            </span>`;
+					}
+		        }
+				return schedule.title;
+		    }
+		},
 	    useCreationPopup: false,
 	    useDetailPopup: true,
 		isReadOnly: false,
@@ -205,6 +226,15 @@ function initCalendar() {
 			    color: '#333',
 			    backgroundColor: '#b7f3c4',           // 초록 계열 예시
 			    dragBackgroundColor: 'rgba(40,167,69,0.6)',
+			    borderColor: '#1e7e34',
+			    isDraggable: false,
+			    isResizable: false
+			},
+			{
+			    id: 'leave',
+			    name: '연차',
+			    color: '#333',
+			    backgroundColor: '#b7f3c4',
 			    borderColor: '#1e7e34',
 			    isDraggable: false,
 			    isResizable: false
@@ -363,6 +393,8 @@ async function loadMonthSchedule() {
 	await calendar.clear();
 	// 저장된 그해의 휴일데이터 입력
 	await calendar.createEvents(holidayData);
+	// 저장된 그해의 휴일데이터 입력
+	await calendar.createEvents(monthlyLeaveData);
 	// 저장된 그달의 일정데이터 입력
 	await calendar.createEvents(monthlyScheduleData);
 	checkFilter();
@@ -389,10 +421,6 @@ async function getScheduleData(params) {
 function convertScheduleDataToSchedules(monthScheduleData) {
 	return monthScheduleData.map(item => {
 		const isAllday = item.alldayYN == "Y";
-//		console.log(isAllday, item);
-//		console.log(item.scheduleStart);
-//		console.log(item.scheduleFinish);
-//		console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@")
 		return {
 			id: String(item.scheduleId),
 			calendarId: getCalendarId(item.scheduleType),
@@ -421,7 +449,12 @@ async function getLeaveData(params) {
 		return response.json();  //JSON 파싱
 	})
 	.then(data => { // response가 ok일때
-		console.log(data);
+		// 연차데이터 날짜별로 그룹화
+		const dateLeaveMap = groupLeavesByDate(data);
+		console.log(dateLeaveMap);
+		monthlyLeaveData = convertGroupedLeavesToSchedules(dateLeaveMap);
+		console.log(monthlyLeaveData, " 변환완료");
+
 		// 조회한 월단위 일정을 캘린더 데이터로 변환
 //		monthlyScheduleData = convertScheduleDataToSchedules(data);
 	}).catch(error => {
@@ -429,6 +462,56 @@ async function getLeaveData(params) {
 		alert("연차 데이터 조회 실패");
 	});
 }
+
+//연차정보를 날짜별로 그룹핑
+function groupLeavesByDate(leaves) {
+    const result = {};
+
+    leaves.forEach(item => {
+        const start = new Date(item.startDate);
+        const end = new Date(item.endDate);
+
+        let current = new Date(start);
+        while (current <= end) {
+            // YYYY-MM-DD 형태로 포맷
+            const yyyyMMdd = current.toISOString().slice(0, 10);
+
+            if (!result[yyyyMMdd]) {
+                result[yyyyMMdd] = [];
+            }
+            result[yyyyMMdd].push(item);
+
+            // 다음 날로 증가
+            current.setDate(current.getDate() + 1);
+        }
+    });
+
+    return result;
+}
+
+// 날짜별 그룹화 연차 정보를 스케줄러 주입하게 변환
+function convertGroupedLeavesToSchedules(dateLeaveMap) {
+    return Object.entries(dateLeaveMap).map(([date, leaves]) => {
+        // 당일 연차자 이름만 모아서 표시
+        const names = leaves.map(leave => leave.emp_name);
+        const title = `연차: ${names.join(', ')} (${leaves.length}명)`;
+        return {
+            id: `leave-summary-${date}`,
+            calendarId: 'leave',
+            title: title,
+            category: 'milestone',
+            isAllDay: true,
+            isReadOnly: true,
+            start: date,
+            end: date,
+            color: '#333',
+            backgroundColor: '#b7f3c4',
+            borderColor: '#1e7e34',
+            raw: {leaves}
+        };
+    });
+}
+
 
 //===============================================================
 // DOM LOAD
