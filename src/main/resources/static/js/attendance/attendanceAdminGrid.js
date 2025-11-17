@@ -66,15 +66,15 @@ const grid = new tui.Grid({
 grid.sort('workDate', true);
 
 // 버튼 이벤트 감지
-grid.on("click", async (ev) => {
+grid.on("click", (ev) => {
 	const { columnName, rowKey } = ev;
 	
 	if (columnName === "btn") {
 		const row = grid.getRow(rowKey);
 		// 해당 행의 id 값 가져오기
-		const attendanceId = row.id;
+		const attendanceId = row.attendanceId;
 		// attendance.js에 만들어둔 함수 사용
-		await openModal("edit", attendanceId);
+		openModal("edit", attendanceId);
 	}
 })
 
