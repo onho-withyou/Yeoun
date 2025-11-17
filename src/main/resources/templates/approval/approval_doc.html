@@ -294,6 +294,10 @@
 		fetchWaitingApprovalDocs().then(data => {
 			grid4.resetData(data);
 		});
+		fetchDoneApprovalDocs().then(data =>{
+			grid5.resetData(data);
+		});
+		
 	}
 	//1. 결재사항 불러오기
 	function fetchPendingApprovalDocs() {
@@ -441,9 +445,9 @@
 				console.error('Error fetching approval documents:', error);
 			});
 	}
-	//5.결재완료 불러오기-안됨
+	//5.결재완료 불러오기
 	function fetchDoneApprovalDocs() {
-		return fetch('/approval/doneApprovalDocGrid')
+		return fetch('/approval/finishedApprovalDocGrid')
 			.then(response => response.json())
 			.then(data => {
 				console.log("grid5 fetch-data----->:",data);
