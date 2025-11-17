@@ -4,6 +4,8 @@ import com.yeoun.emp.entity.Emp;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicInsert;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -13,6 +15,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
+@DynamicInsert
 public class MsgRelation {
 
     // 관계 고유 ID
@@ -49,10 +52,12 @@ public class MsgRelation {
     private String participantYn;
 
     // 마지막 입장 일시
+    @CreatedDate
     @Column(nullable = false)
     private LocalDateTime joinDate;
 
     // 마지막 확인 시간
+    @CreatedDate
     @Column(nullable = false)
     private LocalDateTime activeDate;
 

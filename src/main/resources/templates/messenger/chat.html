@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,13 +13,25 @@
 
 <body>
 
-<div class="chat-window">
+<div class="chat-window" >
 
   <!-- ======================= 상단바 ======================= -->
   <div class="chat-header header-purple">
     <div class="chat-header-left">
       <i class="bi bi-chevron-left back-btn"></i>
-      <div class="chat-title" th:text="${targetName}">홍길동 대리</div>
+      <!-- 그룹채팅인 경우 -->
+      <div class="chat-title"
+           th:if="${groupYn == 'Y'}"
+           th:text="${groupName}">
+        그룹채팅 이름
+      </div>
+
+      <!-- 1:1 채팅인 경우 -->
+      <div class="chat-title"
+           th:if="${groupYn != 'Y'}"
+           th:text="${targetName} + ' ' + ${targetPos}">
+        상대방 이름 직급
+      </div>
     </div>
 
     <div class="chat-header-right">
@@ -31,33 +44,41 @@
   <div class="chat-body" id="chat-body">
 
     <!-- 새 방 안내 -->
-    <div class="new-room-empty" id="new-room-empty">
+    <div class="new-room-empty" id="new-room-empty" th:if="${roomId == null}">
       <div class="empty-guide">
         <span>대화를 시작해보세요.</span>
       </div>
     </div>
 
-    <!-- ====== 예시 메시지: 개발 중 확인용 (실제에선 타임리프 반복으로 대체) ====== -->
-    <!-- 상대방 메시지 -->
-    <div class="msg-row left">
-      <img src="/images/default_profile.png" class="profile-img" alt="profile">
-      <div class="msg-main">
-        <div class="sender-name">홍길동 대리</div>
-        <div class="msg-bubble msg-left">안녕하세요 :)</div>
-      </div>
-      <div class="msg-time msg-time-left">오후 1:22</div>
-    </div>
+    <!-- 메시지 반복 -->
+    <div th:each="msg : ${msgList}"
+         class="msg-row"
+         th:classappend="${msg.senderId} == ${#authentication.principal.empId} ? ' right' : ' left'">
 
-    <!-- 내 메시지 -->
-    <div class="msg-row right">
-	  <div class="msg-meta">
-	    <span>오후 1:23</span>
-	    <i class="bi bi-check2-all"></i>
-	  </div>
-	  <div class="msg-bubble msg-right">
-	    안녕하세요!
-	  </div>
-	</div>
+      <!-- ===================== 왼쪽 메시지(상대) ===================== -->
+      <div th:if="${msg.senderId} != ${#authentication.principal.empId}">
+        <img src="/images/default_profile.png" class="profile-img">
+
+        <div class="msg-main">
+          <div class="sender-name" th:text="${msg.senderName}"></div>
+          <div class="msg-bubble msg-left" th:text="${msg.msgContent}"></div>
+        </div>
+
+        <div class="msg-time msg-time-left"
+             th:text="${#temporals.format(msg.sentDate, 'a h:mm')}"></div>
+      </div>
+
+      <!-- ===================== 오른쪽 메시지(나) ===================== -->
+      <div th:if="${msg.senderId} == ${#authentication.principal.empId}">
+        <div class="msg-meta">
+          <span th:text="${#temporals.format(msg.sentDate, 'a h:mm')}"></span>
+          <i class="bi bi-check2-all"></i>
+        </div>
+
+        <div class="msg-bubble msg-right" th:text="${msg.msgContent}"></div>
+      </div>
+
+    </div>
 
 
   </div>
@@ -72,15 +93,20 @@
 
 </div>
 
-<script>
+<script th:inline="javascript">
   const chatBody = document.getElementById('chat-body');
   const textarea = document.getElementById('message');
   const sendBtn = document.getElementById('send');
   const emptyView = document.getElementById('new-room-empty');
 
   // Thymeleaf에서 내려줄 값
-  let roomId = /*[[${roomId}]]*/ null;
-  let targetEmpId = /*[[${targetEmpId}]]*/ null;
+  let roomId = [[${roomId}]];
+  let targetEmpId = [[${targetEmpId}]];
+  const csrfToken = [[${_csrf.token}]];
+  const csrfHeaderName = [[${_csrf.headerName}]];
+
+  console.log("roomId.... : ", roomId);
+  console.log("target..... : ", targetEmpId);
 
   function isNewRoom() {
     return roomId === null || roomId === undefined;
@@ -92,11 +118,18 @@
 
   function formatTime() {
     const now = new Date();
-    let h = now.getHours();
-    const m = now.getMinutes();
-    const ampm = h >= 12 ? '오후' : '오전';
-    h = h % 12 || 12;
-    return `${ampm} ${h}:${m.toString().padStart(2, '0')}`;
+
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+
+    let hour = now.getHours();
+    const minute = String(now.getMinutes()).padStart(2, '0');
+
+    const ampm = hour >= 12 ? '오후' : '오전';
+    hour = hour % 12 || 12;
+
+    return `${year}-${month}-${day} ${ampm} ${hour}:${minute}`;
   }
 
   // 내 메시지 DOM 생성
@@ -107,10 +140,12 @@
     row.className = 'msg-row right';
 
     row.innerHTML = `
-      <div class="msg-time msg-time-right">${formatTime()}</div>
+      <div class="msg-meta">
+        <span>${formatTime()}</span>
+        <i class="bi bi-check2 read-check"></i>
+      </div>
       <div class="msg-bubble msg-right">
         ${msg}
-        <i class="bi bi-check2 read-check"></i>
       </div>
     `;
 
@@ -139,12 +174,24 @@
     appendMyMessage(msg);
 
     if (isNewRoom()) {
+      console.log("신규 채팅방 생성 요청 진입....");
       // 새 방: 방 생성 + 첫 메시지 저장
+
+      const bodyData = {
+        members: [targetEmpId],
+        groupName : null,
+        firstMessage: msg,
+        msgType: "TEXT"
+      };
+
       try {
-        const res = await fetch('/api/chat/create-room-and-send', {
+        const res = await fetch('/messenger/chat', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ targetEmpId, message: msg })
+          headers: {
+            'Content-Type': 'application/json',
+            [csrfHeaderName]: csrfToken
+          },
+          body: JSON.stringify(bodyData)
         });
         const data = await res.json();
         roomId = data.roomId;
@@ -156,10 +203,18 @@
 
     // 기존 방: 메시지만 저장
     try {
-      await fetch(`/api/chat/${roomId}/send`, {
+      const bodyData = {
+        msgContent: msg,
+        msgType: "TEXT"
+      }
+
+      await fetch(`/messenger/chat/${roomId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: msg })
+        headers: {
+          'Content-Type': 'application/json',
+          [csrfHeaderName]: csrfToken
+        },
+        body: JSON.stringify(bodyData)
       });
     } catch (e) {
       console.error('메시지 전송 실패:', e);
