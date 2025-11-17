@@ -15,6 +15,7 @@ let calendar = null; // calendar 객체 선언
 
 let holidayData = null; // 휴일데이터 저장
 let monthlyScheduleData = null; //달별 스케줄 데이터
+let monthlyLeaveData = null;
 
 let calendarYear = null; // 현재 날짜 년 저장
 let calendarMonth = null; // 현재 날짜 월 저장
@@ -61,7 +62,7 @@ async function updateCurrentDate() {
 		await yearHoliday(year);
 	}
 	
-	dateController.setDate(new Date(currentDate));
+//	dateController.setDate(new Date(currentDate));
 	currentDateEl.textContent = `${year}년 ${month}월`;
 	
 	if(calendarYear != year || calendarMonth != month) {
@@ -347,7 +348,9 @@ async function loadMonthSchedule() {
 		, endDate: formatLocalDateTime(endDate)
 	});
 	
-	await getScheduleData(params);
+	await getScheduleData(params); // 그달의 스케줄 가져오기
+	await getLeaveData(params); // 그달의 연차 데이터 가져오기
+	
 	await calendar.clear();
 //	console.log("클리어");
 	await calendar.createEvents(holidayData);
@@ -400,6 +403,23 @@ function getCalendarId(type, deptId) {
 	if(type === "회사") return "company";
 	if(type === "개인") return "personal";
 	return "department";
+}
+
+// 현재 달력이 선택한 월의 연차 정보 불러오기
+async function getLeaveData(params) {
+	await fetch(`/api/schedules/leaves?${params.toString()}`, {method: 'GET'})
+	.then(response => {
+		if (!response.ok) throw new Error(response.text());
+		return response.json();  //JSON 파싱
+	})
+	.then(data => { // response가 ok일때
+		console.log(data);
+		// 조회한 월단위 일정을 캘린더 데이터로 변환
+//		monthlyScheduleData = convertScheduleDataToSchedules(data);
+	}).catch(error => {
+		console.error('에러', error)
+		alert("연차 데이터 조회 실패");
+	});
 }
 
 //===============================================================

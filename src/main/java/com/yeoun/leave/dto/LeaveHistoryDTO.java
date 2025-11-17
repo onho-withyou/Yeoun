@@ -4,11 +4,14 @@ import java.time.LocalDate;
 
 import org.modelmapper.ModelMapper;
 
+import com.yeoun.emp.entity.Dept;
+import com.yeoun.emp.entity.Emp;
+import com.yeoun.leave.entity.AnnualLeave;
 import com.yeoun.leave.entity.AnnualLeaveHistory;
 
-import groovy.transform.ToString;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
@@ -32,12 +35,28 @@ public class LeaveHistoryDTO {
 	
 	// 엔티티 타입으로 변환
 	public AnnualLeaveHistory toEntity() {
-		return modelMapper.map(this, AnnualLeaveHistory.class);
+		AnnualLeaveHistory leaveHistroy = modelMapper.map(this, AnnualLeaveHistory.class);
+		if(this.getEmp_id() != null) {
+			Emp emp = new Emp();
+			emp.setEmpId(this.getEmp_id().toString());
+			
+			if(this.getDept_id() != null) {
+				Dept dept = new Dept();
+				dept.setDeptId(this.getDept_id());
+				emp.setDept(dept);
+			}
+		leaveHistroy.setEmp(emp);
+		}
+		return leaveHistroy;
 	}
 	
-	// DTO 타입으로 변환 
-	
+	// DTO 타입으로 변환
 	public static LeaveHistoryDTO fromEntity(AnnualLeaveHistory annualLeaveHistory) {
-		return modelMapper.map(annualLeaveHistory, LeaveHistoryDTO.class);
+		LeaveHistoryDTO historyDTO = modelMapper.map(annualLeaveHistory, LeaveHistoryDTO.class);
+		
+		historyDTO.setEmp_id(Long.parseLong(annualLeaveHistory.getEmp().getEmpId()));
+		historyDTO.setDept_id(annualLeaveHistory.getDept().getDeptId());
+		
+		return historyDTO; 
 	}
 }

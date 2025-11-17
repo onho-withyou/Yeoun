@@ -1,5 +1,6 @@
 package com.yeoun.main.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,11 +9,16 @@ import java.util.stream.Collectors;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.emp.dto.DeptDTO;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.EmpRepository;
+import com.yeoun.leave.dto.LeaveDTO;
+import com.yeoun.leave.dto.LeaveHistoryDTO;
+import com.yeoun.leave.entity.AnnualLeaveHistory;
+import com.yeoun.leave.repository.LeaveHistoryRepository;
 import com.yeoun.main.dto.ScheduleDTO;
 import com.yeoun.main.entity.Schedule;
 import com.yeoun.main.repository.ScheduleRepository;
@@ -28,6 +34,7 @@ public class ScheduleService {
 	private final ScheduleRepository scheduleRepository;
 	private final DeptRepository deptRepository;
 	private final EmpRepository empRepository;
+	private final LeaveHistoryRepository leaveHistoryRepository;
 	// --------------------------------------------------
 	
 	//일정 등록모달 부서리스트 가져오기
@@ -104,6 +111,25 @@ public class ScheduleService {
 	public void deleteSchedule(@Valid ScheduleDTO scheduleDTO, Authentication authentication) {
 		Schedule schedule = scheduleDTO.toEntity();
 		scheduleRepository.delete(schedule);
+	}
+	
+	//startDate, endDate의 연차정보 가져오기
+	public List<LeaveHistoryDTO> getLeaveHistoryList(LocalDateTime startDateTime, LocalDateTime endDateTime,
+			LoginDTO loginDTO) {
+		
+		String empId = loginDTO.getEmpId();
+		String deptId = loginDTO.getDeptId();
+		
+		LocalDate startDate = startDateTime.toLocalDate();
+		LocalDate endDate = endDateTime.toLocalDate();
+		System.out.println(startDate);
+		System.out.println(endDate);
+		System.out.println(deptId);
+		System.out.println(empId);
+		
+		List<AnnualLeaveHistory> leaveHistoryList = leaveHistoryRepository.findLeaveHistorySchedule(startDate, endDate, empId, deptId);
+		
+		return leaveHistoryList.stream().map(LeaveHistoryDTO::fromEntity).collect(Collectors.toList());
 	}
 
 
