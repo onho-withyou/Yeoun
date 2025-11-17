@@ -10,6 +10,13 @@ let currentPage = 0;   // 0부터 시작 (Spring Page와 맞춤)
 const pageSize = 10;
 
 document.addEventListener('DOMContentLoaded', () => {
+  
+  const msgHolder = document.getElementById('empMsgHolder');
+    if (msgHolder && msgHolder.dataset.msg) {
+      alert(msgHolder.dataset.msg);
+  }
+ 
+	
   empDetailModal = new bootstrap.Modal(document.getElementById('empDetailModal'));
 
   // 수정 버튼 클릭 이벤트 등록
