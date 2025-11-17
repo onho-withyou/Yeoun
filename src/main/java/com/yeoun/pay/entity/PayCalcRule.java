@@ -51,13 +51,8 @@ public class PayCalcRule {
 
  @Enumerated(EnumType.STRING)
  @Column(name = "RULE_TYPE", length = 10, nullable = false)
- @Comment("규칙 타입: AMT/RATE/FORMULA")
- private RuleType ruleType;
- 
- @Enumerated(EnumType.STRING)
- @Column(name = "CALC_METHOD", length = 12, nullable = false)
  @Comment("계산 타입: FIXED / RATE / FORMULA / EXTERNAL")
- private CalcMethod calcMethod; 
+ private RuleType ruleType;
 
  @Column(name = "START_DATE")
  @Comment("적용 시작일")

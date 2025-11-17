@@ -65,10 +65,10 @@ public class HrActionRestController {
 	// 인사 발령 등록 화면용 사원 목록
 	@ResponseBody
 	@GetMapping("/employees")
-	public List<EmpListDTO> getEmployeesForAction() {
-		return empService.getEmpList();
+	public List<EmpListDTO> getEmployeesForAction(@RequestParam(required = false, name = "deptId") String deptId,
+	        									  @RequestParam(required = false, name = "posCode") String posCode,
+	        									  @RequestParam(required = false, name = "keyword") String keyword) {
+		return empService.getEmpListForHrAction(deptId, posCode, keyword);
 	}
 	
-	
-
 }

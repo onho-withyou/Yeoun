@@ -1,7 +1,7 @@
 // 인사 발령 JS
 
 let empGrid = null;
-let originalEmpList = [];
+//let originalEmpList = [];
 
 // CSRF 토큰 읽기 (전역)
 const csrfToken = document.querySelector("meta[name='_csrf_token']")?.content;
@@ -15,19 +15,19 @@ document.addEventListener('DOMContentLoaded', function() {
 	// 검색 이벤트
 	const btnSearch = document.getElementById('btnSearchEmp');
 	if (btnSearch) {
-		btnSearch.addEventListener('click', onSearchEmp);
+		btnSearch.addEventListener('click', () => onSearchEmp());
 	}
 	
 	// 부서 선택 바뀌면 바로 필터링
 	const selDept = document.getElementById('searchDept');
 	if (selDept) {
-		selDept.addEventListener('change', onSearchEmp);
+		selDept.addEventListener('change', () => onSearchEmp());
 	}
 
 	// 직급 선택 바뀌면 바로 필터링
 	const selPos = document.getElementById('searchPos');
 	if (selPos) {
-		selPos.addEventListener('change', onSearchEmp);
+		selPos.addEventListener('change', () => onSearchEmp());
 	}
 
 	// 이름/사번 입력 후 엔터 누르면 검색
@@ -47,32 +47,37 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 0. 검색 실행 함수
 function onSearchEmp() {
-	const dept = document.getElementById('searchDept').value;
-	const pos = document.getElementById('searchPos').value;
-	const keyword = document.getElementById('searchKeyword').value.trim().toLowerCase();
-
-	let filtered = originalEmpList;
-
-	if (dept) filtered = filtered.filter(emp => emp.deptName === dept);
-	if (pos) filtered = filtered.filter(emp => emp.posName === pos);
-
-	if (keyword) {
-		filtered = filtered.filter(emp =>
-			emp.empName.toLowerCase().includes(keyword) ||
-			emp.empId.includes(keyword)
-		);
-	}
-
-	empGrid.resetData(filtered);
+	loadEmpListForHrAction();
 }
 
-// 1. 사원 목록 불러오기
+// 1. 사원 목록 불러오기 
 function loadEmpListForHrAction() {
-	fetch('/api/hr/employees')
-		.then(res => res.json())
+
+	const dept = document.getElementById('searchDept')?.value || '';
+	const pos = document.getElementById('searchPos')?.value || '';
+	const keyword = document.getElementById('searchKeyword')?.value.trim() || '';
+
+	const params = new URLSearchParams();
+	if (dept) params.append('deptId', dept);
+	if (pos) params.append('posCode', pos);
+	if (keyword) params.append('keyword', keyword);
+
+	const url = '/api/hr/employees' + (params.toString() ? ('?' + params.toString()) : '');
+
+	fetch(url)
+		.then(res => {
+			if (!res.ok) {
+				throw new Error('사원 목록 요청 실패');
+			}
+			return res.json();
+		})
 		.then(data => {
-			originalEmpList = data;
-			buildEmpGrid(data);
+			// 처음에는 그리드 생성, 이후에는 데이터만 교체
+			if (!empGrid) {
+				buildEmpGrid(data);
+			} else {
+				empGrid.resetData(data);
+			}
 		})
 		.catch(err => {
 			console.error('사원 목록 로드 실패:', err);
@@ -194,14 +199,3 @@ function handleSubmitAction(e) {
 	    alert("발령 등록 중 오류가 발생했습니다.");
 	});
 }
-
-
-
-
-
-
-
-
-
-
-

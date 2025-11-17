@@ -97,17 +97,21 @@
 		<!-- 모달 -->
 		<div class="modal fade" id="approval-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
-		    <div class="modal-content">
+		    <div class="modal-content" th:object="${approvalDocDTO}">
 		      <div class="modal-header" data-draggable="true">
 		        <h3 class="modal-title" id="Drafting">기안서 작성</h3>
 		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		      </div>
 		      <div class="modal-body">
-		        <h5 class="d-flex">문서 날짜 : <p id="today-date"></p></h5>
+		        <h5 class="d-flex">
+					<label>문서 날짜 : </label>
+					<p id="today-date" th:field="*{createDate}"></p>
+				</h5>
 		        <h5 class="d-flex">
 					<label class="p-1" style="width: 200px;"> 문서 제목 </label> 	                 
-		        	<input class="form-control" type="text" placeholder="문서제목" style="width:800px;height: 38.94px;">
-		        </h5>
+		        	<input class="form-control" type="text" th:field="*{approvalTitle}" placeholder="문서제목" style="width:800px;height: 38.94px;">
+				</h5>
+				<div class="error_msg" th:if="${#fields.hasErrors('approvalTitle')}" th:errors="*{approvalTitle}"></div>
 		        <h5 class="d-flex">
 					<label class="p-1" style="width: 200px;">양식 종류 </label> 
 		        	<div class="mb-6 mb-0" style="width: 344px;">
@@ -137,11 +141,11 @@
 					<label class="p-1" style="width: 200px;">결재완료기간</label>
 		        	<div class="row flex-nowrap">
 						<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-							<input type="date" name="startDate" class="form-control">
+							<input type="date" name="startDate" id="today-date" class="form-control">
 						</div>
 		                ~
 		                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-			                <input type="date" name="endDate" class="form-control">
+			                <input type="date" name="endDate"  class="form-control">
 		                </div>
 					</div>
 		        </h5>
@@ -153,14 +157,14 @@
 						</div>
 		                ~
 		                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-			                <input type="date" name="endDate" class="form-control">
+			                <input type="date" name="endDate"class="form-control">
 		                </div>
 					</div>
 		        </h5>
 		        <h5 class="d-flex">
 					<label class="p-1" style="width: 200px;">휴가종류-휴가(연차)신청서 [기본-hidden]</label>
 		        	<div class="mb-6 mb-0" style="width: 344px;">
-		            	<select class="form-select">
+		            	<select class="form-select" ><!-- 여기 하다가 잠--> 
 		            		<option selected></option>
 		            		<option name="leave" value="연차유급휴가">연차유급휴가</option>
 							<option name="leave" value="출산전후휴가">출산전후휴가</option>
@@ -179,7 +183,7 @@
 		        <h5 class="d-flex">
 					<label class="p-1" style="width: 200px;">발령부서- 인사발령신청서 [기본-hidden]</label>
 		        	<div class="mb-6 mb-0" style="width: 344px;">
-		            	<select class="form-select">
+		            	<select class="form-select" >
 		            		<option selected>부서</option>
 							<option th:each="item, iterStat : ${deptList}" 
 							 		th:value="${iterStat.index}" 
@@ -191,7 +195,7 @@
 		        <h5 class="d-flex">
 					<label class="p-1" style="width: 200px;">지출종류 - 지출결의서 [기본-hidden]</label>
 		        	<div class="mb-6 mb-0" style="width: 344px;">
-		            	<select class="form-select">
+		            	<select class="form-select" >
 		            		<option selected>지출종류</option>
 		            		<option name="expense" value="고정지출">고정지출</option>
 							<option name="expense" value="변동지출">변동지출</option>
@@ -201,7 +205,7 @@
 		        </h5>
 		        <h5>
 					<label class="p-1" style="width: 200px;">사유내용 -자유양식결재서:[기본-hidden]</label>
-		        	<textarea id="notice-content-write" class="form-control" rows="10" placeholder="결재사유내용 작성"></textarea>
+		        	<textarea id="notice-content-write" class="form-control" th:field="*{reason}" rows="10" placeholder="결재사유내용 작성"></textarea>
 		        </h5>
 		        <h5 class="d-flex">결재권한자 변경:
 		        	<input class="form-check-input" type="checkbox" id="opt-in">
@@ -258,7 +262,7 @@
 			    </div>
 		      	<hr>
 		      	<button type="button" class="btn btn-primary">인쇄</button>
-		        <button type="button" class="btn btn-primary">저장</button>
+		        <button type="submit" class="btn btn-primary">저장</button>
 		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
 		      </div>
 		</div>
@@ -274,368 +278,5 @@
 
 
 <th:block layout:fragment="myScript">
-<script>
-
-
-	//grid - 2.전체결재 - 나와관련된 모든 결재문서
-	window.onload = function() {
-		fetchApprovalDocs().then(data => {
-			console.log(data);
-			grid2.resetData(data);
-		});
-	};
-
-	function fetchApprovalDocs() {
-		return fetch('/approval/approvalDocGrid')
-			.then(response => response.json())
-			.then(data => {
-				
-				let colData = [];
-				let obj = {};
-
-				data.map((item,index) => {
-					obj["row_no"] = item[0]; //결재순번
-					obj["approval_id"]	 = item[1];	//문서id
-					obj["approval_title"] = item[2]; //문서제목	
-					obj["emp_id"] = item[3];	//사원번호
-					obj["emp_name"] = item[4];	//기안자
-					obj["dept_id"] = item[5];	//부서코드
-					obj["dept_name"] = item[6];	//부서명
-					obj["approver"] = item[7];	//결재권한자
-					obj["pos_code"] = item[8];	//직급코드
-					obj["pos_name"] = item[9];	//직급
-					obj["created_date"] = item[10];	//생성일
-					obj["finish_date"] = item[11]; //결재완료일자
-					obj["doc_status"] = item[12]; //상태
-					obj["view_details"] = '<button class="btn btn-primary me-2">상세</button>'; //상세보기
-					colData.push(obj);
-					obj = {};
-				});
-
-				console.log("objectArray outside map:",colData);
-				
-				return colData;
-			})
-			.catch(error => {
-				console.error('Error fetching approval documents:', error);
-			});
-	}
-	const Grid = tui.Grid;
-	const grid1 = new Grid({
-		  el: document.getElementById('approvalGrid'), // 결재사항
-		  columns: [
-	
-		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
-			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
-			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
-			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
-			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
-			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
-			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
-			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
-			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
-			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
-			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
-			,{header: '상세보기' ,name: 'view_details' ,align: 'center'}
-		  ],
-		  data: [
-			{
-		    	row_no: 1,
-				approval_id: 'A-202306-001',
-				approval_title: '지출 결의서',
-				emp_id: '2104502',	
-				emp_name: '이정현',
-				dept_id: 'D-001',
-				dept_name: '개발팀',
-				approver: 'd-이사랑',
-				pos_code: 'P-002',
-				pos_name: '대리',
-				created_date: '2024-06-01',
-				finish_date: '2024-06-05',
-				doc_status: '결재완료',
-				view_details:'<button class="btn btn-primary me-2">상세</button>'
-		    },
-		    {
-		    	row_no: 2,
-				approval_id: 'A-202306-002',
-				approval_title: '휴가(연차)신청서',
-				emp_id: '2104503',
-				emp_name: '한가인',
-				dept_id: 'D-002',
-				dept_name: '인사팀',
-				approver: 'i-정지훈',
-				pos_code: 'P-003',
-				pos_name: '과장',
-				created_date: '2024-06-02',
-				finish_date: '2024-06-06',
-				doc_status: '결재대기',
-				view_details:'<button class="btn btn-primary me-2">상세</button>'
-		    },
-		  ]
-		});
-// 	instance.resetData(newData); // Call API of instance's public method
-	
-// 	Grid.applyTheme('clean'); // Call API of static method
-	const grid2 = new Grid({
-	    el: document.getElementById('allApprovalGrid'), // 전체결재
-	    columns: [
-	
-		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
-			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
-			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
-			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
-			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
-			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
-			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
-			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
-			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
-			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
-			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
-			,{header: '상세보기' ,name: 'view_details' ,align: 'center'}
-		  ],
-		  data: [
-		  ]
-	});
-
-	const grid3 = new Grid({
-	    el: document.getElementById('myApprovalGrid'), // 내 결재목록
-	    columns: [
-	
-		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
-			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
-			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
-			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
-			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
-			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
-			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
-			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
-			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
-			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
-			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
-			,{header: '상세보기' ,name: 'view_details' ,align: 'center'}
-		  ],
-		  data: [
-		    
-		  ]
-	});
-
-	const grid4 = new Grid({
-	    el: document.getElementById('waitingApprovalGrid'), //결재대기
-	    columns: [
-	
-		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
-			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
-			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
-			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
-			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
-			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
-			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
-			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
-			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
-			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
-			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
-			,{header: '상세보기' ,name: 'view_details' ,align: 'center'}
-		  ],
-		  data: [
-		   
-		  ]
-	});
-
-	const grid5 = new Grid({
-	    el: document.getElementById('doneApprovalGrid'), //결재완료
-	    columns: [
-	
-		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
-			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
-			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
-			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
-			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
-			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
-			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
-			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
-			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
-			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
-			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
-			,{header: '상세보기' ,name: 'view_details' ,align: 'center'}
-		  ],
-		  data: [
-		  
-		  ]
-	});
-	
-	//모달창 코드
-	//셀렉트 박스 변경시 모달창에 텍스트 변경함수
-	function draftValFn(e){
-		
-		let draft_doc = e.value;
-		document.getElementById('Drafting').innerText = draft_doc;
-	}
-	
-	let today = new Date();   
-
-	let year = today.getFullYear(); // 년도
-	let month = today.getMonth() + 1;  // 월
-	let date = today.getDate();  // 날짜
-	let day = today.getDay();  // 요일
-
-	const formattedDate = `${year}년 ${month}월 ${date}일`;
-
-	document.getElementById("today-date").textContent = formattedDate;
-
-	//셀렉트박스
-	var approvarDiv = document.querySelector('#approvar');
-	var deptList = "[[${deptList}]]";
-	console.log("deptList",deptList);
-	var selectBox = new tui.SelectBox('#select-box', {
-      data: [
-        {
-          label: '인사팀',
-          data: [{ label: '한가인', value: '한가인'}, 
-        	  	{ label: '정지훈', value: '정지훈' ,selected: true }]
-        },
-        {
-          label: '개발팀',
-          data: [
-            { label: '이정현', value: '이정현'},
-            { label: '마이클', value: '마이클'},
-            { label: '기안', value: '기안'},
-            { label: '이지영', value: '이지영'},
-            { label: '박지운', value: '박지운'}
-          ]
-        }
-      ]
-    });
-	let jeongyeoljaDiv = document.querySelector('#jeongyeolja');
-	let jeongyeoljaContent = document.querySelector("#jeongyeolja-content");
-	let approvarDivClose = document.getElementById("approvarDiv-close");
-	
-    this.count = 0; //결재권한자 label count
-    let defalutApprovarArr = ["d-이사랑","d-미미미누","d-김경란"];
-    let approvarArr = [];//결재권한자 배열 
-	
-    function defaultPrint(){
-    	if(this.count === 0){
-	    	for(var i=0;i<defalutApprovarArr.length;i++){
-	    		
-		    	print("defalut",defalutApprovarArr[i]);
-    			approvarArr.push(defalutApprovarArr[i]);
-	    	}
-    	}
-    }
-    function print(type, text) {
-		// 결재권한자변경 div 버튼 생성
-    	if(this.count < 3){
-		this.count++;
-    	approvarDiv.innerHTML +='<div class="btn btn-success"'
-      						+'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
-      						+'<p onclick="approvarDivclose(this,' + "'"+ type + "'"+ ','+ count +')" style="float:right;margin-right: 8px;">&times;</p>'
-      						+'<p onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
-    						+'</div>';
-    	}
-    } 
-    
-
-	
-	//결재권한자 버튼 클릭시 결재권한자변경 div 태그 생성
-	function approvalNo(count,text){
-	   //해당태그 클릭시 전결자 div 나오기
-		let type="change";
-		jeongyeoljaDiv.innerHTML = '<button onClick="approvarDivclose(this,'+ "'"+ type + "'"+','+ count +')" class="btn-close" style="float:right;margin-right: 8px;"></button>'
-	   		 			+ '<h5>'+ count + "차 결재권한자 : "+ text +" 변경"+'</h5>';
-		jeongyeoljaDiv.innerHTML += jeongyeoljaContent.innerHTML;	
-	   
-	   	if(jeongyeoljaDiv.style.display === 'none'){
-	  	jeongyeoljaDiv.style.display = 'block';  
-	   	  						  
-	}	
-	   
-
-    } 
-	
-	//결재권한자,결재권한자변경(전결자) 닫기버튼
-	function approvarDivclose(buttonDiv,type,count){
-		const divElement = buttonDiv.parentNode; // 버튼의 부모인 div를 찾음
-		
-		console.log("type",type);
-		console.log("jeongyeoljaDiv.style.display",jeongyeoljaDiv.style.display);
-		jeongyeoljaDiv.style.display = 'none';
-		//defalut 태그 닫기 버튼시 
-		if (buttonDiv.parentElement.id === '' || type === 'defalut') {//결재권한자
-	        divElement.remove(); //자신의 div 제거
-	        
-	        if(divElement.innerText !== null){ //defalut 태그가 있을때
-	        	approvarArr = approvarArr.filter((ev) => ev !== defalutApprovarArr[count-1]);	
-	        }
-			approvarArr = approvarArr.filter((ev) => ev !== count);
-			this.count = count-1; //제거 라벨 카운트 원상복기
-	    }
-		
-		
-		if(approvarArr.length === 0){
-    		this.count = 0;
-    	}	
-	}
-	//셀렉트박스 닫힐때
-    selectBox.on('close',(ev)=>{
-    	
-    	let selectlabel = selectBox.getSelectedItem().label;
-    	if(selectlabel != null && approvarArr.length < 3){//셀렉트 라벨선택시 3번까지만셈
-    		print(ev.type, selectlabel);
-    		approvarArr.push(this.count);
-    	}
-	})
-   	//리셋버튼 만들기 하다가잠
-    
-	//에디터
-	 const editor = new toastui.Editor({
-	  el: document.querySelector('#editor'),
-	  height: '500px',
-	  initialEditType: 'markdown',
-	  previewStyle: 'vertical'
-	});
-	
-	editor.getMarkdown();
-	
-	//모달 움직이게 하기
-	const modalHeader = document.querySelector(".modal-header");
-	const modalDialog = document.querySelector(".modal-dialog");
-	let isDragging = false;
-	let mouseOffset = { x: 0, y: 0 };
-	let dialogOffset = { left: 0, right: 0 };
-	
-	modalHeader.addEventListener("mousedown", function (event) {
-	  isDragging = true;
-	  mouseOffset = { x: event.clientX, y: event.clientY };
-	  dialogOffset = {
-	    left: modalDialog.style.left === '' ? 0 : Number(modalDialog.style.left.replace('px', '')),
-	    right: modalDialog.style.top === '' ? 0 : Number(modalDialog.style.top.replace('px', ''))
-	  }
-	});
-	
-	document.addEventListener("mousemove", function (event) {
-	  if (!isDragging) {
-	    return;
-	  }
-	  let newX = event.clientX - mouseOffset.x;
-	  let newY = event.clientY - mouseOffset.y;
-	
-	  modalDialog.style.left = `${dialogOffset.left + newX}px`
-	  modalDialog.style.top = `${dialogOffset.right + newY}px`
-	});
-	
-	document.addEventListener("mouseup", function () {
-	  isDragging = false;
-	});
-	 
-</script>
+		<script src="/js/approval/approvalDoc.js"></script>
 </th:block>

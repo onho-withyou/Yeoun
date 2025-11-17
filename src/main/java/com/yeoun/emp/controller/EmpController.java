@@ -83,22 +83,29 @@ public class EmpController {
 		empService.registEmp(empDTO);
 		
 		rttr.addFlashAttribute("msg", "사원 등록이 완료되었습니다.");
-		return "redirect:/emp/list";
+		return "redirect:/emp";
 		
 	}
 	
 	// ====================================================================================
 	// 사원 메인 페이지 (현황 + 등록 버튼 있는 화면)
 	@GetMapping("")
-	public String empMainPage(Model model) {
+	public String empMainPage(Model model,
+							  @RequestParam(value = "msg", required = false) String msg,
+							  @RequestParam(value = "keyword", required = false) String keyword,
+							  @RequestParam(value = "deptId", required = false) String deptId) {
 		
 	    // 부서 셀렉트 옵션용
 	    model.addAttribute("deptList", deptRepository.findActive());
 	    
-	    // 초기 검색값 (원하면 "" 기본값 세팅)
-        model.addAttribute("keyword", "");
-        model.addAttribute("deptId", null);
+	    // 메시지가 있으면 모델에 담기
+	    if (msg != null && !msg.isBlank()) {
+	        model.addAttribute("msg", msg);
+	    }
 	    
+	    model.addAttribute("keyword", keyword);
+	    model.addAttribute("deptId", deptId);
+        
 		return "/emp/emp_list";
 	}
 	
@@ -152,9 +159,10 @@ public class EmpController {
 	}
 	
 	@PostMapping("/edit")
-	public String updateEmp(@ModelAttribute("empDTO") EmpDTO empDTO) {
+	public String updateEmp(@ModelAttribute("empDTO") EmpDTO empDTO, RedirectAttributes rttr) {
 	    empService.updateEmp(empDTO);
-	    return "redirect:/emp/list";  
+	    rttr.addAttribute("msg", "정보 수정이 완료되었습니다.");
+	    return "redirect:/emp";  
 	}
 	
 	
