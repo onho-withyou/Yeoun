@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
+import java.util.List;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -98,35 +100,69 @@ public class Attendance {
 	
 	// 자동 출근 (출퇴근 버튼 찍었을 경우)
 	public static Attendance createForWorkIn(Emp emp, LocalDate date, LocalTime now, 
-			LocalTime standardIn, int lateLimit, AccessLog accessLog) {
+			LocalTime standardIn, int lateLimit, List<AccessLog> accessLogs) {
 		Attendance attendance = new Attendance();
 
 		attendance.emp = emp;
 		attendance.workDate = date;
 		
-		// 외근 여부 확인
-		if (accessLog != null && "OUTWORK".equalsIgnoreCase(accessLog.getAccessType())) {
-			LocalTime outTime = accessLog.getOutTime();
-			
-			// 외근 시작 시간이 출근 기준 시간 + 지각 유예 시간보다 빠르면 정상 출근 인정
-			if (outTime != null && !outTime.isAfter(standardIn.plusMinutes(lateLimit))) {
-				attendance.statusCode = "WORKIN";
-				attendance.workIn = outTime;
-			} else { // 외근 기준 이후면 지각 처리
-				attendance.statusCode = "LATE";
-				attendance.workIn = (outTime != null) ? outTime : now;
-			}
-			attendance.remark = accessLog.getReason();
-		} else {
-			 attendance.statusCode = now.isAfter(standardIn.plusMinutes(lateLimit)) ? "LATE" : "WORKIN";
-			 attendance.workIn = now;
+		AccessLog outWorkLog = null;
+		
+		// list로 받아온 accesslog에서 accesstype의 outwork 값만 필터링
+		if (accessLogs != null && !accessLogs.isEmpty()) {
+			outWorkLog = accessLogs.stream()
+					.filter(log -> log.getAccessType() != null && 
+							log.getAccessType().equalsIgnoreCase("OUTWORK"))
+					.max(Comparator.comparing(AccessLog::getOutTime))
+					.orElse(null);
 		}
 		
-		 return attendance;
+		if (outWorkLog != null) {
+			LocalTime outworkTime  = outWorkLog.getOutTime();
+			
+			if (outworkTime != null && !outworkTime.isAfter(standardIn.plusMinutes(lateLimit))) {
+				
+				// 정상 출근
+				attendance.statusCode = "WORKIN";
+				attendance.workIn = outworkTime;
+			} else {
+				// 지각
+				attendance.statusCode = "LATE";
+				attendance.workIn = (outworkTime != null) ? outworkTime : now;
+			}
+			
+			attendance.remark = outWorkLog.getReason();
+		} else {
+			// 최근 없는 일반 출근 처리
+			attendance.statusCode = now.isAfter(standardIn.plusMinutes(lateLimit)) ? "LATE" : "WORKIN";
+			
+			attendance.workIn = now;
+		}
+		
+		return attendance;
+		// 외근 여부 확인
+//		if (accessLogs != null && "OUTWORK".equalsIgnoreCase(accessLog.getAccessType())) {
+//			LocalTime outTime = accessLog.getOutTime();
+//			
+//			// 외근 시작 시간이 출근 기준 시간 + 지각 유예 시간보다 빠르면 정상 출근 인정
+//			if (outTime != null && !outTime.isAfter(standardIn.plusMinutes(lateLimit))) {
+//				attendance.statusCode = "WORKIN";
+//				attendance.workIn = outTime;
+//			} else { // 외근 기준 이후면 지각 처리
+//				attendance.statusCode = "LATE";
+//				attendance.workIn = (outTime != null) ? outTime : now;
+//			}
+//			attendance.remark = accessLog.getReason();
+//		} else {
+//			 attendance.statusCode = now.isAfter(standardIn.plusMinutes(lateLimit)) ? "LATE" : "WORKIN";
+//			 attendance.workIn = now;
+//		}
+		
+//		 return attendance;
 	}
 	
 	// 퇴근 처리
-	public void recordWorkOut(LocalTime now, LocalTime standardOut, AccessLog accessLog) {
+	public void recordWorkOut(LocalTime now, LocalTime standardOut) {
 		LocalTime  outTime = now;
 		
 	    if (outTime != null) {

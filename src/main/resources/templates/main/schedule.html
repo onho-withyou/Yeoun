@@ -128,8 +128,8 @@
 	            	<div style="height: 60px; flex-shrink: 0; display: flex; align-items: center; gap: 10px; left: 15px; right: 15px;">
 	            		<img src="/img/avatar.png" alt="User Avatar" class="rounded-circle" width="40" height="40">
 	            		<p th:text="${#authentication.principal.empName}"></p>
-	            		<button class="btn btn-primary ">출근</button>
-	            		<button class="btn btn-primary ">출입</button>
+	            		<button class="btn btn-primary" th:attr="data-emp-id=${#authentication.name}" onclick="handleAttendanceToggle(this.dataset.empId)" id="attendance">출근</button>
+	            		<button class="btn btn-primary" th:attr="data-emp-id=${#authentication.name}" onclick="handleAttendanceToggle(this.dataset.empId)" id="accessBtn">출입</button>
 	            	</div>
 					<div class="card">
 						<div>
@@ -174,6 +174,7 @@
 	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 	
 	<script src="/js/main/schedule.js"></script>
+	<script src="/js/attendance/attendance.js"></script>
 </th:block>
 
 </body>
