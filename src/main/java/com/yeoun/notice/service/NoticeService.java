@@ -111,6 +111,12 @@ public class NoticeService {
 		notice.setDeleteYN("Y");
 	}
 	
+	public List<FileAttachDTO> getNoticeFiles(Long noticeId) {
+		List<FileAttach> fileList = fileAttachRepository.findByRefTableAndRefId("NOTICE", noticeId);
+		
+		return fileList.stream().map(FileAttachDTO::fromEntity).toList(); 
+	}
+	
 
 
 }

@@ -14,8 +14,9 @@ const modifyNoticeBtn = document.getElementById('notice-modify');
 document.addEventListener('DOMContentLoaded', function() {
 	
 	// 공지사항 조회모달 열기 이벤트
-	showNoticeModal.addEventListener('show.bs.modal', function(event){
-		getNoticeData(selectedNoticeId);
+	showNoticeModal.addEventListener('show.bs.modal', async function(event){
+		await getNoticeData(selectedNoticeId);
+		await getNoticeFileData(selectedNoticeId);
 	});
 	
 	//공지사항 조회 - 수정버튼
@@ -140,13 +141,13 @@ async function getNoticeData(noticeId) {
 		return response.json();
 	})
 	.then(data => {
-		console.log(data,"데이어어어어");
+//		console.log(data,"데이어어어어");
 		inputReadData(data);
 		
 	})
 	.catch(error => console.error('Error:', error));
 }
-	
+
 // 공지조회모달 데이터 입력함수
 function inputReadData(data){
 	// 날짜 문자열을 Date 객체로 변환
@@ -182,6 +183,77 @@ function inputReadData(data){
 	initReadModal(data.createdUser);
 }
 
+// 조회할 공지 파일 데이터 가져오기
+async function getNoticeFileData(noticeId) {
+	await fetch('/api/notices/file/' + noticeId)
+	.then(response => { // response가 200이 아닐때
+		if (!response.ok) throw new Error('공지사항을 불러올 수 없습니다.');
+    	
+		return response.json();
+	})
+	.then(data => {
+//		console.log(data,"데이터어어어어");
+		inputReadFileData(data);
+	})
+	.catch(error => console.error('Error:', error));
+}
+
+// 공지 파일 데이터 입력함수
+function inputReadFileData(fileData) {
+	//등록된 파일 데이터 입력
+	console.log(fileData)
+	// 등록된파일위치 초기화
+	document.getElementById("notice-attached-file").innerHTML = "";
+	
+//	let files = Array.from(fileData);
+	// 이미지 파일 갯수만큼 반복문 수행
+	fileData.forEach(function(file, index) {
+		// 미리보기 3-1) 미리보기 HTML 요소 생성
+		const fileList = document.createElement('div');
+		const iconEl = document.createElement('i');
+		const nameSpan = document.createElement('span');
+		const downloadEl = document.createElement('a');
+		const deleteEl = document.createElement('a');
+		const downloadImg = document.createElement('img');
+		const deleteImg   = document.createElement('img');
+		
+		fileList.classList.add('attach-file');
+		iconEl.classList.add('fa-regular', 'fa-file', 'file-icon');
+		nameSpan.textContent = file.originFileName + "  ";
+		
+		fileList.appendChild(iconEl);
+		fileList.appendChild(nameSpan);
+
+		downloadEl.href = `/file/download/${file.fileId}`;
+		downloadEl.classList.add('file-download-link');
+		downloadEl.title = '다운로드';
+		
+		downloadImg.src = '/img/download-icon.png';
+		downloadImg.alt = '다운로드';
+		downloadImg.classList.add('file-download-icon', 'img-btn');
+		
+		downloadEl.appendChild(downloadImg);
+		fileList.appendChild(downloadEl);
+		
+		// 4) 삭제 아이콘 설정
+		deleteEl.href = '#';                                
+		deleteEl.classList.add('file-delete-link');
+		deleteEl.title = '삭제';
+		deleteEl.dataset.fileId = file.fileId;             
+
+		deleteImg.src = '/img/delete-icon.png';
+		deleteImg.alt = '삭제';
+		deleteImg.classList.add('file-delete-icon', 'img-btn');
+
+		deleteEl.appendChild(deleteImg);
+		fileList.appendChild(deleteEl);
+							
+		// 미리보기 3-2) 미리보기 영역에 요소 추가
+		console.log(fileList);
+		document.getElementById("notice-attached-file").append(fileList);
+	});
+}
+
 // 공지조회 모달 열때 글쓴이와 접속자 동일인물 판별
 function initReadModal(createdUser) {
 	if(currentUserId == createdUser) { // 로그인직원과 글쓴이가 동일인물
@@ -211,15 +283,14 @@ function initReadModal(createdUser) {
 
 // 공지등록 첨부파일 엘리먼트
 const fileInput = document.getElementById('notice-files-write');
+const MAX_FILE_COUNT = 5;
 // 공지등록 첨부파일 변화시 동작이벤트
 fileInput.addEventListener('change', function(event) {
 	let files = Array.from(event.target.files);
 
-	const fileCountLimit = 5;
-	
-	if(files.length > fileCountLimit) { // 파일 갯수가 5개보다 많을 경우
-		alert("최대 첨부 가능한 갯수 : " + fileCountLimit);
-		files = files.slice(0, fileCountLimit);
+	if(files.length > MAX_FILE_COUNT) { // 파일 갯수가 5개보다 많을 경우
+		alert("최대 첨부 가능한 갯수 : " + MAX_FILE_COUNT);
+		files = files.slice(0, MAX_FILE_COUNT);
 	}
 	// 미리보기1) 이미지 프리뷰 영역 초기화
 	document.getElementById("fileFieldWrite").innerHTML = "";
@@ -228,7 +299,7 @@ fileInput.addEventListener('change', function(event) {
 	let newFiles = new DataTransfer();
 	
 	// 이미지 파일 갯수만큼 반복문 수행
-	$.each(files, function(index, file) {
+	files.forEach(function(file, index) {
 		// 현재 반복중인 파일 1개를 새로운 DataTransfer 객체에 추가
 		newFiles.items.add(file);
 		// ------------------------
@@ -242,17 +313,20 @@ fileInput.addEventListener('change', function(event) {
 //			console.log(e);
 			
 			// 미리보기 3-1) 미리보기 HTML 요소 생성
-			// => <img> 태그를 활용하여 읽어온 이미지(e.target.result)를 src 속성에 전달
-			const fileList = $(`<div class="div-img-preview">`)
-								.append(`
-									<i class="fa-regular fa-file file-icon"></i>
-									<span>${file.name}</span>	
-								`);
-								
+			const fileList = document.createElement('div');
+			const iconEl = document.createElement('i');
+			const nameSpan = document.createElement('span');
 			
+			fileList.classList.add('div-img-preview');
+			iconEl.classList.add('fa-regular', 'fa-file', 'file-icon');
+			nameSpan.textContent = file.name;
+
+			fileList.appendChild(iconEl);
+			fileList.appendChild(nameSpan);
+								
 			// 미리보기 3-2) 미리보기 영역에 요소 추가
 			console.log(fileList);
-			$("#fileFieldWrite").append(fileList);
+			document.getElementById("fileFieldWrite").append(fileList);
 		}
 		
 		// 미리보기4) 이미지 파일 읽어오기
@@ -264,8 +338,17 @@ fileInput.addEventListener('change', function(event) {
 	});
 	// --------------------------------------------------
 	// 파일 선택 요소 객체의 files 속성에 접근하여 새로운 파일 목록 객체로 업데이트
-	$("#notice-files-write")[0].files = newFiles.files;
+	fileInput.files = newFiles.files;
 });
+
+// 공지사항 조회 파일관리, 첨부
+let existingFileCount; // 현재까지 업로드된 파일 갯수
+
+// 등록된 파일 표시
+function initUploadArea() {
+	
+}
+
 
 
 
