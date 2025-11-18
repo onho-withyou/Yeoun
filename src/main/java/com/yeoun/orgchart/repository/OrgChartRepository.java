@@ -21,7 +21,9 @@ public interface OrgChartRepository extends JpaRepository<Dept, String> {
             e.empName as empName,
             p.rankOrder as posOrder
         from Dept d
-        left join Emp e on e.dept.deptId = d.deptId
+        left join Emp e 
+    		on e.dept.deptId = d.deptId
+    		and e.status = 'ACTIVE'
         left join Position p on e.position.posCode = p.posCode
         order by d.deptId, p.rankOrder desc, e.empName
     """)
