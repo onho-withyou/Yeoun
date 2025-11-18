@@ -73,14 +73,45 @@ public class AttendanceService {
 			 return newAttendance.getStatusCode();
 		}
 		
-		// 이미 출근 기록이 있으면 퇴근 처리
-		if (attendance.isAlreadyOut()) {
+		
+		LocalTime lunchStart = LocalTime.parse(workPolicy.getLunchIn());
+		LocalTime lunchEnd = LocalTime.parse(workPolicy.getLunchOut());
+		LocalTime standardOut  = LocalTime.parse(workPolicy.getOutTime());
+		
+		if (!attendance.isAlreadyOut() && now.isAfter(standardOut)) { // 이미 퇴근 상태면 처리 불가
 			return "ALREADY_OUT";
 		}
 		
-		attendance.recordWorkOut(now, LocalTime.parse(workPolicy.getOutTime()), accessLog);
+		if (now.isAfter(lunchStart) && now.isBefore(lunchEnd)) {
+			return "LUNCH_TIME"; // 점심시간일 때는 아무 처리 안 함
+		}
 		
-		return "OUT";
+		// 퇴근 처리
+		if (now.isAfter(standardOut)) {
+			attendance.recordWorkOut(now, standardOut, accessLog);
+	        return "OUT";
+		}
+		
+		// 외출/복귀 처리
+		AccessLog lastLog = accessLogRepository.findTopByEmpIdAndAccessDateAndReturnTimeIsNullOrderByOutTimeDesc(empId, today);
+		
+		log.info(">>>>>>>>>>>>>>>>>>>> lastLog : " + lastLog);
+		
+		if (lastLog != null) {
+			// 복귀 처리
+			lastLog.accessIn(now, "IN");
+			return "IN"; // 복귀
+		} else {
+			// 외출 처리
+			AccessLog newOutLog = AccessLog.builder()
+					.empId(empId)
+					.accessDate(today)
+					.outTime(now)
+					.accessType("OUT")
+					.build();
+			accessLogRepository.save(newOutLog);
+			return "OUT";
+		}
 	}
 	
 	// 출퇴근 수기 등록

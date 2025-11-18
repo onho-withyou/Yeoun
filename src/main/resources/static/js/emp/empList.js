@@ -10,6 +10,13 @@ let currentPage = 0;   // 0부터 시작 (Spring Page와 맞춤)
 const pageSize = 10;
 
 document.addEventListener('DOMContentLoaded', () => {
+  
+  const msgHolder = document.getElementById('empMsgHolder');
+    if (msgHolder && msgHolder.dataset.msg) {
+      alert(msgHolder.dataset.msg);
+  }
+ 
+	
   empDetailModal = new bootstrap.Modal(document.getElementById('empDetailModal'));
 
   // 수정 버튼 클릭 이벤트 등록
@@ -61,6 +68,37 @@ document.addEventListener('DOMContentLoaded', () => {
 // ================================
 //  사원 목록 불러오기 (서버 페이징)
 // ================================
+class StatusBadgeRenderer {
+  constructor(props) {
+    this.el = document.createElement('span');
+    this.render(props);
+  }
+
+  getElement() {
+    return this.el;
+  }
+
+  render(props) {
+    const row = props.row || {};
+    const code = row.status;          // 'ACTIVE' / 'LEAVE' / 'RETIRE'
+    const text = row.statusName || ''; // '재직' / '휴직' / '퇴직'
+
+    let cls = 'badge bg-secondary';
+
+    if (code === 'ACTIVE') {
+      cls = 'badge bg-success';
+    } else if (code === 'LEAVE') {
+      cls = 'badge bg-warning text-dark';
+    } else if (code === 'RETIRE') {
+      cls = 'badge bg-secondary';
+    }
+
+    this.el.className = cls;
+    this.el.textContent = text;
+  }
+}
+
+
 function loadEmpList(page) {
   const keywordInput = document.getElementById('keyword');
   const deptSelect = document.getElementById('deptId');
@@ -90,6 +128,7 @@ function loadEmpList(page) {
     .catch(() => alert('사원 목록 불러오기 실패'));
 }
 
+
 // ================================
 //  Toast Grid 생성 함수
 // ================================
@@ -105,13 +144,51 @@ function initEmpGrid() {
 //      perPage: pageSize
 //    },
     columns: [
-      { header: '입사일자', name: 'hireDate', align: 'center', sortable: true },
-      { header: '사원번호', name: 'empId',    align: 'center', sortable: true },
-      { header: '성명',     name: 'empName',  align: 'center', sortable: true },
-      { header: '부서',     name: 'deptName', align: 'center', sortable: true },
-      { header: '직급',     name: 'posName',  align: 'center', sortable: true },
-      { header: '전화번호', name: 'mobile',   align: 'center' },
-      { header: 'Email',    name: 'email',    width: 220 },
+      { 
+		header: '입사일자', 
+		name: 'hireDate', 
+		align: 'center', 
+		sortable: true 
+	  },
+      { 
+		header: '사원번호', 
+		name: 'empId',    
+		align: 'center', 
+		sortable: true 
+	  },
+      { 
+		header: '성명',     
+		name: 'empName',  
+		align: 'center', 
+		sortable: true 
+	  },
+      { 
+		header: '부서',     
+		name: 'deptName', 
+		align: 'center', 
+		sortable: true 
+	  },
+      { 
+		header: '직급',     
+		name: 'posName',  
+		align: 'center', 
+		sortable: true 
+	  },
+	  { 
+	      header: '상태', 
+	      name: 'statusName',   // ACTIVE → 재직, LEAVE → 휴직, RETIRE → 퇴직
+	      align: 'center'
+	  },
+      {
+		header: '전화번호', 
+		name: 'mobile',   
+		align: 'center' 
+	  },
+      { 
+		header: 'Email',    
+		name: 'email',    
+		width: 220 
+	  },
       {
         header: ' ',
         name: 'btn',

@@ -42,7 +42,7 @@ INSERT INTO approval_doc(
             ,APPROVAL_TITLE	-- 문서제목
             ,APPROVER	--결재권한자
             ,CREATED_DATE	--생성일자
-            ,DOC_STATUS	--문서상태--반려,1차완료,2차완료,3차완료
+            ,DOC_STATUS	--문서상태
             ,EMP_ID	--사원번호
             ,EXPND_TYPE	 --지출종류
             ,FINISH_DATE --완료 예정일자	
@@ -69,6 +69,16 @@ INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DO
 VALUES(202511150108,'인사부용 테스트 전도연2 문서제목','',sysdate,'','2104502','비정기지출',sysdate,'자유양식결재서','테스트용 2 입니다.',sysdate,sysdate,'개발3팀본부');
 INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
 VALUES(202511150109,'인사부용 테스트 전도연3 문서제목','',sysdate,'','2104502','정기지출',sysdate,'자유양식결재서','테스트용 3 입니다.',sysdate,sysdate,'개발2팀본부');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
+VALUES(202511150110,'영업부 김구1 문서제목 테스트','1306178',sysdate,'1차대기','2505823','비정기지출',sysdate,'자유양식결재서','테스트용 김구1 입니다.',sysdate,sysdate,'개발2팀본부');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
+VALUES(202511150111,'영업부 김구2 문서제목 테스트','1306178',sysdate,'완료','2505823','고정지출',sysdate,'지출결의서','테스트용 김구2 종료 입니다.',sysdate,sysdate,'개발2팀본부');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
+VALUES(202511150112,'영업부 김구3 문서제목 테스트','',sysdate,'완료','2505823','비정지출',sysdate,'지출결의서','테스트용 김구3 종료 입니다.',sysdate,sysdate,'개발2팀본부');
+
+
+
+
 
 -- 결재권한자
 INSERT INTO approver(
@@ -99,6 +109,20 @@ INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, orde
 VALUES('2401300',202511150107,0,'','2','y');
 INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
 VALUES('2104502',202511150107,0,'','1','');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('2012978',202511150110,0,'','3','');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('2410807',202511150110,0,'','2','');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('1306178',202511150110,0,'','1','y');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('2012978',202511150111,0,'','3','y');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('2410807',202511150111,0,'','2','y');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('1306178',202511150111,0,'','1','y');
+
+
 
 -- EMP
 INSERT INTO EMP (EMP_ID, EMP_PWD, EMP_NAME, GENDER, RRN, MOBILE, EMAIL, POST_CODE, ADDRESS1, ADDRESS2, HIRE_DATE, STATUS, PHOTO_FILE_ID, CREATED_DATE, LAST_LOGIN, DEPT_ID, POS_CODE) VALUES ('0009236', '$2a$10$ViLZJqMoejz8sExHrR6ZpeC2QwN4tHfyKBDWj9zMcvTGoGZVmjLeS', '세종대왕', 'M', '800925-5824156', '010-0221-9041', 'sejong@yeoun.com', '36502', '광주광역시 서구 상무중앙로 7 치평동 1201-2', '자이아파트 15층', TO_DATE('2000-09-23', 'YYYY-MM-DD'), 'ACTIVE', NULL, SYSTIMESTAMP, SYSTIMESTAMP, 'DEP001', 'POS007');

@@ -27,7 +27,6 @@ public class LeaveHistoryDTO {
 	private LocalDate endDate; // 사용 종료일
 	private int usedDays; //  사용 일수
 	private String reason; // 연차 사용 이유
-	private String apprStatus; // 결재 상태 (승인/반려) / (APPROVED / REJECTED)
 	private Long paymentId; // 결재문서 Id
 	
 	// --------------------------------

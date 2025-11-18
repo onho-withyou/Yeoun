@@ -23,23 +23,10 @@ public class PayrollHistoryService {
             String month
     ) {
 
-        String yymm = null;
+        String yymm = (year != null && month != null && !year.isEmpty() && !month.isEmpty())
+                ? year + month : null;
 
-        if (year != null && month != null && !year.isEmpty() && !month.isEmpty()) {
-            yymm = year + month;
-        }
-
-        log.info("=== FINAL SEARCH PARAMS ===");
-        log.info("mode = {}", mode);
-        log.info("keyword = {}", keyword);
-        log.info("deptName = {}", deptName);
-        log.info("yymm = {}", yymm);
-
-        return switch (mode) {
-            case "emp" -> repo.searchByEmp(keyword, yymm);
-            case "dept" -> repo.searchByDept(deptName, yymm);
-            case "month" -> repo.searchByMonth(yymm);
-            default -> List.of();
-        };
+        return repo.searchAll(keyword, deptName, yymm);
     }
+
 }

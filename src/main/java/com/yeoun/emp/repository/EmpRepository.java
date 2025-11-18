@@ -43,13 +43,19 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	            p.posName,
 	            p.rankOrder,
 	            e.mobile,
-	            e.email
+	            e.email,
+	            e.status,
+		        cc.codeName
 	        )
 	        from Emp e
 	          join e.dept d
 	          join e.position p
+	          left join CommonCode cc
+	          	on cc.codeId = e.status
+	          	and cc.parent.codeId = 'EMP_STATUS'
+	          	and cc.useYn = 'Y'
 	        where
-	          e.status = 'ACTIVE'
+	          (e.status is null or e.status in ('ACTIVE', 'LEAVE', 'RETIRE'))
       	      and ( :keyword is null or :keyword = '' or
 	                e.empId    like concat('%', :keyword, '%') or
 	                e.empName  like concat('%', :keyword, '%') or
@@ -58,10 +64,47 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	                e.email    like concat('%', :keyword, '%')
 	          )
 	          and ( :deptId is null or :deptId = '' or d.deptId = :deptId )
+            order by
+			  cc.codeSeq asc,
+			  e.hireDate desc
 	        """)
 	 Page<EmpListDTO> searchEmpList(@Param("keyword") String keyword,
-             @Param("deptId") String deptId,
-             Pageable pageable);
+						            @Param("deptId") String deptId,
+						            Pageable pageable);
+	
+	
+	// 인사 발령 등록 화면에서 사용되는 사원 목록 (DTO 직접 조회)
+	@Query("""
+	    SELECT new com.yeoun.emp.dto.EmpListDTO(
+	        e.hireDate,
+	        e.empId,
+	        e.empName,
+	        d.deptName,
+	        p.posName,
+	        p.rankOrder,
+	        e.mobile,
+	        e.email
+	    )
+	    FROM Emp e
+	    JOIN e.dept d
+	    JOIN e.position p
+	    WHERE e.status = 'ACTIVE'
+	      AND (:deptId IS NULL OR d.deptId = :deptId)
+	      AND (:posCode IS NULL OR p.posCode = :posCode)
+	      AND (
+	            :keyword IS NULL
+	            OR :keyword = ''
+	            OR e.empName LIKE concat('%', :keyword, '%')
+	            OR e.empId   LIKE concat('%', :keyword, '%')
+	          )
+	    ORDER BY e.hireDate DESC
+	""")
+	List<EmpListDTO> searchForHrActionDto(
+	        @Param("deptId") String deptId,
+	        @Param("posCode") String posCode,
+	        @Param("keyword") String keyword);
+
+
 	
 	
 

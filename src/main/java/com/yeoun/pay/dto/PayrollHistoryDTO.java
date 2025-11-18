@@ -6,7 +6,7 @@ import lombok.*;
 
 @Getter @Setter @Builder
 @NoArgsConstructor @AllArgsConstructor
-public class PayrollHistoryRow {
+public class PayrollHistoryDTO {
 
     private String empId;
     private String empName;

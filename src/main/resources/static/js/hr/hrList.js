@@ -154,7 +154,7 @@ function renderHrPagination(totalPages) {
   // 이전
   html += `
     <li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
-      <button class="page-link" type="button" onclick="loadHrActionList(${currentPage - 1})">이전</button>
+      <button class="page-link" type="button" onclick="loadHrActionList(${currentPage - 1})"><</button>
     </li>
   `;
 
@@ -170,7 +170,7 @@ function renderHrPagination(totalPages) {
   // 다음
   html += `
     <li class="page-item ${currentPage + 1 >= totalPages ? 'disabled' : ''}">
-      <button class="page-link" type="button" onclick="loadHrActionList(${currentPage + 1})">다음</button>
+      <button class="page-link" type="button" onclick="loadHrActionList(${currentPage + 1})">></button>
     </li>
   `;
 
