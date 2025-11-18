@@ -21,7 +21,4 @@ public class OrgNodeDTO {
 	private String posName;			// 직급명
 	private String empName;			// 사원명
 	
-	// 부서 디자인용
-	private String className;
-
 }

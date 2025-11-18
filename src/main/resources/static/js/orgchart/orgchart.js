@@ -65,10 +65,16 @@ function buildTreantTree(nodes) {
         <span class="emp-pos">${e.posName}</span>
       </div>
     `).join('');
+	
+	const themeClass =
+	  info.deptId === 'DEP999' ? 'theme-representative' :
+	  info.deptId === 'DEP000' || info.parentDeptId === 'DEP000' ? 'theme-erp' :
+	  info.deptId === 'DEP100' || info.parentDeptId === 'DEP100' ? 'theme-mes' :
+	  '';
 
     const cardHtml = `
       <div class="dept-card">
-        <div class="dept-header">${info.deptName}</div>
+        <div class="dept-header ${themeClass}">${info.deptName}</div>
         <div class="dept-body">
           ${empRowsHtml || `<div class="emp-row emp-empty">직원 없음</div>`}
         </div>

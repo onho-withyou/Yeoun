@@ -35,13 +35,6 @@ public class OrgChartService {
 	                    orgNodeDTO.setDeptName(r.getDeptName());
 	                    orgNodeDTO.setPosName(r.getPosName());
 	                    orgNodeDTO.setEmpName(r.getEmpName());
-
-	                    if (r.getParentDeptId() == null) {
-	                    	orgNodeDTO.setClassName("root-node");
-	                    } else {
-	                    	orgNodeDTO.setClassName("child-node");
-	                    }
-
 	                    return orgNodeDTO;
 	                })
 	                .toList();
