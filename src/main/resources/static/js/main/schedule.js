@@ -81,6 +81,9 @@ async function updateCurrentDate() {
 	
 // 버튼 함수 지정
 function changeCalendarType(type) {
+	if(tooltip.style.display == 'block') {
+		tooltip.style.display = 'none';
+	}
 	calendar.changeView(type, true);
 	calendarType = type;
 }
@@ -355,6 +358,10 @@ function checkCalendarType() {
 }
 
 function checkFilter() {
+	if(tooltip.style.display == 'block') {
+		tooltip.style.display = 'none';
+	}
+	
 	const companyFilter = document.getElementById('filter-company')
 	const departmentFilter = document.getElementById('filter-department')
 	const personalFilter = document.getElementById('filter-personal')
@@ -563,7 +570,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			return;
 		}
 		
-		console.log(event);
+//		console.log(event);
 		if (event.calendarId === 'holiday') {
 			alert("휴일입니다.");
 		} else if (event.calendarId === 'leave') {
@@ -584,7 +591,6 @@ document.addEventListener('DOMContentLoaded', function () {
 				console.log("html추가중", html);
 			}
 			
-			console.log("html추가완", html);
 			tooltip.innerHTML = html;
 			
 			// 컨테이너 기준 절대좌표 계산
@@ -673,8 +679,9 @@ function initNoticeGrid(data) {
 			editable: true,
 			columns: [
 				{
-					header: '제목',
-					name: 'noticeTitle'
+					header: '제목'
+					, name: 'noticeTitle'
+					, align: "right"
 				},
 //				{
 //					header: '등록일',
@@ -687,8 +694,8 @@ function initNoticeGrid(data) {
 //					, align: "center"
 //					, formatter: (cellInfo) => "<button type='button' class='btn-detail' data-row='${cellInfo.rowKey}' >상세정보</button>"
 //				}
-			],
-			rowHeaders: ['rowNum'],
+			]
+//			rowHeaders: ['rowNum'],
 		});
 		grid.resetData(data);
 	}

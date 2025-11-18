@@ -33,14 +33,14 @@ public class MainController {
 	private final ScheduleService scheduleService;
 	
 	// 메인페이지 맵핑
-	@GetMapping("")
-	public String Main() {
-		
-		return "/main/main";
-	}
+//	@GetMapping("")
+//	public String Main() {
+//		
+//		return "/main/main";
+//	}
 	
 	// 메인페이지 스케줄페이지
-	@GetMapping("/calendar")
+	@GetMapping("")
 	public String schedule() {
 		return "/main/schedule";
 	}
