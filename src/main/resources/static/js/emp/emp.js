@@ -16,63 +16,101 @@
    * ============================================================
    */
   function initOrgSelects() {
-    const topSel  = document.getElementById('topDept');
-    const deptSel = document.getElementById('deptId');
-    if (!topSel || !deptSel) return; // 다른 화면에서 안전하게 넘어가도록 가드
+    const topSel  = document.getElementById('topDept');  // 본부 (상위부서)
+    const deptSel = document.getElementById('deptId');   // 부서
+    const posSel  = document.getElementById('posCode');  // 직급
 
-    // 폼에 렌더된 모든 하위부서 option(placeholder 제외) 백업
+    if (!topSel || !deptSel || !posSel) return; // 다른 화면 대비 가드
+
+    // 부서 option 백업 (placeholder 제외)
     const allDept = Array.from(deptSel.querySelectorAll('option')).filter(o => o.value);
 
-    function resetDept(phText = '선택') {
+    // 공통: 셀렉트 초기화 + placeholder + disabled 설정 (부서용)
+    function resetDept(phText, disabled = true) {
       deptSel.innerHTML = '';
       const ph = document.createElement('option');
       ph.value = '';
       ph.textContent = phText;
+      ph.disabled = true;
+      ph.selected = true;
       deptSel.appendChild(ph);
+      deptSel.disabled = disabled;
     }
 
-    function filterDeptByTop(topId) {
-      const prev = deptSel.value;  // 이전 선택 복원용
-      resetDept();
+    // 직급 셀렉트의 활성/비활성만 제어 (목록은 그대로 둠)
+    function updatePosState(deptId) {
+      const firstOpt = posSel.querySelector('option[value=""]') || posSel.options[0];
 
-	  if (!topId) { // 상위부서 미선택이면 전체 노출
-	     allDept.forEach(o => deptSel.appendChild(o.cloneNode(true)));
-	     if ([...deptSel.options].some(o => o.value === prev)) {
-	       deptSel.value = prev;
-	     }
-	     return;
-	  }
-
-      allDept
-        .filter(o => o.getAttribute('data-parent') === topId)  // data-parent 기준
-        .forEach(o => deptSel.appendChild(o.cloneNode(true)));
-
-      // 이전 선택 복원
-      if ([...deptSel.options].some(o => o.value === prev)) {
-        deptSel.value = prev;
+      if (!deptId) {
+        // 부서가 없으면 직급 막기
+        if (firstOpt) firstOpt.textContent = '먼저 부서를 선택하세요';
+        posSel.value = '';
+        posSel.disabled = true;
+      } else {
+        // 부서가 선택되면 직급 활성화
+        if (firstOpt) firstOpt.textContent = '직급을 선택하세요';
+        posSel.disabled = false;
       }
     }
 
-    // 최초 로드 시: deptId가 이미 선택되어 있으면 그 parent로 topDept 자동 설정
-    const selected = deptSel.querySelector('option:checked');
-    if (selected && selected.value) {
-      const parentDeptId = selected.getAttribute('data-parent');
-      if (parentDeptId) {
-        topSel.value = parentDeptId;          // 상위부서 자동 지정
-        filterDeptByTop(parentDeptId);        // 하위부서 목록 필터
-        deptSel.value = selected.value;   // 선택 복원
+    // 상위부서 선택에 따라 부서 필터링
+    function filterDeptByTop(topId) {
+      const prevDept = deptSel.value;
+
+      if (!topId) {
+        // 본부 안 고른 상태
+        resetDept('먼저 본부를 선택하세요', true);
+        updatePosState(null); // 직급도 막기
         return;
       }
+
+      // 본부 선택됨 -> 부서 활성화 + 해당 상위부서의 하위부서만 노출
+      resetDept('부서를 선택하세요', false);
+
+      allDept
+        .filter(o => o.getAttribute('data-parent') === topId)  // data-parent = parentDeptId
+        .forEach(o => deptSel.appendChild(o.cloneNode(true)));
+
+      // 이전에 선택한 부서가 여전히 목록에 있으면 복원
+      if ([...deptSel.options].some(o => o.value === prevDept)) {
+        deptSel.value = prevDept;
+        updatePosState(prevDept);
+      } else {
+        updatePosState(null); // 유효한 부서가 없으면 직급도 막기
+      }
     }
-    // 선택 없으면 현재 topDept 값 기준으로만 필터
-    filterDeptByTop(topSel.value);
+
+    // 최초 로드 시 (수정 폼 대비)
+    const selectedDeptOpt = deptSel.querySelector('option:checked[value]');
+
+    if (selectedDeptOpt) {
+      // 폼에 이미 부서가 선택되어 있는 경우 → 상위부서/부서/직급 상태 맞춰주기
+      const parentDeptId = selectedDeptOpt.getAttribute('data-parent');
+      if (parentDeptId) {
+        topSel.value = parentDeptId;
+        filterDeptByTop(parentDeptId);
+        deptSel.value = selectedDeptOpt.value;
+        updatePosState(selectedDeptOpt.value);
+      } else {
+        // parentDeptId 정보가 없으면 그냥 현재 topDept 기준으로만 처리
+        filterDeptByTop(topSel.value);
+        updatePosState(deptSel.value);
+      }
+    } else {
+      // 신규 등록 등 -> 기본 상태
+      filterDeptByTop(topSel.value);
+      updatePosState(deptSel.value);
+    }
 
     // 이벤트 바인딩
     topSel.addEventListener('change', e => filterDeptByTop(e.target.value));
+    deptSel.addEventListener('change', e => updatePosState(e.target.value));
   }
 
   // DOMContentLoaded 시 초기화
   document.addEventListener('DOMContentLoaded', initOrgSelects);
+
+
 
 
   /**

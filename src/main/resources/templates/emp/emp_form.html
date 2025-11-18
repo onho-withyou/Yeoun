@@ -135,15 +135,15 @@
 	
 	        <div class="row g-3">
 	        
-	          <!-- 종류 (ERP / MES) -->
+	          <!-- 본부 (ERP / MES) -->
 	          <div class="col-12 col-md-4">
-	            <label class="form-label required" for="topDept">종류</label>
+	            <label class="form-label required" for="topDept">본부</label>
 				<select class="form-select" id="topDept" th:disabled="${mode == 'edit'}">
 				  <option value="">선택</option>
 				  <option th:each="d : ${deptList}"
 				          th:if="${d.parentDeptId == 'DEP999'}"
 				          th:value="${d.deptId}"
-				          th:text="${d.deptAbbr}">ERP</option>
+				          th:text="${d.deptAbbr}"></option>
 				</select>
 	          </div>
 	          
