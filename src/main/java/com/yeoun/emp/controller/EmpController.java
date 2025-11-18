@@ -54,8 +54,14 @@ public class EmpController {
 	// GET : 사원 등록 폼
 	@GetMapping("/regist")
 	public String registEmp(Model model) {
-		model.addAttribute("empDTO", new EmpDTO());
-		model.addAttribute("mode", "create");
+		
+		if (!model.containsAttribute("empDTO")) {
+	        model.addAttribute("empDTO", new EmpDTO());
+	    }
+	    if (!model.containsAttribute("mode")) {
+	        model.addAttribute("mode", "create");
+	    }
+
 		
 		setupEmpFormCommon(model);
 		
@@ -71,17 +77,20 @@ public class EmpController {
 	@PostMapping("/regist")
 	public String regist(@ModelAttribute("empDTO") @Valid EmpDTO empDTO,
 						 BindingResult bindingResult,
-						 RedirectAttributes rttr,
-						 Model model) {
+						 RedirectAttributes rttr) {
 		log.info(">>>>>>>>>>>>>> empDTO : " + empDTO);
 		log.info(">>>>>>>>>>>>>> bindingResult.getAllErrors : " + bindingResult.getAllErrors());
 		
 		// 1) 입력값 검증 결과가 true 일 때(검증 오류 발생 시) 다시 입력폼으로 포워딩
-		if(bindingResult.hasErrors()) {
-			setupEmpFormCommon(model);
-			model.addAttribute("mode", "create");
-			return "emp/emp_form";
-		}
+		if (bindingResult.hasErrors()) {
+	        rttr.addFlashAttribute("empDTO", empDTO);
+	        rttr.addFlashAttribute("mode", "create");
+	        // BindingResult도 같이 플래시에 태워줘야 th:errors 가 동작함
+	        rttr.addFlashAttribute(
+	            "org.springframework.validation.BindingResult.empDTO", bindingResult);
+
+	        return "redirect:/emp/regist";
+	    }
 		
 		try {
 	        // 2) 서비스 호출 (이메일/연락처 중복 검사)
@@ -103,9 +112,12 @@ public class EmpController {
 	        }
 		
 	        // 다시 폼으로
-	        setupEmpFormCommon(model);
-	        model.addAttribute("mode", "create");
-	        return "emp/emp_form";
+	        rttr.addFlashAttribute("empDTO", empDTO);
+	        rttr.addFlashAttribute("mode", "create");
+	        rttr.addFlashAttribute(
+	            "org.springframework.validation.BindingResult.empDTO", bindingResult);
+
+	        return "redirect:/emp/regist";
 	    }
 
 	    // 4) 정상 등록 시
@@ -117,17 +129,11 @@ public class EmpController {
 	// 사원 메인 페이지 (현황 + 등록 버튼 있는 화면)
 	@GetMapping("")
 	public String empMainPage(Model model,
-							  @RequestParam(value = "msg", required = false) String msg,
 							  @RequestParam(value = "keyword", required = false) String keyword,
 							  @RequestParam(value = "deptId", required = false) String deptId) {
 		
 	    // 부서 셀렉트 옵션용
 	    model.addAttribute("deptList", deptRepository.findActive());
-	    
-	    // 메시지가 있으면 모델에 담기
-	    if (msg != null && !msg.isBlank()) {
-	        model.addAttribute("msg", msg);
-	    }
 	    
 	    model.addAttribute("keyword", keyword);
 	    model.addAttribute("deptId", deptId);
@@ -185,7 +191,7 @@ public class EmpController {
 	@PostMapping("/edit")
 	public String updateEmp(@ModelAttribute("empDTO") EmpDTO empDTO, RedirectAttributes rttr) {
 	    empService.updateEmp(empDTO);
-	    rttr.addAttribute("msg", "정보 수정이 완료되었습니다.");
+	    rttr.addFlashAttribute("msg", "정보 수정이 완료되었습니다.");
 	    return "redirect:/emp";  
 	}
 	
