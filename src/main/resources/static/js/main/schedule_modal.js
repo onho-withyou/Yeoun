@@ -150,6 +150,7 @@ async function openModal(mode, data = null) {
 	const submitBtn = document.getElementById('add-schedule-btn');
 	const select = document.getElementById('schedule-type');
 	const createdUserName = document.getElementById('createdUserName');
+	const alldayCheckbox = document.getElementById('all-day-checkbox-value');
 	
 //	const createdUser = document.getElementById('schedule-writer')
 //	const startpickerInput = document.getElementById('startpicker-input');
@@ -246,8 +247,13 @@ async function openModal(mode, data = null) {
 		picker.setStartDate(data.scheduleStart ? new Date(data.scheduleStart) : today);
 		picker.setEndDate(data.scheduleFinish ? new Date(data.scheduleFinish): nextDay);
 		// 종일 체크 해제
-		form.alldayYN.checked = data.alldayYN === 'Y';
+		alldayCheckbox.checked = data.alldayYN == 'Y';
+//		form.alldayYN.checked = data.alldayYN === 'Y';
 		form.scheduleContent.value = data.scheduleContent || '';
+		
+		console.log(alldayCheckbox.checked, "체크드상태");
+		console.log(form.scheduleContent.value, "체크드값");
+//		console.log(form.alldayYN.checked, "체크드상태");
 		
 		if (data.createdUser !== currentUserId) {
 		    // 권한 없음: 삭제, 수정 버튼 비활성화

@@ -570,7 +570,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			return;
 		}
 		
-//		console.log(event);
+		console.log(event);
 		if (event.calendarId === 'holiday') {
 			alert("휴일입니다.");
 		} else if (event.calendarId === 'leave') {
@@ -613,6 +613,7 @@ document.addEventListener('DOMContentLoaded', function () {
 				return response.json();  //JSON 파싱
 			})
 			.then(data => { // response가 ok일때
+				console.log(data, "dddddddddddddddddd");
 				openModal("edit", data);
 			}).catch(error => {
 				console.error('에러', error)
@@ -621,6 +622,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 	});
 
+	// ----------------------------------------------
 	// datepicker날짜 선택시 캐린더 날짜 변경
 	dateController.on('change', function() {
 		var selectedDate = dateController.getDate();
