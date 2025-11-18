@@ -31,7 +31,7 @@ public class EmpDTO {
 	private String empId;
 	
 	// 이름
-	@NotBlank(message = "이름은 필수 입력값입니다!")
+	@NotBlank(message = "이름은 필수 입력값입니다.")
 	@Length(min = 2, max = 20, message = "이름은 2 ~ 20자리 입니다.")
 	private String empName;  			
 	
@@ -61,8 +61,8 @@ public class EmpDTO {
 	// ========================
 
     // 이메일
-    @NotBlank(message = "이메일은 필수 입력값입니다!")
-    @Email(message = "이메일 형식에 맞게 입력해 주세요!")
+    @NotBlank(message = "이메일은 필수 입력값입니다.")
+    @Email(message = "이메일 형식에 맞게 입력해 주세요.")
     private String email;  		
     
     // 연락처
@@ -71,10 +71,10 @@ public class EmpDTO {
     private String mobile; 	
 	
     // 주소 (우편번호 / 기본주소 + 상세주소)
-	@NotBlank(message = "우편번호는 필수 입력값입니다!") 
+	@NotBlank(message = "우편번호는 필수 입력값입니다.") 
 	private String postCode; 
 	
-	@NotBlank(message = "기본 주소는 필수 입력값입니다!")
+	@NotBlank(message = "기본 주소는 필수 입력값입니다.")
 	private String address1;  	
 	private String address2;   	
 	
@@ -82,8 +82,8 @@ public class EmpDTO {
 	// 조직/직무
 	// ========================
 	
-	// ERP / MES 구분
-	private String empType;
+	@NotBlank(message = "종류를 선택해주세요.")
+    private String topDept;
 	
 	// 부서 
 	@NotBlank(message = "부서를 선택해주세요.")

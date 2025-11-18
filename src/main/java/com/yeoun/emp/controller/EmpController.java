@@ -41,6 +41,13 @@ public class EmpController {
 	private final CommonCodeService commonCodeService;
 	private final DeptRepository deptRepository;
 	private final PositionRepository positionRepository;
+	
+	// 사원 등록/수정 폼 공통 셀렉트 박스 세팅
+	private void setupEmpFormCommon(Model model) {
+		model.addAttribute("deptList", deptRepository.findActive());
+		model.addAttribute("positionList", positionRepository.findActive());
+		model.addAttribute("bankList", commonCodeService.getBankList());
+	}
 
 	// =============================================================================================
 	// 뷰페이지로 포워딩 시 입력값 검증으로 활용되는 DTO 객체(빈 객체)를 Model 객체에 담아 함께 전달
@@ -50,9 +57,7 @@ public class EmpController {
 		model.addAttribute("empDTO", new EmpDTO());
 		model.addAttribute("mode", "create");
 		
-		model.addAttribute("bankList", commonCodeService.getBankList());
-		model.addAttribute("deptList", deptRepository.findActive());
-		model.addAttribute("positionList", positionRepository.findActive());
+		setupEmpFormCommon(model);
 		
 		return "emp/emp_form";
 	}
@@ -74,17 +79,15 @@ public class EmpController {
 		
 		// 입력값 검증 결과가 true 일 때(검증 오류 발생 시) 다시 입력폼으로 포워딩
 		if(bindingResult.hasErrors()) {
-			model.addAttribute("deptList", empService.getDeptList());
-			model.addAttribute("positionList", empService.getPositionList());
+			setupEmpFormCommon(model);
+			model.addAttribute("mode", "create");
 			return "emp/emp_form";
 		}
 		
 		// EmpService - registEmp() 메서드 호출하여 사원 등록 처리 요청
 		empService.registEmp(empDTO);
-		
 		rttr.addFlashAttribute("msg", "사원 등록이 완료되었습니다.");
 		return "redirect:/emp";
-		
 	}
 	
 	// ====================================================================================
@@ -148,12 +151,10 @@ public class EmpController {
 	    model.addAttribute("empDTO", empDTO);
 		model.addAttribute("mode", "edit");
 		
-		model.addAttribute("bankList", commonCodeService.getBankList());
-		model.addAttribute("deptList", deptRepository.findActive());
-		model.addAttribute("positionList", positionRepository.findActive());
+		setupEmpFormCommon(model);
 		
 		// 상태 셀렉트용 공통코드 (재직/휴직/퇴직 등) 
-		model.addAttribute("statusList", List.of("ACTIVE", "LEAVE", "RESIGNED"));
+		model.addAttribute("statusList", commonCodeService.getCodes("EMP_STATUS"));
 		
 		return "emp/emp_form";
 	}
