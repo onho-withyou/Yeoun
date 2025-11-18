@@ -37,12 +37,6 @@ const grid = new tui.Grid({
 			header: "사유",
 			name : "reason"
 		},
-		{
-			header: "승인상태",
-			name : "apprStatus",
-			sortable: true,
-			filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
-		},
 	],
 		
 });
@@ -66,17 +60,10 @@ async function loadLeaveList(startDate, endDate) {
 			SICK: "병가",
 		};
 		
-		// 승인상태 변환
-		const apprStatusMap = {
-			APPROVED: "승인",
-			REJECTED: "반려",
-		};
-		
 		// 상태값이 영어로 들어오는 것을 한글로 변환해서 기존 data에 덮어씌움
 		data = data.map(item => ({
 			...item,
 			leaveType: leaveTypeMap[item.leaveType] || item.leaveType,
-			apprStatus: apprStatusMap[item.apprStatus] || item.apprStatus,
 		}));
 		
 		grid.resetData(data);

@@ -18,7 +18,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -33,6 +36,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 public class AccessLog {
 	@Id
@@ -59,4 +63,18 @@ public class AccessLog {
 	private String reason; // 외근 사유
 	
 	private String accessType; //외출 상태 구분 (OUT/IN/OUTWORK/ETC)
+	
+	@Builder
+	public AccessLog(String empId, LocalDate accessDate, LocalTime outTime, String accessType) {
+		this.empId = empId;
+		this.accessDate = accessDate;
+		this.outTime = outTime;
+		this.accessType = accessType;
+	}
+	
+	// 복귀 처리
+	public void accessIn(LocalTime outTime, String accessType) {
+		this.outTime = outTime;
+		this.accessType = accessType;
+	}
 }
