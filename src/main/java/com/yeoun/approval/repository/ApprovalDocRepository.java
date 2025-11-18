@@ -22,6 +22,11 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 	// 사원 목록 조회
 	@Query("SELECT m FROM Emp m")
     List<Emp> findAllMember();
+
+	@Query(value ="""
+			SELECT m.emp_id,m.emp_name FROM Emp m
+			""",nativeQuery = true)
+    List<Object[]> findAllMember2();
 	
 	//기안서 양식종류
 	@Query(value = """

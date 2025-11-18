@@ -20,45 +20,42 @@
 		});
 		fetchDoneApprovalDocs().then(data =>{
 			grid5.resetData(data);
+		});		
+		empData().then(data => {
+			console.log("deptData in data",data);
 		});
-		
-		// empData().then(data => {
-		// 	console.log("deptData in data",data);
-		// });
 	}
 
-	const itemGroupData  = [
-    	{
-		label: 'disabled items',
-		data: [
-			{ label: 'disable', value: 'disable' },
-			{ label: 'none', value: '0' }
-		]
+	
+	
+	//select - 인사정보 불러오기
+	async function empData() {
+		try {
+			const response = await fetch("/approval/empList");
+			const data = await response.json();
+			
+			let obj ={};
+			data.map((item,index)=>{
+				obj["value"] = item[0]; //empId
+				obj["label"] = item[1]; //empName
+				itemData.push(obj);
+				obj = {};
+			});
+			
+			return itemData;
+		} catch (error) {
+			console.error('Error fetching data:', error);
 		}
-	];
-		
+	}	
+
 	//셀렉트박스
 	var approvarDiv = document.querySelector('#approvar');
 	var selectBox = new tui.SelectBox('#select-box', {
-      data: itemGroupData
+      data: itemData
     });
 
-
-	var username = "[[${empList}]]";
-
-	console.log("username",username);
-	// select - 인사정보 불러오기
-	// function empData() {
-	// 	try {
-	// 		const response = fetch("/approval/empList");
-	// 		const data = response.json();
-	// 		console.log("deptList 데이터-data----->:", data);
-			
-	// 		return data;
-	// 	} catch (error) {
-	// 		console.error('Error fetching data:', error);
-	// 	}
-	// }
+	var itemData  = [];
+	
 	//1. 결재사항 불러오기
 	async function fetchPendingApprovalDocs() {
 		try {

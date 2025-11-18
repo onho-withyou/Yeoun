@@ -43,8 +43,8 @@ public class ApprovalController {
 	//사원목록불러오기 토스트 셀렉트박스
 	@ResponseBody
 	@GetMapping("/empList")
-	public List<Emp> getDeptList() {
-		 return approvalDocService.getEmp();
+	public List<Object[]> getDeptList() {
+		 return approvalDocService.getEmp2();
 	}	
 	//grid - 1.결재사항 - 진행해야할 결재만 - 결재권한자만 볼수있음
 	@ResponseBody

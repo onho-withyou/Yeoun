@@ -41,6 +41,12 @@ public class ApprovalDocService {
 	public List<Emp> getEmp() {
 		return approvalDocRepository.findAllMember();
 	}
+	//기안자명 불러오기
+	@Transactional(readOnly = true)
+	public List<Object[]> getEmp2() {
+		return approvalDocRepository.findAllMember2();
+	}
+
 	//기안서 양식종류
 	@Transactional(readOnly = true)
 	public List<String> getFormTypes() {
