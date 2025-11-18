@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.yeoun.attendance.entity.Attendance;
-import com.yeoun.attendance.entity.WorkPolicy;
 
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 

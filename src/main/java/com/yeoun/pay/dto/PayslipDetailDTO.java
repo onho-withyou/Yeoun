@@ -33,4 +33,6 @@ public class PayslipDetailDTO {
     
     private List<PayslipItemDTO> payItems; // 지급 상세
     private List<PayslipItemDTO> dedItems; // 공제 상세
+    
+    
 }

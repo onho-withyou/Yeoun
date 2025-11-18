@@ -53,16 +53,20 @@ public class AttendanceController {
 		try {
 			String resultStatus = attendanceService.registAttendance(empId);
 			
+			log.info("@@@@@@@@@@@@@@@@ resultStatus : " + resultStatus);
+			
 			result.put("success", true);
 			result.put("status", resultStatus);
 			
 			return ResponseEntity.ok(result);
 		} catch (NoSuchElementException e) {
 			// 사원 정보가 없을 경우
+			e.printStackTrace();
 			result.put("success", false);
 			result.put("message", e.getMessage());
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
 		} catch (Exception e) {
+			e.printStackTrace();
 			// 그 외의 모든 예외
 			result.put("success", false);
 			result.put("message", e.getMessage());
