@@ -19,6 +19,7 @@ $(function () {
 
   $('#chart-container').orgchart({
     data: orgData,
-    nodeContent: 'title'
+    nodeContent: 'title',
+	toggleSiblingsResp: false
   });
 });

@@ -8,22 +8,26 @@
           href="https://cdnjs.cloudflare.com/ajax/libs/orgchart/3.8.0/css/jquery.orgchart.min.css">
 
     <style>
-      .orgchart .node,
-      .orgchart .title,
-      .orgchart .content {
-        background-image: none !important;
-        background-color: #ffffff !important;
-      }
-      .orgchart .node {
-        border: 1px solid #e0e0e0 !important;
-        border-radius: 8px !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-      }
-      #chart-container {
-        width: 100%;
-        min-height: 400px;
-        padding: 24px 16px;
-      }
+   		.orgchart {
+  			background-image: none !important;
+		}
+		
+		#chart-container {
+			display: flex;
+			justify-content: center;
+		}
+		
+		/* 접기/펼치기 화살표/엣지 숨기기 */
+		.orgchart .node .verticalEdge,
+		.orgchart .node .horizontalEdge,
+		.orgchart .node .topEdge,
+		.orgchart .node .bottomEdge,
+		.orgchart .node .leftEdge,
+		.orgchart .node .rightEdge {
+		  display: none !important;
+		}
+				
+		
     </style>
   </th:block>
 
