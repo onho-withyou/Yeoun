@@ -6,9 +6,10 @@ const currentUserName = document.getElementById('currentUserName')?.value;
 const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
 const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
 
+const container = document.getElementById('tui-date-picker'); //데이트피커생성El
 
-const container = document.getElementById('tui-date-picker');
-const input = document.getElementById('datepicker-input');
+const tooltip = document.getElementById('leave_tooltip');
+
 let dateController = null;
 
 let calendar = null; // calendar 객체 선언
@@ -357,10 +358,12 @@ function checkFilter() {
 	const companyFilter = document.getElementById('filter-company')
 	const departmentFilter = document.getElementById('filter-department')
 	const personalFilter = document.getElementById('filter-personal')
+	const leaveFilter = document.getElementById('filter-leaves')
 	
 	companyFilter.checked ? calendar.setCalendarVisibility('company', true) : calendar.setCalendarVisibility('company', false);
 	departmentFilter.checked ? calendar.setCalendarVisibility('department', true) : calendar.setCalendarVisibility('department', false);
 	personalFilter.checked ? calendar.setCalendarVisibility('personal', true) : calendar.setCalendarVisibility('personal', false);
+	leaveFilter.checked ? calendar.setCalendarVisibility('leave', true) : calendar.setCalendarVisibility('leave', false);
 }
 
 //해당월의 달력일정 불러오기
@@ -384,6 +387,11 @@ async function loadMonthSchedule() {
 		startDate: formatLocalDateTime(startDate)
 		, endDate: formatLocalDateTime(endDate)
 	});
+	
+	if(tooltip.style.display == 'block') {
+		tooltip.style.display = 'none';
+		return;
+	}
 	
 	// 해당 월초~월말 정보를 가지고 스케줄데이터 가져오기
 	await getScheduleData(params); // 그달의 스케줄 가져오기
@@ -512,6 +520,8 @@ function convertGroupedLeavesToSchedules(dateLeaveMap) {
 }
 
 
+
+
 //===============================================================
 // DOM LOAD
 document.addEventListener('DOMContentLoaded', function () {
@@ -530,6 +540,12 @@ document.addEventListener('DOMContentLoaded', function () {
 		formattedStartDate = formatDateToYYYYMMDD(startDate);
 		formattedToday = formatDateToYYYYMMDD(today);
 		
+		if(tooltip.style.display == 'block') {
+			tooltip.style.display = 'none';
+			calendar.clearGridSelections();
+			return;
+		}
+		
 		//일정등록모달 열기
 		openAddScheduleModal(event);
 		// 달력 선택 색 초기화
@@ -539,12 +555,49 @@ document.addEventListener('DOMContentLoaded', function () {
 	// 일정 클릭시 이벤트
 	calendar.on('clickEvent', (eventInfo) => {
 		const event = eventInfo.event;
+		const nativeEvent = eventInfo.nativeEvent; // 마우스이벤트
+		const tooltip = document.getElementById('leave_tooltip');
+		
+		if(tooltip.style.display == 'block') {
+			tooltip.style.display = 'none';
+			return;
+		}
+		
 		console.log(event);
 		if (event.calendarId === 'holiday') {
 			alert("휴일입니다.");
 		} else if (event.calendarId === 'leave') {
 //			openMyCustomModal(event);
-			alert("커스텀모달함수등록예정")
+//			alert("커스텀모달함수등록예정")
+			const leaves = event.raw?.leaves || [];
+			let html = '';
+			html += `<div class="leave-tooltip__title">${event.title}</div>`;
+			console.log("1" , html);
+			if (leaves.length === 0) {
+				html += `<div>연차 인원이 없습니다.</div>`;
+			} else {
+				html += '<ul class="leave-tooltip__list">';
+				leaves.forEach((l) => {
+			    	html += `<li>${l.emp_name} - ${l.startDate} ~ ${l.endDate} / ${l.usedDays}일</li>`;
+				});
+				html += '</ul>';
+				console.log("html추가중", html);
+			}
+			
+			console.log("html추가완", html);
+			tooltip.innerHTML = html;
+			
+			// 컨테이너 기준 절대좌표 계산
+		    const calendarEl = document.getElementById('calendar');
+		    const rect = calendarEl.getBoundingClientRect();
+			console.log(nativeEvent, "nativeEvent");
+		    tooltip.style.position = 'absolute';
+		    tooltip.style.left = (nativeEvent.clientX ) + 'px';
+		    tooltip.style.top = (nativeEvent.clientY) + 'px';
+		    calendarEl.appendChild(tooltip); // 중요! body가 아니라 캘린더 아래 붙임
+		    tooltip.style.display = 'block';
+//			setTimeout(() => {tooltipCheck()}, 3000);	
+			
 		} else {
 			const scheduleId = event.id;
 			
@@ -585,7 +638,6 @@ document.addEventListener('DOMContentLoaded', function () {
 		});
 	});
 	
-
 });// DOM로드 끝
 
 async function getLastNoticeList() {

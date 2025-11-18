@@ -33,7 +33,27 @@
 		left: 50%; / 부모 기준 가운데로 /
 		transform: translateX(-50%); / 정확히 중앙 정렬 /
 		z-index: 3000; / 필요 시 더 키우기 */
-	}​					
+	}​		
+	.leave-tooltip {
+	    position: absolute;
+	    z-index: 9999;
+	    background: #fff;
+	    border: 1px solid #ccc;
+	    border-radius: 6px;
+	    padding: 8px 10px;
+	    font-size: 12px;
+	    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+	    max-width: 220px;
+	    display: none;
+	}
+	.leave-tooltip__title {
+	    font-weight: 600;
+	    margin-bottom: 4px;
+	}
+	.leave-tooltip__list {
+	    margin: 0;
+	    padding-left: 16px;
+	}
 	</style>
 	<link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
     <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
@@ -85,6 +105,10 @@
 			                        <label class="form-check-label" for="filter-personal">개인</label>
 			                    </div>
 			                    <div class="form-check">
+			                        <input class="calendar-filter-leave form-check-input calendar-filter" type="checkbox" value="leave" id="filter-leaves" checked>
+			                        <label class="form-check-label" for="filter-leaves">연차</label>
+			                    </div>
+			                    <div class="form-check">
 				                    <button class="btn btn-outline-primary btn-xs" id="open-add-schedule-modal-btn">
 				                            +
 				                    </button>
@@ -124,6 +148,9 @@
 		<th:block th:insert="~{notice/notice_modal}"></th:block>
 	    
 	</div>
+	<!-- 연차툴팁 -->
+	<div id="leave_tooltip" class="leave-tooltip" style="background-color: white; border:black solid; padding:10px; z-index: 99;"></div>
+	
 	<!-- /custom-body 끝 -->
 	<!-- 타임피커 -->
 	<script src="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.min.js"></script>
