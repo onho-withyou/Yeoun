@@ -18,11 +18,12 @@ public interface OrgChartRepository extends JpaRepository<Dept, String> {
             d.parentDeptId as parentDeptId,
             d.deptName as deptName,
             p.posName as posName,
-            e.empName as empName
+            e.empName as empName,
+            p.rankOrder as posOrder
         from Dept d
         left join Emp e on e.dept.deptId = d.deptId
         left join Position p on e.position.posCode = p.posCode
-        order by d.deptId
+        order by d.deptId, p.rankOrder desc, e.empName
     """)
 	List<OrgNodeProjection> findOrgNodes();
 

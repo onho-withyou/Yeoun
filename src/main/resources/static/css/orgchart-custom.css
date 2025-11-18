@@ -1,72 +1,43 @@
-/* 조직도 전체 */
-.chart {
-  width: 100%;
-  min-height: 400px;
-}
-
-/* 공통 노드 스타일 */
-.node-style {
-  background: #fff;
-  border-radius: 14px;
+.dept-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
   overflow: hidden;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.07); /* 부드럽고 고급스러운 그림자 */
-  text-align: center;
-  font-family: "Noto Sans KR", sans-serif;
-  transition: all 0.15s ease-in-out;
+  min-width: 160px;
 }
 
-/* Hover 효과 (살짝 띄우는 느낌) */
-.node-style:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-}
-
-/* 상단 이름 영역 */
-.node-style .node-name {
-  display: block;
+.dept-card .dept-header {
+  background-color: #0d6efd;   /* 파란색 헤더 */
+  color: #ffffff;
   font-weight: 700;
-  font-size: 17px;
-  padding: 10px 20px;
-  border-bottom: 1px solid #f3f4f6;
+  text-align: center;
+  padding: 6px 10px;
+  font-size: 14px;
 }
 
-/* 아래 직책 영역 */
-.node-style .node-title {
-  display: block;
-  font-size: 15px;
-  padding: 1px 14px 4px;
-  color: #4b5563;
+.dept-card .dept-body {
+  background-color: #f8fafc;
+  padding: 8px 10px;
 }
 
-.orgcard {
-  width: 140px;     /* 적당히 컴팩트 */
-  border-radius: 12px;
+.dept-card .emp-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  padding: 2px 0;
+  border-bottom: 1px solid #e2e8f0;
 }
 
-/* CEO 스타일 */
-.dept-ceo .node-name {
-  background: #1e3a8a;
-  color: #fff;
+.dept-card .emp-row:last-child {
+  border-bottom: none;
 }
 
-/* ERP (파란 계열) */
-.dept-erp .node-name,
-.dept-erp-sub .node-name {
-  background: #e0edff;
-  color: #1e3a8a;
-}
+.emp-name { font-weight: 500; }
+.emp-sep  { color: #94a3b8; }
+.emp-pos  { color: #475569; }
 
-/* MES (코랄/핑크 계열) */
-.dept-mes .node-name,
-.dept-mes-sub .node-name {
-  background: #ffe3e3;
-  color: #b91c1c;
+.emp-empty {
+  justify-content: center;
+  color: #94a3b8;
 }
-
-/* 생산부 (레드 계열 살짝 강하게) */
-.dept-prod .node-name {
-  background: #ffd8d8;
-  color: #991b1b;
-}
-
-/* 인사/개발 등 다른 부서 확장: 필요시 추가 가능 */

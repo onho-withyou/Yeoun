@@ -1,5 +1,6 @@
 package com.yeoun.orgchart.service;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -21,7 +22,12 @@ public class OrgChartService {
 		
 		List<OrgNodeProjection> rows = orgChartRepository.findOrgNodes();
 		
-		 return rows.stream()
+		rows.sort(Comparator.comparing(
+					OrgNodeProjection::getPosOrder,
+					Comparator.nullsLast(Integer::compareTo)
+				  ).reversed());
+		
+		return rows.stream()
 	                .map(r -> {
 	                    OrgNodeDTO orgNodeDTO = new OrgNodeDTO();
 	                    orgNodeDTO.setDeptId(r.getDeptId());

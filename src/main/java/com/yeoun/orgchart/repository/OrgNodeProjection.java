@@ -8,5 +8,5 @@ public interface OrgNodeProjection {
 	String getDeptName();
 	String getPosName();
 	String getEmpName();
-
+	Integer getPosOrder();
 }
