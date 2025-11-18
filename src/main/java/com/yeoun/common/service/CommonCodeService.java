@@ -18,11 +18,24 @@ public class CommonCodeService {
 	
 	private final CommonCodeRepository commonCodeRepository;
 	
+	// ------------ 인사 관리 -------------
+	// 재직 상태
+	public List<CommonCode> getCodes(String parentCodeId) {
+	    return commonCodeRepository.findByParentCodeIdAndUseYnOrderByCodeSeq(parentCodeId, "Y");
+	}
+	
 	// 은행 코드 목록 조회
 	public List<CommonCode> getBankList() {
 		return commonCodeRepository.findByParentCodeIdAndUseYnOrderByCodeSeq("BANK", "Y");
 	}
+	
+	// 인사 발령 유형 조회
+	public List<CommonCode> getHrActionTypeList() {
+		return commonCodeRepository.findByParentCodeIdAndUseYnOrderByCodeSeq("HR_ACTION_TYPE", "Y");
+	}
 
+	
+	// ------------ 근태 관리 -------------
 	// 연차 산정 기준 조회
 	public List<CommonCodeDTO> getAnnualBasis(String parentCodeId) {
 		List<CommonCode> codeList = commonCodeRepository.findByParentCodeIdAndUseYnOrderByCodeSeq(parentCodeId, "Y");
@@ -36,9 +49,7 @@ public class CommonCodeService {
 				.collect(Collectors.toList());
 	}
 	
-	// 인사 발령 유형 조회
-	public List<CommonCode> getHrActionTypeList() {
-		return commonCodeRepository.findByParentCodeIdAndUseYnOrderByCodeSeq("HR_ACTION_TYPE", "Y");
-	}
+
+	
 
 }
