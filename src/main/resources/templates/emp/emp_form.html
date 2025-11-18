@@ -71,7 +71,7 @@
 				<div class="row g-3 mt-0" th:if="${mode == 'edit'}">
 				  <div class="col-12 col-md-6">
 				    <label class="form-label" for="status">상태</label>
-				    <select th:field="*{status}">
+				    <select class="form-select" id="status" th:field="*{status}">
 					  <option value="">선택</option>
 					  <option th:each="s : ${statusList}" th:value="${s.codeId}" th:text="${s.codeName}"></option>
 					</select>

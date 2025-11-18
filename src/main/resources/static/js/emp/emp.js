@@ -21,6 +21,10 @@
     const posSel  = document.getElementById('posCode');  // 직급
 
     if (!topSel || !deptSel || !posSel) return; // 다른 화면 대비 가드
+	
+	if (topSel.disabled) {
+	    return;
+	  }
 
     // 부서 option 백업 (placeholder 제외)
     const allDept = Array.from(deptSel.querySelectorAll('option')).filter(o => o.value);
