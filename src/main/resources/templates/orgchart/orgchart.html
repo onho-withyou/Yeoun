@@ -6,29 +6,7 @@
   <th:block layout:fragment="head">
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/orgchart/3.8.0/css/jquery.orgchart.min.css">
-
-    <style>
-   		.orgchart {
-  			background-image: none !important;
-		}
-		
-		#chart-container {
-			display: flex;
-			justify-content: center;
-		}
-		
-		/* 접기/펼치기 화살표/엣지 숨기기 */
-		.orgchart .node .verticalEdge,
-		.orgchart .node .horizontalEdge,
-		.orgchart .node .topEdge,
-		.orgchart .node .bottomEdge,
-		.orgchart .node .leftEdge,
-		.orgchart .node .rightEdge {
-		  display: none !important;
-		}
-				
-		
-    </style>
+	<link rel="stylesheet" th:href="@{/css/orgchart-custom.css}">
   </th:block>
 
   <!-- 2. content -->
