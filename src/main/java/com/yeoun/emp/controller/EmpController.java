@@ -1,7 +1,5 @@
 package com.yeoun.emp.controller;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,9 +17,7 @@ import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpDetailDTO;
 import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.dto.EmpPageResponse;
-import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.DeptRepository;
-import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.emp.repository.PositionRepository;
 import com.yeoun.emp.service.EmpService;
 

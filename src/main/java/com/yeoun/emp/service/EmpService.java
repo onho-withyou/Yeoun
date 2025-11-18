@@ -227,6 +227,24 @@ public class EmpService {
 	    );
 	}
 	
+	// 주민번호 마스킹 (예: 930101-2******)
+	private String getMaskedRrn(String rrn) {
+		if (rrn == null || rrn.isBlank()) {
+			return "";
+		}
+		
+		// 숫자만 추출
+		String digits = rrn.replaceAll("\\D", "");
+		if (digits.length() < 7) {
+			return rrn;
+		}
+		
+		String front = digits.substring(0, 6);	// 생년월일 6자리
+		String mid = digits.substring(6, 7);	// 성별 1자리
+		
+		return front + "-" + mid + "******";
+	}
+	
 	// 상세주소 없는 경우 대비
 	private String buildAddress(Emp emp) {
 	    String addr1 = emp.getAddress1();
@@ -292,6 +310,7 @@ public class EmpService {
 	    empDTO.setAddress2(emp.getAddress2());
 	    empDTO.setDeptId(emp.getDept().getDeptId());
 	    empDTO.setPosCode(emp.getPosition().getPosCode());
+	    empDTO.setMaskedRrn(getMaskedRrn(emp.getRrn()));
 	    
 	    // 사원 급여정보
 	    empBankRepository.findByEmpId(empId).ifPresent(bank -> {

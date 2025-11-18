@@ -20,5 +20,4 @@ public class EmpDetailDTO {
     private String bankInfo;
     private String photoPath;
     
-
 }

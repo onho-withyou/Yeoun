@@ -47,6 +47,8 @@ public class EmpDTO {
       message = "주민등록번호 형식은 000000-0000000 입니다."
     )
     private String rrn;
+	
+	private String maskedRrn;
     
 	// 입사일: 필수 + 과거/오늘
     @NotNull(message = "입사일은 필수입니다.")
