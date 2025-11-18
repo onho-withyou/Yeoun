@@ -49,12 +49,13 @@ public class AccessLog {
 	@Column(nullable = false)
 	private LocalDate accessDate; // 출입 일자
 	
-	@JsonFormat(pattern = "HH:MM")
+	@JsonFormat(pattern = "HH:mm")
 	@DateTimeFormat(pattern = "HH:mm")
 	private LocalTime outTime; // 외출 시간
 	
-	@JsonFormat(pattern = "HH:MM")
+	@JsonFormat(pattern = "HH:mm")
 	@DateTimeFormat(pattern = "HH:mm")
+	@Column(nullable = true)
 	private LocalTime returnTime; // 복귀 시간
 	
 	@CreatedDate
@@ -65,15 +66,22 @@ public class AccessLog {
 	private String accessType; //외출 상태 구분 (OUT/IN/OUTWORK/ETC)
 	
 	@Builder
-	public AccessLog(String empId, LocalDate accessDate, LocalTime outTime, String accessType) {
+	public AccessLog(String empId, LocalDate accessDate, LocalTime outTime, LocalTime returnTime, String accessType) {
 		this.empId = empId;
 		this.accessDate = accessDate;
 		this.outTime = outTime;
+		this.returnTime = returnTime;
 		this.accessType = accessType;
 	}
 	
 	// 복귀 처리
-	public void accessIn(LocalTime outTime, String accessType) {
+	public void accessIn(LocalTime returnTime, String accessType) {
+		this.returnTime = returnTime;
+		this.accessType = accessType;
+	}
+	
+	// 외출 처리
+	public void accessOut(LocalTime outTime, String accessType) {
 		this.outTime = outTime;
 		this.accessType = accessType;
 	}

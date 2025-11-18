@@ -29,6 +29,9 @@ public interface LeaveHistoryRepository extends JpaRepository<AnnualLeaveHistory
 			 @Param("startOfYear") LocalDate startOfYear,
 			 @Param("endOfYear") LocalDate endOfYear
 		    );
+
+	// 오늘 날짜 기준으로 휴무인지 확인
+	boolean existsByEmp_EmpIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(String empId, LocalDate today1, LocalDate today2);
 	
 	// 연차 스케줄 조회
 	@Query("""
