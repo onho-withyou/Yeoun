@@ -58,5 +58,23 @@ public interface EmpNativeRepository extends JpaRepository<Emp, String> {
             WHERE E.EMP_ID = :empId
             """, nativeQuery = true)
     String findEmpNameByEmpId(@Param("empId") String empId);
+    
+    
+    /**직급 조회*/
+    @Query(value = """
+    	    SELECT e.POS_CODE 
+    	    FROM EMP e 
+    	    WHERE e.EMP_ID = :empId
+    	""", nativeQuery = true)
+    	Optional<String> findEmpPositionById(@Param("empId") String empId);
+
+    /**사용연차 조회*/
+    	@Query(value = """
+    	    SELECT NVL(a.remain_days, 0)
+    	    FROM ANNUAL_LEAVE a
+    	    WHERE a.EMP_ID = :empId
+    	""", nativeQuery = true)
+    	Optional<Integer> findUsedAnnualById(@Param("empId") String empId);
+
 
 }

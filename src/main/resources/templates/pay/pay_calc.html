@@ -17,26 +17,14 @@
       .pay-tabs .nav-link.active::after{content:'';position:absolute;left:0;right:0;bottom:-2px;height:3px;background:#0d6efd;border-radius:2px}
     </style>
 
-    <!-- 상단 탭 -->
-    <ul class="nav pay-tabs">
-      <li class="nav-item">
-        <a class="nav-link"
-           th:href="@{/pay/rule}"
-           th:classappend="${activeTab}=='rule' ? 'active' : ''">급여기준정보</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link"
-           th:href="@{/pay/rule_calc}"
-           th:classappend="${activeTab}=='calc' ? 'active' : ''">급여계산</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link"
-           th:href="@{/pay/rule_item}"
-           th:classappend="${activeTab}=='item' ? 'active' : ''">급여항목</a>
-      </li>
-    </ul>
 
-    <div class="container-xxl py-4">
+   <div class="container-xxl py-4">
+  <!-- ===================== 상단 탭 ===================== -->
+<ul class="nav pay-tabs">
+  <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule}"      th:classappend="${activeTab}=='rule' ? 'active'">급여기준정보</a></li>
+  <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule_calc}" th:classappend="${activeTab}=='calc' ? 'active'">급여계산</a></li>
+  <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule_item}" th:classappend="${activeTab}=='item' ? 'active'">급여항목</a></li>
+</ul>
 
       <!-- 메시지 -->
       <div th:if="${msg}" class="alert alert-success alert-dismissible fade show" role="alert">
@@ -209,18 +197,21 @@
                   <div class="form-text">대상 식별 코드 (없으면 비움)</div>
                 </div>
 
-                <!-- VALUE_NUM / CALC_FORMULA 스위칭 -->
-                <div class="col-md-6 create-value">
-                  <label class="form-label">숫자값</label>
-                  <input type="text" class="form-control amount-input" th:field="*{valueNum}" inputmode="decimal" placeholder="금액 또는 비율값">
-                  <div class="form-text">AMT=금액(원), RATE=비율(0~1)</div>
-                </div>
-
-                <div class="col-md-6 create-formula d-none">
-                  <label class="form-label">계산공식</label>
-                  <textarea class="form-control" th:field="*{calcFormula}" rows="3" placeholder="예: UNUSED_DAYS*DAILY_WAGE"></textarea>
-                </div>
-
+           <!-- 숫자값 -->
+				<div class="col-md-6">
+				  <label class="form-label">숫자값</label>
+				  <input type="text" class="form-control amount-input" name="valueNum" 
+				         placeholder="금액 또는 비율값" inputmode="decimal">
+				  <div class="form-text">금액/비율/기타 숫자값</div>
+				</div>
+				
+				<!-- 계산공식 -->
+				<div class="col-md-6">
+				  <label class="form-label">계산공식</label>
+				  <textarea class="form-control" name="calcFormula" rows="3"
+				            placeholder="예: baseSalary * rate"></textarea>
+				  <div class="form-text">FORMULA 유형에서 사용 (AMT/RATE도 입력 가능)</div>
+				</div>
               </div>
             </div>
 
@@ -306,17 +297,22 @@
                     <input type="text" name="targetCode" class="form-control" th:value="${c.targetCode}">
                   </div>
 
-                  <div class="col-md-6 edit-value" th:classappend="${c.ruleType?.name()=='FORMULA' ? ' d-none' : ''}">
-                    <label class="form-label">숫자값</label>
-                    <input type="text" name="valueNum" class="form-control amount-input"
-                           th:value="${c.ruleType?.name()=='RATE' ? c.valueNum : #numbers.formatDecimal(c.valueNum,0,'COMMA',0,'POINT')}">
-                    <div class="form-text">AMT=금액(원), RATE=비율(0~1)</div>
-                  </div>
+               <!-- 숫자값 -->
+				<div class="col-md-6">
+				  <label class="form-label">숫자값</label>
+				  <input type="text" name="valueNum" class="form-control amount-input"
+				         th:value="${c.valueNum}">
+				  <div class="form-text">금액/비율/기타 숫자값</div>
+				</div>
+				
+				<!-- 계산공식 -->
+				<div class="col-md-6">
+				  <label class="form-label">계산공식</label>
+				  <textarea name="calcFormula" class="form-control" rows="3"
+				            th:text="${c.calcFormula}"></textarea>
+				  <div class="form-text">FORMULA 유형에서 사용 (AMT/RATE도 입력 가능)</div>
+				</div>
 
-                  <div class="col-md-6 edit-formula" th:classappend="${c.ruleType?.name()!='FORMULA' ? ' d-none' : ''}">
-                    <label class="form-label">계산공식</label>
-                    <textarea name="calcFormula" class="form-control" rows="3" th:text="${c.calcFormula}"></textarea>
-                  </div>
 
                 </div>
               </div>

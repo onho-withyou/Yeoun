@@ -48,6 +48,20 @@ public class EmployeeQueryAdapter implements EmployeeQueryPort {
         return repo.findDeptNameById(empId)
                    .orElse(null);
     }
+    
+    /** 직급 조회 */
+    @Override
+    public String getEmpPosition(String empId) {
+        return repo.findEmpPositionById(empId)
+                .orElse(null);
+    }
+
+    /** 🔥 사용 연차 조회 */
+    @Override
+    public int getUsedAnnual(String empId) {
+        return repo.findUsedAnnualById(empId)
+                .orElse(0);
+    }
 
 
 

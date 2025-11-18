@@ -38,6 +38,8 @@
     .badge-gray { background:#f3f4f6; color:#6b7280; }
   </style>
 
+
+ <div class="container-xxl py-4">
   <!-- ===================== 상단 탭 ===================== -->
   <ul class="nav pay-tabs">
     <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule}"      th:classappend="${activeTab}=='rule' ? 'active'">급여기준정보</a></li>
@@ -45,7 +47,6 @@
     <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule_item}" th:classappend="${activeTab}=='item' ? 'active'">급여항목</a></li>
   </ul>
 
-  <div class="container-xxl py-4">
 
     <!-- 메시지 -->
     <div th:if="${msg}" class="alert alert-success alert-dismissible fade show">
