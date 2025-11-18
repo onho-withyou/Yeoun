@@ -59,7 +59,7 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	          	and cc.parent.codeId = 'EMP_STATUS'
 	          	and cc.useYn = 'Y'
 	        where
-	          (e.status is null or e.status in ('ACTIVE', 'LEAVE', 'RETIRE'))
+	          (e.status is null or e.status in ('ACTIVE', 'LEAVE'))
       	      and ( :keyword is null or :keyword = '' or
 	                e.empId    like concat('%', :keyword, '%') or
 	                e.empName  like concat('%', :keyword, '%') or
