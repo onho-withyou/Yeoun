@@ -12,6 +12,7 @@ const modifyNoticeBtn = document.getElementById('notice-modify');
 
 //돔로드시작
 document.addEventListener('DOMContentLoaded', function() {
+	
 	// 공지사항 조회모달 열기 이벤트
 	showNoticeModal.addEventListener('show.bs.modal', function(event){
 		getNoticeData(selectedNoticeId);
@@ -72,6 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	const createNoticeForm = document.getElementById("notice-write-form");
 	// 공지사항 등록 모달 열릴때 폼 초기화
 	createNoticeModal.addEventListener('show.bs.modal', function(event){
+		document.getElementById("fileFieldWrite").innerHTML = "";// 파일첨부영역초기화
 		createNoticeForm.reset();
 	});
 	// 공지사항 등록 버튼 함수
@@ -145,18 +147,18 @@ async function getNoticeData(noticeId) {
 	.catch(error => console.error('Error:', error));
 }
 	
-// 공지조회모달 데이터 인풋함수
+// 공지조회모달 데이터 입력함수
 function inputReadData(data){
 	// 날짜 문자열을 Date 객체로 변환
-	console.log(data.createdDate);
+//	console.log(data.createdDate);
 	const createdDate = new Date(data.createdDate);
-	console.log("craetedDate : ", createdDate);
+//	console.log("craetedDate : ", createdDate);
 	const updatedDate = new Date(data.updatedDate);
-	console.log("updatedDate : ", updatedDate);
+//	console.log("updatedDate : ", updatedDate);
 	const createdUser = data.createdUser;
 	const createdUserName = data.empName;
 	const deptName = data.deptName;
-	
+	document.getElementById("fileFieldRead").innerHTML = "";// 파일첨부영역초기화
 	document.getElementById('notice-id-read').value = data.noticeId;
 	document.getElementById('notice-createdUser-read').value = createdUser;
 	document.getElementById('notice-title-read').value = data.noticeTitle;
@@ -171,9 +173,9 @@ function inputReadData(data){
 	
 	document.getElementById('notice-writer-read').textContent = `(${deptName})${createdUserName}`
 	document.getElementById('notice-createdDate-read').textContent = NoticeDetailFormatDate(createdDate);
-	console.log("formatDate(createdDate) : ", formatDate(createdDate));
+//	console.log("formatDate(createdDate) : ", formatDate(createdDate));
 	document.getElementById('notice-updatedDate-read').textContent = NoticeDetailFormatDate(updatedDate);
-	console.log("formatDate(updatedDate) : ", formatDate(updatedDate));
+//	console.log("formatDate(updatedDate) : ", formatDate(updatedDate));
 	document.getElementById('notice-content-read').textContent = data.noticeContent;
 	document.getElementById('notice-modify').add = data.noticeContent;
 	
@@ -207,25 +209,20 @@ function initReadModal(createdUser) {
 	}
 }
 
-// 공지사항 등록시 첨부파일 이벤트
-const msg = "[[${errorMessage}]]";
-if(msg && msg.trim() != "") {
-	alert(msg);
-}
-
+// 공지등록 첨부파일 엘리먼트
 const fileInput = document.getElementById('notice-files-write');
-// 첨부파일 변화시 동작이벤트
+// 공지등록 첨부파일 변화시 동작이벤트
 fileInput.addEventListener('change', function(event) {
-	const files = event.target.files;
-	
+	let files = Array.from(event.target.files);
+
 	const fileCountLimit = 5;
 	
 	if(files.length > fileCountLimit) { // 파일 갯수가 5개보다 많을 경우
 		alert("최대 첨부 가능한 갯수 : " + fileCountLimit);
-		files = imageFiles.slice(0, fileCountLimit);
+		files = files.slice(0, fileCountLimit);
 	}
 	// 미리보기1) 이미지 프리뷰 영역 초기화
-	document.getElementById("imgPreviewArea").html = "";
+	document.getElementById("fileFieldWrite").innerHTML = "";
 	
 	// 기존 파일 선택 영역을 교체할 새로운 파일 목록 객체 변경에 사용되는 DataTransfer 객체 생성
 	let newFiles = new DataTransfer();
@@ -241,20 +238,21 @@ fileInput.addEventListener('change', function(event) {
 		// 미리보기3) FileReader 객체의 onload 이벤트 핸들링
 		// => 아래쪽의 reader.readAsDataURL(file) 코드가 실행되어 이미지 파일을 로딩 완료할 경우 이벤트 발생함
 		reader.onload = function(e) {
-			console.log(e.target.result);
-			console.log(e);
+//			console.log(e.target.result);
+//			console.log(e);
 			
 			// 미리보기 3-1) 미리보기 HTML 요소 생성
 			// => <img> 태그를 활용하여 읽어온 이미지(e.target.result)를 src 속성에 전달
-			const imgPreview = $(`<div class="div-img-preview">`)
+			const fileList = $(`<div class="div-img-preview">`)
 								.append(`
-									<img src="${e.target.result}" alt="미리보기" class="img-preview">
+									<i class="fa-regular fa-file file-icon"></i>
 									<span>${file.name}</span>	
 								`);
 								
 			
 			// 미리보기 3-2) 미리보기 영역에 요소 추가
-			$("#imgPreviewArea").append(imgPreview);
+			console.log(fileList);
+			$("#fileFieldWrite").append(fileList);
 		}
 		
 		// 미리보기4) 이미지 파일 읽어오기
@@ -266,7 +264,7 @@ fileInput.addEventListener('change', function(event) {
 	});
 	// --------------------------------------------------
 	// 파일 선택 요소 객체의 files 속성에 접근하여 새로운 파일 목록 객체로 업데이트
-	$("#custom-file-input")[0].files = newFiles.files;
+	$("#notice-files-write")[0].files = newFiles.files;
 });
 
 
