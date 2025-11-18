@@ -10,7 +10,7 @@ public class OrgChartController {
 	
 	@GetMapping("")
 	public String orgchartPage() {
-		return "orgchart/orgchart";
+		return "org/orgchart";
 	}
 	
 
