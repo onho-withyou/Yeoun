@@ -67,6 +67,5 @@ public class FileAttach {
 	@CreatedDate
 	@Column(name = "CREATED_DATE", updatable = false)
 	private LocalDate createdDate;
-	
 
 }

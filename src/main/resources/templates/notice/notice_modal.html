@@ -15,7 +15,7 @@
 			</div>
 			<!-- 모달 본문 -->
 			<div class="modal-body">
-				<form id="notice-write-form" action="/notices" method="post">
+				<form id="notice-write-form" th:action="@{/notices}" method="post" enctype="multipart/form-data">
 					<div class="mb-3" style="display:flex; gap:8px;">
 					    <input type="text" class="form-control" id="notice-title-write" name="noticeTitle" placeholder="제목" style="flex:1;">
 					    <label class="form-check-label" for="fixedCheck">고정</label>
@@ -25,8 +25,10 @@
 				        <textarea id="notice-content-write" name="noticeContent" class="form-control" rows="10" placeholder="공지사항 내용 작성"></textarea>
 				    </div>
 				    <div>
-						<label for="formFileDisabled" class="form-label">파일 첨부</label>
-						<input class="form-control" type="file" id="notice-files-write" multiple>
+						<label for="notice-files-write" class="form-label">파일 첨부</label>
+						<input class="form-control" type="file" id="notice-files-write" name="noticeFiles" multiple>
+						<div id="imgPreviewArea"></div>
+						<div class="error_msg" id="fileErrorDiv" th:text="${errorMessage}"></div>
 					</div>
 				</form>
 			</div>

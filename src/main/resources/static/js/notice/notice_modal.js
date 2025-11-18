@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
 		getNoticeData(selectedNoticeId);
 	});
 	
-	
 	//공지사항 조회 - 수정버튼
 	showNoticeForm.addEventListener('submit', function(event) {
 		event.preventDefault(); //기본제출 막기
@@ -208,7 +207,67 @@ function initReadModal(createdUser) {
 	}
 }
 
+// 공지사항 등록시 첨부파일 이벤트
+const msg = "[[${errorMessage}]]";
+if(msg && msg.trim() != "") {
+	alert(msg);
+}
 
+const fileInput = document.getElementById('notice-files-write');
+// 첨부파일 변화시 동작이벤트
+fileInput.addEventListener('change', function(event) {
+	const files = event.target.files;
+	
+	const fileCountLimit = 5;
+	
+	if(files.length > fileCountLimit) { // 파일 갯수가 5개보다 많을 경우
+		alert("최대 첨부 가능한 갯수 : " + fileCountLimit);
+		files = imageFiles.slice(0, fileCountLimit);
+	}
+	// 미리보기1) 이미지 프리뷰 영역 초기화
+	document.getElementById("imgPreviewArea").html = "";
+	
+	// 기존 파일 선택 영역을 교체할 새로운 파일 목록 객체 변경에 사용되는 DataTransfer 객체 생성
+	let newFiles = new DataTransfer();
+	
+	// 이미지 파일 갯수만큼 반복문 수행
+	$.each(files, function(index, file) {
+		// 현재 반복중인 파일 1개를 새로운 DataTransfer 객체에 추가
+		newFiles.items.add(file);
+		// ------------------------
+		// 미리보기2) FileReader 객체 생성
+		let reader = new FileReader();
+	
+		// 미리보기3) FileReader 객체의 onload 이벤트 핸들링
+		// => 아래쪽의 reader.readAsDataURL(file) 코드가 실행되어 이미지 파일을 로딩 완료할 경우 이벤트 발생함
+		reader.onload = function(e) {
+			console.log(e.target.result);
+			console.log(e);
+			
+			// 미리보기 3-1) 미리보기 HTML 요소 생성
+			// => <img> 태그를 활용하여 읽어온 이미지(e.target.result)를 src 속성에 전달
+			const imgPreview = $(`<div class="div-img-preview">`)
+								.append(`
+									<img src="${e.target.result}" alt="미리보기" class="img-preview">
+									<span>${file.name}</span>	
+								`);
+								
+			
+			// 미리보기 3-2) 미리보기 영역에 요소 추가
+			$("#imgPreviewArea").append(imgPreview);
+		}
+		
+		// 미리보기4) 이미지 파일 읽어오기
+		// => 이미지 파일 같은 Base64 형식의 인코딩 된 데이터를 읽어오기 위해 
+		//    FileReader 객체의 readAsDataURL() 메서드 활용
+		//    (이미지 미리보기나 AJAX 를 활용한 파일 업로드 등에 활용 가능)
+		// => 실제 동작 순서는 readAsDataURL() 메서드를 통해 파일 읽어온 후 onload 이벤트 호출됨
+		reader.readAsDataURL(file);						
+	});
+	// --------------------------------------------------
+	// 파일 선택 요소 객체의 files 속성에 접근하여 새로운 파일 목록 객체로 업데이트
+	$("#custom-file-input")[0].files = newFiles.files;
+});
 
 
 

@@ -1,5 +1,6 @@
 package com.yeoun.notice.service;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -7,7 +8,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.yeoun.common.dto.FileAttachDTO;
+import com.yeoun.common.entity.FileAttach;
+import com.yeoun.common.repository.FileAttachRepository;
+import com.yeoun.common.util.FileUtil;
 import com.yeoun.notice.dto.NoticeDTO;
 import com.yeoun.notice.entity.Notice;
 import com.yeoun.notice.repository.NoticeRepository;
@@ -22,6 +28,9 @@ import lombok.RequiredArgsConstructor;
 @Log4j2
 public class NoticeService {
 	private final NoticeRepository noticeRepository;
+	private final FileAttachRepository fileAttachRepository;
+	
+	private final FileUtil fileUtil;
 	
 	//공지리스트 불러오기
 	public Page<NoticeDTO> getNotice(int page, int size, String searchKeyword, String orderKey, String orderMethod) {
@@ -56,17 +65,26 @@ public class NoticeService {
 	}
 	
 	//공지사항 등록하기
-	public void createNotice(NoticeDTO noticeDTO, Authentication authentication) {
+	@Transactional
+	public void createNotice(NoticeDTO noticeDTO, List<MultipartFile> noticeFiles) throws IOException {
 		
+		// 공지사항 DB등록
 		if(noticeDTO.getNoticeYN() == null) {
 			noticeDTO.setNoticeYN("N");
 		}
-		
-		noticeDTO.setCreatedUser(authentication.getName());
-
+		System.out.println(noticeFiles);
 		Notice notice = noticeDTO.toEntity();
-		
 		noticeRepository.save(notice);
+		
+		// ===========================================
+		// 파일업로드 시작
+		List<FileAttach> fileList = fileUtil.uploadFile(notice, noticeFiles).stream()
+										.map(FileAttachDTO::toEntity)
+										.toList();
+		
+		// 파일 DB 저장
+		fileAttachRepository.saveAll(fileList);
+		
 	}
 	
 	//공지사항 수정하기

@@ -1,6 +1,7 @@
 package com.yeoun.notice.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.yeoun.notice.dto.NoticeDTO;
 import com.yeoun.notice.service.NoticeService;
@@ -58,17 +60,18 @@ public class NoticeController {
 	//공지사항 등록 로직
 	@PostMapping("")
 	public ResponseEntity<Map<String, String>> notices(@ModelAttribute("noticeDTO") @Valid NoticeDTO noticeDTO, 
-			BindingResult bindingResult, Authentication authentication) {
+			BindingResult bindingResult, Authentication authentication
+			, @RequestParam("noticeFiles") List<MultipartFile> noticeFiles) {
 		Map<String, String> msg = new HashMap<>();
 //		System.out.println("noticeDTO : " + noticeDTO);
 		if(bindingResult.hasErrors()) {
 			msg.put("msg", "공지사항 등록에 실패했습니다");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		}
-		
+		noticeDTO.setCreatedUser(authentication.getName());
 		try {
 			// 공지 등록 수행
-			noticeService.createNotice(noticeDTO, authentication);
+			noticeService.createNotice(noticeDTO, noticeFiles);
 			msg.put("msg", "공지사항이 등록되었습니다.");
 			return ResponseEntity.ok(msg);
 		
