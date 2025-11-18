@@ -451,9 +451,8 @@ async function getLeaveData(params) {
 	.then(data => { // response가 ok일때
 		// 연차데이터 날짜별로 그룹화
 		const dateLeaveMap = groupLeavesByDate(data);
-		console.log(dateLeaveMap);
+		// 스케줄에 넣을 데이터로 변환
 		monthlyLeaveData = convertGroupedLeavesToSchedules(dateLeaveMap);
-		console.log(monthlyLeaveData, " 변환완료");
 
 		// 조회한 월단위 일정을 캘린더 데이터로 변환
 //		monthlyScheduleData = convertScheduleDataToSchedules(data);

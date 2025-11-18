@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.main.dto.ScheduleDTO;
 import com.yeoun.main.service.ScheduleService;
 
@@ -52,7 +54,7 @@ public class MainController {
 	// 일정등록
 	@PostMapping("/schedule")
 	public ResponseEntity<Map<String, String>> createSchedule(@ModelAttribute("scheduleDTO")@Valid ScheduleDTO scheduleDTO, 
-			BindingResult bindingResult, Authentication authentication) {
+			BindingResult bindingResult) {
 		Map<String, String> msg = new HashMap<>();
 		// 일정등록 요청 데이터 검증
 		if(bindingResult.hasErrors()) {
@@ -62,7 +64,7 @@ public class MainController {
 		// 일정등록 요청 데이터 이상 없을때
 		// 일정등록 요청
 		try {
-			scheduleService.createSchedule(scheduleDTO, authentication);
+			scheduleService.createSchedule(scheduleDTO);
 			msg.put("msg", "일정이 등록되었습니다.");
 			return ResponseEntity.ok(msg);
 		

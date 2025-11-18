@@ -47,7 +47,7 @@ public class ScheduleService {
 	}
 	
 	// 일정 등록로직
-	public void createSchedule(@Valid ScheduleDTO scheduleDTO, Authentication authentication) {
+	public void createSchedule(@Valid ScheduleDTO scheduleDTO) {
 		Emp emp = empRepository.findById(scheduleDTO.getCreatedUser()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다.111"));
 		
 		Schedule schedule = scheduleDTO.toEntity();
@@ -81,7 +81,10 @@ public class ScheduleService {
 				} else if(empId.equals(scheduleType)) {
 					schedule.setScheduleType("개인");
 				} else {
-					Dept dept = deptRepository.findById(scheduleType).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 부서입니다."));
+					System.out.println(empId);
+					System.out.println(scheduleType + "여기오류직전");
+					
+					Dept dept = deptRepository.findById(scheduleType).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 부서입니다.222222"));
 					schedule.setScheduleType(dept.getDeptName());
 				}
 				scheduleList2.add(schedule);
