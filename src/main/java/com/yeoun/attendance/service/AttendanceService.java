@@ -1,6 +1,7 @@
 package com.yeoun.attendance.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.leave.entity.AnnualLeave;
+import com.yeoun.leave.repository.LeaveHistoryRepository;
 import com.yeoun.leave.repository.LeaveRepository;
 import com.yeoun.leave.service.LeaveService;
 
@@ -40,6 +42,7 @@ public class AttendanceService {
 	private final WorkPolicyRepository workPolicyRepository;
 	private final AccessLogRepository accessLogRepository;
 	private final LeaveService leaveService;
+	private final LeaveHistoryRepository leaveHistoryRepository;
 	private final EmpRepository empRepository;
 
 	// 출/퇴근 등록
@@ -52,66 +55,121 @@ public class AttendanceService {
 		WorkPolicy workPolicy = workPolicyRepository.findFirstByOrderByPolicyIdAsc()
 				.orElseThrow(() -> new NoSuchElementException("등록된 근무정책이 없습니다."));
 		
-		// 오늘자 출퇴근 기록 조회
-		Attendance attendance  = attendanceRepository.findByEmp_EmpIdAndWorkDate(empId, today).orElse(null);
-		// 오늘자 외근 기록 조회
-		AccessLog accessLog = accessLogRepository.findByEmpIdAndAccessDate(empId, today).orElse(null);
-		
 		// 직원 조회
 		Emp emp = empRepository.findById(empId)
 				.orElseThrow(() -> new NoSuchElementException("사원을 찾을 수 없습니다."));
 		
-		if (attendance == null) {
-			// 출근 기록이 없으면 새로 생성
-			Attendance newAttendance = Attendance.createForWorkIn(emp,
-                    today,
-                    now,
-                    LocalTime.parse(workPolicy.getInTime()),
-                    workPolicy.getLateLimit(),
-                    accessLog);
-			 attendanceRepository.save(newAttendance);
-			 return newAttendance.getStatusCode();
-		}
+		// 오늘자 출퇴근 기록 조회
+		Attendance attendance  = attendanceRepository.findByEmp_EmpIdAndWorkDate(empId, today).orElse(null);
 		
+		// 오늘자 외근 기록 조회
+		AccessLog accessLog = accessLogRepository.findByEmpIdAndAccessDate(empId, today).orElse(null);
 		
 		LocalTime lunchStart = LocalTime.parse(workPolicy.getLunchIn());
 		LocalTime lunchEnd = LocalTime.parse(workPolicy.getLunchOut());
+		LocalTime standardIn  = LocalTime.parse(workPolicy.getInTime());
 		LocalTime standardOut  = LocalTime.parse(workPolicy.getOutTime());
 		
-		if (!attendance.isAlreadyOut() && now.isAfter(standardOut)) { // 이미 퇴근 상태면 처리 불가
-			return "ALREADY_OUT";
-		}
+		log.info("<>>>>>>>>>>>>>>>10");
 		
+		// 점심시간에는 출입 기록 하지 않음
 		if (now.isAfter(lunchStart) && now.isBefore(lunchEnd)) {
-			return "LUNCH_TIME"; // 점심시간일 때는 아무 처리 안 함
+			log.info("<>>>>>>>>>>>>>>>12");
+			return "LUNCH_TIME";
 		}
 		
-		// 퇴근 처리
-		if (now.isAfter(standardOut)) {
-			attendance.recordWorkOut(now, standardOut, accessLog);
-	        return "OUT";
+		log.info("<>>>>>>>>>>>>>>>13");
+		// 오늘 날짜 기준으로 휴무인지 확인
+		boolean isHoliday = leaveHistoryRepository.existsByEmp_EmpIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(empId, today, today);
+		
+		log.info("<>>>>>>>>>>>>>>>14");
+		// 휴무라면 출퇴근이 아니라 외출 현황 로그에만 작성
+		if (isHoliday) {
+			return processAccessLog(empId, now, today);
 		}
 		
-		// 외출/복귀 처리
-		AccessLog lastLog = accessLogRepository.findTopByEmpIdAndAccessDateAndReturnTimeIsNullOrderByOutTimeDesc(empId, today);
+		log.info(">>>>>>>>>>>>>>> 1");
 		
-		log.info(">>>>>>>>>>>>>>>>>>>> lastLog : " + lastLog);
-		
-		if (lastLog != null) {
-			// 복귀 처리
-			lastLog.accessIn(now, "IN");
-			return "IN"; // 복귀
-		} else {
-			// 외출 처리
-			AccessLog newOutLog = AccessLog.builder()
+		// 출근 기록이 없으면 새로 생성
+		if (attendance == null) {
+			log.info(">>>>>>>>>>>>>>> 2");
+			// 기준 출근 시간 이전일 경우 정상 출근
+			if (now.isBefore(standardIn)) {
+				Attendance newAttendance = Attendance.createForWorkIn(
+						emp, today, now, standardIn, workPolicy.getLateLimit(), accessLog);
+				log.info(">>>>>>>>>>>>>>> 3");
+				attendanceRepository.save(newAttendance);
+				return newAttendance.getStatusCode();
+			}
+			log.info(">>>>>>>>>>>>>>> 4");
+			// 기준 출근과 퇴근 사이이면 외출로 처리
+			if (!now.isAfter(standardOut)) {
+				return recordAccessOut(empId, today, now);
+			}
+			log.info(">>>>>>>>>>>>>>> 5");
+			// 기준 퇴근 이후일 경우 외출로 처리
+			return recordAccessOut(empId, today, now);
+		}
+		log.info(">>>>>>>>>>>>>>> 6");
+		// 출근 기록이 있을 경우 
+		if (attendance.isAlreadyOut() && now.isAfter(standardOut)) {
+			AccessLog log = AccessLog.builder()
 					.empId(empId)
 					.accessDate(today)
-					.outTime(now)
-					.accessType("OUT")
+					.returnTime(now)
+					.accessType("IN")
 					.build();
-			accessLogRepository.save(newOutLog);
-			return "OUT";
+			
+			accessLogRepository.save(log);
 		}
+		log.info(">>>>>>>>>>>>>>> 7");
+		// 근무시간 중 퇴근 처리
+		if (now.isAfter(standardOut) && !attendance.isAlreadyOut()) {
+			attendance.recordWorkOut(now, standardOut, accessLog);
+			return "WORK_OUT";
+		}
+		log.info(">>>>>>>>>>>>>>> 8");
+		return processAccessLog(empId, now, today);
+		
+	}
+	
+	// 외출 복귀 처리
+	private String processAccessLog(String empId, LocalTime now, LocalDate today) {
+		Optional<AccessLog> lastLogOpt = accessLogRepository.findLatestOutWithoutReturn(empId, today);
+		
+		if (lastLogOpt.isPresent()) {
+			AccessLog lastLog = lastLogOpt.get();
+			String type = lastLog.getAccessType();
+			
+			log.info("???????? lastLog : " + lastLog);
+			
+			// 복귀 처리
+			if (type != null && type.trim().equalsIgnoreCase("OUT")) {
+				lastLog.accessIn(now, "IN");
+				return "IN";
+			} else {
+				// IN 상태인데 또 들어온 경우 외출로 처리
+				lastLog.accessOut(now, "OUT");
+				return "OUT";
+			}
+		}
+		
+		return recordAccessOut(empId, today, now);
+	}
+	
+	// 외출 기록 생성
+	private String recordAccessOut(String empId, LocalDate today, LocalTime now) {
+		AccessLog newOutLog = AccessLog.builder()
+				.empId(empId)
+				.accessDate(today)
+				.outTime(now)
+				.returnTime(null)
+				.accessType("OUT")
+				.build();
+		
+		accessLogRepository.save(newOutLog);
+		
+		return "OUT";
 	}
 	
 	// 출퇴근 수기 등록

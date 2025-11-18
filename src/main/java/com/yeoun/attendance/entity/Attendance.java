@@ -110,7 +110,7 @@ public class Attendance {
 			
 			// 외근 시작 시간이 출근 기준 시간 + 지각 유예 시간보다 빠르면 정상 출근 인정
 			if (outTime != null && !outTime.isAfter(standardIn.plusMinutes(lateLimit))) {
-				attendance.statusCode = "IN";
+				attendance.statusCode = "WORKIN";
 				attendance.workIn = outTime;
 			} else { // 외근 기준 이후면 지각 처리
 				attendance.statusCode = "LATE";
@@ -118,7 +118,7 @@ public class Attendance {
 			}
 			attendance.remark = accessLog.getReason();
 		} else {
-			 attendance.statusCode = now.isAfter(standardIn.plusMinutes(lateLimit)) ? "LATE" : "IN";
+			 attendance.statusCode = now.isAfter(standardIn.plusMinutes(lateLimit)) ? "LATE" : "WORKIN";
 			 attendance.workIn = now;
 		}
 		
@@ -163,7 +163,7 @@ public class Attendance {
 		LocalTime standardIn = LocalTime.parse(workPolicy.getInTime());
 		int lateLimit = workPolicy.getLateLimit();
 		
-		this.statusCode = (outTime.isAfter(standardIn.plusMinutes(lateLimit))) ? "LATE" : "IN";
+		this.statusCode = (outTime.isAfter(standardIn.plusMinutes(lateLimit))) ? "LATE" : "WORKIN";
 		this.workIn = outTime;
 		this.remark = reason;
 	}
