@@ -56,12 +56,31 @@ body {
   background: #fff;
 }
 
+/* 메인 헤더 전체 줄 */
 .main-header {
-  background: #f7f7fb;
-  border-bottom: 1px solid #e1e1e1;
-  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;  /* 좌측 텍스트 / 우측 아이콘 */
+  padding: 10px 18px;
+  font-size: 18px;
   font-weight: 600;
+  color: #3a416f;
+  border-bottom: 1px solid #e0e0e0;
 }
+
+/* + 버튼 */
+.create-group-btn {
+  font-size: 20px;
+  cursor: pointer;
+  color: #6a5acd;          
+  transition: 0.15s ease;
+}
+
+.create-group-btn:hover {
+  transform: scale(1.2);
+  color: #584ac6;          
+}
+
 
 .panel-body {
   flex: 1;
@@ -258,5 +277,123 @@ box-shadow: none;
   font-weight: 400;
   color: #999;
 }
+
+
+/** 모달관련 추가 css **/
+
+/* 모달 전체 크기 줄이기 */
+.custom-group-modal {
+  max-width: 380px !important;   /* 채팅창보다 작은 사이즈 */
+}
+
+/* 입력창 */
+.group-input {
+  border-radius: 10px;
+  border: 1px solid #d6d3ff;
+}
+
+/* 참여자 리스트 */
+.member-list {
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+/* 각 멤버 행 */
+.member-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  border-radius: 10px;
+  background: #faf7ff;
+  transition: 0.2s ease;
+  cursor: pointer;
+  border: 1px solid #e2dfff;
+}
+
+.member-item:hover {
+  background: #f1edff;
+}
+
+/* 선택된 상태 */
+.member-item.selected {
+  border: 2px solid #6a5acd;
+  background: #ece9ff;
+}
+
+/* 프로필 이미지 */
+.avatar-area {
+  margin-right: 10px;
+}
+
+.avatar-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+/* 이름/부서 */
+.info-area .name {
+  margin: 0;
+  font-weight: 600;
+}
+
+.info-area .dept {
+  color: #888;
+}
+
+/* 오른쪽 체크 부분 */
+.check-area {
+  margin-left: auto;
+}
+
+.check-circle {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #c8c4ff;
+  transition: 0.2s ease;
+}
+
+/* 선택된 체크 */
+.member-item.selected .check-circle {
+  background: #6a5acd;
+  border-color: #6a5acd;
+  box-shadow: 0 0 0 3px rgba(106, 90, 205, 0.2);
+}
+
+/* 선택된 멤버 표시 영역 */
+.selected-box {
+  min-height: 40px;
+  background: #f6f2ff;
+  border: 1px solid #dcd7ff;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.selected-tag {
+  font-size: 13px;
+  background: #6a5acd;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.selected-tag i {
+  cursor: pointer;
+  font-size: 11px;
+}
+
+
+
+
+
 
 

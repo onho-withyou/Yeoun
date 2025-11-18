@@ -5,9 +5,16 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.jexl3.JexlBuilder;
+import org.apache.commons.jexl3.JexlContext;
+import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.jexl3.JexlExpression;
+import org.apache.commons.jexl3.MapContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +27,7 @@ import com.yeoun.pay.entity.PayRule;
 import com.yeoun.pay.entity.PayrollPayslip;
 import com.yeoun.pay.enums.ActiveStatus;
 import com.yeoun.pay.enums.CalcStatus;
+import com.yeoun.pay.enums.ItemGroup;
 import com.yeoun.pay.repository.EmpPayItemRepository;
 import com.yeoun.pay.repository.PayCalcRuleRepository;
 import com.yeoun.pay.repository.PayItemMstRepository;
@@ -28,13 +36,25 @@ import com.yeoun.pay.repository.PayrollPayslipRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
 
 @Service
 @RequiredArgsConstructor
 @Log4j2
 public class PayrollCalcService {
+	
+	@Getter
+	@AllArgsConstructor
+	static class AllowanceResult {
+	    private BigDecimal allowance;   // ALW_AMT
+	    private BigDecimal incentive;   // INC_AMT (직급수당)
+	}
+
+
 
     private final PayrollPayslipRepository payslipRepo;
     private final PayRuleRepository payRuleRepo;
@@ -42,6 +62,8 @@ public class PayrollCalcService {
     private final PayCalcRuleRepository calcRuleRepo;
     private final EmployeeQueryPort employeePort;
     private final EmpPayItemRepository empPayItemRepo;
+    
+    private static final JexlEngine JEXL = new JexlBuilder().create();
 
     @PersistenceContext
     private EntityManager em;
@@ -120,10 +142,12 @@ public class PayrollCalcService {
 
                 // ------- 기존 급여 계산 로직 그대로 --------
                 BigDecimal baseAmt = calcBase(emp, rules, items, calcRules);
-                BigDecimal alwAmt  = calcAllowances(emp, rules, items, calcRules, baseAmt);
+                AllowanceResult ar = calcAllowances(emp, rules, items, calcRules, baseAmt);
+                BigDecimal alwAmt = ar.getAllowance();   // ALW
+                BigDecimal incAmt = ar.getIncentive();
+                
                 BigDecimal dedAmt  = calcDeductions(emp, rules, items, calcRules, baseAmt, alwAmt);
-
-                BigDecimal totAmt = baseAmt.add(alwAmt);
+                BigDecimal totAmt = baseAmt.add(alwAmt).add(incAmt);
                 BigDecimal netAmt = totAmt.subtract(dedAmt);
 
                 PayrollPayslip slip = payslipRepo
@@ -137,6 +161,7 @@ public class PayrollCalcService {
                 slip.setDeptId(emp.deptId());
                 slip.setBaseAmt(safe(baseAmt));
                 slip.setAlwAmt(safe(alwAmt));
+                slip.setIncAmt(safe(incAmt));
                 slip.setDedAmt(safe(dedAmt));
                 slip.setTotAmt(safe(totAmt));
                 slip.setNetAmt(safe(netAmt));
@@ -209,6 +234,19 @@ public class PayrollCalcService {
                         .amount(transAmt)
                         .sortNo(sort++)
                         .build());
+                
+             // 지급: 직급수당 (INCENTIVE)
+                if (incAmt.compareTo(BigDecimal.ZERO) > 0) {
+                    empPayItemRepo.save(EmpPayItem.builder()
+                            .payslip(slip)
+                            .itemType("ALW")
+                            .itemCode("INCENTIVE")
+                            .itemName("직급수당")
+                            .amount(incAmt)
+                            .sortNo(sort++)
+                            .build());
+                }
+
 
                 // 지급 합계
 //                empPayItemRepo.save(EmpPayItem.builder()
@@ -299,7 +337,20 @@ public class PayrollCalcService {
         return count;
     }
 
-    /* ========================= 상세 조회 ========================= */
+    private BigDecimal calcBase(SimpleEmp emp,
+            List<PayRule> rules,
+            List<PayItemMst> items,
+            List<PayCalcRule> calcRules) {
+			
+			PayRule rule = rules.stream().findFirst().orElse(null);
+			if (rule == null) return BigDecimal.ZERO;
+			
+			return safe(rule.getBaseAmt());
+			}
+
+
+
+	/* ========================= 상세 조회 ========================= */
     public PayslipDetailDTO getPayslipDetail(String yyyymm, String empId) {
 
         PayrollPayslip slip = payslipRepo.findByPayYymmAndEmpId(yyyymm, empId)
@@ -332,30 +383,116 @@ public class PayrollCalcService {
                 .build();
     }
 
-
-    /* ========================= 계산 서브로직 ========================= */
-
-    private BigDecimal calcBase(SimpleEmp emp, List<PayRule> rules,
-                                List<PayItemMst> items, List<PayCalcRule> calcRules) {
-
-        PayRule rule = rules.stream().findFirst().orElse(null);
-        return rule == null ? BigDecimal.ZERO :
-                safe(rule.getBaseAmt());
-    }
-
-    private BigDecimal calcAllowances(SimpleEmp emp, List<PayRule> rules,
-                                      List<PayItemMst> items, List<PayCalcRule> calcRules,
-                                      BigDecimal baseAmt) {
+     //===========계산 ==============
+    private AllowanceResult calcAllowances(SimpleEmp emp,
+            List<PayRule> rules,
+            List<PayItemMst> items,
+            List<PayCalcRule> calcRules,
+            BigDecimal baseAmt) {
 
         PayRule rule = rules.stream().findFirst().orElse(null);
-        if (rule == null) return BigDecimal.ZERO;
+        if (rule == null) 
+            return new AllowanceResult(BigDecimal.ZERO, BigDecimal.ZERO);
+
 
         BigDecimal meal = BigDecimal.valueOf(Optional.ofNullable(rule.getMealAmt()).orElse(0.0));
         BigDecimal trans = BigDecimal.valueOf(Optional.ofNullable(rule.getTransAmt()).orElse(0.0));
 
-        return safe(meal.add(trans));
+        BigDecimal totalAllowance = meal.add(trans);   // ALW_AMT
+        BigDecimal incentiveAmt   = BigDecimal.ZERO;   // INC_AMT → 직급수당
+
+        log.info("=== [지급 계산 시작] empId={}, baseAmt={}, meal={}, trans={} ===",
+                emp.empId(), baseAmt, meal, trans);
+
+        /* =======================================================
+           🔥  PayCalcRule 기반 수당 계산
+        ======================================================== */
+        for (PayCalcRule cr : calcRules) {
+
+            if (cr.getItem() == null) {
+                log.warn("🚨 PayCalcRule {} 의 ITEM 이 NULL 입니다. ITEM_CODE 를 확인하세요.", cr.getRuleId());
+                continue;
+            }
+
+            ItemGroup group = cr.getItem().getItemGroup();
+            if (group == null) {
+                log.warn("🚨 PayCalcRule {} ITEM_GROUP 이 NULL 입니다. ITEM_CODE={}", cr.getRuleId(), cr.getItem().getItemCode());
+                continue;
+            }
+
+            if (!List.of(ItemGroup.ALLOWANCE, ItemGroup.INCENTIVE).contains(group))
+                continue;
+
+
+            // 규칙-항목 매칭
+            PayItemMst item = cr.getItem();
+            if (item == null) continue;
+
+            // 대상 조건
+            boolean targetPass = false;
+            switch (cr.getTargetType()) {
+                case ALL -> targetPass = true;
+                case EMP -> targetPass = emp.empId().equals(cr.getTargetCode());
+                case DEPT -> targetPass = emp.deptId().equals(cr.getTargetCode());
+                case GRADE -> {
+                    String pos = employeePort.getEmpPosition(emp.empId());
+                    log.info("사원 직급={}", pos);
+                    targetPass = pos.equals(cr.getTargetCode());
+                }
+            }
+            if (!targetPass) continue;
+
+            // === JEXL 변수 ===
+            Map<String, Object> vars = new HashMap<>();
+            vars.put("BASE_AMT", baseAmt);
+            vars.put("value", cr.getValueNum());
+            vars.put("rate", cr.getValueNum());
+
+            int usedAnnual = employeePort.getUsedAnnual(emp.empId());
+            vars.put("remain_days", usedAnnual);
+
+            JexlContext ctx = new MapContext(vars);
+
+            try {
+                log.info("  → 수식 실행: ruleId={}, expr={}, vars={}",
+                        cr.getRuleId(), cr.getCalcFormula(), vars);
+
+                JexlExpression expr = JEXL.createExpression(cr.getCalcFormula());
+                BigDecimal result = new BigDecimal(expr.evaluate(ctx).toString());
+
+                log.info("  → 계산 결과: empId={}, ruleId={}, 금액={}",
+                        emp.empId(), cr.getRuleId(), result);
+
+                /* ----------------------------------------------
+                 🔥 직급(GRADE) 수당은 incentive 로 저장!
+                 ---------------------------------------------- */
+                if (cr.getTargetType().name().equals("GRADE")) {
+                    incentiveAmt = incentiveAmt.add(result);
+                } else {
+                    totalAllowance = totalAllowance.add(result);
+                }
+
+            } catch (Exception e) {
+                log.error("  → [ERROR] ruleId={} 계산 실패: {}", cr.getRuleId(), e.getMessage());
+            }
+        }
+
+        // === 결과 로그 ===
+        log.info("=== [지급 계산 종료] empId={}, totalAllowance(ALW)={}, incentiveAmt(INC)={} ===",
+                emp.empId(), totalAllowance, incentiveAmt);
+
+        // 👉 여기서는 ALW만 반환 (INC는 호출부에서 저장)
+        return new AllowanceResult(
+        	    safe(totalAllowance),
+        	    safe(incentiveAmt)
+        	);
     }
 
+    /* =======================================================
+	🔥  공제 금액 계산 
+	======================================================= */
+
+    
     private BigDecimal calcDeductions(SimpleEmp emp, List<PayRule> rules,
                                       List<PayItemMst> items, List<PayCalcRule> calcRules,
                                       BigDecimal baseAmt, BigDecimal alwAmt) {
@@ -392,6 +529,8 @@ public class PayrollCalcService {
         List<SimpleEmp> findActiveEmployees();
         String getEmpName(String empId);
         String getDeptName(String deptId);
+        String getEmpPosition(String empId);  // 직급코드 반환
+        int getUsedAnnual(String empId);      // 올해 사용한 연차일수
     }
 
     public record SimpleEmp(String empId, String deptId, LocalDate hireDate) {}

@@ -2,7 +2,10 @@ package com.yeoun.main.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.emp.dto.DeptDTO;
+import com.yeoun.leave.dto.LeaveDTO;
+import com.yeoun.leave.dto.LeaveHistoryDTO;
 import com.yeoun.main.dto.ScheduleDTO;
 import com.yeoun.main.service.ScheduleService;
 
@@ -65,4 +68,19 @@ public class MainRestController {
 		return ResponseEntity.ok(deptList);
 	}
 	
+	//연차 정보 조회
+	
+	// 일정목록 조회
+	@GetMapping("/leaves")
+	@ResponseBody
+	public ResponseEntity<List<LeaveHistoryDTO>> leaves(
+			@RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime startDate
+			, @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime endDate
+			, Authentication authentication, Principal principal) {
+		LoginDTO loginDTO = (LoginDTO)authentication.getPrincipal();
+		List<LeaveHistoryDTO> leaveHistoryList = scheduleService.getLeaveHistoryList(startDate, endDate, loginDTO);
+//		return ResponseEntity.ok(null);
+		System.out.println(leaveHistoryList);
+		return ResponseEntity.ok(leaveHistoryList);
+	}
 }

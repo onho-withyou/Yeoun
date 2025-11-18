@@ -1,6 +1,7 @@
 package com.yeoun.leave.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,4 +32,17 @@ public interface LeaveHistoryRepository extends JpaRepository<AnnualLeaveHistory
 
 	// 오늘 날짜 기준으로 휴무인지 확인
 	boolean existsByEmp_EmpIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(String empId, LocalDate today1, LocalDate today2);
+	
+	// 연차 스케줄 조회
+	@Query("""
+			SELECT h
+			FROM AnnualLeaveHistory h
+			WHERE (h.emp.empId = :empId or h.emp.dept.deptId = :deptId)
+			  AND (h.startDate  <= :endDate AND h.endDate >= :startDate)
+			""")
+	List<AnnualLeaveHistory> findLeaveHistorySchedule(
+			@Param("startDate")LocalDate  startDate
+			, @Param("endDate")LocalDate  endDate
+			, @Param("empId")String empId
+			, @Param("deptId")String deptId);
 }

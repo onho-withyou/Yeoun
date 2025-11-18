@@ -117,7 +117,7 @@ public class MessengerService {
 	// ========================================================
 	// 새 방 생성 & 메시지 보내기
 	@Transactional
-	public Long createRoom(RoomCreateRequestDTO roomCreateRequestDTO) {
+	public Long createRoom(RoomCreateRequest roomCreateRequestDTO) {
 
 		// 1) 채팅방 생성
 		MsgRoom newRoom = new MsgRoom();
@@ -149,6 +149,15 @@ public class MessengerService {
 
 		return newRoom.getRoomId();
 
+	}
+
+	// ========================================================
+	//  마지막으로 읽은 메시지 체크
+	@Transactional
+	public void updateLastRead(String empId, Long roomId, Long lastReadId) {
+		log.info("update last read 진입.............");
+		log.info("empId / roomId / lastreadId :::: " + empId + "/" + roomId + "/" + lastReadId);
+		msgRelationRepository.updateLastRead(empId, roomId, lastReadId);
 	}
 
 }

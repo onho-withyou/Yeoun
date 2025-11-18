@@ -1,0 +1,93 @@
+/* 공통 카드 */
+.dept-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  min-width: 170px;
+}
+
+/* 공통 헤더 */
+.dept-card .dept-header {
+  color: #ffffff;
+  font-weight: 700;
+  text-align: center;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+/* ------------- 대표 ------------- */
+.dept-header.theme-representative {
+  background-color: #334155 !important;
+}
+
+/* ------------- ERP (연한 블루) ------------- */
+.dept-header.theme-erp {
+  background-color: #3B82F6 !important;
+}
+
+/* ERP 하위 부서 (조금 더 연함) */
+.dept-header.erp-sub {
+  background-color: #60A5FA !important;
+}
+
+/* ------------- MES (민트/블루그린) ------------- */
+.dept-header.theme-mes {
+  background-color: #14B8A6 !important; /* 민트 청록 */
+}
+
+/* MES 하위 (조금 더 연한 블루그린) */
+.dept-header.mes-sub {
+  background-color: #2DD4BF !important;
+}
+
+/* 카드 내부 */
+.dept-card .dept-body {
+  background-color: #F9FAFB;
+  padding: 10px 12px;
+}
+
+/* 직원 row */
+.dept-card .emp-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  padding: 3px 0;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.dept-card .emp-row:last-child {
+  border-bottom: none;
+}
+
+.emp-name { font-weight: 500; color: #111827; }
+.emp-sep  { color: #cbd5e1; }
+.emp-pos  { color: #475569; }
+
+.emp-empty {
+  justify-content: center;
+  color: #9ca3af;
+}
+
+/* 조직도 전체를 감싸는 래퍼 – 여기서 스크롤 허용 */
+.org-wrapper {
+  width: 100%;
+  overflow-x: auto;          /* 가로 스크롤 */
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch; /* 모바일 부드러운 스크롤 */
+}
+
+/* Treant가 만들어주는 루트 컨테이너 */
+#orgCard {
+  min-width: max-content;    /* 내용만큼 가로 넓이 잡기 */
+}
+
+/* 상위 레이아웃에서 오른쪽 스크롤 막음 → 강제로 허용 */
+html, body,
+.layout-wrapper,
+.layout-container,
+.layout-page,
+.content-wrapper {
+  overflow-x: visible !important;
+}
