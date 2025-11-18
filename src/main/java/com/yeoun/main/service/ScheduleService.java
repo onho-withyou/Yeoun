@@ -81,9 +81,6 @@ public class ScheduleService {
 				} else if(empId.equals(scheduleType)) {
 					schedule.setScheduleType("개인");
 				} else {
-					System.out.println(empId);
-					System.out.println(scheduleType + "여기오류직전");
-					
 					Dept dept = deptRepository.findById(scheduleType).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 부서입니다.222222"));
 					schedule.setScheduleType(dept.getDeptName());
 				}
@@ -125,9 +122,7 @@ public class ScheduleService {
 		
 		LocalDate startDate = startDateTime.toLocalDate();
 		LocalDate endDate = endDateTime.toLocalDate();
-		
 		List<AnnualLeaveHistory> leaveHistoryList = leaveHistoryRepository.findLeaveHistorySchedule(startDate, endDate, empId, deptId);
-		
 		return leaveHistoryList.stream().map(LeaveHistoryDTO::fromEntity).collect(Collectors.toList());
 	}
 

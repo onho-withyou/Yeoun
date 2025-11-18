@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	// ---------------------------------------------------------------
 	// 일정등록 버튼이벤트
 	document.getElementById('add-schedule').addEventListener('click', () => {
-		openModal('add');
+		openScheduleModal('add');
 	})
 	
 	
@@ -174,7 +174,7 @@ function initGrid(data) {
 				return response.json();  //JSON 파싱
 			})
 			.then(data => { // response가 ok일때
-				openModal("edit", data);
+				openScheduleModal("edit", data);
 			}).catch(error => {
 				console.error('에러', error)
 				alert("데이터 조회 실패");

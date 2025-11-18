@@ -3,10 +3,10 @@
 **/
 
 let picker = null;
-
-document.addEventListener('DOMContentLoaded', function() {
-	
-	// 일정등록 데이트피커 객체 생성
+let startTimePicker = null;
+let endTimePicker = null;
+// 일정등록 데이트피커 객체 생성
+function createRangePicker() {
 	picker = tui.DatePicker.createRangePicker({
 	    startpicker: {
 	        date: today,
@@ -25,13 +25,28 @@ document.addEventListener('DOMContentLoaded', function() {
 			showMeridiem: false
         }
 	});
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+	
+	createRangePicker();
 	
 	const alldayCheck = document.getElementById('all-day-checkbox');
-	
-	//모달 종일 체크박스 체크 이벤트
+
+	// 종일 체크박스 변경 이벤트
 	alldayCheck.addEventListener('change', function() {
 		const alldayYN = document.getElementById('all-day-checkbox-value');
-		alldayCheck.checked ? alldayYN.value = "Y" : alldayYN.value = "N"
+		alldayCheck.checked ? alldayYN.value = "Y" : alldayYN.value = "N";
+	
+		if (alldayCheck.checked) {
+		    // 종일 모드: 시간범위 영역 숨기기
+		} else {
+		    // 시간범위 모드: 시간범위 영역 보이기
+	
+		    // 시작/종료 날짜를 같은 날로 강제하고 싶다면, 예: start 기준
+		    const startDate = picker.getStartDate();
+		    picker.setEndDate(new Date(startDate));
+		}
 	});
 	
 	//일정등록 모달 등록, 수정버튼 이벤트
@@ -142,7 +157,7 @@ async function createSelect() {
 }
 
 // 모달열기함수
-async function openModal(mode, data = null) {
+async function openScheduleModal(mode, data = null) {
 	const modal = new bootstrap.Modal(document.getElementById('add-schedule-modal'));
 	const form = document.getElementById('add-schedule-form');
 	const modalTitle = document.getElementById('modalCenterTitle');
@@ -150,7 +165,7 @@ async function openModal(mode, data = null) {
 	const submitBtn = document.getElementById('add-schedule-btn');
 	const select = document.getElementById('schedule-type');
 	const createdUserName = document.getElementById('createdUserName');
-	const alldayCheckbox = document.getElementById('all-day-checkbox-value');
+	const alldayCheckbox = document.getElementById('all-day-checkbox');
 	
 //	const createdUser = document.getElementById('schedule-writer')
 //	const startpickerInput = document.getElementById('startpicker-input');
@@ -246,9 +261,9 @@ async function openModal(mode, data = null) {
 		// 날짜 초기값
 		picker.setStartDate(data.scheduleStart ? new Date(data.scheduleStart) : today);
 		picker.setEndDate(data.scheduleFinish ? new Date(data.scheduleFinish): nextDay);
-		// 종일 체크 해제
-		alldayCheckbox.checked = data.alldayYN == 'Y';
-//		form.alldayYN.checked = data.alldayYN === 'Y';
+		// 종일 체크
+		alldayCheckbox.checked = data.alldayYN === 'Y'; 
+		form.alldayYN.checked = data.alldayYN === 'Y'; // hidden value
 		form.scheduleContent.value = data.scheduleContent || '';
 		
 		console.log(alldayCheckbox.checked, "체크드상태");

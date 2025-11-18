@@ -80,7 +80,7 @@ public class MainRestController {
 		LoginDTO loginDTO = (LoginDTO)authentication.getPrincipal();
 		List<LeaveHistoryDTO> leaveHistoryList = scheduleService.getLeaveHistoryList(startDate, endDate, loginDTO);
 //		return ResponseEntity.ok(null);
-		System.out.println(leaveHistoryList);
+//		System.out.println(leaveHistoryList);
 		return ResponseEntity.ok(leaveHistoryList);
 	}
 }
