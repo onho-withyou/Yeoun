@@ -53,6 +53,18 @@ public class EmpService {
 	// 사원 신규 등록
 	@Transactional
 	public void registEmp(EmpDTO empDTO) {
+		
+		// 이메일 / 연락처 중복 검사
+	    String email  = empDTO.getEmail();
+	    String mobile = empDTO.getMobile();
+
+	    if (email != null && !email.isBlank() && empRepository.existsByEmail(email)) {
+	        throw new IllegalStateException("이미 사용 중인 이메일입니다.");
+	    }
+
+	    if (mobile != null && !mobile.isBlank() && empRepository.existsByMobile(mobile)) {
+	        throw new IllegalStateException("이미 사용 중인 연락처입니다.");
+	    }
 
 	    // 0) 사번 자동 생성 (충돌 방지 재시도)
 	    String empId = generateEmpId(empDTO.getHireDate(), 3);

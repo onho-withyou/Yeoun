@@ -82,9 +82,6 @@ public class EmpDTO {
 	// 조직/직무
 	// ========================
 	
-	@NotBlank(message = "종류를 선택해주세요.")
-    private String topDept;
-	
 	// 부서 
 	@NotBlank(message = "부서를 선택해주세요.")
     private String deptId;

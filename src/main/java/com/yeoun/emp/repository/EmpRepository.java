@@ -19,6 +19,11 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	// 사원번호로 사용자 조회
 	Optional<Emp> findByEmpId(String empId);
 	
+	// ------ 중복 확인 ------
+	boolean existsByEmpId(String candidate);	// 사원번호
+	boolean existsByEmail(String email);		// 이메일
+	boolean existsByMobile(String mobile);		// 전화번호
+	
 	// 사원번호 + 부서 + 역할
 	@Query("""
 			  SELECT e
@@ -30,8 +35,6 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 			""")
 	Optional<Emp> findByEmpIdWithDeptAndRoles(@Param("empId") String empId);
 	
-	// 사원번호 중복 확인
-	boolean existsByEmpId(String candidate);
 	
 	// 사원 목록 조회
 	@Query("""

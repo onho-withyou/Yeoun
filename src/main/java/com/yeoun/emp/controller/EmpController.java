@@ -74,20 +74,41 @@ public class EmpController {
 						 RedirectAttributes rttr,
 						 Model model) {
 		log.info(">>>>>>>>>>>>>> empDTO : " + empDTO);
-
 		log.info(">>>>>>>>>>>>>> bindingResult.getAllErrors : " + bindingResult.getAllErrors());
 		
-		// 입력값 검증 결과가 true 일 때(검증 오류 발생 시) 다시 입력폼으로 포워딩
+		// 1) 입력값 검증 결과가 true 일 때(검증 오류 발생 시) 다시 입력폼으로 포워딩
 		if(bindingResult.hasErrors()) {
 			setupEmpFormCommon(model);
 			model.addAttribute("mode", "create");
 			return "emp/emp_form";
 		}
 		
-		// EmpService - registEmp() 메서드 호출하여 사원 등록 처리 요청
-		empService.registEmp(empDTO);
-		rttr.addFlashAttribute("msg", "사원 등록이 완료되었습니다.");
-		return "redirect:/emp";
+		try {
+	        // 2) 서비스 호출 (이메일/연락처 중복 검사)
+	        empService.registEmp(empDTO);
+	    } catch (IllegalStateException e) {
+	        // 3) 중복 등 비즈니스 에러 처리
+	        String msg = e.getMessage();
+
+	        // 메시지 내용 보고 필드에 바인딩 (서비스에서 메시지를 저렇게 던진다는 가정)
+	        if (msg.contains("이메일")) {
+	            bindingResult.rejectValue("email", "duplicate", msg);
+	        } else if (msg.contains("연락처")) {
+	            bindingResult.rejectValue("mobile", "duplicate", msg);
+	        } else {
+	            // 혹시 모를 기타 에러는 글로벌 에러로
+	            bindingResult.reject("empRegistError", msg);
+	        }
+		
+	        // 다시 폼으로
+	        setupEmpFormCommon(model);
+	        model.addAttribute("mode", "create");
+	        return "emp/emp_form";
+	    }
+
+	    // 4) 정상 등록 시
+	    rttr.addFlashAttribute("msg", "사원 등록이 완료되었습니다.");
+	    return "redirect:/emp";
 	}
 	
 	// ====================================================================================
