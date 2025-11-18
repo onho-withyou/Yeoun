@@ -74,7 +74,7 @@ grid.on("click", (ev) => {
 		// 해당 행의 id 값 가져오기
 		const attendanceId = row.attendanceId;
 		// attendance.js에 만들어둔 함수 사용
-		openModal("edit", attendanceId);
+		openModalAttendance("edit", attendanceId);
 	}
 })
 
@@ -96,7 +96,7 @@ async function loadAttendanceList(startDate, endDate) {
 		}
 		
 		const statusMap = {
-			IN: "출근",
+			WORKIN: "출근",
 			LATE: "지각",
 			OFF: "휴무",
 			OUTWORK: "외근"
