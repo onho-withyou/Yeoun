@@ -1,11 +1,29 @@
 package com.yeoun.orgchart.repository;
 
-import org.hibernate.type.descriptor.converter.spi.JpaAttributeConverter;
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.yeoun.emp.entity.Emp;
+import com.yeoun.emp.entity.Dept;
 
 @Repository
-public interface OrgChartRepository extends JpaAttributeConverter<Emp, String> {
+public interface OrgChartRepository extends JpaRepository<Dept, String> {
+	
+	// 조직도 조회용
+    @Query("""
+        select 
+            d.deptId as deptId,
+            d.parentDeptId as parentDeptId,
+            d.deptName as deptName,
+            p.posName as posName,
+            e.empName as empName
+        from Dept d
+        left join Emp e on e.dept.deptId = d.deptId
+        left join Position p on e.position.posCode = p.posCode
+        order by d.deptId
+    """)
+	List<OrgNodeProjection> findOrgNodes();
 
 }
