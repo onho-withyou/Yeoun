@@ -18,15 +18,16 @@ async function attendance(empId) {
 
 const handleAttendanceToggle = async (empId) => {
 	const result =  await attendance(empId);
+	const attendanceBtn = document.querySelector("#attendance");
 	
 	let msg = "";
 	
 	// attendance함수의 반환값이 data의 status로 알림 변경
 	if (result.status === "WORKIN") {
-		document.querySelector("#attendance").innerText = "퇴근";
+		attendanceBtn.innerText = "퇴근";
 		msg = "출근했습니다.";
 	} else if (result.status === "WORKOUT") {
-		document.querySelector("#attendance").innerText = "출근";
+		attendanceBtn.innerText = "출근";
 		msg = "퇴근했습니다.";
 	} else if (result.status === "LATE") {
 		msg = "지각입니다.";
@@ -35,6 +36,13 @@ const handleAttendanceToggle = async (empId) => {
 	} else {
 		console.log(result.status);
 		msg = "외출입니다.";
+	}
+	
+	// 버튼 활성화/비활성화 적용
+	if (result.buttonEnabled === false) {
+		attendanceBtn.disabled = true;
+	} else {
+		attendanceBtn.disabled = false;
 	}
 	
 	alert(msg);
@@ -128,7 +136,7 @@ const saveAttendance = async () => {
 		const response = await fetch(url, {
 			method,
 			headers: {
-				[csrfHeader]: csrfToken, 
+				[csrfHeader]: csrf, 
 				"Content-Type": "application/json"
 			},
 			body: JSON.stringify({empId, workIn, workOut, statusCode}),

@@ -53,10 +53,9 @@ public class AttendanceController {
 		try {
 			String resultStatus = attendanceService.registAttendance(empId);
 			
-			log.info("@@@@@@@@@@@@@@@@ resultStatus : " + resultStatus);
-			
 			result.put("success", true);
 			result.put("status", resultStatus);
+			result.put("buttonEnabled", attendanceService.isAttendanceButtonEnabled(empId));
 			
 			return ResponseEntity.ok(result);
 		} catch (NoSuchElementException e) {
