@@ -10,6 +10,7 @@ const tabChats 			= document.getElementById('tab-chats'); // 대화목록 탭
 const friendsPanel 		= document.getElementById('friends-panel'); // 친구패널
 const chatsPanel 		= document.getElementById('chats-panel'); // 대화패널
 const headerTitle 		= document.getElementById('header-title'); // 헤더(친구목록-대화목록 텍스트 전환)
+const groupButton		= document.getElementById('group-button'); // 그룹채팅 시작 버튼
 
 const searchInput		    = document.querySelector('.chat-search input'); // 검색창
 const searchButton		    = document.querySelector('.chat-search span'); // 검색버튼
@@ -121,6 +122,7 @@ function activeFriendsTab() {
 	chatsPanel.classList.add('d-none');
 	
 	headerTitle.textContent = '친구 목록';
+	groupButton.style.display = 'none';
 	
 	// 검색창 초기화
 	searchInput.value = '';
@@ -142,6 +144,7 @@ function activeChatsTab() {
 	friendsPanel.classList.add('d-none');
 	
 	headerTitle.textContent = '대화 목록';
+	groupButton.style.display = 'block';
 	
 	// 검색창 초기화
 	searchInput.value = '';
@@ -329,4 +332,132 @@ document.addEventListener("click", (event) => {
 // 초기 진입 시 : 친구 탭 활성화
 // ==========================
 activeFriendsTab();
+
+
+
+//==========================
+// 모달 JS
+//==========================
+//+버튼 클릭 → 모달 오픈
+document.querySelector('.create-group-btn').addEventListener('click', () => {
+ const modal = new bootstrap.Modal(document.getElementById('group-modal'));
+ modal.show();
+});
+
+//생성 버튼 클릭
+document.getElementById('createGroupBtn').addEventListener('click', async () => {
+ const name = document.getElementById('group-name').value.trim();
+ const members = [...document.querySelectorAll('.group-member:checked')]
+                 .map(x => x.value);
+
+ if (!name) {
+     alert("그룹명을 입력하세요.");
+     return;
+ }
+ if (members.length < 2) {
+     alert("최소 2명 이상 선택해야 합니다.");
+     return;
+ }
+
+ const res = await fetch('/messenger/group/create', {
+     method: 'POST',
+     headers: {
+         'Content-Type': 'application/json',
+         [csrfHeaderName]: csrfToken
+     },
+     body: JSON.stringify({ groupName: name, memberIds: members })
+ });
+
+ const roomId = await res.text();
+
+ // 바로 해당 채팅방으로 이동
+ window.open(`/messenger/room/${roomId}`, "_blank",
+     "width=500,height=700,resizable=no");
+});
+
+//====================================================
+//멤버 선택(토글)
+//====================================================
+document.querySelectorAll('.member-item').forEach(item => {
+ item.addEventListener('click', () => {
+     item.classList.toggle('selected');
+ });
+});
+
+//====================================================
+//그룹 생성 버튼
+//====================================================
+document.getElementById('createGroupBtn').addEventListener('click', async () => {
+
+ const name = document.getElementById('groupName').value.trim();
+ const selected = [...document.querySelectorAll('.member-item.selected')]
+                     .map(el => el.dataset.id);
+ 
+ const selectedBox = document.querySelector('.selected-list');
+
+//member-item 클릭 시 선택 상태 토글
+document.querySelectorAll('.member-item').forEach(item => {
+  item.addEventListener('click', () => {
+      item.classList.toggle('selected');
+      updateSelectedBox();
+  });
+});
+
+//선택된 멤버 목록 박스 업데이트
+function updateSelectedBox() {
+  const selected = [...document.querySelectorAll('.member-item.selected')];
+  selectedBox.innerHTML = '';
+
+  selected.forEach(item => {
+      const id = item.dataset.id;
+      const name = item.querySelector('.name').textContent;
+
+      const tag = document.createElement('div');
+      tag.className = 'selected-tag';
+      tag.innerHTML = `${name} <i class="bi bi-x-lg" data-id="${id}"></i>`;
+      selectedBox.appendChild(tag);
+  });
+}
+
+//X 버튼 클릭 → 선택 해제
+selectedBox.addEventListener('click', (e) => {
+  if (!e.target.classList.contains('bi-x-lg')) return;
+
+  const id = e.target.dataset.id;
+
+  // 원래 멤버 리스트에서 선택 된 클래스 제거
+  const original = document.querySelector(`.member-item[data-id="${id}"]`);
+  if (original) original.classList.remove('selected');
+
+  updateSelectedBox();
+});
+
+
+ if (!name) {
+     alert("그룹명을 입력하세요.");
+     return;
+ }
+ if (selected.length < 2) {
+     alert("최소 2명 이상 선택해야 합니다.");
+     return;
+ }
+
+ const res = await fetch('/messenger/group/create', {
+     method: 'POST',
+     headers: {
+         'Content-Type': 'application/json',
+         [csrfHeaderName]: csrfToken
+     },
+     body: JSON.stringify({
+         groupName: name,
+         memberIds: selected
+     })
+ });
+
+ const roomId = await res.text();
+
+ window.open(`/messenger/room/${roomId}`, "_blank",
+     "width=500,height=700,resizable=no");
+});
+
 
