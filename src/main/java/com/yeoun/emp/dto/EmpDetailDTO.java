@@ -1,5 +1,8 @@
 package com.yeoun.emp.dto;
 
+import com.yeoun.emp.entity.Emp;
+import com.yeoun.emp.repository.EmpBankRepository;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

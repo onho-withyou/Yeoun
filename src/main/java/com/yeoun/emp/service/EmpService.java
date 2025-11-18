@@ -227,8 +227,8 @@ public class EmpService {
 	    );
 	}
 	
-	
-	// 상세주소 없는 경우 대비
+	// ---------- 상세 조회 시 정보 표기 -----------
+	// ========= 상세주소 없는 경우 =========
 	private String buildAddress(Emp emp) {
 	    String addr1 = emp.getAddress1();
 	    String addr2 = emp.getAddress2();
@@ -238,7 +238,7 @@ public class EmpService {
 	    return (addr1 + " " + addr2).trim();
 	}
 	
-	// 주민번호 마스킹 (예: 930101-2******)
+	// ========= 주민번호 마스킹 =========
 	private String maskRrn(String rrn) {
 		if (rrn == null || rrn.isBlank()) {
 			return "";
@@ -256,13 +256,46 @@ public class EmpService {
 		return front + "-" + mid + "******";
 	}
 	
-	// 급여계좌 문자열 조합
+	// ========= 계좌번호 마스킹 =========
+	private String maskAccount(String account) {
+	    if (account == null || account.isBlank()) {
+	        return "";
+	    }
+
+	    // 1) 숫자만 추출
+	    String digits = account.replaceAll("\\D", "");
+	    if (digits.length() < 4) {
+	        // 너무 짧으면 그냥 원본 리턴하거나 전부 마스킹
+	        return account;
+	    }
+
+	    int len = digits.length();
+	    // 앞은 전부 * 로, 뒤 4자리만 살리기
+	    String maskedDigits = "*".repeat(len - 4) + digits.substring(len - 4);
+
+	    // 2) 원본 문자열 구조(하이픈 등)를 유지하면서 숫자만 치환
+	    StringBuilder result = new StringBuilder();
+	    int idx = 0;
+
+	    for (char c : account.toCharArray()) {
+	        if (Character.isDigit(c)) {
+	            result.append(maskedDigits.charAt(idx++));
+	        } else {
+	            result.append(c); // -, 공백 등은 그대로
+	        }
+	    }
+
+	    return result.toString();
+	}
+
+	
+	// ========= 급여통장 문자열 조합 =========
 	private String buildBankInfo(Emp emp) {
 
 	    return empBankRepository.findTopByEmpIdOrderByCreatedDateDesc(emp.getEmpId())
 	            .map(bank -> {
-	            	String bankName = bank.getBank().getCodeName();   // ← 은행명
-	            	String account = bank.getAccountNo();             // 계좌번호
+	            	String bankName = bank.getBank().getCodeName();  		// 은행명
+	            	String account  = maskAccount(bank.getAccountNo());     // 계좌번호
 	            	String holder  = bank.getHolder();     
 
 	            	// 두 줄 구조로 리턴
@@ -280,6 +313,7 @@ public class EmpService {
 	    }
 	    return "/files/photo/" + photoFileId;
 	}
+	// ---------- 상세 조회 시 정보 표기 -----------
 
 	// =============================================================================
 	// 사원 정보 수정
@@ -348,9 +382,7 @@ public class EmpService {
 
 		        empBankRepository.save(empBank);
 		    }
-		    
 		    // 추후 사진 추가
-		
 	}
 
 	
