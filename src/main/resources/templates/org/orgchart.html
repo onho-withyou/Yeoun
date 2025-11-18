@@ -4,8 +4,7 @@
 
   <!-- 1. head: OrgChart CSS -->
   <th:block layout:fragment="head">
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/orgchart/3.8.0/css/jquery.orgchart.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/treant-js/1.0/Treant.css">
 	<link rel="stylesheet" th:href="@{/css/orgchart-custom.css}">
   </th:block>
 
@@ -13,13 +12,14 @@
   <th:block layout:fragment="content">
     <div class="custom-body container-xxl flex-grow-1 container-p-y">
       <h2>조직도</h2>
-      <div id="chart-container"></div>
+      <div id="orgCard" class="chart"></div>
     </div>
   </th:block>
 
   <!-- 3. myScript -->
   <th:block layout:fragment="myScript">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/orgchart/3.8.0/js/jquery.orgchart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/treant-js/1.0/Treant.min.js"></script>
     <script src="/js/orgchart/orgchart.js"></script>
   </th:block>
 
