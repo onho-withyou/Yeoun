@@ -102,6 +102,7 @@
 		FROM MSG_RELATION lr
 		WHERE lr.EMP_ID = #{id}
 		AND lr.ROOM_ID = r.ROOM_ID), 0)
+		AND mm.SENDER_ID != #{id}
 		) 									AS unreadCount
 
 		FROM MSG_RELATION r

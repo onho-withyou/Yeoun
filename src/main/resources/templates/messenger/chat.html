@@ -53,10 +53,11 @@
     <!-- 메시지 반복 -->
     <div th:each="msg : ${msgList}"
          class="msg-row"
-         th:classappend="${msg.senderId} == ${#authentication.principal.empId} ? ' right' : ' left'">
+         th:classappend="${msg.senderId} == ${#authentication.principal.empId} ? ' right' : ' left'"
+         th:attr="data-msg-id=${msg.msgId}">
 
       <!-- ===================== 왼쪽 메시지(상대) ===================== -->
-      <div th:if="${msg.senderId} != ${#authentication.principal.empId}">
+      <th:block th:if="${msg.senderId} != ${#authentication.principal.empId}">
         <img src="/images/default_profile.png" class="profile-img">
 
         <div class="msg-main">
@@ -65,18 +66,18 @@
         </div>
 
         <div class="msg-time msg-time-left"
-             th:text="${#temporals.format(msg.sentDate, 'a h:mm')}"></div>
-      </div>
+             th:text="${#temporals.format(msg.sentDate, 'yyyy-MM-dd a h:mm')}"></div>
+      </th:block>
 
       <!-- ===================== 오른쪽 메시지(나) ===================== -->
-      <div th:if="${msg.senderId} == ${#authentication.principal.empId}">
+      <th:block th:if="${msg.senderId} == ${#authentication.principal.empId}">
         <div class="msg-meta">
-          <span th:text="${#temporals.format(msg.sentDate, 'a h:mm')}"></span>
+          <span th:text="${#temporals.format(msg.sentDate, 'yyyy-MM-dd a h:mm')}"></span>
           <i class="bi bi-check2-all"></i>
         </div>
 
         <div class="msg-bubble msg-right" th:text="${msg.msgContent}"></div>
-      </div>
+      </th:block>
 
     </div>
 
@@ -100,13 +101,15 @@
   const emptyView = document.getElementById('new-room-empty');
 
   // Thymeleaf에서 내려줄 값
-  let roomId = [[${roomId}]];
-  let targetEmpId = [[${targetEmpId}]];
-  const csrfToken = [[${_csrf.token}]];
-  const csrfHeaderName = [[${_csrf.headerName}]];
+  let roomId = /*[[${roomId}]]*/ '';
+  let targetEmpId = /*[[${targetEmpId}]]*/ '';
+  const csrfToken = /*[[${_csrf.token}]]*/ '';
+  const csrfHeaderName = /*[[${_csrf.headerName}]]*/ '';
 
   console.log("roomId.... : ", roomId);
   console.log("target..... : ", targetEmpId);
+  console.log("token..... : ", csrfToken);
+  console.log("headerName..... : ", csrfHeaderName);
 
   function isNewRoom() {
     return roomId === null || roomId === undefined;
@@ -152,7 +155,7 @@
     chatBody.appendChild(row);
     chatBody.scrollTop = chatBody.scrollHeight;
 
-    // 체크 → 읽음 표시 바꾸기 (샘플)
+    // 체크 → 읽음 표시 바꾸기 (샘플) =====================> 소켓 수정 필요 부분
     setTimeout(() => {
       const icon = row.querySelector('.read-check');
       if (!icon) return;
@@ -231,7 +234,6 @@
 
   sendBtn.addEventListener('click', sendMessage);
 
-
 //한 줄 높이(px)
 const baseHeight = 40;
 
@@ -245,6 +247,46 @@ textarea.addEventListener("input", function () {
    this.style.height = Math.min(newHeight, 120) + "px";
  }
 });
+
+//-------------------------------------------------------
+//**여기부터 읽음 처리 코드**
+//-------------------------------------------------------
+
+//1) 마지막 메시지 ID 추출 함수
+/* function getLastMessageId() {
+	const rows = document.querySelectorAll('.msg-row');
+	if (rows.length === 0) return null;
+	return rows[rows.length - 1].getAttribute('data-msg-id');
+}
+
+//2) 읽음 처리 PATCH 호출
+async function updateReadMessage() {
+	if (!roomId) return;  // 신규 방이면 스킵
+	
+	const lastMsgId = getLastMessageId();
+	if (!lastMsgId) return;
+	
+	try {
+	 await fetch(`/messenger/chat/${roomId}`, {
+	   method: "PATCH",
+	   headers: {
+	     "Content-Type": "application/json",
+	     [csrfHeaderName]: csrfToken
+	   },
+	   body: JSON.stringify({ lastReadId: lastMsgId })
+	});
+	
+	 console.log("읽음 처리 성공:", lastMsgId);
+	} catch (e) {
+	 console.error("읽음 처리 실패:", e);
+	}
+}
+
+//3) 방 들어오자마자 자동 읽음 처리
+document.addEventListener("DOMContentLoaded", () => {
+	updateReadMessage();
+}); */
+// ===============================> 다시 확인
 
 
 </script>

@@ -1,12 +1,23 @@
 plugins {
 	id 'java'
+	id 'war'
 	id 'org.springframework.boot' version '3.5.7'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
+bootJar {
+    enabled = false
+}
+
+bootWar {
+    enabled = true
+}
+
+
 group = 'com.yeoun'
 version = '0.0.1-SNAPSHOT'
 description = 'Yeoun Team Project'
+apply plugin: 'war'
 
 java {
 	toolchain {
@@ -37,7 +48,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5'
 	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+//	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'		// war 배포
 //	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	runtimeOnly 'com.oracle.database.jdbc:ojdbc11'

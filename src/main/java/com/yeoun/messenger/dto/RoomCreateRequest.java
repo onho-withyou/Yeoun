@@ -11,7 +11,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @ToString
-public class RoomCreateRequestDTO {
+public class RoomCreateRequest {
     private Set<String> members;         // 참여 멤버
     private String createdUser;          // 생성자 EMP_ID
     private String groupName;            // 그룹 채팅방 이름 (1:1이면 null)

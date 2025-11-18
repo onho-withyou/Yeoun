@@ -9,5 +9,4 @@ import java.util.List;
 @Repository
 public interface MsgRoomRepository extends JpaRepository<MsgRoom, Long> {
 
-
 }
