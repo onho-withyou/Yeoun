@@ -25,7 +25,7 @@ public class OrgChartService {
 		rows.sort(Comparator.comparing(
 					OrgNodeProjection::getPosOrder,
 					Comparator.nullsLast(Integer::compareTo)
-				  ).reversed());
+				  ).reversed()); // 내림차순
 		
 		return rows.stream()
 	                .map(r -> {
