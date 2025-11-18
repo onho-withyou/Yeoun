@@ -227,8 +227,19 @@ public class EmpService {
 	    );
 	}
 	
+	
+	// 상세주소 없는 경우 대비
+	private String buildAddress(Emp emp) {
+	    String addr1 = emp.getAddress1();
+	    String addr2 = emp.getAddress2();
+
+	    if (addr2 == null) addr2 = "";
+
+	    return (addr1 + " " + addr2).trim();
+	}
+	
 	// 주민번호 마스킹 (예: 930101-2******)
-	private String getMaskedRrn(String rrn) {
+	private String maskRrn(String rrn) {
 		if (rrn == null || rrn.isBlank()) {
 			return "";
 		}
@@ -245,22 +256,6 @@ public class EmpService {
 		return front + "-" + mid + "******";
 	}
 	
-	// 상세주소 없는 경우 대비
-	private String buildAddress(Emp emp) {
-	    String addr1 = emp.getAddress1();
-	    String addr2 = emp.getAddress2();
-
-	    if (addr2 == null) addr2 = "";
-
-	    return (addr1 + " " + addr2).trim();
-	}
-	
-	private String maskRrn(String rrn) {
-	    if (rrn == null || rrn.length() < 6) return "";
-	    // 예: 000421-3******
-	    return rrn.substring(0, 8) + "******";
-	}
-
 	// 급여계좌 문자열 조합
 	private String buildBankInfo(Emp emp) {
 
@@ -310,7 +305,7 @@ public class EmpService {
 	    empDTO.setAddress2(emp.getAddress2());
 	    empDTO.setDeptId(emp.getDept().getDeptId());
 	    empDTO.setPosCode(emp.getPosition().getPosCode());
-	    empDTO.setMaskedRrn(getMaskedRrn(emp.getRrn()));
+	    empDTO.setRrnMasked(maskRrn(emp.getRrn()));
 	    
 	    // 사원 급여정보
 	    empBankRepository.findByEmpId(empId).ifPresent(bank -> {

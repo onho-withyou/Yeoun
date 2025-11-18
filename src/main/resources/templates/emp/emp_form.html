@@ -63,7 +63,7 @@
 					  <!-- 수정 모드 -->
 					  <div th:if="${mode == 'edit'}">
 					    <!-- 화면 표시용 (마스킹) -->
-					    <input type="text" class="form-control mb-1" id="rrnDisplay" th:value="*{maskedRrn}"  readonly>
+					    <input type="text" class="form-control mb-1" id="rrnDisplay" th:value="*{rrnMasked}"  readonly>
 					    <!-- 실제 값 전송용 -->
 					    <input type="hidden" th:field="*{rrn}">
 					  </div>

@@ -48,7 +48,7 @@ public class EmpDTO {
     )
     private String rrn;
 	
-	private String maskedRrn;
+	private String rrnMasked;
     
 	// 입사일: 필수 + 과거/오늘
     @NotNull(message = "입사일은 필수입니다.")
