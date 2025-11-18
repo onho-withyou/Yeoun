@@ -54,6 +54,12 @@ public class EmpService {
 	@Transactional
 	public void registEmp(EmpDTO empDTO) {
 		
+		// 주민등록번호 중복 검사
+		String rrn = empDTO.getRrn();
+		if (rrn != null && !rrn.isBlank() && empRepository.existsByRrn(rrn)) {
+			throw new IllegalStateException("이미 등록된 주민등록번호입니다.");
+		}
+		
 		// 이메일 / 연락처 중복 검사
 	    String email  = empDTO.getEmail();
 	    String mobile = empDTO.getMobile();

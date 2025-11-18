@@ -41,6 +41,7 @@ public class EmpDTO {
 	private String gender;  
     
     // 주민번호 
+	@NotBlank(message = "주민등록번호는 필수 입력입니다.")
     @Pattern(
       regexp = "^(\\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01]))-[1-4]\\d{6}$",
       message = "주민등록번호 형식은 000000-0000000 입니다."

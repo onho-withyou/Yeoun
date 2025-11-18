@@ -23,6 +23,7 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	boolean existsByEmpId(String candidate);	// 사원번호
 	boolean existsByEmail(String email);		// 이메일
 	boolean existsByMobile(String mobile);		// 전화번호
+	boolean existsByRrn(String rrn);			// 주민등록번호
 	
 	// 사원번호 + 부서 + 역할
 	@Query("""

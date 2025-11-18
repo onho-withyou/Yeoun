@@ -90,8 +90,10 @@ public class EmpController {
 	        // 3) 중복 등 비즈니스 에러 처리
 	        String msg = e.getMessage();
 
-	        // 메시지 내용 보고 필드에 바인딩 (서비스에서 메시지를 저렇게 던진다는 가정)
-	        if (msg.contains("이메일")) {
+	        // 메시지 내용 보고 필드에 바인딩 (서비스에서 메시지 던진다는 가정)
+	        if (msg.contains("주민등록번호")) {
+	        	bindingResult.rejectValue("rrn", "duplicate", msg);
+	        } else if (msg.contains("이메일")) {
 	            bindingResult.rejectValue("email", "duplicate", msg);
 	        } else if (msg.contains("연락처")) {
 	            bindingResult.rejectValue("mobile", "duplicate", msg);
