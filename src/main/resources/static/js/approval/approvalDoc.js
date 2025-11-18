@@ -22,188 +22,206 @@
 			grid5.resetData(data);
 		});
 		
+		// empData().then(data => {
+		// 	console.log("deptData in data",data);
+		// });
 	}
-	//1. 결재사항 불러오기
-	function fetchPendingApprovalDocs() {
-		return fetch('/approval/pendingApprovalDocGrid')
-			.then(response => response.json())
-			.then(data => {
-				
-				let colData = [];
-				let obj = {};
-				// console.log("grid1 fetch-data----->:",data);
-				data.map((item,index) => {
-					obj["row_no"] = item[0]; //결재순번
-					obj["approval_id"]	 = item[1];	//문서id
-					obj["approval_title"] = item[2]; //문서제목	
-					obj["emp_id"] = item[3];	//사원번호
-					obj["emp_name"] = item[4];	//기안자
-					obj["dept_id"] = item[5];	//부서코드
-					obj["dept_name"] = item[6];	//부서명
-					obj["approver"] = item[7];	//결재권한자id
-					obj["approver_name"] = item[8];	//결재권한자 이름
-					obj["pos_code"] = item[9];	//직급코드
-					obj["pos_name"] = item[10];	//직급
-					obj["created_date"] = item[11];	//생성일
-					obj["finish_date"] = item[12]; //결재완료일자
-					obj["doc_status"] = item[13]; //상태
-					obj["view_details"] = item[14];//상세보기undefined
-					colData.push(obj);
-					obj = {};
-				});
 
-				//console.log("objectArray outside map:",colData);
-				
-				return colData;
-			})
-			.catch(error => {
-				console.error('Error fetching approval documents:', error);
+	const itemGroupData  = [
+    	{
+		label: 'disabled items',
+		data: [
+			{ label: 'disable', value: 'disable' },
+			{ label: 'none', value: '0' }
+		]
+		}
+	];
+		
+	//셀렉트박스
+	var approvarDiv = document.querySelector('#approvar');
+	var selectBox = new tui.SelectBox('#select-box', {
+      data: itemGroupData
+    });
+
+
+	var username = "[[${empList}]]";
+
+	console.log("username",username);
+	// select - 인사정보 불러오기
+	// function empData() {
+	// 	try {
+	// 		const response = fetch("/approval/empList");
+	// 		const data = response.json();
+	// 		console.log("deptList 데이터-data----->:", data);
+			
+	// 		return data;
+	// 	} catch (error) {
+	// 		console.error('Error fetching data:', error);
+	// 	}
+	// }
+	//1. 결재사항 불러오기
+	async function fetchPendingApprovalDocs() {
+		try {
+			const response = await fetch('/approval/pendingApprovalDocGrid');
+			const data = await response.json();
+			let colData = [];
+			let obj = {};
+			// console.log("grid1 fetch-data----->:",data);
+			data.map((item, index) => {
+				obj["row_no"] = item[0]; //결재순번
+				obj["approval_id"] = item[1]; //문서id
+				obj["approval_title"] = item[2]; //문서제목	
+				obj["emp_id"] = item[3]; //사원번호
+				obj["emp_name"] = item[4]; //기안자
+				obj["dept_id"] = item[5]; //부서코드
+				obj["dept_name"] = item[6]; //부서명
+				obj["approver"] = item[7]; //결재권한자id
+				obj["approver_name"] = item[8]; //결재권한자 이름
+				obj["pos_code"] = item[9]; //직급코드
+				obj["pos_name"] = item[10]; //직급
+				obj["created_date"] = item[11]; //생성일
+				obj["finish_date"] = item[12]; //결재완료일자
+				obj["doc_status"] = item[13]; //상태
+				obj["view_details"] = item[14]; //상세보기undefined
+				colData.push(obj);
+				obj = {};
 			});
+			return colData;
+		} catch (error) {
+			console.error('Error fetching approval documents:', error);
+		}
 	}
 	//2. 전체결재 목록 불러오기
-	function fetchApprovalDocs() {
-		return fetch('/approval/approvalDocGrid')
-			.then(response => response.json())
-			.then(data => {
-				
-				let colData = [];
-				let obj = {};
+	async function fetchApprovalDocs() {
+		try {
+			const response = await fetch('/approval/approvalDocGrid');
+			const data = await response.json();
+			let colData = [];
+			let obj = {};
 
-				data.map((item,index) => {
-					obj["row_no"] = item[0]; //결재순번
-					obj["approval_id"]	 = item[1];	//문서id
-					obj["approval_title"] = item[2]; //문서제목	
-					obj["emp_id"] = item[3];	//사원번호
-					obj["emp_name"] = item[4];	//기안자
-					obj["dept_id"] = item[5];	//부서코드
-					obj["dept_name"] = item[6];	//부서명
-					obj["approver"] = item[7];	//결재권한자
-					obj["pos_code"] = item[8];	//직급코드
-					obj["pos_name"] = item[9];	//직급
-					obj["created_date"] = item[10];	//생성일
-					obj["finish_date"] = item[11]; //결재완료일자
-					obj["doc_status"] = item[12]; //상태
-					obj["view_details"] = item[13]; //상세보기undefined
-					colData.push(obj);
-					obj = {};
-				});
-
-				//console.log("objectArray outside map:",colData);
-				
-				return colData;
-			})
-			.catch(error => {
-				console.error('Error fetching approval documents:', error);
+			data.map((item, index) => {
+				obj["row_no"] = item[0]; //결재순번
+				obj["approval_id"] = item[1]; //문서id
+				obj["approval_title"] = item[2]; //문서제목	
+				obj["emp_id"] = item[3]; //사원번호
+				obj["emp_name"] = item[4]; //기안자
+				obj["dept_id"] = item[5]; //부서코드
+				obj["dept_name"] = item[6]; //부서명
+				obj["approver"] = item[7]; //결재권한자
+				obj["pos_code"] = item[8]; //직급코드
+				obj["pos_name"] = item[9]; //직급
+				obj["created_date"] = item[10]; //생성일
+				obj["finish_date"] = item[11]; //결재완료일자
+				obj["doc_status"] = item[12]; //상태
+				obj["view_details"] = item[13]; //상세보기undefined
+				colData.push(obj);
+				obj = {};
 			});
+			return colData;
+		} catch (error) {
+			console.error('Error fetching approval documents:', error);
+		}
 	}
 	//3.내 결재목록 불러오기
-	function fetchMyApprovalDocs() {
-		return fetch('/approval/myApprovalDocGrid')
-			.then(response => response.json())
-			.then(data => {
-				// console.log("grid3 fetch-data----->:",data);
-				let colData = [];
-				let obj = {};
+	async function fetchMyApprovalDocs() {
+		try {
+			const response = await fetch('/approval/myApprovalDocGrid');
+			const data = await response.json();
+			// console.log("grid3 fetch-data----->:",data);
+			let colData = [];
+			let obj = {};
 
-				data.map((item,index) => {
-					obj["row_no"] = item[0]; //결재순번
-					obj["approval_id"]	 = item[1];	//문서id
-					obj["approval_title"] = item[2]; //문서제목	
-					obj["emp_id"] = item[3];	//사원번호
-					obj["emp_name"] = item[4];	//기안자
-					obj["dept_id"] = item[5];	//부서코드
-					obj["dept_name"] = item[6];	//부서명
-					obj["approver"] = item[7];	//결재권한자
-					obj["pos_code"] = item[8];	//직급코드
-					obj["pos_name"] = item[9];	//직급
-					obj["created_date"] = item[10];	//생성일
-					obj["finish_date"] = item[11]; //결재완료일자
-					obj["doc_status"] = item[12]; //상태
-					obj["viewing"] = item[13]; //열람여부
-					obj["view_details"] = item[14]; //상세보기undefined
-					colData.push(obj);
-					obj = {};
-				});
-
-				// console.log("grid3 map------>:",colData);
-				
-				return colData;
-			})
-			.catch(error => {
-				console.error('Error fetching approval documents:', error);
+			data.map((item, index) => {
+				obj["row_no"] = item[0]; //결재순번
+				obj["approval_id"] = item[1]; //문서id
+				obj["approval_title"] = item[2]; //문서제목	
+				obj["emp_id"] = item[3]; //사원번호
+				obj["emp_name"] = item[4]; //기안자
+				obj["dept_id"] = item[5]; //부서코드
+				obj["dept_name"] = item[6]; //부서명
+				obj["approver"] = item[7]; //결재권한자
+				obj["pos_code"] = item[8]; //직급코드
+				obj["pos_name"] = item[9]; //직급
+				obj["created_date"] = item[10]; //생성일
+				obj["finish_date"] = item[11]; //결재완료일자
+				obj["doc_status"] = item[12]; //상태
+				obj["viewing"] = item[13]; //열람여부
+				obj["view_details"] = item[14]; //상세보기undefined
+				colData.push(obj);
+				obj = {};
 			});
+			return colData;
+		} catch (error) {
+			console.error('Error fetching approval documents:', error);
+		}
 	}
 	//4.결재대기 불러오기 -- 1차반려,2차반려,3차반려,1차완료,2차완료,3차완료, 종료
-	function fetchWaitingApprovalDocs() {
-		return fetch('/approval/waitingApprovalDocGrid')
-			.then(response => response.json())
-			.then(data => {
-				console.log("grid4 fetch-data----->:",data);
-				let colData = [];
-				let obj = {};
+	async function fetchWaitingApprovalDocs() {
+		try {
+			const response = await fetch('/approval/waitingApprovalDocGrid');
+			const data = await response.json();
+			console.log("grid4 fetch-data----->:", data);
+			let colData = [];
+			let obj = {};
 
-				data.map((item,index) => {
-					obj["row_no"] = item[0]; //결재순번
-					obj["approval_id"]	 = item[1];	//문서id
-					obj["approval_title"] = item[2]; //문서제목	
-					obj["emp_id"] = item[3];	//사원번호
-					obj["emp_name"] = item[4];	//기안자
-					obj["dept_id"] = item[5];	//부서코드
-					obj["dept_name"] = item[6];	//부서명
-					obj["approver"] = item[7];	//결재권한자
-					obj["pos_code"] = item[8];	//직급코드
-					obj["pos_name"] = item[9];	//직급
-					obj["created_date"] = item[10];	//생성일
-					obj["finish_date"] = item[11]; //결재완료일자
-					obj["doc_status"] = item[12]; //상태
-					obj["view_details"] = item[13]; //상세보기undefined
-					colData.push(obj);
-					obj = {};
-				});
-
-				console.log("grid4 map------>:",colData);
-				
-				return colData;
-			})
-			.catch(error => {
-				console.error('Error fetching approval documents:', error);
+			data.map((item, index) => {
+				obj["row_no"] = item[0]; //결재순번
+				obj["approval_id"] = item[1]; //문서id
+				obj["approval_title"] = item[2]; //문서제목	
+				obj["emp_id"] = item[3]; //사원번호
+				obj["emp_name"] = item[4]; //기안자
+				obj["dept_id"] = item[5]; //부서코드
+				obj["dept_name"] = item[6]; //부서명
+				obj["approver"] = item[7]; //결재권한자
+				obj["pos_code"] = item[8]; //직급코드
+				obj["pos_name"] = item[9]; //직급
+				obj["created_date"] = item[10]; //생성일
+				obj["finish_date"] = item[11]; //결재완료일자
+				obj["doc_status"] = item[12]; //상태
+				obj["view_details"] = item[13]; //상세보기undefined
+				colData.push(obj);
+				obj = {};
 			});
+
+			console.log("grid4 map------>:", colData);
+			return colData;
+		} catch (error) {
+			console.error('Error fetching approval documents:', error);
+		}
 	}
 	//5.결재완료 불러오기
-	function fetchDoneApprovalDocs() {
-		return fetch('/approval/finishedApprovalDocGrid')
-			.then(response => response.json())
-			.then(data => {
-				console.log("grid5 fetch-data----->:",data);
-				let colData = [];
-				let obj = {};
+	async function fetchDoneApprovalDocs() {
+		try {
+			const response = await fetch('/approval/finishedApprovalDocGrid');
+			const data = await response.json();
+			console.log("grid5 fetch-data----->:", data);
+			let colData = [];
+			let obj = {};
 
-				data.map((item,index) => {
-					obj["row_no"] = item[0]; //결재순번
-					obj["approval_id"]	 = item[1];	//문서id
-					obj["approval_title"] = item[2]; //문서제목	
-					obj["emp_id"] = item[3];	//사원번호
-					obj["emp_name"] = item[4];	//기안자
-					obj["dept_id"] = item[5];	//부서코드
-					obj["dept_name"] = item[6];	//부서명
-					obj["approver"] = item[7];	//결재권한자
-					obj["pos_code"] = item[8];	//직급코드
-					obj["pos_name"] = item[9];	//직급
-					obj["created_date"] = item[10];	//생성일
-					obj["finish_date"] = item[11]; //결재완료일자
-					obj["doc_status"] = item[12]; //상태
-					obj["view_details"] = item[13];//상세보기undefined
-					colData.push(obj);
-					obj = {};
-				});
-
-				console.log("grid5 map------>:",colData);
-				
-				return colData;
-			})
-			.catch(error => {
-				console.error('Error fetching approval documents:', error);
+			data.map((item, index) => {
+				obj["row_no"] = item[0]; //결재순번
+				obj["approval_id"] = item[1]; //문서id
+				obj["approval_title"] = item[2]; //문서제목	
+				obj["emp_id"] = item[3]; //사원번호
+				obj["emp_name"] = item[4]; //기안자
+				obj["dept_id"] = item[5]; //부서코드
+				obj["dept_name"] = item[6]; //부서명
+				obj["approver"] = item[7]; //결재권한자
+				obj["pos_code"] = item[8]; //직급코드
+				obj["pos_name"] = item[9]; //직급
+				obj["created_date"] = item[10]; //생성일
+				obj["finish_date"] = item[11]; //결재완료일자
+				obj["doc_status"] = item[12]; //상태
+				obj["view_details"] = item[13]; //상세보기undefined
+				colData.push(obj);
+				obj = {};
 			});
+
+			console.log("grid5 map------>:", colData);
+			return colData;
+		} catch (error) {
+			console.error('Error fetching approval documents:', error);
+		}
 	}
 
 	const Grid = tui.Grid;
@@ -212,15 +230,15 @@
 		  columns: [
 	
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
-			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
 			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
-			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자id' ,name: 'approver' ,align: 'center'}
 			,{header: '결재권한자 이름' ,name: 'approver_name' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
 			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
@@ -240,13 +258,13 @@
 	
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',hidden: true}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
-			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
 			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
@@ -264,14 +282,14 @@
 	    columns: [
 	
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
-			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
 			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
-			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
 			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
@@ -289,14 +307,14 @@
 	    columns: [
 	
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
-			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
 			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
-			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
 			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
@@ -314,14 +332,14 @@
 	    columns: [
 	
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
-			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
 			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
-			,{header: '부서코드' ,name: 'dept_id' ,align: 'center'}
+			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
 			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
@@ -350,32 +368,10 @@
 	let day = today.getDay();  // 요일
 
 	const formattedDate = `${year}년 ${month}월 ${date}일`;
-
 	document.getElementById("today-date").textContent = formattedDate;
 
-	//셀렉트박스
-	var approvarDiv = document.querySelector('#approvar');
-	var deptList = "[[${deptList}]]";
-	console.log("deptList",deptList);
-	var selectBox = new tui.SelectBox('#select-box', {
-      data: [
-        {
-          label: '인사팀',
-          data: [{ label: '한가인', value: '한가인'}, 
-        	  	{ label: '정지훈', value: '정지훈' ,selected: true }]
-        },
-        {
-          label: '개발팀',
-          data: [
-            { label: '이정현', value: '이정현'},
-            { label: '마이클', value: '마이클'},
-            { label: '기안', value: '기안'},
-            { label: '이지영', value: '이지영'},
-            { label: '박지운', value: '박지운'}
-          ]
-        }
-      ]
-    });
+	
+	
 	
 	let jeongyeoljaDiv = document.querySelector('#jeongyeolja');
 	let jeongyeoljaContent = document.querySelector("#jeongyeolja-content");
@@ -405,8 +401,6 @@
     						+'</div>';
     	}
     } 
-    
-
 	
 	//결재권한자 버튼 클릭시 결재권한자변경 div 태그 생성
 	function approvalNo(count,text){
@@ -419,9 +413,7 @@
 	   	if(jeongyeoljaDiv.style.display === 'none'){
 	  	jeongyeoljaDiv.style.display = 'block';  
 	   	  						  
-	}	
-	   
-
+		}	
     } 
 	
 	//결재권한자,결재권한자변경(전결자) 닫기버튼
@@ -455,7 +447,9 @@
     		print(ev.type, selectlabel);
     		approvarArr.push(this.count);
     	}
-	})
+		
+	});
+
    	//리셋버튼 만들기 하다가잠
     
 	//에디터

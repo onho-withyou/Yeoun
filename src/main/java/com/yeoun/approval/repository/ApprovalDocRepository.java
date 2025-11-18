@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.yeoun.approval.entity.ApprovalDoc;
-
+import com.yeoun.approval.entity.ApprovalForm;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 
@@ -23,9 +23,29 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 	@Query("SELECT m FROM Emp m")
     List<Emp> findAllMember();
 	
+	//기안서 양식종류
+	@Query(value = """
+			SELECT DISTINCT
+			af.form_name
+			FROM approval_form af
+			""", nativeQuery = true)
+	List<String> findAllFormTypes();
+
 	//부서목록조회
 	@Query("SELECT d FROM Dept d")
 	List<Dept> findAllDepartments();
+
+	//기안서 작성 저장버튼
+	@Query(value = """
+				INSERT INTO approval_doc (approval_id, approval_title, emp_id, approver, form_type, created_date, doc_status)
+				VALUES (:approvalId, :approvalTitle, :empId, :approver, :formType, SYSDATE, '진행중')
+						
+				""", nativeQuery = true)
+	void saveApprovalDoc(@Param("approvalId") String approvalId,
+						 @Param("approvalTitle") String approvalTitle,
+						 @Param("empId") String empId,
+						 @Param("approver") String approver,
+						 @Param("formType") String formType);
 
 	// 그리드 - 1.결재사항 - 진행해야할 결재만 - 결재권한자만 볼수있음
 	// 열람권한이 있는지에대해생각해보기
@@ -128,6 +148,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 				
 				""", nativeQuery = true)
 	List<Object[]> findMyApprovalDocs(@Param("empId") String empId);
+	
 	// 그리드 - 4.결재대기 - 나와관련된 모든 결재대기문서
 	@Query(value = """
 			SELECT rownum

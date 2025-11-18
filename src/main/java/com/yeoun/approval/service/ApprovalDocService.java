@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.approval.dto.ApprovalDocDTO;
+import com.yeoun.approval.entity.ApprovalForm;
 import com.yeoun.approval.repository.ApprovalDocRepository;
 import com.yeoun.attendance.repository.AccessLogRepository;
 import com.yeoun.attendance.repository.AttendanceRepository;
@@ -38,8 +39,12 @@ public class ApprovalDocService {
 	//기안자 명 불러오기
 	@Transactional(readOnly = true)
 	public List<Emp> getEmp() {
-		// 사원 목록 조회
 		return approvalDocRepository.findAllMember();
+	}
+	//기안서 양식종류
+	@Transactional(readOnly = true)
+	public List<String> getFormTypes() {
+		return approvalDocRepository.findAllFormTypes();
 	}
 	//부서목록조회
 	@Transactional(readOnly = true)
