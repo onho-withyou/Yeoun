@@ -3,6 +3,16 @@ package com.yeoun.pay.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.jexl3.JexlBuilder;
+import org.apache.commons.jexl3.JexlContext;
+import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.jexl3.JexlExpression;
+import org.apache.commons.jexl3.MapContext;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -104,4 +114,41 @@ public class PayCalcRuleController {
         }
         return "redirect:/pay/rule_calc";
     }
+    
+    
+    /**서버 계산테스트*/
+    @PostMapping("/testExpr")
+    @ResponseBody
+    public Map<String,Object> testExpression(@RequestParam String expr,
+                                             @RequestParam(required=false) String empId) {
+
+        Map<String,Object> result = new HashMap<>();
+        try {
+            // 테스트용 변수 세팅
+            BigDecimal base = BigDecimal.valueOf(3000000);
+            BigDecimal rate = BigDecimal.valueOf(0.1);
+            int usedAnnual = 2;
+
+            JexlEngine jexl = new JexlBuilder().create();
+            JexlExpression e = jexl.createExpression(expr);
+
+            JexlContext ctx = new MapContext();
+            ctx.set("baseSalary", base);
+            ctx.set("rate", rate);
+            ctx.set("value", rate);
+            ctx.set("usedAnnual", usedAnnual);
+
+            Object val = e.evaluate(ctx);
+
+            result.put("ok", true);
+            result.put("value", val.toString());
+            return result;
+
+        } catch (Exception ex) {
+            result.put("ok", false);
+            result.put("error", ex.getMessage());
+            return result;
+        }
+    }
+
 }

@@ -47,17 +47,13 @@
       to {width: 100%; margin-left: 0;}
     }
   </style>
-
+  <div class="container-xxl py-4">
   <!-- ===================== 상단 탭 ===================== -->
 <ul class="nav pay-tabs">
   <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule}"      th:classappend="${activeTab}=='rule' ? 'active'">급여기준정보</a></li>
   <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule_calc}" th:classappend="${activeTab}=='calc' ? 'active'">급여계산</a></li>
   <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule_item}" th:classappend="${activeTab}=='item' ? 'active'">급여항목</a></li>
 </ul>
-
-
-
-  <div class="container-xxl py-4">
   
    <!-- 메 세 지 -->
 <div th:if="${msg}" class="alert alert-success alert-dismissible fade show" role="alert">
