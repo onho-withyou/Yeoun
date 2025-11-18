@@ -106,7 +106,7 @@ public class EmpDTO {
 
 	// 계좌번호
 	@NotBlank(message = "계좌번호를 입력해주세요.")
-	@Pattern(regexp = "^[0-9\\-]{6,20}$", message = "계좌번호 형식이 올바르지 않습니다.")
+	@Pattern(regexp = "^[0-9\\-]{6,20}$", message = "계좌번호는 숫자와 '-'만 사용하여 6~25자 내로 입력해주세요.")
 	private String accountNo;  
 
 	// 예금주명
