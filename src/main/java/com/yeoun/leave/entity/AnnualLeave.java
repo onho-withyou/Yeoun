@@ -59,10 +59,10 @@ public class AnnualLeave {
 	private int useYear; // 회계연도 기준일 경우 기준연도
 	
 	@Column(nullable = false)
-	private int totalDays; // 사원에게 부여된 총 연차
+	private double totalDays; // 사원에게 부여된 총 연차
 	
-	private int usedDays; // 사용한 연차
-	private int remainDays; // 남은 연차
+	private double usedDays; // 사용한 연차
+	private double remainDays; // 남은 연차
 	private String updatedUser; // 수기로 연차 수정한 직원
 	private LocalDateTime updatedDate; // 수정된 날짜
 	private String reason; // 수정한 이유
@@ -129,7 +129,7 @@ public class AnnualLeave {
 	}
 	
 	// 연차 사용했을 경우
-	public void useAnnual(int useDays) {
+	public void useAnnual(double useDays) {
 		// 사용 일수가 음수일 경우
 		if (useDays <= 0) {
 			 throw new IllegalArgumentException("사용 일수는 1일 이상이어야 합니다.");

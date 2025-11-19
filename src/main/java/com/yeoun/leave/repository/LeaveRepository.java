@@ -34,4 +34,6 @@ public interface LeaveRepository extends JpaRepository<AnnualLeave, Long> {
 			""")
 	List<AnnualLeave> findAllWithEmpInfo(@Param("empId") String empId);
 
+	Optional<AnnualLeave> findByEmp_empId(String empId);
+
 }

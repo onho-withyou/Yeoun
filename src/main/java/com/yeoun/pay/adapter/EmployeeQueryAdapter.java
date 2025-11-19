@@ -63,6 +63,10 @@ public class EmployeeQueryAdapter implements EmployeeQueryPort {
                 .orElse(0);
     }
 
+    @Override
+    public int getAnnualRemainForYear(String empId, int year) {
+        return repo.findRemainDaysByYear(empId, year).orElse(0);
+    }
 
 
 }

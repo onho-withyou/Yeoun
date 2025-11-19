@@ -24,9 +24,9 @@ public class LeaveDTO {
 	private LocalDate periodStart; // 입사일 기준일 경우 산정 시작일
 	private LocalDate periodEnd; // 입사일 기준일 경우 산정 종료일
 	private int useYear; // 회계연도 기준일 경우 기준연도
-	private int totalDays; // 사원에게 부여된 총 연차
-	private int usedDays; // 사용한 연차
-	private int remainDays; // 남은 연차
+	private double totalDays; // 사원에게 부여된 총 연차
+	private double usedDays; // 사용한 연차
+	private double remainDays; // 남은 연차
 	private String updatedUser; // 수기로 연차 수정한 직원
 	private LocalDateTime updatedDate; // 수정된 날짜
 	private String reason; // 수정한 이유

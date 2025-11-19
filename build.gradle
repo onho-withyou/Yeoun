@@ -75,7 +75,13 @@ dependencies {
 	//문자열 수식을 실제 연산식으로 처리하는 라이브러리
 	// https://mvnrepository.com/artifact/org.apache.commons/commons-jexl3
      implementation 'org.apache.commons:commons-jexl3:3.6.0'
-	
+     
+     //PDF 파일 의존성 추가
+	implementation 'org.xhtmlrenderer:flying-saucer-pdf-openpdf:9.1.22'
+    implementation 'com.openhtmltopdf:openhtmltopdf-core:1.0.10'
+    implementation 'com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10'
+	implementation 'com.openhtmltopdf:openhtmltopdf-slf4j:1.0.10'
+    
 }
 
 tasks.named('test') {

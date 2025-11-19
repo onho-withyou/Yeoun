@@ -1,7 +1,6 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:fragment="schedule_modal">
-	
 <!-- 일정등록 모달 -->
 <div class="modal" id="add-schedule-modal" tabindex="-1" style="display: none;" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
@@ -32,20 +31,26 @@
 								<option th:value="${currentUserId}">개인</option>
 							</select>
 						</div>
-						<div class="tui-datepicker-input tui-datetime-input tui-has-focus mt-1" style="margin-right: 5px; width: 28%;">
-							<input id="startpicker-input" type="text" aria-label="Date" name="scheduleStart">
-							<span class="tui-ico-date" style="width:15px;"></span>
-							<div id="startpicker-container" style="margin-left: -1px;"></div>
+						<div>
+							<div class="d-flex">
+								<div class="tui-datepicker-input tui-datetime-input" style="width:135px">
+									<input id="startpicker-input" name="scheduleStart" type="text" />
+									<span class="tui-ico-date"></span>
+									<div id="startpicker-container"></div>
+								</div>
+								<span class="mx-1">~</span>
+								<div class="tui-datepicker-input tui-datetime-input" style="width:135px">
+									<input id="endpicker-input" name="scheduleFinish" type="text" />
+									<span class="tui-ico-date"></span>
+									<div id="endpicker-container"></div>
+								</div>
+							</div>
 						</div>
-						<span class="mt-2">~</span>
-						<div class="tui-datepicker-input tui-datetime-input tui-has-focus mt-1" style="margin-right: 5px; width: 28%;">
-							<input id="endpicker-input" type="text" aria-label="Date" name="scheduleFinish">
-							<span class="tui-ico-date"></span>
-							<div id="endpicker-container" style="margin-left: -1px;"></div>
+						<div class="d-flex">
+							<input type="checkbox" id="all-day-checkbox" checked style="margin-bottom: 10px;"/>
+							<input type="hidden" id="all-day-checkbox-value" style="margin-bottom: 10px;" name="alldayYN" value="N"/>
+							<label for="all-day-checkbox" style="margin-top: 3px;">종일</label>
 						</div>
-						<input type="checkbox" id="all-day-checkbox" style="margin-bottom: 10px;"/>
-						<input type="hidden" id="all-day-checkbox-value" style="margin-bottom: 10px;" name="alldayYN" value="N"/>
-						<label for="all-day-checkbox" style="margin-top: 3px;">종일</label>
 					</div>
 					<div class="col mb-6">
 						<label for="schedule-content" class="form-label">내용</label>

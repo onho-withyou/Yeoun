@@ -62,9 +62,11 @@ public class MainController {
 	public ResponseEntity<Map<String, String>> createSchedule(@ModelAttribute("scheduleDTO")@Valid ScheduleDTO scheduleDTO, 
 			BindingResult bindingResult) {
 		Map<String, String> msg = new HashMap<>();
+		System.out.println(scheduleDTO + "요기까지왔넹");
+
 		// 일정등록 요청 데이터 검증
 		if(bindingResult.hasErrors()) {
-			msg.put("msg", "일정 등록에 실패했습니다.");
+			msg.put("msg", "일정 등록에 실패했습니다. - BINDING ERROR");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		}
 		// 일정등록 요청 데이터 이상 없을때

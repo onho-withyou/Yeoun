@@ -5,6 +5,9 @@
 	<link rel="stylesheet" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css">
 	<link rel="stylesheet" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@toast-ui/calendar@2.1.3/dist/toastui-calendar.min.css" />
+   	<link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
+	<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+    
 	<style type="text/css">
 	.calendar-filter-company:checked, .calendar-filter-company[type=checkbox]:indeterminate {
 		background-color: #FF5583;
@@ -55,8 +58,7 @@
 	    padding-left: 16px;
 	}
 	</style>
-	<link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
-    <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+
 </head>
 <body>
 <th:block layout:fragment="content">
@@ -110,7 +112,7 @@
 			                    </div>
 			                    <div class="form-check">
 				                    <button class="btn btn-outline-primary btn-xs" id="open-add-schedule-modal-btn">
-				                            +
+				                       + 
 				                    </button>
 			                    </div>
 			                    
@@ -126,10 +128,9 @@
 	            <!-- 오른쪽 열: 일정추가/데이트피커/필터 (세로 3구간) -->
 	            <div class="col-md-5 col-lg-4 d-flex flex-column " style="position: relative !important">
 	            	<div style="height: 60px; flex-shrink: 0; display: flex; align-items: center; gap: 10px; left: 15px; right: 15px;">
-	            		<img src="/img/avatar.png" alt="User Avatar" class="rounded-circle" width="40" height="40">
-	            		<p th:text="${currentUserName}"></p>
 	            		<button class="btn btn-primary" th:attr="data-emp-id=${#authentication.name}" onclick="handleAttendanceToggle(this.dataset.empId)" id="attendance">출근</button>
 	            		<button class="btn btn-primary" th:attr="data-emp-id=${#authentication.name}" onclick="handleAttendanceToggle(this.dataset.empId)" id="accessBtn">출입</button>
+
 	            	</div>
 					<div class="card">
 						<div>
@@ -152,14 +153,14 @@
 	        </div>
 	    </div>
 	    <!-- /customcontent -->
-		<th:block th:insert="~{main/schedule_modal}"></th:block>
-		<th:block th:insert="~{notice/notice_modal}"></th:block>
 	    
 	</div>
+	<!-- /custom-body 끝 -->
 	<!-- 연차툴팁 -->
 	<div id="leave_tooltip" class="leave-tooltip" style="background-color: white; border:black solid; padding:10px; z-index: 99;"></div>
-	
-	<!-- /custom-body 끝 -->
+	<!-- 모달창 삽입 -->
+	<th:block th:insert="~{main/schedule_modal}"></th:block>
+	<th:block th:insert="~{notice/notice_modal}"></th:block>
 	<!-- 타임피커 -->
 	<script src="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.min.js"></script>
 	<!-- 데이트피커 -->

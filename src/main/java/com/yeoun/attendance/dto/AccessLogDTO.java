@@ -31,6 +31,10 @@ public class AccessLogDTO {
 	private String reason; // 외근 사유
 	private String accessType; //외출 상태 구분 (OUT/IN/OUTWORK/ETC)
 	
+	private String deptName; // 부서이름
+	private String posName; // 직급명
+	private String empName; // 직원 이름
+	
 	// ---------------------------------------------------
 	// DTO <-> Entity 변환
 	private static ModelMapper modelMapper = new ModelMapper();
@@ -42,6 +46,13 @@ public class AccessLogDTO {
 	
 	// DTO 타입으로 변환
 	public static AccessLogDTO fromEntity(AccessLog accessLog) {
-		return modelMapper.map(accessLog, AccessLogDTO.class);
+		AccessLogDTO accessLogDTO = modelMapper.map(accessLog, AccessLogDTO.class);
+		accessLogDTO.setEmpName(accessLog.getEmp().getEmpName());
+		accessLogDTO.setDeptName(accessLog.getEmp().getDept().getDeptName());
+		accessLogDTO.setPosName(accessLog.getEmp().getPosition().getPosName());
+		 
+		return accessLogDTO;
 	}
+
+	
 }

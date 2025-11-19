@@ -3,6 +3,7 @@ const myApiKey = "3bb524dc5656794ff51462c21245e81ffd44e902f5c3220a4d89b540465280
 
 const currentUserId = document.getElementById('currentUserId')?.value;
 const currentUserName = document.getElementById('currentUserName')?.value;
+
 const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
 const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
 
@@ -44,7 +45,7 @@ nextMonthBtn.addEventListener('click', function() {
 
 //일정등록버튼 함수
 document.getElementById('open-add-schedule-modal-btn').addEventListener('click', function() {
-	openModal('add');
+	openScheduleModal('add');
 });
 
 // 현재 날짜 표시 업데이트 함수
@@ -273,7 +274,7 @@ async function yearHoliday(year){
 // 커스텀모달 등록
 function openAddScheduleModal(data) {
 	//모달열기
-	openModal('add');
+	openScheduleModal('add');
 	// data로받아서 등록모달 날짜 지정하기
 	var start = new Date(data.start);
 	var end = new Date(start)
@@ -464,6 +465,7 @@ async function getLeaveData(params) {
 		return response.json();  //JSON 파싱
 	})
 	.then(data => { // response가 ok일때
+		console.log("data : " , data);
 		// 연차데이터 날짜별로 그룹화
 		const dateLeaveMap = groupLeavesByDate(data);
 		// 스케줄에 넣을 데이터로 변환
@@ -614,7 +616,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			})
 			.then(data => { // response가 ok일때
 				console.log(data, "dddddddddddddddddd");
-				openModal("edit", data);
+				openScheduleModal("edit", data);
 			}).catch(error => {
 				console.error('에러', error)
 				alert("데이터 조회 실패");
