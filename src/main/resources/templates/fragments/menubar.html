@@ -38,14 +38,12 @@
                             <div data-i18n="Menu1" class="menu-link-sub">사원 목록</div>
                         </a>
                     </li>
-                    
                     <!-- 인사 발령 : 로그인한 사람 누구나 (목록) -->
                     <li class="menu-item" sec:authorize="isAuthenticated()">
                         <a href="/hr/actions" class="menu-link">
                             <div data-i18n="Menu2" class="menu-link-sub">인사 발령 목록</div>
                         </a>
                     </li>
-                    
                     <!-- 조직도 : 로그인한 사람 누구나 -->
                     <li class="menu-item" sec:authorize="isAuthenticated()">
                         <a href="/org" class="menu-link"> 
