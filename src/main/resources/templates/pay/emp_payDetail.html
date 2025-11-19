@@ -52,7 +52,7 @@
 
         <input id="month" type="month"
                class="form-control form-control-sm"
-               style="width:130px;"
+               style="width:130px; height:60px;"
                th:value="${#strings.substring(yymm,0,4)} + '-' + ${#strings.substring(yymm,4,6)}">
 
         <a th:href="@{|/pay/emp_pay?yymm=${next}|}" 
