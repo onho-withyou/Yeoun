@@ -96,8 +96,6 @@ public class EmpDTO {
     // 재직 상태		
 	private String status; 
 	
-	private String roleCode;  // 역할코드	
-	
 	// ========================
 	// 급여통장 정보
 	// ========================

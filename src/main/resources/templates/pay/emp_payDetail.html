@@ -58,9 +58,17 @@
         <a th:href="@{|/pay/emp_pay?yymm=${next}|}" 
            class="btn btn-outline-secondary btn-sm">다음 ▶</a>
 
-        <button class="btn btn-soft pdf-btn" id="printBtn">
-            🖨 PDF 저장
-        </button>
+      <!-- PDF 다운로드 버튼 -->
+      <input type="hidden" id="payslipId" th:value="${payslipId}">
+      
+		<button class="btn btn-soft pdf-btn"
+		        th:if="${payslipId != null}"
+		        th:onclick="'window.open(\'/pay/pdf/' + ${payslipId} + '\', \'_blank\');'">
+		    🖨 PDF 저장
+		</button>
+
+       
+
 
     </div>
 </div>
@@ -201,9 +209,6 @@
 </div>
 
 
-<script>
-document.getElementById('printBtn').addEventListener('click', ()=>window.print());
-</script>
 
 </th:block>
 </th:block>

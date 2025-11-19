@@ -42,10 +42,19 @@ body {
   gap: 8px;
 }
 
+.chat-header-left i {
+  font-size: 18px;
+  color: #ffffff;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: 0.15s ease;
+}
+
 .chat-title {
   font-size: 16px;
   font-weight: 600;
   color: #ffffff;
+  flex: 0 0 auto;
 }
 
 .back-btn {
@@ -54,10 +63,13 @@ body {
   cursor: pointer;
 }
 
-.chat-header-right .pin-icon {
+.chat-header-right i {
   font-size: 18px;
   color: #ffffff;
   cursor: pointer;
+  margin-left: 10px;
+  opacity: 0.85;
+  transition: 0.15s ease;
 }
 
 /* ========================= 메시지 영역 ========================= */
@@ -249,4 +261,101 @@ body {
   align-items: flex-end;
   gap: 4px;
 }
+
+/* 슬라이드 관련 css */
+
+/* 참여자 패널 */
+.member-panel {
+  position: fixed;
+  top: 0;
+  right: -260px;   /* 숨김 상태 */
+  width: 260px;
+  height: 100%;
+  background: #fff;
+  border-left: 1px solid #ddd;
+  transition: right 0.25s ease;
+  box-shadow: -4px 0 10px rgba(0,0,0,0.1);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+}
+
+.member-panel.open {
+  right: 0;
+}
+
+/* 헤더 */
+.member-panel-header {
+  padding: 14px;
+  font-size: 18px;
+  font-weight: 600;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #3a416f;
+}
+
+/* 목록 */
+.member-panel-body {
+  overflow-y: auto;
+  padding: 10px 14px;
+}
+
+.member-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 6px;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.member-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+
+.member-item .name {
+  font-weight: 600;
+  margin: 0;
+}
+
+.member-item .dept {
+  color: #888;
+}
+
+/* 파일 첨부 버튼 */
+
+.file-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #ece9ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-right: 6px;
+  color: #6a5acd;
+  transition: 0.15s ease;
+}
+
+.file-btn:hover {
+  background: #dcd7ff;
+}
+
+
+/* 핀 색상 변화 */
+.pin-icon {
+  transition: 0.15s ease;
+}
+
+.pin-icon.pinned {
+  color: #ffeb3b !important; /* 노란색 강조 (카톡 느낌) */
+  transform: scale(1.2);
+}
+
+
+
 
