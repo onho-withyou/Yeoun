@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 
-import groovy.transform.ToString;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -21,6 +20,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "ANNUAL_LEAVE_HISTORY")

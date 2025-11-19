@@ -1,6 +1,15 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{/layouts/layout.html}">
+<head>
+	<style type="text/css">
+		.img-btn {
+			width: 15px;
+			height: 15px;
+			vertical-align: middle;
+		}
+	</style>
+</head>
 <body>
 	<th:block layout:fragment="content">
 		<div class="custom-body container-xxl flex-grow-1 container-p-y">
@@ -43,10 +52,10 @@
 				                	<td th:text="${notice.noticeTitle}"></td>
 				                	<td th:text="${notice.empName}"></td>
 				                	<!-- 로컬데이트타임은 #temporals.format사용 -->
-									<td th:text="${#temporals.format(notice.createdDate, 'yyyy-MM-dd HH:mm')}"></td>
-									<td th:text="${#temporals.format(notice.updatedDate, 'yyyy-MM-dd HH:mm')}"></td>
+									<td th:text="${#temporals.format(notice.createdDate,'yyyy-MM-dd HH:mm')}"></td>
+									<td th:text="${#temporals.format(notice.updatedDate,'yyyy-MM-dd HH:mm')}"></td>
 				                	<td>
-			                            <button type="button" class="btn btn-info btn-sm" th:data-notice-id = "*{notice.noticeId}">
+			                            <button type="button" class="btn btn-info btn-sm" th:data-notice-id="*{notice.noticeId}">
 			                                보기
 			                            </button>
 				                	</td>

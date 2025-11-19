@@ -3,10 +3,10 @@
 **/
 
 let picker = null;
+let isProgrammaticChange = false; //날자 세팅
 
-document.addEventListener('DOMContentLoaded', function() {
-	
-	// 일정등록 데이트피커 객체 생성
+// 일정등록 데이트피커 객체 생성
+function createRangePicker() {
 	picker = tui.DatePicker.createRangePicker({
 	    startpicker: {
 	        date: today,
@@ -26,12 +26,106 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 	});
 	
+	picker.on('change:start', () => {
+		if (isProgrammaticChange) return;
+		validateRangeWithAllday();
+	});
+
+	// end 날짜 변경 시 검증
+	picker.on('change:end', () => {
+		if (isProgrammaticChange) return;
+		validateRangeWithAllday();
+	});
+}
+
+// 종일 일정이 아닌경우 start, end 같은 날로
+function syncEndDateToStartDate() {
+	const startDate = picker.getStartDate();   // Date 객체 또는 null
+	const endDate   = picker.getEndDate();     // Date 객체 또는 null
+
+  // start 가 아직 없으면 아무것도 못 하니까 그냥 종료
+	if (!(startDate instanceof Date)) {
+		return;
+	}
+
+	let newEnd;
+
+	if (endDate instanceof Date) {
+		// 기존 end 의 시간은 유지하고 날짜(년월일)만 start 기준으로 맞추기
+		newEnd = new Date(endDate);
+		newEnd.setFullYear(
+			startDate.getFullYear(),
+			startDate.getMonth(),
+			startDate.getDate()
+	    );
+	} else {
+	    // end 가 null 인 경우: start 를 그대로 복사해서 end 로 사용
+	    newEnd = new Date(startDate);
+	}
+
+	picker.setEndDate(newEnd);
+}
+
+// 두 Date가 같은 '날짜(년/월/일)'인지 확인
+function isSameDay(d1, d2) {
+	// 둘 중 하나라도 값이 없으면 비교 불가 → false 리턴
+	if (!(d1 instanceof Date) || !(d2 instanceof Date)) {
+		return false;
+	}
+
+	return d1.getFullYear() === d2.getFullYear() &&
+			d1.getMonth()    === d2.getMonth() &&
+			d1.getDate()     === d2.getDate();
+}
+
+// allday 상태를 보고 start/end 검증하는 함수
+function validateRangeWithAllday() {
 	const alldayCheck = document.getElementById('all-day-checkbox');
+	const isAllDay = alldayCheck.checked;
+	const startDate = picker.getStartDate();
+	const endDate   = picker.getEndDate();
+
+	if (!isAllDay) { // 종일 아닐 때만 체크
+
+	    if (!isSameDay(startDate, endDate)) {
+			// end 를 start 날짜로 맞추기 (시간까지 통일하려면 new Date(startDate) 써도 됨)
+			const fixedEnd = new Date(endDate);
+			fixedEnd.setFullYear(
+				startDate.getFullYear(),
+			 	startDate.getMonth(),
+				startDate.getDate()
+			);
+		
+			picker.setEndDate(fixedEnd);
+		
+			alert('종일 일정이 아닐 때는 시작일과 종료일이 같은 날이어야 합니다.\n종료일을 시작일로 변경했습니다.');
+		}
+	} else {
+//		const newStart = new Date(startDate);
+//		const newEnd   = new Date(endDate);
+//	
+//		newStart.setHours(0, 0, 0, 0); 
+//		newEnd.setHours(23, 59, 59, 999); 
+//	
+//		picker.setStartDate(newStart);
+//		picker.setEndDate(newEnd);
+	}
+}
+
+document.addEventListener('DOMContentLoaded', function() {
 	
-	//모달 종일 체크박스 체크 이벤트
+	createRangePicker();
+	
+	const alldayCheck = document.getElementById('all-day-checkbox');
+
+	// 종일 체크박스 변경 이벤트
 	alldayCheck.addEventListener('change', function() {
 		const alldayYN = document.getElementById('all-day-checkbox-value');
-		alldayCheck.checked ? alldayYN.value = "Y" : alldayYN.value = "N"
+		alldayCheck.checked ? alldayYN.value = "Y" : alldayYN.value = "N";
+		
+		if (!alldayCheck.checked) {
+			syncEndDateToStartDate();
+		}
 	});
 	
 	//일정등록 모달 등록, 수정버튼 이벤트
@@ -142,7 +236,7 @@ async function createSelect() {
 }
 
 // 모달열기함수
-async function openModal(mode, data = null) {
+async function openScheduleModal(mode, data = null) {
 	const modal = new bootstrap.Modal(document.getElementById('add-schedule-modal'));
 	const form = document.getElementById('add-schedule-form');
 	const modalTitle = document.getElementById('modalCenterTitle');
@@ -150,7 +244,7 @@ async function openModal(mode, data = null) {
 	const submitBtn = document.getElementById('add-schedule-btn');
 	const select = document.getElementById('schedule-type');
 	const createdUserName = document.getElementById('createdUserName');
-	const alldayCheckbox = document.getElementById('all-day-checkbox-value');
+	const alldayCheckbox = document.getElementById('all-day-checkbox');
 	
 //	const createdUser = document.getElementById('schedule-writer')
 //	const startpickerInput = document.getElementById('startpicker-input');
@@ -190,8 +284,10 @@ async function openModal(mode, data = null) {
 		ep.enable && ep.enable(); //종료날자 선택가능
 		
 		// 날짜 초기값
+		isProgrammaticChange = true;
 		picker.setStartDate(new Date(today));
 		picker.setEndDate(new Date(nextDay));
+		isProgrammaticChange = false;
 		
 		//셀렉트박스 초기화
 		select.innerHTML = '';
@@ -244,16 +340,15 @@ async function openModal(mode, data = null) {
 		select.value = data.scheduleType;
 		
 		// 날짜 초기값
+		isProgrammaticChange = true;
 		picker.setStartDate(data.scheduleStart ? new Date(data.scheduleStart) : today);
 		picker.setEndDate(data.scheduleFinish ? new Date(data.scheduleFinish): nextDay);
-		// 종일 체크 해제
-		alldayCheckbox.checked = data.alldayYN == 'Y';
-//		form.alldayYN.checked = data.alldayYN === 'Y';
-		form.scheduleContent.value = data.scheduleContent || '';
+		isProgrammaticChange = false;
 		
-		console.log(alldayCheckbox.checked, "체크드상태");
-		console.log(form.scheduleContent.value, "체크드값");
-//		console.log(form.alldayYN.checked, "체크드상태");
+		// 종일 체크
+		alldayCheckbox.checked = data.alldayYN === 'Y'; 
+		form.alldayYN.checked = data.alldayYN === 'Y'; // hidden value
+		form.scheduleContent.value = data.scheduleContent || '';
 		
 		if (data.createdUser !== currentUserId) {
 		    // 권한 없음: 삭제, 수정 버튼 비활성화
@@ -262,7 +357,6 @@ async function openModal(mode, data = null) {
 			// 데이트피커 비활성화
 			sp.enable && sp.disable();
 			ep.enable && ep.disable();
-
 			
 		    // 폼 전체의 인풋/셀렉트/체크박스 등을 읽기 전용으로 만들기
 		    Array.from(form.elements).forEach(el => {
