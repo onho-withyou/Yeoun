@@ -351,10 +351,10 @@ function createDatePicker() {
 function checkCalendarType() {
 	if(calendarType == 'month') {
 //		dateController.close();
-		console.log("먼쓰");
+//		console.log("먼쓰");
 	} else {
 //		dateController.open();
-		console.log("먼쓰아님");
+//		console.log("먼쓰아님");
 	}
 }
 
@@ -533,7 +533,7 @@ function convertGroupedLeavesToSchedules(dateLeaveMap) {
 
 //===============================================================
 // DOM LOAD
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
 	
 	createDatePicker(); // 데이트피커 생성
 	initCalendar(); //달력 생성
@@ -640,7 +640,8 @@ document.addEventListener('DOMContentLoaded', function () {
 		dateController.open();
 	});
 	
-	getLastNoticeList();
+	await getLastNoticeList();
+	await getApprovalList();
 	
 	document.querySelectorAll('input.calendar-filter').forEach((checkbox) => {
 		checkbox.addEventListener('change', (event) => {
@@ -650,13 +651,14 @@ document.addEventListener('DOMContentLoaded', function () {
 	
 });// DOM로드 끝
 
+// 최근 공지사항 목록 데이터
 async function getLastNoticeList() {
 	await fetch(`/api/notices/last-notice`, {method: 'GET'})
 	.then(response => {
 		if (!response.ok) throw new Error(response.text());
 		return response.json();  //JSON 파싱
 	}).then(data => {
-		console.log(data);
+		console.log(data, "공지데이터");
 		initNoticeGrid(data);
 	}).catch(error => {
 		console.error('에러', error)
@@ -664,56 +666,85 @@ async function getLastNoticeList() {
 	});
 }
 
-let grid = null;
 
-// 그리드 불러오기 함수
-function initNoticeGrid(data) {
+let noticeGrid = null;
+// 공지그리드 그리기 함수
+async function initNoticeGrid(data) {
 	const Pagination = tui.Pagination;
 	
-	if(!grid){
-		createGrid();
-	} else {
-		grid.destroy();
-		createGrid();
-	}
-	
-	function createGrid() {
-		grid = new tui.Grid({
-			el: document.getElementById("noticeGrid"),
-			editable: true,
-			columns: [
-				{
-					header: '제목'
-					, name: 'noticeTitle'
-					, align: "right"
-				},
-//				{
-//					header: '등록일',
-//					name: 'createdDate'
-//				},
-//				{
-//					header: ' '
-//					, name: "btn"
-//					, width: 100 // 너비 설정
-//					, align: "center"
-//					, formatter: (cellInfo) => "<button type='button' class='btn-detail' data-row='${cellInfo.rowKey}' >상세정보</button>"
-//				}
-			]
-//			rowHeaders: ['rowNum'],
-		});
-		grid.resetData(data);
-	}
-	
+	noticeGrid = new tui.Grid({
+		el: document.getElementById("noticeGrid"),
+		editable: true,
+		columns: [
+			{
+				header: '제목'
+				, name: 'noticeTitle'
+				, align: "right"
+			},
+		]
+	});
+	noticeGrid.resetData(data);
+
 	
 	// 상세보기 버튼 이벤트
-	grid.on("click", (event) => {
+	await noticeGrid.on("click", (event) => {
 //		console.log(event);
-		const rowData = grid.getRow(event.rowKey);
+		const rowData = noticeGrid.getRow(event.rowKey);
 		const noticeId = rowData.noticeId;
 		
 		selectedNoticeId = noticeId;
 		const modalEl = document.getElementById('show-notice');
 		new bootstrap.Modal(modalEl).show();
+			
+
+	});
+}
+
+// 최근 공지사항 목록 데이터
+async function getApprovalList() {
+	await fetch(`/api/approvals`, {method: 'GET'})
+	.then(response => {
+		if (!response.ok) throw new Error(response.text());
+		return response.json();  //JSON 파싱
+	}).then(data => {
+		console.log(data, "결제문서데이터");
+		initApprovalGrid(data);
+	}).catch(error => {
+		console.error('에러', error)
+		alert("결제문서 데이터 조회 실패");
+	});
+}
+
+
+let approvalGrid = null;
+let selectedApprovalId = null;
+// 공지그리드 그리기 함수
+async function initApprovalGrid(data) {
+	const Pagination = tui.Pagination;
+	
+	approvalGrid = new tui.Grid({
+		el: document.getElementById("approvalGrid"),
+		editable: true,
+		columns: [
+			{
+				header: '제목'
+				, name: 'approvalTitle'
+				, align: "right"
+			},
+		]
+	});
+	approvalGrid.resetData(data);
+	
+	// 상세보기 버튼 이벤트
+	await approvalGrid.on("click", (event) => {
+//		console.log(event);
+		const rowData = approvalGrid.getRow(event.rowKey);
+		const approvalId = rowData.approvalId;
+		
+		selectedApprovalId = approvalId;
+		alert("선택된 approvalId : " + approvalId);
+//		const modalEl = document.getElementById('show-notice');
+//		new bootstrap.Modal(modalEl).show();
 			
 
 	});

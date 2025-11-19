@@ -56,7 +56,6 @@ public class MainController {
 	public ResponseEntity<Map<String, String>> createSchedule(@ModelAttribute("scheduleDTO")@Valid ScheduleDTO scheduleDTO, 
 			BindingResult bindingResult) {
 		Map<String, String> msg = new HashMap<>();
-		System.out.println(scheduleDTO + "요기까지왔넹");
 
 		// 일정등록 요청 데이터 검증
 		if(bindingResult.hasErrors()) {

@@ -49,7 +49,6 @@ public class ScheduleService {
 	// 일정 등록로직
 	public void createSchedule(@Valid ScheduleDTO scheduleDTO) {
 		Emp emp = empRepository.findById(scheduleDTO.getCreatedUser()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다.111"));
-		System.out.println(scheduleDTO + "요기까지왔넹");
 
 		Schedule schedule = scheduleDTO.toEntity();
 		schedule.setEmp(emp);

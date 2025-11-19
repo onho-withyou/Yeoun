@@ -128,10 +128,9 @@
 	            <!-- 오른쪽 열: 일정추가/데이트피커/필터 (세로 3구간) -->
 	            <div class="col-md-5 col-lg-4 d-flex flex-column " style="position: relative !important">
 	            	<div style="height: 60px; flex-shrink: 0; display: flex; align-items: center; gap: 10px; left: 15px; right: 15px;">
-<!-- 	            		<img src="/img/avatar.png" alt="User Avatar" class="rounded-circle" width="40" height="40"> -->
-	            		<p th:text="${#authentication.principal.empName}"></p>
-	            		<button class="btn btn-primary" th:attr="data-emp-id=${#authentication.name}" onclick="handleAttendanceToggle(this.dataset.empId)" id="attendance">출근</button>
-	            		<button class="btn btn-primary" th:attr="data-emp-id=${#authentication.name}" onclick="handleAttendanceToggle(this.dataset.empId)" id="accessBtn">출입</button>
+<!-- 	            		<p th:text="${#authentication.principal.empName}"></p> -->
+	            		<button class="btn btn-primary" th:attr="data-emp-id=${#authentication.name}" onclick="handleAttendanceToggle(this.dataset.empId)" id="attendance" style="width:50%">출근</button>
+	            		<button class="btn btn-primary" th:attr="data-emp-id=${#authentication.name}" onclick="handleAttendanceToggle(this.dataset.empId)" id="accessBtn" style="width:50%">출입</button>
 
 	            	</div>
 					<div class="card">
@@ -139,14 +138,18 @@
 							<h3 style="font-size:18px; font-weight:700;">공지사항 목록</h3>
 						</div>
 						<div class="table-responsive text-nowrap" id="noticeGrid"></div>
-<!-- 						<div> -->
 							<p style="font-size:10px; text-align: right; vertical-align: bottom;">
 							<a href="/notices">더보기</a>
 							</p>
-<!-- 						</div> -->
 					</div>
-					<div class="card h-50" style="border: solid;">
-						asdf
+					<div class="card">
+						<div>
+							<h3 style="font-size:18px; font-weight:700;">결제 문서 목록</h3>
+						</div>
+						<div class="table-responsive text-nowrap" id="approvalGrid"></div>
+							<p style="font-size:10px; text-align: right; vertical-align: bottom;">
+							<a href="/approval/approval_doc">더보기</a>
+							</p>
 					</div>
 
 	            </div>
