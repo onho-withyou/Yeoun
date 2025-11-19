@@ -48,7 +48,7 @@ public class LeaveController {
 	public String leave(@AuthenticationPrincipal LoginDTO loginDTO, Model model) {
 		LeaveDTO leaveDTO = leaveService.getAnnualLeave(loginDTO.getEmpId());
 		
-		leaveService.createAnnualLeave(202511150104L);
+//		leaveService.createAnnualLeave(202511150104L);
 		model.addAttribute("leaveDTO", leaveDTO);
 		
 		return "leave/leave";

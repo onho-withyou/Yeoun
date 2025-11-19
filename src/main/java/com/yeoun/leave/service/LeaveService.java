@@ -140,32 +140,31 @@ public class LeaveService {
 		AnnualLeave annualLeave = leaveRepository.findByEmp_empId(approvalDoc.getEmpId())
 				.orElseThrow(() -> new NoSuchElementException("연차 테이블을 찾을 수 없습니다."));
 		
-		log.info(">>>>>>>>>>>>>>>> annualLeave : " + annualLeave.getLeaveId());
-		
 		// 연차 사용 시작일과 종료 일자 계산해서 사용한 일수 구함
 		double usedDays = (double) (ChronoUnit.DAYS.between(approvalDoc.getStartDate(), approvalDoc.getEndDate()) + 1);
 		
 		
 		// 연차 사용 기록 등록 
-//		LeaveHistoryDTO  leaveHistoryDTO = LeaveHistoryDTO.builder()
-//				.emp_id(emp.getEmpId())
-//				.emp_name(emp.getEmpName())
-//				.dept_id(emp.getDept().getDeptId())
-//				.leaveType("ANNUAL")
-//				.startDate(approvalDoc.getStartDate())
-//				.endDate(approvalDoc.getEndDate())
-//				.usedDays(usedDays)
-//				.reason(approvalDoc.getReason())
-//				.approvalId(approvalDoc.getApprovalId())
-//				.build();
-//		
-//		AnnualLeaveHistory annualLeaveHistory = leaveHistoryDTO.toEntity();
-//		annualLeaveHistory.setAnnualLeave(annualLeave);
-//		
-//		historyRepository.save(annualLeaveHistory);
-//		
-//		// 사용한 연차 반영
-//		annualLeave.useAnnual(usedDays);
+		LeaveHistoryDTO  leaveHistoryDTO = LeaveHistoryDTO.builder()
+				.emp_id(emp.getEmpId())
+				.emp_name(emp.getEmpName())
+				.dept_id(emp.getDept().getDeptId())
+				.leaveType("ANNUAL")
+				.startDate(approvalDoc.getStartDate())
+				.endDate(approvalDoc.getEndDate())
+				.usedDays(usedDays)
+				.reason(approvalDoc.getReason())
+				.approvalId(approvalDoc.getApprovalId())
+				.build();
+		
+		AnnualLeaveHistory annualLeaveHistory = leaveHistoryDTO.toEntity();
+		annualLeaveHistory.setAnnualLeave(annualLeave);
+		annualLeaveHistory.setDept(emp.getDept());
+		
+		historyRepository.save(annualLeaveHistory);
+		
+		// 사용한 연차 반영
+		annualLeave.useAnnual(usedDays);
 	}
 	
 	// 연차 재계산 (비동기)
