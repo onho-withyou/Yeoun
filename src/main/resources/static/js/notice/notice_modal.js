@@ -224,7 +224,7 @@ function inputReadFileData(fileData) {
 		fileList.appendChild(iconEl);
 		fileList.appendChild(nameSpan);
 
-		downloadEl.href = `/file/download/${file.fileId}`;
+		downloadEl.href = `/files/download/${file.fileId}`;
 		downloadEl.classList.add('file-download-link');
 		downloadEl.title = '다운로드';
 		

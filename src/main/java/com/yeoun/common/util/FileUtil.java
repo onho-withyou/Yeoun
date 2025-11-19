@@ -1,6 +1,5 @@
 package com.yeoun.common.util;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -86,6 +85,7 @@ public class FileUtil {
 		// 업로드된 파일리스트 반환
 		return fileList;
 	}
+	
 	// ======================================================================
 	// 실제 서버상에 업로드 된 파일 제거(단일 파일 삭제)
 	public void deleteFile() {
