@@ -53,6 +53,9 @@ public class ApprovalDoc {
 	
 	@Column(name="TO_DEPT_ID")
 	private String toDeptId; //발령부서
+
+	@Column(name="LEAVE_TYPE")
+	private String leaveType; //연차 유형
 	
 	@Column(name="EXPND_TYPE")
 	private String expndType; //지출종류
