@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.yeoun.approval.dto.ApprovalFormDTO;
 import com.yeoun.approval.entity.ApprovalDoc;
 import com.yeoun.approval.entity.ApprovalForm;
 import com.yeoun.emp.entity.Dept;
@@ -17,7 +18,8 @@ import java.util.Optional;
 
 @Repository
 public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> {
-	Optional<ApprovalDoc> findByEmpId(String empId);
+	//Optional<ApprovalDoc> findByEmpId(String empId);
+	Optional<Emp> findByEmpId(String empId);
 	
 	// 사원 목록 조회
 	@Query("SELECT m FROM Emp m")
@@ -65,7 +67,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 			WHERE afede.dept_id = :deptId
     		""",nativeQuery = true)
     List<ApprovalForm> findAllFormTypes(@Param("deptId") String deptId);
-
+	
 	//부서목록조회
 	@Query("SELECT d FROM Dept d")
 	List<Dept> findAllDepartments();
@@ -200,24 +202,25 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 					,adr.finish_date
 					,adr.doc_status
 					,adr.viewing
-			FROM emp e, dept d, position p 
-					,( SELECT ad.approval_id
+			FROM emp e, dept d, position p, 
+                (SELECT ad.approval_id
 							,ad.approval_title
-							,ar.emp_id
+							,ad.emp_id
 							,ad.approver 
 							,ad.created_date
 							,ad.finish_date
 							,ad.doc_status
 							,ar.viewing
 					FROM approval_doc ad,approver ar
-					WHERE ad.doc_status != '완료' -- 문서 완료가 아니고
-					AND ad.approval_id = ar.approval_id  -- 문서id가 일치하며
-					AND (ar.viewing ='y' OR ad.emp_id = :empId )  --결재문서의 열람권한이있다. or 문서 작성자다.
-					AND ar.emp_id = :empId ) adr
-			WHERE adr.emp_id = e.emp_id
+					WHERE (ad.doc_status != '완료'
+					AND ad.approval_id = ar.approval_id
+                    AND ar.viewing ='y' and ar.emp_id = :empId)
+                    OR ( ad.doc_status != '완료'  
+                    AND ad.approval_id = ar.approval_id
+                    AND ad.emp_id = :empId)) adr
+            WHERE adr.emp_id = e.emp_id
 			AND e.dept_id = d.dept_id
 			AND e.pos_code = p.pos_code
-	
 	""", nativeQuery = true)
 	List<Object[]> findWaitingApprovalDocs(@Param("empId") String empId);		
 
