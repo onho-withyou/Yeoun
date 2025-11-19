@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		
 }); // DOM로드 끝
 
+// 보기버튼 눌렀을때 모달열기함수
 document.querySelectorAll('button[data-notice-id]').forEach(btn => {
 	btn.addEventListener('click', (event) => {
 		const noticeId = btn.dataset.noticeId;

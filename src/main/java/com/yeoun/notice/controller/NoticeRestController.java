@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.yeoun.common.dto.FileAttachDTO;
 import com.yeoun.notice.dto.NoticeDTO;
 import com.yeoun.notice.service.NoticeService;
 
@@ -20,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class NoticeRestController {
 	
     private final NoticeService noticeService;
-    
+    // 공지사항 조회
     @GetMapping("/{noticeId}")
     public ResponseEntity<NoticeDTO> getNotice(@PathVariable("noticeId")Long noticeId) {
         NoticeDTO noticeDTO = noticeService.getOneNotice(noticeId);
@@ -32,6 +33,7 @@ public class NoticeRestController {
         return ResponseEntity.ok(noticeDTO);
     }
     
+    //최근 공지사항 조회
     @GetMapping("/last-notice")
     public ResponseEntity<List<NoticeDTO>> getLastNotice(){
     	Page<NoticeDTO> noticePage = noticeService.getNotice(0, 5, "", "createdDate", "desc");
@@ -41,5 +43,13 @@ public class NoticeRestController {
         }
         
         return ResponseEntity.ok(noticePage.getContent());
+    }
+    
+    // 공지조회시 파일데이터 조회
+    @GetMapping("/file/{noticeId}")
+    public ResponseEntity<List<FileAttachDTO>> getNoticeFile(@PathVariable("noticeId")Long noticeId){
+    	List<FileAttachDTO> fileDTOList = noticeService.getNoticeFiles(noticeId);
+        
+        return ResponseEntity.ok(fileDTOList);
     }
 }
