@@ -30,6 +30,7 @@ import com.yeoun.emp.repository.EmpBankRepository;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.emp.repository.EmpRoleRepository;
 import com.yeoun.emp.repository.PositionRepository;
+import com.yeoun.leave.service.LeaveService;
 import com.yeoun.messenger.entity.MsgStatus;
 import com.yeoun.messenger.repository.MsgStatusRepository;
 
@@ -48,6 +49,7 @@ public class EmpService {
 	private final PositionRepository positionRepository;
 	private final EmpBankRepository empBankRepository;
 	private final MsgStatusRepository msgStatusRepository;
+	private final LeaveService leaveService;
 	private final BCryptPasswordEncoder encoder;
 
 	// 사원 신규 등록
@@ -120,6 +122,9 @@ public class EmpService {
 	        bank.setFileId(empDTO.getFileId());
 	        empBankRepository.save(bank);
 	    }
+	    
+	    // 7) 연차 생성
+	    leaveService.createAnnualLeaveForEmp(empId);
 
 	    log.info("EMP 등록 완료: empId={}, dept={}, pos={}",
 	            emp.getEmpId(), dept.getDeptName(), position.getPosName());
