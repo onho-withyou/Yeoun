@@ -701,11 +701,9 @@ async function updateCurrentDate() {
 	const currentDateEl = document.getElementById('calendar-date');
     // 현재날짜 저장
 	currentDate = calendar.getDate();
-	console.log("currentDate :", currentDate );
 	if (dateController) {
 	    // change 이벤트 다시 안 터지게 silent 옵션 true
-	    dateController.setDate(currentDate, true);
-		console.log("updatedDateControllerDate : ", dateController.getDate());
+	    dateController.setDate(currentDate.d.d, true);
 	}
 	
     const year = currentDate.getFullYear();
