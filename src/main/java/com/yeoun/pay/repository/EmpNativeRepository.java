@@ -30,7 +30,6 @@ public interface EmpNativeRepository extends JpaRepository<Emp, String> {
 				
 
 
-
     /** 사원명 조회 */
     @Query(value="""
     		SELECT e.empName 
