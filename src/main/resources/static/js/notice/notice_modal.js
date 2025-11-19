@@ -15,8 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
 	
 	// 공지사항 조회모달 열기 이벤트
 	showNoticeModal.addEventListener('show.bs.modal', async function(event){
-		await getNoticeData(selectedNoticeId);
 		await getNoticeFileData(selectedNoticeId);
+		await getNoticeData(selectedNoticeId);
 	});
 	
 	//공지사항 조회 - 수정버튼
@@ -143,7 +143,6 @@ async function getNoticeData(noticeId) {
 	.then(data => {
 //		console.log(data,"데이어어어어");
 		inputReadData(data);
-		
 	})
 	.catch(error => console.error('Error:', error));
 }
@@ -251,8 +250,49 @@ function inputReadFileData(fileData) {
 		// 미리보기 3-2) 미리보기 영역에 요소 추가
 		console.log(fileList);
 		document.getElementById("notice-attached-file").append(fileList);
+		
+		deleteEl.addEventListener('click', function(event) {
+			event.preventDefault();
+			
+			deleteFile(deleteEl);
+
+		});
 	});
 }
+// 파일 삭제 함수
+async function deleteFile(elem) {
+	if(!confirm("상품을 삭제하시겠습니까?")) {
+		return;
+	}
+
+	// 하이퍼링크 요소 객체(elem)에 포함된 데이터셋 id 값(data-id) 가져오기
+	const fileId = elem.dataset.fileId;
+	
+	await $.ajax({
+		// RESTful API 형식으로 주소를 지정할 경우 삭제는 DELETE 방식의 메서드 활용하며, URL 뒤에 삭제할 번호를 경로 변수 형태로 포함
+		url: "/files/" + fileId,
+		type: "delete",
+		// data 속성에 변수값 전달 시 속성명과 변수명이 동일하면 하나만 기술해도 됨
+		dataType: "json",
+		// AJAX 요청 전 먼저 CSRF 값을 서버측으로 전송
+		beforeSend: function(xhr) {
+			xhr.setRequestHeader(csrfHeaderName, csrfToken);
+		},
+		success: async function(response) {
+			if(response.result) {
+				const parent = elem.parentElement; // 자바스크립트
+				console.log(parent);
+				parent.remove();
+				
+				// 첨부파일 요소 영역 초기화후 파일데이터 다시 입력
+			}
+		},
+		error: function() {
+			alert("삭제 요청 실패!");
+		}
+	});
+}
+
 
 // 공지조회 모달 열때 글쓴이와 접속자 동일인물 판별
 function initReadModal(createdUser) {

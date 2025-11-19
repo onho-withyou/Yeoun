@@ -6,6 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -17,7 +19,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -87,6 +91,19 @@ public class FileController {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 타입 식별 에러!");
 		}
 		
+	}
+	
+	// 파일 삭제 맵핑
+	@ResponseBody
+	@DeleteMapping("/{fileId}")
+	public Map<String, Object> removeFile(@PathVariable("fileId") Long fileId) {
+		
+		fileAttachService.removeFile(fileId);
+		
+		Map<String, Object> resultMap = new HashMap<>();
+		resultMap.put("result", true);
+		
+		return resultMap;
 	}
 	
 }

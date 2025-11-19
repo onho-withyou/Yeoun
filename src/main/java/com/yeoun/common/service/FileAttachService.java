@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.yeoun.common.dto.FileAttachDTO;
 import com.yeoun.common.entity.FileAttach;
 import com.yeoun.common.repository.FileAttachRepository;
+import com.yeoun.common.util.FileUtil;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.leave.repository.LeaveHistoryRepository;
@@ -20,6 +21,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class FileAttachService {
 	private final FileAttachRepository fileAttachRepository;
+	private final FileUtil fileUtil;
 	
 	// ---------------------------------------------------------------
 	
@@ -27,6 +29,14 @@ public class FileAttachService {
 	public FileAttachDTO getFile(Long fileId) {
 		FileAttach file = fileAttachRepository.findById(fileId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 파일입니다."));
 		return FileAttachDTO.fromEntity(file);
+	}
+
+	public void removeFile(Long fileId) {
+		FileAttach file = fileAttachRepository.findById(fileId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 파일입니다."));
+		
+		fileAttachRepository.deleteById(fileId);
+		
+		fileUtil.deleteFile(FileAttachDTO.fromEntity(file));
 	}
 	
 }

@@ -88,25 +88,24 @@ public class FileUtil {
 	
 	// ======================================================================
 	// 실제 서버상에 업로드 된 파일 제거(단일 파일 삭제)
-	public void deleteFile() {
-		
-//			Path path = Paths.get(uploadBaseLocation, itemImgDTO.getImgLocation()) // 기본 경로와 파일별 상세경로를 결합하여 Path 객체 생성
-//					.resolve(itemImgDTO.getImgName()) // 디렉토리에 실제 파일명 결합(get() 메서드 파라미터에 추가로 기술해도 됨)
-//					.normalize();
-//			
-//			// Files 클래스의 deleteIfExists() 메서드 호출하여 해당 파일이 서버상에 존재할 경우 삭제 처리
-//			try {
-//				Files.deleteIfExists(path);
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
+	public void deleteFile(FileAttachDTO fileAttachDTO) {
+		// 파일기본경로 + 저장경로 + 저장된 파일명 결합
+		Path path = Paths.get(uploadBaseLocation, fileAttachDTO.getFilePath())
+						.resolve(fileAttachDTO.getFileName())
+						.normalize();
+		// Files 클래스의 deleteIfExists() 메서드 호출하여 해당 파일이 서버상에 존재할 경우 삭제 처리
+		try {
+			Files.deleteIfExists(path);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	// 실제 서버상에 업로드 된 파일 제거(다중 파일 삭제)
-	public void deleteFiles() {
-		// deleteFile() 메서드 재사용하기 위하여 반복문을 통해 리스트 내의 ItemImgDTO 객체를 파라미터로 전달
-//			for(ItemImgDTO itemImgDTO : itemImgDTOList) {
-//				deleteFile(itemImgDTO);
-//			}
+	public void deleteFiles(List<FileAttachDTO> fileAttachDTOList) {
+		for(FileAttachDTO fileAttachDTO : fileAttachDTOList) {
+			deleteFile(fileAttachDTO);
+		}
 	}
 }
