@@ -37,7 +37,8 @@
 	
 	  <!-- 오른쪽: 발령 등록 버튼 -->
 	  <div class="col-12 col-lg d-flex justify-content-lg-end">
-	    <a href="/hr/actions/regist" class="btn btn-primary">
+	    <a href="/hr/actions/regist" class="btn btn-primary"
+	       th:if="${#authorization.expression('hasRole(''HR_ADMIN'') or hasRole(''SYS_ADMIN'')')}">
 	      발령 등록
 	    </a>
 	  </div>
