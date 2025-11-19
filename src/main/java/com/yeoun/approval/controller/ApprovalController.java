@@ -36,7 +36,7 @@ public class ApprovalController {
     public String approvalDoc(Model model) {
 
 		model.addAttribute("empList", approvalDocService.getEmp());//결재- 기안자 목록 불러오기
-		model.addAttribute("formTypes", approvalDocService.getFormTypes()); //결재- 기안서 양식종류 불러오기
+		model.addAttribute("formTypes", approvalDocService.getFormTypes("DEP001")); //결재- 기안서 양식종류 불러오기
 		model.addAttribute("deptList", approvalDocService.getDept()); //결재- 부서목록 불러오기
 		return "approval/approval_doc";
     }

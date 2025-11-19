@@ -21,40 +21,55 @@
 		fetchDoneApprovalDocs().then(data =>{
 			grid5.resetData(data);
 		});		
-		empData().then(data => {
-			console.log("deptData in data",data);
-		});
+		empData();
 	}
+	
+	//let cartList = [];
 
+	       /*[# th:each="item, iterStat : ${formTypes}" "]*/
+
+	       //cartList.push([($formTypes)]);
+
+	       /*[/]*/
+	       console.log("cartList------>",cartList);
 	
 	
-	//select - 인사정보 불러오기
+	
+	let approvarDiv = document.querySelector('#approvar');
+	
+	//selectbox - 인사정보 불러오기
 	async function empData() {
 		try {
 			const response = await fetch("/approval/empList");
 			const data = await response.json();
-			
+			let itemData  = [];
 			let obj ={};
 			data.map((item,index)=>{
-				obj["value"] = item[0]; //empId
-				obj["label"] = item[1]; //empName
+				obj["value"] = item[0]; //사번
+				obj["label"] = (index+1) +" : "+item[1]+"("+item[0]+")"; //이름(사번)
 				itemData.push(obj);
 				obj = {};
 			});
 			
+			//셀렉트박스 - 토스트유아이
+			let selectBox = new tui.SelectBox('#select-box', {
+			  data: itemData
+			});
+			//셀렉트박스 닫힐때
+			selectBox.on('close',(ev)=>{
+				
+				let selectlabel = selectBox.getSelectedItem().label;
+				if(selectlabel != null && approvarArr.length < 3){//셀렉트 라벨선택시 3번까지만셈
+					print(ev.type, selectlabel);
+					approvarArr.push(this.count);
+				}
+				
+			});
 			return itemData;
 		} catch (error) {
 			console.error('Error fetching data:', error);
 		}
 	}	
-
-	//셀렉트박스
-	var approvarDiv = document.querySelector('#approvar');
-	var selectBox = new tui.SelectBox('#select-box', {
-      data: itemData
-    });
-
-	var itemData  = [];
 	
 	//1. 결재사항 불러오기
 	async function fetchPendingApprovalDocs() {
@@ -350,7 +365,7 @@
 	});
 	
 	//모달창 코드
-	//셀렉트 박스 변경시 모달창에 텍스트 변경함수
+	//기안서 셀렉트 박스 변경시 모달창에 텍스트 변경함수
 	function draftValFn(e){
 		
 		let draft_doc = e.value;
@@ -436,16 +451,7 @@
     		this.count = 0;
     	}	
 	}
-	//셀렉트박스 닫힐때
-    selectBox.on('close',(ev)=>{
-    	
-    	let selectlabel = selectBox.getSelectedItem().label;
-    	if(selectlabel != null && approvarArr.length < 3){//셀렉트 라벨선택시 3번까지만셈
-    		print(ev.type, selectlabel);
-    		approvarArr.push(this.count);
-    	}
-		
-	});
+
 
    	//리셋버튼 만들기 하다가잠
     

@@ -35,6 +35,7 @@ import lombok.extern.log4j.Log4j2;
 @Transactional
 public class ApprovalDocService {
 	
+
 	private final ApprovalDocRepository approvalDocRepository;
 	//기안자 명 불러오기
 	@Transactional(readOnly = true)
@@ -46,11 +47,10 @@ public class ApprovalDocService {
 	public List<Object[]> getEmp2() {
 		return approvalDocRepository.findAllMember2();
 	}
-
 	//기안서 양식종류
 	@Transactional(readOnly = true)
-	public List<String> getFormTypes() {
-		return approvalDocRepository.findAllFormTypes();
+	public List<ApprovalForm> getFormTypes(String deptId) {
+		return approvalDocRepository.findAllFormTypes(deptId);
 	}
 	//부서목록조회
 	@Transactional(readOnly = true)

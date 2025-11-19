@@ -10,7 +10,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
+@Entity(name="ApprovalForm")
 @Table(name="APPROVAL_FORM")
 @Getter
 @Setter

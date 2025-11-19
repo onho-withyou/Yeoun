@@ -24,8 +24,8 @@
 	            	<select class="form-select" onchange="draftValFn(this)">
 	            		<option value="기안서" selected>기안서</option>
 	            		 <option th:each="item, iterStat : ${formTypes}" 
-							 		th:value="${item}" 
-							 		th:text="${iterStat.index+1} + ' : ' + ${item}"
+							 		th:value="${item.formName}" 
+							 		th:text="${iterStat.index+1} + ' : ' + ${item.formName}"
 									name="draft">
 						</option>
 	            	</select>
@@ -114,9 +114,10 @@
 		            	<select class="form-select" onchange="draftValFn(this)">
 		            		<option selected>기안서</option>
 		            		<option th:each="item, iterStat : ${formTypes}" 
-							 		th:value="${item}" 
-							 		th:text="${iterStat.index+1} + ' : ' + ${item}"
+							 		th:value="${item.formName}" 
+							 		th:text="${iterStat.index+1} + ' : ' + ${item.formName}"
 									name="draft">
+									
 							</option>
 		            	</select>
 	            	</div>
@@ -242,8 +243,8 @@
 							<select id="emp_id" class="form-select" aria-label="Default select example">
 							  <option selected>이름 사원번호</option>
 							  <option th:each="item, iterStat : ${empList}" 
-							 		th:value="${iterStat.index}" 
-							 		th:text="${iterStat.index} + ' : ' + ${item.empName} + '(' + ${item.empId} + ')'">
+							 			th:value="${item.empId}" 
+							 			th:text="${iterStat.index+1} + ' : ' + ${item.empName} + '(' + ${item.empId} + ')'">
 							 </option> 
 							</select>
 						  </div>
