@@ -137,6 +137,54 @@ async function initOrganizationChart(data) {
 	  console.log('rowKey: ' + rowKey);
 	  console.log('descendantRows: ' + descendantRows);
 	});
+	
+	// 확인버튼
+	const checkedUpEmpBtn = document.getElementById('checkedUpEmpBtn');
+	
+	checkedUpEmpBtn.addEventListener('click', function() {
+		console.log("확인버튼눌림");
+		const checkedUpEmpList = getCheckedEmpId();
+		const checkedEmpEl = document.getElementById("checkedEmp");
+		
+		checkedEmpEl.innerHTML = '';
+		
+		if(checkedUpEmpList.length > 0) {
+			
+			checkedUpEmpList.forEach((emp) => {
+				let div = document.createElement("div");
+				let span = document.createElement("span");
+				const empName = emp.empName;
+				const empId = emp.empId;
+				span.textContent = empName + ' (' + empId + ')'
+				div.appendChild(span);
+				checkedEmpEl.append(div);
+			})
+			
+		}
+		
+	})
+	
+	// 체크한 명단 가져오기
+	function getCheckedEmpId() {
+		let checked = [];
+		const rows = treeGrid.getData();
+//		console.log("treeData : ", rows);
+		rows.forEach((rowData) => {
+			console.log("rowDAta : ", rowData);
+			if(rowData._attributes.checked && rowData.empId != null) {
+				checked.push({
+					empId: rowData.empId
+					, empName: rowData.name
+				});
+			}
+		})
+		
+//		console.log("반복끝 checked : ", checked);
+		return checked;
+	}
+	
+	// 명단 div에 뿌리기
+	
 }
 
 function convertTreeNodes(nodes, myDeptId) {
