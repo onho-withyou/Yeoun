@@ -648,7 +648,7 @@ async function initNoticeGrid(data) {
 	});
 }
 
-// 최근 공지사항 목록 데이터
+// 최근 결제 문서 목록 데이터
 async function getApprovalList() {
 	await fetch(`/api/approvals`, {method: 'GET'})
 	.then(response => {
@@ -666,7 +666,7 @@ async function getApprovalList() {
 
 let approvalGrid = null;
 let selectedApprovalId = null;
-// 공지그리드 그리기 함수
+// 결제그리드 그리기 함수
 async function initApprovalGrid(data) {
 	const Pagination = tui.Pagination;
 	console.log(data, "공지데이터");

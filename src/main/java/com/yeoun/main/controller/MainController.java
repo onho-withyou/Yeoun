@@ -32,6 +32,12 @@ import lombok.RequiredArgsConstructor;
 public class MainController {
 	private final ScheduleService scheduleService;
 	
+	@GetMapping("/test")
+	public String test() {
+		return "/main/organizationChartModal";
+	}
+	
+	
 	// 메인페이지 맵핑
 //	@GetMapping("")
 //	public String Main() {

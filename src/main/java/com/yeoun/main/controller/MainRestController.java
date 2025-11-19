@@ -13,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -83,4 +85,18 @@ public class MainRestController {
 //		System.out.println(leaveHistoryList);
 		return ResponseEntity.ok(leaveHistoryList);
 	}
+	
+	// 부서정보 불러오기
+	@GetMapping("/organizationChart")
+	public ResponseEntity<Map<String, Object>> getOrganizationChart() {
+		
+		List<Map<String, Object>> organizationList = scheduleService.getOrganizationList();
+		
+		Map<String, Object> result = new HashMap<>();
+		result.put("data", organizationList);
+		result.put("count", organizationList.size());
+		
+		return ResponseEntity.ok(result);
+	}
+	
 }

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.security.core.Authentication;
@@ -21,6 +22,7 @@ import com.yeoun.leave.entity.AnnualLeaveHistory;
 import com.yeoun.leave.repository.LeaveHistoryRepository;
 import com.yeoun.main.dto.ScheduleDTO;
 import com.yeoun.main.entity.Schedule;
+import com.yeoun.main.mapper.ScheduleMapper;
 import com.yeoun.main.repository.ScheduleRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -35,6 +37,7 @@ public class ScheduleService {
 	private final DeptRepository deptRepository;
 	private final EmpRepository empRepository;
 	private final LeaveHistoryRepository leaveHistoryRepository;
+	private final ScheduleMapper scheduleMapper;
 	// --------------------------------------------------
 	
 	//일정 등록모달 부서리스트 가져오기
@@ -124,6 +127,13 @@ public class ScheduleService {
 		LocalDate endDate = endDateTime.toLocalDate();
 		List<AnnualLeaveHistory> leaveHistoryList = leaveHistoryRepository.findLeaveHistorySchedule(startDate, endDate, empId, deptId);
 		return leaveHistoryList.stream().map(LeaveHistoryDTO::fromEntity).collect(Collectors.toList());
+	}
+
+	public List<Map<String, Object>> getOrganizationList() {
+		
+		List<Map<String, Object>> organizationList = scheduleMapper.getOrganizationList();
+		
+		return organizationList;
 	}
 
 
