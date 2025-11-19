@@ -52,7 +52,9 @@ public class LoginDTO implements UserDetails {
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return empRoles.stream()
-				.map(er -> new SimpleGrantedAuthority(er.getRole().getRoleCode()))
+				.map(er -> new SimpleGrantedAuthority
+						(er.getRole().getRoleCode()
+				))
 				.collect(Collectors.toList());
 	}
 

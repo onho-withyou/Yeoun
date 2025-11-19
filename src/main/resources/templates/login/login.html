@@ -33,8 +33,12 @@
 			<!-- /여운 Logo -->
 			
 			  <!-- 로그인 실패 시 에러 메시지 출력 -->
-			  <div th:if="${param.error}" class="alert alert-danger mt-2">
+			  <div th:if="${param.error}" class="alert alert-danger small">
 			    아이디 또는 비밀번호가 올바르지 않습니다.
+			  </div>
+			  
+			  <div th:if="${param.session}" class="alert alert-warning small">
+			     세션이 만료되었습니다. 다시 로그인해주세요.
 			  </div>
 
 		      <form id="formAuthentication" th:action="@{/login}" method="post" class="mb-3">
@@ -76,10 +80,6 @@
 		  </div>
 		</div>
 
-		<!-- 로그아웃 alert -->
-		<th:block th:if="${param.logout}">
-		  <script>alert('로그아웃 되었습니다.');</script>
-		</th:block>
 
 </body>
 </html>

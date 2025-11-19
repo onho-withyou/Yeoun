@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WebSecurityConfig {
 	
-	private final CustomUserDetailsService userDetailsService;
+	private final CustomUserDetailsService customuserDetailsService;
 	private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 	
 	// ====================================================================
@@ -28,23 +28,35 @@ public class WebSecurityConfig {
 		// HttpSecurity 객체의 다양한 메서드를 메서드 체이닝 형태로 호출하여 스프링 시큐리티 관련 설정을 수행하고
 		// 마지막에 build() 메서드 호출하여 HttpSecurity 객체 생성하여 리턴
 		return httpSecurity
+				
+				// --------- 세션이 유효하지 않을 때(만료/서버 재시작 등) 이동할 URL -------
+				.sessionManagement(session -> session
+	                    .invalidSessionUrl("/login?session=expired")
+	            )
+				
 				// --------- 요청에 대한 접근 허용 여부 등의 요청 경로에 대한 권한 설정 -------
 				.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-				
-				// =========================================================================
-		        // 공통: 정적 리소스 및 로그인/회원가입 등 완전 공개 구역
-					// 스프링이 인식하는 공통 정적 리소스
+				    // 공통: 정적 리소스 및 로그인/회원가입 등 완전 공개 구역
 					.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-					// 프로젝트에서 실제 쓰는 정적 경로들 명시
 					.requestMatchers("/assets/**", "/css/**", "/custom_bg/**", "/icon/**", "/js/**").permitAll()
-					
-					// 공개 페이지
-					.requestMatchers("/", "/main", "/login", "/logout").permitAll()
-				
-	            // =========================================================================
-                // 그 외 모든 요청은 인증 필요 
-					.anyRequest().authenticated() 
-				)
+					.requestMatchers("/", "/login", "/logout").permitAll()
+
+					// ================== 관리자/인사/MES 권한 ==================
+		            // 사원/인사 관리
+		            .requestMatchers("/emp/**", "/hr/**", "/org/**")
+		                .hasAnyRole("SYS_ADMIN", "HR_ADMIN")
+		           
+	                // 근태 관리
+	                // 급여 관리
+	                // 전자결재 설정(양식/결재선 관리 등)
+	                // 전자결재 일반 사용 (결재 상신/조회 등)
+	                // 공지 관리
+	                // MES 관리자
+	                // MES 일반 사용자
+
+	                // 그 외 나머지는 로그인만 되어있으면 접근 허용
+	                .anyRequest().authenticated()
+				 )
 				// ---------- 로그인 처리 설정 ---------
 				.formLogin(login -> login
 					.loginPage("/login") 			// 로그인 폼 요청에 사용할 URL 지정(컨트롤러에서 매핑 처리)
@@ -60,6 +72,13 @@ public class WebSecurityConfig {
 					.logoutUrl("/logout") 				// 로그아웃 요청 URL 지정(POST 방식 요청으로 취급함)
 					.logoutSuccessUrl("/login?logout") 	// 로그아웃 성공 후 리디렉션 할 URL 지정
 					.permitAll()
+				)
+				// ---------- 접근 권한 오류 --------------
+				.exceptionHandling(ex -> ex
+						// 인증은 됐는데(로그인 O) 권한이 없을 때 → 403
+						.accessDeniedHandler((request, response, e) -> {
+							response.sendRedirect("/error/403");
+						})
 				)
 				// ---------- 자동 로그인 처리 설정 ----------
 				.rememberMe(rememberMeCustormizer -> rememberMeCustormizer
