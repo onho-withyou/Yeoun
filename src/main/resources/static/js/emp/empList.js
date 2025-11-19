@@ -11,9 +11,12 @@ const pageSize = 10;
 
 document.addEventListener('DOMContentLoaded', () => {
   
-  const msgHolder = document.getElementById('empMsgHolder');
-    if (msgHolder && msgHolder.dataset.msg) {
-      alert(msgHolder.dataset.msg);
+  const holder = document.getElementById('empMsgHolder');
+  if (holder) {
+    const msg = holder.dataset.msg;
+    if (msg) {
+      alert(msg); // 또는 Toast, SweetAlert 등
+    }
   }
  
 	

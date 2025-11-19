@@ -53,6 +53,24 @@ public class EmpService {
 	// 사원 신규 등록
 	@Transactional
 	public void registEmp(EmpDTO empDTO) {
+		
+		// 주민등록번호 중복 검사
+		String rrn = empDTO.getRrn();
+		if (rrn != null && !rrn.isBlank() && empRepository.existsByRrn(rrn)) {
+			throw new IllegalStateException("이미 등록된 주민등록번호입니다.");
+		}
+		
+		// 이메일 / 연락처 중복 검사
+	    String email  = empDTO.getEmail();
+	    String mobile = empDTO.getMobile();
+
+	    if (email != null && !email.isBlank() && empRepository.existsByEmail(email)) {
+	        throw new IllegalStateException("이미 사용 중인 이메일입니다.");
+	    }
+
+	    if (mobile != null && !mobile.isBlank() && empRepository.existsByMobile(mobile)) {
+	        throw new IllegalStateException("이미 사용 중인 연락처입니다.");
+	    }
 
 	    // 0) 사번 자동 생성 (충돌 방지 재시도)
 	    String empId = generateEmpId(empDTO.getHireDate(), 3);
@@ -209,7 +227,8 @@ public class EmpService {
 	    );
 	}
 	
-	// 상세주소 없는 경우 대비
+	// ---------- 상세 조회 시 정보 표기 -----------
+	// ========= 상세주소 없는 경우 =========
 	private String buildAddress(Emp emp) {
 	    String addr1 = emp.getAddress1();
 	    String addr2 = emp.getAddress2();
@@ -219,19 +238,64 @@ public class EmpService {
 	    return (addr1 + " " + addr2).trim();
 	}
 	
+	// ========= 주민번호 마스킹 =========
 	private String maskRrn(String rrn) {
-	    if (rrn == null || rrn.length() < 6) return "";
-	    // 예: 000421-3******
-	    return rrn.substring(0, 8) + "******";
+		if (rrn == null || rrn.isBlank()) {
+			return "";
+		}
+		
+		// 숫자만 추출
+		String digits = rrn.replaceAll("\\D", "");
+		if (digits.length() < 7) {
+			return rrn;
+		}
+		
+		String front = digits.substring(0, 6);	// 생년월일 6자리
+		String mid = digits.substring(6, 7);	// 성별 1자리
+		
+		return front + "-" + mid + "******";
+	}
+	
+	// ========= 계좌번호 마스킹 =========
+	private String maskAccount(String account) {
+	    if (account == null || account.isBlank()) {
+	        return "";
+	    }
+
+	    // 1) 숫자만 추출
+	    String digits = account.replaceAll("\\D", "");
+	    if (digits.length() < 4) {
+	        // 너무 짧으면 그냥 원본 리턴하거나 전부 마스킹
+	        return account;
+	    }
+
+	    int len = digits.length();
+	    // 앞은 전부 * 로, 뒤 4자리만 살리기
+	    String maskedDigits = "*".repeat(len - 4) + digits.substring(len - 4);
+
+	    // 2) 원본 문자열 구조(하이픈 등)를 유지하면서 숫자만 치환
+	    StringBuilder result = new StringBuilder();
+	    int idx = 0;
+
+	    for (char c : account.toCharArray()) {
+	        if (Character.isDigit(c)) {
+	            result.append(maskedDigits.charAt(idx++));
+	        } else {
+	            result.append(c); // -, 공백 등은 그대로
+	        }
+	    }
+
+	    return result.toString();
 	}
 
-	// 급여계좌 문자열 조합
+	
+	// ========= 급여통장 문자열 조합 =========
 	private String buildBankInfo(Emp emp) {
 
 	    return empBankRepository.findTopByEmpIdOrderByCreatedDateDesc(emp.getEmpId())
 	            .map(bank -> {
-	            	String bankName = bank.getBank().getCodeName();   // ← 은행명
-	            	String account = bank.getAccountNo();             // 계좌번호
+	            	String bankName = bank.getBank().getCodeName();  		// 은행명
+	            	String account  = maskAccount(bank.getAccountNo());     // 계좌번호
 	            	String holder  = bank.getHolder();     
 
 	            	// 두 줄 구조로 리턴
@@ -249,6 +313,7 @@ public class EmpService {
 	    }
 	    return "/files/photo/" + photoFileId;
 	}
+	// ---------- 상세 조회 시 정보 표기 -----------
 
 	// =============================================================================
 	// 사원 정보 수정
@@ -274,6 +339,7 @@ public class EmpService {
 	    empDTO.setAddress2(emp.getAddress2());
 	    empDTO.setDeptId(emp.getDept().getDeptId());
 	    empDTO.setPosCode(emp.getPosition().getPosCode());
+	    empDTO.setRrnMasked(maskRrn(emp.getRrn()));
 	    
 	    // 사원 급여정보
 	    empBankRepository.findByEmpId(empId).ifPresent(bank -> {
@@ -316,9 +382,7 @@ public class EmpService {
 
 		        empBankRepository.save(empBank);
 		    }
-		    
 		    // 추후 사진 추가
-		
 	}
 
 	

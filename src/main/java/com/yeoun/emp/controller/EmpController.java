@@ -1,7 +1,5 @@
 package com.yeoun.emp.controller;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,9 +17,7 @@ import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpDetailDTO;
 import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.dto.EmpPageResponse;
-import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.DeptRepository;
-import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.emp.repository.PositionRepository;
 import com.yeoun.emp.service.EmpService;
 
@@ -41,18 +37,29 @@ public class EmpController {
 	private final CommonCodeService commonCodeService;
 	private final DeptRepository deptRepository;
 	private final PositionRepository positionRepository;
+	
+	// 사원 등록/수정 폼 공통 셀렉트 박스 세팅
+	private void setupEmpFormCommon(Model model) {
+		model.addAttribute("deptList", deptRepository.findActive());
+		model.addAttribute("positionList", positionRepository.findActive());
+		model.addAttribute("bankList", commonCodeService.getBankList());
+	}
 
 	// =============================================================================================
 	// 뷰페이지로 포워딩 시 입력값 검증으로 활용되는 DTO 객체(빈 객체)를 Model 객체에 담아 함께 전달
 	// GET : 사원 등록 폼
 	@GetMapping("/regist")
 	public String registEmp(Model model) {
-		model.addAttribute("empDTO", new EmpDTO());
-		model.addAttribute("mode", "create");
 		
-		model.addAttribute("bankList", commonCodeService.getBankList());
-		model.addAttribute("deptList", deptRepository.findActive());
-		model.addAttribute("positionList", positionRepository.findActive());
+		if (!model.containsAttribute("empDTO")) {
+	        model.addAttribute("empDTO", new EmpDTO());
+	    }
+	    if (!model.containsAttribute("mode")) {
+	        model.addAttribute("mode", "create");
+	    }
+
+		
+		setupEmpFormCommon(model);
 		
 		return "emp/emp_form";
 	}
@@ -66,42 +73,63 @@ public class EmpController {
 	@PostMapping("/regist")
 	public String regist(@ModelAttribute("empDTO") @Valid EmpDTO empDTO,
 						 BindingResult bindingResult,
-						 RedirectAttributes rttr,
-						 Model model) {
+						 RedirectAttributes rttr) {
 		log.info(">>>>>>>>>>>>>> empDTO : " + empDTO);
-
 		log.info(">>>>>>>>>>>>>> bindingResult.getAllErrors : " + bindingResult.getAllErrors());
 		
-		// 입력값 검증 결과가 true 일 때(검증 오류 발생 시) 다시 입력폼으로 포워딩
-		if(bindingResult.hasErrors()) {
-			model.addAttribute("deptList", empService.getDeptList());
-			model.addAttribute("positionList", empService.getPositionList());
-			return "emp/emp_form";
-		}
+		// 1) 입력값 검증 결과가 true 일 때(검증 오류 발생 시) 다시 입력폼으로 포워딩
+		if (bindingResult.hasErrors()) {
+	        rttr.addFlashAttribute("empDTO", empDTO);
+	        rttr.addFlashAttribute("mode", "create");
+	        // BindingResult도 같이 플래시에 태워줘야 th:errors 가 동작함
+	        rttr.addFlashAttribute(
+	            "org.springframework.validation.BindingResult.empDTO", bindingResult);
+
+	        return "redirect:/emp/regist";
+	    }
 		
-		// EmpService - registEmp() 메서드 호출하여 사원 등록 처리 요청
-		empService.registEmp(empDTO);
+		try {
+	        // 2) 서비스 호출 (이메일/연락처 중복 검사)
+	        empService.registEmp(empDTO);
+	    } catch (IllegalStateException e) {
+	        // 3) 중복 등 비즈니스 에러 처리
+	        String msg = e.getMessage();
+
+	        // 메시지 내용 보고 필드에 바인딩 (서비스에서 메시지 던진다는 가정)
+	        if (msg.contains("주민등록번호")) {
+	        	bindingResult.rejectValue("rrn", "duplicate", msg);
+	        } else if (msg.contains("이메일")) {
+	            bindingResult.rejectValue("email", "duplicate", msg);
+	        } else if (msg.contains("연락처")) {
+	            bindingResult.rejectValue("mobile", "duplicate", msg);
+	        } else {
+	            // 혹시 모를 기타 에러는 글로벌 에러로
+	            bindingResult.reject("empRegistError", msg);
+	        }
 		
-		rttr.addFlashAttribute("msg", "사원 등록이 완료되었습니다.");
-		return "redirect:/emp";
-		
+	        // 다시 폼으로
+	        rttr.addFlashAttribute("empDTO", empDTO);
+	        rttr.addFlashAttribute("mode", "create");
+	        rttr.addFlashAttribute(
+	            "org.springframework.validation.BindingResult.empDTO", bindingResult);
+
+	        return "redirect:/emp/regist";
+	    }
+
+	    // 4) 정상 등록 시
+	    rttr.addFlashAttribute("msg", "사원 등록이 완료되었습니다.");
+	    return "redirect:/emp";
 	}
 	
 	// ====================================================================================
 	// 사원 메인 페이지 (현황 + 등록 버튼 있는 화면)
 	@GetMapping("")
 	public String empMainPage(Model model,
-							  @RequestParam(value = "msg", required = false) String msg,
 							  @RequestParam(value = "keyword", required = false) String keyword,
 							  @RequestParam(value = "deptId", required = false) String deptId) {
 		
 	    // 부서 셀렉트 옵션용
 	    model.addAttribute("deptList", deptRepository.findActive());
-	    
-	    // 메시지가 있으면 모델에 담기
-	    if (msg != null && !msg.isBlank()) {
-	        model.addAttribute("msg", msg);
-	    }
 	    
 	    model.addAttribute("keyword", keyword);
 	    model.addAttribute("deptId", deptId);
@@ -148,12 +176,10 @@ public class EmpController {
 	    model.addAttribute("empDTO", empDTO);
 		model.addAttribute("mode", "edit");
 		
-		model.addAttribute("bankList", commonCodeService.getBankList());
-		model.addAttribute("deptList", deptRepository.findActive());
-		model.addAttribute("positionList", positionRepository.findActive());
+		setupEmpFormCommon(model);
 		
 		// 상태 셀렉트용 공통코드 (재직/휴직/퇴직 등) 
-		model.addAttribute("statusList", List.of("ACTIVE", "LEAVE", "RESIGNED"));
+		model.addAttribute("statusList", commonCodeService.getCodes("EMP_STATUS"));
 		
 		return "emp/emp_form";
 	}
@@ -161,7 +187,7 @@ public class EmpController {
 	@PostMapping("/edit")
 	public String updateEmp(@ModelAttribute("empDTO") EmpDTO empDTO, RedirectAttributes rttr) {
 	    empService.updateEmp(empDTO);
-	    rttr.addAttribute("msg", "정보 수정이 완료되었습니다.");
+	    rttr.addFlashAttribute("msg", "정보 수정이 완료되었습니다.");
 	    return "redirect:/emp";  
 	}
 	
