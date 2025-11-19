@@ -181,4 +181,20 @@ public class LeaveService {
 			log.error("연차 계산 중 오류 발생 : " + e.getMessage());
 		}
 	}
+
+	// 매년 1월 1일에 연차 산정 시작/종료일, 해당연도, 총 연차, 사용 연차, 잔여 연차 수정
+	@Transactional
+	public void updateAllAnnualLeaves() {
+		List<AnnualLeave> leaveList = leaveRepository.findAll();
+		
+		for (AnnualLeave leave : leaveList) {
+			Emp emp = leave.getEmp();
+			LocalDate hiredate = emp.getHireDate();
+			LocalDate now = LocalDate.now();
+			int currentYear = now.getYear();
+			
+			// 연차 산정 시작일과 종료일 수정
+		}
+		
+	}
 }
