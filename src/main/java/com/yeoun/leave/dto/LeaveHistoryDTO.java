@@ -29,14 +29,14 @@ public class LeaveHistoryDTO {
 	private String leaveType; // 연차 종류 (연차/반차/병가) / (ANNUAL / HALF / SICK)
 	private LocalDate startDate; // 사용 시작일
 	private LocalDate endDate; // 사용 종료일
-	private int usedDays; //  사용 일수
+	private double usedDays; //  사용 일수
 	private String reason; // 연차 사용 이유
 	private Long approvalId; // 결재문서 Id
 	
 	// ---------------------------------
 	@Builder
 	public LeaveHistoryDTO(Long leaveHistId, String emp_id, String emp_name, String dept_id, Long leave_id,
-			String leaveType, LocalDate startDate, LocalDate endDate, int usedDays, String reason, Long approvalId) {
+			String leaveType, LocalDate startDate, LocalDate endDate, double usedDays, String reason, Long approvalId) {
 		this.leaveHistId = leaveHistId;
 		this.emp_id = emp_id;
 		this.emp_name = emp_name;

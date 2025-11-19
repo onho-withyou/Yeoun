@@ -142,7 +142,7 @@ public class LeaveService {
 				.orElseThrow(() -> new NoSuchElementException("연차 테이블을 찾을 수 없습니다."));
 		
 		// 연차 사용 시작일과 종료 일자 계산해서 사용한 일수 구함
-		int usedDays = (int) (ChronoUnit.DAYS.between(approvalDoc.getStartDate(), approvalDoc.getEndDate()) + 1);
+		double usedDays = (double) (ChronoUnit.DAYS.between(approvalDoc.getStartDate(), approvalDoc.getEndDate()) + 1);
 		
 		
 		// 연차 사용 기록 등록 
