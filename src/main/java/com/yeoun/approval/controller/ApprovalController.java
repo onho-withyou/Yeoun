@@ -52,7 +52,7 @@ public class ApprovalController {
 	@GetMapping("/empList")
 	public List<Object[]> getDeptList() {
 		 return approvalDocService.getEmp2();
-	}	
+	}
 
 	//grid - 1.결재사항 - 진행해야할 결재만 - 결재권한자만 볼수있음
 	@ResponseBody

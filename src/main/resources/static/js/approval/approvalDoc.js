@@ -161,7 +161,7 @@
 		try {
 			const response = await fetch('/approval/waitingApprovalDocGrid');
 			const data = await response.json();
-			console.log("grid4 fetch-data----->:", data);
+			//console.log("grid4 fetch-data----->:", data);
 			let colData = [];
 			let obj = {};
 
@@ -184,7 +184,7 @@
 				obj = {};
 			});
 
-			console.log("grid4 map------>:", colData);
+			//console.log("grid4 map------>:", colData);
 			return colData;
 		} catch (error) {
 			console.error('Error fetching approval documents:', error);
@@ -195,7 +195,7 @@
 		try {
 			const response = await fetch('/approval/finishedApprovalDocGrid');
 			const data = await response.json();
-			console.log("grid5 fetch-data----->:", data);
+			//console.log("grid5 fetch-data----->:", data);
 			let colData = [];
 			let obj = {};
 
@@ -218,7 +218,7 @@
 				obj = {};
 			});
 
-			console.log("grid5 map------>:", colData);
+			//console.log("grid5 map------>:", colData);
 			return colData;
 		} catch (error) {
 			console.error('Error fetching approval documents:', error);
