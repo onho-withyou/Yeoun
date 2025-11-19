@@ -72,8 +72,8 @@
 </head>
 <body>
 <th:block layout:fragment="content">
-	<input type="hidden" th:value="${#authentication.name}" id="currentUserId">
-	<input type="hidden" th:value="${#authentication.principal.empName}" id="currentUserName">
+	<input type="hidden" th:value="${currentUserId}" id="currentUserId">
+	<input type="hidden" th:value="${currentUserName}" id="currentUserName">
 	<!-- custom-body 시작 -->
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
 	    <!-- custom-content -->
@@ -122,7 +122,7 @@
 			                    </div>
 			                    <div class="form-check">
 				                    <button class="btn btn-outline-primary btn-xs" id="open-add-schedule-modal-btn">
-				                            +
+				                       + 
 				                    </button>
 			                    </div>
 			                    
@@ -138,7 +138,6 @@
 	            <!-- 오른쪽 열: 일정추가/데이트피커/필터 (세로 3구간) -->
 	            <div class="col-md-5 col-lg-4 d-flex flex-column " style="position: relative !important">
 	            	<div style="height: 60px; flex-shrink: 0; display: flex; align-items: center; gap: 10px; left: 15px; right: 15px;">
-<!-- 	            		<p th:text="${#authentication.principal.empName}"></p> -->
 	            		<button class="btn btn-primary" th:attr="data-emp-id=${#authentication.name}" onclick="handleAttendanceToggle(this.dataset.empId)" id="attendance" style="width:50%">출근</button>
 	            		<button class="btn btn-primary" th:attr="data-emp-id=${#authentication.name}" onclick="handleAttendanceToggle(this.dataset.empId)" id="accessBtn" style="width:50%">출입</button>
 

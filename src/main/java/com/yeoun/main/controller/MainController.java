@@ -47,7 +47,13 @@ public class MainController {
 	
 	// 메인페이지 스케줄페이지
 	@GetMapping("")
-	public String schedule() {
+	public String schedule(@AuthenticationPrincipal LoginDTO loginUser, Model model) {
+		
+		if (loginUser != null) {
+	        model.addAttribute("currentUserId", loginUser.getEmpId());
+	        model.addAttribute("currentUserName", loginUser.getEmpName());
+	    }
+		
 		return "/main/schedule";
 	}
 	

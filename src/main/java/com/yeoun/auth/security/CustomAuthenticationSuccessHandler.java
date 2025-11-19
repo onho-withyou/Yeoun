@@ -3,38 +3,55 @@ package com.yeoun.auth.security;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.yeoun.emp.entity.Emp;
+import com.yeoun.emp.repository.EmpRepository;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 // 스프링 시큐리티 로그인 성공 시 추가 작업을 처리하는 핸들러 정의
 @Log4j2
+@Component
+@RequiredArgsConstructor
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
+	
+	private final EmpRepository empRepository;
 	
 	// 로그인 성공 시 별도의 추가 작업을 onAuthenticationSuccess() 메서드 오버라이딩을 통해 처리
 	@Override
-	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-			Authentication authentication) throws IOException, ServletException {
+	@Transactional
+	public void onAuthenticationSuccess(HttpServletRequest request, 
+										HttpServletResponse response,
+										Authentication authentication) throws IOException, ServletException {
 		
-		// 로그인에 사용되어 요청 정보가 HttpServletRequest, 응답 정보가 HttpServletResponse 타입 파라미터로 전달되고
-		// 사용자 인증 정보가 Authentication 타입 파라미터로 전달됨
-		log.info("▶▶▶▶▶▶▶▶▶▶ authentication.getName() : " + authentication.getName()); // 사용자명(username = 현재는 empId 사용)
-		log.info("▶▶▶▶▶▶▶▶▶▶ authentication.getAuthorities() : " + authentication.getAuthorities()); // 사용자 권한 목록 
-		log.info("▶▶▶▶▶▶▶▶▶▶ authentication.getDetails() : " + authentication.getDetails()); // 사용자 IP 주소, 세션 아이디
-		log.info("▶▶▶▶▶▶▶▶▶▶ authentication.getPrincipal() : " + authentication.getPrincipal()); // 인증 객체(UserDetails 또는 상속받은 구현체)
-		// =====================================================================================
-		// 사원번호 저장 체크박스 체크 시 쿠키 처리
-		// 1) 사원번호 저장 체크박스 파라미터값 가져오기
+		log.info(">>>>> authentication.getName() : " + authentication.getName()); 	// 사용자명(username = 현재는 empId 사용)
+		
+		// --------------------- 마지막 로그인 시간 업데이트 --------------------- 
+		String empId = authentication.getName();
+		
+		Emp emp = empRepository.findById(empId)
+							.orElseThrow(() -> new IllegalStateException("로그인 성공 후 사원 조회 실패 : " + empId));
+		
+		emp.setLastLogin(LocalDateTime.now());
+		empRepository.save(emp);
+		
+		// ======================= 사원번호 저장 쿠키 ======================= 
+		// 1. 사원번호 저장 체크박스 파라미터값 가져오기
 		String rememberId = request.getParameter("remember-id");
 		log.info("▶▶▶▶▶▶▶▶▶▶ rememberId : " + rememberId); // null 또는 "on"
 		
-		// 2) 쿠키 생성 공통 코드
+		// 2. 쿠키 생성 공통 코드
 		// 2-1) Cookie 객체 생성하여 "remember-id" 라는 이름으로 사용자명(empId) 저장
 		// 만약, 한글 등의 값이 포함된 문자열일 경우 인코딩 필요
 		Cookie cookie = new Cookie("remember-id", URLEncoder.encode(authentication.getName(), StandardCharsets.UTF_8));

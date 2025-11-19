@@ -45,4 +45,14 @@ public interface LeaveHistoryRepository extends JpaRepository<AnnualLeaveHistory
 			, @Param("endDate")LocalDate  endDate
 			, @Param("empId")String empId
 			, @Param("deptId")String deptId);
+
+	// 반차 여부
+	@Query("""
+			SELECT COUNT(a) > 0
+			FROM AnnualLeaveHistory a
+			WHERE a.emp.empId = :empId
+				AND a.startDate = :date
+				AND a.leaveType = 'HALF'
+			""")
+	boolean existsHalf(@Param("empId") String empId, @Param("date") LocalDate date);
 }

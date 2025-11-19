@@ -14,6 +14,11 @@ public class EmpPayslipResponseDTO {
 
     // 항목 상세
     private List<EmpPayslipItem> items;
+    
+ // 지급월 표시용
+    private String payYear;
+    private String payMonth;
+    private String payYymmFormatted;
 
     @Data @Builder
     public static class EmpPayslipItem {

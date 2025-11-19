@@ -68,10 +68,6 @@ public class AttendanceDTO {
 	}
 	
 	// DTO 타입으로 변환
-//	public static AttendanceDTO fromEntity(Attendance attendance) {
-//		return modelMapper.map(attendance, AttendanceDTO.class);
-//	}
-	
 	public static AttendanceDTO fromEntity(Attendance attendance) {
 	    return AttendanceDTO.builder()
 	        .attendanceId(attendance.getAttendanceId())

@@ -19,16 +19,16 @@
 					<div class="col mb-6">
 						<label for="scheduleTitle" class="form-label">작성자</label>
 						<input type="text" class="form-control" readonly
-							th:value="${#authentication.principal.empName}" id="createdUserName">
+							th:value="${currentUserName}" id="createdUserName">
 						
 						<input type="hidden" id="schedule-writer" class="form-control" 
-							th:value="${#authentication.principal.empId}" name="createdUser" readonly/>
+							th:value="${currentUserId}" name="createdUser" readonly/>
 					</div>
 					<div class="mb-3 mt-3" style="display:flex; gap:8px;">
 						<div>
 							<select id="schedule-type" class="form-select" name="scheduleType">
 								<option value="company">회사</option>
-								<option th:value="${#authentication.name}">개인</option>
+								<option th:value="${currentUserId}">개인</option>
 							</select>
 						</div>
 						<div>

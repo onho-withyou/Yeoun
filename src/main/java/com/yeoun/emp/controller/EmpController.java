@@ -1,6 +1,7 @@
 package com.yeoun.emp.controller;
 
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.common.service.CommonCodeService;
 import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpDetailDTO;
@@ -124,26 +126,43 @@ public class EmpController {
 	// ====================================================================================
 	// 사원 메인 페이지 (현황 + 등록 버튼 있는 화면)
 	@GetMapping("")
-	public String empMainPage(Model model,
+	public String empMainPage(@AuthenticationPrincipal LoginDTO user,
+							  Model model,
 							  @RequestParam(value = "keyword", required = false) String keyword,
 							  @RequestParam(value = "deptId", required = false) String deptId) {
 		
+		boolean isHr  = user.hasRole("HR_ADMIN") || user.hasRole("SYS_ADMIN");
+	    boolean isMgr = user.hasRole("DEPT_MANAGER");
+		
+	    if (isMgr && !isHr) {
+	        deptId = user.getDeptId(); // 부서장은 자기 부서만
+	    }
+	    
 	    // 부서 셀렉트 옵션용
 	    model.addAttribute("deptList", deptRepository.findActive());
-	    
 	    model.addAttribute("keyword", keyword);
 	    model.addAttribute("deptId", deptId);
-        
+	    model.addAttribute("isHr", isHr);
+	    model.addAttribute("isMgr", isMgr);
+	    
 		return "/emp/emp_list";
 	}
 	
 	// AJAX 데이터 로딩 + 검색 + 페이징
 	@ResponseBody
 	@GetMapping("/data")
-	public EmpPageResponse getEmpList (@RequestParam(defaultValue = "0", name = "page") int page,
+	public EmpPageResponse getEmpList (@AuthenticationPrincipal LoginDTO user,
+									   @RequestParam(defaultValue = "0", name = "page") int page,
 									   @RequestParam(defaultValue = "10", name = "size") int size,
 									   @RequestParam(defaultValue = "", name = "keyword") String keyword,
 									   @RequestParam(required = false, name = "deptId") String deptId) {
+		
+		boolean isHr  = user.hasRole("HR_ADMIN") || user.hasRole("SYS_ADMIN");
+	    boolean isMgr = user.hasRole("DEPT_MANAGER");
+
+	    if (isMgr && !isHr) {
+	        deptId = user.getDeptId(); // 부서장은 자기 부서만
+	    }
 		
 		// 서비스에서 Page<EmpListDTO> 받아오기
 		Page<EmpListDTO> empPage = empService.getEmpList(page, size, keyword, deptId);

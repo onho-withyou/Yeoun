@@ -1,336 +1,412 @@
-<th:block xmlns:th="http://www.thymeleaf.org"
-          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-          layout:decorate="~{layouts/layout}">
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
 
-  <!-- 본문 -->
-  <th:block layout:fragment="content">
+<th:block layout:fragment="content">
 
-    <style>
-      .rule-item-card{border-radius:14px}
-      .nowrap{white-space:nowrap}
-      .muted{color:#6b7280}
-      .amount{font-variant-numeric:tabular-nums}
-      .pay-tabs{border-bottom:2px solid #e5e7eb;margin-bottom:1.5rem}
-      .pay-tabs .nav-link{position:relative;color:#6b7280;font-weight:600;padding:.75rem 1.5rem;border:none;border-radius:8px 8px 0 0;transition:all .25s}
-      .pay-tabs .nav-link:hover{color:#0d6efd;background:#f1f5ff}
-      .pay-tabs .nav-link.active{color:#0d6efd;background:#fff;box-shadow:0 -2px 8px rgba(13,110,253,.1)}
-      .pay-tabs .nav-link.active::after{content:'';position:absolute;left:0;right:0;bottom:-2px;height:3px;background:#0d6efd;border-radius:2px}
-    </style>
+<style>
+  .rule-item-card{border-radius:14px}
+  .nowrap{white-space:nowrap}
+  .muted{color:#6b7280}
+  .amount{font-variant-numeric:tabular-nums}
+  .pay-tabs{border-bottom:2px solid #e5e7eb;margin-bottom:1.5rem}
+  .pay-tabs .nav-link{position:relative;color:#6b7280;font-weight:600;padding:.75rem 1.5rem;border:none;border-radius:8px 8px 0 0;transition:all .25s}
+  .pay-tabs .nav-link:hover{color:#0d6efd;background:#f1f5ff}
+  .pay-tabs .nav-link.active{color:#0d6efd;background:#fff;box-shadow:0 -2px 8px rgba(13,110,253,.1)}
+  .pay-tabs .nav-link.active::after{content:'';position:absolute;left:0;right:0;bottom:-2px;height:3px;background:#0d6efd;border-radius:2px}
+</style>
 
 
-   <div class="container-xxl py-4">
-  <!-- ===================== 상단 탭 ===================== -->
-<ul class="nav pay-tabs">
-  <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule}"      th:classappend="${activeTab}=='rule' ? 'active'">급여기준정보</a></li>
-  <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule_calc}" th:classappend="${activeTab}=='calc' ? 'active'">급여계산</a></li>
-  <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule_item}" th:classappend="${activeTab}=='item' ? 'active'">급여항목</a></li>
-</ul>
+<div class="container-xxl py-4">
 
-      <!-- 메시지 -->
-      <div th:if="${msg}" class="alert alert-success alert-dismissible fade show" role="alert">
-        <span th:text="${msg}">성공</span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  <!-- 탭 -->
+  <ul class="nav pay-tabs">
+    <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule}"      th:classappend="${activeTab}=='rule' ? 'active'">급여기준정보</a></li>
+    <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule_calc}" th:classappend="${activeTab}=='calc' ? 'active'">급여계산</a></li>
+    <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule_item}" th:classappend="${activeTab}=='item' ? 'active'">급여항목</a></li>
+  </ul>
+
+  <!-- 메시지 -->
+  <div th:if="${msg}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <span th:text="${msg}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  <div th:if="${err}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <span th:text="${err}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <!-- 헤더 -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="fw-bold text-primary mb-0">급여 계산 규칙</h1>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#calcCreateModal">등 록</button>
+  </div>
+
+  <!-- 목록 카드 -->
+  <div class="card border-0 shadow-sm rule-item-card">
+    <div class="card-body p-3">
+     
+      <div class="text-muted" th:if="${#lists.isEmpty(calcRules)}">등록된 계산 규칙이 없습니다.</div>
+
+      <div class="table-responsive" th:unless="${#lists.isEmpty(calcRules)}">
+        <table class="table table-striped align-middle">
+          <thead class="table-light">
+            <tr class="text-nowrap">
+              <th>규칙No</th>
+              <th>항목코드</th>
+              <th>유형</th>
+              <th>시작일</th>
+              <th>종료일</th>
+              <th>대상구분</th>
+              <th>대상코드</th>
+              <th>숫자값</th>
+              <th>계산공식</th>
+              <th>우선순위</th>
+              <th>상태</th>
+              <th class="text-center">관리</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr th:each="c : ${calcRules}">
+              <td th:text="${c.ruleId}"></td>
+              <td th:text="${c.item.itemCode}"></td>
+              <td th:text="${c.ruleType.label}"></td>
+              <td th:text="${#temporals.format(c.startDate, 'yyyy-MM-dd')}"></td>
+              <td th:text="${c.endDate != null ? #temporals.format(c.endDate,'yyyy-MM-dd'):''}"></td>
+
+              <td th:text="${c.targetType.label}"></td>
+              <td th:text="${c.targetCode}"></td>
+
+              <td class="text-end">
+                <span th:if="${c.ruleType?.name()=='AMT'}"
+                      th:text="${#numbers.formatDecimal(c.valueNum,0,'COMMA',0,'POINT')}"></span>
+                <span th:if="${c.ruleType?.name()=='RATE'}"
+                      th:text="${#numbers.formatDecimal(c.valueNum*100,1,'POINT',2,'POINT')} + '%'"></span>
+              </td>
+
+              <td class="text-truncate" style="max-width:200px" th:text="${c.calcFormula}"></td>
+
+              <td th:text="${c.priority}"></td>
+
+              <td>
+				  <span th:class="${c.status?.name()=='ACTIVE' 
+				                  ? 'badge bg-success' 
+				                  : 'badge bg-secondary'}"
+				        th:text="${c.status}">
+				  </span>
+				</td>
+
+
+              <td class="text-center">
+
+                <!-- 상세 보기 버튼 -->
+                <button class="btn btn-sm btn-outline-secondary me-1"
+                        data-bs-toggle="modal"
+                        th:attr="data-bs-target=${'#remarkModal-' + c.ruleId}">
+                  상세
+                </button>
+
+                <!-- 수정 -->
+                <button class="btn btn-sm btn-outline-primary me-1"
+                        data-bs-toggle="modal"
+                        th:attr="data-bs-target=${'#calcEditModal-' + c.ruleId}">
+                  수정
+                </button>
+
+                <!-- 삭제 -->
+                <form th:action="@{'/pay/rule_calc/' + ${c.ruleId}}" method="post"
+                      style="display:inline;"
+                      th:onsubmit="|return confirm('규칙 No. ${c.ruleId} 삭제하시겠습니까?');|">
+                  <input type="hidden" name="_method" value="DELETE">
+                  <button class="btn btn-sm btn-outline-danger" type="submit">삭제</button>
+                </form>
+
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
       </div>
-      <div th:if="${err}" class="alert alert-danger alert-dismissible fade show" role="alert">
-        <span th:text="${err}">에러</span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ====================
+      등록 모달
+======================= -->
+<div class="modal fade" id="calcCreateModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <form th:action="@{/pay/rule_calc}" th:object="${newCalc}" method="post" novalidate>
+        <div class="modal-header">
+          <h5 class="modal-title">계산 규칙 등록</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="row g-3">
+
+            <!-- 항목 -->
+            <div class="col-md-6">
+              <label class="form-label">항목 코드</label>
+              <select class="form-select" name="item.itemCode" required>
+                <option value="">-- 선택 --</option>
+                <option th:each="i : ${items}" th:value="${i.itemCode}"
+                        th:text="${i.itemCode + ' · ' + i.itemName}">
+                </option>
+              </select>
+            </div>
+
+            <!-- 유형 -->
+            <div class="col-md-3">
+              <label class="form-label">규칙 유형</label>
+              <select class="form-select" th:field="*{ruleType}" required>
+                <option value="">-- 선택 --</option>
+                <option value="AMT">금액</option>
+                <option value="RATE">비율</option>
+                <option value="FORMULA">수식</option>
+              </select>
+            </div>
+
+            <!-- 우선순위 -->
+            <div class="col-md-3">
+              <label class="form-label">우선순위</label>
+              <input type="number" class="form-control" th:field="*{priority}">
+            </div>
+
+            <!-- 날짜 -->
+            <div class="col-md-4">
+              <label class="form-label">시작일</label>
+              <input type="date" th:field="*{startDate}" class="form-control" required>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">종료일</label>
+              <input type="date" th:field="*{endDate}" class="form-control">
+            </div>
+
+            <!-- 상태 -->
+            <div class="col-md-4">
+              <label class="form-label">상태</label>
+              <select class="form-select" th:field="*{status}" required>
+                <option value="">-- 선택 --</option>
+                <option value="ACTIVE">ACTIVE</option>
+                <option value="INACTIVE">INACTIVE</option>
+              </select>
+            </div>
+
+            <!-- 대상 -->
+            <div class="col-md-4">
+              <label class="form-label">대상구분</label>
+              <select class="form-select" th:field="*{targetType}">
+                <option value="">(선택)</option>
+                <option value="ALL">전체</option>
+                <option value="EMP">사원</option>
+                <option value="DEPT">부서</option>
+                <option value="GRADE">직책</option>
+              </select>
+            </div>
+
+            <div class="col-md-8">
+              <label class="form-label">대상코드</label>
+              <input type="text" th:field="*{targetCode}" class="form-control">
+            </div>
+
+            <!-- 숫자값 -->
+            <div class="col-md-6">
+              <label class="form-label">숫자값</label>
+              <input type="text" name="valueNum" class="form-control">
+            </div>
+
+            <!-- 계산공식 -->
+            <div class="col-md-6">
+              <label class="form-label">계산공식</label>
+              <textarea name="calcFormula" class="form-control" rows="3"></textarea>
+            </div>
+
+            <!-- 상세 -->
+            <div class="col-12">
+              <label class="form-label">상세설명</label>
+              <textarea class="form-control" th:field="*{remark}" rows="3"
+                placeholder="해당 계산 규칙에 대한 설명을 입력하세요"></textarea>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-primary" type="submit">등록</button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">닫기</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+
+
+<!-- =========================
+     수정 모달
+=========================== -->
+<div th:each="c : ${calcRules}">
+  <div class="modal fade" th:id="${'calcEditModal-' + c.ruleId}" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+
+        <form th:action="@{'/pay/rule_calc/' + ${c.ruleId}}" method="post">
+          <input type="hidden" name="_method" value="PUT"/>
+
+          <div class="modal-header">
+            <h5 class="modal-title">계산 규칙 수정 - <span th:text="${c.ruleId}"></span></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="row g-3">
+
+              <!-- 항목 -->
+              <div class="col-md-6">
+                <label class="form-label">항목코드</label>
+                <select name="item.itemCode" class="form-select">
+                  <option th:each="i : ${items}" th:value="${i.itemCode}"
+                          th:selected="${i.itemCode == c.item.itemCode}"
+                          th:text="${i.itemCode + ' · ' + i.itemName}">
+                  </option>
+                </select>
+              </div>
+
+              <!-- 유형 -->
+              <div class="col-md-3">
+                <label class="form-label">유형</label>
+                <select name="ruleType" class="form-select">
+                  <option value="AMT"     th:selected="${c.ruleType?.name()=='AMT'}">금액</option>
+                  <option value="RATE"    th:selected="${c.ruleType?.name()=='RATE'}">비율</option>
+                  <option value="FORMULA" th:selected="${c.ruleType?.name()=='FORMULA'}">수식</option>
+                </select>
+              </div>
+
+              <!-- 우선순위 -->
+              <div class="col-md-3">
+                <label class="form-label">우선순위</label>
+                <input type="number" name="priority" class="form-control" th:value="${c.priority}">
+              </div>
+
+              <!-- 날짜 -->
+              <div class="col-md-4">
+                <label class="form-label">시작일</label>
+                <input type="date" name="startDate" th:value="${#temporals.format(c.startDate,'yyyy-MM-dd')}" class="form-control">
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">종료일</label>
+                <input type="date" name="endDate" class="form-control"
+                       th:value="${c.endDate!=null ? #temporals.format(c.endDate,'yyyy-MM-dd'):''}">
+              </div>
+
+              <!-- 상태 -->
+              <div class="col-md-4">
+                <label class="form-label">상태</label>
+                <select name="status" class="form-select">
+                  <option value="ACTIVE" th:selected="${c.status?.name()=='ACTIVE'}">ACTIVE</option>
+                  <option value="INACTIVE" th:selected="${c.status?.name()=='INACTIVE'}">INACTIVE</option>
+                </select>
+              </div>
+
+              <!-- 대상 -->
+              <div class="col-md-4">
+                <label class="form-label">대상구분</label>
+                <select name="targetType" class="form-select">
+                  <option value="ALL"   th:selected="${c.targetType?.name()=='ALL'}">전체</option>
+                  <option value="EMP"   th:selected="${c.targetType?.name()=='EMP'}">사원</option>
+                  <option value="DEPT"  th:selected="${c.targetType?.name()=='DEPT'}">부서</option>
+                  <option value="GRADE" th:selected="${c.targetType?.name()=='GRADE'}">직책</option>
+                </select>
+              </div>
+
+              <div class="col-md-8">
+                <label class="form-label">대상코드</label>
+                <input type="text" name="targetCode" class="form-control" th:value="${c.targetCode}">
+              </div>
+
+              <!-- 숫자 -->
+              <div class="col-md-6">
+                <label class="form-label">숫자값</label>
+                <input type="text" name="valueNum" th:value="${c.valueNum}" class="form-control">
+              </div>
+
+              <!-- 계산공식 -->
+              <div class="col-md-6">
+                <label class="form-label">계산공식</label>
+                <textarea name="calcFormula" class="form-control" rows="3"
+                          th:text="${c.calcFormula}"></textarea>
+              </div>
+
+              <!-- 상세 -->
+              <div class="col-12">
+                <label class="form-label">상세</label>
+                <textarea class="form-control" name="remark" rows="3"
+                          th:text="${c.remark}"></textarea>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-primary" type="submit">저장</button>
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">닫기</button>
+          </div>
+
+        </form>
+
       </div>
+    </div>
+  </div>
+</div>
 
-      <!-- 헤더 -->
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="fw-bold text-primary mb-0">급여 계산 규칙</h1>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#calcCreateModal">등 록</button>
-      </div>
 
-      <!-- 목록 -->
-      <div class="card border-0 shadow-sm rule-item-card">
-        <div class="card-body p-3">
-          <h5 class="card-title mb-3">계산 규칙 목록</h5>
 
-          <div class="text-muted" th:if="${#lists.isEmpty(calcRules)}">등록된 계산 규칙이 없습니다.</div>
+<!-- =========================
+     상세 보기 모달
+=========================== -->
+<div th:each="c : ${calcRules}">
+  <div class="modal fade" th:id="${'remarkModal-' + c.ruleId}" tabindex="-1">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+      <div class="modal-content">
 
-          <div class="table-responsive" th:unless="${#lists.isEmpty(calcRules)}">
-            <table class="table table-striped align-middle">
-              <thead class="table-light">
-                <tr class="text-nowrap">
-                  <th style="width:100px">규칙No.</th>
-                  <th style="width:140px">항목코드</th>
-                  <th style="width:110px">규칙유형</th>
-                  <th style="width:120px">적용시작일</th>
-                  <th style="width:120px">적용종료일</th>
-                  <th style="width:110px">대상구분</th>
-                  <th>대상식별코드</th>
-                  <th style="width:140px">숫자값</th>
-                  <th>계산공식</th>
-                  <th style="width:90px">우선순위</th>
-                  <th style="width:110px">상태</th>
-                  <th class="text-center" style="width:150px">관리</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr th:each="c : ${calcRules}">
-                  <td th:text="${c.ruleId}">1</td>
-                  <!-- ✅ itemCode 표시 수정 -->
-                  <td class="fw-semibold" th:text="${c.item != null ? c.item.itemCode : ''}">ITEM001</td>
-                  <td th:text="${c.ruleType.label}"></td>
-                  <td th:text="${#temporals.format(c.startDate,'yyyy-MM-dd')}"></td>
-                  <td th:text="${c.endDate != null ? #temporals.format(c.endDate,'yyyy-MM-dd') : ''}"></td>
-                  <td th:text="${c.targetType.label}"></td>
-                  <td th:text="${c.targetCode}">M2-1</td>
-                  <td class="text-end amount">
-                    <span th:if="${c.ruleType?.name()=='AMT'}"
-                          th:text="${#numbers.formatDecimal(c.valueNum,0,'COMMA',0,'POINT')}">0</span>
-                    <span th:if="${c.ruleType?.name()=='RATE'}"
-                          th:text="${#numbers.formatDecimal(c.valueNum*100,1,'POINT',2,'POINT')} + '%'">0%</span>
-                  </td>
-                  <td class="text-truncate" style="max-width:220px" th:text="${c.calcFormula}"></td>
-                  <td class="text-end" th:text="${c.priority}">100</td>
-                  <td>
-                    <span class="badge"
-                          th:classappend="${c.status?.name()=='ACTIVE'} ? ' bg-success' : ' bg-secondary'"
-                          th:text="${c.status}">ACTIVE</span>
-                  </td>
-                                           
-                            <td class="text-center">
-                    <button class="btn btn-sm btn-outline-primary me-1"
-                            data-bs-toggle="modal"
-                            th:attr="data-bs-target=${'#calcEditModal-' + c.ruleId}">수정</button>
-                    
-                   <form th:action="@{'/pay/rule_calc/' + ${c.ruleId}}"
-				      method="post"
-				      style="display:inline;"
-				      th:onsubmit="|return confirm('규칙 No. ' + '${c.ruleId}' + '을(를) 정말로 삭제하시겠습니까?');|">
-				  <input type="hidden" name="_method" value="DELETE">
-				  <button class="btn btn-sm btn-outline-danger" type="submit">삭제</button>
-					</form>
+        <div class="modal-header">
+          <h5 class="modal-title">상세설명 - 규칙 No <span th:text="${c.ruleId}"></span></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
 
-                  </td>
-                    
-                </tr>
-              </tbody>
-            </table>
+        <div class="modal-body">
+
+          <div th:if="${c.remark != null && !c.remark.isEmpty()}"
+               th:text="${c.remark}"
+               style="white-space: pre-line;"></div>
+
+          <div class="text-muted" th:if="${c.remark == null || c.remark.isEmpty()}">
+            상세설명이 등록되지 않았습니다.
           </div>
 
         </div>
-      </div>
 
-    </div><!-- /container -->
-
-    <!-- [등록] 모달 -->
-    <div class="modal fade" id="calcCreateModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-          <form th:action="@{/pay/rule_calc}" th:object="${newCalc}" method="post" class="needs-validation" id="calc-create-form" novalidate>
-            <div class="modal-header">
-              <h5 class="modal-title">계산 규칙 등록</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
-            </div>
-
-            <div class="modal-body">
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label">항목 코드</label>
-                  <!-- ✅ th:field 제거 (엔티티에 itemCode 필드 없을 수 있음) -->
-                  <select class="form-select" name="item.itemCode" required>
-                    <option value="">-- 선택 --</option>
-                    <option th:each="i : ${items}" th:value="${i.itemCode}"
-                            th:text="${i.itemCode + ' · ' + i.itemName}"></option>
-                  </select>
-                  <div class="form-text">규칙이 적용될 급여 항목</div>
-                  <div class="invalid-feedback">항목코드 를 선택하세요</div>
-                </div>
-
-                <div class="col-md-3">
-                  <label class="form-label">규칙 유형</label>
-                  <select class="form-select" th:field="*{ruleType}" required>
-                    <option value="">-- 선택 --</option>
-                    <option value="AMT">금액</option>
-                    <option value="RATE">비율</option>
-                    <option value="FORMULA">수식</option>
-                  </select>
-                  <div class="form-text">금액/비율/수식</div>
-                  <div class="invalid-feedback">규칙유형 을 선택하세요</div>
-                </div>
-
-                <div class="col-md-3">
-                  <label class="form-label">우선순위</label>
-                  <input type="number" th:field="*{priority}" class="form-control" min="1" placeholder="기본 100">
-                  <div class="form-text">숫자가 작을수록 먼저 적용</div>
-                </div>
-
-                <div class="col-md-4">
-                  <label class="form-label">적용시작일</label>
-                  <input type="date" th:field="*{startDate}" class="form-control" required>
-                  <div class="invalid-feedback">시작일을 입력하세요</div>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label">적용종료일</label>
-                  <input type="date" th:field="*{endDate}" class="form-control">
-                  <div class="form-text">무기한이면 비워두세요</div>
-                </div>
-
-                <div class="col-md-4">
-                  <label class="form-label">상태</label>
-                  <select class="form-select" th:field="*{status}" required>
-                    <option value="">-- 선택 --</option>
-                    <option value="ACTIVE">ACTIVE</option>
-                    <option value="INACTIVE">INACTIVE</option>
-                  </select>
-                  <div class="invalid-feedback">STATUS 를 선택하세요</div>
-                </div>
-
-                <div class="col-md-4">
-                  <label class="form-label">대상구분</label>
-                  <select class="form-select" th:field="*{targetType}">
-                    <option value="">(선택)</option>                    
-                    <option value="ALL">전체</option>
-                    <option value="EMP">사원</option>
-                    <option value="DEPT">부서</option>
-                    <option value="GRADE">직책</option>
-                  </select>
-                  <div class="form-text">적용 대상 구분</div>
-                </div>
-
-                <div class="col-md-8">
-                  <label class="form-label">대상식별코드</label>
-                  <input type="text" th:field="*{targetCode}" class="form-control" placeholder="예: M2-1, D100, 사번">
-                  <div class="form-text">대상 식별 코드 (없으면 비움)</div>
-                </div>
-
-           <!-- 숫자값 -->
-				<div class="col-md-6">
-				  <label class="form-label">숫자값</label>
-				  <input type="text" class="form-control amount-input" name="valueNum" 
-				         placeholder="금액 또는 비율값" inputmode="decimal">
-				  <div class="form-text">금액/비율/기타 숫자값</div>
-				</div>
-				
-				<!-- 계산공식 -->
-				<div class="col-md-6">
-				  <label class="form-label">계산공식</label>
-				  <textarea class="form-control" name="calcFormula" rows="3"
-				            placeholder="예: baseSalary * rate"></textarea>
-				  <div class="form-text">FORMULA 유형에서 사용 (AMT/RATE도 입력 가능)</div>
-				</div>
-              </div>
-            </div>
-
-            <div class="modal-footer">
-              <button type="submit" class="btn btn-primary">등록</button>
-              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">닫기</button>
-            </div>
-          </form>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">닫기</button>
         </div>
+
       </div>
     </div>
-
-    <!-- [수정] 모달들  -->
-    <div th:each="c : ${calcRules}">
-      <div class="modal fade" th:id="${'calcEditModal-' + c.ruleId}" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-          <div class="modal-content">
-            <form th:action="@{'/pay/rule_calc/' + ${c.ruleId}}" method="post" class="needs-validation" novalidate>
-            <input type="hidden" name="_method" value="PUT"/>
-              <div class="modal-header">
-                <h5 class="modal-title">계산 규칙 수정 - <span th:text="${c.ruleId}"></span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
-              </div>
-
-              <div class="modal-body">
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label class="form-label">항목 코드</label>
-                    <select name="item.itemCode" class="form-select" required>
-                      <option value="">-- 선택 --</option>
-                      <option th:each="i : ${items}" th:value="${i.itemCode}"
-                              th:text="${i.itemCode + ' · ' + i.itemName}"                             
-                              th:selected="${c.item != null and i.itemCode == c.item.itemCode}"></option>
-                    </select>
-                  </div>
-
-                  <div class="col-md-3">
-                    <label class="form-label">규칙 유형</label>
-                    <select name="ruleType" class="form-select" required>
-                      <option value="AMT"     th:selected="${c.ruleType?.name()=='AMT'}">AMT</option>
-                      <option value="RATE"    th:selected="${c.ruleType?.name()=='RATE'}">RATE</option>
-                      <option value="FORMULA" th:selected="${c.ruleType?.name()=='FORMULA'}">FORMULA</option>
-                    </select>
-                  </div>
-
-                  <div class="col-md-3">
-                    <label class="form-label">우선순위</label>
-                    <input type="number" name="priority" class="form-control" min="1" th:value="${c.priority}">
-                  </div>
-
-                  <div class="col-md-4">
-                    <label class="form-label">적용시작일</label>
-                    <input type="date" name="startDate" class="form-control"
-                           th:value="${#temporals.format(c.startDate,'yyyy-MM-dd')}" required>
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">적용종료일</label>
-                    <input type="date" name="endDate" class="form-control"
-                           th:value="${c.endDate!=null ? #temporals.format(c.endDate,'yyyy-MM-dd') : ''}">
-                  </div>
-
-                  <div class="col-md-4">
-                    <label class="form-label">상태</label>
-                    <select name="status" class="form-select" required>
-                      <option value="ACTIVE"   th:selected="${c.status?.name()=='ACTIVE'}">ACTIVE</option>
-                      <option value="INACTIVE" th:selected="${c.status?.name()=='INACTIVE'}">INACTIVE</option>
-                    </select>
-                  </div>
-
-                  <div class="col-md-4">
-                    <label class="form-label">대상구분</label>
-                    <select name="targetType" class="form-select">
-                      <option value=""></option>
-                      <option value="ALL"   th:selected="${c.targetType?.name()=='ALL'}">전체</option>
-                      <option value="EMP"   th:selected="${c.targetType?.name()=='EMP'}">사원</option>
-                      <option value="DEPT"  th:selected="${c.targetType?.name()=='DEPT'}">부서</option>
-                      <option value="GRADE" th:selected="${c.targetType?.name()=='GRADE'}">직책</option>
-                    </select>
-                  </div>
-
-                  <div class="col-md-8">
-                    <label class="form-label">대상식별코드</label>
-                    <input type="text" name="targetCode" class="form-control" th:value="${c.targetCode}">
-                  </div>
-
-               <!-- 숫자값 -->
-				<div class="col-md-6">
-				  <label class="form-label">숫자값</label>
-				  <input type="text" name="valueNum" class="form-control amount-input"
-				         th:value="${c.valueNum}">
-				  <div class="form-text">금액/비율/기타 숫자값</div>
-				</div>
-				
-				<!-- 계산공식 -->
-				<div class="col-md-6">
-				  <label class="form-label">계산공식</label>
-				  <textarea name="calcFormula" class="form-control" rows="3"
-				            th:text="${c.calcFormula}"></textarea>
-				  <div class="form-text">FORMULA 유형에서 사용 (AMT/RATE도 입력 가능)</div>
-				</div>
-
-
-                </div>
-              </div>
-
-              <div class="modal-footer">
-                <button class="btn btn-primary" type="submit">저장</button>
-                <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">닫기</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
+  </div>
+</div>
 
 <script src="/js/pay/pay_calc.js"></script>
 
-
-  </th:block> <!-- /content -->
-
 </th:block>
-
+</html>

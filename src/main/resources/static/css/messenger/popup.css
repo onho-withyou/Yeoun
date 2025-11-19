@@ -281,6 +281,14 @@ box-shadow: none;
 
 /** 모달관련 추가 css **/
 
+/* 그룹 모달을 팝업 화면 가운데에, 380px 폭으로 예쁘게 정렬 */
+#group-modal .modal-dialog.custom-group-modal {
+  width: 380px !important;      /* 실제 폭 고정 */
+  max-width: 380px !important;  /* 혹시 모를 오버라이드 대비 */
+  margin: 0 auto;               /* 수평 가운데 정렬 */
+}
+
+
 /* 모달 전체 크기 줄이기 */
 .custom-group-modal {
   max-width: 380px !important;   /* 채팅창보다 작은 사이즈 */
@@ -366,24 +374,30 @@ box-shadow: none;
 /* 선택된 멤버 표시 영역 */
 .selected-box {
   min-height: 40px;
+  max-height: 100px;          /* 최대 높이 제한 */
+  overflow-y: auto;           /* 박스 안에서만 스크롤 */
   background: #f6f2ff;
   border: 1px solid #dcd7ff;
   border-radius: 8px;
   padding: 8px;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: wrap;            /* 줄바꿈 */
   gap: 6px;
 }
 
+/* 선택된 멤버 개별 태그 */
 .selected-tag {
   font-size: 13px;
   background: #6a5acd;
   color: #fff;
   padding: 4px 8px;
   border-radius: 6px;
-  display: flex;
+  display: inline-flex;  /* inline-flex가 태그 줄바꿈에 유리 */
   align-items: center;
   gap: 4px;
+  max-width: 100%;       /* 너비 넘칠 경우 안전 */
+  word-break: keep-all;
+  white-space: nowrap;   /* 태그 내부는 줄바꿈 없이 유지 */
 }
 
 .selected-tag i {
@@ -391,9 +405,9 @@ box-shadow: none;
   font-size: 11px;
 }
 
-
-
-
-
-
-
+/* 선택된 태그 컨테이너 */
+.selected-list {
+  display: flex;
+  flex-wrap: wrap;             /* 자동 줄바꿈 */
+  gap: 6px;
+}

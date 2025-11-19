@@ -3,6 +3,7 @@ package com.yeoun.attendance.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -119,6 +120,14 @@ public class AttendanceService {
 			return "WORK_OUT";
 		}
 		
+		// 반차 여부 조회
+		boolean halfLeave = leaveHistoryRepository.existsHalf(empId, today);
+		
+		// 최종 근무시간 계산
+		int finalMinutes = calculateWorkDuration(standardIn, standardOut, halfLeave, workPolicy);
+		
+		attendance.adjustWorkDuration(finalMinutes);
+		
 		return processAccessLog(empId, now, today, emp);
 	}
 	
@@ -172,9 +181,28 @@ public class AttendanceService {
 		if (attendance != null && attendance.getWorkOut() == null) {
 			// 정책 시간으로 자동 퇴근
 			LocalTime autoWorkOut = LocalTime.parse(policy.getOutTime());
-			log.info(">>>>>>>>>>>>>> autoWorkOut" + autoWorkOut);
 			attendance.recordWorkOut(autoWorkOut, autoWorkOut);
 		}
+	}
+	
+	// 총근무시간 변경
+	private int calculateWorkDuration(LocalTime in, LocalTime out, boolean halfLeave, WorkPolicy workPolicy) {
+		int minutes = (int) ChronoUnit.MINUTES.between(in, out);
+		
+		// 점심시간 제외
+		LocalTime lunchStart = LocalTime.parse(workPolicy.getLunchIn());
+		LocalTime lunchEnd = LocalTime.parse(workPolicy.getLunchOut());
+		
+		if (!out.isBefore(lunchStart) && !in.isAfter(lunchEnd)) {
+			minutes -= 60;
+		}
+		
+		// 반차 적용
+		if (halfLeave) {
+			minutes = Math.min(minutes, 240); // 240은 4시간을 의미
+		}
+		
+		return Math.max(minutes, 0);
 	}
 	
 	// 출퇴근 수기 등록
@@ -198,6 +226,18 @@ public class AttendanceService {
 		
 		Attendance newAttendance = Attendance.createAttendance(attendanceDTO, emp);
 		
+		// 근무정책 조회
+		WorkPolicy workPolicy = workPolicyRepository.findFirstByOrderByPolicyIdAsc()
+		        .orElseThrow(() -> new NoSuchElementException("근무정책이 없습니다."));
+
+		// 반차 여부
+		boolean halfLeave = leaveHistoryRepository.existsHalf(emp.getEmpId(), today);
+		
+		// 실제 근무시간 재계산
+		int finalMinutes = calculateWorkDuration(newAttendance.getWorkIn(), newAttendance.getWorkOut(), halfLeave, workPolicy);
+		
+		newAttendance.adjustWorkDuration(finalMinutes);
+		
 		attendanceRepository.save(newAttendance);
 	}
 	
@@ -219,10 +259,10 @@ public class AttendanceService {
 		
 		List<Attendance> attendanceList = new ArrayList();
 		
-		if (roles.contains("SYS_ADMIN") || roles.contains("ATTEND_ADMIN")) {
+		if (roles.contains("ROLE_SYS_ADMIN") || roles.contains("ROLE_ATTEND_ADMIN")) {
 			// 관리자의 경우 전체 직원 조회
 			attendanceList = attendanceRepository.findByWorkDateBetween(startDate, endDate);
-		} else if (roles.contains("DEPT_MANAGER")) {
+		} else if (roles.contains("ROLE_DEPT_MANAGER")) {
 			// 부서장의 본인 부서에 대해서 조회
 			attendanceList = attendanceRepository.findByEmp_Dept_DeptIdAndWorkDateBetween(deptId, startDate, endDate);
 		}
@@ -299,6 +339,18 @@ public class AttendanceService {
 		String updateUserEmpId = loginDTO.getEmpId();
 		
 		attendance.modifyAttendance(workIn, workOut, statusCode, updateUserEmpId);
+		
+		// 근무정책 조회
+		WorkPolicy workPolicy = workPolicyRepository.findFirstByOrderByPolicyIdAsc()
+		        .orElseThrow(() -> new NoSuchElementException("근무정책이 없습니다."));
+
+		// 반차 여부
+		boolean halfLeave = leaveHistoryRepository.existsHalf(attendance.getEmp().getEmpId(), attendance.getWorkDate());
+
+		// 최종 근무시간 재계산
+		int finalMinutes = calculateWorkDuration(workIn, workOut, halfLeave, workPolicy);
+
+		attendance.adjustWorkDuration(finalMinutes);
 	}
 
 	// 외근 등록
@@ -308,14 +360,43 @@ public class AttendanceService {
 		LocalDate workDate = accessLogDTO.getAccessDate();
 		LocalTime outTime= accessLogDTO.getOutTime();
 		
+		log.info(">>>>>>>>>>>>>> accessLogDTO : " + accessLogDTO);
+		
 		Attendance attendance = attendanceRepository.findByEmp_EmpIdAndWorkDate(empId, workDate)
-			    .orElseThrow(() -> new NoSuchElementException("출근 기록이 없습니다."));
+			    .orElse(null);
 	
 		WorkPolicy workPolicy = workPolicyRepository.findFirstByOrderByPolicyIdAsc()
 				.orElseThrow(() -> new NoSuchElementException("근무정책이 없습니다."));
 		
-		AccessLog accessLog = accessLogRepository.save(accessLogDTO.toEntity());
+		 Emp emp = empRepository.findById(empId)
+		            .orElseThrow(() -> new NoSuchElementException("사원을 찾을 수 없습니다.")); 
 		
+		AccessLog accessLog = accessLogDTO.toEntity();
+		
+		accessLogRepository.save(accessLog);
+		
+		// 출근 기록이 없을 경우 상태가 외근으로 출근기록 저장
+		if (attendance == null) {
+			AttendanceDTO attendanceDTO = new AttendanceDTO();
+			attendanceDTO.setEmpId(empId);
+			attendanceDTO.setWorkDate(workDate);
+			attendanceDTO.setWorkIn(accessLogDTO.getOutTime());
+			attendanceDTO.setStatusCode("OUTWORK");
+			attendanceDTO.setRemark("외근 선등록");
+			
+			LocalTime standardOut = LocalTime.parse(workPolicy.getOutTime());
+			
+			if (accessLogDTO.getReturnTime().isAfter(standardOut) ) {
+				attendanceDTO.setWorkOut(accessLogDTO.getReturnTime());
+			}
+			
+			Attendance newAttendance = attendanceDTO.toEntity();
+			newAttendance.setEmp(emp);
+			
+			attendanceRepository.save(newAttendance);
+			
+			return;
+		}
 		attendance.markAsInByOutwork(outTime, workPolicy, accessLog.getReason());
 	}
 

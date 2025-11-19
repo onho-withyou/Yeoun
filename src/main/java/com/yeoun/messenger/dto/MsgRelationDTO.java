@@ -1,7 +1,10 @@
 package com.yeoun.messenger.dto;
 
 import com.yeoun.emp.entity.Emp;
+import com.yeoun.messenger.entity.MsgFavorite;
+import com.yeoun.messenger.entity.MsgFavoriteId;
 import com.yeoun.messenger.entity.MsgMessage;
+import com.yeoun.messenger.entity.MsgRelation;
 import com.yeoun.messenger.entity.MsgRoom;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -10,6 +13,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
+
+import org.modelmapper.ModelMapper;
 
 @Getter
 @Setter
@@ -27,7 +32,26 @@ public class MsgRelationDTO {
     private LocalDateTime activeDate;   // 마지막 확인 시간
     private LocalDateTime pinnedDate;   // 채팅방 고정 시간
     private String remark;              // 비고
+    
+    // ===========================================================
+  	// DTO <-> Entity 변환 메서드 구현
+  		
+  	private static ModelMapper modelMapper = new ModelMapper();
+  	
+  	public MsgRelation toEntity(MsgRoom roomId, Emp empId, MsgMessage lastReadId) {
 
+  		MsgRelation msgRelation = new MsgRelation();
+ 		msgRelation.setRoomId(roomId);
+ 		msgRelation.setEmpId(empId);
+ 		msgRelation.setLastReadId(lastReadId);
+ 		
+ 		return msgRelation;
+ 	}
+ 	
+ 	public static MsgRelationDTO fromEntity(MsgRelation msgRelation) {
+ 		return modelMapper.map(msgRelation, MsgRelationDTO.class);
+ 	}
+ 	
 
 
 }

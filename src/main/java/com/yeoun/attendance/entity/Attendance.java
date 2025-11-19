@@ -56,7 +56,6 @@ public class Attendance {
 	private Emp emp; // 출근한 사원 번호
 	
 	@Column(nullable = false)
-	@CreatedDate
 	private LocalDate workDate; // 근무일자
 	
 	@JsonFormat(pattern = "HH:MM")
@@ -93,7 +92,6 @@ public class Attendance {
 		attendance.workOut = attendanceDTO.getWorkOut();
 		attendance.statusCode = attendanceDTO.getStatusCode();
 		attendance.createdUser = attendanceDTO.getCreatedUser();
-		attendance.updateDuration();
 		
 		return attendance;
 	}
@@ -140,25 +138,6 @@ public class Attendance {
 		}
 		
 		return attendance;
-		// 외근 여부 확인
-//		if (accessLogs != null && "OUTWORK".equalsIgnoreCase(accessLog.getAccessType())) {
-//			LocalTime outTime = accessLog.getOutTime();
-//			
-//			// 외근 시작 시간이 출근 기준 시간 + 지각 유예 시간보다 빠르면 정상 출근 인정
-//			if (outTime != null && !outTime.isAfter(standardIn.plusMinutes(lateLimit))) {
-//				attendance.statusCode = "WORKIN";
-//				attendance.workIn = outTime;
-//			} else { // 외근 기준 이후면 지각 처리
-//				attendance.statusCode = "LATE";
-//				attendance.workIn = (outTime != null) ? outTime : now;
-//			}
-//			attendance.remark = accessLog.getReason();
-//		} else {
-//			 attendance.statusCode = now.isAfter(standardIn.plusMinutes(lateLimit)) ? "LATE" : "WORKIN";
-//			 attendance.workIn = now;
-//		}
-		
-//		 return attendance;
 	}
 	
 	// 퇴근 처리
@@ -167,17 +146,7 @@ public class Attendance {
 		
 	    if (outTime != null) {
 	        this.workOut = outTime;
-	        updateDuration();
 	    }
-	}
-	
-	// 근무시간 계산
-	private void updateDuration() {
-		if (this.workIn != null && this.workOut != null) {
-			this.workDuration = (int) ChronoUnit.MINUTES.between(this.workIn, this.workOut);
-		} else {
-			this.workDuration = 0;
-		}
 	}
 	
 	// 근태 수정 로직
@@ -186,7 +155,6 @@ public class Attendance {
 		this.workOut = workOut;
 		this.statusCode = statusCode;
 		this.updatedUser = updateUserEmpId;
-		updateDuration();
 	}
 	
 	// 퇴근 중복 방지 체크
@@ -202,6 +170,11 @@ public class Attendance {
 		this.statusCode = (outTime.isAfter(standardIn.plusMinutes(lateLimit))) ? "LATE" : "WORKIN";
 		this.workIn = outTime;
 		this.remark = reason;
+	}
+	
+	// 근무시간 변경
+	public void adjustWorkDuration(int minutes) {
+	    this.workDuration = Math.max(minutes, 0);
 	}
 }
 

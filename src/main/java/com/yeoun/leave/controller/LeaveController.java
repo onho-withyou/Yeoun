@@ -46,9 +46,9 @@ public class LeaveController {
 	// 개인 연차에 대한 간단한 정보
 	@GetMapping("/my")
 	public String leave(@AuthenticationPrincipal LoginDTO loginDTO, Model model) {
-//		leaveService.createAnnualLeaveForEmp(loginDTO.getEmpId());
 		LeaveDTO leaveDTO = leaveService.getAnnualLeave(loginDTO.getEmpId());
 		
+//		leaveService.createAnnualLeave(202511150104L);
 		model.addAttribute("leaveDTO", leaveDTO);
 		
 		return "leave/leave";

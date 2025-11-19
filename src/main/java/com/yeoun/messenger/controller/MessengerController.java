@@ -4,11 +4,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.messenger.dto.*;
 import com.yeoun.messenger.entity.MsgMessage;
+import com.yeoun.messenger.entity.MsgRelation;
 import com.yeoun.messenger.repository.MsgMessageRepository;
+import com.yeoun.messenger.repository.MsgRelationRepository;
 import com.yeoun.messenger.repository.MsgStatusRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -31,6 +34,7 @@ public class MessengerController {
 	private final MessengerService messengerService;
 	private final MsgMessageRepository msgMessageRepository;
 	private final MsgStatusRepository msgStatusRepository;
+	private final MsgRelationRepository msgRelationRepository;
 	private final EmpRepository empRepository;
 
 	// ==========================================================================
@@ -121,6 +125,14 @@ public class MessengerController {
 
 			dtoList.add(dto);
 		}
+		
+		// 3) 방 소속 멤버 조회
+	    List<MsgRelation> relationList = msgRelationRepository.findByRoomId_RoomId(id);
+	    List<RoomMemberDTO> memberList = new ArrayList<>();
+	    for (MsgRelation relation : relationList) {
+	        String memberId = relation.getEmpId().getEmpId();  // 사번 뽑기
+	        memberList.add(messengerService.buildRoomMember(memberId));
+	    }
 
 		// 3) 모델에 담기
 		model.addAttribute("roomId", id);
@@ -128,6 +140,7 @@ public class MessengerController {
 		//model.addAttribute("targetEmpId", id);
 		model.addAttribute("groupYn", "N");
 		//model.addAttribute("targetPos", empRepository.findById(id).get().getPosition());
+		model.addAttribute("members", memberList);
 		return "/messenger/chat";
 	}
 
@@ -169,5 +182,8 @@ public class MessengerController {
 	return ResponseEntity.ok().build();
 	
 	}
+	
+	// ==========================================================================
+	// 메신저 팝업 채팅방 - 기존 방에 메시지 전송
 	
 }

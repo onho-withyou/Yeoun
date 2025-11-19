@@ -20,4 +20,8 @@ public interface EmpPayslipDetailDTO {
     BigDecimal getTotAmt();
     
     String getRemark();    //메모
+    String getPayYymm();
+
+    
+    
 }

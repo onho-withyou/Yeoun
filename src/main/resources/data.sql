@@ -76,10 +76,6 @@ VALUES(202511150111,'영업부 김구2 문서제목 테스트','1306178',sysdate
 INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
 VALUES(202511150112,'영업부 김구3 문서제목 테스트','',sysdate,'완료','2505823','비정지출',sysdate,'지출결의서','테스트용 김구3 종료 입니다.',sysdate,sysdate,'개발2팀본부');
 
-
-
-
-
 -- 결재권한자
 INSERT INTO approver(
             emp_id, -- 결재자 사원 id
@@ -122,6 +118,141 @@ VALUES('2410807',202511150111,0,'','2','y');
 INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
 VALUES('1306178',202511150111,0,'','1','y');
 
+-- 결재양식 - 결재권한자 디폴트값 지정
+
+-- ERP 본부(DEP000)
+-- 연차신청서 = 결재권한자 1 :이지현(이사)
+-- 반차신청서 = 결재권한자 1: 이지현(이사)
+-- 지출결의서 = 결재권한자 1: 이지현(이사)
+-- 인사발령신청서 = 결재권한자3: 이지현(이사) -> 강호동(인사부 부장)->최고관리자(인사부 사장)
+-- 자유양식결재서 = 결재권한자 0
+
+INSERT INTO approval_form(
+                FORM_CODE -- 양식코드
+                ,FORM_NAME --양식이름
+                ,DEPT_ID --부서id
+                ,APPROVER_1 --결재권한자_1
+                --APPROVER_2 -- 결재권한자_2
+                --APPROVER_3 -- 결재권한자_3
+)
+VALUES('FROM1000','연차신청서','DEP000','2506589');                  -- 결재권한자 1 :이지현(이사)
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1)
+VALUES('FROM2000','반차신청서','DEP000','2506589');                  -- 결재권한자 1: 이지현(이사)
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1)
+VALUES('FROM3000','지출결의서','DEP000','2506589');                  -- 결재권한자 1: 이지현(이사)
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1,APPROVER_2,APPROVER_3)
+VALUES('FROM4000','인사발령신청서','DEP000','2506589','1904184','2511793'); --결재권한자3: 이지현(이사) -> 강호동(인사부 부장)->최고관리자(인사부 사장)
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID)
+VALUES('FROM5000','자유양식결재서','DEP000');                        -- 결재권한자 0
+
+-- MES 본부(DEP100)
+-- 연차신청서 = 결재권한자 1 :안중근(이사)
+-- 반차신청서 = 결재권한자 1 :안중근(이사)
+-- 지출결의서 = 결재권한자 1 :안중근(이사)
+-- 인사발령신청서 = 결재권한자 3:안중근(이사) ->강호동(인사부 부장)->최고관리자(인사부 사장)
+-- 자유양식결재서 = 결재권한자 0
+
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1)
+VALUES('FROM1100','연차신청서','DEP100','2412911');
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1)
+VALUES('FROM2100','반차신청서','DEP100','2412911');
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1)
+VALUES('FROM3100','지출결의서','DEP100','2412911');
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1,APPROVER_2,APPROVER_3)
+VALUES('FROM4400','인사발령신청서','DEP100','2412911','1904184','2511793');
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID)
+VALUES('FROM5500','자유양식결재서','DEP100');
+
+-- 개발부 (DEP001)
+-- 연차신청서 =  박경찬(과장)->세종대왕(차장)
+-- 반차신청서 = 결재권한자 1: 전지현(과장)
+-- 지출결의서 = 결재권한자 1: 이병헌(부장)
+-- 인사발령신청서 = 결재권한자 3:이병헌(부장)->강호동(인사부 부장)->최고관리자(인사부 사장)
+-- 자유양식결재서 = 결재권한자 0
+
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1,APPROVER_2)
+VALUES('FROM1001','연차신청서','DEP001','2001752','0009236');
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1)
+VALUES('FROM2001','반차신청서','DEP001','1706721');
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1)
+VALUES('FROM3001','지출결의서','DEP001','2109967');
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1,APPROVER_2,APPROVER_3)
+VALUES('FROM4001','인사발령신청서','DEP001','2109967','1904184','2511793'); 
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID)
+VALUES('FROM5001','자유양식결재서','DEP001');
+
+-- 마케팅부 (DEP002)
+-- 연차신청서 = 결재권한자 2: 박명수(과장)->최민식(차장)
+-- 반차신청서 = 결재권한자 1: 박명수(과장)
+-- 지출결의서 = 결재권한자 1: 이순신(부장)
+-- 인사발령신청서 = 결재권한자 3:이순신(부장)->강호동(인사부 부장)->최고관리자(인사부 사장)
+-- 자유양식결재서 = 결재권한자 0
+
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1,APPROVER_2)
+VALUES('FROM1002','연차신청서','DEP002','1807375','2011710');
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1)
+VALUES('FROM2002','반차신청서','DEP002','1807375');
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1)
+VALUES('FROM3002','지출결의서','DEP002','2506864');
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1,APPROVER_2,APPROVER_3)
+VALUES('FROM4002','인사발령신청서','DEP002','2506864','1904184','2511793'); 
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID)
+VALUES('FROM5002','자유양식결재서','DEP002');
+
+-- 생산부 (DEP003)
+-- 연차신청서 = 결재권한자 2 : 한수지(과장)->김연아(차장)
+-- 반차신청서 = 결재권한자 1: 한수지(과장)
+-- 지출결의서 = 결재권한자 1: 강감찬(부장)
+-- 인사발령신청서 = 결재권한자 3:강감찬(부장)->강호동(인사부 부장)->최고관리자(인사부 사장)
+-- 자유양식결재서 = 결재권한자 0
+
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1,APPROVER_2)
+VALUES('FROM1003','연차신청서','DEP003','1908631','1301823');
+ INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1)
+VALUES('FROM2003','반차신청서','DEP003','1908631');
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1)
+VALUES('FROM3003','지출결의서','DEP003','2303363');
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1,APPROVER_2,APPROVER_3)
+VALUES('FROM4003','인사발령신청서','DEP003','2303363','1904184','2511793'); 
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID)
+VALUES('FROM5003','자유양식결재서','DEP003');
+
+-- 영업부 (DEP004)
+-- 연차신청서 = 결재권한자 3 : 김아름(과장)->한석규(차장)-> 한효주(부장)
+-- 반차신청서 = 결재권한자 1: 김아름(과장)
+-- 지출결의서 = 결재권한자 1: 한효주(부장)
+-- 인사발령신청서 = 결재권한자 3:한효주(부장)->강호동(인사부 부장)->최고관리자(인사부 사장)
+-- 자유양식결재서 = 결재권한자 0
+
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1,APPROVER_2,APPROVER_3)
+VALUES('FROM1004','연차신청서','DEP004','1412699','2012978','1707705');
+ INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1)
+VALUES('FROM2004','반차신청서','DEP004','1412699');
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1)
+VALUES('FROM3004','지출결의서','DEP004','1707705');
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1,APPROVER_2,APPROVER_3)
+VALUES('FROM4004','인사발령신청서','DEP004','1707705','1904184','2511793');
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID)
+VALUES('FROM5004','자유양식결재서','DEP004');
+
+-- 인사부(DEP005)
+-- 연차신청서 = 결재권한자 3 :전도연(대리)->김영국(과장)->최고관리자(사장)
+-- 반차신청서 = 결재권한자 1: 전도연(대리)
+-- 지출결의서 = 결재권한자 1: 강호동(부장)
+-- 인사발령신청서 = 결재권한자 3: 전도연(대리)->강호동(부장)->최고관리자(사장)
+-- 자유양식결재서 = 결재권한자 0
+
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1,APPROVER_2,APPROVER_3)
+VALUES('FROM1005','연차신청서','DEP005','2104502','2401300','2511793');
+ INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1)
+VALUES('FROM2005','반차신청서','DEP005','2104502');
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1)
+VALUES('FROM3005','지출결의서','DEP005','1904184');
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID,APPROVER_1,APPROVER_2,APPROVER_3)
+VALUES('FROM4005','인사발령신청서','DEP005','2104502','1904184','2511793'); 
+INSERT INTO approval_form(FORM_CODE,FORM_NAME,DEPT_ID)
+VALUES('FROM5005','자유양식결재서','DEP005');
+-- 대표(DEP999) - 특별권한
 
 
 -- EMP
