@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			return response.json();  //JSON 파싱
 		})
 		.then(data => { // response가 ok일때
-			console.log(data);
+//			console.log(data);
 			initGrid(data);
 		}).catch(error => {
 			console.error('에러', error)

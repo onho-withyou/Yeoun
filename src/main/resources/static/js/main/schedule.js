@@ -136,8 +136,8 @@ function showCalendarView(type) {
 // 캘린더 생성함수
 function initCalendar() {
 	calendarEl.innerHTML = ""; // 기존 내용 제거
-	console.log('window.Calendar:', window.Calendar);
-	console.log('window.tui:', window.tui);
+//	console.log('window.Calendar:', window.Calendar);
+//	console.log('window.tui:', window.tui);
 	// 만약 이미 달력이 있으면 제거
 	if (calendar) {
 	    calendar.destroy();
@@ -465,7 +465,7 @@ async function getLeaveData(params) {
 		return response.json();  //JSON 파싱
 	})
 	.then(data => { // response가 ok일때
-		console.log("data : " , data);
+//		console.log("data : " , data);
 		// 연차데이터 날짜별로 그룹화
 		const dateLeaveMap = groupLeavesByDate(data);
 		// 스케줄에 넣을 데이터로 변환
@@ -572,7 +572,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 			return;
 		}
 		
-		console.log(event);
+//		console.log(event);
 		if (event.calendarId === 'holiday') {
 			alert("휴일입니다.");
 		} else if (event.calendarId === 'leave') {
@@ -581,7 +581,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 			const leaves = event.raw?.leaves || [];
 			let html = '';
 			html += `<div class="leave-tooltip__title">${event.title}</div>`;
-			console.log("1" , html);
+//			console.log("1" , html);
 			if (leaves.length === 0) {
 				html += `<div>연차 인원이 없습니다.</div>`;
 			} else {
@@ -590,7 +590,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 			    	html += `<li>${l.emp_name} - ${l.startDate} ~ ${l.endDate} / ${l.usedDays}일</li>`;
 				});
 				html += '</ul>';
-				console.log("html추가중", html);
+//				console.log("html추가중", html);
 			}
 			
 			tooltip.innerHTML = html;
@@ -598,7 +598,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 			// 컨테이너 기준 절대좌표 계산
 		    const calendarEl = document.getElementById('calendar');
 		    const rect = calendarEl.getBoundingClientRect();
-			console.log(nativeEvent, "nativeEvent");
+//			console.log(nativeEvent, "nativeEvent");
 		    tooltip.style.position = 'absolute';
 		    tooltip.style.left = (nativeEvent.clientX ) + 'px';
 		    tooltip.style.top = (nativeEvent.clientY) + 'px';
@@ -615,7 +615,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 				return response.json();  //JSON 파싱
 			})
 			.then(data => { // response가 ok일때
-				console.log(data, "dddddddddddddddddd");
 				openScheduleModal("edit", data);
 			}).catch(error => {
 				console.error('에러', error)
@@ -658,7 +657,7 @@ async function getLastNoticeList() {
 		if (!response.ok) throw new Error(response.text());
 		return response.json();  //JSON 파싱
 	}).then(data => {
-		console.log(data, "공지데이터");
+//		console.log(data, "공지데이터");
 		initNoticeGrid(data);
 	}).catch(error => {
 		console.error('에러', error)
@@ -707,7 +706,7 @@ async function getApprovalList() {
 		if (!response.ok) throw new Error(response.text());
 		return response.json();  //JSON 파싱
 	}).then(data => {
-		console.log(data, "결제문서데이터");
+//		console.log(data, "결제문서데이터");
 		initApprovalGrid(data);
 	}).catch(error => {
 		console.error('에러', error)
