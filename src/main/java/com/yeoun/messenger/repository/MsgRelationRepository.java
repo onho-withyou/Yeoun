@@ -35,6 +35,8 @@ public interface MsgRelationRepository extends JpaRepository<MsgRelation, Long> 
     """)
     void updateLastRead(@Param("empId")String empId, @Param("roomId")Long roomId, @Param("lastReadId")Long lastReadId);
 
+    // 방에 속한 모든 멤버를 조회
+    List<MsgRelation> findByRoomId_RoomId(Long roomId);
     
 
 }

@@ -9,13 +9,20 @@ import com.yeoun.messenger.dto.*;
 import com.yeoun.messenger.entity.MsgMessage;
 import com.yeoun.messenger.entity.MsgRelation;
 import com.yeoun.messenger.entity.MsgRoom;
+import com.yeoun.messenger.entity.MsgStatus;
 import com.yeoun.messenger.repository.MsgMessageRepository;
 import com.yeoun.messenger.repository.MsgRelationRepository;
 import com.yeoun.messenger.repository.MsgRoomRepository;
+import com.yeoun.messenger.repository.MsgStatusRepository;
+
 import org.springframework.stereotype.Service;
 
+import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
+import com.yeoun.emp.entity.Position;
+import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.EmpRepository;
+import com.yeoun.emp.repository.PositionRepository;
 import com.yeoun.messenger.entity.MsgFavorite;
 import com.yeoun.messenger.mapper.MessengerMapper;
 import com.yeoun.messenger.repository.MsgFavoriteRepository;
@@ -30,11 +37,16 @@ import lombok.extern.log4j.Log4j2;
 public class MessengerService {
 	
 	private final MessengerMapper messengerMapper;
-	private final MsgFavoriteRepository msgFavoriteRepository;
-	private final EmpRepository empRepository;
-	private final MsgRelationRepository msgRelationRepository;
 	private final MsgRoomRepository msgRoomRepository;
+	private final MsgStatusRepository msgStatusRepository;
 	private final MsgMessageRepository msgMessageRepository;
+	private final MsgFavoriteRepository msgFavoriteRepository;
+	private final MsgRelationRepository msgRelationRepository;
+	
+	// messenger 외 repository
+	private final EmpRepository empRepository;
+	private final DeptRepository deptRepository;
+	private final PositionRepository positionRepository;
 
 	// ====================================================
 	// 친구 목록을 불러오는 서비스
@@ -152,12 +164,34 @@ public class MessengerService {
 	}
 
 	// ========================================================
-	//  마지막으로 읽은 메시지 체크
+	// 마지막으로 읽은 메시지 체크
 	@Transactional
 	public void updateLastRead(String empId, Long roomId, Long lastReadId) {
 		log.info("update last read 진입.............");
 		log.info("empId / roomId / lastreadId :::: " + empId + "/" + roomId + "/" + lastReadId);
 		msgRelationRepository.updateLastRead(empId, roomId, lastReadId);
 	}
+	
+	// ========================================================
+	// 방 내 인원 정보 조회
+	public RoomMemberDTO buildRoomMember (String empId) {
+		Emp emp = empRepository.findById(empId)
+				.orElseThrow(() -> new RuntimeException("사용자 없음"));
+		
+		MsgStatus msgStatus = msgStatusRepository.findById(empId)
+				.orElseThrow(() -> new RuntimeException("사용자 프로필 없음"));
+		
+		String posName = positionRepository.findById(emp.getPosition().getPosCode())
+				.map(Position::getPosName).orElse("미정");
+				
+		String deptName = deptRepository.findById(emp.getDept().getDeptId())
+				.map(Dept::getDeptName).orElse("미정");
+		
+		return RoomMemberDTO.of(emp, msgStatus, posName, deptName);
+	}
+	
+	
+	
+	
 
 }
