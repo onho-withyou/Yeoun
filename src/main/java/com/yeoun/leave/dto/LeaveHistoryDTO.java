@@ -9,16 +9,20 @@ import com.yeoun.emp.entity.Emp;
 import com.yeoun.leave.entity.AnnualLeave;
 import com.yeoun.leave.entity.AnnualLeaveHistory;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @ToString
 public class LeaveHistoryDTO {
 	private Long leaveHistId;
-	private Long emp_id; // 직원 id
+	private String emp_id; // 직원 id
 	private String emp_name; //직원 이름
 	private String dept_id; // 부서 Id
 	private Long leave_id; // 연차 Id
@@ -27,7 +31,24 @@ public class LeaveHistoryDTO {
 	private LocalDate endDate; // 사용 종료일
 	private int usedDays; //  사용 일수
 	private String reason; // 연차 사용 이유
-	private Long paymentId; // 결재문서 Id
+	private Long approvalId; // 결재문서 Id
+	
+	// ---------------------------------
+	@Builder
+	public LeaveHistoryDTO(Long leaveHistId, String emp_id, String emp_name, String dept_id, Long leave_id,
+			String leaveType, LocalDate startDate, LocalDate endDate, int usedDays, String reason, Long approvalId) {
+		this.leaveHistId = leaveHistId;
+		this.emp_id = emp_id;
+		this.emp_name = emp_name;
+		this.dept_id = dept_id;
+		this.leave_id = leave_id;
+		this.leaveType = leaveType;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.usedDays = usedDays;
+		this.reason = reason;
+		this.approvalId = approvalId;
+	}
 	
 	// --------------------------------
 	// DTO <-> Entity 변환
@@ -54,7 +75,7 @@ public class LeaveHistoryDTO {
 	public static LeaveHistoryDTO fromEntity(AnnualLeaveHistory annualLeaveHistory) {
 		LeaveHistoryDTO historyDTO = modelMapper.map(annualLeaveHistory, LeaveHistoryDTO.class);
 		
-		historyDTO.setEmp_id(Long.parseLong(annualLeaveHistory.getEmp().getEmpId()));
+		historyDTO.setEmp_id((annualLeaveHistory.getEmp().getEmpId()));
 		historyDTO.setEmp_name(annualLeaveHistory.getEmp().getEmpName());
 		historyDTO.setDept_id(annualLeaveHistory.getDept().getDeptId());
 		
