@@ -34,6 +34,16 @@ public class LoginDTO implements UserDetails {
 	private String deptName;// 직원 부서명
 	// ------------------------------
 	
+	public boolean hasRole(String role) {
+	    if (empRoles == null) return false;
+
+	    String roleName = role.startsWith("ROLE_") ? role : "ROLE_" + role;
+
+	    return getAuthorities().stream()
+	            .anyMatch(auth -> auth.getAuthority().equals(roleName));
+	}
+
+	
 	// ---------------------------------------------------
 	// 필수 오버라이딩 메서드
 	// 1) 사용자명(= 아이디 역할)을 리턴하는 메서드

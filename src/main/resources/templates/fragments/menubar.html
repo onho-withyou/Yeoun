@@ -32,8 +32,8 @@
                 </a>
                 <ul class="menu-sub">
                 
-                	<!-- 사원 목록 : HR + SYS_ADMIN만 -->
-                    <li class="menu-item" sec:authorize="hasAnyRole('HR_ADMIN','SYS_ADMIN')">
+                	<!-- 사원 목록 : HR + SYS_ADMIN + DEPT_MANAGER -->
+                    <li class="menu-item" sec:authorize="hasAnyRole('HR_ADMIN','SYS_ADMIN', 'DEPT_MANAGER')">
                         <a href="/emp" class="menu-link">
                             <div data-i18n="Menu1" class="menu-link-sub">사원 목록</div>
                         </a>

@@ -48,7 +48,7 @@ public class WebSecurityConfig {
 					// ================== 관리자/인사/MES 권한 ==================
 		            // 사원/인사 관리
 		            .requestMatchers("/emp/**", "/hr/actions/regist")
-		                .hasAnyRole("SYS_ADMIN", "HR_ADMIN")
+		                .hasAnyRole("SYS_ADMIN", "HR_ADMIN", "DEPT_MANAGER")
 		           
 	                // 근태 관리
 	                // 급여 관리
