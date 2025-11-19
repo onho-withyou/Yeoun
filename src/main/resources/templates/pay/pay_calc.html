@@ -231,6 +231,7 @@
           <div class="modal-content">
             <form th:action="@{'/pay/rule_calc/' + ${c.ruleId}}" method="post" class="needs-validation" novalidate>
             <input type="hidden" name="_method" value="PUT"/>
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
               <div class="modal-header">
                 <h5 class="modal-title">계산 규칙 수정 - <span th:text="${c.ruleId}"></span></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
