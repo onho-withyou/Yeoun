@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 
-import groovy.transform.ToString;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -21,6 +20,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "ANNUAL_LEAVE_HISTORY")
@@ -66,10 +66,7 @@ public class AnnualLeaveHistory {
 	@Column(nullable = false)
 	private String reason; // 연차 사용 이유
 	
-	@Column(nullable = false)
-	private String apprStatus = "REJECTED"; // 결재 상태 (승인/반려) / (APPROVED / REJECTED)
-	
-	private Long paymentId; // 결재문서 Id
+	private Long approvalId; // 결재문서 Id
 	
 	@Builder
 	public AnnualLeaveHistory(Emp emp, AnnualLeave annualLeave, String leaveType, LocalDate startDate,
@@ -81,12 +78,7 @@ public class AnnualLeaveHistory {
 		this.endDate = endDate;
 		this.usedDays = usedDays;
 		this.reason = reason;
-		this.apprStatus = "REJECTED";
-		this.paymentId = paymentId;
+		this.approvalId = paymentId;
 	}
 	
-	// 결재 상태가 변경되었을 때 사용
-	public void changeApprStatus(String status) {
-		this.apprStatus = status;
-	}
 }

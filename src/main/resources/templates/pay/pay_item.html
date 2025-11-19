@@ -38,6 +38,8 @@
     .badge-gray { background:#f3f4f6; color:#6b7280; }
   </style>
 
+
+ <div class="container-xxl py-4">
   <!-- ===================== 상단 탭 ===================== -->
   <ul class="nav pay-tabs">
     <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule}"      th:classappend="${activeTab}=='rule' ? 'active'">급여기준정보</a></li>
@@ -45,7 +47,6 @@
     <li class="nav-item"><a class="nav-link" th:href="@{/pay/rule_item}" th:classappend="${activeTab}=='item' ? 'active'">급여항목</a></li>
   </ul>
 
-  <div class="container-xxl py-4">
 
     <!-- 메시지 -->
     <div th:if="${msg}" class="alert alert-success alert-dismissible fade show">
@@ -73,19 +74,19 @@
 
         <!-- 리스트 -->
         <div th:if="${items!=null}" class="table-responsive">
-          <table class="table table-sm align-middle">
+          <table class="table table-striped align-middle text-center">
             <thead class="table-light">
               <tr>
-                <th>코드</th>
-                <th>명칭</th>
-                <th>유형</th>
-                <th>그룹</th>
-                <th>과세</th>
-                <th>계산방식</th>
-                <th class="text-end">정렬</th>
-                <th>사용</th>
-                <th>비고</th>
-                <th class="text-end">관리</th>
+                <th class="text-center">코드</th>
+                <th class="text-center">명칭</th>
+                <th class="text-center">유형</th>
+                <th class="text-center">그룹</th>
+                <th class="text-center">과세</th>
+                <th class="text-center">계산방식</th>
+                <th class="text-center">정렬</th>
+                <th class="text-center">사용</th>
+                <th class="text-center">비고</th>
+                <th class="text-center">관리</th>
               </tr>
             </thead>
             <tbody>
@@ -94,17 +95,18 @@
                 <td th:text="${it.itemName}"></td>
                 <td><span class="badge badge-gray" th:text="${it.itemType}"></span></td>
                 <td><span class="badge badge-soft" th:text="${it.itemGroup}"></span></td>
-                <td>
-                  <span class="badge"
-                        th:classappend="${it.taxable=='Y'} ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'"
-                        th:text="${it.taxable}"></span>
-                </td>
+                <td class="text-center">
+					  <span th:if="${it.taxable?.name() == 'Y'}"
+					        class="badge bg-success-subtle text-success fw-semibold">✔ </span>					
+					  <span th:if="${it.taxable?.name() == 'N'}"
+					        class="badge bg-danger-subtle text-danger fw-semibold">✘  </span>					
+					</td>
                 <td><span class="badge bg-secondary-subtle text-secondary" th:text="${it.calcMethod}"></span></td>
                 <td class="text-end" th:text="${it.sortNo}"></td>
                 <td>
                   <span class="badge"
-                        th:classappend="${it.useYn.name() == 'Y'} ? 'bg-primary' : 'bg-secondary'"
-                        th:text="${it.useYn.name() == 'Y' ? '사용' : '중지'}"></span>
+                        th:classappend="${it.useYn.name() == 'Y'} ? 'bg-danger-subtle text-success fw-semibold' : 'bg-success-subtle text-danger fw-semibold'"
+                        th:text="${it.useYn.name() == 'Y' ? '✔' : '✘'}"></span>
                 </td>
                 <td class="text-truncate" style="max-width:240px" th:text="${it.remark}"></td>
                 <td class="text-end">

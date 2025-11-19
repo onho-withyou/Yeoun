@@ -23,10 +23,7 @@ import java.time.LocalDate;
      @Index(name = "IX_PAY_CALC_RULE_ITEM", columnList = "ITEM_CODE"),
      @Index(name = "IX_PAY_CALC_RULE_STATUS", columnList = "STATUS")
  }
-//, uniqueConstraints = {
-//     // 필요하면 조합 유니크 추가(예: 동일 항목/타깃/시작일 중복 방지)
-//     // @UniqueConstraint(name="UK_RULE_SCOPE", columnNames={"ITEM_CODE","RULE_TYPE","TARGET_TYPE","TARGET_CODE","START_DATE"})
-// }
+
 )
 @Getter @Setter
 @NoArgsConstructor
@@ -91,6 +88,10 @@ public class PayCalcRule {
  @ColumnDefault("'ACTIVE'")
  @Comment("사용 상태: ACTIVE/INACTIVE")
  private ActiveStatus status;
+ 
+ @Column(name = "REMARK")
+ private String remark;
+
 
 //급여 계산용
 public BigDecimal getAmount() {
@@ -104,6 +105,7 @@ public BigDecimal getRate() {
 public String getExpr() {
   return this.calcFormula;
 }
+
 
  
 }

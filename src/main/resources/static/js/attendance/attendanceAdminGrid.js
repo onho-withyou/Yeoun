@@ -51,7 +51,17 @@ const grid = new tui.Grid({
 		},
 		{
 			header: "총근무시간",
-			name : "workDuration"
+			name : "workDuration",
+			formatter: ({value}) => {
+				if (value === null) return "";
+				
+				// data에서 받아온 값 중에서 workDuration를 60으로 나눠서 시간 구하기
+				const hours = Math.floor(value / 60);
+				// 60으로 나머지를 구해서 분 구하기
+				const minutes = value % 60;
+				
+				return `${hours}시간${minutes}분`;
+			}
 		},
 		{
 			header: " ",
@@ -74,7 +84,7 @@ grid.on("click", (ev) => {
 		// 해당 행의 id 값 가져오기
 		const attendanceId = row.attendanceId;
 		// attendance.js에 만들어둔 함수 사용
-		openModal("edit", attendanceId);
+		openModalAttendance("edit", attendanceId);
 	}
 })
 
@@ -96,7 +106,7 @@ async function loadAttendanceList(startDate, endDate) {
 		}
 		
 		const statusMap = {
-			IN: "출근",
+			WORKIN: "출근",
 			LATE: "지각",
 			OFF: "휴무",
 			OUTWORK: "외근"

@@ -30,7 +30,6 @@ public interface EmpNativeRepository extends JpaRepository<Emp, String> {
 				
 
 
-
     /** 사원명 조회 */
     @Query(value="""
     		SELECT e.empName 
@@ -58,5 +57,34 @@ public interface EmpNativeRepository extends JpaRepository<Emp, String> {
             WHERE E.EMP_ID = :empId
             """, nativeQuery = true)
     String findEmpNameByEmpId(@Param("empId") String empId);
+    
+    
+    /**직급 조회*/
+    @Query(value = """
+    	    SELECT e.POS_CODE 
+    	    FROM EMP e 
+    	    WHERE e.EMP_ID = :empId
+    	""", nativeQuery = true)
+    	Optional<String> findEmpPositionById(@Param("empId") String empId);
+
+    /**사용연차 조회*/
+    	@Query(value = """
+    	    SELECT NVL(a.remain_days, 0)
+    	    FROM ANNUAL_LEAVE a
+    	    WHERE a.EMP_ID = :empId
+    	""", nativeQuery = true)
+    	Optional<Integer> findUsedAnnualById(@Param("empId") String empId);
+
+    	/** 특정 연도의 잔여 연차(remain_days) 조회 */
+    	@Query(value = """
+    	    SELECT NVL(a.remain_days, 0)
+    	      FROM ANNUAL_LEAVE a
+    	     WHERE a.EMP_ID = :empId
+    	       AND a.use_year = :year
+    	    """, nativeQuery = true)
+    	Optional<Integer> findRemainDaysByYear(
+    	        @Param("empId") String empId,
+    	        @Param("year") int year);
+
 
 }

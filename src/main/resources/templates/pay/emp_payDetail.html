@@ -1,0 +1,214 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{layouts/layout}">
+
+<th:block layout:fragment="content">
+<style>
+  :root{
+    --bg:#f6f8fb;
+    --card:#ffffff;
+    --line:#e6eaf2;
+    --text:#0f172a;
+    --muted:#475569;
+    --subtle:#64748b;
+    --accent:#0ea5a4;
+    --accent-strong:#0d9488;
+    --accent-soft:#ccfbf1;
+    --head:#f1f5f9;
+  }
+  body{margin:0;background:var(--bg);font-family:"Noto Sans KR";}
+  .container{max-width:1200px;margin:0 auto;padding:18px 20px}  
+  .grid{display:grid;gap:18px}
+  .two{grid-template-columns:1fr 1fr}
+  @media(max-width:980px){.two{grid-template-columns:1fr}}
+  .panel,.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px 12px;border-bottom:1px solid var(--line)}
+  th{background:var(--head)}
+  .right{text-align:right}
+  .muted{color:#64748b}
+  .mini{font-size:12px}
+  .btn{padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
+  .btn-ghost{border:1px solid var(--line);background:#fff}
+  .btn-soft{background:var(--accent-soft);border:1px solid #99f6e4}
+</style>
+
+
+<div class="container-xxl py-4">
+
+  <div class="container d-flex justify-content-between align-items-center mb-4">
+
+    <!-- 왼쪽: 제목 -->
+    <div>
+        <h1 class="m-0 fw-bold">급여 명세서 조회</h1>
+       
+    </div>
+
+    <!-- 오른쪽: 버튼/날짜 선택 영역 -->
+    <div class="d-flex align-items-center gap-2">
+
+        <a th:href="@{|/pay/emp_pay?yymm=${prev}|}" 
+           class="btn btn-outline-secondary btn-sm">◀ 이전</a>
+
+        <input id="month" type="month"
+               class="form-control form-control-sm"
+               style="width:130px; height:60px;"
+               th:value="${#strings.substring(yymm,0,4)} + '-' + ${#strings.substring(yymm,4,6)}">
+
+        <a th:href="@{|/pay/emp_pay?yymm=${next}|}" 
+           class="btn btn-outline-secondary btn-sm">다음 ▶</a>
+
+      <!-- PDF 다운로드 버튼 -->
+      <input type="hidden" id="payslipId" th:value="${payslipId}">
+      
+		<button class="btn btn-soft pdf-btn"
+		        th:if="${payslipId != null}"
+		        th:onclick="'window.open(\'/pay/pdf/' + ${payslipId} + '\', \'_blank\');'">
+		    🖨 PDF 저장
+		</button>
+
+       
+
+
+    </div>
+</div>
+
+
+  <!-- ########## 신규 추가: header null일 때 처리 ########## -->
+  <section th:if="${header == null}">
+    <div class="panel" style="text-align:center; padding:40px">
+      <h2 th:text="${error != null ? error : '급여명세서 데이터가 없습니다.'}"></h2>
+      <p class="muted">선택한 월에 대한 급여 내역이 없습니다.</p>
+
+      <a th:href="@{/pay/emp_pay}" class="btn btn-ghost" style="margin-top:12px">현재월로 이동</a>
+    </div>
+    <!-- header 없으면 아래 본문 전체 렌더링 안함 -->
+    <div style="display:none" ></div>
+  </section>
+
+
+
+  <!-- ########## header 있을 때만 명세서 본문 출력 ########## -->
+  <section th:if="${header != null}">
+
+    <!-- Summary -->
+<section class="row g-3">
+
+  <!-- 왼쪽: 실수령액 -->
+  <div class="col-md-6">
+    <div class="card shadow-sm p-4">
+
+      <div class="text-muted fw-semibold mb-2"
+           th:text="${#strings.substring(yymm,0,4)} + '년 ' + ${#strings.substring(yymm,4,6)} + '월'">
+      </div>
+
+      <div class="text-secondary fw-bold mb-1">실수령액</div>
+
+      <div class="fw-bold fs-3 text-primary"
+     th:text="'₩' + ${#numbers.formatInteger(header.netAmt,3,'COMMA')}">
+	</div>
+
+
+    </div>
+  </div>
+
+
+  <!-- 오른쪽: 사원 정보 -->
+  <div class="col-md-6">
+    <div class="card shadow-sm p-4">
+
+      <div class="d-flex justify-content-between align-items-start">
+
+        <div>
+          <h4 class="fw-bold mb-1" th:text="${header.empName}"></h4>
+
+          <span class="badge bg-primary mb-2"
+                th:text="${header.posName}"></span>
+
+          <div class="text-muted mt-2">
+            부서:
+            <span class="fw-semibold" th:text="${header.deptName}"></span>
+            · 사번:
+            <span class="fw-semibold" th:text="${header.empId}"></span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+    <!-- 지급 / 공제 -->
+    <section class="grid two">
+
+      <!-- 지급 항목 -->
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <h3>지급 항목</h3>
+          <span class="muted mini"
+                th:text="${#lists.size(items.?[type=='ALW'])} + '개'"></span>
+        </div>
+
+        <table>
+          <thead><tr><th>항목</th><th class="right">금액</th><th class="right">비고</th></tr></thead>
+          <tbody>
+            <tr th:each="i : ${items}" th:if="${i.type=='ALW'}">
+              <td th:text="${i.itemName}"></td>
+              <td class="right" th:text="'₩' + ${#numbers.formatInteger(i.amount,3,'COMMA')}"></td>
+              <td class="right muted"></td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <th>소계</th>
+              <th class="right"
+			    th:text="'₩' + ${#numbers.formatInteger(header.baseAmt + header.alwAmt, 3, 'COMMA')}">
+			</th>
+
+              <th></th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+
+      <!-- 공제 항목 -->
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <h3>공제 항목</h3>
+          <span class="muted mini"
+                th:text="${#lists.size(items.?[type=='DED'])} + '개'"></span>
+        </div>
+
+        <table>
+          <thead><tr><th>항목</th><th class="right">금액</th><th class="right">비고</th></tr></thead>
+          <tbody>
+            <tr th:each="i : ${items}" th:if="${i.type=='DED'}">
+              <td th:text="${i.itemName}"></td>
+              <td class="right" th:text="'₩' + ${#numbers.formatInteger(i.amount,3,'COMMA')}"></td>
+              <td class="right muted"></td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <th>소계</th>
+              <th class="right"
+                  th:text="'₩' + ${#numbers.formatInteger(header.dedAmt,3,'COMMA')}"></th>
+              <th></th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+    </section>
+
+  </section> <!-- header != null END -->
+
+</div>
+
+
+
+</th:block>
+</th:block>

@@ -1,5 +1,4 @@
-// 메타 태그에서 CSRF 값 가져오기
-const csrfToken = document.querySelector('meta[name="_csrf_token"]').getAttribute('content');
+const csrf = document.querySelector('meta[name="_csrf_token"]').getAttribute('content');
 const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]').getAttribute('content');
 
 // 출/퇴근 버튼 클릭 시 사원번호를 전달해서 출/퇴근 기록 요청
@@ -8,7 +7,7 @@ async function attendance(empId) {
 	const response = await fetch(PROCESS_ATTENDANCE, { 
 		method: "POST",
 		headers: {
-			[csrfHeader]: csrfToken, 
+			[csrfHeader]: csrf, 
 			"Content-Type": "application/json"
 		}
 	});
@@ -19,20 +18,31 @@ async function attendance(empId) {
 
 const handleAttendanceToggle = async (empId) => {
 	const result =  await attendance(empId);
+	const attendanceBtn = document.querySelector("#attendance");
 	
 	let msg = "";
 	
 	// attendance함수의 반환값이 data의 status로 알림 변경
-	if (result.status === "IN") {
-		document.querySelector("#attendance").innerText = "퇴근";
+	if (result.status === "WORKIN") {
+		attendanceBtn.innerText = "퇴근";
 		msg = "출근했습니다.";
-	} else if (result.status === "OUT") {
-		document.querySelector("#attendance").innerText = "출근";
+	} else if (result.status === "WORKOUT") {
+		attendanceBtn.innerText = "출근";
 		msg = "퇴근했습니다.";
 	} else if (result.status === "LATE") {
 		msg = "지각입니다.";
+	} else if (result.status === "IN") {
+		msg = "복귀합니다.";
 	} else {
-		msg = "외출입니다";
+		console.log(result.status);
+		msg = "외출입니다.";
+	}
+	
+	// 버튼 활성화/비활성화 적용
+	if (result.buttonEnabled === false) {
+		attendanceBtn.disabled = true;
+	} else {
+		attendanceBtn.disabled = false;
 	}
 	
 	alert(msg);
@@ -69,7 +79,7 @@ let currentMode = "regist";
 let currentAttendanceId = null;
 
 // 출퇴근 수기 등록 및 수정 모달
-const openModal = async (mode, attendanceId = null) => {
+const openModalAttendance = async (mode, attendanceId = null) => {
 	const modalTitle = document.querySelector("#modalCenterTitle");
 	const saveBtn = document.querySelector("#saveBtn");
 	const modalElement = document.querySelector("#modalCenter");
@@ -126,7 +136,7 @@ const saveAttendance = async () => {
 		const response = await fetch(url, {
 			method,
 			headers: {
-				[csrfHeader]: csrfToken, 
+				[csrfHeader]: csrf, 
 				"Content-Type": "application/json"
 			},
 			body: JSON.stringify({empId, workIn, workOut, statusCode}),

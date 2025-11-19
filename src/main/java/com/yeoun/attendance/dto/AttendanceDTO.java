@@ -12,14 +12,19 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class AttendanceDTO {
 	private Long attendanceId;
@@ -63,10 +68,6 @@ public class AttendanceDTO {
 	}
 	
 	// DTO 타입으로 변환
-//	public static AttendanceDTO fromEntity(Attendance attendance) {
-//		return modelMapper.map(attendance, AttendanceDTO.class);
-//	}
-	
 	public static AttendanceDTO fromEntity(Attendance attendance) {
 	    return AttendanceDTO.builder()
 	        .attendanceId(attendance.getAttendanceId())

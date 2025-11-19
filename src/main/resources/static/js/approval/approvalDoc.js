@@ -24,17 +24,6 @@
 		empData();
 	}
 	
-	//let cartList = [];
-
-	       /*[# th:each="item, iterStat : ${formTypes}" "]*/
-
-	       //cartList.push([($formTypes)]);
-
-	       /*[/]*/
-	       console.log("cartList------>",cartList);
-	
-	
-	
 	let approvarDiv = document.querySelector('#approvar');
 	
 	//selectbox - 인사정보 불러오기
@@ -268,9 +257,9 @@
 	    el: document.getElementById('allApprovalGrid'), // 전체결재
 	    columns: [
 	
-		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
-			,{header: '문서id' ,name: 'approval_id' ,align: 'center'}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',hidden: true}
+		   {header: '결재순번' ,name: 'row_no' ,align: 'center'}
+			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
@@ -382,9 +371,6 @@
 	const formattedDate = `${year}년 ${month}월 ${date}일`;
 	document.getElementById("today-date").textContent = formattedDate;
 
-	
-	
-	
 	let jeongyeoljaDiv = document.querySelector('#jeongyeolja');
 	let jeongyeoljaContent = document.querySelector("#jeongyeolja-content");
 	let approvarDivClose = document.getElementById("approvarDiv-close");

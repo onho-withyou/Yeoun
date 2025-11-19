@@ -1,5 +1,6 @@
 package com.yeoun.main.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,11 +9,16 @@ import java.util.stream.Collectors;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.emp.dto.DeptDTO;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.EmpRepository;
+import com.yeoun.leave.dto.LeaveDTO;
+import com.yeoun.leave.dto.LeaveHistoryDTO;
+import com.yeoun.leave.entity.AnnualLeaveHistory;
+import com.yeoun.leave.repository.LeaveHistoryRepository;
 import com.yeoun.main.dto.ScheduleDTO;
 import com.yeoun.main.entity.Schedule;
 import com.yeoun.main.repository.ScheduleRepository;
@@ -28,6 +34,7 @@ public class ScheduleService {
 	private final ScheduleRepository scheduleRepository;
 	private final DeptRepository deptRepository;
 	private final EmpRepository empRepository;
+	private final LeaveHistoryRepository leaveHistoryRepository;
 	// --------------------------------------------------
 	
 	//일정 등록모달 부서리스트 가져오기
@@ -40,9 +47,10 @@ public class ScheduleService {
 	}
 	
 	// 일정 등록로직
-	public void createSchedule(@Valid ScheduleDTO scheduleDTO, Authentication authentication) {
+	public void createSchedule(@Valid ScheduleDTO scheduleDTO) {
 		Emp emp = empRepository.findById(scheduleDTO.getCreatedUser()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다.111"));
-		
+		System.out.println(scheduleDTO + "요기까지왔넹");
+
 		Schedule schedule = scheduleDTO.toEntity();
 		schedule.setEmp(emp);
 		
@@ -74,7 +82,7 @@ public class ScheduleService {
 				} else if(empId.equals(scheduleType)) {
 					schedule.setScheduleType("개인");
 				} else {
-					Dept dept = deptRepository.findById(scheduleType).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 부서입니다."));
+					Dept dept = deptRepository.findById(scheduleType).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 부서입니다.222222"));
 					schedule.setScheduleType(dept.getDeptName());
 				}
 				scheduleList2.add(schedule);
@@ -104,6 +112,19 @@ public class ScheduleService {
 	public void deleteSchedule(@Valid ScheduleDTO scheduleDTO, Authentication authentication) {
 		Schedule schedule = scheduleDTO.toEntity();
 		scheduleRepository.delete(schedule);
+	}
+	
+	//startDate, endDate의 연차정보 가져오기
+	public List<LeaveHistoryDTO> getLeaveHistoryList(LocalDateTime startDateTime, LocalDateTime endDateTime,
+			LoginDTO loginDTO) {
+		
+		String empId = loginDTO.getEmpId();
+		String deptId = loginDTO.getDeptId();
+		
+		LocalDate startDate = startDateTime.toLocalDate();
+		LocalDate endDate = endDateTime.toLocalDate();
+		List<AnnualLeaveHistory> leaveHistoryList = leaveHistoryRepository.findLeaveHistorySchedule(startDate, endDate, empId, deptId);
+		return leaveHistoryList.stream().map(LeaveHistoryDTO::fromEntity).collect(Collectors.toList());
 	}
 
 

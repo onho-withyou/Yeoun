@@ -5,7 +5,9 @@ import java.time.LocalDateTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.yeoun.common.util.FileUtil.FileUploadHelpper;
 import com.yeoun.emp.entity.Emp;
 
 import jakarta.persistence.Column;
@@ -35,7 +37,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @EntityListeners(AuditingEntityListener.class)
-public class Notice {
+public class Notice implements FileUploadHelpper{
 	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "MEMBERS_SEQ_GENERATOR")
 	@Column(updatable = false)
 	private Long noticeId; // 공지 번호
@@ -49,7 +51,6 @@ public class Notice {
 	@Column(nullable = false, length = 1)
 	private String noticeYN = "N"; // 공지 상단 배치여부
 
-	
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "CREATED_USER", referencedColumnName = "EMP_ID", nullable = false)
 	private Emp emp;
@@ -62,6 +63,22 @@ public class Notice {
 	
 	@Column(nullable = false, length = 1)
 	private String deleteYN = "N"; // 공지 삭제 판별
+	
+	// ==========================================================
+	// 파일첨부 파일등록
+	
+	// ================================================
+	@Override
+	public String getTargetTable() {
+		// TODO Auto-generated method stub
+		return "NOTICE";
+	}
+
+	@Override
+	public Long getTargetTableId() {
+		// TODO Auto-generated method stub
+		return noticeId;
+	}
 }
 
 

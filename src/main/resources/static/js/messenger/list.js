@@ -6,10 +6,11 @@
 // DOM 요소 참조 / 전역 상태
 // ==========================
 const tabFriends		= document.getElementById('tab-friends'); // 친구목록 탭
-const tabChats 		= document.getElementById('tab-chats'); // 대화목록 탭
-const friendsPanel 	= document.getElementById('friends-panel'); // 친구패널
+const tabChats 			= document.getElementById('tab-chats'); // 대화목록 탭
+const friendsPanel 		= document.getElementById('friends-panel'); // 친구패널
 const chatsPanel 		= document.getElementById('chats-panel'); // 대화패널
 const headerTitle 		= document.getElementById('header-title'); // 헤더(친구목록-대화목록 텍스트 전환)
+const groupButton		= document.getElementById('group-button'); // 그룹채팅 시작 버튼
 
 const searchInput		    = document.querySelector('.chat-search input'); // 검색창
 const searchButton		    = document.querySelector('.chat-search span'); // 검색버튼
@@ -121,6 +122,7 @@ function activeFriendsTab() {
 	chatsPanel.classList.add('d-none');
 	
 	headerTitle.textContent = '친구 목록';
+	groupButton.style.display = 'none';
 	
 	// 검색창 초기화
 	searchInput.value = '';
@@ -142,6 +144,7 @@ function activeChatsTab() {
 	friendsPanel.classList.add('d-none');
 	
 	headerTitle.textContent = '대화 목록';
+	groupButton.style.display = 'block';
 	
 	// 검색창 초기화
 	searchInput.value = '';
@@ -169,15 +172,24 @@ tabChats.addEventListener('click', () => {
 // ==========================
 // 더블클릭 시 채팅창 팝업
 // ==========================
-document.querySelectorAll('.friend-item, .chat-item').forEach(item => {
+document.querySelectorAll('.friend-item').forEach(item => {
   item.addEventListener('dblclick', () => {
-    const name = item.querySelector('p').textContent;
     const targetId = item.dataset.id;
     window.open(
       'target/' + targetId,
       '_blank',
       'width=500,height=700,resizable=no,scrollbars=no');
   });
+});
+
+document.querySelectorAll('.chat-item').forEach(item => {
+	item.addEventListener('dblclick', () => {
+		const roomId = item.dataset.id;
+		window.open(
+			'room/' + roomId,
+			'_blank',
+			'width=500,height=700,resizable=no,scrollbars=no');
+	});
 });
 
 
@@ -320,4 +332,131 @@ document.addEventListener("click", (event) => {
 // 초기 진입 시 : 친구 탭 활성화
 // ==========================
 activeFriendsTab();
+
+
+
+//==========================
+// 모달 열기
+//==========================
+document.querySelector('.create-group-btn').addEventListener('click', () => {
+ const modal = new bootstrap.Modal(document.getElementById('group-modal'));
+ modal.show();
+});
+
+//========================================
+// 선택 멤버 박스
+//========================================
+const selectedBox = document.querySelector('.selected-list');
+const modalEl = document.getElementById('group-modal');
+
+//========================================
+// 1) 멤버 클릭 이벤트 등록 (한 번만 등록)
+//========================================
+document.querySelectorAll('#group-modal .member-item').forEach(item => {
+ item.addEventListener('click', () => {
+     item.classList.toggle('selected');  // 선택/해제
+     updateSelectedBox();
+ });
+});
+//========================================
+// 2) 모달 열리기 "직전" 초기화 (show.bs.modal)
+// → 화면에 나타나기 전에 초기화되므로 깜빡임 없음
+//========================================
+modalEl.addEventListener('show.bs.modal', () => {
+
+ // 이전 선택 UI 제거 (한 줄)
+ selectedBox.innerHTML = '';
+
+ // 모든 선택 해제
+ document.querySelectorAll('#group-modal .member-item')
+     .forEach(item => item.classList.remove('selected'));
+});
+
+//========================================
+// 3) 선택된 멤버 박스 업데이트
+//========================================
+function updateSelectedBox() {
+ const selectedItems = [...document.querySelectorAll('#group-modal .member-item.selected')];
+ selectedBox.innerHTML = '';
+
+ selectedItems.forEach(item => {
+     const id = item.dataset.id;
+     const name = item.querySelector('.name').textContent;
+
+     const tag = document.createElement('div');
+     tag.className = 'selected-tag';
+     tag.innerHTML = `${name} <i class="bi bi-x-lg" data-id="${id}"></i>`;
+     selectedBox.appendChild(tag);
+ });
+}
+
+//========================================
+// 4) X 버튼 클릭 → 선택 해제
+//========================================
+selectedBox.addEventListener('click', (e) => {
+ if (!e.target.classList.contains('bi-x-lg')) return;
+
+ const id = e.target.dataset.id;
+ const original = document.querySelector(`#group-modal .member-item[data-id="${id}"]`);
+
+ if (original) original.classList.remove('selected');
+
+ updateSelectedBox();
+});
+
+//========================================
+//5) 그룹 채팅방 생성
+//========================================
+
+document.getElementById('create-group-btn')
+.addEventListener('click', async () => {
+
+  // 1) 선택된 멤버 수집
+  const members = [...document.querySelectorAll('#group-modal .member-item.selected')]
+                    .map(item => item.dataset.id);
+
+  if (members.length < 2) {
+    alert("두 명 이상 선택해야 그룹채팅을 만들 수 있어요!");
+    return;
+  }
+
+  // 2) 그룹명 (없으면 null)
+  const groupNameInput = document.getElementById('group-name');
+  const groupName = groupNameInput ? groupNameInput.value.trim() : null;
+
+  // 3) createRoom 호출 (네가 만든 구조 그대로)
+  const roomId = await createRoom({
+    members: members,
+    groupYn: true,             // 그룹 채팅
+    groupName: groupName,     // 입력값 또는 null
+    msg: null,                // 그룹은 firstMessage 없음
+    msgType: null,            // 그룹은 msgType 없음
+    csrfHeaderName: csrfHeaderName,
+    csrfToken: csrfToken
+  });
+  
+  console.log("roomId :: ", roomId);
+  console.log("members :: ", members);
+  console.log("groupName :: ", groupName);
+
+  if (!roomId) {
+    alert("그룹 채팅방 생성에 실패했습니다.");
+    return;
+  }
+
+  // 4) 모달 닫기
+  const modal = bootstrap.Modal.getInstance(document.getElementById('group-modal'));
+  modal.hide();
+
+  // 5) 생성된 그룹 채팅방 오픈
+  window.open(
+    '/messenger/room/' + roomId,
+    '_blank',
+    'width=500,height=700,resizable=no,scrollbars=no'
+  );
+});
+
+
+
+
 

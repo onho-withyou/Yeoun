@@ -41,7 +41,10 @@
           </form>
         </div>
         <div class="col-12 col-lg-3 d-grid d-lg-flex justify-content-lg-end">
-          <a href="/emp/regist" class="btn btn-primary">인사 등록</a>
+          <a href="/emp/regist" class="btn btn-primary" 
+          	th:if="${#authorization.expression('hasRole(''HR_ADMIN'') or hasRole(''SYS_ADMIN'')')}">
+          	인사 등록
+          </a>
         </div>
       </div>
       
@@ -162,15 +165,16 @@
 		    </div>
 		
 		    <div class="modal-footer">
-		      <button type="button" class="btn btn-primary" id="editBtn" >수정</button>
+		      <button type="button" class="btn btn-primary" id="editBtn" 
+		      		  sec:authorize="hasAnyRole('HR_ADMIN','SYS_ADMIN')">
+		      	수정
+		      </button>
 		      <button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
 		    </div>
 		    
 		  </div>
 		</div>
 	  </div>
-	  
-	  <br>
 
       <!-- 그리드 DOM 반드시 포함 -->
       <div class="card-body p-0">
