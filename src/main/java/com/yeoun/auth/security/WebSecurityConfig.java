@@ -40,10 +40,14 @@ public class WebSecurityConfig {
 					.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
 					.requestMatchers("/assets/**", "/css/**", "/custom_bg/**", "/icon/**", "/js/**").permitAll()
 					.requestMatchers("/", "/login", "/logout").permitAll()
+					
+					// ================== 로그인 한 모든 사원 ==================
+		            .requestMatchers("/org/**", "/hr/actions")
+		                .authenticated()
 
 					// ================== 관리자/인사/MES 권한 ==================
 		            // 사원/인사 관리
-		            .requestMatchers("/emp/**", "/hr/**", "/org/**")
+		            .requestMatchers("/emp/**", "/hr/actions/regist")
 		                .hasAnyRole("SYS_ADMIN", "HR_ADMIN")
 		           
 	                // 근태 관리
