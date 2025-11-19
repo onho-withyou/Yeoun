@@ -26,15 +26,12 @@ import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
-import com.yeoun.leave.entity.AnnualLeave;
 import com.yeoun.leave.repository.LeaveHistoryRepository;
-import com.yeoun.leave.repository.LeaveRepository;
 import com.yeoun.leave.service.LeaveService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import net.bytebuddy.description.annotation.AnnotationDescription.Latent;
 
 @Service
 @RequiredArgsConstructor
@@ -64,8 +61,10 @@ public class AttendanceService {
 		// 오늘자 출퇴근 기록 조회
 		Attendance attendance  = attendanceRepository.findByEmp_EmpIdAndWorkDate(empId, today).orElse(null);
 		
+		log.info("attendance is null? {}" , attendance == null);
+		
 		// 오늘자 외근 기록 조회
-		List<AccessLog> accessLogs = accessLogRepository.findByEmpIdAndAccessDate(empId, today);
+		List<AccessLog> accessLogs = accessLogRepository.findByEmp_EmpIdAndAccessDate(empId, today);
 		
 		LocalTime lunchStart = LocalTime.parse(workPolicy.getLunchIn());
 		LocalTime lunchEnd = LocalTime.parse(workPolicy.getLunchOut());
@@ -82,7 +81,7 @@ public class AttendanceService {
 		
 		// 휴무라면 출퇴근이 아니라 외출 현황 로그에만 작성
 		if (isHoliday) {
-			return processAccessLog(empId, now, today);
+			return processAccessLog(empId, now, today, emp);
 		}
 		
 		// 퇴근 처리 안했을 경우 자동으로 퇴근 처리
@@ -90,7 +89,7 @@ public class AttendanceService {
 		
 		// 출근 기록이 있고 이미 퇴근을 완료한 경우
 		if (attendance != null && attendance.getWorkOut() != null) {
-			return processAccessLog(empId, now, today);
+			return processAccessLog(empId, now, today, emp);
 		}
 		
 		// 출근 기록이 없으면 새로 생성
@@ -103,41 +102,28 @@ public class AttendanceService {
 				attendanceRepository.save(newAttendance);
 				
 				return newAttendance.getStatusCode();
+			} else if (now.isAfter(standardIn) && !now.isAfter(standardOut)) {
+				Attendance lateAttendance = Attendance.createForWorkIn(
+						emp, today, now, standardIn, workPolicy.getLateLimit(), accessLogs);
+				
+				attendanceRepository.save(lateAttendance);
+				
+				return lateAttendance.getStatusCode();
+			} else {
+				return processAccessLog(empId, now, today, emp);
 			}
-			// 기준 출근과 퇴근 사이이면 외출로 처리
-			if (!now.isAfter(standardOut)) {
-				return recordAccessOut(empId, today, now);
-			}
-			
-			// 기준 퇴근 이후일 경우 외출로 처리
-			return processAccessLog(empId, now, today);
 		}
 		// 출근 기록이 있을 경우 
 		if (now.isAfter(standardOut)) {
-//			AccessLog log = AccessLog.builder()
-//					.empId(empId)
-//					.accessDate(today)
-//					.returnTime(now)
-//					.accessType("IN")
-//					.build();
-			
-//			accessLogRepository.save(log);
-			
 			attendance.recordWorkOut(now, null);
 			return "WORK_OUT";
 		}
 		
-		// 근무시간 중 퇴근 처리
-//		if (now.isAfter(standardOut) && !attendance.isAlreadyOut()) {
-//			attendance.recordWorkOut(now, standardOut);
-//			return "WORK_OUT";
-//		}
-		
-		return processAccessLog(empId, now, today);
+		return processAccessLog(empId, now, today, emp);
 	}
 	
 	// 외출 복귀 처리
-	private String processAccessLog(String empId, LocalTime now, LocalDate today) {
+	private String processAccessLog(String empId, LocalTime now, LocalDate today, Emp emp) {
 		List<AccessLog> logs = accessLogRepository.findOutLogsWithoutReturn(empId, today);
 		
 		// 가장 최신의access_type인 OUT 찾기
@@ -157,13 +143,13 @@ public class AttendanceService {
 			}
 		}
 		
-		return recordAccessOut(empId, today, now);
+		return recordAccessOut(emp, today, now);
 	}
 	
 	// 외출 기록 생성
-	private String recordAccessOut(String empId, LocalDate today, LocalTime now) {
+	private String recordAccessOut(Emp emp, LocalDate today, LocalTime now) {
 		AccessLog newOutLog = AccessLog.builder()
-				.empId(empId)
+				.emp(emp)
 				.accessDate(today)
 				.outTime(now)
 				.returnTime(null)
@@ -226,16 +212,17 @@ public class AttendanceService {
 	// 부서장 또는 관리자가 확인하는 근태현황
 	public List<AttendanceDTO> getAttendanceListByRole(LoginDTO loginDTO, LocalDate startDate, LocalDate endDate) {
 		String deptId = loginDTO.getDeptId();
-		List<String> roles = loginDTO.getAuthorities().stream()
-				.map(authority -> authority.getAuthority())
+		
+		List<String> roles = loginDTO.getEmpRoles().stream()
+				.map(er -> er.getRole().getRoleCode()) 
 				.collect(Collectors.toList());
 		
 		List<Attendance> attendanceList = new ArrayList();
 		
-		if (roles.contains("ROLE_ADMIN")) {
+		if (roles.contains("SYS_ADMIN") || roles.contains("ATTEND_ADMIN")) {
 			// 관리자의 경우 전체 직원 조회
 			attendanceList = attendanceRepository.findByWorkDateBetween(startDate, endDate);
-		} else if (roles.contains("ROLE_ADMIN_SUB")) {
+		} else if (roles.contains("DEPT_MANAGER")) {
 			// 부서장의 본인 부서에 대해서 조회
 			attendanceList = attendanceRepository.findByEmp_Dept_DeptIdAndWorkDateBetween(deptId, startDate, endDate);
 		}
@@ -350,6 +337,14 @@ public class AttendanceService {
 		}
 		
 		return true;
+	}
+
+	// 건물 출입 현황
+	public List<AccessLogDTO> getAccessLogList(LocalDate start, LocalDate end) {
+		return accessLogRepository.findByAccessDateBetween(start, end)
+				.stream()
+				.map(AccessLogDTO::fromEntity)
+				.collect(Collectors.toList());
 	}
 
 }

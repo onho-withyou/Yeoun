@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -172,12 +173,14 @@ public class AttendanceController {
 		LocalDate end = (endDate != null) ? LocalDate.parse(endDate) : LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
 		
 		try {
-			List<AttendanceDTO> list = attendanceService.getMyAttendanceList(loginDTO.getEmpId(), start, end);
-			return ResponseEntity.ok(list);
+			List<AttendanceDTO> AttendanceDTOList = attendanceService.getMyAttendanceList(loginDTO.getEmpId(), start, end);
+			return ResponseEntity.ok(AttendanceDTOList);
 		} catch(NoSuchElementException  e) {
 			return null;
 		}
 	}
+	
+	
 	
 	// 외근 등록
 	@PostMapping("/outwork")
@@ -215,5 +218,35 @@ public class AttendanceController {
 		redirectAttributes.addFlashAttribute("msg", message);
 		
 		return "redirect:/attendance/policy";
+	}
+	
+	// 건물 출입 현황 페이지
+	@GetMapping("/accessList")
+	public String accessList() {
+		return "attendance/access_list";
+	}
+	
+	// 건물 출입 현황 데이터
+	@GetMapping("/accessList/data")
+	public ResponseEntity<?> accessListInfo(
+			@AuthenticationPrincipal LoginDTO loginDTO, 
+			@RequestParam(required = false, name = "startDate") String startDate,  
+			@RequestParam(required = false, name = "endDate") String endDate) {
+		
+		LocalDate start = (startDate != null) ? LocalDate.parse(startDate) : LocalDate.now().withDayOfMonth(1);
+		LocalDate end = (endDate != null) ? LocalDate.parse(endDate) : LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
+		
+		boolean isAdmin = loginDTO.getEmpRoles().stream()
+		        .anyMatch(r -> r.getRole().getRoleCode().equals("SYS_ADMIN"));
+		
+		// 권한 확인 후 권한이 없을 경우 메인 페이지로 이동(accessList에서 메인페이지로 이동하도록 처리)
+		if (!isAdmin) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+		            .body(Map.of("msg", "접근 권한이 없습니다."));
+		}
+		
+		List<AccessLogDTO> AccessLogDTOList = attendanceService.getAccessLogList(start, end);
+		
+		return ResponseEntity.ok(AccessLogDTOList);
 	}
 }
