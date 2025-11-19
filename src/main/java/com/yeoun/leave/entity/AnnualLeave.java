@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.yeoun.attendance.entity.WorkPolicy;
+import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.leave.dto.LeaveChangeRequestDTO;
 
@@ -22,6 +23,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
@@ -82,11 +84,11 @@ public class AnnualLeave {
 	}
 	
 	// 연차 기준 정책에 따라 총 연차 계산
-	public void updateTotaldays(WorkPolicy workPolicy) {
+	public void updateTotaldays(String workPolicy) {
 		LocalDate hireDate = emp.getHireDate();
 		LocalDate today = LocalDate.now();
 		
-		if ("JOIN".equals(workPolicy.getAnnualBasis())) { // 입사일 기준
+		if ("JOIN".equals(workPolicy)) { // 입사일 기준
 			this.totalDays = calculateJoinBasisAnnual(hireDate, today);
 		} else { // 회계연도 기준
 			this.totalDays = calculateFiscalBasisAnnual(hireDate, today);
@@ -159,5 +161,15 @@ public class AnnualLeave {
 		this.updatedUser = userId;
 		this.updatedDate = LocalDateTime.now();
 		this.reason = leaveChangeRequestDTO.getReason();
+	}
+	
+	// 매년 1월 1일 연차 업데이트
+	public void updateAnnual(LocalDate newStart, LocalDate newEnd, int currentYear, String policy) {
+		this.periodStart = newStart;
+		this.periodEnd = newEnd;
+		this.useYear = currentYear;
+		this.updateTotaldays(policy);
+		this.usedDays = 0;
+		this.remainDays = this.totalDays;
 	}
 }

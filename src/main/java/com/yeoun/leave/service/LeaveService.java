@@ -18,7 +18,6 @@ import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.leave.dto.LeaveChangeRequestDTO;
 import com.yeoun.leave.dto.LeaveDTO;
 import com.yeoun.leave.dto.LeaveHistoryDTO;
-import com.yeoun.leave.dto.LeaveHistoryDTO.LeaveHistoryDTOBuilder;
 import com.yeoun.leave.entity.AnnualLeave;
 import com.yeoun.leave.entity.AnnualLeaveHistory;
 import com.yeoun.leave.repository.LeaveHistoryRepository;
@@ -67,7 +66,7 @@ public class LeaveService {
 				.build();
 		
 		// 정책 기준으로 연차 계산
-		annualLeave.updateTotaldays(workPolicy);
+		annualLeave.updateTotaldays(workPolicy.getAnnualBasis());
 		
 		leaveRepository.save(annualLeave);
 	}
@@ -83,7 +82,7 @@ public class LeaveService {
 		// 현재 날짜 기준으로 yyyymm 생성
 		String currentDate = String.format("%d%02d", now.getYear(), now.getMonthValue());
 		
-		 PayrollPayslip payslip = payslipRepo
+		PayrollPayslip payslip = payslipRepo
 	                .findByPayYymmAndEmpId(currentDate, empId)
 	                .orElseThrow(() -> new IllegalArgumentException("명세서 없음"));
 		 
@@ -150,8 +149,7 @@ public class LeaveService {
 				.emp_id(emp.getEmpId())
 				.emp_name(emp.getEmpName())
 				.dept_id(emp.getDept().getDeptId())
-				.leave_id(annualLeave.getLeaveId())
-				.leaveType(null)
+				.leaveType("ANNUAL")
 				.startDate(approvalDoc.getStartDate())
 				.endDate(approvalDoc.getEndDate())
 				.usedDays(usedDays)
@@ -159,7 +157,11 @@ public class LeaveService {
 				.approvalId(approvalDoc.getApprovalId())
 				.build();
 		
-		historyRepository.save(leaveHistoryDTO.toEntity());
+		AnnualLeaveHistory annualLeaveHistory = leaveHistoryDTO.toEntity();
+		annualLeaveHistory.setAnnualLeave(annualLeave);
+		annualLeaveHistory.setDept(emp.getDept());
+		
+		historyRepository.save(annualLeaveHistory);
 		
 		// 사용한 연차 반영
 		annualLeave.useAnnual(usedDays);
@@ -175,7 +177,7 @@ public class LeaveService {
 			
 			// 변경된 연차 기준에 맞게 업데이트
 			for (AnnualLeave leave : annualLeaves) {
-				leave.updateTotaldays(workPolicy);
+				leave.updateTotaldays(workPolicy.getAnnualBasis());
 			}
 		} catch (Exception e) {
 			log.error("연차 계산 중 오류 발생 : " + e.getMessage());
@@ -187,13 +189,27 @@ public class LeaveService {
 	public void updateAllAnnualLeaves() {
 		List<AnnualLeave> leaveList = leaveRepository.findAll();
 		
+		// 근무정책 조회
+		WorkPolicy workPolicy = workPolicyRepository.findFirstByOrderByPolicyIdAsc()
+				.orElseThrow(() -> new NoSuchElementException("등록된 근무정책이 없습니다."));
+		
+		LocalDate now = LocalDate.now();
+		// 회계연도에 사용될 현재 연도
+		int currentYear = now.getYear();
+		
 		for (AnnualLeave leave : leaveList) {
 			Emp emp = leave.getEmp();
-			LocalDate hiredate = emp.getHireDate();
-			LocalDate now = LocalDate.now();
-			int currentYear = now.getYear();
+			LocalDate hireDate = emp.getHireDate();
 			
 			// 연차 산정 시작일과 종료일 수정
+			LocalDate newStart = (hireDate.getMonthValue() == 1 && hireDate.getDayOfMonth() == 1) 
+					? hireDate // 입사일이 1월 1일이면 그대로 사용
+					: LocalDate.of(currentYear, hireDate.getMonth(), hireDate.getDayOfMonth());
+			
+			LocalDate newEnd = newStart.plusYears(1).minusDays(1);
+			
+			// 연차 업데이트
+			leave.updateAnnual(newStart, newEnd, currentYear, workPolicy.getAnnualBasis());
 		}
 		
 	}
