@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	// 공지사항 조회모달 열기 이벤트
 	showNoticeModal.addEventListener('show.bs.modal', async function(event){
 		await getNoticeFileData(selectedNoticeId);
-		await getNoticeData(selectedNoticeId);
+		await getNoticeData(selectedNoticeId);		
 	});
 	
 	//공지사항 조회 - 수정버튼
@@ -148,7 +148,7 @@ async function getNoticeData(noticeId) {
 }
 
 // 공지조회모달 데이터 입력함수
-function inputReadData(data){
+async function inputReadData(data){
 	// 날짜 문자열을 Date 객체로 변환
 //	console.log(data.createdDate);
 	const createdDate = new Date(data.createdDate);
@@ -158,6 +158,7 @@ function inputReadData(data){
 	const createdUser = data.createdUser;
 	const createdUserName = data.empName;
 	const deptName = data.deptName;
+	document.getElementById("notice-files-read").value = "";// 파일첨부영역초기화
 	document.getElementById("fileFieldRead").innerHTML = "";// 파일첨부영역초기화
 	document.getElementById('notice-id-read').value = data.noticeId;
 	document.getElementById('notice-createdUser-read').value = createdUser;
@@ -179,7 +180,8 @@ function inputReadData(data){
 	document.getElementById('notice-content-read').textContent = data.noticeContent;
 	document.getElementById('notice-modify').add = data.noticeContent;
 	
-	initReadModal(data.createdUser);
+	await initReadModal(data.createdUser);
+	
 }
 
 // 조회할 공지 파일 데이터 가져오기
@@ -258,6 +260,8 @@ function inputReadFileData(fileData) {
 
 		});
 	});
+	
+	initUploadArea();
 }
 // 파일 삭제 함수
 async function deleteFile(elem) {
@@ -283,8 +287,8 @@ async function deleteFile(elem) {
 				const parent = elem.parentElement; // 자바스크립트
 				console.log(parent);
 				parent.remove();
-				
-				// 첨부파일 요소 영역 초기화후 파일데이터 다시 입력
+				// 삭제된 파일 지우고 파일업로드창 생성
+				initUploadArea();
 			}
 		},
 		error: function() {
@@ -295,7 +299,7 @@ async function deleteFile(elem) {
 
 
 // 공지조회 모달 열때 글쓴이와 접속자 동일인물 판별
-function initReadModal(createdUser) {
+async function initReadModal(createdUser) {
 	if(currentUserId == createdUser) { // 로그인직원과 글쓴이가 동일인물
 		Array.from(showNoticeForm.elements).forEach(el => {
 			if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
@@ -322,73 +326,112 @@ function initReadModal(createdUser) {
 }
 
 // 공지등록 첨부파일 엘리먼트
-const fileInput = document.getElementById('notice-files-write');
+const writeFileInput = document.getElementById('notice-files-write');
+const readFileInput = document.getElementById('notice-files-read');
 const MAX_FILE_COUNT = 5;
+
 // 공지등록 첨부파일 변화시 동작이벤트
-fileInput.addEventListener('change', function(event) {
+writeFileInput.addEventListener('change', function(event) {
 	let files = Array.from(event.target.files);
 
 	if(files.length > MAX_FILE_COUNT) { // 파일 갯수가 5개보다 많을 경우
 		alert("최대 첨부 가능한 갯수 : " + MAX_FILE_COUNT);
 		files = files.slice(0, MAX_FILE_COUNT);
 	}
-	// 미리보기1) 이미지 프리뷰 영역 초기화
+	// 파일등록 영역 초기화
 	document.getElementById("fileFieldWrite").innerHTML = "";
 	
 	// 기존 파일 선택 영역을 교체할 새로운 파일 목록 객체 변경에 사용되는 DataTransfer 객체 생성
 	let newFiles = new DataTransfer();
 	
-	// 이미지 파일 갯수만큼 반복문 수행
+	// 파일 갯수만큼 반복문 수행
 	files.forEach(function(file, index) {
 		// 현재 반복중인 파일 1개를 새로운 DataTransfer 객체에 추가
 		newFiles.items.add(file);
-		// ------------------------
-		// 미리보기2) FileReader 객체 생성
-		let reader = new FileReader();
-	
-		// 미리보기3) FileReader 객체의 onload 이벤트 핸들링
-		// => 아래쪽의 reader.readAsDataURL(file) 코드가 실행되어 이미지 파일을 로딩 완료할 경우 이벤트 발생함
-		reader.onload = function(e) {
-//			console.log(e.target.result);
-//			console.log(e);
-			
-			// 미리보기 3-1) 미리보기 HTML 요소 생성
-			const fileList = document.createElement('div');
-			const iconEl = document.createElement('i');
-			const nameSpan = document.createElement('span');
-			
-			fileList.classList.add('div-img-preview');
-			iconEl.classList.add('fa-regular', 'fa-file', 'file-icon');
-			nameSpan.textContent = file.name;
-
-			fileList.appendChild(iconEl);
-			fileList.appendChild(nameSpan);
-								
-			// 미리보기 3-2) 미리보기 영역에 요소 추가
-			console.log(fileList);
-			document.getElementById("fileFieldWrite").append(fileList);
-		}
+		// 미리보기 3-1) 미리보기 HTML 요소 생성
+		const fileList = document.createElement('div');
+		const iconEl = document.createElement('i');
+		const nameSpan = document.createElement('span');
 		
-		// 미리보기4) 이미지 파일 읽어오기
-		// => 이미지 파일 같은 Base64 형식의 인코딩 된 데이터를 읽어오기 위해 
-		//    FileReader 객체의 readAsDataURL() 메서드 활용
-		//    (이미지 미리보기나 AJAX 를 활용한 파일 업로드 등에 활용 가능)
-		// => 실제 동작 순서는 readAsDataURL() 메서드를 통해 파일 읽어온 후 onload 이벤트 호출됨
-		reader.readAsDataURL(file);						
+		fileList.classList.add('file');
+		iconEl.classList.add('fa-regular', 'fa-file', 'file-icon');
+		nameSpan.textContent = file.name;
+
+		fileList.appendChild(iconEl);
+		fileList.appendChild(nameSpan);
+							
+		// 미리보기 3-2) 미리보기 영역에 요소 추가
+		console.log(fileList);
+		document.getElementById("fileFieldWrite").append(fileList);
 	});
 	// --------------------------------------------------
 	// 파일 선택 요소 객체의 files 속성에 접근하여 새로운 파일 목록 객체로 업데이트
-	fileInput.files = newFiles.files;
+	writeFileInput.files = newFiles.files;
 });
 
 // 공지사항 조회 파일관리, 첨부
 let existingFileCount; // 현재까지 업로드된 파일 갯수
 
-// 등록된 파일 표시
-function initUploadArea() {
+//파일업로드창 초기화
+async function initUploadArea() {
+	//현재까지 업로드된 첨부파일 갯수 가져오기(클래스 선택자 itemImg 와 oldFile 이 함께 붙은 요소의 갯수)
+	existingFileCount = $(".attach-file").length;
 	
+//	console.log("initUploadArea : ", existingFileCount);
+
+	// 현재까지 업로드 된 첨부파일 갯수가 최대 첨부 가능 갯수와 같으면 첨부파일 요소 숨김처리, 아니면 표시
+	if(existingFileCount == MAX_FILE_COUNT) {
+		$("#uploadArea").hide(); // 숨김
+	} else {
+		$("#uploadArea").show(); // 숨김
+	}
 }
 
+
+// 공지조회모달 첨부파일 변화시 동작이벤트
+readFileInput.addEventListener('change', function(event) {
+	let files = Array.from(event.target.files);
+	console.log(files, "Asdfasdfszdf");
+	
+	const totalFileCount = files.length + existingFileCount;
+//	console.log("!!!!!!!!!!!!!", existingFileCount);
+//	console.log(totalFileCount);
+	if(totalFileCount > MAX_FILE_COUNT) { // 파일 갯수가 5개보다 많을 경우
+		let availableFileCount = MAX_FILE_COUNT - existingFileCount;
+		alert("최대 첨부 가능한 갯수 : " + availableFileCount);
+		
+		files = files.slice(0, availableFileCount);
+	}
+	// 파일등록 영역 초기화
+	document.getElementById("fileFieldRead").innerHTML = "";
+	
+	// 기존 파일 선택 영역을 교체할 새로운 파일 목록 객체 변경에 사용되는 DataTransfer 객체 생성
+	let newFiles = new DataTransfer();
+	
+	// 파일 갯수만큼 반복문 수행
+	files.forEach(function(file, index) {
+		// 현재 반복중인 파일 1개를 새로운 DataTransfer 객체에 추가
+		newFiles.items.add(file);
+		// 미리보기 3-1) 미리보기 HTML 요소 생성
+		const fileList = document.createElement('div');
+		const iconEl = document.createElement('i');
+		const nameSpan = document.createElement('span');
+		
+		fileList.classList.add('added_file');
+		iconEl.classList.add('fa-regular', 'fa-file', 'file-icon');
+		nameSpan.textContent = file.name;
+
+		fileList.appendChild(iconEl);
+		fileList.appendChild(nameSpan);
+							
+		// 미리보기 3-2) 미리보기 영역에 요소 추가
+		console.log(fileList);
+		document.getElementById("fileFieldRead").append(fileList);
+	});
+	// --------------------------------------------------
+	// 파일 선택 요소 객체의 files 속성에 접근하여 새로운 파일 목록 객체로 업데이트
+	readFileInput.files = newFiles.files;
+});
 
 
 

@@ -87,41 +87,7 @@
 				    </div>
 				    <div>
 						<label for="notice-attached-file" class="form-label">첨부된 파일</label>
-				    	<div class="itemImg oldFile" id="notice-attached-file">
-							<!-- 1) img 태그로 서버상의 이미지 리소스에 직접 접근 -->
-							<!-- => 클라이언트에서 정적 리소스 요청 시 기본적으로 루트(/)가 static 경로를 가리킴 -->
-<!-- 								<img th:src="@{/images/1.jpg}" width="100" height="100" /> -->
-							<!-- => 즉, src/main/resources/static/images 경로상의 리소스를 서버측으로 요청 -->
-							
-							<!-- 단, 클라이언트가 요청 불가능한 경로(정적 리소스 경로 제외)에 파일 업로드가 이루어지므로 -->
-							<!-- 별도의 추가 설정을 통해 서버측으로 요청한 정보를 해석하고 실제 파일 위치를 탐색해야함 -->
-							<!-- 2) 클라이언트에서 요청할 URL 을 가상의 축약 경로를 사용하여 요청하고 -->
-							<!--    서버측에서 축약 경로에 대한 실제 경로로 변환하게 해당 요청 처리 후 응답 -->
-							<!--    => 컨트롤러 측에서 별도의 매핑은 불필요하며 WebConfig 파일에 변환 처리 코드로 처리됨 -->
-<!-- 								<img th:src="@{/files{imgLocation}/{imgName}(imgLocation=${itemImgDTO.imgLocation}, imgName=${itemImgDTO.imgName})}" title="/files 요청" width="100" height="100" /> -->
-							
-							<!-- ================================================================= -->
-							<!-- [ 첨부파일 다운로드 ] -->
-							<!-- 1) HTML5 에서 제공하는 하이퍼링크 download 속성 활용하여 클라이언트가 해당 리소스 다운로드를 직접 요청 후 처리 -->
-<!-- 								<span th:text="${itemImgDTO.originalImgName}"></span> -->
-<!-- 								<a th:href="@{/files{imgLocation}/{imgName}(imgLocation=${itemImgDTO.imgLocation}, imgName=${itemImgDTO.imgName})}" th:download="${itemImgDTO.originalImgName}"> -->
-<!-- 									<input type="button" class="btn-download" value="다운로드"> -->
-<!-- 								</a> -->
-							
-							<!-- 2) 클라이언트 상에서 실제 파일명을 노출시키지 않고 아이디값만으로 서버측으로 다운로드 요청을 전송하여 -->
-							<!--    서버측에서 요청에 따른 파일 전송 처리까지 수행하는 방법(= 다운로드 횟수 누적 등의 부가 작업도 처리 가능) -->
-							<!--    => 컨트롤러에서 처리 필요! -->
-<!-- 							<span th:text="${itemImgDTO.originalImgName}"></span> -->
-<!-- 							<a th:href="@{/items/download/{id}(id=${itemImgDTO.id})}"> -->
-<!-- 									<input type="button" class="btn-download" value="다운로드"> -->
-<!-- 								<img th:src="@{/images/download-icon.png}" class="img_btn" title="다운로드" /> -->
-<!-- 							</a> -->
-							<!-- 주의! 자바스크립트 함수 호출 시 타임리프 객체를 전달하려면 문자열 결합처럼 || 기호로 감싸야함 -->
-<!-- 								<a href="javascript:void(0)" th:onclick="|deleteFile(${itemImgDTO.id})|"> -->
-<!-- 							<a href="javascript:void(0)" onclick="deleteFile(this)" th:data-id="${itemImgDTO.id}"> -->
-<!-- 								<img th:src="@{/images/delete-icon.png}" class="img_btn" title="삭제" /> -->
-<!-- 							</a> -->
-						</div>
+				    	<div class="file oldFile" id="notice-attached-file"></div>
 						<div id="uploadArea">
 							<label for="notice-files-read" class="form-label">파일 첨부</label>
 							<input class="form-control" type="file" id="notice-files-read" name="noticeFiles" multiple>
