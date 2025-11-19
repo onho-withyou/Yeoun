@@ -374,12 +374,23 @@ public class PayrollCalcService {
     BigDecimal annualAmt      = BigDecimal.ZERO;   //연차수당
     BigDecimal LONGSERV      = BigDecimal.ZERO;   //근속수당
     
- // 🔥 근속년수 계산 (입사일 기준 ~ 오늘)
+ // 🔥 근속년수 계산 (입사일 기준 → 급여 계산 대상 월 기준)
     int yearsOfService = 0;
+
     if (emp.hireDate() != null) {
-        yearsOfService = Period.between(emp.hireDate(), LocalDate.now()).getYears();
+
+        int year = Integer.parseInt(payYymm.substring(0, 4));
+        int month = Integer.parseInt(payYymm.substring(4, 6));
+
+        // 해당 월의 마지막 날짜
+        LocalDate calcDate = LocalDate.of(year, month, 1)
+                                      .withDayOfMonth(LocalDate.of(year, month, 1).lengthOfMonth());
+        
+        // 근속연수 계산 (입사일 ~ 해당 계산월 기준)
+        yearsOfService = Period.between(emp.hireDate(), calcDate).getYears();
         if (yearsOfService < 0) yearsOfService = 0;
     }
+
 
     for (PayCalcRule cr : calcRules) {
 

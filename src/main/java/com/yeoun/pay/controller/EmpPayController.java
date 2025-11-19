@@ -63,7 +63,8 @@ public class EmpPayController {
 
         // 정상 데이터
         EmpPayslipResponseDTO result = payslipDetailService.getDetail(payslipId);
-
+        
+        model.addAttribute("payslipId", payslipId);
         model.addAttribute("empId", empId);
         model.addAttribute("header", result.getHeader());
         model.addAttribute("items", result.getItems());
