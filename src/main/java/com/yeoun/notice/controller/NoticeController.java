@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.mysql.cj.log.Log;
 import com.yeoun.notice.dto.NoticeDTO;
 import com.yeoun.notice.service.NoticeService;
 
@@ -84,7 +85,9 @@ public class NoticeController {
 	//공지사항 수정 로직
 	@PatchMapping("/{noticeId}")
 	public ResponseEntity<Map<String, String>> notices( @PathVariable("noticeId")Long noticeId,
-			@ModelAttribute("noticeDTO") @Valid NoticeDTO noticeDTO, BindingResult bindingResult) {
+			@ModelAttribute("noticeDTO") @Valid NoticeDTO noticeDTO, BindingResult bindingResult
+			, @RequestParam("noticeFiles") List<MultipartFile> noticeFiles) {
+	
 		Map<String, String> msg = new HashMap<>();
 		
 		if(bindingResult.hasErrors()) {
@@ -94,7 +97,7 @@ public class NoticeController {
 		
 		try {
 			// 공지 수정 수행
-			noticeService.modifyNotice(noticeDTO);
+			noticeService.modifyNotice(noticeDTO, noticeFiles);
 			msg.put("msg", "공지사항이 수정되었습니다.");
 			return ResponseEntity.ok(msg);
 			

@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			alert("제목, 내용은 필수입력 사항입니다.");
 		});
 	});
-	
+
 	//공지사항 조회 - 삭제버튼
 	deleteNoticeBtn.addEventListener('click', function(event) {
 		event.preventDefault(); //기본제출 막기
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			method: 'DELETE'
 			, headers: {
 				[csrfHeaderName]: csrfToken
-			}			
+			}		
 		})
 		.then(response => {
 			if (!response.ok) throw new Error('삭제에 실패했습니다.');

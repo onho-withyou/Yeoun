@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.yeoun.common.dto.FileAttachDTO;
 import com.yeoun.common.entity.FileAttach;
 import com.yeoun.common.repository.FileAttachRepository;
+import com.yeoun.common.service.FileAttachService;
 import com.yeoun.common.util.FileUtil;
 import com.yeoun.notice.dto.NoticeDTO;
 import com.yeoun.notice.entity.Notice;
@@ -29,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 public class NoticeService {
 	private final NoticeRepository noticeRepository;
 	private final FileAttachRepository fileAttachRepository;
+	private final FileAttachService fileAttachService;
 	
 	private final FileUtil fileUtil;
 	
@@ -72,7 +74,7 @@ public class NoticeService {
 		if(noticeDTO.getNoticeYN() == null) {
 			noticeDTO.setNoticeYN("N");
 		}
-		System.out.println(noticeFiles);
+//		System.out.println(noticeFiles);
 		Notice notice = noticeDTO.toEntity();
 		noticeRepository.save(notice);
 		
@@ -89,7 +91,7 @@ public class NoticeService {
 	
 	//공지사항 수정하기
 	@Transactional
-	public void modifyNotice(@Valid NoticeDTO noticeDTO) {
+	public void modifyNotice(@Valid NoticeDTO noticeDTO, List<MultipartFile> noticeFiles) throws IOException {
 		Long noticeId = noticeDTO.getNoticeId();
 		Notice notice = noticeRepository.findById(noticeId).orElseThrow();
 		
@@ -101,6 +103,15 @@ public class NoticeService {
 		}
 		notice.setNoticeYN(noticeDTO.getNoticeYN()); // 고정여부 변경값 적용
 		// 트랜잭션이 끝날때 변경사항 자동 적용(더티체킹)
+		
+		// ===========================================
+		// 파일업로드 시작
+		List<FileAttach> fileList = fileUtil.uploadFile(notice, noticeFiles).stream()
+										.map(FileAttachDTO::toEntity)
+										.toList();
+		
+		// 파일 DB 저장
+		fileAttachRepository.saveAll(fileList);
 	}
 	
 	// 공지사항 삭제하기
@@ -109,6 +120,13 @@ public class NoticeService {
 		Notice notice = noticeRepository.findById(noticeId).orElseThrow();
 		
 		notice.setDeleteYN("Y");
+		
+		// ======================================
+		// 파일 삭제
+		// noticeId, NOTICE 활용하여 파일리스트 객체 가져오기
+		List<FileAttach> fileList = fileAttachRepository.findByRefTableAndRefId("NOTICE", noticeId);
+		
+		fileAttachService.removeFiles(fileList);
 	}
 	
 	public List<FileAttachDTO> getNoticeFiles(Long noticeId) {
