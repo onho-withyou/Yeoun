@@ -103,7 +103,7 @@ public class MainController {
 	public ResponseEntity<Map<String, String>> deleteSchedule(@ModelAttribute("scheduleDTO")@Valid ScheduleDTO scheduleDTO, 
 			BindingResult bindingResult, Authentication authentication) {
 		Map<String, String> msg = new HashMap<>();
-		System.out.println(scheduleDTO);
+//		System.out.println(scheduleDTO);
 		
 		// 일정수정 요청 데이터 검증
 		if(bindingResult.hasErrors()) {
