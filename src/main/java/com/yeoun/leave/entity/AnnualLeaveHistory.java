@@ -43,9 +43,9 @@ public class AnnualLeaveHistory {
 	@JoinColumn(name = "EMP_ID", nullable = false)
 	private Emp emp;
 	 
-//	@ManyToOne(fetch = FetchType.LAZY)
-//	@JoinColumn(name = "DEPT_ID", nullable = false)
-//	private Dept dept;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "DEPT_ID", nullable = false)
+	private Dept dept;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "LEAVE_ID", nullable = false)
