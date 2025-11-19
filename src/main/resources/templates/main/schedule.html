@@ -60,8 +60,8 @@
 </head>
 <body>
 <th:block layout:fragment="content">
-	<input type="hidden" th:value="${#authentication.name}" id="currentUserId">
-	<input type="hidden" th:value="${#authentication.principal.empName}" id="currentUserName">
+	<input type="hidden" th:value="${currentUserId}" id="currentUserId">
+	<input type="hidden" th:value="${currentUserName}" id="currentUserName">
 	<!-- custom-body 시작 -->
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
 	    <!-- custom-content -->
@@ -127,7 +127,7 @@
 	            <div class="col-md-5 col-lg-4 d-flex flex-column " style="position: relative !important">
 	            	<div style="height: 60px; flex-shrink: 0; display: flex; align-items: center; gap: 10px; left: 15px; right: 15px;">
 	            		<img src="/img/avatar.png" alt="User Avatar" class="rounded-circle" width="40" height="40">
-	            		<p th:text="${#authentication.principal.empName}"></p>
+	            		<p th:text="${currentUserName}"></p>
 	            		<button class="btn btn-primary" th:attr="data-emp-id=${#authentication.name}" onclick="handleAttendanceToggle(this.dataset.empId)" id="attendance">출근</button>
 	            		<button class="btn btn-primary" th:attr="data-emp-id=${#authentication.name}" onclick="handleAttendanceToggle(this.dataset.empId)" id="accessBtn">출입</button>
 	            	</div>
