@@ -598,7 +598,7 @@ async function getLastNoticeList() {
 		if (!response.ok) throw new Error(response.text());
 		return response.json();  //JSON 파싱
 	}).then(data => {
-//		console.log(data, "공지데이터");
+		console.log(data, "공지데이터");
 		initNoticeGrid(data);
 	}).catch(error => {
 		console.error('에러', error)
@@ -624,8 +624,17 @@ async function initNoticeGrid(data) {
 			},
 		]
 	});
+	// 그리드 데이터 추가
 	noticeGrid.resetData(data);
-
+	console.log(noticeGrid.gridEl, "노티스그리드");
+	const rows = noticeGrid.getData();
+	
+	rows.forEach(row => {
+		if(row.noticeYN == 'Y'){
+			noticeGrid.addCellClassName(row.rowKey, 'noticeTitle', 'notice-cell');
+		}
+	});	
+	
 	
 	// 상세보기 버튼 이벤트
 	await noticeGrid.on("click", (event) => {
@@ -636,8 +645,6 @@ async function initNoticeGrid(data) {
 		selectedNoticeId = noticeId;
 		const modalEl = document.getElementById('show-notice');
 		new bootstrap.Modal(modalEl).show();
-			
-
 	});
 }
 
@@ -662,7 +669,7 @@ let selectedApprovalId = null;
 // 공지그리드 그리기 함수
 async function initApprovalGrid(data) {
 	const Pagination = tui.Pagination;
-	
+	console.log(data, "공지데이터");
 	approvalGrid = new tui.Grid({
 		el: document.getElementById("approvalGrid"),
 		editable: true,
@@ -670,8 +677,14 @@ async function initApprovalGrid(data) {
 			{
 				header: '제목'
 				, name: 'approvalTitle'
-				, align: "right"
+				, align: "left"
 			},
+			{
+				header: '상태'
+				, name: 'docStatus'
+				, align: 'left'
+				, width: 80
+			}
 		]
 	});
 	approvalGrid.resetData(data);
