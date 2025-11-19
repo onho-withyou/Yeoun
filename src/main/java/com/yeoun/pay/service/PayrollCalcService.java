@@ -157,7 +157,7 @@ public class PayrollCalcService {
                 // ------------ 계산 로직 ------------
                 BigDecimal baseAmt = calcBase(emp, rules, items, calcRules);
                 AllowanceResult ar =
-                        calcAllowances(emp, rules, items, calcRules, baseAmt);
+                        calcAllowances(emp, rules, items, calcRules, baseAmt, payYymm);
 
                 BigDecimal alwAmt = ar.getAllowance()
                         .add(ar.getIncentive())
@@ -360,7 +360,7 @@ public class PayrollCalcService {
             List<PayRule> rules,
             List<PayItemMst> items,
             List<PayCalcRule> calcRules,
-            BigDecimal baseAmt) {
+            BigDecimal baseAmt,String payYymm) {
 
     PayRule rule = rules.stream().findFirst().orElse(null);
     if (rule == null) 
@@ -405,8 +405,25 @@ public class PayrollCalcService {
         vars.put("YEAR_DIFF", yearsOfService); //근속년수
         vars.put("value", cr.getValueNum());
         vars.put("rate", cr.getValueNum());
-        vars.put("remain_days", employeePort.getUsedAnnual(emp.empId()));
+       
+        /*1년 1회 연차수당 계산*/
+        String yyyymm = payYymm;  // 이미 runMonthlyBatch에서 넘어온 값
+        int calcYear = Integer.parseInt(yyyymm.substring(0, 4));
+        int calcMonth = Integer.parseInt(yyyymm.substring(4, 6));
 
+        // 연차수당은 1월 급여에서만 계산됨
+        boolean isAnnualPayMonth = (calcMonth == 1);
+
+        // 1월이면 → 작년 remain_days 사용
+        int annualRemain = 0;
+        if (isAnnualPayMonth) {
+            int targetYear = calcYear - 1;
+            annualRemain = employeePort.getAnnualRemainForYear(emp.empId(), targetYear);
+        }
+
+        vars.put("remain_days", annualRemain);
+
+        
         BigDecimal result;
         try {
             JexlExpression expr = JEXL.createExpression(cr.getCalcFormula());
@@ -491,6 +508,7 @@ public class PayrollCalcService {
         String getDeptName(String deptId);
         String getEmpPosition(String empId);
         int getUsedAnnual(String empId);
+        int getAnnualRemainForYear(String empId, int year);
     }
 
     public record SimpleEmp(String empId, String deptId, LocalDate hireDate) {}

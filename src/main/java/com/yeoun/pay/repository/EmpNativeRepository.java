@@ -76,5 +76,16 @@ public interface EmpNativeRepository extends JpaRepository<Emp, String> {
     	""", nativeQuery = true)
     	Optional<Integer> findUsedAnnualById(@Param("empId") String empId);
 
+    	/** 특정 연도의 잔여 연차(remain_days) 조회 */
+    	@Query(value = """
+    	    SELECT NVL(a.remain_days, 0)
+    	      FROM ANNUAL_LEAVE a
+    	     WHERE a.EMP_ID = :empId
+    	       AND a.use_year = :year
+    	    """, nativeQuery = true)
+    	Optional<Integer> findRemainDaysByYear(
+    	        @Param("empId") String empId,
+    	        @Param("year") int year);
+
 
 }
