@@ -433,3 +433,172 @@ function formatDate(date) {
 	const day = date.getDate().toString().padStart(2, '0');
 	return `${year}-${month}-${day}`;
 }
+
+// ------------------------------------------------------------------
+// 조직도 모달 함수
+
+//모달열기
+function openOrgModal() {
+    document.getElementById('organization-modal').style.display = 'block';
+}
+
+// 모달닫기
+function closeOrgModal() {
+    document.getElementById('organization-modal').style.display = "none";
+}
+let toastTreeData = null;
+// 조직도 불러오기
+async function getOrganizationChart() {
+	await fetch(`/api/schedules/organizationChart`, {method: 'GET'})
+	.then(response => {
+		if (!response.ok) throw new Error(response.text());
+		return response.json();  //JSON 파싱
+	}).then(async data => {
+		toastTreeData = await buildDeptTree(data.data);
+		await renderOrgGrid();
+	}).catch(error => {
+		console.error('에러', error)
+		alert("조직 데이터 조회 실패");
+	});
+}
+
+// 트리그리드 형태로 변환
+async function buildDeptTree(flatList) {
+    const deptMap = {};
+    flatList.forEach(item => {
+        // 부서 노드 준비
+        if (!deptMap[item.DEPT_ID]) {
+            deptMap[item.DEPT_ID] = {
+                name: item.DEPT_NAME,
+                deptId: item.DEPT_ID,
+                type: 'department',
+                parentId: item.PARENT_ID ?? null,
+                children: []
+            };
+        }
+        // 직원 노드는 부서 children에 추가
+        if (item.EMP_ID) {
+            deptMap[item.DEPT_ID].children.push({
+                name: item.EMP_NAME,
+                empId: item.EMP_ID,
+                type: 'employee'
+            });
+        }
+    });
+
+    // 계층 트리화
+    const treeRoot = [];
+    Object.values(deptMap).forEach(dept => {
+        if (!dept.parentId || !deptMap[dept.parentId]) {
+            treeRoot.push(dept);   // 최상위 부서
+        } else {
+            deptMap[dept.parentId].children.push(dept);  // 하위부서로 연결
+        }
+    });
+	
+	const toastTreeData = convertTreeNodes(treeRoot);
+
+    return toastTreeData;
+}
+
+// 트리 노드 변환
+function convertTreeNodes(nodes) {
+    return nodes.map(node => {
+        const newNode = { ...node };
+        if (Array.isArray(newNode.children) && newNode.children.length > 0) {
+            newNode._children = convertTreeNodes(newNode.children);
+        }
+        delete newNode.children;
+        newNode._attributes = { expanded: true }; // 펼침 초기화
+        return newNode;
+    });
+}
+
+let treeGrid = null;
+
+// 조직도그리드 그리기
+async function renderOrgGrid() {
+	// 조직도 열때마다 초기화
+    if (treeGrid) {
+		treeGrid.destroy();
+		treeGrid = null;
+	}
+	
+    treeGrid = new tui.Grid({
+        el: document.getElementById('organizationChartGrid'),
+        data: toastTreeData, // 트리화 데이터
+        rowHeaders: ['checkbox'],
+        bodyHeight: 300,
+        treeColumnOptions: {
+            name: 'name',
+            useCascadingCheckbox: true
+        },
+        columns: [
+            { header: '이름', name: 'name', treeColumn: true, align: 'left', width: 200 },
+            { header: '사번', name: 'empId', align: 'center' }
+        ]
+    });
+}
+
+document.getElementById('select-sharer-btn').addEventListener('click', function(){
+    openOrgModal();
+    getOrganizationChart();
+});
+
+
+document.getElementById('select-org-btn').addEventListener('click', function(){
+    // 체크된 직원 정보 가져오기
+    const checkedUpEmpList = getCheckedEmpId();
+    // 명단 노출
+    const checkedNames = checkedUpEmpList.map(item => `${item.empName} (${item.empId})`);
+    document.getElementById('schedule-sharer').value = checkedNames.join(', ');
+    // 필요시 숨겨진 input에도 empId 저장
+    // document.getElementById('schedule-sharer-ids').value = checkedUpEmpList.map(item => item.empId).join(',');
+    closeOrgModal();
+});
+
+document.getElementById('select-org-btn').addEventListener('click', function(){
+    // 체크된 직원 정보 가져오기
+    const checkedUpEmpList = getCheckedEmpId();
+    // 명단 노출
+    const checkedNames = checkedUpEmpList.map(item => `${item.empName} (${item.empId})`);
+    document.getElementById('schedule-sharer').value = checkedNames.join(', ');
+    // 필요시 숨겨진 input에도 empId 저장
+    // document.getElementById('schedule-sharer-ids').value = checkedUpEmpList.map(item => item.empId).join(',');
+    closeOrgModal();
+});
+
+
+function getCheckedEmpId() {
+    let checked = [];
+    const rows = treeGrid.getData();
+    rows.forEach((rowData) => {
+        // 직원만
+        if(rowData._attributes && rowData._attributes.checked && rowData.empId != null) {
+            checked.push({
+                empId: rowData.empId,
+                empName: rowData.name
+            });
+        }
+    });
+    return checked;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
