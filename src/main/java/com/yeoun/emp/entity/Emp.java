@@ -95,10 +95,6 @@ public class Emp {
 	@Column(name = "PHOTO_FILE_ID")
 	private Long photoFileId;	
 	
-	// 역할코드
-	@Column(name = "ROLE_CODE", length = 20)
-	private String roleCode;	
-	
 	// 등록 일시
 	@CreatedDate
 	@Column(name = "CREATED_DATE", updatable = false)
