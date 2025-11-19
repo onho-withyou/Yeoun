@@ -23,8 +23,6 @@ const workStatus		= document.getElementById('work-status'); // 수동 근무 상
 //현재 모드: 'friend' / 'chat'
 let currentMode = 'friend';
 
-
-
 // ==========================
 // 각 친구의 상태
 // ==========================
@@ -206,6 +204,32 @@ let statuses = [
 let current = 0;
 let manuallySet = false;  // 수동 상태 변경 여부
 
+
+// ==========================
+// 서버로 상태 전송 함수
+// ==========================
+async function sendStatusToServer(presence, reason = null) {
+    try {
+        const res = await fetch('/messenger/status', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeaderName]: csrfToken
+            },
+            body: JSON.stringify({
+                presence: presence,   // ONLINE / AWAY / BUSY / OFFLINE
+                reason: reason        // MEETING / LUNCH / WORKING / etc
+            })
+        });
+
+        const text = await res.text();
+        console.log("상태 전송 완료:", presence, reason, text);
+
+    } catch (err) {
+        console.error("상태 전송 실패:", err);
+    }
+}
+
 // =====================
 // 수동 상태 변경
 // =====================
@@ -215,7 +239,29 @@ statusIndicator.addEventListener('click', () => {
     current = (current + 1) % statuses.length;
     statusIndicator.style.backgroundColor = statuses[current].color;
     statusText.textContent = statuses[current].text;
+
+    // 상태 매핑: 텍스트 → 코드
+    let presenceCode = '';
+
+    switch (statuses[current].text) {
+        case '온라인':
+            presenceCode = 'ONLINE';
+            break;
+        case '자리비움':
+            presenceCode = 'AWAY';
+            break;
+        case '다른 용무중':
+            presenceCode = 'BUSY';
+            break;
+        default:
+            presenceCode = 'ONLINE';
+    }
+
+// 서버로 전송
+    sendStatusToServer(presenceCode, null);
+
 });
+
 
 
 // =====================
@@ -250,6 +296,84 @@ setInterval(() => {
         statusIndicator.style.backgroundColor = '#4CAF50';
         statusText.textContent = '온라인';
     });
+});
+
+
+// ==========================
+// 업무 사유(workStatus) 선택 시 → 1차 상태 자동 변경
+// ==========================
+workStatus.addEventListener('change', () => {
+    const value = workStatus.value;
+
+    // 업무 사유 선택은 수동 변경으로 취급 → 자동 자리비움 잠시 중지
+    manuallySet = true;
+
+    // 상태 매핑
+    let newStatus = { color: '', text: '' };
+
+    switch (value) {
+        case 'MEETING':         // 회의 중
+        case 'CALL':            // 통화 중
+        case 'FOCUS':           // 집중 업무 중
+            newStatus = { color: '#F44336', text: '다른 용무중' }; // BUSY
+            break;
+
+        case 'LUNCH':           // 식사 중
+        case 'OUTING':          // 외출 중
+        case 'FIELDWORK':       // 외근 중
+            newStatus = { color: '#FFC107', text: '자리비움' }; // AWAY
+            break;
+
+        case 'VACATION':        // 휴가 중
+            newStatus = { color: '#9E9E9E', text: '오프라인' }; // OFFLINE
+            break;
+
+        case 'WORKING':         // 근무 중
+        case 'WFH':             // 재택근무 중
+            newStatus = { color: '#4CAF50', text: '온라인' }; // ONLINE
+            break;
+
+        default:
+            newStatus = { color: '#4CAF50', text: '온라인' };
+    }
+
+    // UI 적용
+    statusIndicator.style.backgroundColor = newStatus.color;
+    statusText.textContent = newStatus.text;
+
+    // ==========================
+    // 업무 사유 선택 시 서버로 전송
+    // ==========================
+    const reasonMap = {
+        '회의 중': 'MEETING',
+        '통화 중': 'CALL',
+        '집중 업무 중': 'FOCUS',
+        '식사 중': 'LUNCH',
+        '외출 중': 'OUTING',
+        '외근 중': 'FIELDWORK',
+        '휴가 중': 'VACATION',
+        '근무 중': 'WORKING',
+        '재택근무 중': 'WFH'
+    };
+
+    const presenceMap = {
+        '회의 중': 'BUSY',
+        '통화 중': 'BUSY',
+        '집중 업무 중': 'BUSY',
+        '식사 중': 'AWAY',
+        '외출 중': 'AWAY',
+        '외근 중': 'AWAY',
+        '휴가 중': 'OFFLINE',
+        '근무 중': 'ONLINE',
+        '재택근무 중': 'ONLINE'
+    };
+
+    const reason = reasonMap[value];
+    const presence = presenceMap[value];
+
+    // 서버 전송
+    sendStatusToServer(presence, reason);
+
 });
 
 
