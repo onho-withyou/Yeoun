@@ -9,16 +9,16 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import lombok.RequiredArgsConstructor;
+
 @Configuration
 @EnableWebSecurity	// 스프링 시큐리티 기능 설정 클래스로 지정
+@RequiredArgsConstructor
 public class WebSecurityConfig {
 	
-	// 시큐리티 정보 조회에 사용할 서비스 클래스 주입
 	private final CustomUserDetailsService userDetailsService;
+	private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 	
-	public WebSecurityConfig(CustomUserDetailsService userDetailsService) {
-		this.userDetailsService = userDetailsService;
-	}
 	// ====================================================================
 	// 스프링 시큐리티 보안 필터 설정
 	// => 리턴타입이 SecurityFilterChain 타입을 리턴하는 메서드여야 함
@@ -51,7 +51,7 @@ public class WebSecurityConfig {
 					.loginProcessingUrl("/login") 	// 로그인 폼에서 제출된 데이터 처리용 요청 주소(자동으로 POST 방식으로 처리됨)
 					.usernameParameter("empId") 	// 로그인 과정에서 사용할 사용자명(username)을 사원번호(empId)로 지정(기본값 : username)
 					.passwordParameter("empPwd") 	// 로그인 과정에서 사용할 패스워드 지정(기본값 : password)
-					.successHandler(new CustomAuthenticationSuccessHandler())  // 로그인 성공 시 별도의 추가 작업을 처리할 핸들러 지정
+					.successHandler(customAuthenticationSuccessHandler)  // 로그인 성공 시 별도의 추가 작업을 처리할 핸들러 지정
 					.failureUrl("/login?error")		// 로그인 실패 시 리다이렉트
 					.permitAll() 					// 로그인 경로 관련 요청 주소를 모두 허용
 				) 
