@@ -219,10 +219,10 @@ public class AttendanceService {
 		
 		List<Attendance> attendanceList = new ArrayList();
 		
-		if (roles.contains("SYS_ADMIN") || roles.contains("ATTEND_ADMIN")) {
+		if (roles.contains("ROLE_SYS_ADMIN") || roles.contains("ROLE_ATTEND_ADMIN")) {
 			// 관리자의 경우 전체 직원 조회
 			attendanceList = attendanceRepository.findByWorkDateBetween(startDate, endDate);
-		} else if (roles.contains("DEPT_MANAGER")) {
+		} else if (roles.contains("ROLE_DEPT_MANAGER")) {
 			// 부서장의 본인 부서에 대해서 조회
 			attendanceList = attendanceRepository.findByEmp_Dept_DeptIdAndWorkDateBetween(deptId, startDate, endDate);
 		}

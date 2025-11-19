@@ -1,12 +1,15 @@
 package com.yeoun.leave.service;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.yeoun.approval.entity.ApprovalDoc;
+import com.yeoun.approval.repository.ApprovalDocRepository;
 import com.yeoun.attendance.entity.WorkPolicy;
 import com.yeoun.attendance.repository.WorkPolicyRepository;
 import com.yeoun.auth.dto.LoginDTO;
@@ -15,7 +18,9 @@ import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.leave.dto.LeaveChangeRequestDTO;
 import com.yeoun.leave.dto.LeaveDTO;
 import com.yeoun.leave.dto.LeaveHistoryDTO;
+import com.yeoun.leave.dto.LeaveHistoryDTO.LeaveHistoryDTOBuilder;
 import com.yeoun.leave.entity.AnnualLeave;
+import com.yeoun.leave.entity.AnnualLeaveHistory;
 import com.yeoun.leave.repository.LeaveHistoryRepository;
 import com.yeoun.leave.repository.LeaveRepository;
 import com.yeoun.pay.entity.PayrollPayslip;
@@ -35,6 +40,7 @@ public class LeaveService {
 	private final LeaveHistoryRepository historyRepository;
 	private final WorkPolicyRepository workPolicyRepository;
 	private final PayrollPayslipRepository payslipRepo;
+	private final ApprovalDocRepository approvalDocRepository;
 
 	// 직원 연차 생성
 	@Transactional
@@ -105,6 +111,59 @@ public class LeaveService {
 				.map(LeaveDTO::fromEntity)
 				.collect(Collectors.toList());
 	}
+	// 연차 개별 조회
+	public LeaveDTO getLeaveDetail(Long leaveId) {
+		AnnualLeave annualLeave = leaveRepository.findById(leaveId)
+				.orElseThrow(() -> new NoSuchElementException("조회된 연차가 없습니다."));
+		
+		return LeaveDTO.fromEntity(annualLeave);
+	}
+
+	// 연차 수정
+	@Transactional
+	public void modifyLeave(LoginDTO loginDTO, LeaveChangeRequestDTO leaveChangeRequestDTO, Long leaveId) {
+		AnnualLeave annualLeave = leaveRepository.findById(leaveId)
+				.orElseThrow(() -> new NoSuchElementException("조회된 연차가 없습니다."));
+		
+		annualLeave.modifyAnnual(loginDTO.getEmpId(), leaveChangeRequestDTO);
+	}
+	
+	// 개인 연차 사용 등록
+	@Transactional
+	public void createAnnualLeave(Long approvalId) {
+		// 결재 문서 조회
+		ApprovalDoc approvalDoc = approvalDocRepository.findById(approvalId)
+				.orElseThrow(() -> new NoSuchElementException("결재 문서를 찾을 수 없습니다."));
+		
+		Emp emp = empRepository.findById(approvalDoc.getEmpId())
+				.orElseThrow(() -> new NoSuchElementException("사원을 찾을 수 없습니다."));
+		
+		AnnualLeave annualLeave = leaveRepository.findByEmp_empId(approvalDoc.getEmpId())
+				.orElseThrow(() -> new NoSuchElementException("연차 테이블을 찾을 수 없습니다."));
+		
+		// 연차 사용 시작일과 종료 일자 계산해서 사용한 일수 구함
+		double usedDays = (double) (ChronoUnit.DAYS.between(approvalDoc.getStartDate(), approvalDoc.getEndDate()) + 1);
+		
+		
+		// 연차 사용 기록 등록 
+		LeaveHistoryDTO  leaveHistoryDTO = LeaveHistoryDTO.builder()
+				.emp_id(emp.getEmpId())
+				.emp_name(emp.getEmpName())
+				.dept_id(emp.getDept().getDeptId())
+				.leave_id(annualLeave.getLeaveId())
+				.leaveType(null)
+				.startDate(approvalDoc.getStartDate())
+				.endDate(approvalDoc.getEndDate())
+				.usedDays(usedDays)
+				.reason(approvalDoc.getReason())
+				.approvalId(approvalDoc.getApprovalId())
+				.build();
+		
+		historyRepository.save(leaveHistoryDTO.toEntity());
+		
+		// 사용한 연차 반영
+		annualLeave.useAnnual(usedDays);
+	}
 	
 	// 연차 재계산 (비동기)
 	@Async
@@ -123,20 +182,19 @@ public class LeaveService {
 		}
 	}
 
-	// 연차 개별 조회
-	public LeaveDTO getLeaveDetail(Long leaveId) {
-		AnnualLeave annualLeave = leaveRepository.findById(leaveId)
-				.orElseThrow(() -> new NoSuchElementException("조회된 연차가 없습니다."));
-		
-		return LeaveDTO.fromEntity(annualLeave);
-	}
-
-	// 연차 수정
+	// 매년 1월 1일에 연차 산정 시작/종료일, 해당연도, 총 연차, 사용 연차, 잔여 연차 수정
 	@Transactional
-	public void modifyLeave(LoginDTO loginDTO, LeaveChangeRequestDTO leaveChangeRequestDTO, Long leaveId) {
-		AnnualLeave annualLeave = leaveRepository.findById(leaveId)
-				.orElseThrow(() -> new NoSuchElementException("조회된 연차가 없습니다."));
+	public void updateAllAnnualLeaves() {
+		List<AnnualLeave> leaveList = leaveRepository.findAll();
 		
-		annualLeave.modifyAnnual(loginDTO.getEmpId(), leaveChangeRequestDTO);
+		for (AnnualLeave leave : leaveList) {
+			Emp emp = leave.getEmp();
+			LocalDate hiredate = emp.getHireDate();
+			LocalDate now = LocalDate.now();
+			int currentYear = now.getYear();
+			
+			// 연차 산정 시작일과 종료일 수정
+		}
+		
 	}
 }
