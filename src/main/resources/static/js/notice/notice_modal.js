@@ -202,7 +202,7 @@ async function getNoticeFileData(noticeId) {
 // 공지 파일 데이터 입력함수
 function inputReadFileData(fileData) {
 	//등록된 파일 데이터 입력
-	console.log(fileData)
+//	console.log(fileData)
 	// 등록된파일위치 초기화
 	document.getElementById("notice-attached-file").innerHTML = "";
 	
@@ -250,7 +250,7 @@ function inputReadFileData(fileData) {
 		fileList.appendChild(deleteEl);
 							
 		// 미리보기 3-2) 미리보기 영역에 요소 추가
-		console.log(fileList);
+//		console.log(fileList);
 		document.getElementById("notice-attached-file").append(fileList);
 		
 		deleteEl.addEventListener('click', function(event) {
@@ -285,7 +285,7 @@ async function deleteFile(elem) {
 		success: async function(response) {
 			if(response.result) {
 				const parent = elem.parentElement; // 자바스크립트
-				console.log(parent);
+//				console.log(parent);
 				parent.remove();
 				// 삭제된 파일 지우고 파일업로드창 생성
 				initUploadArea();
@@ -361,7 +361,7 @@ writeFileInput.addEventListener('change', function(event) {
 		fileList.appendChild(nameSpan);
 							
 		// 미리보기 3-2) 미리보기 영역에 요소 추가
-		console.log(fileList);
+//		console.log(fileList);
 		document.getElementById("fileFieldWrite").append(fileList);
 	});
 	// --------------------------------------------------
@@ -391,7 +391,7 @@ async function initUploadArea() {
 // 공지조회모달 첨부파일 변화시 동작이벤트
 readFileInput.addEventListener('change', function(event) {
 	let files = Array.from(event.target.files);
-	console.log(files, "Asdfasdfszdf");
+//	console.log(files, "Asdfasdfszdf");
 	
 	const totalFileCount = files.length + existingFileCount;
 //	console.log("!!!!!!!!!!!!!", existingFileCount);
@@ -425,7 +425,7 @@ readFileInput.addEventListener('change', function(event) {
 		fileList.appendChild(nameSpan);
 							
 		// 미리보기 3-2) 미리보기 영역에 요소 추가
-		console.log(fileList);
+//		console.log(fileList);
 		document.getElementById("fileFieldRead").append(fileList);
 	});
 	// --------------------------------------------------

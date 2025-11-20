@@ -129,6 +129,7 @@ public class NoticeService {
 		fileAttachService.removeFiles(fileList);
 	}
 	
+	// 공지사항 파일 가져오기
 	public List<FileAttachDTO> getNoticeFiles(Long noticeId) {
 		List<FileAttach> fileList = fileAttachRepository.findByRefTableAndRefId("NOTICE", noticeId);
 		

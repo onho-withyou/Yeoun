@@ -53,7 +53,7 @@ public class NoticeController {
 	    model.addAttribute("orderKey", orderKey);
 	    model.addAttribute("orderMethod", orderMethod);
 	    
-	    System.out.println("노티스페이지" + noticePage.getContent());
+//	    System.out.println("노티스페이지" + noticePage.getContent());
 		return "/notice/notice";
 	}
 	
@@ -101,7 +101,6 @@ public class NoticeController {
 			return ResponseEntity.ok(msg);
 			
 		} catch (Exception e) {
-			System.out.println(e);
 			msg.put("msg", "공지사항 수정에 실패했습니다 :" + e.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		}

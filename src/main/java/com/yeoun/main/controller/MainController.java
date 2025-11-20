@@ -32,6 +32,12 @@ import lombok.RequiredArgsConstructor;
 public class MainController {
 	private final ScheduleService scheduleService;
 	
+	@GetMapping("/test")
+	public String test() {
+		return "/main/organizationChartModal";
+	}
+	
+	
 	// 메인페이지 맵핑
 //	@GetMapping("")
 //	public String Main() {
@@ -62,7 +68,6 @@ public class MainController {
 	public ResponseEntity<Map<String, String>> createSchedule(@ModelAttribute("scheduleDTO")@Valid ScheduleDTO scheduleDTO, 
 			BindingResult bindingResult) {
 		Map<String, String> msg = new HashMap<>();
-		System.out.println(scheduleDTO + "요기까지왔넹");
 
 		// 일정등록 요청 데이터 검증
 		if(bindingResult.hasErrors()) {
@@ -110,7 +115,7 @@ public class MainController {
 	public ResponseEntity<Map<String, String>> deleteSchedule(@ModelAttribute("scheduleDTO")@Valid ScheduleDTO scheduleDTO, 
 			BindingResult bindingResult, Authentication authentication) {
 		Map<String, String> msg = new HashMap<>();
-		System.out.println(scheduleDTO);
+//		System.out.println(scheduleDTO);
 		
 		// 일정수정 요청 데이터 검증
 		if(bindingResult.hasErrors()) {
