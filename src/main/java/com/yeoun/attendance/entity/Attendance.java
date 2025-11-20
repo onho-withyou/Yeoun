@@ -151,8 +151,14 @@ public class Attendance {
 	
 	// 근태 수정 로직
 	public void modifyAttendance(LocalTime workIn, LocalTime workOut, String statusCode, String updateUserEmpId) {
-		this.workIn = workIn;
-		this.workOut = workOut;
+		if (workIn != null) {
+			this.workIn = workIn;
+		}
+
+		if (workOut != null) {
+			this.workOut = workOut;
+		}
+		
 		this.statusCode = statusCode;
 		this.updatedUser = updateUserEmpId;
 	}
@@ -164,11 +170,15 @@ public class Attendance {
 
 	// 외근 등록 후 데이터 변경
 	public void markAsInByOutwork(LocalTime outTime, WorkPolicy workPolicy, String reason) {
-		LocalTime standardIn = LocalTime.parse(workPolicy.getInTime());
-		int lateLimit = workPolicy.getLateLimit();
+		// 출근 시간이 없을 경우에만 외근 시작 시간을 출근 시간으로 변경
+		if (this.workIn == null) {
+			this.workIn = outTime;
+			
+			LocalTime standardIn = LocalTime.parse(workPolicy.getInTime());
+			int lateLimit = workPolicy.getLateLimit();
+			this.statusCode = (outTime.isAfter(standardIn.plusMinutes(lateLimit))) ? "LATE" : "WORKIN";
+		}
 		
-		this.statusCode = (outTime.isAfter(standardIn.plusMinutes(lateLimit))) ? "LATE" : "WORKIN";
-		this.workIn = outTime;
 		this.remark = reason;
 	}
 	

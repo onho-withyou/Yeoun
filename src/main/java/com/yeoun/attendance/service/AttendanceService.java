@@ -142,7 +142,8 @@ public class AttendanceService {
 		
 		if (lastLog != null) {
 			// OUT -> IN 복귀 처리
-			if ("OUT".equalsIgnoreCase(lastLog.getAccessType())) {
+			if ("OUT".equalsIgnoreCase(lastLog.getAccessType())
+					|| "OUTWORK".equalsIgnoreCase(lastLog.getAccessType())) {
 				lastLog.accessIn(now, "IN");
 				return "IN";
 			} else {
@@ -187,6 +188,10 @@ public class AttendanceService {
 	
 	// 총근무시간 변경
 	private int calculateWorkDuration(LocalTime in, LocalTime out, boolean halfLeave, WorkPolicy workPolicy) {
+		if (in == null || out == null) {
+			return 0;
+		}
+		
 		int minutes = (int) ChronoUnit.MINUTES.between(in, out);
 		
 		// 점심시간 제외
@@ -360,8 +365,6 @@ public class AttendanceService {
 		LocalDate workDate = accessLogDTO.getAccessDate();
 		LocalTime outTime= accessLogDTO.getOutTime();
 		
-		log.info(">>>>>>>>>>>>>> accessLogDTO : " + accessLogDTO);
-		
 		Attendance attendance = attendanceRepository.findByEmp_EmpIdAndWorkDate(empId, workDate)
 			    .orElse(null);
 	
@@ -383,12 +386,6 @@ public class AttendanceService {
 			attendanceDTO.setWorkIn(accessLogDTO.getOutTime());
 			attendanceDTO.setStatusCode("OUTWORK");
 			attendanceDTO.setRemark("외근 선등록");
-			
-			LocalTime standardOut = LocalTime.parse(workPolicy.getOutTime());
-			
-			if (accessLogDTO.getReturnTime().isAfter(standardOut) ) {
-				attendanceDTO.setWorkOut(accessLogDTO.getReturnTime());
-			}
 			
 			Attendance newAttendance = attendanceDTO.toEntity();
 			newAttendance.setEmp(emp);
