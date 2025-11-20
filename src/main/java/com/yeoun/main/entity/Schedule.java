@@ -38,7 +38,7 @@ import lombok.ToString;
 @EntityListeners(AuditingEntityListener.class)
 public class Schedule {
 	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SCHEDULES_SEQ_GENERATOR")
-	@Column(updatable = false)
+	@Column(name = "SCHEDULE_ID", updatable = false)
 	private Long scheduleId; // 일정ID
 
 	@Column(nullable = false)

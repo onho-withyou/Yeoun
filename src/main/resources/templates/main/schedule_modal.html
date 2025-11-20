@@ -27,8 +27,9 @@
 					<div class="mb-3 mt-3" style="display:flex; gap:8px;">
 						<div>
 							<select id="schedule-type" class="form-select" name="scheduleType">
+								<option value="share" selected>공유</option>
 								<option value="company">회사</option>
-								<option th:value="${currentUserId}">개인</option>
+								<option th:value="${currentUserId}" >개인</option>
 							</select>
 						</div>
 						<div>
@@ -53,7 +54,7 @@
 						</div>
 					</div>
 
-					<div class="col mb-6">
+					<div class="col mb-6" id="shareField">
 					    <label for="schedule-sharer" class="form-label">공유자</label>
 					    <div style="display:flex; gap:8px;">
 					        <input id="schedule-sharer" class="form-control" readonly style="flex:1;" />

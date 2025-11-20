@@ -1,6 +1,7 @@
 package com.yeoun.main.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.main.dto.ScheduleDTO;
+import com.yeoun.main.dto.ScheduleSharerDTO;
 import com.yeoun.main.service.ScheduleService;
 
 import jakarta.validation.Valid;
@@ -66,9 +68,10 @@ public class MainController {
 	// 일정등록
 	@PostMapping("/schedule")
 	public ResponseEntity<Map<String, String>> createSchedule(@ModelAttribute("scheduleDTO")@Valid ScheduleDTO scheduleDTO, 
-			BindingResult bindingResult) {
+			BindingResult bindingResult, @RequestParam("sharedEmpId")List<String> sharedEmpId) {
 		Map<String, String> msg = new HashMap<>();
-
+		System.out.println("scheduleDTO : " + scheduleDTO);
+		System.out.println("sharedEmpId : " + sharedEmpId);
 		// 일정등록 요청 데이터 검증
 		if(bindingResult.hasErrors()) {
 			msg.put("msg", "일정 등록에 실패했습니다. - BINDING ERROR");
@@ -77,7 +80,7 @@ public class MainController {
 		// 일정등록 요청 데이터 이상 없을때
 		// 일정등록 요청
 		try {
-			scheduleService.createSchedule(scheduleDTO);
+//			scheduleService.createSchedule(scheduleDTO);
 			msg.put("msg", "일정이 등록되었습니다.");
 			return ResponseEntity.ok(msg);
 		
