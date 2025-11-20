@@ -2,6 +2,8 @@ package com.yeoun.pay.repository;
 
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.pay.dto.EmpForPayrollProjection;
+import com.yeoun.pay.dto.EmpPayslipDetailDTO;
+
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
@@ -10,7 +12,7 @@ import java.util.Optional;
 
 public interface EmpNativeRepository extends JpaRepository<Emp, String> {
   
-	/** 활성화 부서,사원 조회*/
+	/** 활성화 부서, 전체 사원 조회*/
 	 @Query(value = """
 		        SELECT
 		            e.EMP_ID      AS empId,
@@ -27,6 +29,31 @@ public interface EmpNativeRepository extends JpaRepository<Emp, String> {
 		        ORDER BY e.EMP_ID
 		        """, nativeQuery = true)
 		    List<EmpForPayrollProjection> findActiveEmpForPayroll();
+	 
+	 /** 특정 사원 1명 급여계산용 조회 */
+	 @Query(value = """
+	         SELECT
+	             e.EMP_ID      AS empId,
+	             e.EMP_NAME    AS empName,
+	             e.ROLE_CODE   AS roleCode,
+	             e.STATUS      AS status,
+	             e.HIRE_DATE   AS hireDate,
+	             e.DEPT_ID     AS deptId,
+	             d.DEPT_NAME   AS deptName,
+	             e.POS_CODE    AS posCode,
+	             p.POS_NAME    AS posName
+	         FROM EMP e
+	         LEFT JOIN DEPT d
+	             ON d.DEPT_ID = e.DEPT_ID
+	         LEFT JOIN POSITION p
+	             ON p.POS_CODE = e.POS_CODE
+	         WHERE e.EMP_ID = :empId
+	           AND e.STATUS = 'ACTIVE'
+	         ORDER BY e.EMP_ID
+	         """, nativeQuery = true)
+	 List<EmpForPayrollProjection> findActiveEmpForPayrollByEmpId(@Param("empId") String empId);
+
+
 				
 
 
@@ -85,6 +112,36 @@ public interface EmpNativeRepository extends JpaRepository<Emp, String> {
     	Optional<Integer> findRemainDaysByYear(
     	        @Param("empId") String empId,
     	        @Param("year") int year);
+
+    	 // =========================
+        // Projection 내부 인터페이스
+        // =========================
+        interface EmpSimpleProjection {
+            String getEmpId();
+            String getEmpName();
+            String getDeptName();
+            String getPosName();
+        }
+
+
+        /** 사원 선택 리스트 조회 */
+        @Query(value = """
+                SELECT 
+                    e.EMP_ID       AS empId,
+                    e.EMP_NAME     AS empName,
+                    d.DEPT_NAME    AS deptName,
+                    p.POS_NAME     AS posName
+                FROM EMP e
+                LEFT JOIN DEPT d 
+                    ON d.DEPT_ID = e.DEPT_ID
+                LEFT JOIN POSITION p
+                    ON p.POS_CODE = e.POS_CODE
+                WHERE e.STATUS = 'ACTIVE'
+                ORDER BY e.EMP_NAME
+                """, nativeQuery = true)
+        List<EmpSimpleProjection> findActiveEmpList();
+
+
 
 
 }

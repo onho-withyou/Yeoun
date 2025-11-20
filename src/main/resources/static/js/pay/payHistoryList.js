@@ -24,9 +24,7 @@ function initGrid() {
 
 	const columnDefs = [
 	    { 
-	        headerName: "지급월", 
-	        field: "payYymm",
-	        width: 120,
+	        headerName: "지급월", field: "payYymm",  width: 120,
 	        valueFormatter: p => formatYymm(p.value),
 	        cellStyle: { textAlign: "center", fontWeight: "600" }
 	    },
