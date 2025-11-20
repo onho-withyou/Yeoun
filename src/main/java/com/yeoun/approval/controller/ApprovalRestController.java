@@ -9,12 +9,17 @@ import com.yeoun.auth.dto.LoginDTO;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 
@@ -37,6 +42,23 @@ public class ApprovalRestController {
 		}
 		
 		return ResponseEntity.ok(approvalDocDTOPage.getContent());	
+	}
+	
+	@PatchMapping("/{approvalId}")
+	public ResponseEntity<Map<String,String>> approvalCheck(@PathVariable("approvalId") Long approvalId
+			, @AuthenticationPrincipal LoginDTO loginDTO) {
+		Map<String, String> result = new HashMap<>();
+		String empId = loginDTO.getEmpId();
+		
+		try {
+			approvalDocService.updateApproval(approvalId, empId);
+			result.put("result", "결재 승인 완료!!!");
+			return ResponseEntity.ok(result);
+		} catch (Exception e) {
+			result.put("result", "결제 승인 실패 : " + e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+		}
 	}
 	
 }
