@@ -16,6 +16,10 @@
 </style>
 <body>
 <th:block layout:fragment="content">
+	<!-- 현재사용자 사번, 이름 저장 -->
+	<input type="hidden" th:value="${currentUserId}" id="currentUserId">
+	<input type="hidden" th:value="${currentUserName}" id="currentUserName">
+	
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
 		<h2>전자 결재</h2>
 			<div class="d-flex justify-content-between">
@@ -280,7 +284,7 @@
 		      <div class="modal-footer">
 		      	<div>
 			     	<button type="button" class="btn btn-primary">첨부파일</button>
-			      	<button type="button" class="btn btn-primary">결재확인</button>
+			      	<button type="button" class="btn btn-primary" id="approvalCheckBtn">결재확인</button>
 			    </div>
 		      	<hr>
 		      	<button type="button" class="btn btn-primary">인쇄</button>

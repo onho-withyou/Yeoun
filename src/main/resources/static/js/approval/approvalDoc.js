@@ -1,5 +1,55 @@
 //결재.js
+	// 현재 로그인한 사용자 EMP_ID
+	const LOGIN_USER_ID = document.getElementById('currentUserId').value;
+	const LOGIN_USER_NAME = document.getElementById('currentUserName').value;
+	// 현재 열린 문서의 approvalId
+	let approvalId;
+	// 현재 열린 문서의 결재권자(approval) 
+	let currentApprover;
+	// 모달의 결재확인 버튼
+	const approvalCheckBtn = document.getElementById('approvalCheckBtn');
+	
+	const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
+	const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
 
+	
+	// 결재확인 버튼 눌렀을때 동작할 함수
+	approvalCheckBtn.addEventListener('click', () => {
+		
+		console.log(currentApprover, LOGIN_USER_ID);
+		// 현재 로그인한 사용자와 결재권자 비교
+		if(currentApprover != LOGIN_USER_ID) {
+			alert("결재권한이 없습니다."); 
+			return;
+		}
+		
+		// 결재권한자와 사용자가 동일인물일 때
+		if(confirm("승인하시겠습니까?")) {
+			//결재 확인 동작함수
+			fetch('/api/approvals/' + approvalId, {
+				method: 'PATCH'
+				, headers: {
+					[csrfHeaderName]: csrfToken
+				}
+			})
+			.then(response => {
+				if (!response.ok) return response.json().then(err => { throw new Error(err.result); });
+				return response.json();
+			})
+			.then(data => {
+				alert(data.result);
+				// 결제승인완료시 새로고침
+				location.reload();
+				
+			}).catch(error => {
+				console.error('에러', error)
+				alert("결재 승인 실패!!");
+			});
+		 }
+		
+	})
+	
+	
 	//grid - 1.결재사항 - 진행해야할 결재만 - 결재권한자만 볼수있음
 	//grid - 2.전체결재 - 나와관련된 모든 결재문서
 	//grid - 3.내 결재목록 - 내가 기안한 문서
@@ -69,6 +119,12 @@
 				const rowData = grid1.getRow(ev.rowKey);
 				console.log("rowData ----->",rowData);//로우데이터는 이걸로 불러오면됨
 				$('#approval-modal').modal('show');
+				
+				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
+				approvalId = rowData.approval_id;
+				// 문서 열릴때 현재 결재권자(approval) 저장
+				currentApprover = rowData.approver;
+				
 				document.getElementById('Drafting').innerText = rowData.approval_title;
 				document.getElementById('today-date').innerText = rowData.created_date.split('T')[0] ;//결재 작성날짜 = 결재시작일
 				document.getElementById('approval-title').value = rowData.approval_title;
@@ -107,6 +163,12 @@
 				const rowData = grid2.getRow(ev.rowKey);
 				console.log("rowData ----->",rowData);//로우데이터는 이걸로 불러오면됨
 				$('#approval-modal').modal('show');
+				
+				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
+				approvalId = rowData.approval_id;
+				// 문서 열릴때 현재 결재권자(approval) 저장
+				currentApprover = rowData.approver;
+				
 				document.getElementById('Drafting').innerText = rowData.approval_title;
 				document.getElementById('today-date').innerText = rowData.created_date.split('T')[0] ;//결재 작성날짜 = 결재시작일
 				//document.getElementById('approval-title').value = rowData.approval_title;
@@ -145,6 +207,12 @@
 				const rowData = grid3.getRow(ev.rowKey);
 				console.log("rowData ----->",rowData);//로우데이터는 이걸로 불러오면됨
 				$('#approval-modal').modal('show');
+				
+				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
+				approvalId = rowData.approval_id;
+				// 문서 열릴때 현재 결재권자(approval) 저장
+				currentApprover = rowData.approver;
+				
 				document.getElementById('Drafting').innerText = rowData.approval_title;
 				document.getElementById('today-date').innerText = rowData.created_date.split('T')[0] ;//결재 작성날짜 = 결재시작일
 				//document.getElementById('approval-title').value = rowData.approval_title;
@@ -180,6 +248,12 @@
 			const rowData = grid4.getRow(ev.rowKey);
 			console.log("rowData ----->",rowData);//로우데이터는 이걸로 불러오면됨
 			$('#approval-modal').modal('show');
+			
+			// 문서 열릴때 approvalId에 현재 열린 문서id 저장
+			approvalId = rowData.approval_id;
+			// 문서 열릴때 현재 결재권자(approval) 저장
+			currentApprover = rowData.approver;
+			
 			document.getElementById('Drafting').innerText = rowData.approval_title;
 			document.getElementById('today-date').innerText = rowData.created_date.split('T')[0] ;//결재 작성날짜 = 결재시작일
 			//document.getElementById('approval-title').value = rowData.approval_title;
@@ -217,6 +291,12 @@
 			const rowData = grid5.getRow(ev.rowKey);
 			console.log("rowData ----->",rowData);//로우데이터는 이걸로 불러오면됨
 			$('#approval-modal').modal('show');
+			
+			// 문서 열릴때 approvalId에 현재 열린 문서id 저장
+			approvalId = rowData.approval_id;
+			// 문서 열릴때 현재 결재권자(approval) 저장
+			currentApprover = rowData.approver;
+			
 			document.getElementById('Drafting').innerText = rowData.approval_title;
 			document.getElementById('today-date').innerText = rowData.created_date.split('T')[0] ;//결재 작성날짜 = 결재시작일
 			//document.getElementById('approval-title').value = rowData.approval_title;
