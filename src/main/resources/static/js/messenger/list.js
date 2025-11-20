@@ -6,8 +6,8 @@
 // DOM 요소 참조 / 전역 상태
 // ==========================
 const tabFriends		= document.getElementById('tab-friends'); // 친구목록 탭
-const tabChats 			= document.getElementById('tab-chats'); // 대화목록 탭
-const friendsPanel 		= document.getElementById('friends-panel'); // 친구패널
+const tabChats 		= document.getElementById('tab-chats'); // 대화목록 탭
+const friendsPanel 	= document.getElementById('friends-panel'); // 친구패널
 const chatsPanel 		= document.getElementById('chats-panel'); // 대화패널
 const headerTitle 		= document.getElementById('header-title'); // 헤더(친구목록-대화목록 텍스트 전환)
 const groupButton		= document.getElementById('group-button'); // 그룹채팅 시작 버튼
@@ -57,11 +57,13 @@ document.querySelectorAll('.friend-item').forEach(item => {
 //==========================
 function renderRoomList(rooms) {
 
+    document.querySelectorAll('#chats-panel .chat-item').forEach(e => e.remove());
+
     const chatList = document.querySelector('.chat-list');
     const emptyChat = document.querySelector('.empty-chat');
 
     if (!chatList) {
-        console.error("❌ chat-list 컨테이너가 존재하지 않습니다.");
+        console.error("chat-list 컨테이너가 존재하지 않습니다.");
         return;
     }
 
@@ -88,12 +90,12 @@ function renderRoomList(rooms) {
                  src="/img/msg_img_${room.profileImg}.png">
 
             <div class="chat-center">
-                <p class="chat-title">${room.groupName || ''}</p>
-                <p class="chat-last">${room.lastMessage || ''}</p>
+                <p class="chat-title">${room.groupName}</p>
+                <p class="chat-last">${room.previewMessage}</p>
             </div>
 
             <div class="chat-right">
-                <span class="chat-time">${room.lastMessageTime || ''}</span>
+                <span class="chat-time">${room.previewTime}</span>
 
                 ${
                     room.unreadCount && room.unreadCount > 0
@@ -130,6 +132,7 @@ function filterFriends()  {
 // 대화 목록 필터링 (대화 상세내용)
 function filterChats() {
     const keyword = searchInput.value.trim();
+    if (!keyword) return;
     
     fetch(`/messenger/rooms/search?keyword=${encodeURIComponent(keyword)}`)
     .then(response => response.json())

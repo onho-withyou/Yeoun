@@ -46,6 +46,12 @@ public interface MsgRelationRepository extends JpaRepository<MsgRelation, Long> 
 		       "join r.empId e " +
 		       "where e.empName like %:keyword%")
 	List<Long> findRoomIdByMemberName(@Param("keyword") String keyword);
+
+    // 내가 속한 방 목록
+    @Query("select r.roomId.roomId FROM MsgRelation r " +
+            "WHERE TRIM(r.participantYn) = 'Y' " +
+            "AND r.empId.empId = :empId")
+    List<Long> findRoomIdsByEmpId(@Param("empId") String empId);
 	
 
 }

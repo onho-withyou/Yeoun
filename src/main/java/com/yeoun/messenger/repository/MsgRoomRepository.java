@@ -13,7 +13,9 @@ import java.util.List;
 public interface MsgRoomRepository extends JpaRepository<MsgRoom, Long> {
 
 	// 방 이름 검색
-	List<Long> findRoomIdByGroupNameContaining(String keyword);
+	@Query("select r.roomId from MsgRoom r where r.groupName like %:keyword%")
+	List<Long> findRoomIdByGroupNameContaining(@Param("keyword") String keyword);
+
 
 
 }

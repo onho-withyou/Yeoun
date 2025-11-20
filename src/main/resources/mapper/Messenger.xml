@@ -54,7 +54,7 @@
 	</select>
 
 	<!-- 메신저 대화목록 조회 -->
-	<select id="selectChats" resultType="com.yeoun.messenger.dto.MsgRoomDTO">
+	<select id="selectChats" parameterType="map" resultType="com.yeoun.messenger.dto.MsgRoomListDTO">
 		SELECT
 		r.ROOM_ID                        	AS roomId,
 		r.PINNED_YN                      	AS pinnedYn,
@@ -87,10 +87,10 @@
 		END 								AS profileImg,
 
 		-- 최근 메시지
-		lastMsg.MSG_CONTENT                 AS lastMessage,
+		lastMsg.MSG_CONTENT                 AS previewMessage,
 
 		-- 최근 메시지 시간
-		lastMsg.SENT_DATE                   AS lastMessageTime,
+		lastMsg.SENT_DATE                   AS previewTime,
 
 		-- 읽지 않은 메시지 수
 		(
@@ -130,6 +130,83 @@
 		ORDER BY
 		r.PINNED_YN DESC,
 		lastMsg.SENT_DATE DESC
+	</select>
+
+	<!-- 메신저 대화목록 '특정 방' 조회 -->
+	<select id="selectChat" resultType="com.yeoun.messenger.dto.MsgRoomListDTO">
+		SELECT
+		r.ROOM_ID                               AS roomId,
+		rm.GROUP_YN                             AS groupYn,
+		r.PINNED_YN                             AS pinnedYn,
+
+		-- 1:1일 때 상대방 이름 가져오기
+		CASE
+			WHEN rm.GROUP_YN = 'N' THEN (
+			SELECT e.EMP_NAME
+			FROM MSG_RELATION rr
+			JOIN EMP e ON rr.EMP_ID = e.EMP_ID
+			WHERE rr.ROOM_ID = r.ROOM_ID
+			AND rr.EMP_ID != #{empId}
+			AND rr.PARTICIPANT_YN = 'Y'
+			)
+			ELSE rm.GROUP_NAME
+		END 									AS groupName,
+
+		-- 1:1일 때 상대방 프로필 사진 가져오기
+		CASE
+			WHEN rm.GROUP_YN = 'N' THEN (
+			SELECT ms.MSG_PROFILE
+			FROM MSG_RELATION rr
+			JOIN MSG_STATUS ms ON rr.EMP_ID = ms.EMP_ID
+			WHERE rr.ROOM_ID = r.ROOM_ID
+			AND rr.EMP_ID != #{empId}
+			AND rr.PARTICIPANT_YN = 'Y'
+			)
+			ELSE 6
+		END AS profileImg,
+
+		-- 최근 메시지
+		lastMsg.MSG_CONTENT                   AS previewMessage,
+
+		-- 최근 메시지 시간
+		lastMsg.SENT_DATE                     AS previewTime,
+
+		-- 읽지 않은 메시지 수
+		(
+			SELECT COUNT(*)
+			FROM MSG_MESSAGE mm
+			WHERE mm.ROOM_ID = r.ROOM_ID
+				AND mm.MSG_ID >
+					NVL(
+						(SELECT lr.LAST_READ_ID
+						FROM MSG_RELATION lr
+						WHERE lr.EMP_ID = #{empId}
+						AND lr.ROOM_ID = r.ROOM_ID),
+						0
+					)
+				AND mm.SENDER_ID != #{empId}
+		) AS unreadCount
+
+		FROM MSG_RELATION r
+		JOIN MSG_ROOM rm ON rm.ROOM_ID = r.ROOM_ID
+
+		LEFT JOIN (
+			SELECT msg.ROOM_ID,
+				   msg.MSG_CONTENT,
+				   msg.SENT_DATE
+			FROM (
+				SELECT
+					m.*,
+					ROW_NUMBER() OVER(PARTITION BY m.ROOM_ID ORDER BY m.SENT_DATE DESC) AS rn
+				FROM MSG_MESSAGE m
+			) msg
+			WHERE msg.rn = 1
+		) lastMsg
+		ON lastMsg.ROOM_ID = r.ROOM_ID
+
+		WHERE r.EMP_ID = #{empId}
+			AND r.PARTICIPANT_YN = 'Y'
+			AND r.ROOM_ID = #{roomId}
 	</select>
 
 </mapper>
