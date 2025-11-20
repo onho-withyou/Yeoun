@@ -186,6 +186,11 @@ public class Attendance {
 	public void adjustWorkDuration(int minutes) {
 	    this.workDuration = Math.max(minutes, 0);
 	}
+	
+	// 상태 변경
+	public void changeStatus(String status) {
+		this.statusCode = status;
+	}
 }
 
 
