@@ -23,8 +23,6 @@ const workStatus		= document.getElementById('work-status'); // 수동 근무 상
 //현재 모드: 'friend' / 'chat'
 let currentMode = 'friend';
 
-
-
 // ==========================
 // 각 친구의 상태
 // ==========================
@@ -54,6 +52,63 @@ document.querySelectorAll('.friend-item').forEach(item => {
   }
 });
 
+//==========================
+// 대화창 검색 동작 후 대화창 렌더링
+//==========================
+function renderRoomList(rooms) {
+
+    const chatList = document.querySelector('.chat-list');
+    const emptyChat = document.querySelector('.empty-chat');
+
+    if (!chatList) {
+        console.error("❌ chat-list 컨테이너가 존재하지 않습니다.");
+        return;
+    }
+
+    // 기존 내용 제거
+    chatList.innerHTML = '';
+
+    // 1) 검색 결과가 없을 경우 → emptyChat 보여주기
+    if (!rooms || rooms.length === 0) {
+        if (emptyChat) emptyChat.style.display = 'block';
+        return;
+    } else {
+        if (emptyChat) emptyChat.style.display = 'none';
+    }
+
+    // 2) 검색 결과 렌더링
+    rooms.forEach(room => {
+
+        const item = document.createElement('div');
+        item.classList.add('chat-item');
+        item.dataset.id = room.roomId;
+
+        item.innerHTML = `
+            <img class="rounded-circle"
+                 src="/img/msg_img_${room.profileImg}.png">
+
+            <div class="chat-center">
+                <p class="chat-title">${room.groupName || ''}</p>
+                <p class="chat-last">${room.lastMessage || ''}</p>
+            </div>
+
+            <div class="chat-right">
+                <span class="chat-time">${room.lastMessageTime || ''}</span>
+
+                ${
+                    room.unreadCount && room.unreadCount > 0
+                        ? `<span class="badge-unread">${room.unreadCount}</span>`
+                        : ''
+                }
+            </div>
+        `;
+
+        chatList.appendChild(item);
+    });
+}
+
+
+
 // ==========================
 // 검색 로직
 // ==========================
@@ -74,16 +129,15 @@ function filterFriends()  {
 
 // 대화 목록 필터링 (대화 상세내용)
 function filterChats() {
-    const keyword = searchInput.value.trim().toLowerCase();
-    const items = document.querySelectorAll('.chat-item');
+    const keyword = searchInput.value.trim();
     
-    items.forEach(item => {
-        const name = item.querySelector('p').textContent.toLowerCase();
-        const preview = item.querySelector('small').textContent.toLowerCase();
-        
-        const visible = name.includes(keyword) || preview.includes(keyword);
-        item.style.display = visible ? 'flex' : 'none';
-    });
+    fetch(`/messenger/rooms/search?keyword=${encodeURIComponent(keyword)}`)
+    .then(response => response.json())
+    .then(rooms => {
+    	renderRoomList(rooms);
+    })
+    .catch(err => console.error(err));
+
 }
 
 
@@ -206,6 +260,32 @@ let statuses = [
 let current = 0;
 let manuallySet = false;  // 수동 상태 변경 여부
 
+
+// ==========================
+// 서버로 상태 전송 함수
+// ==========================
+async function sendStatusToServer(presence, reason = null) {
+    try {
+        const res = await fetch('/messenger/status', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeaderName]: csrfToken
+            },
+            body: JSON.stringify({
+                avlbStat: presence,   		  // ONLINE / AWAY / BUSY / OFFLINE
+                manualWorkStat: reason        // MEETING / LUNCH / WORKING / etc
+            })
+        });
+
+        const text = await res.text();
+        console.log("상태 전송 완료:", presence, reason, text);
+
+    } catch (err) {
+        console.error("상태 전송 실패:", err);
+    }
+}
+
 // =====================
 // 수동 상태 변경
 // =====================
@@ -215,7 +295,29 @@ statusIndicator.addEventListener('click', () => {
     current = (current + 1) % statuses.length;
     statusIndicator.style.backgroundColor = statuses[current].color;
     statusText.textContent = statuses[current].text;
+
+    // 상태 매핑: 텍스트 → 코드
+    let presenceCode = '';
+
+    switch (statuses[current].text) {
+        case '온라인':
+            presenceCode = 'ONLINE';
+            break;
+        case '자리비움':
+            presenceCode = 'AWAY';
+            break;
+        case '다른 용무중':
+            presenceCode = 'BUSY';
+            break;
+        default:
+            presenceCode = 'ONLINE';
+    }
+
+// 서버로 전송
+    sendStatusToServer(presenceCode, null);
+
 });
+
 
 
 // =====================
@@ -250,6 +352,84 @@ setInterval(() => {
         statusIndicator.style.backgroundColor = '#4CAF50';
         statusText.textContent = '온라인';
     });
+});
+
+
+// ==========================
+// 업무 사유(workStatus) 선택 시 → 1차 상태 자동 변경
+// ==========================
+workStatus.addEventListener('change', () => {
+    const value = workStatus.value;
+
+    // 업무 사유 선택은 수동 변경으로 취급 → 자동 자리비움 잠시 중지
+    manuallySet = true;
+
+    // 상태 매핑
+    let newStatus = { color: '', text: '' };
+
+    switch (value) {
+        case 'MEETING':         // 회의 중
+        case 'CALL':            // 통화 중
+        case 'FOCUS':           // 집중 업무 중
+            newStatus = { color: '#F44336', text: '다른 용무중' }; // BUSY
+            break;
+
+        case 'LUNCH':           // 식사 중
+        case 'OUTING':          // 외출 중
+        case 'FIELDWORK':       // 외근 중
+            newStatus = { color: '#FFC107', text: '자리비움' }; // AWAY
+            break;
+
+        case 'VACATION':        // 휴가 중
+            newStatus = { color: '#9E9E9E', text: '오프라인' }; // OFFLINE
+            break;
+
+        case 'WORKING':         // 근무 중
+        case 'WFH':             // 재택근무 중
+            newStatus = { color: '#4CAF50', text: '온라인' }; // ONLINE
+            break;
+
+        default:
+            newStatus = { color: '#4CAF50', text: '온라인' };
+    }
+
+    // UI 적용
+    statusIndicator.style.backgroundColor = newStatus.color;
+    statusText.textContent = newStatus.text;
+
+    // ==========================
+    // 업무 사유 선택 시 서버로 전송
+    // ==========================
+    const reasonMap = {
+        '회의 중': 'MEETING',
+        '통화 중': 'CALL',
+        '집중 업무 중': 'FOCUS',
+        '식사 중': 'LUNCH',
+        '외출 중': 'OUTING',
+        '외근 중': 'FIELDWORK',
+        '휴가 중': 'VACATION',
+        '근무 중': 'WORKING',
+        '재택근무 중': 'WFH'
+    };
+
+    const presenceMap = {
+        '회의 중': 'BUSY',
+        '통화 중': 'BUSY',
+        '집중 업무 중': 'BUSY',
+        '식사 중': 'AWAY',
+        '외출 중': 'AWAY',
+        '외근 중': 'AWAY',
+        '휴가 중': 'OFFLINE',
+        '근무 중': 'ONLINE',
+        '재택근무 중': 'ONLINE'
+    };
+
+    const reason = reasonMap[value];
+    const presence = presenceMap[value];
+
+    // 서버 전송
+    sendStatusToServer(presence, reason);
+
 });
 
 
@@ -360,7 +540,6 @@ document.querySelectorAll('#group-modal .member-item').forEach(item => {
 });
 //========================================
 // 2) 모달 열리기 "직전" 초기화 (show.bs.modal)
-// → 화면에 나타나기 전에 초기화되므로 깜빡임 없음
 //========================================
 modalEl.addEventListener('show.bs.modal', () => {
 
@@ -424,13 +603,13 @@ document.getElementById('create-group-btn')
   const groupNameInput = document.getElementById('group-name');
   const groupName = groupNameInput ? groupNameInput.value.trim() : null;
 
-  // 3) createRoom 호출 (네가 만든 구조 그대로)
+  // 3) createRoom 호출
   const roomId = await createRoom({
     members: members,
-    groupYn: true,             // 그룹 채팅
-    groupName: groupName,     // 입력값 또는 null
-    msg: null,                // 그룹은 firstMessage 없음
-    msgType: null,            // 그룹은 msgType 없음
+    groupYn: 'Y',              // 그룹 채팅
+    groupName: groupName,      // 입력값 또는 null
+    firstMessage: null,        // 그룹은 firstMessage 없음
+    msgType: null,             // 그룹은 msgType 없음
     csrfHeaderName: csrfHeaderName,
     csrfToken: csrfToken
   });
@@ -455,6 +634,7 @@ document.getElementById('create-group-btn')
     'width=500,height=700,resizable=no,scrollbars=no'
   );
 });
+
 
 
 

@@ -24,7 +24,6 @@ public class MsgMessageDTO {
     private String msgContent;      // 메시지 내용
     private String msgType;         // 메시지 타입
     private String fileId;          // 파일 ID
-    private String thumbUrl;        // 사진 미리보기 URL
     private LocalDateTime sentDate; // 메시지 전송시간
     private String remark;          // 비고
 

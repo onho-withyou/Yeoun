@@ -183,7 +183,7 @@ public class EmpService {
 	    if (deptId != null && deptId.isBlank()) deptId = null;
 	    if (posCode != null && posCode.isBlank()) posCode = null;
 	    
-	    return empRepository.searchForHrActionDto(deptId, posCode, keyword);
+	    return empRepository.searchActiveEmpList(deptId, posCode, keyword);
 	}
 
 	// ==============================================================================

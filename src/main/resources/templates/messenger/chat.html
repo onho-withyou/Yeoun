@@ -120,7 +120,7 @@
       <img th:src="|@{/img/msg_img_}${m.msgProfile}.png|" class="member-avatar">
       <div class="info">
         <p class="name" th:text="${m.empName}"></p>
-        <small th:text="|${m.deptName} / ${m.posName}|"></small>
+        <small th:text="|${m.department} / ${m.position}|"></small>
       </div>
     </div>
   </div>
@@ -267,8 +267,8 @@
       console.log("신규 채팅방 생성 요청 진입....");
     
       const newRoomId = await createRoom({
-    	 targetEmpId: targetEmpId,
-    	 groupYn: false,
+    	 members: [targetEmpId],
+    	 groupYn: 'N',
     	 firstMessage: msg,
     	 csrfHeaderName: csrfHeaderName,
     	 csrfToken: csrfToken
@@ -373,7 +373,7 @@ document.getElementById('renameSubmit').addEventListener('click', () => {
 
     document.querySelector('.chat-header-left .chat-title').textContent = newName;
 
-    // 백엔드 전송은 나중에 붙여도 됨
+    // 백엔드 전송은 나중에 붙이기
     // fetch(`/messenger/group/${roomId}/rename`, ...)
 
     bootstrap.Modal.getInstance(document.getElementById('renameModal')).hide();
@@ -402,8 +402,8 @@ document.getElementById('exitSubmit').addEventListener('click', async () => {
     if (!roomId) return;
 
     try {
-        await fetch(`/messenger/room/${roomId}/exit`, {
-            method: 'POST',
+        await fetch(`/messenger/room/${roomId}/member`, {
+            method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
                 [csrfHeaderName]: csrfToken

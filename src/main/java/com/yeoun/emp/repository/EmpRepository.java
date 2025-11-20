@@ -77,7 +77,7 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 						            Pageable pageable);
 	
 	
-	// 인사 발령 등록 화면에서 사용되는 사원 목록 (DTO 직접 조회)
+	// 재직자 공용 조회 (HR발령 + 권한관리 둘 다 여기 사용)
 	@Query("""
 	    SELECT new com.yeoun.emp.dto.EmpListDTO(
 	        e.hireDate,
@@ -101,12 +101,11 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	            OR e.empName LIKE concat('%', :keyword, '%')
 	            OR e.empId   LIKE concat('%', :keyword, '%')
 	          )
-	    ORDER BY e.hireDate DESC
+	    ORDER BY d.deptName, p.rankOrder DESC, e.hireDate DESC
 	""")
-	List<EmpListDTO> searchForHrActionDto(
-	        @Param("deptId") String deptId,
-	        @Param("posCode") String posCode,
-	        @Param("keyword") String keyword);
+	List<EmpListDTO> searchActiveEmpList(@Param("deptId") String deptId,
+									     @Param("posCode") String posCode,
+									     @Param("keyword") String keyword);
 
 
 	

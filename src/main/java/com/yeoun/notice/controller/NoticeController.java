@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.mysql.cj.log.Log;
 import com.yeoun.notice.dto.NoticeDTO;
 import com.yeoun.notice.service.NoticeService;
 
@@ -54,7 +53,7 @@ public class NoticeController {
 	    model.addAttribute("orderKey", orderKey);
 	    model.addAttribute("orderMethod", orderMethod);
 	    
-	    System.out.println("노티스페이지" + noticePage.getContent());
+//	    System.out.println("노티스페이지" + noticePage.getContent());
 		return "/notice/notice";
 	}
 	
@@ -102,7 +101,6 @@ public class NoticeController {
 			return ResponseEntity.ok(msg);
 			
 		} catch (Exception e) {
-			System.out.println(e);
 			msg.put("msg", "공지사항 수정에 실패했습니다 :" + e.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		}
