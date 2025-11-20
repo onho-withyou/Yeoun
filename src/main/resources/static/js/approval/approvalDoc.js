@@ -25,6 +25,10 @@
 	}
 	
 	let approvarDiv = document.querySelector('#approvar');
+
+	// let width = 150;
+    // let height = 70;
+    // let grid = createGrid(width, height);
 	
 	//selectbox - 인사정보 불러오기
 	async function empData() {
@@ -68,7 +72,7 @@
 				document.getElementById('Drafting').innerText = rowData.approval_title;
 				document.getElementById('today-date').innerText = rowData.created_date.split('T')[0] ;//결재 작성날짜 = 결재시작일
 				document.getElementById('approval-title').value = rowData.approval_title;
-				//양식종류form-menu
+				//양식종류 form-menu
 				document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
 				console.log("rowData.created_date",rowData.created_date.split('T')[0] );
 				const createdDate = rowData.created_date;
@@ -85,7 +89,10 @@
 				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 				//document.getElementById('approvar').value = rowData.approver;//결재권한자
 				
-				selectBox.select(rowData.approver);
+				if(rowData.approver != null){
+					selectBox.select(rowData.approver);
+					print("defalut", selectBox.getSelectedItem().label);
+				}
 				//document.getElementById('approvar').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 				
@@ -95,7 +102,7 @@
 		
 				console.log("ev ------>",ev);
 				const target = ev.nativeEvent.target;
-				console.log("target ---->",target);
+				console.log("target ---->", );
 				
 				const rowData = grid2.getRow(ev.rowKey);
 				console.log("rowData ----->",rowData);//로우데이터는 이걸로 불러오면됨
@@ -118,7 +125,12 @@
 				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
 				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 				//document.getElementById('approvar').value = rowData.approver;//결재권한자
-				selectBox.select(rowData.approver);
+				
+				if(rowData.approver != null){
+					selectBox.select(rowData.approver);
+					console.log(selectBox.getSelectedItem().label);
+					print("defalut", selectBox.getSelectedItem().label);
+				}
 				//document.getElementById('approvar').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 			});
@@ -126,7 +138,7 @@
 
 			grid3.on("click", (ev) => {
 		
-			console.log("ev ------>",ev);
+				console.log("ev ------>",ev);
 				const target = ev.nativeEvent.target;
 				console.log("target ---->",target);
 				
@@ -151,14 +163,17 @@
 				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
 				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 				//document.getElementById('approvar').value = rowData.approver;//결재권한자
-				selectBox.select(rowData.approver);
+				if(rowData.approver != null){
+					selectBox.select(rowData.approver);
+					print("defalut", selectBox.getSelectedItem().label);
+				}
 				//document.getElementById('approvar').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 			});
 
 		grid4.on("click", (ev) => {
 			
-		console.log("ev ------>",ev);
+			console.log("ev ------>",ev);
 			const target = ev.nativeEvent.target;
 			console.log("target ---->",target);
 			
@@ -183,14 +198,19 @@
 			document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
 			document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 			//document.getElementById('approvar').value = rowData.approver;//결재권한자
-			selectBox.select(rowData.approver);
+			if(rowData.approver != null){
+				selectBox.select(rowData.approver);
+
+				print("defalut", selectBox.getSelectedItem().label);
+
+			}
 			//document.getElementById('approvar').innerText = rowData.approver;//전결자
 			document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 		});
 	
 		grid5.on("click", (ev) => {
 			
-		console.log("ev ------>",ev);
+			console.log("ev ------>",ev);
 			const target = ev.nativeEvent.target;
 			console.log("target ---->",target);
 			
@@ -215,7 +235,10 @@
 			document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
 			document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 			//document.getElementById('approvar').value = rowData.approver;//결재권한자
-			selectBox.select(rowData.approver);
+			if(rowData.approver != null){
+				selectBox.select(rowData.approver);
+				print("defalut", selectBox.getSelectedItem().label);
+			}
 			//document.getElementById('approvar').innerText = rowData.approver;//전결자
 			document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 		});
@@ -249,10 +272,10 @@
 				obj["approver_name"] = item[8]; //결재권한자 이름
 				obj["pos_code"] = item[9]; //직급코드
 				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = item[11]; //생성일
-				obj["finish_date"] = item[12]; //결재완료일자
-				obj["start_date"] = item[13]; //
-				obj["end_date"] = item[14]; //	
+				obj["created_date"] = item[11].split('T')[0]; //생성일
+				obj["finish_date"] = item[12].split('T')[0]; //결재완료일자
+				obj["start_date"] = item[13].split('T')[0]; //
+				obj["end_date"] = item[14].split('T')[0]; //	
 				obj["leave_type"] = item[15]; //	
 				obj["to_dept_id"] = item[16]; //	
 				obj["expnd_type"] = item[17]; //
@@ -287,10 +310,10 @@
 				obj["approver_name"] = item[8]; //결재권한자 이름
 				obj["pos_code"] = item[9]; //직급코드
 				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = item[11]; //생성일
-				obj["finish_date"] = item[12]; //결재완료일자
-				obj["start_date"] = item[13]; //
-				obj["end_date"] = item[14]; //	
+				obj["created_date"] = item[11].split('T')[0]; //생성일
+				obj["finish_date"] = item[12].split('T')[0]; //결재완료일자
+				obj["start_date"] = item[13].split('T')[0]; //
+				obj["end_date"] = item[14].split('T')[0]; //	
 				obj["leave_type"] = item[15]; //	
 				obj["to_dept_id"] = item[16]; //	
 				obj["expnd_type"] = item[17]; //
@@ -326,10 +349,10 @@
 				obj["approver_name"] = item[8]; //결재권한자 이름
 				obj["pos_code"] = item[9]; //직급코드
 				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = item[11]; //생성일
-				obj["finish_date"] = item[12]; //결재완료일자
-				obj["start_date"] = item[13]; //
-				obj["end_date"] = item[14]; //	
+				obj["created_date"] = item[11].split('T')[0]; //생성일
+				obj["finish_date"] = item[12].split('T')[0]; //결재완료일자
+				obj["start_date"] = item[13].split('T')[0]; //
+				obj["end_date"] = item[14].split('T')[0]; //	
 				obj["leave_type"] = item[15]; //	
 				obj["to_dept_id"] = item[16]; //	
 				obj["expnd_type"] = item[17]; //
@@ -365,10 +388,10 @@
 				obj["approver_name"] = item[8]; //결재권한자 이름
 				obj["pos_code"] = item[9]; //직급코드
 				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = item[11]; //생성일
-				obj["finish_date"] = item[12]; //결재완료일자
-				obj["start_date"] = item[13]; //
-				obj["end_date"] = item[14]; //	
+				obj["created_date"] = item[11].split('T')[0]; //생성일
+				obj["finish_date"] = item[12].split('T')[0]; //결재완료일자
+				obj["start_date"] = item[13].split('T')[0]; //
+				obj["end_date"] = item[14].split('T')[0]; //	
 				obj["leave_type"] = item[15]; //	
 				obj["to_dept_id"] = item[16]; //	
 				obj["expnd_type"] = item[17]; //
@@ -406,10 +429,10 @@
 				obj["approver_name"] = item[8]; //결재권한자 이름
 				obj["pos_code"] = item[9]; //직급코드
 				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = item[11]; //생성일
-				obj["finish_date"] = item[12]; //결재완료일자
-				obj["start_date"] = item[13]; //
-				obj["end_date"] = item[14]; //	
+				obj["created_date"] = item[11].split('T')[0]; //생성일
+				obj["finish_date"] = item[12].split('T')[0]; //결재완료일자
+				obj["start_date"] = item[13].split('T')[0]; //
+				obj["end_date"] = item[14].split('T')[0]; //	
 				obj["leave_type"] = item[15]; //	
 				obj["to_dept_id"] = item[16]; //	
 				obj["expnd_type"] = item[17]; //
@@ -458,6 +481,10 @@
 			}}
 		  ],
 		  data: []
+		  ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
+		  ,columnOptions: {
+        		resizable: true
+      		}
 		});
 	
 	// 	Grid.applyTheme('clean'); // Call API of static method
@@ -476,7 +503,7 @@
 			,{header: '결재권한자 이름' ,name: 'approver_name' ,align: 'center'}
 			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
-			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
+			,{header: '생성일' ,name: 'created_date' ,align: 'center',width:300}
 			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
 			,{header: '휴가시작일자' ,name: 'start_date' ,align: 'center'}
 			,{header: '휴가종료일자' ,name: 'end_date' ,align: 'center'}
@@ -492,6 +519,10 @@
 			}}
 		  ],
 		  data: []
+		  ,bodyHeight: 500
+		  ,columnOptions: {
+        	resizable: true
+      		}
 	});
 
 	const grid3 = new Grid({
@@ -524,6 +555,10 @@
 			}}
 		  ],
 		  data: []
+		  ,bodyHeight: 500
+		  ,columnOptions: {
+        	resizable: true
+      	  }
 	});
 
 	const grid4 = new Grid({
@@ -556,6 +591,8 @@
 			}}
 		  ],
 		  data: []
+		  ,bodyHeight: 500
+		  ,draggable: true
 	});
 
 	const grid5 = new Grid({
@@ -588,20 +625,44 @@
 			}}
 		  ],
 		  data: []
+		  ,bodyHeight: 500
+		  ,columnOptions: {
+        	resizable: true
+      	  }
 	});
 	
 	
-	
+	//조회버튼
+	const searchBtn = document.getElementById("searchBtn");
+    if (searchBtn) {
+        searchBtn.addEventListener("click", (ev) => {
+			//alert(" 날짜,기안자,문서이름조회 구현중")
+			console.log(ev);
+			const params = new URLSearchParams({
+	    
+			 	start_date: document.getElementById("searchStartDate").value ?? "",
+	    	 	end_date: document.getElementById("searchEndDate").value ?? "",
+	    	 	emp_name: document.getElementById("searchEmpIdAndformType").value ?? "",
+				approval_title: document.getElementById("searchEmpIdAndformType").value ?? ""
+			});
 
+			fetch('/approval/search?' + params.toString())
+        	.then(res => res.json())
+        	.then(data => {
+            	grid2.resetData(data);
+        	})
+        	.catch(err => {
+            	console.error("조회오류", err);
+        	});
+			
+		});
 
-
-
-	
+    }
 	//모달창 코드
 	//기안서 셀렉트 박스 변경시 모달창에 텍스트 변경함수
-	function draftValFn(e){
+	function draftValFn(ev){
 		
-		let draft_doc = e.value;
+		let draft_doc = ev.value;
 		document.getElementById('Drafting').innerText = draft_doc;
 	}
 	
@@ -682,9 +743,6 @@
     	}	
 	}
 
-
-   	//리셋버튼 만들기 하다가잠
-    
 	//에디터
 	 const editor = new toastui.Editor({
 	  el: document.querySelector('#editor'),
