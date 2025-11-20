@@ -1,0 +1,174 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
+
+<th:block layout:fragment="content">
+  <div class="custom-body container-xxl flex-grow-1 container-p-y">
+
+    <!-- 헤더 / 제목 -->
+    <h2>권한 관리</h2>
+
+    <div class="row g-4">
+      <!-- ================== 왼쪽: 사원 목록 ================== -->
+      <div class="col-12 col-lg-5">
+        <div class="card h-100">
+          <div class="card-header pb-2">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">사원 목록</h5>
+            </div>
+          </div>
+
+          <div class="card-body pt-3">
+            <!-- 검색 영역 -->
+            <form class="row g-2 mb-3" id="empSearchForm">
+              <div class="col-6">
+                <input type="text" class="form-control form-control-sm"
+                       name="keyword"
+                       placeholder="이름 / 사번 검색">
+              </div>
+              <div class="col-4">
+                <select class="form-select form-select-sm" name="deptId">
+                  <option value="">전체 부서</option>
+                  <!-- 부서 목록 바인딩 -->
+                  <option th:each="d : ${deptList}"
+                          th:value="${d.deptId}"
+                          th:text="${d.deptName}">
+                  </option>
+                </select>
+              </div>
+              <div class="col-2 d-grid">
+                <button type="submit" class="btn btn-sm btn-primary">검색</button>
+              </div>
+            </form>
+
+            <!-- 사원 목록 테이블 -->
+<!--             <div class="card-body pt-3"> -->
+<!-- 			  <div id="empGrid" style="height: 420px;"></div> -->
+<!-- 			</div> -->
+            
+            <div id="empGrid" class="grid"></div>
+
+            <!-- 페이징 (필요 시 Ajax용으로 바꿔도 됨) -->
+            <nav th:if="${empPage != null}" class="mt-2">
+              <ul class="pagination pagination-sm justify-content-center mb-0">
+                <li class="page-item" th:classappend="${empPage.first} ? 'disabled'">
+                  <a class="page-link" href="#" data-page="0">«</a>
+                </li>
+                <li class="page-item" th:classappend="${empPage.first} ? 'disabled'">
+                  <a class="page-link" href="#"
+                     th:data-page="${empPage.number - 1}">‹</a>
+                </li>
+
+                <li class="page-item"
+                    th:each="p : ${#numbers.sequence(0, empPage.totalPages - 1)}"
+                    th:classappend="${p == empPage.number} ? 'active'">
+                  <a class="page-link" href="#"
+                     th:text="${p + 1}"
+                     th:data-page="${p}">1</a>
+                </li>
+
+                <li class="page-item" th:classappend="${empPage.last} ? 'disabled'">
+                  <a class="page-link" href="#"
+                     th:data-page="${empPage.number + 1}">›</a>
+                </li>
+                <li class="page-item" th:classappend="${empPage.last} ? 'disabled'">
+                  <a class="page-link" href="#"
+                     th:data-page="${empPage.totalPages - 1}">»</a>
+                </li>
+              </ul>
+            </nav>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ================== 오른쪽: 사원 권한 설정 ================== -->
+      <div class="col-12 col-lg-7">
+        <div class="card h-100">
+          <div class="card-header pb-2">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">사원 권한 설정</h5>
+            </div>
+          </div>
+
+          <div class="card-body pt-3">
+            <!-- 선택된 사원 정보 -->
+            <div class="border rounded p-3 mb-3 bg-light">
+              <div class="row g-2">
+                <div class="col-12 col-md-4">
+                  <div class="text-secondary small">사번</div>
+                  <div id="sel-empId" class="fw-semibold">—</div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="text-secondary small">이름</div>
+                  <div id="sel-empName" class="fw-semibold">사원을 선택하세요</div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="text-secondary small">부서 / 직급</div>
+                  <div id="sel-deptPos" class="">—</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 역할 체크박스 영역 -->
+            <form id="roleAssignForm" method="post" th:action="@{/auth/manage/save}">
+              <input type="hidden" name="empId" id="formEmpId">
+
+              <div class="mb-2">
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="fw-semibold">시스템 역할</span>
+                  <span class="text-muted small">사원에게 부여할 역할을 선택하세요.</span>
+                </div>
+              </div>
+
+              <div class="row g-2 mb-3">
+                <!-- 역할 목록 th:each -->
+                <div class="col-6 col-md-4"
+                     th:each="r : ${roleList}">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input role-checkbox"
+                           type="checkbox"
+                           th:id="'role-' + ${r.roleCode}"
+                           name="roleCodes"
+                           th:value="${r.roleCode}">
+<!--                            th:checked="${r.assigned}"> -->
+                    <label class="form-check-label"
+                           th:for="'role-' + ${r.roleCode}">
+                      <span th:text="${r.roleName}">HR 관리자</span>
+                      <span class="text-muted small"
+                            th:text="' (' + ${r.roleCode} + ')'">
+                        (ROLE_HR_ADMIN)
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 역할 없음 -->
+                <div class="col-12" th:if="${#lists.isEmpty(roleList)}">
+                  <div class="text-muted small">
+                    등록된 역할이 없습니다. ROLE 테이블부터 확인해주세요.
+                  </div>
+                </div>
+              </div>
+
+              <div class="ard-footer d-flex justify-content-end gap-2">
+                <a th:href="@{/auth/manage}" class="btn btn-outline-secondary">
+                  취소
+                </a>
+                <button type="button" class="btn btn-primary" id="btnSaveRole" disabled>
+                  권한 저장
+                </button>
+              </div>
+              
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <th:block layout:fragment="myScript">
+    <script src="/js/auth/manage.js"></script>
+  </th:block>
+</th:block>
