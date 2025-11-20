@@ -37,9 +37,11 @@ public class AuthAdminService {
 	}
 
 	
-	
-	
-	
+	// 3. 특정 사원의 역할 목록
+	@Transactional(readOnly = true)
+    public List<String> getRoleCodesByEmp(String empId) {
+        return empRoleRepository.findRoleCodesByEmpId(empId);
+    }
 	
 	
 	
