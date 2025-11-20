@@ -33,6 +33,8 @@ const handleAttendanceToggle = async (empId) => {
 		msg = "지각입니다.";
 	} else if (result.status === "IN") {
 		msg = "복귀합니다.";
+	} else if (result.status === "LUNCH_TIME") {
+		msg = "점심시간입니다.";
 	} else {
 		console.log(result.status);
 		msg = "외출입니다.";
