@@ -6,12 +6,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.approval.dto.ApprovalDocDTO;
 import com.yeoun.approval.entity.ApprovalForm;
+import com.yeoun.approval.entity.ApprovalDoc;
 import com.yeoun.approval.repository.ApprovalDocRepository;
 import com.yeoun.attendance.repository.AccessLogRepository;
 import com.yeoun.attendance.repository.AttendanceRepository;
@@ -82,5 +86,19 @@ public class ApprovalDocService {
 	 public List<Object[]> getFinishedApprovalDocs(String empId) {
 	 	return approvalDocRepository.findFinishedApprovalDocs(empId);
 	 }
+	 
+	 
+	 
+	 
+	 
+	// -------------------------------------------------------------------------------
+	// 메인페이지 내가 결제할 결제문서, 내가올린 결제 문서 불러오기
+	public Page<ApprovalDocDTO> getSummaryApproval(String empId) {
+		
+		PageRequest pageRequest = PageRequest.of(0, 5);
+		Page<ApprovalDoc> approvalDOCPage = approvalDocRepository.getSummaryApprovalPage(empId, pageRequest);
+		
+		return approvalDOCPage.map(ApprovalDocDTO::fromEntity); 
+	}
 
 }

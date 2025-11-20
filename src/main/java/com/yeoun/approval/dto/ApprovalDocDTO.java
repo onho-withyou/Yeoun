@@ -2,7 +2,10 @@ package com.yeoun.approval.dto;
 
 import java.time.LocalDate;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.yeoun.approval.entity.ApprovalDoc;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
@@ -49,5 +52,17 @@ public class ApprovalDocDTO {
 	private String expndType; //지출종류 - 지출결의서
 	
 	private String reason; //사유 - 자유양식결재서
+	
+	// ----------------------------------------------------------
+	// fromEntity, toEntity 설정
+	private static ModelMapper modelMapper = new ModelMapper();
+	
+	public static ApprovalDocDTO fromEntity(ApprovalDoc approvalDoc) {
+		return modelMapper.map(approvalDoc, ApprovalDocDTO.class);
+	}
+	
+	public ApprovalDoc toEntity(ApprovalDocDTO approvalDocDTO) {
+		return modelMapper.map(this, ApprovalDoc.class);
+	}
 
 }
