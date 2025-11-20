@@ -126,12 +126,15 @@ public class PayrollCalcService {
         List<PayItemMst> items = itemRepo.findAll();
         List<PayCalcRule> calcRules = calcRuleRepo.findAll();
         calcRules.sort(Comparator.comparingInt(PayCalcRule::getPriority));
-        List<SimpleEmp> employees = employeePort.findActiveEmployees();
+        List<SimpleEmp> employees;
 
         if (targetEmpId != null && !targetEmpId.isBlank()) {
-            employees = employees.stream()
-                    .filter(e -> targetEmpId.equals(e.empId()))
-                    .toList();
+            // 사원 1명 조회
+            SimpleEmp e = employeePort.findOneEmployee(targetEmpId);
+            if (e == null) return 0;
+            employees = List.of(e);
+        } else {
+            employees = employeePort.findActiveEmployees();
         }
 
         if (employees == null || employees.isEmpty())
@@ -139,10 +142,10 @@ public class PayrollCalcService {
 
         int count = 0;
 
-        LocalDate calcMonthEnd = LocalDate.parse(payYymm + "01",
-                DateTimeFormatter.ofPattern("yyyyMMdd"))
-                .withDayOfMonth(LocalDate.parse(payYymm + "01",
-                        DateTimeFormatter.ofPattern("yyyyMMdd")).lengthOfMonth());
+        LocalDate calcDate = LocalDate.parse(payYymm + "01",
+                DateTimeFormatter.ofPattern("yyyyMMdd"));
+        LocalDate calcMonthEnd = calcDate.withDayOfMonth(calcDate.lengthOfMonth());
+
 
         for (SimpleEmp emp : employees) {
             try {
@@ -150,9 +153,14 @@ public class PayrollCalcService {
                 if (emp.hireDate() != null && emp.hireDate().isAfter(calcMonthEnd)) {
                     continue;
                 }
+                //사원개별 재계산 업데이트
+                if (!overwrite) {
+                    if (payslipRepo.existsByPayYymmAndEmpId(payYymm, emp.empId())) {
+                        if (targetEmpId == null) continue; 
+                    }
+                }
+              
 
-                if (!overwrite && payslipRepo.existsByPayYymmAndEmpId(payYymm, emp.empId()))
-                    continue;
 
                 // ------------ 계산 로직 ------------
                 BigDecimal baseAmt = calcBase(emp, rules, items, calcRules);
@@ -185,7 +193,12 @@ public class PayrollCalcService {
                 slip.setDedAmt(safe(dedAmt));
                 slip.setTotAmt(safe(totAmt));
                 slip.setNetAmt(safe(netAmt));
-                slip.setCalcType(simulated ? "SIMULATED" : "BATCH ALL");
+                String calcType = simulated
+                        ? (targetEmpId == null ? "SIMULATED" : "SIMULATED ONE")
+                        : (targetEmpId == null ? "BATCH ALL" : "BATCH ONE");
+
+                slip.setCalcType(calcType);
+
                 slip.setCalcStatus(status);
                 slip.setCalcDt(LocalDateTime.now());
                 slip.setJobId(jobId);
@@ -515,7 +528,8 @@ public class PayrollCalcService {
 
     public interface EmployeeQueryPort {
         List<SimpleEmp> findActiveEmployees();
-        String getEmpName(String empId);
+        SimpleEmp findOneEmployee(String empId);
+		String getEmpName(String empId);
         String getDeptName(String deptId);
         String getEmpPosition(String empId);
         int getUsedAnnual(String empId);

@@ -26,6 +26,10 @@ public interface PayrollPayslipRepository extends JpaRepository<PayrollPayslip, 
 
     /** ✅ 특정 월 전체 건수 */
     long countByPayYymm(String payYymm);
+    
+    /** ✅ 사원별삭제용 */
+    void deleteByPayYymmAndEmpId(String payYymm, String empId);
+
 
     /** ✅ 특정 월 총 지급액 합계 */
     @Query("SELECT COALESCE(SUM(p.totAmt), 0) FROM PayrollPayslip p WHERE p.payYymm = :payYymm")
@@ -97,7 +101,7 @@ public interface PayrollPayslipRepository extends JpaRepository<PayrollPayslip, 
     	        @Param("status") String status);
 
     
-    /*계산 상태 값 변경*/
+    /*전체 계산 상태 값 변경*/
     @Query(value = """
             SELECT CALC_STATUS 
             FROM PAYROLL_PAYSLIP
@@ -108,6 +112,19 @@ public interface PayrollPayslipRepository extends JpaRepository<PayrollPayslip, 
     Optional<String> findFirstStatusByYyyymm(@Param("yyyymm") String yyyymm);
     
     
+    /*개별사원 계산 상태 값 변경*/
+    @Query(value = """
+            SELECT CALC_STATUS
+            FROM PAYROLL_PAYSLIP
+            WHERE PAY_YYMM = :yyyymm
+              AND EMP_ID = :empId
+            """,
+            nativeQuery = true)
+    Optional<String> findCalcStatus(
+            @Param("yyyymm") String yyyymm,
+            @Param("empId") String empId
+    );
+
 }
 
 

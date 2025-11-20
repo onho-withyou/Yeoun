@@ -9,5 +9,8 @@ public interface EmpForPayrollProjection {
 	    String getRoleCode();
 	    String getStatus();
 	    LocalDate getHireDate();		
- 		String getDeptId();  //부서
+ 		String getDeptId();  
+ 		String getDeptName();    
+ 	    String getPosCode();    
+ 	    String getPosName(); 
 }
