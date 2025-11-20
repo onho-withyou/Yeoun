@@ -29,7 +29,7 @@
 							<select id="schedule-type" class="form-select" name="scheduleType">
 								<option value="share" selected>공유</option>
 								<option value="company">회사</option>
-								<option th:value="${currentUserId}" >개인</option>
+								<option th:value="private" >개인</option>
 							</select>
 						</div>
 						<div>
@@ -49,7 +49,7 @@
 						</div>
 						<div class="d-flex">
 							<input type="checkbox" id="all-day-checkbox" checked style="margin-bottom: 10px;"/>
-							<input type="hidden" id="all-day-checkbox-value" style="margin-bottom: 10px;" name="alldayYN" value="N"/>
+							<input type="hidden" id="all-day-checkbox-value" style="margin-bottom: 10px;" name="alldayYN" value="Y"/>
 							<label for="all-day-checkbox" style="margin-top: 3px;">종일</label>
 						</div>
 					</div>

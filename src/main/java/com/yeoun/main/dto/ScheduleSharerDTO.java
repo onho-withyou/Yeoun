@@ -18,6 +18,8 @@ public class ScheduleSharerDTO {
 	
 	private String empId;
 	
+	private String empName;
+	
 	// ----------------------------------------------------------
 	private static ModelMapper modelMapper = new ModelMapper();
 	

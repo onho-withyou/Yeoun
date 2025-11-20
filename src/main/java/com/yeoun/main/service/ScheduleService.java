@@ -21,9 +21,12 @@ import com.yeoun.leave.dto.LeaveHistoryDTO;
 import com.yeoun.leave.entity.AnnualLeaveHistory;
 import com.yeoun.leave.repository.LeaveHistoryRepository;
 import com.yeoun.main.dto.ScheduleDTO;
+import com.yeoun.main.dto.ScheduleSharerDTO;
 import com.yeoun.main.entity.Schedule;
+import com.yeoun.main.entity.ScheduleSharer;
 import com.yeoun.main.mapper.ScheduleMapper;
 import com.yeoun.main.repository.ScheduleRepository;
+import com.yeoun.main.repository.ScheduleSharerRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -38,6 +41,7 @@ public class ScheduleService {
 	private final EmpRepository empRepository;
 	private final LeaveHistoryRepository leaveHistoryRepository;
 	private final ScheduleMapper scheduleMapper;
+	private final ScheduleSharerRepository scheduleSharerRepository;
 	// --------------------------------------------------
 	
 	//일정 등록모달 부서리스트 가져오기
@@ -50,13 +54,33 @@ public class ScheduleService {
 	}
 	
 	// 일정 등록로직
-	public void createSchedule(@Valid ScheduleDTO scheduleDTO) {
+	@Transactional
+	public void createSchedule(@Valid ScheduleDTO scheduleDTO, List<ScheduleSharerDTO> list) {
 		Emp emp = empRepository.findById(scheduleDTO.getCreatedUser()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다.111"));
 
 		Schedule schedule = scheduleDTO.toEntity();
 		schedule.setEmp(emp);
-		
+		// 여기서 Schedule테이블 정보 저장
 		scheduleRepository.save(schedule);
+		
+		// Schedule테이블에 저장된 정보를 토대로 ScheduleSharer테이블에 정보저장
+		for(ScheduleSharerDTO DTO : list) {
+			System.out.println(DTO + "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+			// save할 객체 생성
+			ScheduleSharer scheduleSharer = new ScheduleSharer();
+			// sharer에 공유된 empId로 emp객체 찾기
+			Emp sharerEmp = empRepository.findById(DTO.getEmpId()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다.111"));;
+			
+			// scheduleSharer엔티티에 schedule객체, emp 객체 추가 
+			scheduleSharer.setSchedule(schedule);
+			scheduleSharer.setSharedEmp(sharerEmp);
+			// 엔티티 값 저장
+			System.out.println("@@@@@@@@@@@@@@scheduleId : " + schedule.getScheduleId());
+			System.out.println("@@@@@@@@@@@@@@sharerEmp.getEmpId() : " + sharerEmp.getEmpId());
+			scheduleSharerRepository.save(scheduleSharer);
+		}
+		
+		
 	}
 	
 	// 일정 목록 조회로직

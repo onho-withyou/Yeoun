@@ -4,7 +4,7 @@
 
 let picker = null;
 let isProgrammaticChange = false; //날자 세팅
-
+let checkedUpEmpList;
 // 일정등록 데이트피커 객체 생성
 function createRangePicker() {
 	picker = tui.DatePicker.createRangePicker({
@@ -134,18 +134,31 @@ document.addEventListener('DOMContentLoaded', function() {
 	
 	addScheduleForm.addEventListener('submit', function(event) {
 		event.preventDefault(); // 기본제출 막기
-		
+		const formData = new FormData(addScheduleForm);
+		if (!addScheduleForm) {
+		    alert('add-schedule-form 폼 엘리먼트가 존재하지 않습니다!');
+		    return;
+		}
 		// 일정 등록 일때 구분
 		if(addScheduleBtn.value == 'add') {
 			// 등록일때는 scheduleId의 name값 제거 [jpa에 id가 null이어야 자동생성가능]
 			addScheduleForm.scheduleId.removeAttribute('name');
+			const scheduleType = document.getElementById('schedule-type');
+			if (scheduleType.value === 'share') {
+				if (!checkedUpEmpList || checkedUpEmpList.length === 0) {
+					alert('공유자 명단을 1명 이상 선택해야 합니다.');
+					return;
+				} else {
+					formData.append('sharedEmpList', JSON.stringify(checkedUpEmpList));
+				}
+			}
 			
 			fetch('/main/schedule', {
 				method: 'POST'
 				, headers: {
 					[csrfHeaderName]: csrfToken
 				}
-				, body: new FormData(addScheduleForm)
+				, body: formData
 			})
 			.then(response => {
 				if (!response.ok) {
@@ -545,7 +558,7 @@ document.getElementById('select-sharer-btn').addEventListener('click', function(
 
 document.getElementById('select-org-btn').addEventListener('click', function(){
     // 체크된 직원 정보 가져오기
-    const checkedUpEmpList = getCheckedEmpId();
+    checkedUpEmpList = getCheckedEmpId();
 	// 체크된직원 input 처리
 	setSharers(checkedUpEmpList);
 	
@@ -568,17 +581,17 @@ function setSharers(checkedUpEmpList) {
 	}
 	
 	// 기존 hidden 인풋 초기화
-	const oldInputs = form.querySelectorAll('input[name="sharedEmpId"]');
-	oldInputs.forEach(el => el.remove());
+//	const oldInputs = form.querySelectorAll('input[name="sharedEmpId"]');
+//	oldInputs.forEach(el => el.remove());
 	
 	// 새 hidden input 생성
-	checkedUpEmpList.forEach(item => {
-		const input = document.createElement('input');
-		input.type = 'hidden';
-		input.name = 'sharedEmpId';
-		input.value = item.empId;
-		form.appendChild(input);
-	})
+//	checkedUpEmpList.forEach(item => {
+//		const input = document.createElement('input');
+//		input.type = 'hidden';
+//		input.name = 'sharedEmpId';
+//		input.value = item.empId;
+//		form.appendChild(input);
+//	})
 }
 
 
