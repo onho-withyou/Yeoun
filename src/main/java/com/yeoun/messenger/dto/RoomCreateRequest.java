@@ -14,7 +14,7 @@ import java.util.Set;
 public class RoomCreateRequest {
     private Set<String> members;    // 참여 멤버
     private String createdUser;     // 생성자 EMP_ID
-    private boolean groupYn;		// 그룹 채팅 여부
+    private String groupYn;			// 그룹 채팅 여부
     private String groupName;       // 그룹 채팅방 이름 (1:1이면 null)
     private String firstMessage;    // 첫번째 메시지
     private String msgType;         // 메시지 타입
