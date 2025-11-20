@@ -25,6 +25,7 @@ import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.emp.service.EmpService;
+import com.yeoun.pay.dto.PayrollHistoryProjection;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -38,15 +39,25 @@ public class ApprovalController {
 	private final ApprovalDocService approvalDocService;
 	
 	//전자결재 연결페이지
-  @GetMapping("/approval_doc")
-  public String approvalDoc(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+  	@GetMapping("/approval_doc")
+  	public String approvalDoc(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
 		model.addAttribute("empList", approvalDocService.getEmp());//결재- 기안자 목록 불러오기
 		model.addAttribute("formTypes",approvalDocService.getFormTypes(loginDTO.getDeptId())); //"DEP001"결재- 기안서 양식종류 불러오기
 		model.addAttribute("deptList", approvalDocService.getDept()); //결재- 부서목록 불러오기
 		model.addAttribute("approvalDocDTO", new ApprovalDocDTO());//결재문서DTO
 		return "approval/approval_doc";
-  }
+ 	}
   
+	//날짜,기안자,검색구현
+	@GetMapping("/search")
+	public List<Object[]> getMethodName(@RequestParam(name="start_date") String start_date
+										,@RequestParam(name="end_date") String end_date
+										,@RequestParam(name="emp_name") String emp_name
+										,@RequestParam(name="approval_title") String approval_title) {
+		return approvalDocService.getSearchList(start_date,end_date,emp_name,approval_title);
+	}
+
+
 	//사원목록불러오기 토스트 셀렉트박스
 	@ResponseBody
 	@GetMapping("/empList")

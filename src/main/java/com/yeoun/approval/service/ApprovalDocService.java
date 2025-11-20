@@ -53,6 +53,12 @@ public class ApprovalDocService {
 	public List<Object[]> getEmp2() {
 		return approvalDocRepository.findAllMember2();
 	}
+	//검색 조회
+	@Transactional(readOnly = true)
+	public List<Object[]> getSearchList(String createDate,String finishDate,String empName,String approvalTitle){
+		//return approvalDocRepository.findPendingApprovalDocs(createDate,finishDate,empName,approvalTitle);
+		return null;
+	}
 	//기안서 양식종류
 	@Transactional(readOnly = true)
 	public List<ApprovalForm> getFormTypes(String deptId) {
