@@ -142,7 +142,7 @@
 					<label class="p-1" style="width: 200px;">결재완료기간</label>
 		        	<div class="row flex-nowrap">
 						<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-							<input type="date" name="startDate" id="today-date" class="form-control">
+							<input type="date" name="startDate" id="create-date" class="form-control">
 						</div>
 		                ~
 		                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
@@ -162,7 +162,7 @@
 		                </div>
 					</div>
 		        </h5>
-		     <h5 class="d-flex">
+		     <!-- <h5 class="d-flex">
 		     	
 		       <label>연차유형 : </label>
 		          <label class="form-check-label" for="radioDefault1">
@@ -180,21 +180,24 @@
 						  <label class="form-check-label"  for="radioDefault2">
 						    오후반차 
 						  </label>
-		       	</h5>
+		       	</h5> -->
 		       	<h5 class="d-flex">
 					<label class="p-1" style="width: 200px;">휴가종류-휴가(연차)신청서 [기본-hidden]</label>
 		        	<div class="mb-6 mb-0" style="width: 344px;">
 		  \          	<select id="leave-type" class="form-select"  >
 		            		<option selected></option>
-		            		<option name="leave" value="연차유급휴가">연차유급휴가</option>
+		            		<option name="leave" value="연차">연차</option>
+							<option name="leave" value="오전반차">오전반차</option>
+							<option name="leave" value="오후반차">오후반차</option>
+							<option name="leave" value="병가">병가</option>
+							<option name="leave" value="공가">공가</option>
+							<option name="leave" value="연차유급휴가">연차유급휴가</option>
 							<option name="leave" value="출산전후휴가">출산전후휴가</option>
 							<option name="leave" value="배우자출산휴가">배우자출산휴가</option>
 							<option name="leave" value="생리휴가">생리휴가</option>
 							<option name="leave" value="가족돌봄휴가">가족돌봄휴가</option>
 							<option name="leave" value="경조사휴가">경조사휴가</option>
 							<option name="leave" value="여름휴가">여름휴가</option>
-							<option name="leave" value="병가">병가</option>
-							<option name="leave" value="공가">공가</option>
 							<option name="leave" value="개인사정">개인사정</option>
 							<option name="leave" value="기타">기타</option>
 		            	</select>
@@ -225,7 +228,7 @@
 		        </h5>
 		        <h5>
 					<label class="p-1" style="width: 200px;">사유내용 -자유양식결재서:[기본-hidden]</label>
-		        	<textarea id="notice-content-write" class="form-control" th:field="*{reason}" rows="10" placeholder="결재사유내용 작성"></textarea>
+		        	<textarea id="reason-write" class="form-control" th:field="*{reason}" rows="10" placeholder="결재사유내용 작성"></textarea>
 		        </h5>
 		        <h5 class="d-flex">결재권한자 변경:
 		        	<input class="form-check-input" type="checkbox" id="opt-in">
