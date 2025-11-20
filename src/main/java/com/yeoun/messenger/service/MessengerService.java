@@ -2,9 +2,8 @@ package com.yeoun.messenger.service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Pattern;
 
 import com.yeoun.messenger.dto.*;
 import com.yeoun.messenger.entity.MsgMessage;
@@ -17,6 +16,7 @@ import com.yeoun.messenger.repository.MsgRoomRepository;
 import com.yeoun.messenger.repository.MsgStatusRepository;
 
 import org.apache.ibatis.javassist.NotFoundException;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -58,6 +58,16 @@ public class MessengerService {
 	private final FileAttachRepository fileAttachRepository;
 
 	// ====================================================
+	// 하이라이트 처리 관련 유틸 함수
+	private String highlight(String text, String keyword) {
+		if (text == null || keyword == null) return text;
+
+		// (?i)는 대소문자 무시
+		return text.replaceAll("(?i)" + Pattern.quote(keyword),
+				"<mark>$0</mark>");
+	}
+	
+	// ====================================================
 	// 친구 목록을 불러오는 서비스
 	public List<MsgStatusDTO> getUsers(String username) {
 
@@ -80,7 +90,7 @@ public class MessengerService {
 
 	// ====================================================
 	// 대화 목록을 불러오는 서비스
-	public List<MsgRoomDTO> getChatRooms (String username) {
+	public List<MsgRoomListDTO> getChatRooms (String username) {
 		return messengerMapper.selectChats(username);
 	}
 
@@ -239,25 +249,69 @@ public class MessengerService {
 		MsgRelation relation = msgRelationRepository.findByRoomId_RoomIdAndEmpId_EmpId(roomId, empId)
 				.orElseThrow(() -> new RuntimeException("참여자 없음"));
 				
-		//log.info(">>>>>>>>>>>>>>>>>>>>>>>>>> 나가기 진입...............");
 		relation.setParticipantYn("N");
 	}
 	
 	// ========================================================
 	// 대화방 검색 기능
-	public List<MsgRoom> searchRooms(String keyword) {
+	public List<MsgRoomListDTO> searchRooms(String empId, String keyword) {
+		if (keyword == null || keyword.isBlank())
+			return Collections.emptyList();
 
+		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 대화방 검색 진입... = ");
+		// 1) roomId 검색
 	    List<Long> byName 	 = msgRoomRepository.findRoomIdByGroupNameContaining(keyword);
 	    List<Long> byMember  = msgRelationRepository.findRoomIdByMemberName(keyword);
 	    List<Long> byMessage = msgMessageRepository.findRoomIdByMessageContent(keyword);
 
-	    // 중복 제거
+		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> byName = " + byName);
+		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> byMember = " + byMember);
+		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> byMessage = " + byMessage);
+
+	    // 2) 중복 제거 및 모으기
 	    Set<Long> roomIds = new HashSet<>();
 	    roomIds.addAll(byName);
 	    roomIds.addAll(byMember);
 	    roomIds.addAll(byMessage);
+		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> roomIds = " + roomIds);
 
-	    return msgRoomRepository.findAllById(roomIds);
+		// 3) 현재 유저가 속한 방만 남기기
+		List<Long> myRooms = msgRelationRepository.findRoomIdsByEmpId(empId);
+		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> myRooms = " + myRooms);
+		roomIds.retainAll(myRooms);
+		if (roomIds.isEmpty())
+			return Collections.emptyList();
+
+		// 4) 방 목록 생성
+		List<MsgRoomListDTO> result = new ArrayList<>();
+
+		for (Long roomId : roomIds) {
+
+			// a) 기본 방 정보 찾기
+			MsgRoomListDTO room = messengerMapper.selectChat(empId, roomId);
+
+			// b) 메시지 내용에서 매칭되는 문장 찾기
+			String message = msgMessageRepository.findMatchedMessage(roomId, keyword);
+
+			// 검색어가 있을 경우 해당 메시지를 보여주고 하이라이트 처리
+			if (message != null) {
+				room.setPreviewMessage(highlight(message, keyword));
+			}
+
+			// c) 이름/그룹명에서 매칭되는 결과에 하이라이트 처리
+			//String groupName = room.getGroupName();
+			//if (groupName != null && !groupName.isBlank()) {
+			//	room.setGroupName(highlight(groupName, keyword));
+			//}
+
+			result.add(room);
+
+		}
+		
+		// 4) 최신 순 정렬
+		result.sort(Comparator.comparing(MsgRoomListDTO::getPreviewTime).reversed());
+		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> result = " + result);
+		return result;
 	}
 
 	

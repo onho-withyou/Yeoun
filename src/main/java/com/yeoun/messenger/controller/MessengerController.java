@@ -52,7 +52,7 @@ public class MessengerController {
 	public String list(Authentication authentication, Model model) {
 		LoginDTO loginDTO = (LoginDTO)authentication.getPrincipal();
 		List<MsgStatusDTO> msgStatusDTOList = messengerService.getUsers(loginDTO.getUsername());
-		List<MsgRoomDTO> msgRoomsDTOList = messengerService.getChatRooms(loginDTO.getUsername());
+		List<MsgRoomListDTO> msgRoomsDTOList = messengerService.getChatRooms(loginDTO.getUsername());
 		model.addAttribute("friends", msgStatusDTOList);
 		model.addAttribute("rooms", msgRoomsDTOList);
 		return "/messenger/list";
@@ -209,8 +209,8 @@ public class MessengerController {
 	// ==========================================================================
 	// 채팅방 검색 기능
 	@GetMapping("/rooms/search")
-	public ResponseEntity<?> searchRooms(@RequestParam("keyword") String keyword) {
-	    return ResponseEntity.ok(messengerService.searchRooms(keyword));
+	public ResponseEntity<?> searchRooms(Authentication authentication, @RequestParam("keyword") String keyword) {
+	    return ResponseEntity.ok(messengerService.searchRooms(authentication.getName(), keyword));
 	}
 
 

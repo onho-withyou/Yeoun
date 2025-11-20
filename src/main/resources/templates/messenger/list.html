@@ -116,12 +116,12 @@
 
             <div class="chat-center">
               <p class="chat-title" th:text="${room.groupName}"></p>
-              <p class="chat-last" th:text="${room.lastMessage}"></p>
+              <p class="chat-last" th:text="${room.previewMessage}"></p>
             </div>
 
             <div class="chat-right">
                 <span class="chat-time"
-                      th:text="${#temporals.format(room.lastMessageTime, 'HH:mm')}"></span>
+                      th:text="${#temporals.format(room.previewTime, 'HH:mm')}"></span>
 
               <span class="badge-unread"
                     th:if="${room.unreadCount > 0}"
