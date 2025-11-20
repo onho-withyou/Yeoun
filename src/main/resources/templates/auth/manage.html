@@ -1,6 +1,13 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
           layout:decorate="~{/layouts/layout.html}">
+<th:block layout:fragment="head">
+	<style>
+	.role-row {
+	  row-gap: 10px;  
+	}
+	</style>
+</th:block>
 
 <th:block layout:fragment="content">
   <div class="custom-body container-xxl flex-grow-1 container-p-y">
@@ -43,36 +50,6 @@
 
             <!-- 사원 목록 테이블 -->
             <div id="empGrid" class="grid"></div>
-
-            <!-- 페이징 (필요 시 Ajax용으로 바꿔도 됨) -->
-            <nav th:if="${empPage != null}" class="mt-2">
-              <ul class="pagination pagination-sm justify-content-center mb-0">
-                <li class="page-item" th:classappend="${empPage.first} ? 'disabled'">
-                  <a class="page-link" href="#" data-page="0">«</a>
-                </li>
-                <li class="page-item" th:classappend="${empPage.first} ? 'disabled'">
-                  <a class="page-link" href="#"
-                     th:data-page="${empPage.number - 1}">‹</a>
-                </li>
-
-                <li class="page-item"
-                    th:each="p : ${#numbers.sequence(0, empPage.totalPages - 1)}"
-                    th:classappend="${p == empPage.number} ? 'active'">
-                  <a class="page-link" href="#"
-                     th:text="${p + 1}"
-                     th:data-page="${p}">1</a>
-                </li>
-
-                <li class="page-item" th:classappend="${empPage.last} ? 'disabled'">
-                  <a class="page-link" href="#"
-                     th:data-page="${empPage.number + 1}">›</a>
-                </li>
-                <li class="page-item" th:classappend="${empPage.last} ? 'disabled'">
-                  <a class="page-link" href="#"
-                     th:data-page="${empPage.totalPages - 1}">»</a>
-                </li>
-              </ul>
-            </nav>
 
           </div>
         </div>
@@ -117,9 +94,9 @@
                 </div>
               </div>
 
-              <div class="row g-2 mb-3">
+              <div class="row g-2 mb-3 role-row">
                 <!-- 역할 목록 th:each -->
-                <div class="col-6 col-md-4"
+                <div class="col-6 col-md-6"
                      th:each="r : ${roleList}">
                   <div class="form-check form-switch">
                     <input class="form-check-input role-checkbox" type="checkbox"
@@ -159,7 +136,7 @@
     </div>
   </div>
   
-  <th:block layout:fragment="myScript">
+<th:block layout:fragment="myScript">
 	  <!-- 기존 권한 관리 JS -->
 	  <script th:src="@{/js/auth/manage.js}"></script>
 
@@ -170,4 +147,5 @@
 	      alert(msg);                      
 	    }
   </script>
+</th:block>
 </th:block>
