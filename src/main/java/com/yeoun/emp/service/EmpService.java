@@ -377,7 +377,6 @@ public class EmpService {
 	    }
 	    return "/files/photo/" + photoFileId;
 	}
-	// ---------- 상세 조회 시 정보 표기 -----------
 
 	// =============================================================================
 	// 사원 정보 수정
@@ -448,6 +447,15 @@ public class EmpService {
 		    }
 		    // 추후 사진 추가
 	}
+
+	// 비밀번호 변경
+	public void changePassword(String empId, String newPassword) {
+        Emp emp = empRepository.findById(empId)
+                .orElseThrow(() -> new EntityNotFoundException("사원 없음: " + empId));
+
+        String encoded = encoder.encode(newPassword);
+        emp.setEmpPwd(encoded);
+    }
 
 	
 
