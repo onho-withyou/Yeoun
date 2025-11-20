@@ -59,6 +59,7 @@
 			console.error('Error fetching data:', error);
 		}
 	}	
+
 	
 	//1. 결재사항 불러오기
 	async function fetchPendingApprovalDocs() {
@@ -161,7 +162,7 @@
 		try {
 			const response = await fetch('/approval/waitingApprovalDocGrid');
 			const data = await response.json();
-			console.log("grid4 fetch-data----->:", data);
+			//console.log("grid4 fetch-data----->:", data);
 			let colData = [];
 			let obj = {};
 
@@ -184,7 +185,7 @@
 				obj = {};
 			});
 
-			console.log("grid4 map------>:", colData);
+			//console.log("grid4 map------>:", colData);
 			return colData;
 		} catch (error) {
 			console.error('Error fetching approval documents:', error);
@@ -195,7 +196,7 @@
 		try {
 			const response = await fetch('/approval/finishedApprovalDocGrid');
 			const data = await response.json();
-			console.log("grid5 fetch-data----->:", data);
+			//console.log("grid5 fetch-data----->:", data);
 			let colData = [];
 			let obj = {};
 
@@ -218,7 +219,7 @@
 				obj = {};
 			});
 
-			console.log("grid5 map------>:", colData);
+			//console.log("grid5 map------>:", colData);
 			return colData;
 		} catch (error) {
 			console.error('Error fetching approval documents:', error);
@@ -272,6 +273,7 @@
 			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
 			,{header: '상세보기' ,name: 'view_details' ,align: 'center'
 				,formatter: (rowInfo) => {
+					console.log("rowInfo.row.rowKey------->",rowInfo.row.rowKey);
  					return `<button type='button' class='btn btn-primary me-2' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
 			}}
 		  ],
@@ -347,11 +349,48 @@
 			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
 			,{header: '상세보기' ,name: 'view_details' ,align: 'center'
 				,formatter: (rowInfo) => {
- 					return `<button type='button' class='btn btn-primary me-2' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
+ 					return `<button type='button'  class='btn btn-primary me-2' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
 			}}
 		  ],
 		  data: []
 	});
+	
+	const modal = document.getElementById('approval-modal');
+	
+	grid2.on("click", (ev) => {
+		
+		
+		console.log("ev ------>",ev);
+		const target = ev.nativeEvent.target;
+		console.log("target ---->",target);
+		
+		const rowData = grid2.getRow(ev.rowKey);
+		console.log("rowData ----->",rowData);//로우데이터는 이걸로 불러오면됨
+		$('#approval-modal').modal('show');
+		document.getElementById('Drafting').innerText = rowData.approval_title;
+		document.getElementById('today-date').innerText = rowData.created_date;//결재 작성날짜 = 결재시작일
+		document.getElementById('approval-title').value = rowData.approval_title;
+		//양식종류form-menu
+		document.getElementById('approver-name').value  = rowData.approver;//결재자명
+		document.getElementById('today-date').value = rowData.created_date;//결재시작일 =결재 작성날짜
+		document.getElementById('finish-date').value = rowData.finish_date;//결재완료날짜
+		//휴가 연차신청서 
+		document.getElementById('start-date').value = rowData.start_date; //휴가시작날짜
+		document.getElementById('end-date').value = rowData.end_date; //휴가종료날짜
+		//연차유형
+		//휴가종류
+		//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오
+		//document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
+		//document.getElementById('to-dept-id').value = rowData.TO_DEPT_ID ;//발령부서
+		//document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
+		document.getElementById('approvar').value = rowData.approver;//결재권한자
+		//document.getElementById('approvar').innerText = rowData.approver;//전결자
+		document.getElementById('reason-write').innerText = rowData.reason;//결재사유내용
+	
+		
+		
+	});
+	
 	
 	//모달창 코드
 	//기안서 셀렉트 박스 변경시 모달창에 텍스트 변경함수
