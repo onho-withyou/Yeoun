@@ -5,7 +5,7 @@
 	// 현재 열린 문서의 approvalId
 	let approvalId;
 	// 현재 열린 문서의 결재권자(approval) 
-	let currentApproval;
+	let currentApprover;
 	// 모달의 결재확인 버튼
 	const approvalCheckBtn = document.getElementById('approvalCheckBtn');
 	
@@ -16,9 +16,9 @@
 	// 결재확인 버튼 눌렀을때 동작할 함수
 	approvalCheckBtn.addEventListener('click', () => {
 		
-		console.log(currentApproval, LOGIN_USER_ID);
+		console.log(currentApprover, LOGIN_USER_ID);
 		// 현재 로그인한 사용자와 결재권자 비교
-		if(currentApproval != LOGIN_USER_ID) {
+		if(currentApprover != LOGIN_USER_ID) {
 			alert("결재권한이 없습니다."); 
 			return;
 		}
@@ -119,7 +119,7 @@
 				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 				approvalId = rowData.approval_id;
 				// 문서 열릴때 현재 결재권자(approval) 저장
-				currentApproval = rowData.approver;
+				currentApprover = rowData.approver;
 				
 				document.getElementById('Drafting').innerText = rowData.approval_title;
 				document.getElementById('today-date').innerText = rowData.created_date.split('T')[0] ;//결재 작성날짜 = 결재시작일
@@ -160,7 +160,7 @@
 				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 				approvalId = rowData.approval_id;
 				// 문서 열릴때 현재 결재권자(approval) 저장
-				currentApproval = rowData.approver;
+				currentApprover = rowData.approver;
 				
 				document.getElementById('Drafting').innerText = rowData.approval_title;
 				document.getElementById('today-date').innerText = rowData.created_date.split('T')[0] ;//결재 작성날짜 = 결재시작일
@@ -199,7 +199,7 @@
 				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 				approvalId = rowData.approval_id;
 				// 문서 열릴때 현재 결재권자(approval) 저장
-				currentApproval = rowData.approver;
+				currentApprover = rowData.approver;
 				
 				document.getElementById('Drafting').innerText = rowData.approval_title;
 				document.getElementById('today-date').innerText = rowData.created_date.split('T')[0] ;//결재 작성날짜 = 결재시작일
@@ -237,7 +237,7 @@
 			// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 			approvalId = rowData.approval_id;
 			// 문서 열릴때 현재 결재권자(approval) 저장
-			currentApproval = rowData.approver;
+			currentApprover = rowData.approver;
 			
 			document.getElementById('Drafting').innerText = rowData.approval_title;
 			document.getElementById('today-date').innerText = rowData.created_date.split('T')[0] ;//결재 작성날짜 = 결재시작일
@@ -275,7 +275,7 @@
 			// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 			approvalId = rowData.approval_id;
 			// 문서 열릴때 현재 결재권자(approval) 저장
-			currentApproval = rowData.approver;
+			currentApprover = rowData.approver;
 			
 			document.getElementById('Drafting').innerText = rowData.approval_title;
 			document.getElementById('today-date').innerText = rowData.created_date.split('T')[0] ;//결재 작성날짜 = 결재시작일
