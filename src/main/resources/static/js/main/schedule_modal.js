@@ -439,13 +439,22 @@ function formatDate(date) {
 
 //모달열기
 function openOrgModal() {
-    document.getElementById('organization-modal').style.display = 'block';
+    const modal = new bootstrap.Modal(document.getElementById('organization-modal'));
+    modal.show();
+
+    // 모달 열린 후 Grid layout refresh
+    setTimeout(() => {
+        if (treeGrid) treeGrid.refreshLayout && treeGrid.refreshLayout();
+    }, 200);
 }
 
 // 모달닫기
 function closeOrgModal() {
-    document.getElementById('organization-modal').style.display = "none";
+    const modalEl = document.getElementById('organization-modal');
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    modal.hide();
 }
+
 let toastTreeData = null;
 // 조직도 불러오기
 async function getOrganizationChart() {
@@ -523,7 +532,7 @@ async function renderOrgGrid() {
 		treeGrid.destroy();
 		treeGrid = null;
 	}
-	
+	console.log("토스트트리데이터 : ",toastTreeData);
     treeGrid = new tui.Grid({
         el: document.getElementById('organizationChartGrid'),
         data: toastTreeData, // 트리화 데이터
@@ -534,8 +543,19 @@ async function renderOrgGrid() {
             useCascadingCheckbox: true
         },
         columns: [
-            { header: '이름', name: 'name', treeColumn: true, align: 'left', width: 200 },
-            { header: '사번', name: 'empId', align: 'center' }
+            { header: '이름'
+			, name: 'name'
+			, treeColumn: true
+			, align: 'left'
+//			, width: 200
+			, formatter: function({row}) {
+				if(row.empId != null){
+					return `${row.name}(${row.empId})`
+				} else {
+					return `${row.name}(${row.deptId})`
+				}
+			}
+			 }
         ]
     });
 }
@@ -552,21 +572,26 @@ document.getElementById('select-org-btn').addEventListener('click', function(){
     // 명단 노출
     const checkedNames = checkedUpEmpList.map(item => `${item.empName} (${item.empId})`);
     document.getElementById('schedule-sharer').value = checkedNames.join(', ');
-    // 필요시 숨겨진 input에도 empId 저장
-    // document.getElementById('schedule-sharer-ids').value = checkedUpEmpList.map(item => item.empId).join(',');
+    
+	// 필요시 숨겨진 input에도 empId 저장
+	// 기존 숨은 input 모두 제거 (중복 방지)
+	const form = document.getElementById('add-schedule-form');
+	// sharedEmpId name 가진 기존 input 모두 삭제
+	const oldInputs = form.querySelectorAll('input[name="sharedEmpId"]');
+	oldInputs.forEach(el => el.remove());
+
+	// 새로 선택된 인원만큼 hidden input 생성
+	checkedUpEmpList.forEach(item => {
+	    const input = document.createElement('input');
+	    input.type = 'hidden';
+	    input.name = 'sharedEmpId';
+	    input.value = item.empId;
+	    form.appendChild(input);
+	});
+		
     closeOrgModal();
 });
 
-document.getElementById('select-org-btn').addEventListener('click', function(){
-    // 체크된 직원 정보 가져오기
-    const checkedUpEmpList = getCheckedEmpId();
-    // 명단 노출
-    const checkedNames = checkedUpEmpList.map(item => `${item.empName} (${item.empId})`);
-    document.getElementById('schedule-sharer').value = checkedNames.join(', ');
-    // 필요시 숨겨진 input에도 empId 저장
-    // document.getElementById('schedule-sharer-ids').value = checkedUpEmpList.map(item => item.empId).join(',');
-    closeOrgModal();
-});
 
 
 function getCheckedEmpId() {
@@ -584,6 +609,15 @@ function getCheckedEmpId() {
     return checked;
 }
 
+//function searchInGrid(searchText) {
+//    // 원본 데이터 저장 필요 (전역 변수를 활용)
+//    const filtered = toastTreeData.filter(row =>
+//        Object.values(row).some(val =>
+//            String(val).toLowerCase().includes(searchText.toLowerCase())
+//        )
+//    );
+//    treeGrid.resetData(filtered); // 그리드에 필터링 결과만 표시
+//}
 
 
 
