@@ -69,11 +69,15 @@ function createDatePicker() {
 
 // 데이트피커의 날을 캘린더 형식에 맞게 변경
 function formatDateToYYYYMMDD(date) {
-	var year = date.getFullYear();
-	var month = String(date.getMonth() + 1).padStart(2, '0');
-	var day = String(date.getDate()).padStart(2, '0');
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, '0');
+	const day = String(date.getDate()).padStart(2, '0');
 	return year + '-' + month + '-' + day;
 }
+
+const obj = {};
+
+obj.name = "name";
 
 // 달력 월 변경 버튼 함수
 prevMonthBtn.addEventListener('click', function() {
