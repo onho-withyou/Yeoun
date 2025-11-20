@@ -49,6 +49,8 @@ public class ApprovalDocDTO {
 	
 	private String toDeptId; //발령부서 - 인사 발령신청서
 	
+	private String leaveType; //연차 유형
+	
 	private String expndType; //지출종류 - 지출결의서
 	
 	private String reason; //사유 - 자유양식결재서

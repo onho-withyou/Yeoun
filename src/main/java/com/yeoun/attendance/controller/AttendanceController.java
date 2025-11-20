@@ -180,8 +180,6 @@ public class AttendanceController {
 		}
 	}
 	
-	
-	
 	// 외근 등록
 	@PostMapping("/outwork")
 	public String registOutwork(@ModelAttribute("accessLogDTO") AccessLogDTO accessLogDTO, RedirectAttributes redirectAttributes) {
@@ -237,7 +235,7 @@ public class AttendanceController {
 		LocalDate end = (endDate != null) ? LocalDate.parse(endDate) : LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
 		
 		boolean isAdmin = loginDTO.getEmpRoles().stream()
-		        .anyMatch(r -> r.getRole().getRoleCode().equals("SYS_ADMIN"));
+		        .anyMatch(r -> r.getRole().getRoleCode().equals("ROLE_SYS_ADMIN"));
 		
 		// 권한 확인 후 권한이 없을 경우 메인 페이지로 이동(accessList에서 메인페이지로 이동하도록 처리)
 		if (!isAdmin) {

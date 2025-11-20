@@ -1,0 +1,115 @@
+<!-- 🔥 detailModal fragment 시작 -->
+<div th:fragment="payslip_detailModal">
+
+<!-- ===================== 급여 상세 모달 ===================== -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content rounded-4 shadow">
+
+      <div class="modal-header border-0">
+        <h4 class="modal-title fw-bold text-primary">급여 상세 내역</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- 상단 기본 정보 -->
+        <div class="p-4 rounded-4 mb-4" style="background:#f8f9fa;">
+          <div class="row g-3">
+
+            <div class="col-md-4">
+              <div class="small text-secondary">사번</div>
+              <div class="fw-bold fs-5" id="d-empId"></div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="small text-secondary">이름</div>
+              <div class="fw-bold fs-5" id="d-empName"></div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="small text-secondary">부서</div>
+              <div class="fw-bold fs-5" id="d-deptName"></div>
+            </div>
+
+          </div>
+
+          <hr>
+
+          <div class="row text-center">
+            <div class="col">
+              <div class="small text-secondary">기본급</div>
+              <div class="fw-bold fs-5" id="d-baseAmt"></div>
+            </div>
+            <div class="col">
+              <div class="small text-secondary">수당 합계</div>
+              <div class="fw-bold fs-5" id="d-alwAmt"></div>
+            </div>
+            <div class="col">
+              <div class="small text-secondary">공제 합계</div>
+              <div class="fw-bold fs-5 text-danger" id="d-dedAmt"></div>
+            </div>
+            <div class="col">
+              <div class="small text-secondary">실수령액</div>
+              <div class="fw-bold fs-5 text-primary" id="d-netAmt"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 지급 / 공제 영역 -->
+        <div class="row g-4">
+
+          <!-- 🔵 지급 항목 -->
+          <div class="col-md-6">
+            <div class="rounded-4 border shadow-sm p-3">
+              <div class="d-flex justify-content-between mb-3">
+                <h5 class="fw-bold text-primary mb-0">지급 항목</h5>
+                <span class="small text-secondary" id="payCount"></span>
+              </div>
+
+              <table class="table align-middle" style="background:#fdfdfd;">
+                <thead class="table-light">
+                  <tr>
+                    <th>항목명</th>
+                    <th class="text-end">금액</th>
+                  </tr>
+                </thead>
+                <tbody id="payItemsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 🔴 공제 항목 -->
+          <div class="col-md-6">
+            <div class="rounded-4 border shadow-sm p-3">
+              <div class="d-flex justify-content-between mb-3">
+                <h5 class="fw-bold text-danger mb-0">공제 항목</h5>
+                <span class="small text-secondary" id="dedCount"></span>
+              </div>
+
+              <table class="table align-middle" style="background:#fdfdfd;">
+                <thead class="table-light">
+                  <tr>
+                    <th>항목명</th>
+                    <th class="text-end">금액</th>
+                  </tr>
+                </thead>
+                <tbody id="dedItemsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="modal-footer border-0">
+        <button class="btn btn-secondary px-4" data-bs-dismiss="modal">닫기</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</div>
+<!-- 🔥 detailModal fragment 끝 -->
+

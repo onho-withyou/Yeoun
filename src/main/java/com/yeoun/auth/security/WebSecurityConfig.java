@@ -46,6 +46,10 @@ public class WebSecurityConfig {
 		                .authenticated()
 
 					// ================== 관리자/인사/MES 권한 ==================
+		            // 시스템 관리자만 가능
+		            .requestMatchers("/auth/**")
+		            	.hasAnyRole("SYS_ADMIN")
+		                
 		            // 인사관리 - 부서장도 가능
 	                .requestMatchers("/emp")
 	                    .hasAnyRole("SYS_ADMIN", "HR_ADMIN", "DEPT_MANAGER")

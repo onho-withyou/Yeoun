@@ -1,5 +1,6 @@
 package com.yeoun.messenger.entity;
 
+import com.yeoun.common.util.FileUtil.FileUploadHelpper;
 import com.yeoun.emp.entity.Emp;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
-public class MsgMessage {
+public class MsgMessage implements FileUploadHelpper {
 
     // 메시지 ID
     @Id
@@ -50,9 +51,9 @@ public class MsgMessage {
     @Column(length = 255)
     private String fileId;
 
-    // 미리보기 url
-    @Column(length = 500)
-    private String thumbUrl;
+    // 미리보기 url		===============> 컬럼 삭제
+    //@Column(length = 500)
+    //private String thumbUrl;
 
     // 메시지 전송시간
     @CreatedDate
@@ -62,6 +63,16 @@ public class MsgMessage {
     // 비고
     @Column
     private String remark;
+
+	@Override
+	public String getTargetTable() {
+		return "MSG_MESSAGE";
+	}
+
+	@Override
+	public Long getTargetTableId() {
+		return msgId;
+	}
 
 
 }

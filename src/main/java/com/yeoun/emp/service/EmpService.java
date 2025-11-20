@@ -15,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.yeoun.auth.entity.Role;
 import com.yeoun.auth.repository.RoleRepository;
 import com.yeoun.common.repository.CommonCodeRepository;
 import com.yeoun.emp.dto.EmpDTO;
@@ -50,22 +51,22 @@ public class EmpService {
 	private final EmpBankRepository empBankRepository;
 	private final MsgStatusRepository msgStatusRepository;
 	private final LeaveService leaveService;
+	private final RoleRepository roleRepository;
+	private final EmpRoleRepository empRoleRepository;
 	private final BCryptPasswordEncoder encoder;
-
-	// 사원 신규 등록
+	
+	// =========== 사원 등록 ===========
+	// 1. 사원 신규 등록
 	@Transactional
 	public void registEmp(EmpDTO empDTO) {
 		
-		// 주민등록번호 중복 검사
+		// 주민등록번호 / 이메일 / 연락처 중복 검사
 		String rrn = empDTO.getRrn();
-		if (rrn != null && !rrn.isBlank() && empRepository.existsByRrn(rrn)) {
-			throw new IllegalStateException("이미 등록된 주민등록번호입니다.");
-		}
-		
-		// 이메일 / 연락처 중복 검사
 	    String email  = empDTO.getEmail();
 	    String mobile = empDTO.getMobile();
-
+	    if (rrn != null && !rrn.isBlank() && empRepository.existsByRrn(rrn)) {
+			throw new IllegalStateException("이미 등록된 주민등록번호입니다.");
+		}
 	    if (email != null && !email.isBlank() && empRepository.existsByEmail(email)) {
 	        throw new IllegalStateException("이미 사용 중인 이메일입니다.");
 	    }
@@ -96,6 +97,9 @@ public class EmpService {
 
 	    // 4) EMP 저장
 	    empRepository.saveAndFlush(emp);
+	    
+		// 4-1) 역할 자동 부여 
+	    assignDefaultRoles(emp);
 	    
 	    // 5) 메신저 상태(MSG_STATUS) 저장
 	    MsgStatus status = new MsgStatus();
@@ -129,8 +133,8 @@ public class EmpService {
 	    log.info("EMP 등록 완료: empId={}, dept={}, pos={}",
 	            emp.getEmpId(), dept.getDeptName(), position.getPosName());
 	}
-
-	// 사원번호 생성 로직
+		
+	// 1-1. 사원번호 생성 로직
 	private String generateEmpId(LocalDate hireDate, int maxRetry) {
 		LocalDate base = (hireDate != null) ? hireDate : LocalDate.now();
         String datePart = base.format(DateTimeFormatter.ofPattern("yyMM"));
@@ -143,7 +147,62 @@ public class EmpService {
         }
         throw new IllegalStateException("사번 생성 충돌: 재시도 초과");
 	}
+
+	// 1-2. 부서/직급에 따라 권한 자동 부여
+	private void assignDefaultRoles(Emp emp) {
+
+	    String deptId  = emp.getDept().getDeptId();
+	    String posName = emp.getPosition().getPosName(); 
+
+	    // ========== 1. 인사부 ==========
+	    if (deptId.equals("DEP005")) {
+	        addRoleIfNotExists(emp, "ROLE_HR_ADMIN");
+	    }
+
+	    // ========== 2. 부장 ==========
+	    if (posName != null && posName.contains("부장")) {
+	        addRoleIfNotExists(emp, "ROLE_DEPT_MANAGER");
+	    }
+
+		// ========== 3. 대표 ==========
+	    if ("대표".equals(posName)) {
+	        addRoleIfNotExists(emp, "ROLE_SYS_ADMIN");
+	        addRoleIfNotExists(emp, "ROLE_NOTICE_WRITER");
+	        return; // 대표는 추가 규칙 적용 X
+	    }
+
+	    // ========== 4. ERP / MES 이사 ==========
+	    if (posName != null && posName.contains("이사")) {
+
+	        // 공통: 공지 작성 권한
+	        addRoleIfNotExists(emp, "ROLE_NOTICE_WRITER");
+
+	        // ERP본부 or MES본부 → HR_ADMIN 추가
+	        if (deptId.equals("DEP000") || deptId.equals("DEP100")) {
+	            addRoleIfNotExists(emp, "ROLE_HR_ADMIN");
+	        }
+	    }
+	}
 	
+	private void addRoleIfNotExists(Emp emp, String roleCode) {
+
+	    Role role = roleRepository.findByRoleCode(roleCode)
+	            .orElseThrow(() -> new IllegalStateException("역할 없음: " + roleCode));
+
+	    // 이미 가진 권한이면 스킵 (emp.getEmpRoles() 가 연관관계에 있다면)
+	    boolean already = emp.getEmpRoles() != null &&
+	            emp.getEmpRoles().stream()
+	               .anyMatch(er -> er.getRole().getRoleCode().equals(roleCode));
+
+	    if (already) return;
+
+	    EmpRole empRole = new EmpRole();
+	    empRole.setEmp(emp);
+	    empRole.setRole(role);
+
+	    empRoleRepository.save(empRole);
+	}
+
 	// 활성화된 부서 목록 조회
 	public  List<Dept> getDeptList() {
 		return deptRepository.findActive();
@@ -183,7 +242,7 @@ public class EmpService {
 	    if (deptId != null && deptId.isBlank()) deptId = null;
 	    if (posCode != null && posCode.isBlank()) posCode = null;
 	    
-	    return empRepository.searchForHrActionDto(deptId, posCode, keyword);
+	    return empRepository.searchActiveEmpList(deptId, posCode, keyword);
 	}
 
 	// ==============================================================================
@@ -318,7 +377,6 @@ public class EmpService {
 	    }
 	    return "/files/photo/" + photoFileId;
 	}
-	// ---------- 상세 조회 시 정보 표기 -----------
 
 	// =============================================================================
 	// 사원 정보 수정
@@ -389,6 +447,15 @@ public class EmpService {
 		    }
 		    // 추후 사진 추가
 	}
+
+	// 비밀번호 변경
+	public void changePassword(String empId, String newPassword) {
+        Emp emp = empRepository.findById(empId)
+                .orElseThrow(() -> new EntityNotFoundException("사원 없음: " + empId));
+
+        String encoded = encoder.encode(newPassword);
+        emp.setEmpPwd(encoded);
+    }
 
 	
 

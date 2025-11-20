@@ -36,8 +36,6 @@ VALUES ('POS007', '사장', 7, 'Y', 'Y', SYSDATE);
 INSERT INTO ROLE (ROLE_CODE, ROLE_NAME, ROLE_DESC, USE_YN, CREATED_DATE)
 SELECT 'ROLE_SYS_ADMIN', '시스템 관리자', '전체 시스템 관리 (권한/공통코드 포함)', 'Y', SYSDATE FROM DUAL;
 INSERT INTO ROLE (ROLE_CODE, ROLE_NAME, ROLE_DESC, USE_YN, CREATED_DATE)
-SELECT 'ROLE_EMP', '일반 사원', '기본 로그인 사용자', 'Y', SYSDATE FROM DUAL;
-INSERT INTO ROLE (ROLE_CODE, ROLE_NAME, ROLE_DESC, USE_YN, CREATED_DATE)
 SELECT 'ROLE_HR_ADMIN', '인사 관리자', '사원/조직/인사발령/근태 전체 관리', 'Y', SYSDATE FROM DUAL;
 INSERT INTO ROLE (ROLE_CODE, ROLE_NAME, ROLE_DESC, USE_YN, CREATED_DATE)
 SELECT 'ROLE_ATTEND_ADMIN', '근태 관리자', '근태 정책 및 출퇴근/연차 관리', 'Y', SYSDATE FROM DUAL;
@@ -93,12 +91,27 @@ INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DO
 VALUES(202511150111,'영업부 김구2 문서제목 테스트','1306178',sysdate,'완료','2505823','고정지출',sysdate,'지출결의서','테스트용 김구2 종료 입니다.',sysdate,sysdate,'개발2팀본부');
 INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
 VALUES(202511150112,'영업부 김구3 문서제목 테스트','',sysdate,'완료','2505823','비정지출',sysdate,'지출결의서','테스트용 김구3 종료 입니다.',sysdate,sysdate,'개발2팀본부');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID,leave_type)
+VALUES(202511150113,'개발부 박경찬1 문서제목 테스트','2506589',sysdate,'1차대기','2001752','',sysdate,'연차신청서','테스트용 개발부 박경찬1 입니다.',sysdate,sysdate+10,'','연차');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID,leave_type)
+VALUES(202511150114,'개발부 박경찬2 문서제목 테스트','2506589',sysdate,'1차대기','2001752','',sysdate,'반차신청서','테스트용 개발부 박경찬2 입니다.',sysdate,sysdate,'','반차');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID,leave_type)
+VALUES(202511150115,'개발부 박경찬3 문서제목 테스트','2506589',sysdate,'1차대기','2001752','',sysdate,'반차신청서','테스트용 개발부 박경찬3 입니다.',sysdate,sysdate,'','병가');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID,leave_type)
+VALUES(202511150116,'개발부 박경찬4 문서제목 테스트','2506589',sysdate,'완료','2001752','',sysdate,'지출결의서','테스트용 개발부 박경찬4 입니다.',sysdate,sysdate+10,'','');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID,leave_type)
+VALUES(202511150117,'개발부 박경찬5 문서제목 테스트','2511793',sysdate,'완료','2001752','',sysdate,'인사발령신청서','테스트용 개발부 박경찬5 입니다.',sysdate,sysdate,'인사부','');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID,leave_type)
+VALUES(202511150118,'개발부 박경찬6 문서제목 테스트','1904184',sysdate,'완료','2001752','',sysdate,'자유양식결재서','테스트용 개발부 박경찬6 입니다.',sysdate,sysdate,'','');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID,leave_type)
+VALUES(202511150119,'개발부 박경찬7 문서제목 테스트','2001752',sysdate,'1차대기','2001752','',sysdate,'자유양식결재서','테스트용 개발부 박경찬6 입니다.',sysdate,sysdate,'','');
+
 
 -- 결재권한자
 INSERT INTO approver(
             emp_id, -- 결재자 사원 id
             approval_id, -- 결재서류 id
-            approval_status, --결재 상태
+            approval_status, --결재 상태 
             delegate_status, --전결자 상태
             order_approvers, --결재순서
             viewing)  --열람권한
@@ -135,6 +148,23 @@ INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, orde
 VALUES('2410807',202511150111,0,'','2','y');
 INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
 VALUES('1306178',202511150111,0,'','1','y');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('2506589',202511150113,0,'','1','y');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('2506589',202511150114,0,'','1','y');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('2506589',202511150115,0,'','1','y');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('2506589',202511150116,0,'','1','y');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('2511793',202511150117,0,'','3','y');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('1904184',202511150117,0,'','2','y');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('2506589',202511150117,0,'','1','y');
+INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
+VALUES('1904184',202511150118,0,'','1','y');
+
 
 -- 결재양식 - 결재권한자 디폴트값 지정
 
