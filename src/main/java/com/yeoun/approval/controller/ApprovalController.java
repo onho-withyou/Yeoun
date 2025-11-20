@@ -44,6 +44,10 @@ public class ApprovalController {
 		model.addAttribute("formTypes",approvalDocService.getFormTypes(loginDTO.getDeptId())); //"DEP001"결재- 기안서 양식종류 불러오기
 		model.addAttribute("deptList", approvalDocService.getDept()); //결재- 부서목록 불러오기
 		model.addAttribute("approvalDocDTO", new ApprovalDocDTO());//결재문서DTO
+		
+		// --------------------------------------------
+		model.addAttribute("currentUserId", loginDTO.getEmpId());
+		model.addAttribute("currentUserName", loginDTO.getEmpName());
 		return "approval/approval_doc";
   }
   

@@ -1,37 +1,22 @@
 package com.yeoun.approval.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.approval.dto.ApprovalDocDTO;
-import com.yeoun.approval.dto.ApprovalFormDTO;
 import com.yeoun.approval.entity.ApprovalForm;
+import com.yeoun.approval.entity.Approver;
 import com.yeoun.approval.entity.ApprovalDoc;
 import com.yeoun.approval.repository.ApprovalDocRepository;
-import com.yeoun.attendance.repository.AccessLogRepository;
-import com.yeoun.attendance.repository.AttendanceRepository;
-import com.yeoun.attendance.repository.WorkPolicyRepository;
-import com.yeoun.auth.dto.LoginDTO;
-import com.yeoun.emp.dto.EmpDTO;
-import com.yeoun.emp.dto.EmpListDTO;
+import com.yeoun.approval.repository.ApproverRepository;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
-import com.yeoun.emp.entity.EmpRole;
-import com.yeoun.emp.repository.EmpRepository;
-import com.yeoun.emp.service.EmpService;
 
-import groovy.util.logging.Log4j;
-
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -43,6 +28,7 @@ public class ApprovalDocService {
 	
 
 	private final ApprovalDocRepository approvalDocRepository;
+	private final ApproverRepository approverRepository;
 	//기안자 명 불러오기
 	@Transactional(readOnly = true)
 	public List<Emp> getEmp() {
@@ -91,7 +77,33 @@ public class ApprovalDocService {
 	 
 	 
 	 
-	 
+	 // --------------------------------------------------------------------------------------
+	 // 결재 승인 메서드 
+	 @Transactional
+	 public void updateApproval(Long approvalId, String empId) {
+		 // 전달받은 문서ID를 사용하여 문서엔티티 가져오기
+		 ApprovalDoc approvalDoc = approvalDocRepository.findById(approvalId)
+				 					.orElseThrow(() -> new EntityNotFoundException("존재하지 않는 결재문서 입니다."));
+		 
+		 // 해당 문서의 approvalId를 통해 approver 객체에서 승인권자 목록 가져오기
+		 List<Approver> approverList = approverRepository.findByApprovalId(approvalId);
+		 
+		 // 불러온 승인권자리스트 요소 반복
+		 for(Approver approver : approverList) {
+			 // 현재 로그인사용자와 승인권자의 empId가 동일한지 판별후
+			 if(empId.equals(approver.getEmpId())) {
+				 // 현재 로그인 사용자와 승인권자자의 empId가 동일하다면 해당 엔티티의 VIEWING을 Y로 변경
+				 approver.setViewing("Y");
+				 // 현재 승인권자의 orderApprover의 순서가 apporverList의 크기와 같다면(마지막결제권자라면)
+				 if(Integer.parseInt(approver.getOrderApprovers()) == approverList.size()) {
+					 approvalDoc.setDocStatus("완료");
+				 } else { // 아니라면 순서에 맞는 status로 변경
+					 String approvalOrder = approver.getOrderApprovers();
+					 approvalDoc.setDocStatus(approvalOrder + "차 완료");
+				 }
+			 }
+		 }
+	 }
 	 
 	// -------------------------------------------------------------------------------
 	// 메인페이지 내가 결제할 결제문서, 내가올린 결제 문서 불러오기
@@ -102,5 +114,6 @@ public class ApprovalDocService {
 		
 		return approvalDOCPage.map(ApprovalDocDTO::fromEntity); 
 	}
+	
 
 }
