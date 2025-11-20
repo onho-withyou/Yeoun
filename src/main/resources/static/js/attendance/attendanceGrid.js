@@ -34,7 +34,7 @@ const grid = new tui.Grid({
 			}
 		},
 	],
-		
+	bodyHeight: 500,	
 });
 
 // 데이터 가져오기

@@ -71,6 +71,7 @@ const grid = new tui.Grid({
 			}
 		},
 	],
+	bodyHeight: 500,
 });
 
 grid.sort('workDate', true);
