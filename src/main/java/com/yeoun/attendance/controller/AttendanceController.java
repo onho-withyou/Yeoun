@@ -180,8 +180,6 @@ public class AttendanceController {
 		}
 	}
 	
-	
-	
 	// 외근 등록
 	@PostMapping("/outwork")
 	public String registOutwork(@ModelAttribute("accessLogDTO") AccessLogDTO accessLogDTO, RedirectAttributes redirectAttributes) {

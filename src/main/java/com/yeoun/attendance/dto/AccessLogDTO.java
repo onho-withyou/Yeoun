@@ -18,8 +18,6 @@ import lombok.ToString;
 @ToString
 public class AccessLogDTO {
 	private Long accessId;
-	
-	@NotNull(message = "사원번호는 필수 입력값입니다")
 	private String empId; // 외출한 사원 번호
 	
 	@NotNull
@@ -30,7 +28,6 @@ public class AccessLogDTO {
 	private LocalDateTime createdDate; // 등록 일시
 	private String reason; // 외근 사유
 	private String accessType; //외출 상태 구분 (OUT/IN/OUTWORK/ETC)
-	
 	private String deptName; // 부서이름
 	private String posName; // 직급명
 	private String empName; // 직원 이름
