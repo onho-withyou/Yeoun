@@ -7,6 +7,7 @@ import java.util.stream.Collector;
 import org.hibernate.validator.constraints.Length;
 import org.modelmapper.ModelMapper;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.yeoun.emp.entity.Emp;
 
@@ -113,8 +114,17 @@ public class EmpDTO {
 	@NotBlank(message = "예금주명을 입력해주세요.")
 	private String holder; 
 
-	// 통장 사본 파일 ID (선택)
+	// 통장 사본 파일 ID 
 	private Long fileId; 
+	
+	// ========================
+	// 업로드용 파일 
+	// ========================
+	// 사원 사진 
+	private MultipartFile photoFile;
+	
+	// 통장 사본
+	private MultipartFile bankbookFile;
 	
 	// -----------------------------------------------------------------------
 	private static ModelMapper modelMapper = new ModelMapper();

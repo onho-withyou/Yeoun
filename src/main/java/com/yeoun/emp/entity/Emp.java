@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.yeoun.auth.entity.Role;
+import com.yeoun.common.util.FileUtil.FileUploadHelpper;
 import com.yeoun.leave.entity.AnnualLeave;
 
 import jakarta.persistence.CascadeType;
@@ -30,7 +31,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
-public class Emp {
+public class Emp implements FileUploadHelpper { 
 
 	// 사원번호 (로그인 ID)
 	@Id
@@ -122,9 +123,23 @@ public class Emp {
 		// 사용자 권한 목록 객체(List<EmpRole>)에 1개의 권한이 저장된 EmpRole 엔티티 추가
 		empRoles.add(empRole);
 	}
-	
+
+	// ---------------------------------------------------------------
 	// 연차 테이블과 연동
 	@OneToOne(mappedBy = "emp", cascade = CascadeType.ALL, orphanRemoval = true)
 	private AnnualLeave annualLeave;
+	
+	// ---------------------------------------------------------------
+	@Override
+	public String getTargetTable() {
+		return "EMP";
+	}
+
+	@Override
+	public Long getTargetTableId() {
+		return Long.valueOf(empId);
+	}
+	
+	
 	
 }
