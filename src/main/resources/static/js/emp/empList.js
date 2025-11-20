@@ -255,6 +255,9 @@ function showEmpDetail(empId) {
   fetch(`/emp/detail/${empId}`)
     .then(res => res.json())
     .then(d => {
+		
+	  document.getElementById('empDetailModalTitle').innerText = '사원 상세';
+	  
       // 간단히 값 채우기
       document.getElementById('d-empName').textContent = d.empName;
       document.getElementById('d-empId').textContent = d.empId;
