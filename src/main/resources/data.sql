@@ -87,6 +87,9 @@ INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DO
 VALUES(202511150117,'개발부 박경찬5 문서제목 테스트','2511793',sysdate,'완료','2001752','',sysdate,'인사발령신청서','테스트용 개발부 박경찬5 입니다.',sysdate,sysdate,'인사부','');
 INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID,leave_type)
 VALUES(202511150118,'개발부 박경찬6 문서제목 테스트','1904184',sysdate,'완료','2001752','',sysdate,'자유양식결재서','테스트용 개발부 박경찬6 입니다.',sysdate,sysdate,'','');
+INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID,leave_type)
+VALUES(202511150119,'개발부 박경찬7 문서제목 테스트','2001752',sysdate,'1차대기','2001752','',sysdate,'자유양식결재서','테스트용 개발부 박경찬6 입니다.',sysdate,sysdate,'','');
+
 
 -- 결재권한자
 INSERT INTO approver(
