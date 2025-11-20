@@ -8,9 +8,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.yeoun.auth.service.AuthAdminService;
 import com.yeoun.emp.dto.EmpListDTO;
@@ -65,6 +67,17 @@ public class AuthAdminController {
 	@ResponseBody
 	public List<String> getRoles(@PathVariable("empId") String EmpId) {
 		return authAdminService.getRoleCodesByEmp(EmpId);
+	}
+	
+	// 새로운 역할 저장
+	@PostMapping("/save")
+	public String saveRoles(@RequestParam("empId") String empId,
+							@RequestParam(required = false, name = "roleCodes") List<String> roleCodes,
+							RedirectAttributes rttr) {
+		
+		authAdminService.updateEmpRoles(empId, roleCodes);
+		rttr.addFlashAttribute("msg", "권한이 저장되었습니다.");
+		return "redirect:/auth/manage";
 	}
 	
 	

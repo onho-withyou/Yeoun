@@ -101,7 +101,7 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	            OR e.empName LIKE concat('%', :keyword, '%')
 	            OR e.empId   LIKE concat('%', :keyword, '%')
 	          )
-	    ORDER BY e.hireDate DESC
+	    ORDER BY d.deptName, p.rankOrder DESC, e.hireDate DESC
 	""")
 	List<EmpListDTO> searchActiveEmpList(@Param("deptId") String deptId,
 									     @Param("posCode") String posCode,

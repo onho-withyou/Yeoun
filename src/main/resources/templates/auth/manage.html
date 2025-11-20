@@ -42,10 +42,6 @@
             </form>
 
             <!-- 사원 목록 테이블 -->
-<!--             <div class="card-body pt-3"> -->
-<!-- 			  <div id="empGrid" style="height: 420px;"></div> -->
-<!-- 			</div> -->
-            
             <div id="empGrid" class="grid"></div>
 
             <!-- 페이징 (필요 시 Ajax용으로 바꿔도 됨) -->
@@ -126,14 +122,9 @@
                 <div class="col-6 col-md-4"
                      th:each="r : ${roleList}">
                   <div class="form-check form-switch">
-                    <input class="form-check-input role-checkbox"
-                           type="checkbox"
-                           th:id="'role-' + ${r.roleCode}"
-                           name="roleCodes"
-                           th:value="${r.roleCode}">
-<!--                            th:checked="${r.assigned}"> -->
-                    <label class="form-check-label"
-                           th:for="'role-' + ${r.roleCode}">
+                    <input class="form-check-input role-checkbox" type="checkbox"
+                           th:id="'role-' + ${r.roleCode}" name="roleCodes" th:value="${r.roleCode}">
+                    <label class="form-check-label" th:for="'role-' + ${r.roleCode}">
                       <span th:text="${r.roleName}">HR 관리자</span>
                       <span class="text-muted small"
                             th:text="' (' + ${r.roleCode} + ')'">
@@ -169,6 +160,14 @@
   </div>
   
   <th:block layout:fragment="myScript">
-    <script src="/js/auth/manage.js"></script>
-  </th:block>
+	  <!-- 기존 권한 관리 JS -->
+	  <script th:src="@{/js/auth/manage.js}"></script>
+
+	  <!-- 권한 저장 후 플래시 메시지 출력 -->
+	  <script th:inline="javascript">
+	    const msg = /*[[${msg}]]*/ null;   // 컨트롤러에서 온 flash attribute
+	    if (msg) {
+	      alert(msg);                      
+	    }
+  </script>
 </th:block>
