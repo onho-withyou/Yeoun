@@ -50,7 +50,7 @@ async function loadAttendanceList(startDate, endDate) {
 		let data = await res.json();
 		
 		const statusMap = {
-			IN: "출근",
+			WORKIN: "출근",
 			LATE: "지각",
 			OFF: "휴무",
 			OUTWORK: "외근"

@@ -12,7 +12,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,7 +37,6 @@ public class AttendanceDTO {
 	@NotNull(message = "출근시간은 필수 입력값입니다.")
 	private LocalTime workIn; // 출근시간
 	
-	@NotNull(message = "퇴근시간은 필수 입력값입니다.")
 	private LocalTime workOut; // 퇴근시간
 	
 	@Min(0)
