@@ -38,10 +38,17 @@
             <span class="status-text" id="status-text">온라인</span>
 
             <select class="status-select" id="work-status">
-            <option selected>근무 중</option>
-            <option>회의 중</option>
-            <option>식사 중</option>
-            <option>외출 중</option>
+	            <!-- ==========================공통 코드 변경 예정============================== -->
+	            <option value="WORKING" selected>근무 중</option>
+	            <option value="MEETING">회의 중</option>
+	            <option value="CALL">통화 중</option>
+	            <option value="FOCUS">집중 업무 중</option>
+	            <option value="LUNCH">식사 중</option>
+	            <option value="OUTING">외출 중</option>
+	            <option value="FIELDWORK">외근 중</option>
+	            <option value="VACATION">휴가 중</option>
+	            <option value="WFH">재택근무 중</option>
+	            <!-- ==========================공통 코드 변경 예정============================== -->
             </select>
         </div>
     </div>
@@ -67,6 +74,25 @@
             <p class="mb-0 fw-bold" th:text="${friend.empName}"></p>
             <small class="text-muted" th:text="|${friend.deptName} / ${friend.posName} |"></small>
           </div>
+          <div>
+          	<!-- ======== 업무 사유 상태메시지 표시 ======== -->
+			<small class="status-msg"
+			       th:switch="${friend.manualWorkStat}">
+			       
+			    <span th:case="'WORKING'">근무 중</span>
+			    <span th:case="'MEETING'">회의 중</span>
+			    <span th:case="'CALL'">통화 중</span>
+			    <span th:case="'FOCUS'">집중 업무 중</span>
+			    <span th:case="'LUNCH'">식사 중</span>
+			    <span th:case="'OUTING'">외출 중</span>
+			    <span th:case="'FIELDWORK'">외근 중</span>
+			    <span th:case="'WFH'">재택근무 중</span>
+			    <span th:case="'VACATION'">휴가 중</span>
+			
+			    <!-- 값 없을 때 -->
+			    <span th:case="*">-</span>
+			</small>
+          </div>
           <i class="star-btn"
              th:data-id="${friend.empId}"
              th:classappend="${friend.favoriteYn == 'Y'} ? 'bi-star-fill active' : 'bi-star'">
@@ -75,6 +101,10 @@
       </div>
 
       <div class="panel-body d-none" id="chats-panel">
+      	
+      	<!-- JS가 렌더링할 자리 -->
+    	<div class="chat-list"></div>
+        
         <!-- 1) 대화방 목록 있는 경우 -->
         <div th:if="${rooms.size() > 0}">
           <div class="chat-item"

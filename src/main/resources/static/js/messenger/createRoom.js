@@ -15,7 +15,7 @@ async function createRoom ({
 	members,			// 방에 속한 멤버
 	groupYn,			// 그룹채팅 여부
 	groupName,			// 채팅방 이름
-	msg,				// 첫번째 전송 메시지
+	firstMessage,		// 첫번째 전송 메시지
 	msgType,			// 첫번째 전송 메시지의 타입
 	csrfHeaderName,
 	csrfToken
@@ -26,7 +26,7 @@ async function createRoom ({
 	    members: members,		
 	    groupYn: groupYn,
 	    groupName: groupName,		
-	    firstMessage: msg,			
+	    firstMessage: firstMessage,			
 	    msgType: msgType		
 	  };
 	

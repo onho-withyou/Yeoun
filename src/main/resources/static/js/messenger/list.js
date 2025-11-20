@@ -52,6 +52,63 @@ document.querySelectorAll('.friend-item').forEach(item => {
   }
 });
 
+//==========================
+// 대화창 검색 동작 후 대화창 렌더링
+//==========================
+function renderRoomList(rooms) {
+
+    const chatList = document.querySelector('.chat-list');
+    const emptyChat = document.querySelector('.empty-chat');
+
+    if (!chatList) {
+        console.error("❌ chat-list 컨테이너가 존재하지 않습니다.");
+        return;
+    }
+
+    // 기존 내용 제거
+    chatList.innerHTML = '';
+
+    // 1) 검색 결과가 없을 경우 → emptyChat 보여주기
+    if (!rooms || rooms.length === 0) {
+        if (emptyChat) emptyChat.style.display = 'block';
+        return;
+    } else {
+        if (emptyChat) emptyChat.style.display = 'none';
+    }
+
+    // 2) 검색 결과 렌더링
+    rooms.forEach(room => {
+
+        const item = document.createElement('div');
+        item.classList.add('chat-item');
+        item.dataset.id = room.roomId;
+
+        item.innerHTML = `
+            <img class="rounded-circle"
+                 src="/img/msg_img_${room.profileImg}.png">
+
+            <div class="chat-center">
+                <p class="chat-title">${room.groupName || ''}</p>
+                <p class="chat-last">${room.lastMessage || ''}</p>
+            </div>
+
+            <div class="chat-right">
+                <span class="chat-time">${room.lastMessageTime || ''}</span>
+
+                ${
+                    room.unreadCount && room.unreadCount > 0
+                        ? `<span class="badge-unread">${room.unreadCount}</span>`
+                        : ''
+                }
+            </div>
+        `;
+
+        chatList.appendChild(item);
+    });
+}
+
+
+
 // ==========================
 // 검색 로직
 // ==========================
@@ -72,16 +129,15 @@ function filterFriends()  {
 
 // 대화 목록 필터링 (대화 상세내용)
 function filterChats() {
-    const keyword = searchInput.value.trim().toLowerCase();
-    const items = document.querySelectorAll('.chat-item');
+    const keyword = searchInput.value.trim();
     
-    items.forEach(item => {
-        const name = item.querySelector('p').textContent.toLowerCase();
-        const preview = item.querySelector('small').textContent.toLowerCase();
-        
-        const visible = name.includes(keyword) || preview.includes(keyword);
-        item.style.display = visible ? 'flex' : 'none';
-    });
+    fetch(`/messenger/rooms/search?keyword=${encodeURIComponent(keyword)}`)
+    .then(response => response.json())
+    .then(rooms => {
+    	renderRoomList(rooms);
+    })
+    .catch(err => console.error(err));
+
 }
 
 
@@ -217,8 +273,8 @@ async function sendStatusToServer(presence, reason = null) {
                 [csrfHeaderName]: csrfToken
             },
             body: JSON.stringify({
-                presence: presence,   // ONLINE / AWAY / BUSY / OFFLINE
-                reason: reason        // MEETING / LUNCH / WORKING / etc
+                avlbStat: presence,   		  // ONLINE / AWAY / BUSY / OFFLINE
+                manualWorkStat: reason        // MEETING / LUNCH / WORKING / etc
             })
         });
 
@@ -484,7 +540,6 @@ document.querySelectorAll('#group-modal .member-item').forEach(item => {
 });
 //========================================
 // 2) 모달 열리기 "직전" 초기화 (show.bs.modal)
-// → 화면에 나타나기 전에 초기화되므로 깜빡임 없음
 //========================================
 modalEl.addEventListener('show.bs.modal', () => {
 
@@ -548,13 +603,13 @@ document.getElementById('create-group-btn')
   const groupNameInput = document.getElementById('group-name');
   const groupName = groupNameInput ? groupNameInput.value.trim() : null;
 
-  // 3) createRoom 호출 (네가 만든 구조 그대로)
+  // 3) createRoom 호출
   const roomId = await createRoom({
     members: members,
-    groupYn: true,             // 그룹 채팅
-    groupName: groupName,     // 입력값 또는 null
-    msg: null,                // 그룹은 firstMessage 없음
-    msgType: null,            // 그룹은 msgType 없음
+    groupYn: 'Y',              // 그룹 채팅
+    groupName: groupName,      // 입력값 또는 null
+    firstMessage: null,        // 그룹은 firstMessage 없음
+    msgType: null,             // 그룹은 msgType 없음
     csrfHeaderName: csrfHeaderName,
     csrfToken: csrfToken
   });
@@ -579,6 +634,7 @@ document.getElementById('create-group-btn')
     'width=500,height=700,resizable=no,scrollbars=no'
   );
 });
+
 
 
 
