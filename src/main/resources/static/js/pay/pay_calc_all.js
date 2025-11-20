@@ -1,3 +1,7 @@
+const csrfToken = document.querySelector('meta[name="_csrf_token"]').content;
+const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]').content;
+
+
 /* ============================
    월 선택 시 페이지와 hidden input 업데이트
 ============================ */
@@ -171,12 +175,94 @@ async function refreshStatus(mm) {
 
   document.getElementById("statCalc").textContent = statusMap[s.calcStatus];
   document.getElementById("statCount").textContent = `건수 ${s.count}`;
-  document.getElementById("statTot").textContent = fmt(s.totalAmt);
+  document.getElementById("statTot").textContent = fmt(s.totAmt);
   document.getElementById("statDed").textContent = fmt(s.dedAmt);
   document.getElementById("statNet").textContent = fmt(s.netAmt);
+
 }
 
 document.addEventListener("DOMContentLoaded", ()=>{
   const mm = document.getElementById("calc_month")?.value;
   if (mm) refreshStatus(mm);
 });
+
+/*전체 가계산*/
+document.getElementById("btnSimulateAll")?.addEventListener("click", () => {
+    const yyyymm = document.getElementById("calc_month").value;
+
+    if (!yyyymm) return alert("월을 선택하세요.");
+
+    fetch(`/pay/calc/simulateJson`, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            [csrfHeader]: csrfToken
+        },
+        body: new URLSearchParams({ yyyymm })
+    })
+    .then(res => res.json())
+    .then(r => {
+        if (!r.success) {
+            alert("❌ 오류: " + r.message);
+            return;
+        }
+        alert("✅ " + r.message);
+
+        // 상태 리로드
+        refreshStatus(yyyymm);
+
+        // 그리드 데이터 다시 로드
+        loadGridData(yyyymm);
+    });
+});
+
+/*전체 확정*/
+document.getElementById("btnConfirmAll")?.addEventListener("click", () => {
+    const yyyymm = document.getElementById("calc_month").value;
+
+    if (!yyyymm) return alert("월을 선택하세요.");
+
+    if (!confirm("해당 월 급여를 전체 확정하시겠습니까?\n확정 후에는 수정할 수 없습니다.")) {
+        return;
+    }
+
+    fetch(`/pay/calc/confirmJson`, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            [csrfHeader]: csrfToken
+        },
+        body: new URLSearchParams({ yyyymm })
+    })
+    .then(res => res.json())
+    .then(r => {
+        if (!r.success) {
+            alert("❌ 오류: " + r.message);
+            return;
+        }
+
+        alert("✅ " + r.message);
+
+        // 상태 리로드
+        refreshStatus(yyyymm);
+
+        // 그리드 리로드
+        loadGridData(yyyymm);
+    });
+});
+
+/* AG-Grid 데이터를 다시 로드 */
+function loadGridData(yyyymm) {
+    fetch(`/pay/calc/list?yyyymm=${yyyymm}`)
+        .then(res => res.json())
+        .then(list => {
+
+            const waitApi = setInterval(() => {
+                if (gridOptions.api) {
+                    gridOptions.api.setRowData(list);
+                    clearInterval(waitApi);
+                }
+            }, 50);
+
+        });
+}

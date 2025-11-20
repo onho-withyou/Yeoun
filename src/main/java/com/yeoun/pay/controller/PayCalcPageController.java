@@ -35,73 +35,54 @@ public class PayCalcPageController {
     private final PayrollCalcQueryService payrollCalcQueryService;
     private final EmpNativeRepository empNativeRepository;
 
-    /* ==========================
-       공통: 최근 12개월 리스트 생성
-    ========================== */
+    /* 최근 12개월 */
     private List<String> getRecentMonths() {
         List<String> months = new ArrayList<>();
         LocalDate now = LocalDate.now();
         for (int i = 0; i < 12; i++) {
-            LocalDate d = now.minusMonths(i);
-            months.add(d.format(DateTimeFormatter.ofPattern("yyyyMM")));
+            months.add(now.minusMonths(i).format(DateTimeFormatter.ofPattern("yyyyMM")));
         }
         return months;
     }
 
-    /* ==========================
-        공통: 현재 yyyymm 계산
-    ========================== */
+    /* 타겟 월 결정 */
     private String getTargetMonth(String yyyymm) {
         return (yyyymm == null || yyyymm.isBlank())
                 ? PayrollCalcService.currentYymm()
                 : yyyymm;
     }
 
-    /* ==========================
-        AJAX - 상태 조회
-    ========================== */
+    /* AJAX - 상태 조회 */
     @GetMapping("/status")
     @ResponseBody
     public PayCalcStatusDTO status(@RequestParam("yyyymm") String yyyymm) {
         return statusSvc.getStatus(yyyymm);
     }
-    
-    /* ==========================
-		    기본 진입점
-		    /pay/calc → 전체 급여 계산 화면으로 연결
-		========================== */
-		@GetMapping
-		public String redirectToAll(@RequestParam(name = "yyyymm", required = false) String yyyymm,
-		                            Model model) {
-		    return pageAll(yyyymm, model);
-		}
 
-    
-	    /* ==========================
-	    0) 급여 계산 메인 선택 화면
-	    - pay_calc_main.html
-	 ========================== */
-	 @GetMapping("/main")
-	 public String calcMain() {
-	     return "pay/pay_calc_main";
-	 }
+    /* 기본 페이지 → 전체 페이지로 리다이렉트 */
+    @GetMapping
+    public String redirectToAll(@RequestParam(name = "yyyymm", required = false) String yyyymm,
+                                Model model) {
+        return pageAll(yyyymm, model);
+    }
 
+    /* 급여 계산 메인 선택 화면 */
+    @GetMapping("/main")
+    public String calcMain() {
+        return "pay/pay_calc_main";
+    }
 
-    /* ==========================
-        1) 전체 계산 화면 (HTML)
-        - pay_calc_all.html
-    ========================== */
+    /* 전체 계산 화면 */
     @GetMapping("/all")
     public String pageAll(@RequestParam(name = "yyyymm", required = false) String yyyymm,
                           Model model) {
 
         String mm = getTargetMonth(yyyymm);
 
-        List<String> months = getRecentMonths();
         List<PayslipViewDTO> slips = querySvc.findForView(mm);
         var totals = querySvc.totals(slips);
 
-        model.addAttribute("months", months);
+        model.addAttribute("months", getRecentMonths());
         model.addAttribute("yyyymm", mm);
         model.addAttribute("status", statusSvc.getStatus(mm));
         model.addAttribute("slips", slips);
@@ -112,11 +93,7 @@ public class PayCalcPageController {
         return "pay/pay_calc_all";
     }
 
-
-    /* ==========================
-        2) 사원별 계산 화면 (HTML)
-        - pay_calc_emp.html
-    ========================== */
+    /* 사원별 계산 화면 */
     @GetMapping("/emp")
     public String pageEmp(@RequestParam(name = "yyyymm", required = false) String yyyymm,
                           Model model) {
@@ -125,16 +102,14 @@ public class PayCalcPageController {
 
         model.addAttribute("months", getRecentMonths());
         model.addAttribute("yyyymm", mm);
-        model.addAttribute("empList", empNativeRepository.findActiveEmpList()); 
-        // ↑ 사원 리스트 조회용 NativeQuery (없는 경우 내가 만들어줄게)
+        model.addAttribute("empList", empNativeRepository.findActiveEmpList());
 
         return "pay/pay_calc_emp";
     }
 
-
-    /* ==========================
-        [POST] 가계산 (전체/사원별 자동 분기)
-    ========================== */
+    /* ==============================
+     * 전체/개별 가계산(POST)
+     * ============================== */
     @PostMapping("/simulate")
     public String simulate(
             @RequestParam(name = "yyyymm") String yyyymm,
@@ -142,27 +117,30 @@ public class PayCalcPageController {
             @RequestParam(name = "empId", required = false) String empId,
             RedirectAttributes ra) {
 
-        int cnt;
+        try {
+            int cnt;
+            if (empId != null && !empId.isBlank()) {
+                cnt = payrollCalcService.simulateOne(yyyymm, empId, overwrite);
+                ra.addFlashAttribute("msg", "사원 " + empId + " 가계산 완료 (" + cnt + "건)");
+                return "redirect:/pay/calc/emp?yyyymm=" + yyyymm;
+            } else {
+                cnt = payrollCalcService.simulateMonthly(yyyymm, overwrite);
+                ra.addFlashAttribute("msg", "전체 가계산 완료 (" + cnt + "건)");
+                return "redirect:/pay/calc/all?yyyymm=" + yyyymm;
+            }
 
-        if (empId != null && !empId.isBlank()) {
-            cnt = payrollCalcService.simulateOne(yyyymm, empId, overwrite);
-            ra.addFlashAttribute("msg",
-                    "사원 " + empId + " 가계산 완료 (" + cnt + "건)");
-
-            return "redirect:/pay/calc/emp?yyyymm=" + yyyymm;
-        } else {
-            cnt = payrollCalcService.simulateMonthly(yyyymm, overwrite);
-            ra.addFlashAttribute("msg",
-                    "전체 가계산 완료 (" + cnt + "건)");
-
-            return "redirect:/pay/calc/all?yyyymm=" + yyyymm;
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+            if (empId != null && !empId.isBlank())
+                return "redirect:/pay/calc/emp?yyyymm=" + yyyymm;
+            else
+                return "redirect:/pay/calc/all?yyyymm=" + yyyymm;
         }
     }
 
-
-    /* ==========================
-        [POST] 확정 (전체/사원별 자동 분기)
-    ========================== */
+    /* ==============================
+     * 전체/개별 확정(POST)
+     * ============================== */
     @PostMapping("/confirm")
     public String confirm(
             @RequestParam(name = "yyyymm") String yyyymm,
@@ -174,26 +152,30 @@ public class PayCalcPageController {
         String loginEmpId = auth.getName();
         String loginEmpName = empNativeRepository.findEmpNameByEmpId(loginEmpId);
 
-        int cnt;
+        try {
+            int cnt;
 
-        if (empId != null && !empId.isBlank()) {
-            cnt = payrollCalcService.confirmOne(yyyymm, empId, overwrite, loginEmpName);
-            ra.addFlashAttribute("msg",
-                    "사원 " + empId + " 확정 완료 (" + cnt + "건)");
+            if (empId != null && !empId.isBlank()) {
+                cnt = payrollCalcService.confirmOne(yyyymm, empId, overwrite, loginEmpName);
+                ra.addFlashAttribute("msg", "사원 " + empId + " 확정 완료 (" + cnt + "건)");
+                return "redirect:/pay/calc/emp?yyyymm=" + yyyymm;
 
-            return "redirect:/pay/calc/emp?yyyymm=" + yyyymm;
-        } else {
-            cnt = payrollCalcService.confirmMonthly(yyyymm, overwrite, loginEmpName);
-            ra.addFlashAttribute("msg",
-                    loginEmpName + " 님이 전체 급여 확정 완료했습니다.");
+            } else {
+                cnt = payrollCalcService.confirmMonthly(yyyymm, overwrite, loginEmpName);
+                ra.addFlashAttribute("msg", loginEmpName + " 님이 전체 급여 확정 완료했습니다.");
+                return "redirect:/pay/calc/all?yyyymm=" + yyyymm;
+            }
 
-            return "redirect:/pay/calc/all?yyyymm=" + yyyymm;
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+            if (empId != null && !empId.isBlank())
+                return "redirect:/pay/calc/emp?yyyymm=" + yyyymm;
+            else
+                return "redirect:/pay/calc/all?yyyymm=" + yyyymm;
         }
     }
 
-    /* ==========================
-        상세 조회 (AJAX)
-    ========================== */
+    /* 상세 조회 (AJAX) */
     @GetMapping("/detail")
     @ResponseBody
     public PayslipDetailDTO detail(
@@ -202,12 +184,8 @@ public class PayCalcPageController {
 
         return payrollCalcQueryService.getPayslipDetail(yyyymm, empId);
     }
-    
-    
-    /* ==========================
-    		개별 사원 정보 조회 
-		========================== */
-        
+
+    /* 사원 정보 조회 (AJAX) */
     @GetMapping("/emp/info")
     @ResponseBody
     public Map<String, Object> getEmpInfo(
@@ -223,7 +201,6 @@ public class PayCalcPageController {
 
         if (emp == null) return Map.of("error", "NOT_FOUND");
 
-        // DB에서 상태 가져오기
         String calcStatus = payslipRepo
                 .findCalcStatus(yyyymm, empId)
                 .orElse("READY");
@@ -237,59 +214,124 @@ public class PayCalcPageController {
         );
     }
 
-	    
-	    /* ==========================
-	    사원별 가계산 (AJAX)
-	========================== */
+    /* ==============================
+     * 사원별 가계산 AJAX
+     * ============================== */
     @PostMapping("/emp/simulate")
     @ResponseBody
-    public PayslipDetailDTO simulateOneAjax(
+    public Map<String, Object> simulateOneAjax(
             @RequestParam(name = "empId") String empId,
             @RequestParam(name = "yyyymm") String yyyymm
     ) {
-        payrollCalcService.simulateOne(yyyymm, empId, true);
-        return payrollCalcQueryService.getPayslipDetail(yyyymm, empId);
+        try {
+            payrollCalcService.simulateOne(yyyymm, empId, true);
+            return Map.of(
+                    "success", true,
+                    "data", payrollCalcQueryService.getPayslipDetail(yyyymm, empId)
+            );
+
+        } catch (Exception e) {
+            return Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            );
+        }
     }
-	
-	
-	/* ==========================
-	    사원별 확정 (AJAX)
-	========================== */
+
+    /* ==============================
+     * 사원별 확정 AJAX
+     * ============================== */
     @PostMapping("/emp/confirm")
     @ResponseBody
-    public PayslipDetailDTO confirmOneAjax(
+    public Map<String, Object> confirmOneAjax(
             @RequestParam(name = "empId") String empId,
             @RequestParam(name = "yyyymm") String yyyymm
     ) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String loginEmpId = auth.getName();
-        String loginEmpName = empNativeRepository.findEmpNameByEmpId(loginEmpId);
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String loginEmpId = auth.getName();
+            String loginEmpName = empNativeRepository.findEmpNameByEmpId(loginEmpId);
 
-        payrollCalcService.confirmOne(yyyymm, empId, true, loginEmpName);
-        return payrollCalcQueryService.getPayslipDetail(yyyymm, empId);
+            payrollCalcService.confirmOne(yyyymm, empId, true, loginEmpName);
+
+            return Map.of(
+                    "success", true,
+                    "data", payrollCalcQueryService.getPayslipDetail(yyyymm, empId)
+            );
+
+        } catch (Exception e) {
+            return Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            );
+        }
     }
 
-	/* ==========================
-    AJAX - 사원 검색 (자동완성)
-	========================== */
-	@GetMapping("/searchEmployee")
-	@ResponseBody
-	public List<Map<String, String>> searchEmployee(@RequestParam("keyword") String keyword) {
+    /* 사원 검색 자동완성 */
+    @GetMapping("/searchEmployee")
+    @ResponseBody
+    public List<Map<String, String>> searchEmployee(@RequestParam("keyword") String keyword) {
 
-	    List<EmpForPayrollProjection> list = empNativeRepository.findActiveEmpForPayroll();
-	    List<Map<String, String>> result = new ArrayList<>();
+        List<EmpForPayrollProjection> list = empNativeRepository.findActiveEmpForPayroll();
+        List<Map<String, String>> result = new ArrayList<>();
 
-	    for (EmpForPayrollProjection e : list) {
-	        if (e.getEmpName().contains(keyword)) {
-	            Map<String, String> item = new HashMap<>();
-	            item.put("empId", e.getEmpId());
-	            item.put("empName", e.getEmpName());
-	            result.add(item);
-	        }
-	    }
-	    return result;
-	}
+        for (EmpForPayrollProjection e : list) {
+            if (e.getEmpName().contains(keyword)) {
+                result.add(Map.of(
+                        "empId", e.getEmpId(),
+                        "empName", e.getEmpName()
+                ));
+            }
+        }
+        return result;
+    }
 
+    @PostMapping("/simulateJson")
+    @ResponseBody
+    public Map<String, Object> simulateJson(
+            @RequestParam("yyyymm") String yyyymm
+    ) {
+        try {
+            int cnt = payrollCalcService.simulateMonthly(yyyymm, true);
 
+            return Map.of(
+                    "success", true,
+                    "message", "전체 가계산 완료 (" + cnt + "건)"
+            );
 
+        } catch (Exception e) {
+            return Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            );
+        }
+    }
+
+    
+    @PostMapping("/confirmJson")
+    @ResponseBody
+    public Map<String, Object> confirmJson(
+            @RequestParam("yyyymm") String yyyymm
+    ) {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String loginEmpId = auth.getName();
+            String loginEmpName = empNativeRepository.findEmpNameByEmpId(loginEmpId);
+
+            int cnt = payrollCalcService.confirmMonthly(yyyymm, true, loginEmpName);
+
+            return Map.of(
+                    "success", true,
+                    "message", loginEmpName + " 님이 전체 급여 확정 완료 (" + cnt + "건)"
+            );
+
+        } catch (Exception e) {
+            return Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            );
+        }
+    }
+
+    
 }

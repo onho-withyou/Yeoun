@@ -30,25 +30,21 @@
           </div>
 
           <!-- 액션 버튼 -->
-          <div class="d-flex flex-wrap gap-2 mb-3">
-            <form th:action="@{/pay/calc/simulate}" method="post">
-              <input type="hidden" name="yyyymm" id="calcMonth" th:value="${yyyymm}">
-              <input type="hidden" name="overwrite" value="true">
+      <div class="d-flex flex-wrap gap-2 mb-3">
 
-              <button type="submit" class="btn btn-warning">
-                계산 시뮬레이션 (가계산)
-              </button>
-            </form>
+		  <button id="btnSimulateAll" class="btn btn-warning">
+		    계산 시뮬레이션 (가계산)
+		  </button>
+		
+		  <button id="btnConfirmAll" class="btn btn-success">
+		    계산 결과 확정
+		  </button>
+		
+		  <!-- 숨겨진 yyyymm 값 -->
+		  <input type="hidden" id="calcMonth" th:value="${yyyymm}">
+		  <input type="hidden" id="calcMonthConfirm" th:value="${yyyymm}">
+		</div>
 
-            <form th:action="@{/pay/calc/confirm}" method="post">
-              <input type="hidden" name="yyyymm" id="calcMonthConfirm" th:value="${yyyymm}">
-              <input type="hidden" name="overwrite" value="true">
-
-              <button type="submit" class="btn btn-success">
-                계산 결과 확정
-              </button>
-            </form>
-          </div>
 
           <!-- 상태 박스 -->
           <div id="statusBox"
@@ -57,20 +53,23 @@
 
             <div>
               선택 월(<span id="statMonth" th:text="${yyyymm}">YYYYMM</span>) 계산 상태:
-              <strong id="statCalc" th:switch="${status.calcStatus}">
-                <span th:case="'CONFIRMED'">확정 완료</span>
-                <span th:case="'CALCULATED'">계산 완료</span>
-                <span th:case="'SIMULATED'">가계산</span>
-                <span th:case="*">미계산</span>
-              </strong>
+<!--               <strong id="statCalc" th:switch="${status.calcStatus}"> -->
+<!--                 <span th:case="'CONFIRMED'">확정 완료</span> -->
+<!--                 <span th:case="'CALCULATED'">계산 완료</span> -->
+<!--                 <span th:case="'SIMULATED'">가계산</span> -->
+<!--                 <span th:case="*">미계산</span> -->
+<!--               </strong> -->
 
-              <span class="ms-2 badge bg-secondary" id="statCount"
-                    th:text="|건수 ${status.count}|">건수 0</span>
+               <span class="badge bg-primary">총 [[${status.totalCount}]]건</span>
+		      <span class="badge bg-success">확정 [[${status.confirmedCount}]]건</span>
+		      <span class="badge bg-warning text-dark">가계산 [[${status.simulatedCount}]]건</span>
+<!-- 		      <span class="badge bg-info text-dark">계산완료 [[${status.calculatedCount}]]건</span> -->
+
             </div>
 
             <div>
               총지급: <span id="statTot" class="text-primary fw-bold ms-1"
-                         th:text="${#numbers.formatInteger(status.totalAmt,0)}">0</span> 원
+                         th:text="${#numbers.formatInteger(status.totAmt,0)}">0</span> 원
               · 공제:
               <span id="statDed" class="text-danger fw-bold ms-1"
                     th:text="${#numbers.formatInteger(status.dedAmt,0)}">0</span> 원
@@ -90,7 +89,8 @@
       </section>
 
       <!-- 상세 모달 -->
-      <div th:replace="pay/payslip_detailModal :: payslip_detailModal"></div>
+      <div th:replace="~{pay/payslip_detailModal :: payslip_detailModal}"></div>
+
       
 
       <!-- 2. 급여 명세서 관리 -->

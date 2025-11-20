@@ -94,10 +94,16 @@ function simulateOne() {
         body: new URLSearchParams({ empId, yyyymm })
     })
     .then(res => res.json())
-    .then(data => {
-        renderResult(data);
-        loadEmpInfo(); // ★ 가계산 후 상태 갱신
-    });
+	.then(data => {
+	    if (!data.success) {
+	        alert(data.message);
+	        return;
+	    }
+
+	    renderResult(data.data);
+	    loadEmpInfo();
+	});
+
 }
 
 /* ===============================
@@ -118,10 +124,16 @@ function confirmOne() {
         body: new URLSearchParams({ empId, yyyymm })
     })
     .then(res => res.json())
-    .then(data => {
-        renderResult(data);
-        loadEmpInfo(); // ★ 확정 후 상태 갱신
-    });
+	.then(data => {
+	    if (!data.success) {
+	        alert(data.message);
+	        return;
+	    }
+
+	    renderResult(data.data);
+	    loadEmpInfo();
+	});
+
 }
 
 /* ===============================
