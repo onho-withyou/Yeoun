@@ -925,7 +925,13 @@
 		
 		for (let i = 1; i <= 3; i++) {
 		// selectedForm의 approver1, approver2, approver3을 가져오기 위해서 템플릿 문자열 사용
-		    const approver = selectedForm[`approver${i}`];
+		    const approver = selectedForm[`approver${i}`] + " " + selectedForm[`approver${i}Name`];
+		
+			// 결재권자가 없으면 화면에 출력되지 않도록 처리
+			if (selectedForm[`approver${i}`] == null) {
+				return;
+			}
+			
 		    if (approver) {
 		        print("default", approver);
 		    }
