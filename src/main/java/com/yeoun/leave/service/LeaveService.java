@@ -3,6 +3,7 @@ package com.yeoun.leave.service;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import org.springframework.scheduling.annotation.Async;
@@ -143,13 +144,18 @@ public class LeaveService {
 		// 연차 사용 시작일과 종료 일자 계산해서 사용한 일수 구함
 		double usedDays = (double) (ChronoUnit.DAYS.between(approvalDoc.getStartDate(), approvalDoc.getEndDate()) + 1);
 		
+		if ("반차".equals(approvalDoc.getLeaveType())) {
+			usedDays = 0.5;
+		}
+		
+		String leaveTypeCode = toLeaveCode(approvalDoc.getLeaveType());
 		
 		// 연차 사용 기록 등록 
 		LeaveHistoryDTO  leaveHistoryDTO = LeaveHistoryDTO.builder()
 				.emp_id(emp.getEmpId())
 				.emp_name(emp.getEmpName())
 				.dept_id(emp.getDept().getDeptId())
-				.leaveType("ANNUAL")
+				.leaveType(leaveTypeCode)
 				.startDate(approvalDoc.getStartDate())
 				.endDate(approvalDoc.getEndDate())
 				.usedDays(usedDays)
@@ -167,6 +173,16 @@ public class LeaveService {
 		annualLeave.useAnnual(usedDays);
 	}
 	
+	private static final Map<String, String> LEAVE_TYPE_MAP = Map.of(
+		"연차", "ANNUAL",
+		"반차", "HALF",
+		"병가", "SICK"
+	);
+	
+	private String toLeaveCode(String type) {
+		return LEAVE_TYPE_MAP.getOrDefault(type, "UNKNOWN");
+	}
+			
 	// 연차 재계산 (비동기)
 	@Async
 	@Transactional

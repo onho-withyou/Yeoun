@@ -11,16 +11,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.approval.dto.ApprovalDocDTO;
+
+import com.yeoun.approval.dto.ApprovalFormDTO;
 import com.yeoun.approval.dto.ApproverDTO;
 import com.yeoun.approval.entity.ApprovalForm;
 import com.yeoun.approval.entity.Approver;
 import com.yeoun.approval.entity.ApproverId;
+import com.yeoun.approval.mapper.ApprovalFormMapper;
 import com.yeoun.approval.entity.ApprovalDoc;
 import com.yeoun.approval.repository.ApprovalDocRepository;
 import com.yeoun.approval.repository.ApproverRepository;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
-import com.yeoun.hr.service.HrActionService;
+import com.yeoun.hr.entity.HrAction;
+import com.yeoun.hr.repository.HrActionRepository;
+import com.yeoun.leave.service.LeaveService;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -31,11 +36,12 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @Transactional
 public class ApprovalDocService {
-	
 
 	private final ApprovalDocRepository approvalDocRepository;
 	private final ApproverRepository approverRepository;
-	private final HrActionService hrActionService;
+	private final HrActionRepository hrActionRepository;
+	private final ApprovalFormMapper approvalFormMapper;
+	private final LeaveService leaveService;
 	
 	
 	//기안자 명 불러오기
@@ -164,6 +170,7 @@ public class ApprovalDocService {
 	 
 	 
 	 
+
 	 // --------------------------------------------------------------------------------------
 	 // 결재 승인 메서드 
 	 @Transactional
@@ -172,7 +179,7 @@ public class ApprovalDocService {
 		 ApprovalDoc approvalDoc = approvalDocRepository.findById(approvalId)
 				 					.orElseThrow(() -> new EntityNotFoundException("존재하지 않는 결재문서 입니다."));
 		 
-		 // 결제승인 버튼을 눌렀을 때
+		 // 결재승인 버튼을 눌렀을 때
 		 if("accept".equals(btn)) {
 			 // 해당 문서의 approvalId를 통해 approver 객체에서 승인권자 목록 가져오기
 			 List<Approver> approverList = approverRepository.findByApprovalId(approvalId);
@@ -189,6 +196,11 @@ public class ApprovalDocService {
 						 approvalDoc.setDocStatus("완료");
 						 
 						 handleAfterFinalApproval(approvalDoc);
+						 
+						 // 결재 완료된 문서의 양식이 연차신청서인 경우 동작
+						 if ("연차신청서".equals(approvalDoc.getFormType())) {
+		                      leaveService.createAnnualLeave(approvalDoc.getApprovalId());
+		                   }
 						 
 					 } else { // 현재 로그인 사용자와 승인권자자의 empId가 동일하고, 최종 결재권자가 아닌경우  
 						 // 현재 승인권자 다음 순서 확인( 현재 결재문서, 현재결재순서 + 1)
@@ -209,6 +221,14 @@ public class ApprovalDocService {
 		 }
 	 }
 	 
+	 // 기본 결재권자 가져오기
+	 public List<ApprovalFormDTO> getDefaultApproverList(String empId) {
+		 
+		 List<ApprovalFormDTO> list = approvalFormMapper.findDefaultApproverList(empId);
+		 
+		 return list;
+	 }
+	 
 	// ------------------------------------------------------------------------------
 	// 전자결재 최종 승인(=완료) 후 도메인별 후처리
 	 private void handleAfterFinalApproval(ApprovalDoc approvalDoc) {
@@ -221,13 +241,26 @@ public class ApprovalDocService {
 		 // 2) 인사발령 서비스에 해당 결재문서의 발령을 적용
 		 Long approvalId = approvalDoc.getApprovalId();
 		 
-		 hrActionService.applyHrActionByApprovalId(approvalId);
+		 HrAction hrAction = hrActionRepository.findByApprovalId(approvalId)
+		            .orElseThrow(() -> new EntityNotFoundException(
+		                    "결재문서와 연결된 인사발령을 찾을 수 없습니다. approvalId=" + approvalId));
+		 
+		 // 3) 발령 상태만 '승인완료'로 변경 (EMP 적용 금지)
+		 hrAction.setStatus("승인완료");
+		 
+		 // 4) 적용여부는 그대로 'N'
+		 hrAction.setAppliedYn("N");
+		 
+		 // 5) appliedDate NULL
+		 hrAction.setAppliedDate(null);
+	 
 	 }	 
 	 
 	 // 결제문서 조회시 결제권한자 목록 불러오기
 	 public List<ApproverDTO> getApproverDTOList(Long approvalId) {
 		 return approverRepository.findByApprovalId(approvalId).stream().map(ApproverDTO::fromEntity).toList();
 	 }
+
 	 
 	// -------------------------------------------------------------------------------
 	// 메인페이지 내가 결제할 결제문서, 내가올린 결제 문서 불러오기
