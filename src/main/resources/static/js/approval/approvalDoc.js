@@ -438,24 +438,25 @@
 			data.map((item, index) => {
 				obj["row_no"] = item[0]; //결재순번
 				obj["approval_id"] = item[1]; //문서id
-				obj["approval_title"] = item[2]; //문서제목	
-				obj["emp_id"] = item[3]; //사원번호
-				obj["emp_name"] = item[4]; //기안자
-				obj["dept_id"] = item[5]; //부서코드
-				obj["dept_name"] = item[6]; //부서명
-				obj["approver"] = item[7]; //결재권한자id
-				obj["approver_name"] = item[8]; //결재권한자 이름
-				obj["pos_code"] = item[9]; //직급코드
-				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = toDateStr(item[11]); //생성일
-				obj["finish_date"]  = toDateStr(item[12]); //결재완료일자
-				obj["start_date"]   = toDateStr(item[13]); //휴가시작일자
-				obj["end_date"]     = toDateStr(item[14]); //휴가종료일자
-				obj["leave_type"] = item[15]; //	
-				obj["to_dept_id"] = item[16]; //	
-				obj["expnd_type"] = item[17]; //
-				obj["reason"] = item[18]; //	
-				obj["doc_status"] = item[19]; //상태
+				obj["approval_title"] = item[2]; //문서제목
+				obj["form_type"] = item[3];	//폼양식
+				obj["emp_id"] = item[4]; //사원번호
+				obj["emp_name"] = item[5]; //기안자
+				obj["dept_id"] = item[6]; //부서코드
+				obj["dept_name"] = item[7]; //부서명
+				obj["approver"] = item[8]; //결재권한자id
+				obj["approver_name"] = item[9]; //결재권한자 이름
+				obj["pos_code"] = item[10]; //직급코드
+				obj["pos_name"] = item[11]; //직급
+				obj["created_date"] = toDateStr(item[12]); //생성일
+				obj["finish_date"]  = toDateStr(item[13]); //결재완료일자
+				obj["start_date"]   = toDateStr(item[14]); //휴가시작일자
+				obj["end_date"]     = toDateStr(item[15]); //휴가종료일자
+				obj["leave_type"] = item[16]; //	
+				obj["to_dept_id"] = item[17]; //	
+				obj["expnd_type"] = item[18]; //
+				obj["reason"] = item[19]; //	
+				obj["doc_status"] = item[20]; //상태
 				colData.push(obj);
 				obj = {};
 			});
@@ -475,24 +476,25 @@
 			data.map((item, index) => {
 				obj["row_no"] = item[0]; //결재순번
 				obj["approval_id"] = item[1]; //문서id
-				obj["approval_title"] = item[2]; //문서제목	
-				obj["emp_id"] = item[3]; //사원번호
-				obj["emp_name"] = item[4]; //기안자
-				obj["dept_id"] = item[5]; //부서코드
-				obj["dept_name"] = item[6]; //부서명
-				obj["approver"] = item[7]; //결재권한자
-				obj["approver_name"] = item[8]; //결재권한자 이름
-				obj["pos_code"] = item[9]; //직급코드
-				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = toDateStr(item[11]); //생성일
-				obj["finish_date"]  = toDateStr(item[12]); //결재완료일자
-				obj["start_date"]   = toDateStr(item[13]); //휴가시작일자
-				obj["end_date"]     = toDateStr(item[14]); //휴가종료일자
-				obj["leave_type"] = item[15]; //	
-				obj["to_dept_id"] = item[16]; //	
-				obj["expnd_type"] = item[17]; //
-				obj["reason"] = item[18]; //	
-				obj["doc_status"] = item[19]; //상태
+				obj["approval_title"] = item[2]; //문서제목
+				obj["form_type"] = item[3];	
+				obj["emp_id"] = item[4]; //사원번호
+				obj["emp_name"] = item[5]; //기안자
+				obj["dept_id"] = item[6]; //부서코드
+				obj["dept_name"] = item[7]; //부서명
+				obj["approver"] = item[8]; //결재권한자
+				obj["approver_name"] = item[9]; //결재권한자 이름
+				obj["pos_code"] = item[10]; //직급코드
+				obj["pos_name"] = item[11]; //직급
+				obj["created_date"] = toDateStr(item[12]); //생성일
+				obj["finish_date"]  = toDateStr(item[13]); //결재완료일자
+				obj["start_date"]   = toDateStr(item[14]); //휴가시작일자
+				obj["end_date"]     = toDateStr(item[15]); //휴가종료일자
+				obj["leave_type"] = item[16]; //	
+				obj["to_dept_id"] = item[17]; //	
+				obj["expnd_type"] = item[18]; //
+				obj["reason"] = item[19]; //	
+				obj["doc_status"] = item[20]; //상태
 				colData.push(obj);
 				obj = {};
 			});
@@ -513,24 +515,25 @@
 			data.map((item, index) => {
 				obj["row_no"] = item[0]; //결재순번
 				obj["approval_id"] = item[1]; //문서id
-				obj["approval_title"] = item[2]; //문서제목	
-				obj["emp_id"] = item[3]; //사원번호
-				obj["emp_name"] = item[4]; //기안자
-				obj["dept_id"] = item[5]; //부서코드
-				obj["dept_name"] = item[6]; //부서명
-				obj["approver"] = item[7]; //결재권한자
-				obj["approver_name"] = item[8]; //결재권한자 이름
-				obj["pos_code"] = item[9]; //직급코드
-				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = toDateStr(item[11]); //생성일
-				obj["finish_date"]  = toDateStr(item[12]); //결재완료일자
-				obj["start_date"]   = toDateStr(item[13]); //휴가시작일자
-				obj["end_date"]     = toDateStr(item[14]); //휴가종료일자
-				obj["leave_type"] = item[15]; //	
-				obj["to_dept_id"] = item[16]; //	
-				obj["expnd_type"] = item[17]; //
-				obj["reason"] = item[18]; //	
-				obj["doc_status"] = item[19]; //상태
+				obj["approval_title"] = item[2]; //문서제목
+				obj["form_type"] = item[3];//폼양식	
+				obj["emp_id"] = item[4]; //사원번호
+				obj["emp_name"] = item[5]; //기안자
+				obj["dept_id"] = item[6]; //부서코드
+				obj["dept_name"] = item[7]; //부서명
+				obj["approver"] = item[8]; //결재권한자
+				obj["approver_name"] = item[9]; //결재권한자 이름
+				obj["pos_code"] = item[10]; //직급코드
+				obj["pos_name"] = item[11]; //직급
+				obj["created_date"] = toDateStr(item[12]); //생성일
+				obj["finish_date"]  = toDateStr(item[13]); //결재완료일자
+				obj["start_date"]   = toDateStr(item[14]); //휴가시작일자
+				obj["end_date"]     = toDateStr(item[15]); //휴가종료일자
+				obj["leave_type"] = item[16]; //	
+				obj["to_dept_id"] = item[17]; //	
+				obj["expnd_type"] = item[18]; //
+				obj["reason"] = item[19]; //	
+				obj["doc_status"] = item[20]; //상태
 				colData.push(obj);
 				obj = {};
 			});
@@ -552,23 +555,24 @@
 				obj["row_no"] = item[0]; //결재순번
 				obj["approval_id"] = item[1]; //문서id
 				obj["approval_title"] = item[2]; //문서제목	
-				obj["emp_id"] = item[3]; //사원번호
-				obj["emp_name"] = item[4]; //기안자
-				obj["dept_id"] = item[5]; //부서코드
-				obj["dept_name"] = item[6]; //부서명
-				obj["approver"] = item[7]; //결재권한자
-				obj["approver_name"] = item[8]; //결재권한자 이름
-				obj["pos_code"] = item[9]; //직급코드
-				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = toDateStr(item[11]); //생성일
-				obj["finish_date"]  = toDateStr(item[12]); //결재완료일자
-				obj["start_date"]   = toDateStr(item[13]); //휴가시작일자
-				obj["end_date"]     = toDateStr(item[14]); //휴가종료일자
-				obj["leave_type"] = item[15]; //	
-				obj["to_dept_id"] = item[16]; //	
-				obj["expnd_type"] = item[17]; //
-				obj["reason"] = item[18]; //	
-				obj["doc_status"] = item[19]; //상태
+				obj["form_type"] = item[3];
+				obj["emp_id"] = item[4]; //사원번호
+				obj["emp_name"] = item[5]; //기안자
+				obj["dept_id"] = item[6]; //부서코드
+				obj["dept_name"] = item[7]; //부서명
+				obj["approver"] = item[8]; //결재권한자
+				obj["approver_name"] = item[9]; //결재권한자 이름
+				obj["pos_code"] = item[10]; //직급코드
+				obj["pos_name"] = item[11]; //직급
+				obj["created_date"] = toDateStr(item[12]); //생성일
+				obj["finish_date"]  = toDateStr(item[13]); //결재완료일자
+				obj["start_date"]   = toDateStr(item[14]); //휴가시작일자
+				obj["end_date"]     = toDateStr(item[15]); //휴가종료일자
+				obj["leave_type"] = item[16]; //	
+				obj["to_dept_id"] = item[17]; //	
+				obj["expnd_type"] = item[18]; //
+				obj["reason"] = item[19]; //	
+				obj["doc_status"] = item[20]; //상태
 				colData.push(obj);
 				obj = {};
 			});
@@ -592,23 +596,24 @@
 				obj["row_no"] = item[0]; //결재순번
 				obj["approval_id"] = item[1]; //문서id
 				obj["approval_title"] = item[2]; //문서제목	
-				obj["emp_id"] = item[3]; //사원번호
-				obj["emp_name"] = item[4]; //기안자
-				obj["dept_id"] = item[5]; //부서코드
-				obj["dept_name"] = item[6]; //부서명
-				obj["approver"] = item[7]; //결재권한자
-				obj["approver_name"] = item[8]; //결재권한자 이름
-				obj["pos_code"] = item[9]; //직급코드
-				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = toDateStr(item[11]); //생성일
-				obj["finish_date"]  = toDateStr(item[12]); //결재완료일자
-				obj["start_date"]   = toDateStr(item[13]); //휴가시작일자
-				obj["end_date"]     = toDateStr(item[14]); //휴가종료일자
-				obj["leave_type"] = item[15]; //	
-				obj["to_dept_id"] = item[16]; //	
-				obj["expnd_type"] = item[17]; //
-				obj["reason"] = item[18]; //	
-				obj["doc_status"] = item[19]; //상태
+				obj["form_type"] = item[3];
+				obj["emp_id"] = item[4]; //사원번호
+				obj["emp_name"] = item[5]; //기안자
+				obj["dept_id"] = item[6]; //부서코드
+				obj["dept_name"] = item[7]; //부서명
+				obj["approver"] = item[8]; //결재권한자
+				obj["approver_name"] = item[9]; //결재권한자 이름
+				obj["pos_code"] = item[10]; //직급코드
+				obj["pos_name"] = item[11]; //직급
+				obj["created_date"] = toDateStr(item[12]); //생성일
+				obj["finish_date"]  = toDateStr(item[13]); //결재완료일자
+				obj["start_date"]   = toDateStr(item[14]); //휴가시작일자
+				obj["end_date"]     = toDateStr(item[15]); //휴가종료일자
+				obj["leave_type"] = item[16]; //	
+				obj["to_dept_id"] = item[17]; //	
+				obj["expnd_type"] = item[18]; //
+				obj["reason"] = item[19]; //	
+				obj["doc_status"] = item[20]; //상태
 				colData.push(obj);
 				obj = {};
 			});
@@ -628,6 +633,7 @@
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
 			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '양식' ,name: 'form_type' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
@@ -665,6 +671,7 @@
 		   {header: '결재순번' ,name: 'row_no' ,align: 'center'}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
 			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '양식' ,name: 'form_type' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
@@ -701,6 +708,7 @@
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
 			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '양식' ,name: 'form_type' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
@@ -737,6 +745,7 @@
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
 			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '양식' ,name: 'form_type' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
@@ -771,6 +780,7 @@
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
 			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '양식' ,name: 'form_type' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
@@ -860,6 +870,7 @@
 		
 		// 선택한 결재 양식과 서버에서 받아온 데이터 중 일치하는 값 찾기
 		selectedForm = formList.find(item => item.formName === draft_doc);
+		console.log("draft_doc",draft_doc);
 		//양식종류에따라 보여지는 화면이 다름
 		if(draft_doc == "지출결의서"){
 			document.getElementById('expndTypeForm').style.display = 'flex';
@@ -886,7 +897,7 @@
 			document.getElementById('leaveTypeForm').style.display = 'none';
 			document.getElementById('expndTypeForm').style.display = 'none';
 			document.getElementById('toDeptForm').style.display = 'none';
-		}
+		} 
 		formReset();
 		defaultPrint();
 	}
@@ -931,7 +942,14 @@
 		
 		// selectedForm 값이 없을 경우 에러가 생길 수 있어서 에러 처리
 		if (!selectedForm) {
-		    console.log("선택된 양식이 없습니다.");
+		    	console.log("선택된 양식이 없습니다.")
+				//alert("선택된 양식이 없습니다.");
+			
+				document.getElementById('leavePeriodForm').style.display = 'flex';
+				document.getElementById('leaveTypeForm').style.display = 'flex';
+				document.getElementById('expndTypeForm').style.display = 'flex';
+				document.getElementById('toDeptForm').style.display = 'flex';
+			
 		    return;
 		}
 		
