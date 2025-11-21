@@ -190,8 +190,27 @@ function numberFormat(x) {
 
 function statusBadge(s) {
     if (!s) return "";
-    return `<span class="badge bg-info">${s}</span>`;
+
+    let color = "bg-secondary"; // 기본값 (SIMULATED 등)
+
+    switch (s) {
+        case "SIMULATED":
+            color = "bg-secondary";    // 회색
+            break;
+        case "CALCULATED":
+            color = "bg-primary";      // 파란색
+            break;
+        case "CONFIRMED":
+            color = "bg-success";      // 초록색
+            break;
+        case "ERROR":
+            color = "bg-danger";       // 빨간색
+            break;
+    }
+
+    return `<span class="badge ${color}">${s}</span>`;
 }
+
 
 // ===============================
 // 지급월 포맷 (YYYYMM → YYYY-MM)
