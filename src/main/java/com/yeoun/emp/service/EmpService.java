@@ -1,5 +1,6 @@
 package com.yeoun.emp.service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -17,7 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.auth.entity.Role;
 import com.yeoun.auth.repository.RoleRepository;
+import com.yeoun.common.dto.FileAttachDTO;
+import com.yeoun.common.entity.FileAttach;
 import com.yeoun.common.repository.CommonCodeRepository;
+import com.yeoun.common.repository.FileAttachRepository;
+import com.yeoun.common.util.FileUtil;
 import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpDetailDTO;
 import com.yeoun.emp.dto.EmpListDTO;
@@ -53,6 +58,8 @@ public class EmpService {
 	private final LeaveService leaveService;
 	private final RoleRepository roleRepository;
 	private final EmpRoleRepository empRoleRepository;
+	private final FileUtil fileUtil;
+    private final FileAttachRepository fileAttachRepository;
 	private final BCryptPasswordEncoder encoder;
 	
 	// =========== 사원 등록 ===========
@@ -96,10 +103,32 @@ public class EmpService {
 	    emp.setPosition(position);
 
 	    // 4) EMP 저장
-	    empRepository.saveAndFlush(emp);
+	    Emp savedEmp = empRepository.saveAndFlush(emp);
 	    
-		// 4-1) 역할 자동 부여 
-	    assignDefaultRoles(emp);
+	    // 4-1) 사원 사진 파일 업로드
+	    if (empDTO.getPhotoFile() != null && !empDTO.getPhotoFile().isEmpty()) {
+	        try {
+	            List<FileAttachDTO> uploadedList =
+	                    fileUtil.uploadFile(savedEmp, List.of(empDTO.getPhotoFile()));
+
+	            // FILE_ATTACH 엔티티로 변환 후 저장
+	            List<FileAttach> attachEntities = uploadedList.stream()
+	                    .map(FileAttachDTO::toEntity)
+	                    .toList();
+
+	            fileAttachRepository.saveAll(attachEntities);
+
+	            // 첫 번째 파일의 FILE_ID 를 Emp.photoFileId 에 연결
+	            Long photoFileId = attachEntities.get(0).getFileId();
+	            savedEmp.setPhotoFileId(photoFileId);
+
+	        } catch (IOException e) {
+	            throw new RuntimeException("사원 사진 업로드 중 오류가 발생했습니다.", e);
+	        }
+	    }
+	    
+		// 4-2) 역할 자동 부여 
+	    assignDefaultRoles(savedEmp);
 	    
 	    // 5) 메신저 상태(MSG_STATUS) 저장
 	    MsgStatus status = new MsgStatus();
@@ -119,12 +148,32 @@ public class EmpService {
 	    // 6) 급여계좌(EMP_BANK) 저장 (선택값 없으면 스킵)
 	    if (empDTO.getBankCode() != null && empDTO.getAccountNo() != null) {
 	        EmpBank bank = new EmpBank();
-	        bank.setEmpId(emp.getEmpId());
+	        bank.setEmpId(savedEmp.getEmpId());
 	        bank.setBankCode(empDTO.getBankCode());
 	        bank.setAccountNo(empDTO.getAccountNo());
 	        bank.setHolder(empDTO.getHolder());
-	        bank.setFileId(empDTO.getFileId());
-	        empBankRepository.save(bank);
+	        // fileId 는 나중에 파일 업로드 후 세팅
+	        EmpBank savedBank = empBankRepository.saveAndFlush(bank);
+
+	        // 6-1) 🔹 통장 사본 파일 업로드 (있으면)
+	        if (empDTO.getBankbookFile() != null && !empDTO.getBankbookFile().isEmpty()) {
+	            try {
+	                List<FileAttachDTO> uploadedList =
+	                        fileUtil.uploadFile(savedBank, List.of(empDTO.getBankbookFile()));
+
+	                List<FileAttach> attachEntities = uploadedList.stream()
+	                        .map(FileAttachDTO::toEntity)
+	                        .toList();
+
+	                fileAttachRepository.saveAll(attachEntities);
+
+	                Long fileId = attachEntities.get(0).getFileId();
+	                savedBank.setFileId(fileId);
+
+	            } catch (IOException e) {
+	                throw new RuntimeException("통장 사본 업로드 중 오류가 발생했습니다.", e);
+	            }
+	        }
 	    }
 	    
 	    // 7) 연차 생성
@@ -375,7 +424,8 @@ public class EmpService {
 	    if (photoFileId == null) {
 	        return null; // 사진 없음 → JS에서 기본 이미지 처리
 	    }
-	    return "/files/photo/" + photoFileId;
+	    // FileController 의 /files/download/{fileId} 사용
+	    return "/files/download/" + photoFileId;
 	}
 
 	// =============================================================================

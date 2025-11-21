@@ -89,54 +89,63 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 	// 그리드 - 1.결재사항 - 진행해야할 결재만 - 결재권한자만 볼수있음
 	// 열람권한이 있는지에대해생각해보기
 	@Query(value = """
-		SELECT ROWNUM
-				,ade.approval_id
-				,ade.approval_title
-				,ade.emp_id
-				,ade.emp_name
-				,ade.dept_id
-				,ade.dept_name
-				,ade.approver
-				,e.emp_name AS approvar_name
-				,ade.pos_code
-				,ade.pos_name
-				,ade.created_date
-				,ade.finish_date
-                ,ade.start_date
-                ,ade.end_date
-                ,ade.leave_type
-                ,ade.to_dept_id
-                ,ade.expnd_type
-                ,ade.reason
-				,ade.doc_status
-			FROM emp e
-					,(SELECT
-						ad.approval_id
-						,ad.approval_title
-						,ad.emp_id
-						,e.emp_name
-						,e.dept_id
-						,d.dept_name
-						,ad.approver
-                        ,p.pos_code
-						,p.pos_name
-						,ad.created_date
-						,ad.finish_date
-                        ,ad.start_date -- 휴가시작날짜
-                        ,ad.end_date -- 휴가종료날짜
-                        ,ad.leave_type-- 연차유형,휴가종류
-                        ,ad.to_dept_id-- 발령부서
-                        ,ad.expnd_type-- 지출종류
-                        ,ad.reason-- 결재사유내용
-						,ad.doc_status
-					FROM approval_doc ad,emp e,dept d,position p
-					WHERE ad.emp_id = e.emp_id 
-					AND e.dept_id = d.dept_id
-					AND e.pos_code = p.pos_code
-					AND ad.approver = :empId ) ade
-			WHERE ade.approver = e.emp_id
+						SELECT ROWNUM
+								,ade.approval_id
+								,ade.approval_title
+								,ade.emp_id
+								,ade.emp_name
+								,ade.dept_id
+								,ade.dept_name
+								,ade.approver
+								,e.emp_name AS approver_name
+								,ade.pos_code
+								,ade.pos_name
+								,ade.created_date
+								,ade.finish_date
+				                ,ade.start_date
+				                ,ade.end_date
+				                ,ade.leave_type
+				                ,ade.to_dept_id
+				                ,ade.expnd_type
+				                ,ade.reason
+								,ade.doc_status
+							FROM emp e
+									,(SELECT
+										ad.approval_id
+										,ad.approval_title
+										,ad.emp_id
+										,e.emp_name
+										,e.dept_id
+										,d.dept_name
+										,ad.approver
+				                        ,p.pos_code
+										,p.pos_name
+										,ad.created_date
+										,ad.finish_date
+				                        ,ad.start_date -- 휴가시작날짜
+				                        ,ad.end_date -- 휴가종료날짜
+				                        ,ad.leave_type-- 연차유형,휴가종류
+				                        ,ad.to_dept_id-- 발령부서
+				                        ,ad.expnd_type-- 지출종류
+				                        ,ad.reason-- 결재사유내용
+										,ad.doc_status
+									FROM approval_doc ad,emp e,dept d,position p
+									WHERE ad.emp_id = e.emp_id 
+									AND e.dept_id = d.dept_id
+									AND e.pos_code = p.pos_code
+									AND ad.approver = :empId ) ade
+							WHERE ade.approver = e.emp_id
 				""", nativeQuery = true)
 	List<Object[]> findPendingApprovalDocs(@Param("empId") String empId);
+	/**
+	 * @Param("createdDate") String createdDate
+											,@Param("finishDate") String finishDate
+											,@Param("empName") String empName
+											,@Param("approval_title") String approvalTitle 
+											,
+	 * @param empId
+	 * @return
+	 */
 
 	// 그리드 - 2.전체결재- 나와관련된 모든 결재문서
 	@Query(value = """

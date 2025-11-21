@@ -56,6 +56,7 @@ public class MainController {
 	    }
 		
 		model.addAttribute("buttonEnabled", attendanceService.isAttendanceButtonEnabled(loginUser.getEmpId()));
+		model.addAttribute("status", attendanceService.attendanceStatus(loginUser.getEmpId()));
 		
 		return "/main/schedule";
 	}

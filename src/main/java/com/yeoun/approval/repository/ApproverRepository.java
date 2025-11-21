@@ -25,5 +25,7 @@ public interface ApproverRepository extends JpaRepository<Approver, ApproverId> 
 	
 	List<Approver> findByApprovalId(Long approvalId);
 
+	Approver findByApprovalIdAndOrderApprovers(Long approvalId, String orderApprovers);
+
 
 }

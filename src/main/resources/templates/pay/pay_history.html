@@ -69,38 +69,140 @@
 
 </div>
 
+<!-- ============================
+     급여 상세 모달
+============================ -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content rounded-4 shadow">
+
+      <div class="modal-header border-0">
+        <h4 class="modal-title fw-bold text-primary">급여 상세 내역</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- 상단 기본 정보 -->
+        <div class="p-4 rounded-4 mb-4" style="background:#f8f9fa;">
+  <div class="row g-3 align-items-center">
+
+    <div class="col-md-2">
+      <div class="small text-secondary">지급월</div>
+      <div class="fw-bold fs-5" id="d-payYymm"></div>
+    </div>
+
+    <div class="col-md-2">
+      <div class="small text-secondary">사번</div>
+      <div class="fw-bold fs-5" id="d-empId"></div>
+    </div>
+
+    <div class="col-md-2">
+      <div class="small text-secondary">이름</div>
+      <div class="fw-bold fs-5" id="d-empName"></div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="small text-secondary">부서</div>
+      <div class="fw-bold fs-5" id="d-deptName"></div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="small text-secondary">직책</div>
+      <div class="fw-bold fs-5" id="d-posName"></div>
+    </div>
+
+  </div>
+
+  <hr>
+
+  <div class="row text-center">
+    <div class="col">
+      <div class="small text-secondary">기본급</div>
+      <div class="fw-bold fs-5" id="d-baseAmt"></div>
+    </div>
+    <div class="col">
+      <div class="small text-secondary">수당 합계</div>
+      <div class="fw-bold fs-5" id="d-alwAmt"></div>
+    </div>
+    <div class="col">
+      <div class="small text-secondary">공제 합계</div>
+      <div class="fw-bold fs-5" id="d-dedAmt"></div>
+    </div>
+    <div class="col">
+      <div class="small text-secondary">총지급액</div>
+      <div class="fw-bold fs-5" id="d-totAmt"></div>
+    </div>
+    <div class="col">
+      <div class="small text-secondary">실수령액</div>
+      <div class="fw-bold fs-5 text-primary" id="d-netAmt"></div>
+    </div>
+  </div>
+</div>
+
+
+        <!-- 지급 / 공제 영역 -->
+        <div class="row g-4">
+
+          <!-- 🔵 지급 항목 -->
+          <div class="col-md-6">
+            <div class="rounded-4 border shadow-sm p-3">
+              <div class="d-flex justify-content-between mb-3">
+                <h5 class="fw-bold text-primary mb-0">지급 항목</h5>
+                <span class="small text-secondary" id="payCount"></span>
+              </div>
+
+              <table class="table align-middle" style="background:#fdfdfd;">
+                <thead class="table-light">
+                  <tr>
+                    <th>항목명</th>
+                    <th class="text-end">금액</th>
+                  </tr>
+                </thead>
+                <tbody id="payItemsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 🔴 공제 항목 -->
+          <div class="col-md-6">
+            <div class="rounded-4 border shadow-sm p-3">
+              <div class="d-flex justify-content-between mb-3">
+                <h5 class="fw-bold text-danger mb-0">공제 항목</h5>
+                <span class="small text-secondary" id="dedCount"></span>
+              </div>
+
+              <table class="table align-middle" style="background:#fdfdfd;">
+                <thead class="table-light">
+                  <tr>
+                    <th>항목명</th>
+                    <th class="text-end">금액</th>
+                  </tr>
+                </thead>
+                <tbody id="dedItemsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="modal-footer border-0">
+        <button class="btn btn-secondary px-4" data-bs-dismiss="modal">닫기</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
 <!-- ========================== -->
 <!-- JS 포함 -->
 <!-- ========================== -->
 <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
 <script src="/js/pay/payHistoryList.js"></script>
 
-<!-- 🔥 연도/월 자동 생성 스크립트 -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
 
-    // 현재 연도
-    const thisYear = new Date().getFullYear();
-    const yearSelect = document.getElementById("year");
-
-    // 올해, 작년만 넣기
-    yearSelect.innerHTML = `
-        <option value="">연도</option>
-        <option value="${thisYear}">${thisYear}</option>
-        <option value="${thisYear - 1}">${thisYear - 1}</option>
-    `;
-
-    // 월 1~12 자동 생성
-    const monthSelect = document.getElementById("month");
-    let monthHtml = `<option value="">월</option>`;
-    for (let i = 1; i <= 12; i++) {
-        const v = i.toString().padStart(2, "0");
-        monthHtml += `<option value="${v}">${i}월</option>`;
-    }
-    monthSelect.innerHTML = monthHtml;
-
-});
-</script>
 
 </th:block>
 </th:block>

@@ -101,7 +101,7 @@
 		<!-- 모달 -->
 		<div class="modal fade" id="approval-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
-		    <div class="modal-content" th:action="@{/approval/approval_doc}" th:object="${approvalDocDTO}" enctype="multipart/form-data">
+		    <form class="modal-content" th:action="@{/approval/approval_doc}" method="POST" th:object="${approvalDocDTO}" enctype="multipart/form-data">
 		      <div class="modal-header" data-draggable="true">
 		        <h3 class="modal-title" id="Drafting">기안서 작성</h3>
 		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -242,7 +242,7 @@
 					<label>결재권한자 : </label> 
 		          	<div id="select-box" style="width: 200px"></div>
 		        </h5>
-     				<div id="approvar" th:value="${empList}" onload="defaultPrint()" style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
+     				<div id="approver" th:value="${empList}" onload="defaultPrint()" style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
 					<!-- 결재권한자 버튼 생성 영역 -->
      				</div>	
      				
@@ -279,11 +279,12 @@
 						</div>
 					</div>
 	     				
-		        <div id="editor" style="border: 1px solid black;;"></div>
+		        <!--  <div id="editor" style="border: 1px solid black;;"></div> -->
 		      </div>
 		      <div class="modal-footer">
 		      	<div>
 			     	<button type="button" class="btn btn-primary">첨부파일</button>
+			     	<button type="button" class="btn btn-primary" id="approvalCompanionBtn">반려</button>
 			      	<button type="button" class="btn btn-primary" id="approvalCheckBtn">결재확인</button>
 			    </div>
 		      	<hr>
@@ -291,13 +292,12 @@
 		        <button type="submit" class="btn btn-primary">저장</button>
 		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
 		      </div>
-		</div>
+		</form>
 	    </div>
 	</div>
 	</div>
 
 </th:block>
-	
 </body>
 
 <th:block layout:fragment="myScript"> 

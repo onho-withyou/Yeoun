@@ -12,7 +12,6 @@
 	const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
 	const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
 
-	
 	// 결재확인 버튼 눌렀을때 동작할 함수
 	approvalCheckBtn.addEventListener('click', () => {
 		
@@ -74,7 +73,7 @@
 		empData();
 	}
 	
-	let approvarDiv = document.querySelector('#approvar');
+	let approverDiv = document.querySelector('#approver');
 
 	// let width = 150;
     // let height = 70;
@@ -102,9 +101,9 @@
 			selectBox.on('close',(ev)=>{
 				
 				let selectlabel = selectBox.getSelectedItem().label;
-				if(selectlabel != null && approvarArr.length < 3){//셀렉트 라벨선택시 3번까지만셈
+				if(selectlabel != null && approverArr.length < 3){//셀렉트 라벨선택시 3번까지만셈
 					print(ev.type, selectlabel);
-					approvarArr.push(this.count);
+					approverArr.push(this.count);
 				}
 				
 			});
@@ -143,13 +142,13 @@
 				console.log("rowData.to_dept_id",rowData.to_dept_id);
 				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
 				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
-				//document.getElementById('approvar').value = rowData.approver;//결재권한자
+				//document.getElementById('approver').value = rowData.approver;//결재권한자
 				
 				if(rowData.approver != null){
 					selectBox.select(rowData.approver);
 					print("defalut", selectBox.getSelectedItem().label);
 				}
-				//document.getElementById('approvar').innerText = rowData.approver;//전결자
+				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 				
 			});
@@ -186,14 +185,14 @@
 			
 				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
 				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
-				//document.getElementById('approvar').value = rowData.approver;//결재권한자
+				//document.getElementById('approver').value = rowData.approver;//결재권한자
 				
 				if(rowData.approver != null){
 					selectBox.select(rowData.approver);
 					console.log(selectBox.getSelectedItem().label);
 					print("defalut", selectBox.getSelectedItem().label);
 				}
-				//document.getElementById('approvar').innerText = rowData.approver;//전결자
+				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 			});
 
@@ -230,12 +229,12 @@
 			
 				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
 				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
-				//document.getElementById('approvar').value = rowData.approver;//결재권한자
+				//document.getElementById('approver').value = rowData.approver;//결재권한자
 				if(rowData.approver != null){
 					selectBox.select(rowData.approver);
 					print("defalut", selectBox.getSelectedItem().label);
 				}
-				//document.getElementById('approvar').innerText = rowData.approver;//전결자
+				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 			});
 
@@ -271,14 +270,14 @@
 		
 			document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
 			document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
-			//document.getElementById('approvar').value = rowData.approver;//결재권한자
+			//document.getElementById('approver').value = rowData.approver;//결재권한자
 			if(rowData.approver != null){
 				selectBox.select(rowData.approver);
 
 				print("defalut", selectBox.getSelectedItem().label);
 
 			}
-			//document.getElementById('approvar').innerText = rowData.approver;//전결자
+			//document.getElementById('approver').innerText = rowData.approver;//전결자
 			document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 		});
 	
@@ -314,12 +313,12 @@
 		
 			document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
 			document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
-			//document.getElementById('approvar').value = rowData.approver;//결재권한자
+			//document.getElementById('approver').value = rowData.approver;//결재권한자
 			if(rowData.approver != null){
 				selectBox.select(rowData.approver);
 				print("defalut", selectBox.getSelectedItem().label);
 			}
-			//document.getElementById('approvar').innerText = rowData.approver;//전결자
+			//document.getElementById('approver').innerText = rowData.approver;//전결자
 			document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 		});
 	
@@ -758,18 +757,18 @@
 
 	let jeongyeoljaDiv = document.querySelector('#jeongyeolja');
 	let jeongyeoljaContent = document.querySelector("#jeongyeolja-content");
-	let approvarDivClose = document.getElementById("approvarDiv-close");
+	let approverDivClose = document.getElementById("approverDiv-close");
 	
     this.count = 0; //결재권한자 label count
-    let defalutApprovarArr = ["d-이사랑","d-미미미누","d-김경란"];
-    let approvarArr = [];//결재권한자 배열 
+    let defalutapproverArr = ["d-이사랑","d-미미미누","d-김경란"];
+    let approverArr = [];//결재권한자 배열 
 	
     function defaultPrint(){
     	if(this.count === 0){
-	    	for(var i=0;i<defalutApprovarArr.length;i++){
+	    	for(var i=0;i<defalutapproverArr.length;i++){
 	    		
-		    	print("defalut",defalutApprovarArr[i]);
-    			approvarArr.push(defalutApprovarArr[i]);
+		    	print("defalut",defalutapproverArr[i]);
+    			approverArr.push(defalutapproverArr[i]);
 	    	}
     	}
     }
@@ -777,9 +776,9 @@
 		// 결재권한자변경 div 버튼 생성
     	if(this.count < 3){
 		this.count++;
-    	approvarDiv.innerHTML +='<div class="btn btn-success"'
+    	approverDiv.innerHTML +='<div class="btn btn-success"'
       						+'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
-      						+'<p onclick="approvarDivclose(this,' + "'"+ type + "'"+ ','+ count +')" style="float:right;margin-right: 8px;">&times;</p>'
+      						+'<p onclick="approverDivclose(this,' + "'"+ type + "'"+ ','+ count +')" style="float:right;margin-right: 8px;">&times;</p>'
       						+'<p onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
     						+'</div>';
     	}
@@ -789,7 +788,7 @@
 	function approvalNo(count,text){
 	   //해당태그 클릭시 전결자 div 나오기
 		let type = "change";
-		jeongyeoljaDiv.innerHTML = '<button onClick="approvarDivclose(this,'+ "'"+ type + "'"+','+ count +')" class="btn-close" style="float:right;margin-right: 8px;"></button>'
+		jeongyeoljaDiv.innerHTML = '<button onClick="approverDivclose(this,'+ "'"+ type + "'"+','+ count +')" class="btn-close" style="float:right;margin-right: 8px;"></button>'
 	   		 			+ '<h5>'+ count + "차 결재권한자 : "+ text +" 변경"+'</h5>';
 		jeongyeoljaDiv.innerHTML += jeongyeoljaContent.innerHTML;	
 	   
@@ -800,7 +799,7 @@
     } 
 	
 	//결재권한자,결재권한자변경(전결자) 닫기버튼
-	function approvarDivclose(buttonDiv,type,count){
+	function approverDivclose(buttonDiv,type,count){
 		const divElement = buttonDiv.parentNode; // 버튼의 부모인 div를 찾음
 		
 		// console.log("type",type);
@@ -811,14 +810,14 @@
 	        divElement.remove(); //자신의 div 제거
 	        
 	        if(divElement.innerText !== null){ //defalut 태그가 있을때
-	        	approvarArr = approvarArr.filter((ev) => ev !== defalutApprovarArr[count-1]);	
+	        	approverArr = approverArr.filter((ev) => ev !== defalutapproverArr[count-1]);	
 	        }
-			approvarArr = approvarArr.filter((ev) => ev !== count);
+			approverArr = approverArr.filter((ev) => ev !== count);
 			this.count = count-1; //제거 라벨 카운트 원상복기
 	    }
 		
 		
-		if(approvarArr.length === 0){
+		if(approverArr.length === 0){
     		this.count = 0;
     	}	
 	}

@@ -199,3 +199,25 @@ empKeyword?.addEventListener("input", function () {
             });
         });
 });
+/* ===========================
+            초기화 
+=========================== */
+
+document.getElementById("btnResetEmp").addEventListener("click", () => {
+
+    // 입력값 초기화
+    document.getElementById("emp_keyword").value = "";
+    document.getElementById("emp_select").value = "";
+
+    // 사원 정보 숨기기
+    document.getElementById("empInfoBox").style.display = "none";
+    document.getElementById("empResultBox").style.display = "none";
+
+    // 버튼 비활성화
+    document.getElementById("btnSimulateOne").disabled = true;
+    document.getElementById("btnConfirmOne").disabled = true;
+
+    // 상태 박스 숨기기
+    const statusBox = document.getElementById("empStatusBox");
+    if (statusBox) statusBox.style.display = "none";
+});

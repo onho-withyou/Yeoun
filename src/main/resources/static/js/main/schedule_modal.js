@@ -308,7 +308,8 @@ async function openScheduleModal(mode, data = null) {
 		select.value = 'company';
 
 		// 종일 체크 해제
-		form.alldayYN.checked = false;
+		alldayCheckbox.checked = true;
+		form.alldayYN.value = "Y";
 
 	} else if (mode === 'edit' && data) {
 		modalTitle.textContent = '일정조회';
@@ -346,8 +347,8 @@ async function openScheduleModal(mode, data = null) {
 		isProgrammaticChange = false;
 		
 		// 종일 체크
-		alldayCheckbox.checked = data.alldayYN === 'Y'; 
-		form.alldayYN.checked = data.alldayYN === 'Y'; // hidden value
+		alldayCheckbox.checked = data.alldayYN === 'Y';
+		form.alldayYN.value = data.alldayYN // hidden value
 		form.scheduleContent.value = data.scheduleContent || '';
 		
 		if (data.createdUser !== currentUserId) {

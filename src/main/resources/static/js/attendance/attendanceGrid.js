@@ -34,7 +34,10 @@ const grid = new tui.Grid({
 			}
 		},
 	],
-	bodyHeight: 500,	
+	bodyHeight: 500,
+	columnOptions: {
+		resizable: true
+	}
 });
 
 // 데이터 가져오기
@@ -77,7 +80,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	
 	// 이번 달 1일과 말일 계산
 	const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
-	const endDate = new Date(year, month, 0).toISOString().split("T")[0];
+	const endDate = today.toISOString().split("T")[0];
 	
 	// 날짜 input 기본값 설정
 	document.querySelector("#startDate").value = startDate;
