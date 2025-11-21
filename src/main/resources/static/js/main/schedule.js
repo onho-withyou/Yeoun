@@ -69,15 +69,12 @@ function createDatePicker() {
 
 // 데이트피커의 날을 캘린더 형식에 맞게 변경
 function formatDateToYYYYMMDD(date) {
-	const year = date.getFullYear();
-	const month = String(date.getMonth() + 1).padStart(2, '0');
-	const day = String(date.getDate()).padStart(2, '0');
+	var year = date.getFullYear();
+	var month = String(date.getMonth() + 1).padStart(2, '0');
+	var day = String(date.getDate()).padStart(2, '0');
 	return year + '-' + month + '-' + day;
 }
 
-const obj = {};
-
-obj.name = "name";
 
 // 달력 월 변경 버튼 함수
 prevMonthBtn.addEventListener('click', function() {
@@ -107,8 +104,8 @@ function checkFilter() {
 	const leaveFilter = document.getElementById('filter-leaves')
 	
 	companyFilter.checked ? calendar.setCalendarVisibility('company', true) : calendar.setCalendarVisibility('company', false);
-	departmentFilter.checked ? calendar.setCalendarVisibility('department', true) : calendar.setCalendarVisibility('department', false);
-	personalFilter.checked ? calendar.setCalendarVisibility('personal', true) : calendar.setCalendarVisibility('personal', false);
+	departmentFilter.checked ? calendar.setCalendarVisibility('share', true) : calendar.setCalendarVisibility('share', false);
+	personalFilter.checked ? calendar.setCalendarVisibility('private', true) : calendar.setCalendarVisibility('private', false);
 	leaveFilter.checked ? calendar.setCalendarVisibility('leave', true) : calendar.setCalendarVisibility('leave', false);
 }
 
@@ -219,7 +216,7 @@ function initCalendar() {
 		        borderColor: '#e74c3c'
 		    },
 			{
-                id: 'personal',
+                id: 'private',
                 name: '개인',
                 color: '#000',
                 backgroundColor: '#ffbb3b',
@@ -229,7 +226,7 @@ function initCalendar() {
                 isResizable: false
             },
             {
-                id: 'department',
+                id: 'share',
                 name: '부서',
                 color: '#fff',
                 backgroundColor: '#00a9ff',
@@ -446,7 +443,7 @@ async function getScheduleData(params) {
 		return response.json();  //JSON 파싱
 	})
 	.then(data => { // response가 ok일때
-//		console.log(data);
+		console.log("한달일정데이터",data);
 		// 조회한 월단위 일정을 캘린더 데이터로 변환
 		monthlyScheduleData = convertScheduleDataToSchedules(data);
 	}).catch(error => {
@@ -460,7 +457,7 @@ function convertScheduleDataToSchedules(monthScheduleData) {
 		const isAllday = item.alldayYN == "Y";
 		return {
 			id: String(item.scheduleId),
-			calendarId: getCalendarId(item.scheduleType),
+			calendarId: item.scheduleType,
 			title: item.scheduleTitle,
 			body: item.scheduleContent || "",
 			start: item.scheduleStart.replace(" ", "T"),
@@ -470,12 +467,6 @@ function convertScheduleDataToSchedules(monthScheduleData) {
 //			raw: { ...item } // 기타등등 넣을정보
 		};
 	});
-}
-// scheduleType에 따른 캘린더Id설정
-function getCalendarId(type, deptId) {
-	if(type === "회사") return "company";
-	if(type === "개인") return "personal";
-	return "department";
 }
 
 // 현재 달력이 선택한 월의 연차 정보 불러오기
@@ -552,9 +543,12 @@ function openAddScheduleModal(data) {
 	// data로받아서 등록모달 날짜 지정하기
 	var start = new Date(data.start);
 	var end = new Date(start)
+	
 	end.setDate(start.getDate() + 1);
+	isProgrammaticChange = true;
 	picker.setStartDate(start ? new Date(start) : today);
 	picker.setEndDate(end ? new Date(end): nextDay);
+	isProgrammaticChange = false;
 }
 // -------------------------------------------------------------
 // 캘린더 관련 함수 끝

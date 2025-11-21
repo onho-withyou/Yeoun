@@ -1,6 +1,8 @@
 package com.yeoun.main.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -11,15 +13,23 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.yeoun.attendance.service.AttendanceService;
+
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.main.dto.ScheduleDTO;
+import com.yeoun.main.dto.ScheduleSharerDTO;
 import com.yeoun.main.service.ScheduleService;
 
 import jakarta.validation.Valid;
@@ -37,6 +47,7 @@ public class MainController {
 	public String test() {
 		return "/main/organizationChartModal";
 	}
+	
 	
 	
 	// 메인페이지 맵핑
@@ -70,9 +81,25 @@ public class MainController {
 	// 일정등록
 	@PostMapping("/schedule")
 	public ResponseEntity<Map<String, String>> createSchedule(@ModelAttribute("scheduleDTO")@Valid ScheduleDTO scheduleDTO, 
-			BindingResult bindingResult) {
+			BindingResult bindingResult, @RequestParam(name = "sharedEmpList", required = false, defaultValue = "[]" ) String sharedEmpListJson) {
+		// 리턴에 사용할 Map 객체 생성
 		Map<String, String> msg = new HashMap<>();
-
+		// 받아온  sharedEmpListJson를 파싱해서 저장할 ScheduleSharerDTO리스트 생성
+		List<ScheduleSharerDTO> list = new ArrayList<ScheduleSharerDTO>();
+		
+		// sharedEmpListJson 형태를 DTO로 변환할 객체 
+		ObjectMapper mapper = new ObjectMapper();
+		// sharedEmpListJson객체가 존재할때만 실행
+		if(sharedEmpListJson != null || sharedEmpListJson != "") {
+			try {
+				list = mapper.readValue(sharedEmpListJson, new TypeReference<List<ScheduleSharerDTO>>(){});
+			} catch (JsonMappingException e) {
+				e.printStackTrace();
+			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		// 일정등록 요청 데이터 검증
 		if(bindingResult.hasErrors()) {
 			msg.put("msg", "일정 등록에 실패했습니다. - BINDING ERROR");
@@ -81,7 +108,7 @@ public class MainController {
 		// 일정등록 요청 데이터 이상 없을때
 		// 일정등록 요청
 		try {
-			scheduleService.createSchedule(scheduleDTO);
+			scheduleService.createSchedule(scheduleDTO, list);
 			msg.put("msg", "일정이 등록되었습니다.");
 			return ResponseEntity.ok(msg);
 		
@@ -94,8 +121,24 @@ public class MainController {
 	// 일정수정
 	@PatchMapping("/schedule")
 	public ResponseEntity<Map<String, String>> modifySchedule(@ModelAttribute("scheduleDTO")@Valid ScheduleDTO scheduleDTO, 
-			BindingResult bindingResult, Authentication authentication) {
+			BindingResult bindingResult, @RequestParam(name = "sharedEmpList", required = false, defaultValue = "[]" ) String sharedEmpListJson) {
 		Map<String, String> msg = new HashMap<>();
+		// 받아온  sharedEmpListJson를 파싱해서 저장할 ScheduleSharerDTO리스트 생성
+		List<ScheduleSharerDTO> list = new ArrayList<ScheduleSharerDTO>();
+		
+		// sharedEmpListJson 형태를 DTO로 변환할 객체 
+		ObjectMapper mapper = new ObjectMapper();
+		// sharedEmpListJson객체가 존재할때만 실행
+		if(sharedEmpListJson != null || sharedEmpListJson != "") {
+			try {
+				list = mapper.readValue(sharedEmpListJson, new TypeReference<List<ScheduleSharerDTO>>(){});
+			} catch (JsonMappingException e) {
+				e.printStackTrace();
+			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		// 일정수정 요청 데이터 검증
 		if(bindingResult.hasErrors()) {
 			msg.put("msg", "일정 수정에 실패했습니다.");
@@ -104,7 +147,7 @@ public class MainController {
 		// 일정수정 요청 데이터 이상 없을때
 		// 일정수정 요청
 		try {
-			scheduleService.modifySchedule(scheduleDTO, authentication);
+			scheduleService.modifySchedule(scheduleDTO, list);
 			msg.put("msg", "일정이 수정되었습니다.");
 			return ResponseEntity.ok(msg);
 		

@@ -17,12 +17,10 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 			select s
 			from Schedule s
 			where (s.scheduleStart <= :endDate and s.scheduleFinish >= :startDate)
-				and
-				(s.scheduleType in ('company', :empId, :myDeptId)
-				or s.emp.empId = :empId)
+				and (s.scheduleType in ('company', 'share') or s.emp.empId = :empId)
 			order by s.scheduleStart asc
 			""")
-	List<Schedule> getIndividualSchedule(@Param("empId")String empId, @Param("myDeptId")String myDeptId
+	List<Schedule> getIndividualSchedule(@Param("empId")String empId 
 			, @Param("startDate")LocalDateTime startDate, @Param("endDate")LocalDateTime endDate);
 	
 }
