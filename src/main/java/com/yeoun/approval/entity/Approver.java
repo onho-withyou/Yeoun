@@ -38,16 +38,6 @@ public class Approver {
 	
 	@Column(name="VIEWING")
 	private String viewing; //결재열람권한
-
-    public void setEmpId(int i) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setEmpId'");
-    }
-
-	public void setEmpId(String string) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'setEmpId'");
-	}
 	
 	
 }

@@ -1,11 +1,7 @@
 package com.yeoun.approval.controller;
 
-import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +9,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,13 +16,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yeoun.approval.dto.ApprovalDocDTO;
 import com.yeoun.approval.dto.ApprovalFormDTO;
-import com.yeoun.approval.dto.ApproverDTO;
-import com.yeoun.approval.entity.ApprovalDoc;
-import com.yeoun.approval.entity.Approver;
 import com.yeoun.approval.repository.ApprovalDocRepository;
 import com.yeoun.approval.service.ApprovalDocService;
 import com.yeoun.auth.dto.LoginDTO;
@@ -37,10 +27,8 @@ import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.emp.service.EmpService;
-import com.yeoun.messenger.dto.MsgFavoriteDTO;
 import com.yeoun.pay.dto.PayrollHistoryProjection;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -58,7 +46,7 @@ public class ApprovalController {
 		model.addAttribute("empList", approvalDocService.getEmp());//결재- 기안자 목록 불러오기
 		model.addAttribute("formTypes",approvalDocService.getFormTypes(loginDTO.getDeptId())); //"DEP001"결재- 기안서 양식종류 불러오기
 		model.addAttribute("deptList", approvalDocService.getDept()); //결재- 부서목록 불러오기
-		//model.addAttribute("approvalDocDTO", new ApprovalDocDTO());//결재문서DTO
+		model.addAttribute("approvalDocDTO", new ApprovalDocDTO());//결재문서DTO
 		
 		// --------------------------------------------
 		model.addAttribute("currentUserId", loginDTO.getEmpId());
@@ -74,6 +62,17 @@ public class ApprovalController {
 										,@RequestParam(name="approval_title") String approval_title) {
 		return approvalDocService.getSearchList(start_date,end_date,emp_name,approval_title);
 	}
+<<<<<<< HEAD
+=======
+	
+	@ResponseBody
+	@PostMapping("/save")
+	public String setPostSave(@RequestParam Map<String, Object> test) {
+		log.info("test ---------------------->",test);
+		return null;
+	}
+
+>>>>>>> parent of 0f506fb (mod.저장버튼 - approval-doc만됨)
 
 	//사원목록불러오기 토스트 셀렉트박스
 	@ResponseBody
@@ -113,12 +112,11 @@ public class ApprovalController {
 	 	return approvalDocService.getFinishedApprovalDocs(loginDTO.getEmpId());//"2505823"
 	 }
 
-	@PostMapping("/approval_doc")
-	public String postMethodName(@AuthenticationPrincipal LoginDTO loginDTO, @RequestParam Map<String, String> doc) throws JsonProcessingException {
-		
-		approvalDocService.saveApprovalDoc(loginDTO.getEmpId(),doc);
-		
-		return "redirect:/approval/approval_doc";
-	}
-
+//	@PostMapping("/approval_doc")
+//	public String postMethodName(@RequestParam Map<String, Object> test) {
+//		log.info(">>>>>>>>>>>>>>>>>> test : " + test);
+//		
+//		return "redirect:/approval/approval_doc";
+//	}
+	
 }
