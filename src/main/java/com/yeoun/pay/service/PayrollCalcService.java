@@ -214,13 +214,21 @@ public int runMonthlyBatch(String payYymm,
     final CalcStatus status = simulated ? CalcStatus.SIMULATED : CalcStatus.CALCULATED;
 
     List<PayRule> rules = payRuleRepo.findActiveValidRules(ActiveStatus.ACTIVE, LocalDate.now());
-    List<PayItemMst> items = itemRepo.findAll();
-    List<PayCalcRule> calcRules = calcRuleRepo.findAll();
+    List<PayItemMst> items = itemRepo.findAll();    
+    
+    LocalDate asOf = LocalDate.of(
+            Integer.parseInt(payYymm.substring(0,4)),
+            Integer.parseInt(payYymm.substring(4,6)),
+            1
+    ).withDayOfMonth(20); // 급여규칙 적용시기
+
+    List<PayCalcRule> calcRules = calcRuleRepo.findActiveRules(asOf);
+
     calcRules.sort(Comparator.comparingInt(PayCalcRule::getPriority));
         
     /* -----------------------------
 		    대상 사원 조회
-		   ----------------------------- */
+	 ----------------------------- */
         
         
         List<SimpleEmp> employees;
