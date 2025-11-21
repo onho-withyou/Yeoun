@@ -258,38 +258,3 @@ function initApproverView() {
   if (a2) a2.textContent = "-";
   if (a3) a3.textContent = "-";
 }
-
-// 4. 결재자 정보 로드 (발령 대상자 empId 기반)
-function loadApproverOptions(empId) {
-  // 아직 사원 선택 안 했으면 비우기만
-  if (!empId) {
-    initApproverView();
-    return;
-  }
-
-  fetch(`/api/hr/approvers?formName=인사발령신청서&empId=${encodeURIComponent(empId)}`)
-    .then(res => {
-      if (!res.ok) {
-        throw new Error("결재자 API 호출 실패");
-      }
-      return res.json();
-    })
-    .then(list => {
-      const a1 = document.getElementById("appr1");
-      const a2 = document.getElementById("appr2");
-      const a3 = document.getElementById("appr3");
-
-      initApproverView(); // 먼저 초기화
-
-      // list[0] = 1차, list[1] = 2차, list[2] = 3차
-      if (list[0] && a1) a1.textContent = `${list[0].empName} (${list[0].deptName})`;
-      if (list[1] && a2) a2.textContent = `${list[1].empName} (${list[1].deptName})`;
-      if (list[2] && a3) a3.textContent = `${list[2].empName} (${list[2].deptName})`;
-    })
-    .catch(err => {
-      console.error("결재자 로드 실패:", err);
-      // 에러 난 경우도 깔끔하게 표시
-      const a1 = document.getElementById("appr1");
-      if (a1) a1.textContent = "결재선 로드 실패";
-    });
-}

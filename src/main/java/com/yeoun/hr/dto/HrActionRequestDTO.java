@@ -38,7 +38,7 @@ public class HrActionRequestDTO {
         action.setActionType(this.actionType);
         action.setEffectiveDate(this.effectiveDate);
         action.setActionReason(this.actionReason);
-        action.setStatus("REQ");       
+        action.setStatus("대기");       
         return action;
     }
 

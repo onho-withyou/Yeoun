@@ -43,7 +43,7 @@ public class HrActionDTO {
 	// 이후 직금명
 	private String toPosName;
 	
-	// 상태 (REQ / APPR / REJ)
+	// 상태 
 	private String status;
 	
 	// 등록일시

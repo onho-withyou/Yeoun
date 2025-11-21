@@ -34,6 +34,7 @@ import com.yeoun.hr.dto.HrActionRequestDTO;
 import com.yeoun.hr.entity.HrAction;
 import com.yeoun.hr.repository.HrActionRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -92,7 +93,7 @@ public class HrActionService {
         action.setCreatedUser(creator); 			// 등록자
         
         // 발령 상태 기본값 (요청 상태)
-        action.setStatus("REQ");
+        action.setStatus("대기");
 
         // 발령(HR_ACTION) 저장
         HrAction saved = hrActionRepository.save(action);
@@ -112,49 +113,52 @@ public class HrActionService {
     	    toDept.getDeptName()                 // 영업팀
     	);
         
-        // 3-2. approval_doc 엔티티 생성
-        ApprovalDoc approvalDoc = new ApprovalDoc();
-        approvalDoc.setApprovalTitle(title);			// 문서제목
-        approvalDoc.setEmpId(creator.getEmpId());		// 사원번호
-        approvalDoc.setCreatedDate(LocalDate.now());	// 생성일자
-        approvalDoc.setDocStatus("1차대기");			// 문서상태
-        approvalDoc.setFormType("인사발령신청서");		// 양식종류
-        approvalDoc.setToDeptId(toDept.getDeptId());	// 발령부서
-        approvalDoc.setReason(hrActionRequestDTO.getActionReason());	// 사유
-        
-        // 3-3. approval_doc 저장
-        ApprovalDoc savedDoc = approvalDocRepository.save(approvalDoc);
-        
         // ==========================
         // 4. 결재선(approver) 생성
         // ==========================
-        // 신청자 소속 부서 기준으로 approval_form 가져오기
+        // 4-1. 신청자 소속 부서 기준으로 approval_form 가져오기
         String formName = "인사발령신청서";
-        String deptIdForForm = creator.getDept().getDeptId(); 
+        String deptIdForForm = emp.getDept().getDeptId(); 
         
         ApprovalForm form = approvalFormRepository
                 .findByFormNameAndDeptId(formName, deptIdForForm)
                 .orElseThrow(() -> new IllegalStateException(
                         "해당 부서의 인사발령 결재양식이 없습니다. deptId=" + deptIdForForm));
-
+        
+        // 3-2. approval_doc 엔티티 생성
+        ApprovalDoc approvalDoc = new ApprovalDoc();
+        approvalDoc.setApprovalTitle(title);							// 문서제목
+        approvalDoc.setEmpId(creator.getEmpId());						// 사원번호
+        approvalDoc.setCreatedDate(LocalDate.now());					// 생성일자
+        approvalDoc.setDocStatus("1차대기");							// 문서상태
+        approvalDoc.setFormType("인사발령신청서");						// 양식종류
+        approvalDoc.setToDeptId(toDept.getDeptId());					// 발령부서
+        approvalDoc.setReason(hrActionRequestDTO.getActionReason());	// 발령사유
+        
+        // 3-3. 현재 결재자(1차 결재자) 세팅
+        if (form.getApprover1() != null) {
+            approvalDoc.setApprover(form.getApprover1());
+        }
+        
+        // 3-4. 전자결재 문서 저장
+        ApprovalDoc savedDoc = approvalDocRepository.save(approvalDoc);
         Long approvalId = savedDoc.getApprovalId();
 
         int order = 1;
         
-        // 4-1. approval_doc에 '현재 결재자(1차 결재자)' 세팅
-        if (form.getApprover1() != null) {
-            savedDoc.setApprover(form.getApprover1());
-        }
+        // ==========================
+        // 4-2. 결재선(Approver) 엔티티들 생성
+        // ==========================
         
-        // APPROVER_1
+        // APPROVER_1 (1차 결재자)
         if (form.getApprover1() != null) {
             Approver line1 = new Approver();
-            line1.setEmpId(form.getApprover1());
-            line1.setApprovalId(approvalId);
-            line1.setApprovalStatus(false);      // 0 = 대기
-            line1.setOrderApprovers(String.valueOf(order++));
-            line1.setDelegateStatus(null);   // or "본인"
-            line1.setViewing("Y");
+            line1.setEmpId(form.getApprover1());				// 결재자 사번
+            line1.setApprovalId(approvalId);					// 결재문서 ID
+            line1.setApprovalStatus(false);      				// 승인 여부 (false = 대기)
+            line1.setOrderApprovers(String.valueOf(order++));	// 결재 순서: 1
+            line1.setDelegateStatus(null);  					// 대결자 여부
+            line1.setViewing("y");								// 결재문서 목록에 보이도록
             approverRepository.save(line1);
         }
 
@@ -166,7 +170,7 @@ public class HrActionService {
             line2.setApprovalStatus(false);
             line2.setOrderApprovers(String.valueOf(order++));
             line2.setDelegateStatus(null);
-            line2.setViewing("Y");
+            line2.setViewing(null);								// 아직 열람 대상 아님
             approverRepository.save(line2);
         }
 
@@ -178,18 +182,15 @@ public class HrActionService {
             line3.setApprovalStatus(false);
             line3.setOrderApprovers(String.valueOf(order++));
             line3.setDelegateStatus(null);
-            line3.setViewing("Y");
+            line3.setViewing(null);
             approverRepository.save(line3);
         }
 
         // ==========================
         // 5. HR_ACTION에 approvalId 연결
         // ==========================
-        saved.setApprovalId(approvalId);      // 필드 타입/이름에 맞게 수정 (Long, String 등)
-        // JPA 엔티티니까 트랜잭션 안에서 dirty checking으로 자동 update 되지만,
-        // 확실히 하려면 아래처럼 save 한 번 더 호출해도 됨.
-        // hrActionRepository.save(saved);
-        
+        saved.setApprovalId(approvalId);      // 발령(HR_ACTION) ← 결재문서 ID 매핑
+
         return saved.getActionId();
     }
     
@@ -205,9 +206,35 @@ public class HrActionService {
             default           -> "인사발령";
         };
     }
+    
+	// ====================================================
+    // 2. 전자결재 approvalId 기준으로 인사발령 적용
+    // ====================================================
+	public void applyHrActionByApprovalId(Long approvalId) {
+
+		HrAction hrAction = hrActionRepository.findByApprovalId(approvalId)
+					.orElseThrow(() -> new EntityNotFoundException("해당 결재와 연결된 인사발령을 찾을 수 없습니다. approvalId: " + approvalId));
+
+		Emp emp = hrAction.getEmp();
+		
+		// 실제 EMP 정보 변경
+		if(hrAction.getToDept() != null) {
+			emp.setDept(hrAction.getToDept());
+		}
+					
+		if(hrAction.getToPosition() != null) {
+			emp.setPosition(hrAction.getToPosition());
+		}
+		
+		// HR_ACTION 상태도 완료
+		hrAction.setAppliedDate(LocalDate.now());
+		hrAction.setStatus("완료");
+	}
+        
+    
 
 	// ==========================
-    // 2. 인사 발령 목록
+    // 3. 인사 발령 목록
     // ==========================
     public Page<HrActionDTO> getHrActionList(int page, int size, String keyword,
             								 String actionType, String startDate, String endDate) {
@@ -264,7 +291,8 @@ public class HrActionService {
 		
 			return dtoPage;
 		}
-        
+
+
         
         
         

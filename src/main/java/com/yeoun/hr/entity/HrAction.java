@@ -80,9 +80,9 @@ public class HrAction {
 	@Column(name = "REASON", length = 200)
 	private String actionReason;
 	
-	// 상태 (REQ=요청, APPR=승인, REJ=반려 등)
+	// 승인상태
 	@Column(name = "STATUS", length = 10, nullable = false)
-    private String status = "REQ";   // 자바에서 기본값 세팅
+    private String status = "대기";   // 자바에서 기본값 세팅
 	
 	// 등록자 (CREATED_USER = 사원)
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -98,7 +98,9 @@ public class HrAction {
 	@Column(name="APPROVAL_ID")
 	private Long approvalId;
 	 
-	
+	// 적용일자 (최종 승인 후 실제 발령이 반영된 날짜)
+	@Column(name = "APPLIED_DATE")
+	private LocalDate appliedDate;
 	
 
 }
