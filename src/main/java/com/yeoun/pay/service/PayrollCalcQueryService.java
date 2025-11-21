@@ -87,10 +87,13 @@ public class PayrollCalcQueryService {
 
         // 5) 최종 DTO 반환
         return PayslipDetailDTO.builder()
+        		.payYymm(payslip.getPayYymm()) 
                 .empId(payslip.getEmpId())
                 .empName(payslip.getEmpName())  
                 .deptId(payslip.getDeptId())
                 .deptName(payslip.getDept() != null ? payslip.getDept().getDeptName() : null)
+                .posName(payslip.getEmp() != null &&  payslip.getEmp().getPosition() != null
+                	        ? payslip.getEmp().getPosition().getPosName() : null	)
 
                 .baseAmt(payslip.getBaseAmt())
                 .alwAmt(payslip.getAlwAmt())
@@ -103,5 +106,6 @@ public class PayrollCalcQueryService {
                 .dedItems(dedItems)
                 .build();
     }
-
+    
+   
 }

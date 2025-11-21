@@ -9,10 +9,12 @@ import lombok.Data;
 @Data
 @Builder
 public class PayslipDetailDTO {
+	private String payYymm;
     private String empId;
     private String empName;
     private String deptId;
     private String deptName;
+    private String posName;
 
     private BigDecimal baseAmt;
     private BigDecimal alwAmt;

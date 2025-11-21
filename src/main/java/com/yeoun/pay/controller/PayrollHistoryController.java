@@ -1,6 +1,9 @@
 package com.yeoun.pay.controller;
 
 import com.yeoun.pay.dto.PayrollHistoryProjection;
+import com.yeoun.pay.dto.PayslipDetailDTO;
+import com.yeoun.pay.repository.PayrollHistoryRepository;
+import com.yeoun.pay.service.PayrollCalcQueryService;
 import com.yeoun.pay.service.PayrollHistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +20,7 @@ import java.util.List;
 public class PayrollHistoryController {
 
     private final PayrollHistoryService service;
+    private final PayrollCalcQueryService payrollCalcQueryService;
 
     /** 화면 이동 */
     @GetMapping
@@ -36,4 +40,18 @@ public class PayrollHistoryController {
     ) {
         return service.search(mode, keyword, deptName, year, month);
     }
+    
+    
+    /*급여 이력 상세모달*/
+    @GetMapping("/detail")
+    @ResponseBody
+    public PayslipDetailDTO getDetail(
+            @RequestParam(name="payYymm") String payYymm,
+            @RequestParam(name="empId") String empId
+    ) {
+        return payrollCalcQueryService.getPayslipDetail(payYymm, empId);
+    }
+
+
+
 }
