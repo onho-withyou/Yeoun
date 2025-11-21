@@ -147,6 +147,8 @@ public class Attendance {
 	    if (outTime != null) {
 	        this.workOut = outTime;
 	    }
+	    
+	    this.statusCode = "WORKOUT";
 	}
 	
 	// 근태 수정 로직

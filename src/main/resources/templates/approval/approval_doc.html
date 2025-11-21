@@ -101,7 +101,7 @@
 		<!-- 모달 -->
 		<div class="modal fade" id="approval-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
-		    <div class="modal-content" th:action="@{/approval/approval_doc}" th:object="${approvalDocDTO}" enctype="multipart/form-data">
+		    <form class="modal-content" th:action="@{/approval/approval_doc}" method="POST" th:object="${approvalDocDTO}" enctype="multipart/form-data">
 		      <div class="modal-header" data-draggable="true">
 		        <h3 class="modal-title" id="Drafting">기안서 작성</h3>
 		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -291,13 +291,12 @@
 		        <button type="submit" class="btn btn-primary">저장</button>
 		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
 		      </div>
-		</div>
+		</form>
 	    </div>
 	</div>
 	</div>
 
 </th:block>
-	
 </body>
 
 <th:block layout:fragment="myScript"> 
