@@ -8,19 +8,27 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Table(name="APPROVAL_DOC")
+@SequenceGenerator(
+    name = "APPROVAL_DOC_SEQ_GENERATOR",
+    sequenceName = "APPROVAL_SEQ",
+    allocationSize = 1
+)
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class) 
 public class ApprovalDoc {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "APPROVAL_DOC_SEQ_GENERATOR")
 	@Column(name="APPROVAL_ID")
 	private Long approvalId; //결재문서id
 	

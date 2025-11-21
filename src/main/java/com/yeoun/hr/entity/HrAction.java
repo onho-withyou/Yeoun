@@ -95,9 +95,8 @@ public class HrAction {
     private LocalDateTime createdDate;
 	
 	// 결재문서ID
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "APPROVAL_ID")
-	private ApprovalDoc approvalDoc;
+	@Column(name="APPROVAL_ID")
+	private Long approvalId;
 	 
 	
 	

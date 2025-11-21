@@ -12,6 +12,9 @@ document.addEventListener('DOMContentLoaded', function() {
 	// 페이지 로드되면 사원 목록 불러오기
 	loadEmpListForHrAction();
 	
+	// 결재자 셀렉트박스 옵션 로드
+	initApproverView();
+	
 	// 검색 이벤트
 	const btnSearch = document.getElementById('btnSearchEmp');
 	if (btnSearch) {
@@ -134,6 +137,8 @@ function buildEmpGrid(rows) {
 		document.getElementById('sel-emp-pos').textContent = row.posName;
 
 		document.getElementById('empId').value = row.empId;
+		
+		loadApproverOptions(row.empId);
 	});
 }
 
@@ -149,7 +154,6 @@ function handleSubmitAction(e) {
 		toDeptId: document.querySelector("select[name='toDeptId']").value,
 		toPosCode: document.querySelector("select[name='toPosCode']").value,
 		actionReason: document.querySelector("textarea[name='actionReason']").value,
-		approverEmpId: document.querySelector("select[name='approverEmpId']").value || null
 	};
 	
 	// 필수값 체크
@@ -198,4 +202,94 @@ function handleSubmitAction(e) {
 	    console.error("발령 등록 실패:", err);
 	    alert("발령 등록 중 오류가 발생했습니다.");
 	});
+}
+
+// 결재선 초기화 (처음 로딩 시)
+function initApproverView() {
+  const a1 = document.getElementById("appr1");
+  const a2 = document.getElementById("appr2");
+  const a3 = document.getElementById("appr3");
+  if (a1) a1.textContent = "-";
+  if (a2) a2.textContent = "-";
+  if (a3) a3.textContent = "-";
+}
+
+// 4. 결재자 정보 로드 (발령 대상자 empId 기반)
+function loadApproverOptions(empId) {
+  // 아직 사원 선택 안 했으면 비우기만
+  if (!empId) {
+    initApproverView();
+    return;
+  }
+
+  fetch(`/api/hr/approvers?formName=인사발령신청서&empId=${encodeURIComponent(empId)}`)
+    .then(res => {
+      if (!res.ok) {
+        throw new Error("결재자 API 호출 실패");
+      }
+      return res.json();
+    })
+    .then(list => {
+      const a1 = document.getElementById("appr1");
+      const a2 = document.getElementById("appr2");
+      const a3 = document.getElementById("appr3");
+
+      initApproverView(); // 먼저 초기화
+
+      // list[0] = 1차, list[1] = 2차, list[2] = 3차
+      if (list[0] && a1) a1.textContent = `${list[0].empName} (${list[0].deptName})`;
+      if (list[1] && a2) a2.textContent = `${list[1].empName} (${list[1].deptName})`;
+      if (list[2] && a3) a3.textContent = `${list[2].empName} (${list[2].deptName})`;
+    })
+    .catch(err => {
+      console.error("결재자 로드 실패:", err);
+      // 에러 난 경우도 깔끔하게 표시
+      const a1 = document.getElementById("appr1");
+      if (a1) a1.textContent = "결재선 로드 실패";
+    });
+}
+
+// 결재선 초기화 (처음 로딩 시)
+function initApproverView() {
+  const a1 = document.getElementById("appr1");
+  const a2 = document.getElementById("appr2");
+  const a3 = document.getElementById("appr3");
+  if (a1) a1.textContent = "-";
+  if (a2) a2.textContent = "-";
+  if (a3) a3.textContent = "-";
+}
+
+// 4. 결재자 정보 로드 (발령 대상자 empId 기반)
+function loadApproverOptions(empId) {
+  // 아직 사원 선택 안 했으면 비우기만
+  if (!empId) {
+    initApproverView();
+    return;
+  }
+
+  fetch(`/api/hr/approvers?formName=인사발령신청서&empId=${encodeURIComponent(empId)}`)
+    .then(res => {
+      if (!res.ok) {
+        throw new Error("결재자 API 호출 실패");
+      }
+      return res.json();
+    })
+    .then(list => {
+      const a1 = document.getElementById("appr1");
+      const a2 = document.getElementById("appr2");
+      const a3 = document.getElementById("appr3");
+
+      initApproverView(); // 먼저 초기화
+
+      // list[0] = 1차, list[1] = 2차, list[2] = 3차
+      if (list[0] && a1) a1.textContent = `${list[0].empName} (${list[0].deptName})`;
+      if (list[1] && a2) a2.textContent = `${list[1].empName} (${list[1].deptName})`;
+      if (list[2] && a3) a3.textContent = `${list[2].empName} (${list[2].deptName})`;
+    })
+    .catch(err => {
+      console.error("결재자 로드 실패:", err);
+      // 에러 난 경우도 깔끔하게 표시
+      const a1 = document.getElementById("appr1");
+      if (a1) a1.textContent = "결재선 로드 실패";
+    });
 }
