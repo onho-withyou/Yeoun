@@ -737,6 +737,69 @@
 		});
 
     }
+	
+	//기안서 모달 등록 버튼
+	function approvalDocSave(){
+	    alert("기안서 모달 등록 버튼");
+		//문서from 타입//양식종류
+		const formType = document.getElementById("form-menu").value ?? "";
+		//문서제목
+		const formTitle = document.getElementById("approval-title").value ?? "";
+		//결재자명
+		const empId = document.getElementById("approver-name").value ?? "";
+		//결재완료기간
+		const approvalDocStartDate = document.getElementById("create-date").value;//문서 생성일자
+		const approvalDocEndDate = document.getElementById("finish-date").value;
+		//휴가신청서
+		const annualDocStartDate = document.getElementById("start-date").value;
+		const annualDocEndDate = document.getElementById("end-date").value;
+		//휴가종류
+		const annualType = document.getElementById("leave-type").value;
+		//발령부서
+		const toDept = document.getElementById("to-dept-id").value;
+		//지출종류
+		const expenType = document.getElementById("expnd-type").value;
+		//사유내용
+		const reasonText = document.getElementById("reason-write").value;
+		//결재권한자 - approverDTO
+		
+		const params = {
+			
+			formType: formType
+			,formTitle: formType
+			,empId: empId
+			,approvalDocStartDate: approvalDocStartDate
+			,approvalDocEndDate: approvalDocEndDate
+			,annualDocStartDate: annualDocStartDate
+			,annualDocEndDate: annualDocEndDate
+			,annualType: annualType
+			,toDept: toDept
+			,expenType: expenType
+			,reasonText: reasonText
+		};
+		
+		console.log("approval----->",params);
+		// REST API POST
+			fetch("/approval/save", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					[csrfHeader]: csrfToken
+				},
+				body: params
+			})
+			.then(response => {
+			    if (!response.ok) {
+			        throw new Error("서버 오류 발생");
+			    }
+			    return response.text(); 
+			}
+			//폼데이터랑, 가공을 하고, json   가공한 폼 데이터에 추가 할수있다.
+			);
+		
+	} 
+	
+	
 	//모달창 코드
 	//기안서 셀렉트 박스 변경시 모달창에 텍스트 변경함수
 	function draftValFn(ev){
