@@ -1,6 +1,9 @@
 package com.yeoun.approval.dto;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.yeoun.approval.entity.Approver;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.validation.constraints.NotBlank;
@@ -28,5 +31,15 @@ public class ApproverDTO {
 	private String orderApprovers; //결재 순서
 	
 	private boolean viewing; //결재열람권한 y/n
+	
+	private static ModelMapper modelMapper = new ModelMapper();
+	
+	public Approver toEntity() {
+		return modelMapper.map(this, Approver.class);
+	}
+	
+	public static ApproverDTO fromEntity(Approver approver) {
+		return modelMapper.map(approver, ApproverDTO.class);
+	}
     
 }
