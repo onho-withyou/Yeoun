@@ -80,37 +80,44 @@ public class HrActionRestController {
 		return empService.getEmpListForHrAction(deptId, posCode, keyword);
 	}
 	
-	// 결재자 목록 API
+	// 결재자 목록 API (발령 대상자 기준)
 	@GetMapping("/approvers")
-	public List<EmpListDTO> getApprovers(@RequestParam(name = "formName") String formName) {
+	public List<EmpListDTO> getApprovers(@RequestParam(name = "formName") String formName,
+	                                     @RequestParam(name = "empId") String empId) {
 
-	    // 1) 로그인 사용자 정보
-	    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-	    LoginDTO loginUser = (LoginDTO) auth.getPrincipal();
-	    String deptId = loginUser.getDeptId();
+	    // 1) 발령 대상자 조회
+	    Emp target = empRepository.findByEmpId(empId)
+	            .orElseThrow(() -> new IllegalArgumentException("사원을 찾을 수 없습니다: " + empId));
 
-	    // 2) 결재양식 조회 (해당 부서 기준)
+	    String deptId = target.getDept().getDeptId();  // 대상자 부서 기준
+
+	    // 2) 해당 부서 + 양식명으로 결재양식 조회
 	    ApprovalForm form = approvalFormRepository
 	            .findByFormNameAndDeptId(formName, deptId)
 	            .orElseThrow(() -> new IllegalStateException(
-	                    "해당 부서 결재 양식 없음: deptId=" + deptId));
+	                    "해당 부서의 인사발령 결재양식이 없습니다. deptId=" + deptId));
 
-	    // 3) 결재자 ID 목록 (null/빈 값 제거)
-	    List<String> approverIds = List.of(
-	            form.getApprover1(),
-	            form.getApprover2(),
-	            form.getApprover3()
-	    ).stream()
-	     .filter(id -> id != null && !id.isBlank())
-	     .toList();
+	    // 3) APPROVER_1/2/3 → EmpListDTO로 변환 (순서 유지)
+	    List<EmpListDTO> result = new java.util.ArrayList<>();
 
-	    // 4) 결재자 목록 조회
-	    List<Emp> approvers = empRepository.findByEmpIdIn(approverIds);
+	    if (form.getApprover1() != null && !form.getApprover1().isBlank()) {
+	        empRepository.findByEmpId(form.getApprover1())
+	                .map(EmpListDTO::fromEntity)
+	                .ifPresent(result::add);
+	    }
+	    if (form.getApprover2() != null && !form.getApprover2().isBlank()) {
+	        empRepository.findByEmpId(form.getApprover2())
+	                .map(EmpListDTO::fromEntity)
+	                .ifPresent(result::add);
+	    }
+	    if (form.getApprover3() != null && !form.getApprover3().isBlank()) {
+	        empRepository.findByEmpId(form.getApprover3())
+	                .map(EmpListDTO::fromEntity)
+	                .ifPresent(result::add);
+	    }
 
-	    // 5) 엔티티 → DTO 변환
-	    return approvers.stream()
-	            .map(EmpListDTO::fromEntity)
-	            .toList();
+	    return result;
 	}
+
 
 }
