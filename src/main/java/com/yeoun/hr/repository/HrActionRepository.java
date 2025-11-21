@@ -26,6 +26,8 @@ public interface HrActionRepository extends JpaRepository<HrAction, Long> {
         from HrAction a
           join a.emp e
         where
+    	  a.status = '완료'
+    	  and
           (:keyword is null or :keyword = '' 
             or e.empId like concat('%', :keyword, '%')
             or e.empName like concat('%', :keyword, '%'))
