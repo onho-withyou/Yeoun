@@ -132,14 +132,17 @@
 		        <h5 class="d-flex">
 					<label class="p-1" style="width: 200px;">결재자명(기안자)</label> 
 		        	<div class="mb-6 mb-0" style="width: 344px;">
-		            	 <select id="approver-name" class="form-select">
+		        		<p id="approver-name" th:text="|${#authentication.principal.empName} (${#authentication.principal.empId})|"></p>
+		        		
+		        				        	
+		            	<!--   <select id="approver-name" class="form-select">
 		            		<option selected>이름(사번)</option>
 		            		 <option id="approverItem" th:each="item, iterStat : ${empList}" 
 							 		th:value="${item.empId}" 
 							 		th:text="${iterStat.index+1} + ' : ' + ${item.empName} + '(' + ${item.empId} + ')'">
 							 </option>
 
-		            	</select> 
+		            	</select> --> 
 	            	</div>
 		        </h5>
 		        <h5 class="d-flex">
@@ -289,7 +292,7 @@
 			    </div>
 		      	<hr>
 		      	<button type="button" class="btn btn-primary">인쇄</button>
-		        <button type="submit" class="btn btn-primary">저장</button>
+		        <button type="button" class="btn btn-primary" onclick="approvalDocSave()">등록</button>
 		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
 		      </div>
 		</form>
