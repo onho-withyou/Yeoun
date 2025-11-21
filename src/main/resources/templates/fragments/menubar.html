@@ -75,8 +75,8 @@
                             <div data-i18n="Menu1" class="menu-link-sub">사원 출/퇴근 현황</div>
                         </a>
                     </li>
-                    <!-- 부서장 + 시스템 관리자 + 근태 관리자  -->
-                    <li class="menu-item" sec:authorize="hasAnyRole('ATTEND_ADMIN','SYS_ADMIN', 'DEPT_MANAGER')">
+                    <!-- 시스템 관리자 + 근태 관리자  -->
+                    <li class="menu-item" sec:authorize="hasAnyRole('ATTEND_ADMIN','SYS_ADMIN')">
                         <a href="/leave/list" class="menu-link">
                             <div data-i18n="Menu1" class="menu-link-sub">사원 연차 현황</div>
                         </a>

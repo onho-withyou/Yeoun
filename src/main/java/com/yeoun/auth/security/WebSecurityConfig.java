@@ -42,7 +42,7 @@ public class WebSecurityConfig {
 					.requestMatchers("/", "/login", "/logout").permitAll()
 					
 					// ================== 로그인 한 모든 사원 ==================
-		            .requestMatchers("/org/**", "/hr/actions")
+		            .requestMatchers("/org/**", "/hr/actions", "/attendance/my/**", "/leave/my/**", "/attendance/outwork", "/attendance/toggle/**")
 		                .authenticated()
 
 					// ================== 관리자/인사/MES 권한 ==================
@@ -60,6 +60,16 @@ public class WebSecurityConfig {
 
 		           
 	                // 근태 관리
+		            // 근태 관리 - 관리자 및 근태 담당자, 부서장
+	                .requestMatchers("/attendance/list/**", "attendance/search", "attendance/*")
+                    	.hasAnyRole("SYS_ADMIN", "DEPT_MANAGER", "ATTEND_ADMIN")
+                    // 근태 관리 - 관리자 및 근태 담당자
+                    .requestMatchers("/attendance/policy/**", "/leave/list/**", "leave/*")
+                    	.hasAnyRole("SYS_ADMIN", "ATTEND_ADMIN")
+                	// 근태 관리 - 관리자
+                	.requestMatchers("/attendance/accessList/**")
+                    	.hasAnyRole("SYS_ADMIN")
+                    	
 	                // 급여 관리
 	                // 전자결재 설정(양식/결재선 관리 등)
 	                // 전자결재 일반 사용 (결재 상신/조회 등)

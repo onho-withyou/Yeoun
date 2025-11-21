@@ -74,8 +74,6 @@ const grid = new tui.Grid({
 	bodyHeight: 500,
 });
 
-grid.sort('workDate', true);
-
 // 버튼 이벤트 감지
 grid.on("click", (ev) => {
 	const { columnName, rowKey } = ev;
@@ -120,6 +118,8 @@ async function loadAttendanceList(startDate, endDate) {
 		}));
 		
 		grid.resetData(data);
+		
+		grid.sort('workDate', true);
 	} catch(error) {
 		console.error(error);
 		alert("데이터를 불러오는 중 오류가 발생했습니다.");	
