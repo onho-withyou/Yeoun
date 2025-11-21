@@ -7,25 +7,45 @@
 	// 현재 열린 문서의 결재권자(approval) 
 	let currentApprover;
 	// 모달의 결재확인 버튼
-	const approvalCheckBtn = document.getElementById('approvalCheckBtn');
 	
 	const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
 	const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
+	// 결제확인 버튼
+	const approvalCheckBtn = document.getElementById('approvalCheckBtn');
+	// 반려 버튼
+	const approvalCompanionBtn = document.getElementById('approvalCompanionBtn');
 
 	// 결재확인 버튼 눌렀을때 동작할 함수
 	approvalCheckBtn.addEventListener('click', () => {
+		patchApproval("accept");
+	});
+	
+	// 반려버튼 눌렀을때 동작할 함수
+	approvalCompanionBtn.addEventListener('click', () => {
+		patchApproval("deny")		
+	});
+	
 		
-		console.log(currentApprover, LOGIN_USER_ID);
-		// 현재 로그인한 사용자와 결재권자 비교
+	// 현재 로그인한 사용자와 결재권자 비교
+	function checkApprover() {
 		if(currentApprover != LOGIN_USER_ID) {
-			alert("결재권한이 없습니다."); 
-			return;
+			alert("반려권한이 없습니다."); 
+			return true;
 		}
+	}
+	
+	// 결재 패치 보내기 함수
+	function patchApproval(btn) {
+		// 현재 로그인한 사용자와 결재권자 비교
+		if(checkApprover()) return;
+		let msg = "";
+		btn == 'accept' ? msg = "승인하시겠습니까?" : msg = "반려하시겠습니까?"
+		 
 		
 		// 결재권한자와 사용자가 동일인물일 때
-		if(confirm("승인하시겠습니까?")) {
+		if(confirm(msg)) {
 			//결재 확인 동작함수
-			fetch('/api/approvals/' + approvalId, {
+			fetch(`/api/approvals/${approvalId}?btn=${btn}` , {
 				method: 'PATCH'
 				, headers: {
 					[csrfHeaderName]: csrfToken
@@ -45,9 +65,7 @@
 				alert("결재 승인 실패!!");
 			});
 		 }
-		
-	})
-	
+	}
 	
 	//grid - 1.결재사항 - 진행해야할 결재만 - 결재권한자만 볼수있음
 	//grid - 2.전체결재 - 나와관련된 모든 결재문서

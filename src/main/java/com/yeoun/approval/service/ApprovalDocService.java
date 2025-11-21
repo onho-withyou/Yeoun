@@ -87,37 +87,42 @@ public class ApprovalDocService {
 	 // --------------------------------------------------------------------------------------
 	 // 결재 승인 메서드 
 	 @Transactional
-	 public void updateApproval(Long approvalId, String empId) {
+	 public void updateApproval(Long approvalId, String empId, String btn) {
 		 // 전달받은 문서ID를 사용하여 문서엔티티 가져오기
 		 ApprovalDoc approvalDoc = approvalDocRepository.findById(approvalId)
 				 					.orElseThrow(() -> new EntityNotFoundException("존재하지 않는 결재문서 입니다."));
 		 
-		 // 해당 문서의 approvalId를 통해 approver 객체에서 승인권자 목록 가져오기
-		 List<Approver> approverList = approverRepository.findByApprovalId(approvalId);
-		 ApproverId approverId = new ApproverId(approvalDoc.getApprovalId(), approvalDoc.getApprover());
-		 
-		 
-		 // 불러온 승인권자리스트 요소 반복
-		 for(Approver approver : approverList) {
-			 // 현재 로그인사용자와 승인권자의 empId가 동일한지 하고, 현재 승인권자의 순서가 마지막 순서인지 확인후
-			 if(empId.equals(approver.getEmpId())) {
-				 // 현재 로그인 사용자와 승인권자의 empId가 동일하고, 현재 승인권자의 순서가 마지막 순서일 때
-				 if(Integer.parseInt(approver.getOrderApprovers()) == approverList.size()) {
-					 // approvalDoc의 status를 완료로 변경
-					 approvalDoc.setDocStatus("완료");
-				 } else { // 현재 로그인 사용자와 승인권자자의 empId가 동일하고, 최종 결재권자가 아닌경우  
-					 // 현재 승인권자 다음 순서 확인( 현재 결재문서, 현재결재순서 + 1)
-					 Long nextApproverOrder = Long.parseLong(approver.getOrderApprovers()) + 1; 
-					 Approver nextApprover = approverRepository.findByApprovalIdAndOrderApprovers(approver.getApprovalId(), nextApproverOrder.toString());
-					 // 다음 결재권자의 VIEWING을 Y로 변경
-					 nextApprover.setViewing("Y");
-					 
-					 // approvalDoc의 approver을 다음 결재권자의 EmpId로 변경
-					 approvalDoc.setApprover(nextApprover.getEmpId());
-					 // approvalDoc의 status 변경
-					 approvalDoc.setDocStatus(nextApprover.getOrderApprovers() + "차 대기");
-				 }
-			 } 
+		 // 결제승인 버튼을 눌렀을 때
+		 if(btn == "accept") {
+			 // 해당 문서의 approvalId를 통해 approver 객체에서 승인권자 목록 가져오기
+			 List<Approver> approverList = approverRepository.findByApprovalId(approvalId);
+			 ApproverId approverId = new ApproverId(approvalDoc.getApprovalId(), approvalDoc.getApprover());
+			 
+			 
+			 // 불러온 승인권자리스트 요소 반복
+			 for(Approver approver : approverList) {
+				 // 현재 로그인사용자와 승인권자의 empId가 동일한지 하고, 현재 승인권자의 순서가 마지막 순서인지 확인후
+				 if(empId.equals(approver.getEmpId())) {
+					 // 현재 로그인 사용자와 승인권자의 empId가 동일하고, 현재 승인권자의 순서가 마지막 순서일 때
+					 if(Integer.parseInt(approver.getOrderApprovers()) == approverList.size()) {
+						 // approvalDoc의 status를 완료로 변경
+						 approvalDoc.setDocStatus("완료");
+					 } else { // 현재 로그인 사용자와 승인권자자의 empId가 동일하고, 최종 결재권자가 아닌경우  
+						 // 현재 승인권자 다음 순서 확인( 현재 결재문서, 현재결재순서 + 1)
+						 Long nextApproverOrder = Long.parseLong(approver.getOrderApprovers()) + 1; 
+						 Approver nextApprover = approverRepository.findByApprovalIdAndOrderApprovers(approver.getApprovalId(), nextApproverOrder.toString());
+						 // 다음 결재권자의 VIEWING을 Y로 변경
+						 nextApprover.setViewing("Y");
+						 
+						 // approvalDoc의 approver을 다음 결재권자의 EmpId로 변경
+						 approvalDoc.setApprover(nextApprover.getEmpId());
+						 // approvalDoc의 status 변경
+						 approvalDoc.setDocStatus(nextApprover.getOrderApprovers() + "차 대기");
+					 }
+				 } 
+			 }
+		 } else { // 반려 버튼이 눌렸을 때
+			 approvalDoc.setDocStatus("반려");
 		 }
 	 }
 	 

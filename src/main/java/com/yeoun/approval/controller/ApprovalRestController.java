@@ -46,16 +46,26 @@ public class ApprovalRestController {
 	
 	@PatchMapping("/{approvalId}")
 	public ResponseEntity<Map<String,String>> approvalCheck(@PathVariable("approvalId") Long approvalId
-			, @AuthenticationPrincipal LoginDTO loginDTO) {
+			, @AuthenticationPrincipal LoginDTO loginDTO, @RequestParam("btn")String btn) {
+		
 		Map<String, String> result = new HashMap<>();
 		String empId = loginDTO.getEmpId();
+		String msg = "";
+		
+		if(btn == "accept") {
+			msg = "결제 승인";
+		} else {
+			msg = "반려";
+		}
 		
 		try {
-			approvalDocService.updateApproval(approvalId, empId);
-			result.put("result", "결재 승인 완료!!!");
+			// 결제확인 버튼을 눌럿을때 작동할 서비스
+			approvalDocService.updateApproval(approvalId, empId, btn);
+			
+			result.put("result", msg + " 완료!!!");
 			return ResponseEntity.ok(result);
 		} catch (Exception e) {
-			result.put("result", "결제 승인 실패 : " + e.getMessage());
+			result.put("result", msg + " 실패 : " + e.getMessage());
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
 		}
