@@ -74,14 +74,6 @@ public class ApprovalController {
 										,@RequestParam(name="approval_title") String approval_title) {
 		return approvalDocService.getSearchList(start_date,end_date,emp_name,approval_title);
 	}
-	
-	// @ResponseBody
-	// @PostMapping("/save")
-	// public String setPostSave(@RequestParam Map<String, Object> test) {
-	// 	log.info("test ---------------------->",test);
-	// 	return null;
-	// }
-
 
 	//사원목록불러오기 토스트 셀렉트박스
 	@ResponseBody
