@@ -3,7 +3,7 @@
 <mapper namespace="com.yeoun.main.mapper.ScheduleMapper">
 
 	<!-- 조직도 계층형 쿼리 불러오기 -->	
-	<select id="getOrganizationList" parameterType="map">
+	<select id="getOrganizationList">
 		SELECT d.DEPT_ID, d.DEPT_NAME, d.PARENT_ID, e.EMP_ID, e.EMP_NAME
 		FROM DEPT d
 		LEFT OUTER JOIN EMP e

@@ -7,7 +7,9 @@ import com.yeoun.emp.dto.DeptDTO;
 import com.yeoun.leave.dto.LeaveDTO;
 import com.yeoun.leave.dto.LeaveHistoryDTO;
 import com.yeoun.main.dto.ScheduleDTO;
+import com.yeoun.main.dto.ScheduleSharerDTO;
 import com.yeoun.main.service.ScheduleService;
+import com.yeoun.main.service.ScheduleSharerService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/api/schedules")
 public class MainRestController {
 	private final ScheduleService scheduleService;
+	private final ScheduleSharerService scheduleSharerService; 
 	
 	// 일정목록 조회
 	@GetMapping("")
@@ -71,8 +74,6 @@ public class MainRestController {
 	}
 	
 	//연차 정보 조회
-	
-	// 일정목록 조회
 	@GetMapping("/leaves")
 	@ResponseBody
 	public ResponseEntity<List<LeaveHistoryDTO>> leaves(
@@ -97,6 +98,16 @@ public class MainRestController {
 		result.put("count", organizationList.size());
 		
 		return ResponseEntity.ok(result);
+	}
+	
+	// 공유일정 공유자목록 불러오기
+	@GetMapping("/sharerList/{scheduleId}")
+	@ResponseBody
+	public ResponseEntity<List<ScheduleSharerDTO>> getSharerList(@PathVariable("scheduleId")String scheduleId) {
+		Long scheduleIdl = Long.parseLong(scheduleId); 
+		List<ScheduleSharerDTO> sharerDTOList = scheduleSharerService.getSchedule(scheduleIdl);
+		
+		return ResponseEntity.ok(sharerDTOList);
 	}
 	
 }

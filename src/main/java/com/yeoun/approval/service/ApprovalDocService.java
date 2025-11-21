@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.approval.dto.ApprovalDocDTO;
+
 import com.yeoun.approval.dto.ApprovalFormDTO;
 import com.yeoun.approval.dto.ApproverDTO;
 import com.yeoun.approval.entity.ApprovalForm;
@@ -91,6 +92,7 @@ public class ApprovalDocService {
 	 
 	 
 	 
+
 	 // --------------------------------------------------------------------------------------
 	 // 결재 승인 메서드 
 	 @Transactional
@@ -175,6 +177,7 @@ public class ApprovalDocService {
 	 public List<ApproverDTO> getApproverDTOList(Long approvalId) {
 		 return approverRepository.findByApprovalId(approvalId).stream().map(ApproverDTO::fromEntity).toList();
 	 }
+
 	 
 	// -------------------------------------------------------------------------------
 	// 메인페이지 내가 결제할 결제문서, 내가올린 결제 문서 불러오기
@@ -185,4 +188,5 @@ public class ApprovalDocService {
 		
 		return approvalDOCPage.map(ApprovalDocDTO::fromEntity); 
 	}
+
 }

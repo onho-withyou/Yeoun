@@ -1,6 +1,7 @@
 package com.yeoun.main.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -18,6 +19,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -38,7 +40,7 @@ import lombok.ToString;
 @EntityListeners(AuditingEntityListener.class)
 public class Schedule {
 	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SCHEDULES_SEQ_GENERATOR")
-	@Column(updatable = false)
+	@Column(name = "SCHEDULE_ID", updatable = false)
 	private Long scheduleId; // 일정ID
 
 	@Column(nullable = false)
@@ -68,6 +70,10 @@ public class Schedule {
 	
 	@LastModifiedDate
 	private LocalDateTime updatedDate; // 수정 일시
+	
+	// ------------------------------------------------------------------------
+	@OneToMany(mappedBy = "schedule", fetch = FetchType.LAZY)
+	private List<ScheduleSharer> scheduleSharers;
 	
 	public void changeSchedule(ScheduleDTO scheduleDTO) {
 		this.scheduleTitle = scheduleDTO.getScheduleTitle();
