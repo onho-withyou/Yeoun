@@ -346,15 +346,17 @@ async function openScheduleModal(mode, data = null) {
 		select.value = data.scheduleType;
 		select.dispatchEvent(new Event('change'));
 		
-		// 만약 셀렉트 scheduleType이 share라면 해당 공유자 명단 불러오기
-		const oldSharers = await checkSharers(data.scheduleType, data.scheduleId);
-		// 등록할때 쓰이는 checkedUpEmpList에 값 저장
-		checkedUpEmpList = oldSharers.map(item => ({
-								empId: item.empId
-								,empName: item.empName
-							}));
-		// 일정조회 모달의 공유자 인풋에 보여주기
-		setSharers(oldSharers);
+		if(data.scheduleType == 'share') {
+			// 만약 셀렉트 scheduleType이 share라면 해당 공유자 명단 불러오기
+			const oldSharers = await checkSharers(data.scheduleType, data.scheduleId);
+			// 등록할때 쓰이는 checkedUpEmpList에 값 저장
+			checkedUpEmpList = oldSharers.map(item => ({
+									empId: item.empId
+									,empName: item.empName
+								}));
+			// 일정조회 모달의 공유자 인풋에 보여주기
+			setSharers(oldSharers);
+		}
 		
 		// 날짜 초기값
 		isProgrammaticChange = true;

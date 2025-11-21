@@ -104,8 +104,8 @@ function checkFilter() {
 	const leaveFilter = document.getElementById('filter-leaves')
 	
 	companyFilter.checked ? calendar.setCalendarVisibility('company', true) : calendar.setCalendarVisibility('company', false);
-	departmentFilter.checked ? calendar.setCalendarVisibility('department', true) : calendar.setCalendarVisibility('department', false);
-	personalFilter.checked ? calendar.setCalendarVisibility('personal', true) : calendar.setCalendarVisibility('personal', false);
+	departmentFilter.checked ? calendar.setCalendarVisibility('share', true) : calendar.setCalendarVisibility('share', false);
+	personalFilter.checked ? calendar.setCalendarVisibility('private', true) : calendar.setCalendarVisibility('private', false);
 	leaveFilter.checked ? calendar.setCalendarVisibility('leave', true) : calendar.setCalendarVisibility('leave', false);
 }
 
@@ -730,17 +730,6 @@ async function updateCurrentDate() {
 	} else if(calendarYear != year) { // 선택된 년도가 바뀔때
 		await yearHoliday(year);
 	}
-	
-	// 기존의 년월과 현재 업데이트하는 년월이 다를경우
-	// 그달의 스케줄 정보 불러오기
-	if(calendarYear != year || calendarMonth != month) { 
-		await loadMonthSchedule();
-	}
-	
-	// 바뀐 년월 정보 저장
-	calendarYear = year;
-	calendarMonth = month;
-}
 	
 	// 기존의 년월과 현재 업데이트하는 년월이 다를경우
 	// 그달의 스케줄 정보 불러오기

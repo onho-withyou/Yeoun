@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -47,11 +48,6 @@ public class MainController {
 		return "/main/organizationChartModal";
 	}
 	
-	
-	@GetMapping("/test")
-	public String test() {
-		return "/main/organizationChartModal";
-	}
 	
 	
 	// 메인페이지 맵핑
