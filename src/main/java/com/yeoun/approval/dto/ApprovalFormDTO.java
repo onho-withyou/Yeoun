@@ -39,6 +39,7 @@ public class ApprovalFormDTO {
 	
 	private String approver3Name; // 결재권한자3 이름
 	
+    private String empName;
 	// -----------------------------------
 	private static ModelMapper modelMapper = new ModelMapper();
 	
