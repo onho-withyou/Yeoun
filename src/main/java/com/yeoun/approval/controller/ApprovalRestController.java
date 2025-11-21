@@ -83,7 +83,6 @@ public class ApprovalRestController {
 		
 		try {
 			List<ApprovalFormDTO> approvalFormList = approvalDocService.getDefaultApproverList(empId);
-			log.info(">>>>>>>>>>>>>> approvalFormList " + approvalFormList);
 			return ResponseEntity.ok(approvalFormList);
 		} catch (Exception e) {
 			e.printStackTrace();

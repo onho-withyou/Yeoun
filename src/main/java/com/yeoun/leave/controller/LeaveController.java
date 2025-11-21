@@ -17,10 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.yeoun.attendance.controller.AttendanceController;
-import com.yeoun.attendance.service.AttendanceService;
 import com.yeoun.auth.dto.LoginDTO;
-import com.yeoun.common.service.CommonCodeService;
 import com.yeoun.leave.dto.LeaveChangeRequestDTO;
 import com.yeoun.leave.dto.LeaveDTO;
 import com.yeoun.leave.dto.LeaveHistoryDTO;
@@ -48,7 +45,6 @@ public class LeaveController {
 	public String leave(@AuthenticationPrincipal LoginDTO loginDTO, Model model) {
 		LeaveDTO leaveDTO = leaveService.getAnnualLeave(loginDTO.getEmpId());
 		
-//		leaveService.createAnnualLeave(202511150104L);
 		model.addAttribute("leaveDTO", leaveDTO);
 		
 		return "leave/leave";
