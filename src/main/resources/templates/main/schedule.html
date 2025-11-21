@@ -144,9 +144,8 @@
 	            			style="width:50%"
 	            			 th:attr="data-emp-id=${#authentication.name},
                  					  disabled=${buttonEnabled} ? null : 'disabled'">
-	            				<span th:if="${status == 'WORKIN'}">퇴근</span>
-	            				<span th:if="${status == 'LATE'}">퇴근</span>
-	            				<span th:unless="${status == 'WORKIN'}">출근</span>
+	            				<span th:if="${status == 'WORKIN' or status == 'LATE'}">퇴근</span>
+	            				<span th:unless="${status == 'WORKIN' or status == 'LATE'}">출근</span>
 	            		</button>
 	            		<button class="btn btn-primary" th:attr="data-emp-id=${#authentication.name}" onclick="handleAttendanceToggle(this.dataset.empId)" id="accessBtn" style="width:50%">출입</button>
 
