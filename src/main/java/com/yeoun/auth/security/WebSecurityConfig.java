@@ -71,6 +71,15 @@ public class WebSecurityConfig {
                     	.hasAnyRole("SYS_ADMIN")
                     	
 	                // 급여 관리
+                    	// 사원용 급여명세서
+                    	.requestMatchers("/pay/emp_pay", "/pay/emp_pay/**")
+                    	    .authenticated()
+
+                    	// 급여 관리자 페이지
+                    	.requestMatchers("/pay/rule/**", "/pay/rule_calc/**", "/pay/rule_item/**", "/pay/calc/**", "/pay/history/**", "/pay/**" )
+                       	.hasAnyRole("SYS_ADMIN", "HR_ADMIN")
+                    	
+                    	
 	                // 전자결재 설정(양식/결재선 관리 등)
 	                // 전자결재 일반 사용 (결재 상신/조회 등)
 	                // 공지 관리

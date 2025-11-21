@@ -208,6 +208,12 @@ document.getElementById("btnResetEmp").addEventListener("click", () => {
     // 입력값 초기화
     document.getElementById("emp_keyword").value = "";
     document.getElementById("emp_select").value = "";
+	
+	// 계산월 초기화 (첫 번째 옵션으로 돌리기)
+	    const monthSelect = document.getElementById("emp_calc_month");
+	    if (monthSelect) {
+	        monthSelect.selectedIndex = 0;   // 첫 번째 항목 선택
+	    }
 
     // 사원 정보 숨기기
     document.getElementById("empInfoBox").style.display = "none";

@@ -46,6 +46,18 @@ public interface PayCalcRuleRepository extends JpaRepository<PayCalcRule, Long> 
         """, nativeQuery = true)
     List<PayCalcRule> findActiveByItemAndDate(@Param("itemCode") String itemCode,
                                               @Param("asOf") LocalDate asOf);
+    //활성화, 적용기간 규칙 적용
+    @Query(value = """
+    	    SELECT *
+    	      FROM PAY_CALC_RULE R
+    	     WHERE R.STATUS = 'ACTIVE'
+    	       AND :asOf BETWEEN R.START_DATE 
+    	                    AND NVL(R.END_DATE, :asOf)
+    	     ORDER BY R.PRIORITY NULLS LAST, R.RULE_ID
+    	    """, nativeQuery = true)
+    	List<PayCalcRule> findActiveRules(@Param("asOf") LocalDate asOf);
+
+
 
 
 }

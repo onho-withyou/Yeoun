@@ -26,6 +26,12 @@
 		patchApproval("deny")		
 	});
 	
+	// null-safe 날짜 변환 함수
+	function toDateStr(value) {
+	  if (!value) return '';              // null, undefined, '' 전부 빈 문자열 처리
+	  return String(value).split('T')[0]; // 혹시 문자열 아니어도 방어
+	}
+	
 		
 	// 현재 로그인한 사용자와 결재권자 비교
 	function checkApprover() {
@@ -413,16 +419,15 @@
 				obj["approver_name"] = item[8]; //결재권한자 이름
 				obj["pos_code"] = item[9]; //직급코드
 				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = item[11].split('T')[0]; //생성일
-				obj["finish_date"] = item[12].split('T')[0]; //결재완료일자
-				obj["start_date"] = item[13].split('T')[0]; //
-				obj["end_date"] = item[14].split('T')[0]; //	
+				obj["created_date"] = toDateStr(item[11]); //생성일
+				obj["finish_date"]  = toDateStr(item[12]); //결재완료일자
+				obj["start_date"]   = toDateStr(item[13]); //휴가시작일자
+				obj["end_date"]     = toDateStr(item[14]); //휴가종료일자
 				obj["leave_type"] = item[15]; //	
 				obj["to_dept_id"] = item[16]; //	
 				obj["expnd_type"] = item[17]; //
 				obj["reason"] = item[18]; //	
 				obj["doc_status"] = item[19]; //상태
-				obj["view_details"] = item[20]; //상세보기undefined
 				colData.push(obj);
 				obj = {};
 			});
@@ -451,16 +456,15 @@
 				obj["approver_name"] = item[8]; //결재권한자 이름
 				obj["pos_code"] = item[9]; //직급코드
 				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = item[11].split('T')[0]; //생성일
-				obj["finish_date"] = item[12].split('T')[0]; //결재완료일자
-				obj["start_date"] = item[13].split('T')[0]; //
-				obj["end_date"] = item[14].split('T')[0]; //	
+				obj["created_date"] = toDateStr(item[11]); //생성일
+				obj["finish_date"]  = toDateStr(item[12]); //결재완료일자
+				obj["start_date"]   = toDateStr(item[13]); //휴가시작일자
+				obj["end_date"]     = toDateStr(item[14]); //휴가종료일자
 				obj["leave_type"] = item[15]; //	
 				obj["to_dept_id"] = item[16]; //	
 				obj["expnd_type"] = item[17]; //
 				obj["reason"] = item[18]; //	
 				obj["doc_status"] = item[19]; //상태
-				obj["view_details"] = item[20]; //상세보기undefined
 				colData.push(obj);
 				obj = {};
 			});
@@ -490,16 +494,15 @@
 				obj["approver_name"] = item[8]; //결재권한자 이름
 				obj["pos_code"] = item[9]; //직급코드
 				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = item[11].split('T')[0]; //생성일
-				obj["finish_date"] = item[12].split('T')[0]; //결재완료일자
-				obj["start_date"] = item[13].split('T')[0]; //
-				obj["end_date"] = item[14].split('T')[0]; //	
+				obj["created_date"] = toDateStr(item[11]); //생성일
+				obj["finish_date"]  = toDateStr(item[12]); //결재완료일자
+				obj["start_date"]   = toDateStr(item[13]); //휴가시작일자
+				obj["end_date"]     = toDateStr(item[14]); //휴가종료일자
 				obj["leave_type"] = item[15]; //	
 				obj["to_dept_id"] = item[16]; //	
 				obj["expnd_type"] = item[17]; //
 				obj["reason"] = item[18]; //	
 				obj["doc_status"] = item[19]; //상태
-				obj["view_details"] = item[20]; //상세보기undefined
 				colData.push(obj);
 				obj = {};
 			});
@@ -529,16 +532,15 @@
 				obj["approver_name"] = item[8]; //결재권한자 이름
 				obj["pos_code"] = item[9]; //직급코드
 				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = item[11].split('T')[0]; //생성일
-				obj["finish_date"] = item[12].split('T')[0]; //결재완료일자
-				obj["start_date"] = item[13].split('T')[0]; //
-				obj["end_date"] = item[14].split('T')[0]; //	
+				obj["created_date"] = toDateStr(item[11]); //생성일
+				obj["finish_date"]  = toDateStr(item[12]); //결재완료일자
+				obj["start_date"]   = toDateStr(item[13]); //휴가시작일자
+				obj["end_date"]     = toDateStr(item[14]); //휴가종료일자
 				obj["leave_type"] = item[15]; //	
 				obj["to_dept_id"] = item[16]; //	
 				obj["expnd_type"] = item[17]; //
 				obj["reason"] = item[18]; //	
 				obj["doc_status"] = item[19]; //상태
-				obj["view_details"] = item[20]; //상세보기undefined
 				colData.push(obj);
 				obj = {};
 			});
@@ -570,16 +572,15 @@
 				obj["approver_name"] = item[8]; //결재권한자 이름
 				obj["pos_code"] = item[9]; //직급코드
 				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = item[11].split('T')[0]; //생성일
-				obj["finish_date"] = item[12].split('T')[0]; //결재완료일자
-				obj["start_date"] = item[13].split('T')[0]; //
-				obj["end_date"] = item[14].split('T')[0]; //	
+				obj["created_date"] = toDateStr(item[11]); //생성일
+				obj["finish_date"]  = toDateStr(item[12]); //결재완료일자
+				obj["start_date"]   = toDateStr(item[13]); //휴가시작일자
+				obj["end_date"]     = toDateStr(item[14]); //휴가종료일자
 				obj["leave_type"] = item[15]; //	
 				obj["to_dept_id"] = item[16]; //	
 				obj["expnd_type"] = item[17]; //
 				obj["reason"] = item[18]; //	
 				obj["doc_status"] = item[19]; //상태
-				obj["view_details"] = item[20]; //상세보기undefined
 				colData.push(obj);
 				obj = {};
 			});
@@ -799,6 +800,69 @@
 		});
 
     }
+	
+	//기안서 모달 등록 버튼
+	function approvalDocSave(){
+	    alert("기안서 모달 등록 버튼");
+		//문서from 타입//양식종류
+		const formType = document.getElementById("form-menu").value ?? "";
+		//문서제목
+		const formTitle = document.getElementById("approval-title").value ?? "";
+		//결재자명
+		const empId = document.getElementById("approver-name").value ?? "";
+		//결재완료기간
+		const approvalDocStartDate = document.getElementById("create-date").value;//문서 생성일자
+		const approvalDocEndDate = document.getElementById("finish-date").value;
+		//휴가신청서
+		const annualDocStartDate = document.getElementById("start-date").value;
+		const annualDocEndDate = document.getElementById("end-date").value;
+		//휴가종류
+		const annualType = document.getElementById("leave-type").value;
+		//발령부서
+		const toDept = document.getElementById("to-dept-id").value;
+		//지출종류
+		const expenType = document.getElementById("expnd-type").value;
+		//사유내용
+		const reasonText = document.getElementById("reason-write").value;
+		//결재권한자 - approverDTO
+		
+		const params = {
+			
+			formType: formType
+			,formTitle: formType
+			,empId: empId
+			,approvalDocStartDate: approvalDocStartDate
+			,approvalDocEndDate: approvalDocEndDate
+			,annualDocStartDate: annualDocStartDate
+			,annualDocEndDate: annualDocEndDate
+			,annualType: annualType
+			,toDept: toDept
+			,expenType: expenType
+			,reasonText: reasonText
+		};
+		
+		console.log("approval----->",params);
+		// REST API POST
+			fetch("/approval/save", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					[csrfHeader]: csrfToken
+				},
+				body: params
+			})
+			.then(response => {
+			    if (!response.ok) {
+			        throw new Error("서버 오류 발생");
+			    }
+			    return response.text(); 
+			}
+			//폼데이터랑, 가공을 하고, json   가공한 폼 데이터에 추가 할수있다.
+			);
+		
+	} 
+	
+	
 	//모달창 코드
 	//기안서 셀렉트 박스 변경시 모달창에 텍스트 변경함수
 	function draftValFn(ev){

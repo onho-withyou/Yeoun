@@ -1,6 +1,7 @@
 package com.yeoun.pay.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,17 @@ public class PayCalcStatusService {
         String calcStatus = repo.findFirstStatusByYyyymm(yyyymm)
                                 .orElse("READY");
 
+        // 🔥 확정 정보 조회
+        String confirmUser = null;
+        LocalDateTime confirmDate = null;
+
+        Object[] info = repo.findLastConfirmInfo(yyyymm);
+        if (info != null && info.length == 2) {
+            confirmUser = (String) info[0];
+            confirmDate = (LocalDateTime) info[1];
+        }
+
+
         return PayCalcStatusDTO.builder()
                 .payYymm(yyyymm)
                 .totalCount(totalCount)
@@ -42,7 +54,8 @@ public class PayCalcStatusService {
                 .dedAmt(dedAmt)
                 .netAmt(netAmt)
                 .calcStatus(calcStatus)
+                .confirmUser(confirmUser)    
+                .confirmDate(confirmDate)    
                 .build();
-
     }
 }

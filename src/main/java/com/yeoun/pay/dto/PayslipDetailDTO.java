@@ -1,6 +1,7 @@
 package com.yeoun.pay.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.Builder;
@@ -22,7 +23,10 @@ public class PayslipDetailDTO {
     private BigDecimal netAmt;
     private BigDecimal incAmt;
     private BigDecimal totAmt;
-
+    
+    private String confirmUser;     
+    private LocalDateTime confirmDate;
+    
     private List<Item> items;
     
 

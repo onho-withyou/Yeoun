@@ -3,9 +3,9 @@ package com.yeoun.messenger.entity;
 import com.yeoun.common.util.FileUtil.FileUploadHelpper;
 import com.yeoun.emp.entity.Emp;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.BatchSize;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -63,6 +63,9 @@ public class MsgMessage implements FileUploadHelpper {
     // 비고
     @Column
     private String remark;
+    
+    // 기본 생성자 추가
+    protected MsgMessage() {}
 
 	@Override
 	public String getTargetTable() {
@@ -73,6 +76,19 @@ public class MsgMessage implements FileUploadHelpper {
 	public Long getTargetTableId() {
 		return msgId;
 	}
+	
+	@Builder
+	public MsgMessage(Long roomId, String senderId, String msgContent, String msgType) {
+	    this.roomId = MsgRoom.IdOnly().roomId(roomId).build();
+	    
+	    Emp sender = new Emp();
+	    sender.setEmpId(senderId);
+	    this.senderId = sender;
+	    
+	    this.msgContent = msgContent;
+	    this.msgType = msgType;
+	}
+
 
 
 }
