@@ -107,8 +107,9 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 									     @Param("posCode") String posCode,
 									     @Param("keyword") String keyword);
 
+	
+	List<Emp> findByEmpIdIn(List<String> approverIds);
 
-	
-	
+
 
 }

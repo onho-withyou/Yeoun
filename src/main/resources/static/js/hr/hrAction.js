@@ -12,6 +12,9 @@ document.addEventListener('DOMContentLoaded', function() {
 	// 페이지 로드되면 사원 목록 불러오기
 	loadEmpListForHrAction();
 	
+	// 결재자 셀렉트박스 옵션 로드
+	loadApproverOptions();
+	
 	// 검색 이벤트
 	const btnSearch = document.getElementById('btnSearchEmp');
 	if (btnSearch) {
@@ -198,4 +201,28 @@ function handleSubmitAction(e) {
 	    console.error("발령 등록 실패:", err);
 	    alert("발령 등록 중 오류가 발생했습니다.");
 	});
+}
+
+// 4. 결재자 셀렉트박스 옵션 로드
+function loadApproverOptions() {
+	const select = document.querySelector("select[name='approverEmpId']");
+	if (!select) return;
+
+	select.innerHTML = `
+		<option value="">결재자를 선택하세요</option>
+	`;
+
+	fetch("/api/hr/approvers?formName=인사발령신청서")
+	  .then(res => res.json())
+	  .then(list => {
+	    list.forEach(e => {
+	      const opt = document.createElement("option");
+	      opt.value = e.empId;
+	      opt.textContent = `${e.empName} (${e.deptName})`;
+	      select.appendChild(opt);
+	    });
+	  })
+	  .catch(err => {
+		  console.error("결재자 목록 로드 실패:", err);
+	  });
 }

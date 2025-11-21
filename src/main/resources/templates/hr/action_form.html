@@ -156,12 +156,9 @@
 
                       <div class="col-md-6">
                         <label class="form-label">결재자</label>
-<!--                         <select class="form-select" th:field="*{approverEmpId}"> -->
-<!--                           <option value="">결재자 선택</option> -->
-<!--                         </select> -->
-						<select class="form-select" th:field="*{approverEmpId}" disabled>
-						  <option value="">(결재 기능 준비 중)</option>
-						</select>
+                        <select id="approverEmpId" name="approverEmpId" class="form-select">
+                          <option value="">결재자 선택</option>
+                        </select>
                       </div>
                     </div>
                   </div>
