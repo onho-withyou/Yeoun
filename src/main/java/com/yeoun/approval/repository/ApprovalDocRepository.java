@@ -97,7 +97,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 								,ade.dept_id
 								,ade.dept_name
 								,ade.approver
-								,e.emp_name AS approvar_name
+								,e.emp_name AS approver_name
 								,ade.pos_code
 								,ade.pos_name
 								,ade.created_date
