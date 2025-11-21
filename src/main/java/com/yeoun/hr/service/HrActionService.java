@@ -34,6 +34,7 @@ import com.yeoun.hr.dto.HrActionRequestDTO;
 import com.yeoun.hr.entity.HrAction;
 import com.yeoun.hr.repository.HrActionRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -92,7 +93,7 @@ public class HrActionService {
         action.setCreatedUser(creator); 			// 등록자
         
         // 발령 상태 기본값 (요청 상태)
-        action.setStatus("REQ");
+        action.setStatus("대기");
 
         // 발령(HR_ACTION) 저장
         HrAction saved = hrActionRepository.save(action);
@@ -166,7 +167,7 @@ public class HrActionService {
             line2.setApprovalStatus(false);
             line2.setOrderApprovers(String.valueOf(order++));
             line2.setDelegateStatus(null);
-            line2.setViewing("Y");
+            line2.setViewing(null);
             approverRepository.save(line2);
         }
 
@@ -178,7 +179,7 @@ public class HrActionService {
             line3.setApprovalStatus(false);
             line3.setOrderApprovers(String.valueOf(order++));
             line3.setDelegateStatus(null);
-            line3.setViewing("Y");
+            line3.setViewing(null);
             approverRepository.save(line3);
         }
 
@@ -205,9 +206,36 @@ public class HrActionService {
             default           -> "인사발령";
         };
     }
+    
+	// ====================================================
+    // 2. 전자결재 approvalId 기준으로 인사발령 적용
+    // ====================================================
+	public void applyHrActionByApprovalId(Long approvalId) {
+
+		HrAction hrAction = hrActionRepository.findByApprovalId(approvalId)
+					.orElseThrow(() -> new EntityNotFoundException("해당 결재와 연결된 인사발령을 찾을 수 없습니다. approvalId: " + approvalId));
+
+		Emp emp = hrAction.getEmp();
+		
+		// 실제 EMP 정보 변경
+		if(hrAction.getToDept() != null) {
+			emp.setDept(hrAction.getToDept());
+		}
+					
+		if(hrAction.getToPosition() != null) {
+			emp.setPosition(hrAction.getToPosition());
+		}
+		
+		// HR_ACTION 상태도 완료
+		hrAction.setStatus("완료");
+		hrAction.setAppliedDate(LocalDate.now());
+					
+	}
+        
+    
 
 	// ==========================
-    // 2. 인사 발령 목록
+    // 3. 인사 발령 목록
     // ==========================
     public Page<HrActionDTO> getHrActionList(int page, int size, String keyword,
             								 String actionType, String startDate, String endDate) {
@@ -264,7 +292,8 @@ public class HrActionService {
 		
 			return dtoPage;
 		}
-        
+
+
         
         
         

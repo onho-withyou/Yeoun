@@ -80,9 +80,8 @@ public class HrAction {
 	@Column(name = "REASON", length = 200)
 	private String actionReason;
 	
-	// 상태 (REQ=요청, APPR=승인, REJ=반려 등)
 	@Column(name = "STATUS", length = 10, nullable = false)
-    private String status = "REQ";   // 자바에서 기본값 세팅
+    private String status = "대기";   // 자바에서 기본값 세팅
 	
 	// 등록자 (CREATED_USER = 사원)
 	@ManyToOne(fetch = FetchType.LAZY)
