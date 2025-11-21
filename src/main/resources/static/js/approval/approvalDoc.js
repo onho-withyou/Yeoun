@@ -14,7 +14,8 @@
 	const approvalCheckBtn = document.getElementById('approvalCheckBtn');
 	// 반려 버튼
 	const approvalCompanionBtn = document.getElementById('approvalCompanionBtn');
-
+	
+	
 	// 결재확인 버튼 눌렀을때 동작할 함수
 	approvalCheckBtn.addEventListener('click', () => {
 		patchApproval("accept");
@@ -800,6 +801,7 @@
       						+'<p onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
     						+'</div>';
     	}
+
     } 
 	
 	//결재권한자 버튼 클릭시 결재권한자변경 div 태그 생성

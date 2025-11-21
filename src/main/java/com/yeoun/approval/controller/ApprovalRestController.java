@@ -52,12 +52,13 @@ public class ApprovalRestController {
 		String empId = loginDTO.getEmpId();
 		String msg = "";
 		
-		if(btn == "accept") {
+		if("accept".equals(btn)) {
 			msg = "결제 승인";
 		} else {
 			msg = "반려";
 		}
-		
+		System.out.println(btn);
+		System.out.println(msg);
 		try {
 			// 결제확인 버튼을 눌럿을때 작동할 서비스
 			approvalDocService.updateApproval(approvalId, empId, btn);
