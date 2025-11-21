@@ -28,8 +28,9 @@
 	            	<select class="form-select" onchange="draftValFn(this)">
 	            		<option value="기안서" selected>기안서</option>
 	            		 <option th:each="item, iterStat : ${formTypes}" 
-							 		th:value="${item.formName}" 
+							 		th:value="${item.formCode}" 
 							 		th:text="${iterStat.index+1} + ' : ' + ${item.formName}"
+							 		th:data-formname="${item.formName}"
 									name="draft">
 						</option>
 	            	</select>
@@ -132,14 +133,17 @@
 		        <h5 class="d-flex">
 					<label class="p-1" style="width: 200px;">결재자명(기안자)</label> 
 		        	<div class="mb-6 mb-0" style="width: 344px;">
-		            	 <select id="approver-name" class="form-select">
+		        		<p id="approver-name" th:text="|${#authentication.principal.empName} (${#authentication.principal.empId})|"></p>
+		        		
+		        				        	
+		            	<!--   <select id="approver-name" class="form-select">
 		            		<option selected>이름(사번)</option>
 		            		 <option id="approverItem" th:each="item, iterStat : ${empList}" 
 							 		th:value="${item.empId}" 
 							 		th:text="${iterStat.index+1} + ' : ' + ${item.empName} + '(' + ${item.empId} + ')'">
 							 </option>
 
-		            	</select> 
+		            	</select> --> 
 	            	</div>
 		        </h5>
 		        <h5 class="d-flex">
@@ -289,7 +293,7 @@
 			    </div>
 		      	<hr>
 		      	<button type="button" class="btn btn-primary">인쇄</button>
-		        <button type="submit" class="btn btn-primary">저장</button>
+		        <button type="button" class="btn btn-primary" onclick="approvalDocSave()">등록</button>
 		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
 		      </div>
 		</form>

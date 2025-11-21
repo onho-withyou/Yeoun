@@ -77,37 +77,41 @@
           <table class="table table-striped align-middle text-center">
             <thead class="table-light">
               <tr>
+              <th class="text-center">순번</th>
+               <th class="text-center">사용</th>
                 <th class="text-center">코드</th>
                 <th class="text-center">명칭</th>
                 <th class="text-center">유형</th>
                 <th class="text-center">그룹</th>
                 <th class="text-center">과세</th>
                 <th class="text-center">계산방식</th>
-                <th class="text-center">정렬</th>
-                <th class="text-center">사용</th>
+                
+               
                 <th class="text-center">비고</th>
                 <th class="text-center">관리</th>
               </tr>
             </thead>
             <tbody>
               <tr th:each="it : ${items}">
+              <td class="text-end" th:text="${it.sortNo}"></td>
+              <td>
+                  <span class="badge"
+                        th:classappend="${it.useYn.name() == 'Y'} ? 'bg-success' : 'bg-secondary'"
+                        th:text="${it.useYn.name() == 'Y' ? '✔' : '✘'}"></span>
+                </td>
                 <td class="fw-semibold" th:text="${it.itemCode}"></td>
                 <td th:text="${it.itemName}"></td>
                 <td><span class="badge badge-gray" th:text="${it.itemType}"></span></td>
                 <td><span class="badge badge-soft" th:text="${it.itemGroup}"></span></td>
                 <td class="text-center">
-					  <span th:if="${it.taxable?.name() == 'Y'}"
-					        class="badge bg-success-subtle text-success fw-semibold">✔ </span>					
-					  <span th:if="${it.taxable?.name() == 'N'}"
-					        class="badge bg-danger-subtle text-danger fw-semibold">✘  </span>					
+					     
+					        <span class="badge"
+                        th:classappend="${it.taxable.name() == 'Y'} ? 'bg-success' : 'bg-secondary'"
+                        th:text="${it.taxable.name() == 'Y' ? '✔' : '✘'}"></span>			
 					</td>
                 <td><span class="badge bg-secondary-subtle text-secondary" th:text="${it.calcMethod}"></span></td>
-                <td class="text-end" th:text="${it.sortNo}"></td>
-                <td>
-                  <span class="badge"
-                        th:classappend="${it.useYn.name() == 'Y'} ? 'bg-danger-subtle text-success fw-semibold' : 'bg-success-subtle text-danger fw-semibold'"
-                        th:text="${it.useYn.name() == 'Y' ? '✔' : '✘'}"></span>
-                </td>
+                
+                
                 <td class="text-truncate" style="max-width:240px" th:text="${it.remark}"></td>
                 <td class="text-end">
                   <button class="btn btn-sm btn-outline-primary"

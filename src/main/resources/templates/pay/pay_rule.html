@@ -100,7 +100,8 @@
           <div class="d-flex align-items-center">
             <span class="badge me-3" th:classappend="${r.status.name()=='ACTIVE'} ? 'bg-success' : 'bg-secondary'"
                   th:text="${r.status}"></span>
-
+                  
+                  
             <button class="btn btn-sm btn-outline-primary me-2"
                     data-bs-toggle="modal"
                     th:attr="data-bs-target=${'#editModal-' + r.ruleId}">

@@ -91,7 +91,6 @@
 		}
 	}
 	
-	
 	//grid - 1.결재사항 - 진행해야할 결재만 - 결재권한자만 볼수있음
 	//grid - 2.전체결재 - 나와관련된 모든 결재문서
 	//grid - 3.내 결재목록 - 내가 기안한 문서
@@ -800,12 +799,97 @@
 		});
 
     }
+	
+	//기안서 모달 등록 버튼
+	function approvalDocSave(){
+	    alert("기안서 모달 등록 버튼");
+		//문서from 타입//양식종류
+		const formType = document.getElementById("form-menu").value ?? "";
+		//문서제목
+		const formTitle = document.getElementById("approval-title").value ?? "";
+		//결재자명
+		const empId = document.getElementById("approver-name").value ?? "";
+		//결재완료기간
+		const approvalDocStartDate = document.getElementById("create-date").value;//문서 생성일자
+		const approvalDocEndDate = document.getElementById("finish-date").value;
+		//휴가신청서
+		const annualDocStartDate = document.getElementById("start-date").value;
+		const annualDocEndDate = document.getElementById("end-date").value;
+		//휴가종류
+		const annualType = document.getElementById("leave-type").value;
+		//발령부서
+		const toDept = document.getElementById("to-dept-id").value;
+		//지출종류
+		const expenType = document.getElementById("expnd-type").value;
+		//사유내용
+		const reasonText = document.getElementById("reason-write").value;
+		//결재권한자 - approverDTO
+		
+		const params = {
+			
+			formType: formType
+			,formTitle: formType
+			,empId: empId
+			,approvalDocStartDate: approvalDocStartDate
+			,approvalDocEndDate: approvalDocEndDate
+			,annualDocStartDate: annualDocStartDate
+			,annualDocEndDate: annualDocEndDate
+			,annualType: annualType
+			,toDept: toDept
+			,expenType: expenType
+			,reasonText: reasonText
+		};
+		
+		console.log("approval----->",params);
+		// REST API POST
+			fetch("/approval/save", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					[csrfHeader]: csrfToken
+				},
+				body: params
+			})
+			.then(response => {
+			    if (!response.ok) {
+			        throw new Error("서버 오류 발생");
+			    }
+			    return response.text(); 
+			}
+			//폼데이터랑, 가공을 하고, json   가공한 폼 데이터에 추가 할수있다.
+			);
+		
+	} 
+	
+	// 서버에서 받아온 default 결재권자 담을 변수
+	let formList = [];
+	// 선택한 양식을 담을 변수
+	let selectedForm = null;
+
+	// default 결재권자 가져오는 함수
+	async function defalutapprover() {
+		const res = await fetch("/api/approvals/defaultApprover", {method: "GET"});
+		
+		if (!res.ok) {
+			throw new Error("데이터 로드 실패!");
+		}
+		
+		formList = await res.json();
+	}
+
 	//모달창 코드
 	//기안서 셀렉트 박스 변경시 모달창에 텍스트 변경함수
 	function draftValFn(ev){
 		
 		let draft_doc = ev.value;
-		document.getElementById('Drafting').innerText = draft_doc;
+		
+		// html에서 th:data-formname="${item.formName}" 값을 가져와서 이름으로 사용
+		const formName = ev.selectedOptions[0].dataset.formname;
+		
+		document.getElementById('Drafting').innerText = formName;
+		
+		// 선택한 결재 양식과 서버에서 받아온 데이터 중 일치하는 값 찾기
+		selectedForm = formList.find(item => item.formCode === draft_doc);
 	}
 	
 	let today = new Date();   
@@ -826,15 +910,30 @@
     let defalutapproverArr = ["d-이사랑","d-미미미누","d-김경란"];
     let approverArr = [];//결재권한자 배열 
 	
+	// 작성 버튼 클릭 시 실행되는 함수
     function defaultPrint(){
-    	if(this.count === 0){
-	    	for(var i=0;i<defalutapproverArr.length;i++){
-	    		
-		    	print("defalut",defalutapproverArr[i]);
-    			approverArr.push(defalutapproverArr[i]);
-	    	}
-    	}
+		// 모달을 닫고 다시 작성 버튼을 클릭하면 이전 데이터가 남아있어서 초기화 진행
+		approverDiv.innerHTML = "";
+		
+		window.count = 0;
+		
+		// selectedForm 값이 없을 경우 에러가 생길 수 있어서 에러 처리
+		if (!selectedForm) {
+		    console.log("선택된 양식이 없습니다.");
+		    return;
+		}
+		
+		for (let i = 1; i <= 3; i++) {
+		// selectedForm의 approver1, approver2, approver3을 가져오기 위해서 템플릿 문자열 사용
+		    const approver = selectedForm[`approver${i}`];
+		    if (approver) {
+		        print("default", approver);
+		    }
+		}
     }
+
+	defalutapprover();
+	
     function print(type, text) {
 		// 결재권한자변경 div 버튼 생성
 		console.log(window.count, "@@@@@@@@@@@@");
@@ -928,4 +1027,3 @@
 	document.addEventListener("mouseup", function () {
 	  isDragging = false;
 	});
-	 

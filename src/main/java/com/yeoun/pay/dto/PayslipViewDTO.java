@@ -1,6 +1,7 @@
 package com.yeoun.pay.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public interface PayslipViewDTO {
     Long getPayslipId();
@@ -15,4 +16,7 @@ public interface PayslipViewDTO {
     BigDecimal getNetAmt();
     BigDecimal getTotAmt();
     String getCalcStatus();
+    String confirmUser();
+    LocalDateTime confirmDate();
+
 }

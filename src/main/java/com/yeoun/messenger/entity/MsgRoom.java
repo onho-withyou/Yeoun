@@ -1,10 +1,11 @@
 package com.yeoun.messenger.entity;
 
 import com.yeoun.emp.entity.Emp;
+
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.DynamicInsert;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -63,6 +64,14 @@ public class MsgRoom {
 
     @OneToMany(mappedBy = "roomId")
     private List<MsgMessage> messages = new ArrayList<>();
+
+    // 필요한 최소 생성자 — ID만 있는 방(프록시) 만들 때 사용
+    @Builder(builderMethodName = "IdOnly")
+    public static MsgRoom createById(Long roomId) {
+        MsgRoom room = new MsgRoom();
+        room.setRoomId(roomId);
+        return room;
+    }
 
 }
 

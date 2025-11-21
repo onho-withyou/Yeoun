@@ -15,8 +15,6 @@ import com.yeoun.messenger.repository.MsgRelationRepository;
 import com.yeoun.messenger.repository.MsgRoomRepository;
 import com.yeoun.messenger.repository.MsgStatusRepository;
 
-import org.apache.ibatis.javassist.NotFoundException;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -225,21 +223,20 @@ public class MessengerService {
 	// ========================================================
 	// 내 상태 실시간 변경
 	@Transactional
-	public void updateStatus(String name, MsgStatusDTO msgStatusDTO) {
-		MsgStatus msgStatus = msgStatusRepository.findById(name)
+	public void updateStatus(StatusChangeRequest statusChangeRequest) {
+		MsgStatus msgStatus = msgStatusRepository.findById(statusChangeRequest.getEmpId())
 				.orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다"));
 		
-		if (msgStatusDTO.getAvlbStat() != null) {
-			msgStatus.setAvlbStat(msgStatusDTO.getAvlbStat());
+		if (statusChangeRequest.getAvlbStat() != null) {
+			msgStatus.setAvlbStat(statusChangeRequest.getAvlbStat());
 		}
 		
-		if (msgStatusDTO.getManualWorkStat() != null) {
-			msgStatus.setManualWorkStat(msgStatusDTO.getManualWorkStat());
+		if (statusChangeRequest.getWorkStat() != null) {
+			msgStatus.setManualWorkStat(statusChangeRequest.getWorkStat());
 		}
 		
 		msgStatus.setWorkStatSource("MANUAL");
 		msgStatus.setWorkStatUpdated(LocalDateTime.now());
-		
 	}
 
 	// ========================================================
