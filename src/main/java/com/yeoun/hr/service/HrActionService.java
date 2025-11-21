@@ -164,7 +164,7 @@ public class HrActionService {
             line1.setApprovalStatus(false);      				// 승인 여부 (false = 대기)
             line1.setOrderApprovers(String.valueOf(order++));	// 결재 순서: 1
             line1.setDelegateStatus(null);  					// 대결자 여부
-            line1.setViewing("y");								// 결재문서 목록에 보이도록
+            line1.setViewing("Y");								// 결재문서 목록에 보이도록
             approverRepository.save(line1);
         }
 
