@@ -3,6 +3,7 @@ package com.yeoun.approval.entity;
 import java.io.Serializable;
 import java.util.Objects;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,6 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class ApproverId implements Serializable {
     private Long approvalId;
     private String empId;

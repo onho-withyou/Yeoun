@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.yeoun.approval.dto.ApprovalDocDTO;
 import com.yeoun.approval.entity.ApprovalForm;
 import com.yeoun.approval.entity.Approver;
+import com.yeoun.approval.entity.ApproverId;
 import com.yeoun.approval.entity.ApprovalDoc;
 import com.yeoun.approval.repository.ApprovalDocRepository;
 import com.yeoun.approval.repository.ApproverRepository;
@@ -93,21 +94,30 @@ public class ApprovalDocService {
 		 
 		 // 해당 문서의 approvalId를 통해 approver 객체에서 승인권자 목록 가져오기
 		 List<Approver> approverList = approverRepository.findByApprovalId(approvalId);
+		 ApproverId approverId = new ApproverId(approvalDoc.getApprovalId(), approvalDoc.getApprover());
+		 
 		 
 		 // 불러온 승인권자리스트 요소 반복
 		 for(Approver approver : approverList) {
-			 // 현재 로그인사용자와 승인권자의 empId가 동일한지 판별후
+			 // 현재 로그인사용자와 승인권자의 empId가 동일한지 하고, 현재 승인권자의 순서가 마지막 순서인지 확인후
 			 if(empId.equals(approver.getEmpId())) {
-				 // 현재 로그인 사용자와 승인권자자의 empId가 동일하다면 해당 엔티티의 VIEWING을 Y로 변경
-				 approver.setViewing("Y");
-				 // 현재 승인권자의 orderApprover의 순서가 apporverList의 크기와 같다면(마지막결제권자라면)
+				 // 현재 로그인 사용자와 승인권자의 empId가 동일하고, 현재 승인권자의 순서가 마지막 순서일 때
 				 if(Integer.parseInt(approver.getOrderApprovers()) == approverList.size()) {
+					 // approvalDoc의 status를 완료로 변경
 					 approvalDoc.setDocStatus("완료");
-				 } else { // 아니라면 순서에 맞는 status로 변경
-					 String approvalOrder = approver.getOrderApprovers();
-					 approvalDoc.setDocStatus(approvalOrder + "차 완료");
+				 } else { // 현재 로그인 사용자와 승인권자자의 empId가 동일하고, 최종 결재권자가 아닌경우  
+					 // 현재 승인권자 다음 순서 확인( 현재 결재문서, 현재결재순서 + 1)
+					 Long nextApproverOrder = Long.parseLong(approver.getOrderApprovers()) + 1; 
+					 Approver nextApprover = approverRepository.findByApprovalIdAndOrderApprovers(approver.getApprovalId(), nextApproverOrder.toString());
+					 // 다음 결재권자의 VIEWING을 Y로 변경
+					 nextApprover.setViewing("Y");
+					 
+					 // approvalDoc의 approver을 다음 결재권자의 EmpId로 변경
+					 approvalDoc.setApprover(nextApprover.getEmpId());
+					 // approvalDoc의 status 변경
+					 approvalDoc.setDocStatus(nextApprover.getOrderApprovers() + "차 대기");
 				 }
-			 }
+			 } 
 		 }
 	 }
 	 
