@@ -839,8 +839,12 @@
 		return data;
 	}
 	
-	const defaultApp = await defalutapprover();
+	const defaultApp = defalutapprover();
 	
+	
+	// 아래의 함수에서 select 이벤트 혹은 select 의 option의 value 값을 가져와서
+	// defalutapprover 값의 formCode와 비교해서 defalutapproverArr 에 empId + 이름 넣어주기
+	// print 사용해서 넣어주기?
     function defaultPrint(){
     	if(this.count === 0){
 	    	for(var i=0;i<defalutapproverArr.length;i++){

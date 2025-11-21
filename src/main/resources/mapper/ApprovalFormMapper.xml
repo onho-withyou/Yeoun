@@ -10,7 +10,8 @@
 		        a.dept_id AS deptId,
 		        a.approver_1 AS approver1,
 		        a.approver_2 AS approver2,
-		        a.approver_3 AS approver3
+		        a.approver_3 AS approver3,
+		        e.emp_name
 		    FROM dept d
 		    JOIN approval_form a ON d.dept_id = a.dept_id
 		    JOIN emp e ON d.dept_id = e.dept_id
