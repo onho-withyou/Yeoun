@@ -26,6 +26,12 @@
 		patchApproval("deny")		
 	});
 	
+	// null-safe 날짜 변환 함수
+	function toDateStr(value) {
+	  if (!value) return '';              // null, undefined, '' 전부 빈 문자열 처리
+	  return String(value).split('T')[0]; // 혹시 문자열 아니어도 방어
+	}
+	
 		
 	// 현재 로그인한 사용자와 결재권자 비교
 	function checkApprover() {
@@ -413,16 +419,15 @@
 				obj["approver_name"] = item[8]; //결재권한자 이름
 				obj["pos_code"] = item[9]; //직급코드
 				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = item[11].split('T')[0]; //생성일
-				obj["finish_date"] = item[12].split('T')[0]; //결재완료일자
-				obj["start_date"] = item[13].split('T')[0]; //
-				obj["end_date"] = item[14].split('T')[0]; //	
+				obj["created_date"] = toDateStr(item[11]); //생성일
+				obj["finish_date"]  = toDateStr(item[12]); //결재완료일자
+				obj["start_date"]   = toDateStr(item[13]); //휴가시작일자
+				obj["end_date"]     = toDateStr(item[14]); //휴가종료일자
 				obj["leave_type"] = item[15]; //	
 				obj["to_dept_id"] = item[16]; //	
 				obj["expnd_type"] = item[17]; //
 				obj["reason"] = item[18]; //	
 				obj["doc_status"] = item[19]; //상태
-				obj["view_details"] = item[20]; //상세보기undefined
 				colData.push(obj);
 				obj = {};
 			});
@@ -451,16 +456,15 @@
 				obj["approver_name"] = item[8]; //결재권한자 이름
 				obj["pos_code"] = item[9]; //직급코드
 				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = item[11].split('T')[0]; //생성일
-				obj["finish_date"] = item[12].split('T')[0]; //결재완료일자
-				obj["start_date"] = item[13].split('T')[0]; //
-				obj["end_date"] = item[14].split('T')[0]; //	
+				obj["created_date"] = toDateStr(item[11]); //생성일
+				obj["finish_date"]  = toDateStr(item[12]); //결재완료일자
+				obj["start_date"]   = toDateStr(item[13]); //휴가시작일자
+				obj["end_date"]     = toDateStr(item[14]); //휴가종료일자
 				obj["leave_type"] = item[15]; //	
 				obj["to_dept_id"] = item[16]; //	
 				obj["expnd_type"] = item[17]; //
 				obj["reason"] = item[18]; //	
 				obj["doc_status"] = item[19]; //상태
-				obj["view_details"] = item[20]; //상세보기undefined
 				colData.push(obj);
 				obj = {};
 			});
@@ -490,16 +494,15 @@
 				obj["approver_name"] = item[8]; //결재권한자 이름
 				obj["pos_code"] = item[9]; //직급코드
 				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = item[11].split('T')[0]; //생성일
-				obj["finish_date"] = item[12].split('T')[0]; //결재완료일자
-				obj["start_date"] = item[13].split('T')[0]; //
-				obj["end_date"] = item[14].split('T')[0]; //	
+				obj["created_date"] = toDateStr(item[11]); //생성일
+				obj["finish_date"]  = toDateStr(item[12]); //결재완료일자
+				obj["start_date"]   = toDateStr(item[13]); //휴가시작일자
+				obj["end_date"]     = toDateStr(item[14]); //휴가종료일자
 				obj["leave_type"] = item[15]; //	
 				obj["to_dept_id"] = item[16]; //	
 				obj["expnd_type"] = item[17]; //
 				obj["reason"] = item[18]; //	
 				obj["doc_status"] = item[19]; //상태
-				obj["view_details"] = item[20]; //상세보기undefined
 				colData.push(obj);
 				obj = {};
 			});
@@ -529,16 +532,15 @@
 				obj["approver_name"] = item[8]; //결재권한자 이름
 				obj["pos_code"] = item[9]; //직급코드
 				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = item[11].split('T')[0]; //생성일
-				obj["finish_date"] = item[12].split('T')[0]; //결재완료일자
-				obj["start_date"] = item[13].split('T')[0]; //
-				obj["end_date"] = item[14].split('T')[0]; //	
+				obj["created_date"] = toDateStr(item[11]); //생성일
+				obj["finish_date"]  = toDateStr(item[12]); //결재완료일자
+				obj["start_date"]   = toDateStr(item[13]); //휴가시작일자
+				obj["end_date"]     = toDateStr(item[14]); //휴가종료일자
 				obj["leave_type"] = item[15]; //	
 				obj["to_dept_id"] = item[16]; //	
 				obj["expnd_type"] = item[17]; //
 				obj["reason"] = item[18]; //	
 				obj["doc_status"] = item[19]; //상태
-				obj["view_details"] = item[20]; //상세보기undefined
 				colData.push(obj);
 				obj = {};
 			});
@@ -570,16 +572,15 @@
 				obj["approver_name"] = item[8]; //결재권한자 이름
 				obj["pos_code"] = item[9]; //직급코드
 				obj["pos_name"] = item[10]; //직급
-				obj["created_date"] = item[11].split('T')[0]; //생성일
-				obj["finish_date"] = item[12].split('T')[0]; //결재완료일자
-				obj["start_date"] = item[13].split('T')[0]; //
-				obj["end_date"] = item[14].split('T')[0]; //	
+				obj["created_date"] = toDateStr(item[11]); //생성일
+				obj["finish_date"]  = toDateStr(item[12]); //결재완료일자
+				obj["start_date"]   = toDateStr(item[13]); //휴가시작일자
+				obj["end_date"]     = toDateStr(item[14]); //휴가종료일자
 				obj["leave_type"] = item[15]; //	
 				obj["to_dept_id"] = item[16]; //	
 				obj["expnd_type"] = item[17]; //
 				obj["reason"] = item[18]; //	
 				obj["doc_status"] = item[19]; //상태
-				obj["view_details"] = item[20]; //상세보기undefined
 				colData.push(obj);
 				obj = {};
 			});
