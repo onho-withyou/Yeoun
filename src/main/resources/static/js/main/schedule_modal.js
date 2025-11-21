@@ -80,6 +80,7 @@ function isSameDay(d1, d2) {
 
 // allday 상태를 보고 start/end 검증하는 함수
 function validateRangeWithAllday() {
+	
 	const alldayCheck = document.getElementById('all-day-checkbox');
 	const isAllDay = alldayCheck.checked;
 	const startDate = picker.getStartDate();
@@ -134,15 +135,18 @@ document.addEventListener('DOMContentLoaded', function() {
 	
 	addScheduleForm.addEventListener('submit', function(event) {
 		event.preventDefault(); // 기본제출 막기
-		const formData = new FormData(addScheduleForm);
-		if (!addScheduleForm) {
-		    alert('add-schedule-form 폼 엘리먼트가 존재하지 않습니다!');
-		    return;
-		}
+
 		// 일정 등록 일때 구분
 		if(addScheduleBtn.value == 'add') {
+			// 폼데이터 지정
+			const formData = new FormData(addScheduleForm);
+			if (!addScheduleForm) {
+			    alert('add-schedule-form 폼 엘리먼트가 존재하지 않습니다!');
+			    return;
+			}
 			// 등록일때는 scheduleId의 name값 제거 [jpa에 id가 null이어야 자동생성가능]
 			addScheduleForm.scheduleId.removeAttribute('name');
+			// scheduleType이 share일 때공유자명단을 formData에 추가
 			const scheduleType = document.getElementById('schedule-type');
 			if (scheduleType.value === 'share') {
 				if (!checkedUpEmpList || checkedUpEmpList.length === 0) {
@@ -174,16 +178,33 @@ document.addEventListener('DOMContentLoaded', function() {
 			});
 			
 		} else if(addScheduleBtn.value == 'edit') {
+			
 			if(confirm("수정하시겠습니까?")){
+				// 폼데이터 지정
+				const formData = new FormData(addScheduleForm);
+				if (!addScheduleForm) {
+				    alert('add-schedule-form 폼 엘리먼트가 존재하지 않습니다!');
+				    return;
+				}
 				// 수정일때는 scheduleId 포함해서 보내기
 				addScheduleForm.scheduleId.setAttribute('name', 'scheduleId');
+				// scheduleType이 share일 때공유자명단을 formData에 추가
+				const scheduleType = document.getElementById('schedule-type');
+				if (scheduleType.value === 'share') {
+					if (!checkedUpEmpList || checkedUpEmpList.length === 0) {
+						alert('공유자 명단을 1명 이상 선택해야 합니다.');
+						return;
+					} else {
+						formData.append('sharedEmpList', JSON.stringify(checkedUpEmpList));
+					}
+				}
 				
 				fetch('/main/schedule', {
 					method: 'PATCH'
 					, headers: {
 						[csrfHeaderName]: csrfToken
 					}
-					, body: new FormData(addScheduleForm)
+					, body: formData
 				})
 				.then(response => {
 					if (!response.ok) {
@@ -231,7 +252,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // ----------------------------------------------------------
-
+// 일정 타입셀렉트박스 변경이벤트 추가
+document.getElementById('schedule-type').addEventListener('change', (event) => {
+	const shareEl = document.getElementById('shareField');
+	// 선택된 공유자 목록,명단 초기화
+	setSharers([]);
+	
+	if(event.target.value == 'share'){
+		shareEl.style.display = 'block';
+	} else {
+		shareEl.style.display = 'none';
+	}
+});
 // 모달열기함수
 async function openScheduleModal(mode, data = null) {
 	const modal = new bootstrap.Modal(document.getElementById('add-schedule-modal'));
@@ -254,23 +286,6 @@ async function openScheduleModal(mode, data = null) {
 	const ep = picker.getEndpicker();
 	
 	// -------------------------------------------------------------------
-	select.addEventListener('change', (event) => {
-		const shareEl = document.getElementById('shareField');
-		// 선택된 공유자 목록,명단 초기화
-		setSharers([]);
-		
-		if(event.target.value == 'share'){
-			shareEl.style.display = 'block';
-		} else {
-			shareEl.style.display = 'none';
-		}
-	});
-	
-	
-	
-	
-	
-	
 	// -------------------------------------------------------------------
 	// 모달이 열릴때 add, edit 구분
 	if(mode === 'add') {
@@ -311,10 +326,11 @@ async function openScheduleModal(mode, data = null) {
 		// 등록모달은 개인으로 기본값설정
 		select.value = 'share';
 		// 종일 체크 해제
-		form.alldayYN.checked = false;
+		alldayCheckbox.checked = true
+		form.alldayYN.value = "Y";
 		
 		organizeInput.disabled = true;
-		
+		organizeBtn.disabled = false;
 
 	} else if (mode === 'edit' && data) {
 		modalTitle.textContent = '일정조회';
@@ -326,8 +342,19 @@ async function openScheduleModal(mode, data = null) {
 		createdUserName.value = data.empName || '';
 		form.createdUser.value = data.createdUser || '';
 		
-		//셀렉트박스 기본값 설정
+		//셀렉트박스 데이터값 설정 후 체인지 이벤트 실행
 		select.value = data.scheduleType;
+		select.dispatchEvent(new Event('change'));
+		
+		// 만약 셀렉트 scheduleType이 share라면 해당 공유자 명단 불러오기
+		const oldSharers = await checkSharers(data.scheduleType, data.scheduleId);
+		// 등록할때 쓰이는 checkedUpEmpList에 값 저장
+		checkedUpEmpList = oldSharers.map(item => ({
+								empId: item.empId
+								,empName: item.empName
+							}));
+		// 일정조회 모달의 공유자 인풋에 보여주기
+		setSharers(oldSharers);
 		
 		// 날짜 초기값
 		isProgrammaticChange = true;
@@ -337,11 +364,12 @@ async function openScheduleModal(mode, data = null) {
 		
 		// 종일 체크
 		alldayCheckbox.checked = data.alldayYN === 'Y'; 
-		form.alldayYN.checked = data.alldayYN === 'Y'; // hidden value
+		form.alldayYN.value = data.alldayYN; // hidden value
 		form.scheduleContent.value = data.scheduleContent || '';
 		
 		if (data.createdUser !== currentUserId) {
-		    // 권한 없음: 삭제, 수정 버튼 비활성화
+		    // 권한 없음: 조직선택, 삭제, 수정 버튼 비활성화
+			organizeBtn.disabled = true;
 		    deleteBtn.disabled = true;
 		    submitBtn.disabled = true;
 			// 데이트피커 비활성화
@@ -359,6 +387,7 @@ async function openScheduleModal(mode, data = null) {
 		    });
 		} else {
 		    // 권한 있는 사용자에게는 모든 기능 활성화
+			organizeBtn.disabled = false;
 		    deleteBtn.disabled = false;
 		    submitBtn.disabled = false;
 			
@@ -557,7 +586,7 @@ document.getElementById('select-sharer-btn').addEventListener('click', function(
 
 
 document.getElementById('select-org-btn').addEventListener('click', function(){
-    // 체크된 직원 정보 가져오기
+	// 체크된 직원 정보 가져오기
     checkedUpEmpList = getCheckedEmpId();
 	// 체크된직원 input 처리
 	setSharers(checkedUpEmpList);
@@ -569,9 +598,7 @@ document.getElementById('select-org-btn').addEventListener('click', function(){
 function setSharers(checkedUpEmpList) {
 	// 명단 보여줄 input
 	const sharerInput = document.getElementById('schedule-sharer');
-	// form 객체
-	const form = document.getElementById('add-schedule-form');
-	
+	sharerInput.disabled = true;
 	// 텍스트 명단 초기화 & 세팅
 	if(checkedUpEmpList.length === 0) {
 		sharerInput.value = '';
@@ -580,18 +607,6 @@ function setSharers(checkedUpEmpList) {
 		sharerInput.value = checkedNames.join(', ');
 	}
 	
-	// 기존 hidden 인풋 초기화
-//	const oldInputs = form.querySelectorAll('input[name="sharedEmpId"]');
-//	oldInputs.forEach(el => el.remove());
-	
-	// 새 hidden input 생성
-//	checkedUpEmpList.forEach(item => {
-//		const input = document.createElement('input');
-//		input.type = 'hidden';
-//		input.name = 'sharedEmpId';
-//		input.value = item.empId;
-//		form.appendChild(input);
-//	})
 }
 
 
@@ -611,16 +626,21 @@ function getCheckedEmpId() {
     return checked;
 }
 
-//function searchInGrid(searchText) {
-//    // 원본 데이터 저장 필요 (전역 변수를 활용)
-//    const filtered = toastTreeData.filter(row =>
-//        Object.values(row).some(val =>
-//            String(val).toLowerCase().includes(searchText.toLowerCase())
-//        )
-//    );
-//    treeGrid.resetData(filtered); // 그리드에 필터링 결과만 표시
-//}
-
+async function checkSharers(scheduleType, scheduleId) {
+	// 스케줄타입이 공유가 아니면 리턴
+	if(scheduleType != 'share') return;
+	try {
+		const response = await fetch(`/api/schedules/sharerList/${scheduleId}`, {method: 'GET'});
+		if(!response.ok) throw new Error(await response.text());
+		
+		const data = await response.json();
+		console.log(data);
+		return data;
+	} catch(error) {
+		console.error('에러', error)
+		alert("공유자 목록 조회 실패");
+	}
+}
 
 
 

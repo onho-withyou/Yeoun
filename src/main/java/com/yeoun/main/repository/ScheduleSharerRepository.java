@@ -8,12 +8,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.yeoun.main.dto.ScheduleSharerDTO;
 import com.yeoun.main.entity.Schedule;
 import com.yeoun.main.entity.ScheduleSharer;
 import com.yeoun.main.entity.ScheduleSharerPK;
 
 @Repository
 public interface ScheduleSharerRepository extends JpaRepository<ScheduleSharer, ScheduleSharerPK> {
+
+	List<ScheduleSharer> findBySchedule_ScheduleId(Long scheduleId);
 	
 	
 }

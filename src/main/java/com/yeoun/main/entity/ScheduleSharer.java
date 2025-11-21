@@ -20,7 +20,6 @@ import lombok.ToString;
 @Table(name = "schedule_sharer")
 @Getter
 @Setter
-@ToString
 @EntityListeners(AuditingEntityListener.class)
 // 엔티티의 복합키 설정방법
 @IdClass(ScheduleSharerPK.class)
