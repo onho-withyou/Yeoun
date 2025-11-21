@@ -1,21 +1,11 @@
 package com.yeoun.messenger.dto;
 
 import com.yeoun.emp.entity.Emp;
-import com.yeoun.messenger.entity.MsgMessage;
-import com.yeoun.messenger.entity.MsgRelation;
 import com.yeoun.messenger.entity.MsgRoom;
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.modelmapper.ModelMapper;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-
 import java.time.LocalDateTime;
 
 @Getter
@@ -33,8 +23,6 @@ public class MsgRoomDTO {
 
     // ===========================================================
     // DTO <-> Entity 변환 메서드 구현
-
-    private static ModelMapper modelMapper = new ModelMapper();
 
     public MsgRoom toEntity(Emp empId) {
         MsgRoom msgRoom = new MsgRoom();
