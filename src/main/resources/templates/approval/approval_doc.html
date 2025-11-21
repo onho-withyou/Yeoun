@@ -30,6 +30,7 @@
 	            		 <option th:each="item, iterStat : ${formTypes}" 
 							 		th:value="${item.formName}" 
 							 		th:text="${iterStat.index+1} + ' : ' + ${item.formName}"
+									th:data-formname="${item.formName}"
 									name="draft">
 						</option>
 	            	</select>
@@ -125,6 +126,7 @@
 		            		<option th:each="item, iterStat : ${formTypes}" 
 							 		th:value="${item.formName}" 
 							 		th:text="${iterStat.index+1} + ' : ' + ${item.formName}"
+									th:data-formname="${item.formName}"
 									name="draft">		
 							</option>
 		            	</select>
@@ -148,8 +150,9 @@
 		                </div>
 					</div>
 		        </h5>
-		        <h5 class="d-flex">
-					<label class="p-1" style="width: 200px;">기간-휴가(연차)신청서 [기본-hidden]</label>
+				
+		        <h5 id="leavePeriodForm" style="display:none;">
+					<label class="p-1" style="width: 200px;">휴가기간</label>
 		        	<div class="row flex-nowrap">
 						<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
 							<input type="date" name="startDate"  id="start-date" class="form-control">
@@ -160,10 +163,11 @@
 		                </div>
 					</div>
 		        </h5>
-		       	<h5 class="d-flex">
-					<label class="p-1" style="width: 200px;">휴가종류-휴가(연차)신청서 [기본-hidden]</label>
+			
+		       	<h5 id="leaveTypeForm" style="display: none;">
+					<label class="p-1" style="width: 200px;">휴가종류</label><!---휴가(연차)신청서-->
 		        	<div class="mb-6 mb-0" style="width: 344px;">
-		           	<select id="leave-type" name="leaveType" class="form-select"  >
+		           	<select id="leave-type" name="leaveType" class="form-select">
 		            		<option selected></option>
 		            		<option name="leave" value="연차">연차</option>
 							<option name="leave" value="오전반차">오전반차</option>
@@ -182,8 +186,8 @@
 		            	</select>
 	            	</div>
 		        </h5>
-		        <h5 class="d-flex">
-					<label class="p-1" style="width: 200px;">발령부서- 인사발령신청서 [기본-hidden]</label>
+		        <h5 id="toDeptForm" style="display: none;">
+					<label class="p-1" style="width: 200px;">발령부서</label><!--- 인사발령신청서-->
 		        	<div class="mb-6 mb-0" style="width: 344px;">
 		            	<select id="to-dept-id" name="toDeptId" class="form-select" >
 		            		<option selected>부서</option>
@@ -194,8 +198,8 @@
 		            	</select>
 	            	</div>
 		        </h5>
-		        <h5 class="d-flex">
-					<label class="p-1" style="width: 200px;">지출종류 - 지출결의서 [기본-hidden]</label>
+		        <h5 id="expndTypeForm" style="display:none;">
+					<label class="p-1"  style="width: 200px;">지출종류 </label><!-- 지출결의서-->
 		        	<div class="mb-6 mb-0" style="width: 344px;">
 		            	<select id="expnd-type" name="expndType" class="form-select" >
 		            		<option selected>지출종류</option>
@@ -206,7 +210,7 @@
 	            	</div>
 		        </h5>
 		        <h5>
-					<label class="p-1" style="width: 200px;">사유내용 -자유양식결재서:[기본-hidden]</label>
+					<label class="p-1" style="width: 200px;">사유내용</label>
 		        	<textarea id="reason-write" class="form-control" name="reason" rows="10" placeholder="결재사유내용 작성"></textarea>
 		        </h5>
 		        <!--<h5 class="d-flex">결재권한자 변경:
@@ -253,7 +257,7 @@
 						  </div>
 						</div>
 					</div>
-	     				
+	     				<!--에디터-->
 		        <!--  <div id="editor" style="border: 1px solid black;;"></div> -->
 		      </div>
 		      <div class="modal-footer">
