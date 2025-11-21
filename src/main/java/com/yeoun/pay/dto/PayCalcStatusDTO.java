@@ -1,6 +1,7 @@
 package com.yeoun.pay.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +24,9 @@ public class PayCalcStatusDTO {
     private BigDecimal totAmt;
     private BigDecimal dedAmt;
     private BigDecimal netAmt;
+    private LocalDateTime confirmDate; //확정일시
+    private String confirmUser; //확정자
+
 
 
     // ===== Thymeleaf 표시용 =====

@@ -240,6 +240,22 @@ async function openDetailModal(payYymm, empId) {
         document.getElementById("d-empName").innerText = data.empName;
         document.getElementById("d-deptName").innerText = data.deptName;
 		document.getElementById("d-posName").innerText = data.posName;
+		document.getElementById("confirmUser").textContent = data.confirmUser ?? "-";		
+		if (data.confirmDate) {
+		    const d = new Date(data.confirmDate);
+		    const formatted =
+		        d.getFullYear() + "-" +
+		        String(d.getMonth()+1).padStart(2,"0") + "-" +
+		        String(d.getDate()).padStart(2,"0") + " " +
+		        String(d.getHours()).padStart(2,"0") + ":" +
+		        String(d.getMinutes()).padStart(2,"0") + ":" +
+		        String(d.getSeconds()).padStart(2,"0");
+
+		    document.getElementById("confirmDate").textContent = formatted;
+		} else {
+		    document.getElementById("confirmDate").textContent = "-";
+		}
+
 
         document.getElementById("d-baseAmt").innerText = numberFormat(data.baseAmt) + " 원";
         document.getElementById("d-alwAmt").innerText  = numberFormat(data.alwAmt) + " 원";

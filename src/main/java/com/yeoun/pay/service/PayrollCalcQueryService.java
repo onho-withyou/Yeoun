@@ -101,6 +101,8 @@ public class PayrollCalcQueryService {
                 .dedAmt(payslip.getDedAmt())
                 .totAmt(payslip.getTotAmt())
                 .netAmt(payslip.getNetAmt())
+                .confirmUser(payslip.getConfirmUser())
+                .confirmDate(payslip.getConfirmDate())
 
                 .payItems(payItems)
                 .dedItems(dedItems)

@@ -491,6 +491,8 @@ public int runMonthlyBatch(String payYymm,
                 .alwAmt(slip.getAlwAmt())
                 .dedAmt(slip.getDedAmt())
                 .netAmt(slip.getNetAmt())
+                .confirmUser(slip.getConfirmUser())
+                .confirmDate(slip.getConfirmDate())
                 .items(itemDtos)
                 .build();
     }
