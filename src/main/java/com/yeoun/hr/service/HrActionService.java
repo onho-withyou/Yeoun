@@ -117,7 +117,7 @@ public class HrActionService {
         approvalDoc.setApprovalTitle(title);			// 문서제목
         approvalDoc.setEmpId(creator.getEmpId());		// 사원번호
         approvalDoc.setCreatedDate(LocalDate.now());	// 생성일자
-        approvalDoc.setDocStatus("1차 대기");			// 문서상태
+        approvalDoc.setDocStatus("1차대기");			// 문서상태
         approvalDoc.setFormType("인사발령신청서");		// 양식종류
         approvalDoc.setToDeptId(toDept.getDeptId());	// 발령부서
         approvalDoc.setReason(hrActionRequestDTO.getActionReason());	// 사유
@@ -140,6 +140,11 @@ public class HrActionService {
         Long approvalId = savedDoc.getApprovalId();
 
         int order = 1;
+        
+        // 4-1. approval_doc에 '현재 결재자(1차 결재자)' 세팅
+        if (form.getApprover1() != null) {
+            savedDoc.setApprover(form.getApprover1());
+        }
         
         // APPROVER_1
         if (form.getApprover1() != null) {
