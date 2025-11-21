@@ -13,7 +13,7 @@
 					<h5 class="card-title text-center text-capitalize mb-1">총 연차</h5>
 				</div>
 				<div class="d-flex justify-content-center mb-3">
-					<h4 th:text="|${leaveDTO.totalDays}일|"></h4>
+					<h4 th:text="|${leaveDTO.totalDays} 일|"></h4>
 				</div>
 			</div>
 			<div class="col-xl mb-md-0 px-3 ms-2 card border rounded shadow-none">
@@ -21,7 +21,7 @@
 					<h5 class="card-title text-center text-capitalize mb-1">사용 연차</h5>
 				</div>
 				<div class="d-flex justify-content-center mb-3">
-					<h4 th:text="|${leaveDTO.usedDays}일|"></h4>
+					<h4 th:text="|${leaveDTO.usedDays} 일|"></h4>
 				</div>
 			</div>
 			<div class="col-xl mb-md-0 px-3 ms-2 card border rounded shadow-none">
@@ -29,7 +29,7 @@
 					<h5 class="card-title text-center text-capitalize mb-1">잔여 연차</h5>
 				</div>
 				<div class="d-flex justify-content-center mb-3">
-					<h4 th:text="|${leaveDTO.remainDays}일|"></h4>
+					<h4 th:text="|${leaveDTO.remainDays} 일|"></h4>
 				</div>
 			</div>
 			<div class="col-xl mb-md-0 px-3 ms-2 card border rounded shadow-none">
@@ -37,7 +37,7 @@
 					<h5 class="card-title text-center text-capitalize mb-1">연차 수당 추계액</h5>
 				</div>
 				<div class="d-flex justify-content-center mb-3">
-					<h4 th:text="|₩${leaveDTO.leaveAllowanceAmount}|"></h4>
+					<h4 th:text="|${#numbers.formatInteger(leaveDTO.leaveAllowanceAmount, 3, 'COMMA')} 원|"></h4>
 				</div>
 			</div>
 		</div>
