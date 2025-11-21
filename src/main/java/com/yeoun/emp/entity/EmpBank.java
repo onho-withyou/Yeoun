@@ -7,6 +7,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.yeoun.common.entity.CommonCode;
 import com.yeoun.common.entity.FileAttach;
+import com.yeoun.common.util.FileUtil.FileUploadHelpper;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,7 +34,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
-public class EmpBank {
+public class EmpBank implements FileUploadHelpper {
 	
 	// 계좌ID
 	@Id
@@ -82,6 +83,20 @@ public class EmpBank {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FILE_ID", referencedColumnName = "FILE_ID", insertable = false, updatable = false)
     private FileAttach fileAttach;
+
+    // =====================================================================
+    
+	@Override
+	public String getTargetTable() {
+		return "EMP_BANK";
+	}
+
+	@Override
+	public Long getTargetTableId() {
+		return bankId;
+	}
 	
+    
+    
 
 }
