@@ -105,6 +105,7 @@
 			const data = await response.json();
 			let itemData  = [];
 			let obj ={};
+			console.log(data);
 			data.map((item,index)=>{
 				obj["value"] = item[0]; //사번
 				obj["label"] = (index+1) +" : "+item[1]+"("+item[0]+")"; //이름(사번)
@@ -118,11 +119,17 @@
 			});
 			//셀렉트박스 닫힐때
 			selectBox.on('close',(ev)=>{
-				
 				let selectlabel = selectBox.getSelectedItem().label;
+//				let data = selectBox.getData()
+				let approverEmpId = selectBox.getSelectedItem().value;
+				console.log("@@@@@@@@@@@@@@@@@@@@@@", approverEmpId);
 				if(selectlabel != null && approverArr.length < 3){//셀렉트 라벨선택시 3번까지만셈
 					print(ev.type, selectlabel);
-					approverArr.push(this.count);
+					approverArr.push({
+						empId: approverEmpId
+						, approverOrder: this.count
+					});
+					console.log("@@@@@@@@@@@@@@@@@@@@@@",approverArr);
 				}
 				
 			});
