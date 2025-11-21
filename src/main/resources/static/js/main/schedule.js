@@ -104,8 +104,8 @@ function checkFilter() {
 	const leaveFilter = document.getElementById('filter-leaves')
 	
 	companyFilter.checked ? calendar.setCalendarVisibility('company', true) : calendar.setCalendarVisibility('company', false);
-	departmentFilter.checked ? calendar.setCalendarVisibility('department', true) : calendar.setCalendarVisibility('department', false);
-	personalFilter.checked ? calendar.setCalendarVisibility('personal', true) : calendar.setCalendarVisibility('personal', false);
+	departmentFilter.checked ? calendar.setCalendarVisibility('share', true) : calendar.setCalendarVisibility('share', false);
+	personalFilter.checked ? calendar.setCalendarVisibility('private', true) : calendar.setCalendarVisibility('private', false);
 	leaveFilter.checked ? calendar.setCalendarVisibility('leave', true) : calendar.setCalendarVisibility('leave', false);
 }
 
