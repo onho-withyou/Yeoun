@@ -99,7 +99,7 @@ public class ApprovalDocService {
 					 approvalDoc.setDocStatus("완료");
 				 } else { // 아니라면 순서에 맞는 status로 변경
 					 String approvalOrder = approver.getOrderApprovers();
-					 approvalDoc.setDocStatus(approvalOrder + "차 완료");
+					 approvalDoc.setDocStatus((Integer.parseInt(approvalOrder) + 1) + "차 대기");
 				 }
 			 }
 		 }
