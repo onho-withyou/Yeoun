@@ -37,6 +37,8 @@ const grid = new tui.Grid({
 	bodyHeight: 500,	
 });
 
+grid.sort('workDate', true);
+
 // 데이터 가져오기
 async function loadAttendanceList(startDate, endDate) {
 	const ATTENDANCE_LIST = `/attendance/my/data?startDate=${startDate}&endDate=${endDate}`;
