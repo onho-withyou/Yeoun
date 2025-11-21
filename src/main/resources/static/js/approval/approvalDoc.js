@@ -12,7 +12,6 @@
 	const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
 	const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
 
-	
 	// 결재확인 버튼 눌렀을때 동작할 함수
 	approvalCheckBtn.addEventListener('click', () => {
 		
