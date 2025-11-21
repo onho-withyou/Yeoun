@@ -17,6 +17,8 @@ import com.yeoun.approval.repository.ApprovalDocRepository;
 import com.yeoun.approval.repository.ApproverRepository;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
+import com.yeoun.hr.entity.HrAction;
+import com.yeoun.hr.repository.HrActionRepository;
 import com.yeoun.hr.service.HrActionService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -32,7 +34,7 @@ public class ApprovalDocService {
 
 	private final ApprovalDocRepository approvalDocRepository;
 	private final ApproverRepository approverRepository;
-	private final HrActionService hrActionService;
+	private final HrActionRepository hrActionRepository;
 	
 	//기안자 명 불러오기
 	@Transactional(readOnly = true)
@@ -145,7 +147,19 @@ public class ApprovalDocService {
 		 // 2) 인사발령 서비스에 해당 결재문서의 발령을 적용
 		 Long approvalId = approvalDoc.getApprovalId();
 		 
-		 hrActionService.applyHrActionByApprovalId(approvalId);
+		 HrAction hrAction = hrActionRepository.findByApprovalId(approvalId)
+		            .orElseThrow(() -> new EntityNotFoundException(
+		                    "결재문서와 연결된 인사발령을 찾을 수 없습니다. approvalId=" + approvalId));
+		 
+		 // 3) 발령 상태만 '승인완료'로 변경 (EMP 적용 금지)
+		 hrAction.setStatus("승인완료");
+		 
+		 // 4) 적용여부는 그대로 'N'
+		 hrAction.setAppliedYn("N");
+		 
+		 // 5) appliedDate NULL
+		 hrAction.setAppliedDate(null);
+	 
 	 }	 
 	 
 	 // 결제문서 조회시 결제권한자 목록 불러오기

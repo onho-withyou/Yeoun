@@ -37,9 +37,11 @@ import com.yeoun.hr.repository.HrActionRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class HrActionService {
 
     private final HrActionRepository hrActionRepository;
@@ -94,6 +96,10 @@ public class HrActionService {
         
         // 발령 상태 기본값 (요청 상태)
         action.setStatus("대기");
+        
+        action.setAppliedYn("N");     // 발령은 처음 생성될 때 무조건 미적용
+        action.setAppliedDate(null);  // 적용일자 없음
+
 
         // 발령(HR_ACTION) 저장
         HrAction saved = hrActionRepository.save(action);
@@ -207,31 +213,78 @@ public class HrActionService {
         };
     }
     
-	// ====================================================
-    // 2. 전자결재 approvalId 기준으로 인사발령 적용
-    // ====================================================
-	public void applyHrActionByApprovalId(Long approvalId) {
-
-		HrAction hrAction = hrActionRepository.findByApprovalId(approvalId)
-					.orElseThrow(() -> new EntityNotFoundException("해당 결재와 연결된 인사발령을 찾을 수 없습니다. approvalId: " + approvalId));
-
-		Emp emp = hrAction.getEmp();
+	// ==========================
+    // 2. 인사 발령 목록
+    // ==========================
+    // 인사 발령 자동 적용
+    @Transactional
+	public void applyScheduledHrActions() {
+    	
+    	LocalDate today = LocalDate.now();
+    	log.info("[발령자동적용] {} 기준 발령 적용 시작", today);
+    	
+    	// 1. 승인 완료 + 미적용 + 효력일 도달한 발령 리스트 조회
+    	List<HrAction> targetList =
+    			hrActionRepository.findByStatusAndAppliedYnAndEffectiveDateLessThanEqual(
+    				"승인완료",		// 최종 승인 상태
+    				"N", 		// 아직 적용 안 됨
+    				today		// 효력일이 오늘 이전/오늘
+				);
+    	
+    	if(targetList.isEmpty()) {
+    		log.info("[발령자동적용] 적용할 발령 없음");
+    		return;
+    	}
+    	
+    	log.info("[발령자동적용] 총 {}건 적용 예정", targetList.size());
+    	
+    	// 2. 각 발령을 실제 EMP 정보에 반영
+    	for (HrAction action : targetList) {
+    		
+    		Emp emp = action.getEmp();	// 발령 대상 사원
+    		
+    		// 발령 유형에 따라 분기
+    		switch (action.getActionType()) {
+    			case "PROMOTION":
+    				if (action.getToPosition() != null) {
+    					emp.setPosition(action.getToPosition());
+    					log.info("[발령적용] 승진 적용 - 사번:{} / 직급:{}",
+                                emp.getEmpId(),
+                                action.getToPosition().getPosName());
+				}
+    			break;
+    			
+    			case "TRANSFER":
+    				if (action.getToDept() != null) {
+    					emp.setDept(action.getToDept());
+    					log.info("[발령적용] 전보 적용 - 사번:{} / 부서:{}",
+                                emp.getEmpId(),
+                                action.getToDept().getDeptName());
+    				}
+    				if(action.getToPosition() != null) {
+    					emp.setPosition(action.getToPosition());
+    					log.info("[발령적용] 전보 직급 변경 - 사번:{} / 직급:{}",
+                                emp.getEmpId(),
+                                action.getToPosition().getPosName());
+    				}
+    				break;
+    				
+				default:
+					log.warn("[발령적용] 미지원 발령타입: {} (ACTION_ID={})",
+                            action.getActionType(), action.getActionId());
+                    continue;
+    		}
+    		
+    		// 3) HR_ACTION 상태 업데이트 (적용여부 / 적용일자 / 상태)
+            action.setAppliedYn("Y");          // 이제 적용 완료
+            action.setAppliedDate(today);      // 실제 반영된 날짜 기록
+            action.setStatus("적용완료");
+    		
+    	}
+    	
+    	log.info("[발령자동적용] 발령 {}건 적용 완료", targetList.size());
 		
-		// 실제 EMP 정보 변경
-		if(hrAction.getToDept() != null) {
-			emp.setDept(hrAction.getToDept());
-		}
-					
-		if(hrAction.getToPosition() != null) {
-			emp.setPosition(hrAction.getToPosition());
-		}
-		
-		// HR_ACTION 상태도 완료
-		hrAction.setAppliedDate(LocalDate.now());
-		hrAction.setStatus("완료");
 	}
-        
-    
 
 	// ==========================
     // 3. 인사 발령 목록
@@ -293,17 +346,8 @@ public class HrActionService {
 		}
 
 
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
         
         
         
