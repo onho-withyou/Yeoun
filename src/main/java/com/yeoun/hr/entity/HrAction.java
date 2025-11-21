@@ -80,6 +80,7 @@ public class HrAction {
 	@Column(name = "REASON", length = 200)
 	private String actionReason;
 	
+	// 승인상태
 	@Column(name = "STATUS", length = 10, nullable = false)
     private String status = "대기";   // 자바에서 기본값 세팅
 	
@@ -97,7 +98,9 @@ public class HrAction {
 	@Column(name="APPROVAL_ID")
 	private Long approvalId;
 	 
-	
+	// 적용일자 (최종 승인 후 실제 발령이 반영된 날짜)
+	@Column(name = "APPLIED_DATE")
+	private LocalDate appliedDate;
 	
 
 }
