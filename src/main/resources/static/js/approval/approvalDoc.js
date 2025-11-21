@@ -91,7 +91,6 @@
 		}
 	}
 	
-	
 	//grid - 1.결재사항 - 진행해야할 결재만 - 결재권한자만 볼수있음
 	//grid - 2.전체결재 - 나와관련된 모든 결재문서
 	//grid - 3.내 결재목록 - 내가 기안한 문서
@@ -862,13 +861,35 @@
 		
 	} 
 	
-	
+	// 서버에서 받아온 default 결재권자 담을 변수
+	let formList = [];
+	// 선택한 양식을 담을 변수
+	let selectedForm = null;
+
+	// default 결재권자 가져오는 함수
+	async function defalutapprover() {
+		const res = await fetch("/api/approvals/defaultApprover", {method: "GET"});
+		
+		if (!res.ok) {
+			throw new Error("데이터 로드 실패!");
+		}
+		
+		formList = await res.json();
+	}
+
 	//모달창 코드
 	//기안서 셀렉트 박스 변경시 모달창에 텍스트 변경함수
 	function draftValFn(ev){
 		
 		let draft_doc = ev.value;
-		document.getElementById('Drafting').innerText = draft_doc;
+		
+		// html에서 th:data-formname="${item.formName}" 값을 가져와서 이름으로 사용
+		const formName = ev.selectedOptions[0].dataset.formname;
+		
+		document.getElementById('Drafting').innerText = formName;
+		
+		// 선택한 결재 양식과 서버에서 받아온 데이터 중 일치하는 값 찾기
+		selectedForm = formList.find(item => item.formCode === draft_doc);
 	}
 	
 	let today = new Date();   
@@ -889,35 +910,29 @@
     let defalutapproverArr = ["d-이사랑","d-미미미누","d-김경란"];
     let approverArr = [];//결재권한자 배열 
 	
-	async function defalutapprover() {
-		const res = await fetch("/api/approvals/defaultApprover", {method: "GET"});
+	// 작성 버튼 클릭 시 실행되는 함수
+    function defaultPrint(){
+		// 모달을 닫고 다시 작성 버튼을 클릭하면 이전 데이터가 남아있어서 초기화 진행
+		approverDiv.innerHTML = "";
 		
-		if (!res.ok) {
-			throw new Error("데이터 로드 실패!");
+		window.count = 0;
+		
+		// selectedForm 값이 없을 경우 에러가 생길 수 있어서 에러 처리
+		if (!selectedForm) {
+		    console.log("선택된 양식이 없습니다.");
+		    return;
 		}
 		
-		const data = await res.json();
-		
-		console.log(data);
-		
-		return data;
-	}
-	
-	const defaultApp = defalutapprover();
-	
-	
-	// 아래의 함수에서 select 이벤트 혹은 select 의 option의 value 값을 가져와서
-	// defalutapprover 값의 formCode와 비교해서 defalutapproverArr 에 empId + 이름 넣어주기
-	// print 사용해서 넣어주기?
-    function defaultPrint(){
-    	if(this.count === 0){
-	    	for(var i=0;i<defalutapproverArr.length;i++){
-	    		
-		    	print("defalut",defalutapproverArr[i]);
-    			approverArr.push(defalutapproverArr[i]);
-	    	}
-    	}
+		for (let i = 1; i <= 3; i++) {
+		// selectedForm의 approver1, approver2, approver3을 가져오기 위해서 템플릿 문자열 사용
+		    const approver = selectedForm[`approver${i}`];
+		    if (approver) {
+		        print("default", approver);
+		    }
+		}
     }
+
+	defalutapprover();
 	
     function print(type, text) {
 		// 결재권한자변경 div 버튼 생성
@@ -1012,4 +1027,3 @@
 	document.addEventListener("mouseup", function () {
 	  isDragging = false;
 	});
-	 

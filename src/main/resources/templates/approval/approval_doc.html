@@ -30,6 +30,7 @@
 	            		 <option th:each="item, iterStat : ${formTypes}" 
 							 		th:value="${item.formCode}" 
 							 		th:text="${iterStat.index+1} + ' : ' + ${item.formName}"
+							 		th:data-formname="${item.formName}"
 									name="draft">
 						</option>
 	            	</select>
