@@ -132,6 +132,9 @@
 	<script async defer src="https://buttons.github.io/buttons.js"></script>
 	<script th:src="@{/custom_bg/custom_bg.js}"></script>
 	
+	<!-- 내 정보 모달 -->
+	<th:block th:replace="~{/emp/emp_detail_modal :: emp-detail-modal}"></th:block>
+	
     <!-- 개별 페이지의 자바스크립트 영역 -->
 	<th:block layout:fragment="myScript"></th:block>
 </body>

@@ -1,10 +1,9 @@
 package com.yeoun.messenger.controller;
 
-import java.time.LocalDateTime;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.messenger.dto.*;
@@ -13,11 +12,14 @@ import com.yeoun.messenger.entity.MsgRelation;
 import com.yeoun.messenger.repository.MsgMessageRepository;
 import com.yeoun.messenger.repository.MsgRelationRepository;
 import com.yeoun.messenger.repository.MsgStatusRepository;
+
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.messenger.service.MessengerService;
@@ -50,11 +52,19 @@ public class MessengerController {
 	public String list(Authentication authentication, Model model) {
 		LoginDTO loginDTO = (LoginDTO)authentication.getPrincipal();
 		List<MsgStatusDTO> msgStatusDTOList = messengerService.getUsers(loginDTO.getUsername());
-		List<MsgRoomDTO> msgRoomsDTOList = messengerService.getChatRooms(loginDTO.getUsername());
+		List<MsgRoomListDTO> msgRoomsDTOList = messengerService.getChatRooms(loginDTO.getUsername());
 		model.addAttribute("friends", msgStatusDTOList);
 		model.addAttribute("rooms", msgRoomsDTOList);
 		return "/messenger/list";
 	}
+	
+	// ==========================================================================
+	// 메신저 상태 실시간 변경
+//	@PatchMapping("/status")
+//	public ResponseEntity<?> changeStatus(Authentication authentication, @RequestBody MsgStatusDTO msgStatusDTO){
+//		messengerService.updateStatus(statusChangeRequest);
+//		return ResponseEntity.noContent().build();
+//	}
 	
 	// ==========================================================================
 	// 친구목록 즐겨찾기 토글
@@ -148,7 +158,7 @@ public class MessengerController {
 	// 메신저 팝업 채팅방 - 새로운 방 생성
 	@PostMapping("/chat")
 	public ResponseEntity<?> createRoom(Authentication authentication,
-										@RequestBody RoomCreateRequest roomCreateRequest){
+										@RequestBody RoomCreateRequest roomCreateRequest) throws IOException{
 		String empId = authentication.getName();
 
 		roomCreateRequest.setCreatedUser(empId);
@@ -159,31 +169,50 @@ public class MessengerController {
 
 	// ==========================================================================
 	// 메신저 팝업 채팅방 - 기존 방에 메시지 전송
-	@PostMapping("/chat/{id}")
+	@PostMapping(value = "/chat/{id}",
+				 consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> sendMessage(Authentication authentication,
 										 @PathVariable("id") Long id,
-										 @RequestBody MsgMessageDTO msgMessageDTO){
+										 @RequestPart("message") MsgMessageDTO msgMessageDTO,
+										 @RequestPart(value = "files", required = false) List<MultipartFile> files)
+		throws IOException{
+		
 		msgMessageDTO.setRoomId(id);
 		msgMessageDTO.setSenderId(authentication.getName());
-		messengerService.sendMessage(msgMessageDTO);
+		messengerService.sendMessage(msgMessageDTO, files);
 		return ResponseEntity.ok().build();
 	}
 	
 	// ==========================================================================
 	// 메시지 읽음 처리
-	@PatchMapping("/chat/{roomId}")
-	public ResponseEntity<?> updateReadMessage(Authentication authentication,
-											@PathVariable("roomId") Long roomId,
-											@RequestBody ReadUpdateRequest readUpdateRequest){
-	
-	String empId = authentication.getName();
-	messengerService.updateLastRead(empId, roomId, readUpdateRequest.getLastReadId());
-	
-	return ResponseEntity.ok().build();
-	
-	}
+//	@PatchMapping("/chat/{roomId}")
+//	public ResponseEntity<?> updateReadMessage(Authentication authentication,
+//											@PathVariable("roomId") Long roomId,
+//											@RequestBody ReadUpdateRequest readUpdateRequest){
+//	
+//	String empId = authentication.getName();
+//	messengerService.updateLastRead(empId, roomId, readUpdateRequest.getLastReadId());
+//	
+//	return ResponseEntity.ok().build();
+//	
+//	}
 	
 	// ==========================================================================
-	// 메신저 팝업 채팅방 - 기존 방에 메시지 전송
+	// 채팅방 퇴장 처리
+//	@DeleteMapping("/room/{roomId}/member")
+//	public ResponseEntity<?> exitRoom (Authentication authentication, @PathVariable("roomId") Long roomId){
+//		messengerService.exitRoom(roomId, authentication.getName());
+//		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>> deleteMapping 진입...............");
+//		return ResponseEntity.noContent().build();
+//	}
+	
+	// ==========================================================================
+	// 채팅방 검색 기능
+	@GetMapping("/rooms/search")
+	public ResponseEntity<?> searchRooms(Authentication authentication, @RequestParam("keyword") String keyword) {
+	    return ResponseEntity.ok(messengerService.searchRooms(authentication.getName(), keyword));
+	}
+
+
 	
 }

@@ -15,6 +15,7 @@
   .pay-tabs .nav-link:hover{color:#0d6efd;background:#f1f5ff}
   .pay-tabs .nav-link.active{color:#0d6efd;background:#fff;box-shadow:0 -2px 8px rgba(13,110,253,.1)}
   .pay-tabs .nav-link.active::after{content:'';position:absolute;left:0;right:0;bottom:-2px;height:3px;background:#0d6efd;border-radius:2px}
+  .table td, .table th {white-space: nowrap !important; vertical-align: middle;}
 </style>
 
 
@@ -91,11 +92,11 @@
               <td th:text="${c.priority}"></td>
 
               <td>
-				  <span th:class="${c.status?.name()=='ACTIVE' 
-				                  ? 'badge bg-success' 
-				                  : 'badge bg-secondary'}"
-				        th:text="${c.status}">
-				  </span>
+  
+				  
+            <span class="badge me-3" th:classappend="${c.status.name()=='ACTIVE'} ? 'bg-success' : 'bg-secondary'"
+                  th:text="${c.status.name() == 'ACTIVE' ? '✔' : '✘' }"></span>
+                  
 				</td>
 
 

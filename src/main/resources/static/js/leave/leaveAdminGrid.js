@@ -22,9 +22,6 @@ const grid = new tui.Grid({
 			header: "사원번호",
 			name : "empId",
 			sortable: true,
-			filter: {
-				type: 'date', options: {format: 'yyyy-MM-dd'}
-			}
 		},
 		{
 			header: "이름",
@@ -44,13 +41,16 @@ const grid = new tui.Grid({
 			name : "remainDays",
 		},
 		{
-			header: " ",
+			header: "수정",
 			name : "btn",
 			formatter: (rowInfo) => {
 				return  `<button class="btn btn-primary" data-id="${rowInfo.row.id}">수정</button>`
 			}
 		},
 	],
+	columnOptions: {
+		resizable: true
+	},
 	bodyHeight: 500,	
 });
 

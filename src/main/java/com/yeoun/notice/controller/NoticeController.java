@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.mysql.cj.log.Log;
 import com.yeoun.notice.dto.NoticeDTO;
 import com.yeoun.notice.service.NoticeService;
 
@@ -43,7 +42,7 @@ public class NoticeController {
 		    @RequestParam(defaultValue = "10", name = "size")int size,
 		    @RequestParam(defaultValue = "", name = "searchKeyword")String searchKeyword,
 		    @RequestParam(defaultValue = "updatedDate", name = "orderKey")String orderKey,
-		    @RequestParam(defaultValue = "", name = "orderMethod")String orderMethod) {
+		    @RequestParam(defaultValue = "desc", name = "orderMethod")String orderMethod) {
 		
 		Page<NoticeDTO> noticePage = noticeService.getNotice(page, size, searchKeyword, orderKey, orderMethod);
 		

@@ -26,13 +26,15 @@ const handleAttendanceToggle = async (empId) => {
 	if (result.status === "WORKIN") {
 		attendanceBtn.innerText = "퇴근";
 		msg = "출근했습니다.";
-	} else if (result.status === "WORKOUT") {
+	} else if (result.status === "WORK_OUT") {
 		attendanceBtn.innerText = "출근";
 		msg = "퇴근했습니다.";
 	} else if (result.status === "LATE") {
 		msg = "지각입니다.";
 	} else if (result.status === "IN") {
 		msg = "복귀합니다.";
+	} else if (result.status === "LUNCH_TIME") {
+		msg = "점심시간입니다.";
 	} else {
 		console.log(result.status);
 		msg = "외출입니다.";

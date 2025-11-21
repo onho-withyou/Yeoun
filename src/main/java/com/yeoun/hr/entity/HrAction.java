@@ -80,9 +80,9 @@ public class HrAction {
 	@Column(name = "REASON", length = 200)
 	private String actionReason;
 	
-	// 상태 (REQ=요청, APPR=승인, REJ=반려 등)
+	// 승인상태
 	@Column(name = "STATUS", length = 10, nullable = false)
-    private String status = "REQ";   // 자바에서 기본값 세팅
+    private String status = "대기";   // 자바에서 기본값 세팅
 	
 	// 등록자 (CREATED_USER = 사원)
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -95,11 +95,21 @@ public class HrAction {
     private LocalDateTime createdDate;
 	
 	// 결재문서ID
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "APPROVAL_ID")
-	private ApprovalDoc approvalDoc;
+	@Column(name="APPROVAL_ID")
+	private Long approvalId;
 	 
-	
+	// 발령 적용일자 (최종 승인 후 실제 발령이 반영된 날짜)
+	@Column(name = "APPLIED_DATE")
+	private LocalDate appliedDate; 
+
+	// 발령 적용 여부
+	/* N : 아직 발령이 시스템이 적용되지 않음
+	 *     즉 결재 중이거나, 결재는 완료되었지만 효력일이 미래인 상태
+	 * Y : 발령이 실제로 EMP 테이블에 반영 완료
+	 *     즉 스케줄러가 돌면서 해당 발령을 처리한 상태
+	 */
+	@Column(name = "APPLIED_YN", nullable = false)
+	private String appliedYn = "N";
 	
 
 }

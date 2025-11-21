@@ -18,12 +18,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.yeoun.attendance.service.AttendanceService;
+
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.main.dto.ScheduleDTO;
 import com.yeoun.main.dto.ScheduleSharerDTO;
@@ -38,6 +40,13 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/main")
 public class MainController {
 	private final ScheduleService scheduleService;
+	private final AttendanceService attendanceService;
+	
+	@GetMapping("/test")
+	public String test() {
+		return "/main/organizationChartModal";
+	}
+	
 	
 	@GetMapping("/test")
 	public String test() {
@@ -60,6 +69,9 @@ public class MainController {
 	        model.addAttribute("currentUserId", loginUser.getEmpId());
 	        model.addAttribute("currentUserName", loginUser.getEmpName());
 	    }
+		
+		model.addAttribute("buttonEnabled", attendanceService.isAttendanceButtonEnabled(loginUser.getEmpId()));
+		model.addAttribute("status", attendanceService.attendanceStatus(loginUser.getEmpId()));
 		
 		return "/main/schedule";
 	}

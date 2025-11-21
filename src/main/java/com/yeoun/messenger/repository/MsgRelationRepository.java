@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MsgRelationRepository extends JpaRepository<MsgRelation, Long> {
@@ -38,5 +39,19 @@ public interface MsgRelationRepository extends JpaRepository<MsgRelation, Long> 
     // 방에 속한 모든 멤버를 조회
     List<MsgRelation> findByRoomId_RoomId(Long roomId);
     
+    Optional<MsgRelation> findByRoomId_RoomIdAndEmpId_EmpId(@Param("roomId")Long roomId, @Param("empId")String empId);
+    
+	// 참여자 이름 검색
+	@Query("select distinct r.roomId.roomId from MsgRelation r " +
+		       "join r.empId e " +
+		       "where e.empName like %:keyword%")
+	List<Long> findRoomIdByMemberName(@Param("keyword") String keyword);
+
+    // 내가 속한 방 목록
+    @Query("select r.roomId.roomId FROM MsgRelation r " +
+            "WHERE TRIM(r.participantYn) = 'Y' " +
+            "AND r.empId.empId = :empId")
+    List<Long> findRoomIdsByEmpId(@Param("empId") String empId);
+	
 
 }

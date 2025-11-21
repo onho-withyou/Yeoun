@@ -75,6 +75,7 @@ function formatDateToYYYYMMDD(date) {
 	return year + '-' + month + '-' + day;
 }
 
+
 // 달력 월 변경 버튼 함수
 prevMonthBtn.addEventListener('click', function() {
 	calendar.prev();
@@ -741,4 +742,27 @@ async function updateCurrentDate() {
 	calendarMonth = month;
 }
 	
+	// 기존의 년월과 현재 업데이트하는 년월이 다를경우
+	// 그달의 스케줄 정보 불러오기
+	if(calendarYear != year || calendarMonth != month) { 
+		await loadMonthSchedule();
+	}
 	
+	// 바뀐 년월 정보 저장
+	calendarYear = year;
+	calendarMonth = month;
+}
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+

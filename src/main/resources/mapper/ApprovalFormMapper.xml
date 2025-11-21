@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeoun.approval.mapper.ApprovalFormMapper">
+
+	<!-- 조직도 계층형 쿼리 불러오기 -->	
+	<select id="findDefaultApproverList" resultType="com.yeoun.approval.dto.ApprovalFormDTO">
+		 SELECT 
+		        a.form_code AS formCode,
+		        a.form_name AS formName,
+		        a.dept_id AS deptId,
+		        a.approver_1 AS approver1,
+		        a.approver_2 AS approver2,
+		        a.approver_3 AS approver3,
+		        e.emp_name
+		    FROM dept d
+		    JOIN approval_form a ON d.dept_id = a.dept_id
+		    JOIN emp e ON d.dept_id = e.dept_id
+		    WHERE e.emp_id = #{empId}
+	</select>
+	
+
+</mapper>
+
+
+
+
+

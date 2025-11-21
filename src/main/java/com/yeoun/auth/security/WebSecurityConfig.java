@@ -42,10 +42,14 @@ public class WebSecurityConfig {
 					.requestMatchers("/", "/login", "/logout").permitAll()
 					
 					// ================== 로그인 한 모든 사원 ==================
-		            .requestMatchers("/org/**", "/hr/actions")
+		            .requestMatchers("/org/**", "/hr/actions", "/attendance/my/**", "/leave/my/**", "/attendance/outwork", "/attendance/toggle/**")
 		                .authenticated()
 
 					// ================== 관리자/인사/MES 권한 ==================
+		            // 시스템 관리자만 가능
+		            .requestMatchers("/auth/**")
+		            	.hasAnyRole("SYS_ADMIN")
+		                
 		            // 인사관리 - 부서장도 가능
 	                .requestMatchers("/emp")
 	                    .hasAnyRole("SYS_ADMIN", "HR_ADMIN", "DEPT_MANAGER")
@@ -56,7 +60,26 @@ public class WebSecurityConfig {
 
 		           
 	                // 근태 관리
+		            // 근태 관리 - 관리자 및 근태 담당자, 부서장
+	                .requestMatchers("/attendance/list/**", "attendance/search", "attendance/*")
+                    	.hasAnyRole("SYS_ADMIN", "DEPT_MANAGER", "ATTEND_ADMIN")
+                    // 근태 관리 - 관리자 및 근태 담당자
+                    .requestMatchers("/attendance/policy/**", "/leave/list/**", "leave/*")
+                    	.hasAnyRole("SYS_ADMIN", "ATTEND_ADMIN")
+                	// 근태 관리 - 관리자
+                	.requestMatchers("/attendance/accessList/**")
+                    	.hasAnyRole("SYS_ADMIN")
+                    	
 	                // 급여 관리
+                    	// 사원용 급여명세서
+                    	.requestMatchers("/pay/emp_pay", "/pay/emp_pay/**")
+                    	    .authenticated()
+
+                    	// 급여 관리자 페이지
+                    	.requestMatchers("/pay/rule/**", "/pay/rule_calc/**", "/pay/rule_item/**", "/pay/calc/**", "/pay/history/**", "/pay/**" )
+                       	.hasAnyRole("SYS_ADMIN", "HR_ADMIN")
+                    	
+                    	
 	                // 전자결재 설정(양식/결재선 관리 등)
 	                // 전자결재 일반 사용 (결재 상신/조회 등)
 	                // 공지 관리

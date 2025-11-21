@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 
 import com.yeoun.pay.entity.PayrollPayslip;
 import com.yeoun.pay.enums.CalcStatus;
-
 import com.yeoun.pay.dto.PayslipViewDTO;
 
 public interface PayrollPayslipRepository extends JpaRepository<PayrollPayslip, Long> {
@@ -26,6 +25,10 @@ public interface PayrollPayslipRepository extends JpaRepository<PayrollPayslip, 
 
     /** ✅ 특정 월 전체 건수 */
     long countByPayYymm(String payYymm);
+    
+    /** 특정 월 확정(CALC_STATUS = CONFIRMED) 건수 */
+    long countByPayYymmAndCalcStatus(String payYymm, CalcStatus status);
+
 
     /** ✅ 특정 월 총 지급액 합계 */
     @Query("SELECT COALESCE(SUM(p.totAmt), 0) FROM PayrollPayslip p WHERE p.payYymm = :payYymm")
@@ -97,16 +100,60 @@ public interface PayrollPayslipRepository extends JpaRepository<PayrollPayslip, 
     	        @Param("status") String status);
 
     
-    /*계산 상태 값 변경*/
+    /* 전체 계산 대표 상태 조회 */
+    /* 전체 계산 상태 — 상태 상관없이 한 건만 조회 */
     @Query(value = """
-            SELECT CALC_STATUS 
+            SELECT CALC_STATUS
             FROM PAYROLL_PAYSLIP
             WHERE PAY_YYMM = :yyyymm
-            AND ROWNUM = 1
+            FETCH FIRST 1 ROWS ONLY
             """,
             nativeQuery = true)
     Optional<String> findFirstStatusByYyyymm(@Param("yyyymm") String yyyymm);
+
     
+    
+    /*개별사원 계산 상태 값 변경*/
+    @Query(value = """
+            SELECT CALC_STATUS
+            FROM PAYROLL_PAYSLIP
+            WHERE PAY_YYMM = :yyyymm
+              AND EMP_ID = :empId
+            """,
+            nativeQuery = true)
+    Optional<String> findCalcStatus(
+            @Param("yyyymm") String yyyymm,
+            @Param("empId") String empId
+    );
+    
+    /*계산 갯수 정보 조회*/
+
+    @Query("""
+    	    SELECT COUNT(p)
+    	      FROM PayrollPayslip p
+    	     WHERE p.payYymm = :yyyymm
+    	       AND p.calcStatus = 'SIMULATED'
+    	""")
+    	long countSimulated(@Param("yyyymm") String yyyymm);
+
+    	@Query("""
+    	    SELECT COUNT(p)
+    	      FROM PayrollPayslip p
+    	     WHERE p.payYymm = :yyyymm
+    	       AND p.calcStatus = 'CALCULATED'
+    	""")
+    	long countCalculated(@Param("yyyymm") String yyyymm);
+    	
+    	
+    	/*확정자 정보 조회*/
+    	@Query("""
+    		    SELECT p.confirmUser, p.confirmDate
+    		    FROM PayrollPayslip p
+    		    WHERE p.payYymm = :yyyymm
+    		    ORDER BY p.confirmDate DESC
+    		    """)
+    		Object[] findLastConfirmInfo(@Param("yyyymm") String yyyymm);
+
     
 }
 

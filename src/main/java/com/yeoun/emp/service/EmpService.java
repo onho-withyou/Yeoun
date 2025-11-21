@@ -1,5 +1,6 @@
 package com.yeoun.emp.service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -15,8 +16,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.yeoun.auth.entity.Role;
 import com.yeoun.auth.repository.RoleRepository;
+import com.yeoun.common.dto.FileAttachDTO;
+import com.yeoun.common.entity.FileAttach;
 import com.yeoun.common.repository.CommonCodeRepository;
+import com.yeoun.common.repository.FileAttachRepository;
+import com.yeoun.common.util.FileUtil;
 import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpDetailDTO;
 import com.yeoun.emp.dto.EmpListDTO;
@@ -50,22 +56,24 @@ public class EmpService {
 	private final EmpBankRepository empBankRepository;
 	private final MsgStatusRepository msgStatusRepository;
 	private final LeaveService leaveService;
+	private final RoleRepository roleRepository;
+	private final EmpRoleRepository empRoleRepository;
+	private final FileUtil fileUtil;
+    private final FileAttachRepository fileAttachRepository;
 	private final BCryptPasswordEncoder encoder;
-
-	// 사원 신규 등록
+	
+	// =========== 사원 등록 ===========
+	// 1. 사원 신규 등록
 	@Transactional
 	public void registEmp(EmpDTO empDTO) {
 		
-		// 주민등록번호 중복 검사
+		// 주민등록번호 / 이메일 / 연락처 중복 검사
 		String rrn = empDTO.getRrn();
-		if (rrn != null && !rrn.isBlank() && empRepository.existsByRrn(rrn)) {
-			throw new IllegalStateException("이미 등록된 주민등록번호입니다.");
-		}
-		
-		// 이메일 / 연락처 중복 검사
 	    String email  = empDTO.getEmail();
 	    String mobile = empDTO.getMobile();
-
+	    if (rrn != null && !rrn.isBlank() && empRepository.existsByRrn(rrn)) {
+			throw new IllegalStateException("이미 등록된 주민등록번호입니다.");
+		}
 	    if (email != null && !email.isBlank() && empRepository.existsByEmail(email)) {
 	        throw new IllegalStateException("이미 사용 중인 이메일입니다.");
 	    }
@@ -95,7 +103,32 @@ public class EmpService {
 	    emp.setPosition(position);
 
 	    // 4) EMP 저장
-	    empRepository.saveAndFlush(emp);
+	    Emp savedEmp = empRepository.saveAndFlush(emp);
+	    
+	    // 4-1) 사원 사진 파일 업로드
+	    if (empDTO.getPhotoFile() != null && !empDTO.getPhotoFile().isEmpty()) {
+	        try {
+	            List<FileAttachDTO> uploadedList =
+	                    fileUtil.uploadFile(savedEmp, List.of(empDTO.getPhotoFile()));
+
+	            // FILE_ATTACH 엔티티로 변환 후 저장
+	            List<FileAttach> attachEntities = uploadedList.stream()
+	                    .map(FileAttachDTO::toEntity)
+	                    .toList();
+
+	            fileAttachRepository.saveAll(attachEntities);
+
+	            // 첫 번째 파일의 FILE_ID 를 Emp.photoFileId 에 연결
+	            Long photoFileId = attachEntities.get(0).getFileId();
+	            savedEmp.setPhotoFileId(photoFileId);
+
+	        } catch (IOException e) {
+	            throw new RuntimeException("사원 사진 업로드 중 오류가 발생했습니다.", e);
+	        }
+	    }
+	    
+		// 4-2) 역할 자동 부여 
+	    assignDefaultRoles(savedEmp);
 	    
 	    // 5) 메신저 상태(MSG_STATUS) 저장
 	    MsgStatus status = new MsgStatus();
@@ -115,12 +148,32 @@ public class EmpService {
 	    // 6) 급여계좌(EMP_BANK) 저장 (선택값 없으면 스킵)
 	    if (empDTO.getBankCode() != null && empDTO.getAccountNo() != null) {
 	        EmpBank bank = new EmpBank();
-	        bank.setEmpId(emp.getEmpId());
+	        bank.setEmpId(savedEmp.getEmpId());
 	        bank.setBankCode(empDTO.getBankCode());
 	        bank.setAccountNo(empDTO.getAccountNo());
 	        bank.setHolder(empDTO.getHolder());
-	        bank.setFileId(empDTO.getFileId());
-	        empBankRepository.save(bank);
+	        // fileId 는 나중에 파일 업로드 후 세팅
+	        EmpBank savedBank = empBankRepository.saveAndFlush(bank);
+
+	        // 6-1) 🔹 통장 사본 파일 업로드 (있으면)
+	        if (empDTO.getBankbookFile() != null && !empDTO.getBankbookFile().isEmpty()) {
+	            try {
+	                List<FileAttachDTO> uploadedList =
+	                        fileUtil.uploadFile(savedBank, List.of(empDTO.getBankbookFile()));
+
+	                List<FileAttach> attachEntities = uploadedList.stream()
+	                        .map(FileAttachDTO::toEntity)
+	                        .toList();
+
+	                fileAttachRepository.saveAll(attachEntities);
+
+	                Long fileId = attachEntities.get(0).getFileId();
+	                savedBank.setFileId(fileId);
+
+	            } catch (IOException e) {
+	                throw new RuntimeException("통장 사본 업로드 중 오류가 발생했습니다.", e);
+	            }
+	        }
 	    }
 	    
 	    // 7) 연차 생성
@@ -129,8 +182,8 @@ public class EmpService {
 	    log.info("EMP 등록 완료: empId={}, dept={}, pos={}",
 	            emp.getEmpId(), dept.getDeptName(), position.getPosName());
 	}
-
-	// 사원번호 생성 로직
+		
+	// 1-1. 사원번호 생성 로직
 	private String generateEmpId(LocalDate hireDate, int maxRetry) {
 		LocalDate base = (hireDate != null) ? hireDate : LocalDate.now();
         String datePart = base.format(DateTimeFormatter.ofPattern("yyMM"));
@@ -143,7 +196,62 @@ public class EmpService {
         }
         throw new IllegalStateException("사번 생성 충돌: 재시도 초과");
 	}
+
+	// 1-2. 부서/직급에 따라 권한 자동 부여
+	private void assignDefaultRoles(Emp emp) {
+
+	    String deptId  = emp.getDept().getDeptId();
+	    String posName = emp.getPosition().getPosName(); 
+
+	    // ========== 1. 인사부 ==========
+	    if (deptId.equals("DEP005")) {
+	        addRoleIfNotExists(emp, "ROLE_HR_ADMIN");
+	    }
+
+	    // ========== 2. 부장 ==========
+	    if (posName != null && posName.contains("부장")) {
+	        addRoleIfNotExists(emp, "ROLE_DEPT_MANAGER");
+	    }
+
+		// ========== 3. 대표 ==========
+	    if ("대표".equals(posName)) {
+	        addRoleIfNotExists(emp, "ROLE_SYS_ADMIN");
+	        addRoleIfNotExists(emp, "ROLE_NOTICE_WRITER");
+	        return; // 대표는 추가 규칙 적용 X
+	    }
+
+	    // ========== 4. ERP / MES 이사 ==========
+	    if (posName != null && posName.contains("이사")) {
+
+	        // 공통: 공지 작성 권한
+	        addRoleIfNotExists(emp, "ROLE_NOTICE_WRITER");
+
+	        // ERP본부 or MES본부 → HR_ADMIN 추가
+	        if (deptId.equals("DEP000") || deptId.equals("DEP100")) {
+	            addRoleIfNotExists(emp, "ROLE_HR_ADMIN");
+	        }
+	    }
+	}
 	
+	private void addRoleIfNotExists(Emp emp, String roleCode) {
+
+	    Role role = roleRepository.findByRoleCode(roleCode)
+	            .orElseThrow(() -> new IllegalStateException("역할 없음: " + roleCode));
+
+	    // 이미 가진 권한이면 스킵 (emp.getEmpRoles() 가 연관관계에 있다면)
+	    boolean already = emp.getEmpRoles() != null &&
+	            emp.getEmpRoles().stream()
+	               .anyMatch(er -> er.getRole().getRoleCode().equals(roleCode));
+
+	    if (already) return;
+
+	    EmpRole empRole = new EmpRole();
+	    empRole.setEmp(emp);
+	    empRole.setRole(role);
+
+	    empRoleRepository.save(empRole);
+	}
+
 	// 활성화된 부서 목록 조회
 	public  List<Dept> getDeptList() {
 		return deptRepository.findActive();
@@ -183,7 +291,7 @@ public class EmpService {
 	    if (deptId != null && deptId.isBlank()) deptId = null;
 	    if (posCode != null && posCode.isBlank()) posCode = null;
 	    
-	    return empRepository.searchForHrActionDto(deptId, posCode, keyword);
+	    return empRepository.searchActiveEmpList(deptId, posCode, keyword);
 	}
 
 	// ==============================================================================
@@ -316,9 +424,9 @@ public class EmpService {
 	    if (photoFileId == null) {
 	        return null; // 사진 없음 → JS에서 기본 이미지 처리
 	    }
-	    return "/files/photo/" + photoFileId;
+	    // FileController 의 /files/download/{fileId} 사용
+	    return "/files/download/" + photoFileId;
 	}
-	// ---------- 상세 조회 시 정보 표기 -----------
 
 	// =============================================================================
 	// 사원 정보 수정
@@ -389,6 +497,15 @@ public class EmpService {
 		    }
 		    // 추후 사진 추가
 	}
+
+	// 비밀번호 변경
+	public void changePassword(String empId, String newPassword) {
+        Emp emp = empRepository.findById(empId)
+                .orElseThrow(() -> new EntityNotFoundException("사원 없음: " + empId));
+
+        String encoded = encoder.encode(newPassword);
+        emp.setEmpPwd(encoded);
+    }
 
 	
 

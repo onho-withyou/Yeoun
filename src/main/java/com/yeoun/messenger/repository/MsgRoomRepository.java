@@ -1,7 +1,10 @@
 package com.yeoun.messenger.repository;
 
 import com.yeoun.messenger.entity.MsgRoom;
+
+import org.apache.ibatis.annotations.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -9,4 +12,15 @@ import java.util.List;
 @Repository
 public interface MsgRoomRepository extends JpaRepository<MsgRoom, Long> {
 
+	// 방 이름 검색
+	@Query("select r.roomId from MsgRoom r where r.groupName like %:keyword%")
+	List<Long> findRoomIdByGroupNameContaining(@Param("keyword") String keyword);
+
+
+
 }
+
+
+
+
+

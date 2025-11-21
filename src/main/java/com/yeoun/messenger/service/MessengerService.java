@@ -1,9 +1,9 @@
 package com.yeoun.messenger.service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.regex.Pattern;
 
 import com.yeoun.messenger.dto.*;
 import com.yeoun.messenger.entity.MsgMessage;
@@ -16,7 +16,12 @@ import com.yeoun.messenger.repository.MsgRoomRepository;
 import com.yeoun.messenger.repository.MsgStatusRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.yeoun.common.dto.FileAttachDTO;
+import com.yeoun.common.entity.FileAttach;
+import com.yeoun.common.repository.FileAttachRepository;
+import com.yeoun.common.util.FileUtil;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.entity.Position;
@@ -44,10 +49,22 @@ public class MessengerService {
 	private final MsgRelationRepository msgRelationRepository;
 	
 	// messenger 외 repository
+	private final FileUtil fileUtil;
 	private final EmpRepository empRepository;
 	private final DeptRepository deptRepository;
 	private final PositionRepository positionRepository;
+	private final FileAttachRepository fileAttachRepository;
 
+	// ====================================================
+	// 하이라이트 처리 관련 유틸 함수
+	private String highlight(String text, String keyword) {
+		if (text == null || keyword == null) return text;
+
+		// (?i)는 대소문자 무시
+		return text.replaceAll("(?i)" + Pattern.quote(keyword),
+				"<mark>$0</mark>");
+	}
+	
 	// ====================================================
 	// 친구 목록을 불러오는 서비스
 	public List<MsgStatusDTO> getUsers(String username) {
@@ -71,7 +88,7 @@ public class MessengerService {
 
 	// ====================================================
 	// 대화 목록을 불러오는 서비스
-	public List<MsgRoomDTO> getChatRooms (String username) {
+	public List<MsgRoomListDTO> getChatRooms (String username) {
 		return messengerMapper.selectChats(username);
 	}
 
@@ -118,22 +135,37 @@ public class MessengerService {
 	// ========================================================
 	// 메시지 보내기
 	@Transactional
-	public void sendMessage(MsgMessageDTO msgMessageDTO) {
-		MsgMessage msgMessage = msgMessageDTO.toEntity(							// 엔티티 변환
-				msgRoomRepository.getReferenceById(msgMessageDTO.getRoomId()),	// roomId
-				empRepository.getReferenceById(msgMessageDTO.getSenderId())		// senderId
-		);
-		msgMessageRepository.save(msgMessage);
+	public void sendMessage(MsgMessageDTO msgMessageDTO, List<MultipartFile> files) throws IOException {
+		
+		MsgRoom msgRoom = msgRoomRepository.getReferenceById(msgMessageDTO.getRoomId());
+		Emp sender = empRepository.getReferenceById(msgMessageDTO.getSenderId());
+		
+		// 1) 메시지 저장
+		MsgMessage msgMessage = msgMessageDTO.toEntity(msgRoom, sender);
+		MsgMessage savedMessage = msgMessageRepository.save(msgMessage);
+		
+		// 2) 파일 업로드
+		if (files != null && !files.isEmpty()) {
+			List<FileAttach> uploaded = fileUtil.uploadFile(savedMessage, files)
+					.stream()
+					.map(FileAttachDTO::toEntity)
+					.toList();
+			
+			fileAttachRepository.saveAll(uploaded);
+		}
+		
 	}
 
 	// ========================================================
 	// 새 방 생성 & 메시지 보내기
 	@Transactional
-	public Long createRoom(RoomCreateRequest roomCreateRequestDTO) {
+	public Long createRoom(RoomCreateRequest roomCreateRequestDTO) throws IOException {
+		
+		log.info("roomCreateRequestDTO : " + roomCreateRequestDTO);
 
 		// 1) 채팅방 생성
 		MsgRoom newRoom = new MsgRoom();
-		newRoom.setGroupYn(roomCreateRequestDTO.getMembers().size() > 2 ? "Y" : "N");
+		newRoom.setGroupYn(roomCreateRequestDTO.getGroupYn());
 		newRoom.setGroupName(roomCreateRequestDTO.getGroupName());
 		msgRoomRepository.save(newRoom);
 
@@ -145,7 +177,7 @@ public class MessengerService {
 			msgRelationRepository.save(relation);
 		}
 
-		// 3) 첫 메시지 저장
+		// 3) 첫 메시지가 텍스트인 경우에 저장
 		if (roomCreateRequestDTO.getFirstMessage() != null &&
 				!roomCreateRequestDTO.getFirstMessage().isBlank()) {
 
@@ -153,14 +185,12 @@ public class MessengerService {
 			msgMessageDTO.setRoomId(newRoom.getRoomId());
 			msgMessageDTO.setSenderId(roomCreateRequestDTO.getCreatedUser());
 			msgMessageDTO.setMsgContent(roomCreateRequestDTO.getFirstMessage());
-			msgMessageDTO.setMsgType(roomCreateRequestDTO.getMsgType());
-
-			sendMessage(msgMessageDTO);
+			msgMessageDTO.setMsgType("TEXT");
+			
+			sendMessage(msgMessageDTO, null);
 		}
 
-
 		return newRoom.getRoomId();
-
 	}
 
 	// ========================================================
@@ -189,6 +219,98 @@ public class MessengerService {
 		
 		return RoomMemberDTO.of(emp, msgStatus, posName, deptName);
 	}
+
+	// ========================================================
+	// 내 상태 실시간 변경
+	@Transactional
+	public void updateStatus(StatusChangeRequest statusChangeRequest) {
+		MsgStatus msgStatus = msgStatusRepository.findById(statusChangeRequest.getEmpId())
+				.orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다"));
+		
+		if (statusChangeRequest.getAvlbStat() != null) {
+			msgStatus.setAvlbStat(statusChangeRequest.getAvlbStat());
+		}
+		
+		if (statusChangeRequest.getWorkStat() != null) {
+			msgStatus.setManualWorkStat(statusChangeRequest.getWorkStat());
+		}
+		
+		msgStatus.setWorkStatSource("MANUAL");
+		msgStatus.setWorkStatUpdated(LocalDateTime.now());
+	}
+
+	// ========================================================
+	// 방에서 나가기 처리
+	@Transactional
+	public void exitRoom(Long roomId, String empId) {
+		MsgRelation relation = msgRelationRepository.findByRoomId_RoomIdAndEmpId_EmpId(roomId, empId)
+				.orElseThrow(() -> new RuntimeException("참여자 없음"));
+				
+		relation.setParticipantYn("N");
+	}
+	
+	// ========================================================
+	// 대화방 검색 기능
+	public List<MsgRoomListDTO> searchRooms(String empId, String keyword) {
+		if (keyword == null || keyword.isBlank())
+			return Collections.emptyList();
+
+		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 대화방 검색 진입... = ");
+		// 1) roomId 검색
+	    List<Long> byName 	 = msgRoomRepository.findRoomIdByGroupNameContaining(keyword);
+	    List<Long> byMember  = msgRelationRepository.findRoomIdByMemberName(keyword);
+	    List<Long> byMessage = msgMessageRepository.findRoomIdByMessageContent(keyword);
+
+		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> byName = " + byName);
+		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> byMember = " + byMember);
+		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> byMessage = " + byMessage);
+
+	    // 2) 중복 제거 및 모으기
+	    Set<Long> roomIds = new HashSet<>();
+	    roomIds.addAll(byName);
+	    roomIds.addAll(byMember);
+	    roomIds.addAll(byMessage);
+		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> roomIds = " + roomIds);
+
+		// 3) 현재 유저가 속한 방만 남기기
+		List<Long> myRooms = msgRelationRepository.findRoomIdsByEmpId(empId);
+		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> myRooms = " + myRooms);
+		roomIds.retainAll(myRooms);
+		if (roomIds.isEmpty())
+			return Collections.emptyList();
+
+		// 4) 방 목록 생성
+		List<MsgRoomListDTO> result = new ArrayList<>();
+
+		for (Long roomId : roomIds) {
+
+			// a) 기본 방 정보 찾기
+			MsgRoomListDTO room = messengerMapper.selectChat(empId, roomId);
+
+			// b) 메시지 내용에서 매칭되는 문장 찾기
+			String message = msgMessageRepository.findMatchedMessage(roomId, keyword);
+
+			// 검색어가 있을 경우 해당 메시지를 보여주고 하이라이트 처리
+			if (message != null) {
+				room.setPreviewMessage(highlight(message, keyword));
+			}
+
+			// c) 이름/그룹명에서 매칭되는 결과에 하이라이트 처리
+			//String groupName = room.getGroupName();
+			//if (groupName != null && !groupName.isBlank()) {
+			//	room.setGroupName(highlight(groupName, keyword));
+			//}
+
+			result.add(room);
+
+		}
+		
+		// 4) 최신 순 정렬
+		result.sort(Comparator.comparing(MsgRoomListDTO::getPreviewTime).reversed());
+		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> result = " + result);
+		return result;
+	}
+
 	
 	
 	

@@ -41,13 +41,15 @@ public class ApprovalDocDTO {
 	private String formType; //양식종류
 	
 	@NotBlank(message="결재권한자는 필수 입력값입니다!")
-	private String approvar; //결재권한자
+	private String approver; //결재권한자
 	
 	private LocalDate startDate; //시작휴가날짜 - 휴가(연차신청서)
 	
 	private LocalDate endDate; //종료휴가날짜 - 휴가(연차신청서)
 	
 	private String toDeptId; //발령부서 - 인사 발령신청서
+	
+	private String leaveType; //연차 유형
 	
 	private String expndType; //지출종류 - 지출결의서
 	

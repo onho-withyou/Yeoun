@@ -154,15 +154,15 @@
                                   placeholder="최소 10자 이상 입력해주세요."></textarea>
                       </div>
 
-                      <div class="col-md-6">
-                        <label class="form-label">결재자</label>
-<!--                         <select class="form-select" th:field="*{approverEmpId}"> -->
-<!--                           <option value="">결재자 선택</option> -->
-<!--                         </select> -->
-						<select class="form-select" th:field="*{approverEmpId}" disabled>
-						  <option value="">(결재 기능 준비 중)</option>
-						</select>
-                      </div>
+                    <div class="mb-3">
+					  <label class="form-label">결재선</label>
+					  <div class="border rounded p-2 bg-light">
+					    <div>1차 결재자: <span id="appr1">-</span></div>
+					    <div>2차 결재자: <span id="appr2">-</span></div>
+					    <div>3차 결재자: <span id="appr3">-</span></div>
+					  </div>
+					</div>
+
                     </div>
                   </div>
 

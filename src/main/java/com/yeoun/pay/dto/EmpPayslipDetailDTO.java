@@ -3,7 +3,7 @@ package com.yeoun.pay.dto;
 import java.math.BigDecimal;
 
 public interface EmpPayslipDetailDTO {
-
+	String payYymm();
     String getEmpId();
     String getEmpName();
     String getDeptId();

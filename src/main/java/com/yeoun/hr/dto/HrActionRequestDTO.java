@@ -31,14 +31,14 @@ public class HrActionRequestDTO {
     private String actionReason; 
     
     // 결재자 사번
-    private String approverEmpId;
+//    private String approverEmpId;
 
     public HrAction toEntity() {
         HrAction action = new HrAction();
         action.setActionType(this.actionType);
         action.setEffectiveDate(this.effectiveDate);
         action.setActionReason(this.actionReason);
-        action.setStatus("REQ");       
+        action.setStatus("대기");       
         return action;
     }
 

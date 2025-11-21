@@ -47,12 +47,6 @@ li.menu-inner {
 	z-index: 1050;
 }
 
-/* 헤더 a태그 커서 */
-a.nav-font-size {
-  cursor: default !important;
-  transition: color 0.2s ease;
-}
-
 /* 반응형 여백 설정*/
 
 /* 공통영역 css */

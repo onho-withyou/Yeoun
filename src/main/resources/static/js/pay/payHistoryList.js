@@ -24,19 +24,17 @@ function initGrid() {
 
 	const columnDefs = [
 	    { 
-	        headerName: "지급월", 
-	        field: "payYymm",
-	        width: 120,
+	        headerName: "지급월", field: "payYymm",  width: 120,
 	        valueFormatter: p => formatYymm(p.value),
 	        cellStyle: { textAlign: "center", fontWeight: "600" }
 	    },
 	    { headerName: "사번", field: "empId", width: 120 },
-	    { headerName: "이름", field: "empName", width: 140 },
-	    { headerName: "부서", field: "deptName", width: 140 },
+	    { headerName: "이름", field: "empName", width: 120 },
+	    { headerName: "부서", field: "deptName", width: 120 },
         {
             headerName: "총지급액",
             field: "totAmt",
-            width: 140,
+            width: 120,
             valueFormatter: p => numberFormat(p.value),
             cellStyle: { textAlign: "right" }
         },
@@ -44,38 +42,51 @@ function initGrid() {
 		{
 			            headerName: "기본급",
 			            field: "baseAmt",
-			            width: 140,
+			            width: 120,
 			            valueFormatter: p => numberFormat(p.value),
 			            cellStyle: { textAlign: "right" }
 		        },
 				{
 						            headerName: "수당합계",
 						            field: "alwAmt",
-						            width: 140,
+						            width: 120,
 						            valueFormatter: p => numberFormat(p.value),
 						            cellStyle: { textAlign: "right" }
 						        },
 								{
 										            headerName: "공제액",
 										            field: "dedAmt",
-										            width: 140,
+										            width: 120,
 										            valueFormatter: p => numberFormat(p.value),
 										            cellStyle: { textAlign: "right" }
 										        },
         {
             headerName: "실수령액",
             field: "netAmt",
-            width: 140,
+            width: 120,
             valueFormatter: p => numberFormat(p.value),
             cellStyle: { textAlign: "right", color: "#0d6efd", fontWeight: "600" }
         },
-        {
-            headerName: "상태",
-            field: "calcStatus",
-            width: 120,
-            cellRenderer: p => statusBadge(p.value),
-            cellStyle: { textAlign: "center" }
-        }
+       
+		{
+		    headerName: "상세",
+		    width: 120,
+		    cellRenderer: p => {
+		        return `<button class="btn btn-sm btn-outline-primary" 
+		                      onclick="openDetailModal('${p.data.payYymm}', '${p.data.empId}')">
+		                   상세보기
+		                </button>`;
+		    },
+		    cellStyle: { textAlign: "center" }
+		},
+		{
+		           headerName: "상태",
+		           field: "calcStatus",
+		           width: 120,
+		           cellRenderer: p => statusBadge(p.value),
+		           cellStyle: { textAlign: "center" }
+		       }
+
     ];
 
 	const gridOptions = {
@@ -179,8 +190,27 @@ function numberFormat(x) {
 
 function statusBadge(s) {
     if (!s) return "";
-    return `<span class="badge bg-info">${s}</span>`;
+
+    let color = "bg-secondary"; // 기본값 (SIMULATED 등)
+
+    switch (s) {
+        case "SIMULATED":
+            color = "bg-secondary";    // 회색
+            break;
+        case "CALCULATED":
+            color = "bg-primary";      // 파란색
+            break;
+        case "CONFIRMED":
+            color = "bg-success";      // 초록색
+            break;
+        case "ERROR":
+            color = "bg-danger";       // 빨간색
+            break;
+    }
+
+    return `<span class="badge ${color}">${s}</span>`;
 }
+
 
 // ===============================
 // 지급월 포맷 (YYYYMM → YYYY-MM)
@@ -192,3 +222,111 @@ function formatYymm(yymm) {
     return `${yyyy}-${mm}`;
 }
 
+// ===============================
+// 급여 상세모달
+// ===============================
+async function openDetailModal(payYymm, empId) {
+
+    try {
+        // 🔥 상세 데이터 조회 API 호출
+        const res = await fetch(`/pay/history/detail?payYymm=${payYymm}&empId=${empId}`);
+        const data = await res.json();
+
+        // ===========================
+        // 1) 기본정보 표시
+        // ===========================
+        document.getElementById("d-payYymm").innerText = formatYymm(data.payYymm);
+        document.getElementById("d-empId").innerText = data.empId;
+        document.getElementById("d-empName").innerText = data.empName;
+        document.getElementById("d-deptName").innerText = data.deptName;
+		document.getElementById("d-posName").innerText = data.posName;
+		document.getElementById("confirmUser").textContent = data.confirmUser ?? "-";		
+		if (data.confirmDate) {
+		    const d = new Date(data.confirmDate);
+		    const formatted =
+		        d.getFullYear() + "-" +
+		        String(d.getMonth()+1).padStart(2,"0") + "-" +
+		        String(d.getDate()).padStart(2,"0") + " " +
+		        String(d.getHours()).padStart(2,"0") + ":" +
+		        String(d.getMinutes()).padStart(2,"0") + ":" +
+		        String(d.getSeconds()).padStart(2,"0");
+
+		    document.getElementById("confirmDate").textContent = formatted;
+		} else {
+		    document.getElementById("confirmDate").textContent = "-";
+		}
+
+
+        document.getElementById("d-baseAmt").innerText = numberFormat(data.baseAmt) + " 원";
+        document.getElementById("d-alwAmt").innerText  = numberFormat(data.alwAmt) + " 원";
+        document.getElementById("d-dedAmt").innerText  = numberFormat(data.dedAmt) + " 원";
+        document.getElementById("d-netAmt").innerText  = numberFormat(data.netAmt) + " 원";
+        document.getElementById("d-totAmt").innerText  = numberFormat(data.totAmt) + " 원";
+
+        // ===========================
+        // 2) 지급항목 테이블 표시
+        // ===========================
+        renderItemTable("payItemsBody", data.payItems);
+
+        // ===========================
+        // 3) 공제항목 테이블 표시
+        // ===========================
+        renderItemTable("dedItemsBody", data.dedItems);
+
+        // ===========================
+        // 4) 모달 열기
+        // ===========================
+        new bootstrap.Modal(document.getElementById("detailModal")).show();
+
+    } catch (err) {
+        console.error("상세조회 오류:", err);
+        alert("상세 조회 중 오류가 발생했습니다.");
+    }
+}
+
+
+// ===============================
+// 지급 / 공제 테이블 채우기 함수
+// ===============================
+function renderItemTable(target, list) {
+    const el = document.getElementById(target);
+    el.innerHTML = "";
+
+    (list ?? []).forEach(it => {
+        el.innerHTML += `
+            <tr>
+                <td>${it.itemName}</td>
+                <td class="text-end">${numberFormat(it.amount)}</td>
+            </tr>
+        `;
+    });
+}
+
+
+// ===============================
+// 연도/월 자동생성
+// ===============================
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    // 현재 연도
+    const thisYear = new Date().getFullYear();
+    const yearSelect = document.getElementById("year");
+
+    // 올해, 작년만 넣기
+    yearSelect.innerHTML = `
+        <option value="">연도</option>
+        <option value="${thisYear}">${thisYear}</option>
+        <option value="${thisYear - 1}">${thisYear - 1}</option>
+    `;
+
+    // 월 1~12 자동 생성
+    const monthSelect = document.getElementById("month");
+    let monthHtml = `<option value="">월</option>`;
+    for (let i = 1; i <= 12; i++) {
+        const v = i.toString().padStart(2, "0");
+        monthHtml += `<option value="${v}">${i}월</option>`;
+    }
+    monthSelect.innerHTML = monthHtml;
+
+});

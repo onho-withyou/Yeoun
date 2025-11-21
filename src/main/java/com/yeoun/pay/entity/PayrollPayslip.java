@@ -130,5 +130,6 @@ public class PayrollPayslip {
     @Column(name = "REMARK")
     private String remark;
 
+
 	
 }

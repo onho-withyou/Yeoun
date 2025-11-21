@@ -16,6 +16,10 @@
 </style>
 <body>
 <th:block layout:fragment="content">
+	<!-- 현재사용자 사번, 이름 저장 -->
+	<input type="hidden" th:value="${currentUserId}" id="currentUserId">
+	<input type="hidden" th:value="${currentUserName}" id="currentUserName">
+	
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
 		<h2>전자 결재</h2>
 			<div class="d-flex justify-content-between">
@@ -24,28 +28,29 @@
 	            	<select class="form-select" onchange="draftValFn(this)">
 	            		<option value="기안서" selected>기안서</option>
 	            		 <option th:each="item, iterStat : ${formTypes}" 
-							 		th:value="${item.formName}" 
+							 		th:value="${item.formCode}" 
 							 		th:text="${iterStat.index+1} + ' : ' + ${item.formName}"
+							 		th:data-formname="${item.formName}"
 									name="draft">
 						</option>
 	            	</select>
 	            </div>
 	            <div class="d-flex justify-content-end" style="margin-left: 5px;">
-						<button onclick="defaultPrint()" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#approval-modal" style="width: 71px;">
-						작성
-						</button>
+					<button onclick="defaultPrint()" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#approval-modal" style="width: 71px;">
+					작성
+					</button>
 		        </div>
 		        <div class="row flex-nowrap" style="margin-left: 389px;">
 					<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-						<input type="date" name="startDate" class="form-control">
+						<input id="searchStartDate" type="date" name="startDate" class="form-control">
 					</div>
 	                ~
 	                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-		                <input type="date" name="endDate" class="form-control">
+		                <input id="searchEndDate" type="date" name="endDate" class="form-control">
 	                </div>
-	                 <input class="form-control" type="text" placeholder="기안자및문서이름" style="width: 200px;height: 38.94px;">
+	                 <input id="searchEmpIdAndformType" class="form-control" type="text" placeholder="기안자및문서이름" style="width: 200px;height: 38.94px;">
 	                <div class="mb-6 col-lg-6 col-xl-3 col-12 mb-0">
-		             	<button class="btn btn-primary">검색</button>
+		             	<button id="searchBtn" class="btn btn-primary">검색</button>
 	                </div>
 				</div>
 			</div>
@@ -97,7 +102,7 @@
 		<!-- 모달 -->
 		<div class="modal fade" id="approval-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
-		    <div class="modal-content" th:object="${approvalDocDTO}">
+		    <form class="modal-content" th:action="@{/approval/approval_doc}" method="POST" th:object="${approvalDocDTO}" enctype="multipart/form-data">
 		      <div class="modal-header" data-draggable="true">
 		        <h3 class="modal-title" id="Drafting">기안서 작성</h3>
 		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -109,19 +114,18 @@
 				</h5>
 		        <h5 class="d-flex">
 					<label class="p-1" style="width: 200px;"> 문서 제목 </label> 	                 
-		        	<input class="form-control" type="text" th:field="*{approvalTitle}" placeholder="문서제목" style="width:800px;height: 38.94px;">
+		        	<input id="approval-title" class="form-control" type="text" th:field="*{approvalTitle}" placeholder="문서제목" style="width:800px;height: 38.94px;">
 				</h5>
 				<div class="error_msg" th:if="${#fields.hasErrors('approvalTitle')}" th:errors="*{approvalTitle}"></div>
 		        <h5 class="d-flex">
 					<label class="p-1" style="width: 200px;">양식 종류 </label> 
 		        	<div class="mb-6 mb-0" style="width: 344px;">
-		            	<select class="form-select" onchange="draftValFn(this)">
+		            	<select id="form-menu" class="form-select" onchange="draftValFn(this)">
 		            		<option selected>기안서</option>
 		            		<option th:each="item, iterStat : ${formTypes}" 
 							 		th:value="${item.formName}" 
 							 		th:text="${iterStat.index+1} + ' : ' + ${item.formName}"
-									name="draft">
-									
+									name="draft">		
 							</option>
 		            	</select>
 	            	</div>
@@ -129,25 +133,28 @@
 		        <h5 class="d-flex">
 					<label class="p-1" style="width: 200px;">결재자명(기안자)</label> 
 		        	<div class="mb-6 mb-0" style="width: 344px;">
-		            	 <select class="form-select">
+		        		<p id="approver-name" th:text="|${#authentication.principal.empName} (${#authentication.principal.empId})|"></p>
+		        		
+		        				        	
+		            	<!--   <select id="approver-name" class="form-select">
 		            		<option selected>이름(사번)</option>
 		            		 <option id="approverItem" th:each="item, iterStat : ${empList}" 
 							 		th:value="${item.empId}" 
 							 		th:text="${iterStat.index+1} + ' : ' + ${item.empName} + '(' + ${item.empId} + ')'">
 							 </option>
 
-		            	</select> 
+		            	</select> --> 
 	            	</div>
 		        </h5>
 		        <h5 class="d-flex">
 					<label class="p-1" style="width: 200px;">결재완료기간</label>
 		        	<div class="row flex-nowrap">
 						<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-							<input type="date" name="startDate" id="today-date" class="form-control">
+							<input type="date" name="startDate" id="create-date" class="form-control">
 						</div>
 		                ~
 		                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-			                <input type="date" name="endDate"  class="form-control">
+			                <input type="date" name="finishDate"  id="finish-date" class="form-control">
 		                </div>
 					</div>
 		        </h5>
@@ -155,28 +162,50 @@
 					<label class="p-1" style="width: 200px;">기간-휴가(연차)신청서 [기본-hidden]</label>
 		        	<div class="row flex-nowrap">
 						<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-							<input type="date" name="startDate" class="form-control">
+							<input type="date" name="startDate"  id="start-date" class="form-control">
 						</div>
 		                ~
 		                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-			                <input type="date" name="endDate"class="form-control">
+			                <input type="date" name="endDate"  id="end-date" class="form-control">
 		                </div>
 					</div>
 		        </h5>
-		        <h5 class="d-flex">
+		     <!-- <h5 class="d-flex">
+		     	
+		       <label>연차유형 : </label>
+		          <label class="form-check-label" for="radioDefault1">
+						    연차 
+						  </label>
+						  <input class="form-check-input" type="radio" name="leaveDefault" id="radioDefault1" checked>
+						  <label class="form-check-label" for="radioDefault1">
+						    반차  
+						  </label>
+						  <input class="form-check-input" type="radio" name="leaveDefault" id="radioDefault1">
+						  <label class="form-check-label" for="radioDefault2">
+						    오전반차  
+						  </label>
+						  <input class="form-check-input" type="radio" name="leaveDefault" id="radioDefault2">
+						  <label class="form-check-label"  for="radioDefault2">
+						    오후반차 
+						  </label>
+		       	</h5> -->
+		       	<h5 class="d-flex">
 					<label class="p-1" style="width: 200px;">휴가종류-휴가(연차)신청서 [기본-hidden]</label>
 		        	<div class="mb-6 mb-0" style="width: 344px;">
-		            	<select class="form-select" ><!-- 여기 하다가 잠--> 
+		  \          	<select id="leave-type" class="form-select"  >
 		            		<option selected></option>
-		            		<option name="leave" value="연차유급휴가">연차유급휴가</option>
+		            		<option name="leave" value="연차">연차</option>
+							<option name="leave" value="오전반차">오전반차</option>
+							<option name="leave" value="오후반차">오후반차</option>
+							<option name="leave" value="병가">병가</option>
+							<option name="leave" value="공가">공가</option>
+							<option name="leave" value="연차유급휴가">연차유급휴가</option>
 							<option name="leave" value="출산전후휴가">출산전후휴가</option>
 							<option name="leave" value="배우자출산휴가">배우자출산휴가</option>
 							<option name="leave" value="생리휴가">생리휴가</option>
 							<option name="leave" value="가족돌봄휴가">가족돌봄휴가</option>
 							<option name="leave" value="경조사휴가">경조사휴가</option>
 							<option name="leave" value="여름휴가">여름휴가</option>
-							<option name="leave" value="병가">병가</option>
-							<option name="leave" value="공가">공가</option>
 							<option name="leave" value="개인사정">개인사정</option>
 							<option name="leave" value="기타">기타</option>
 		            	</select>
@@ -185,7 +214,7 @@
 		        <h5 class="d-flex">
 					<label class="p-1" style="width: 200px;">발령부서- 인사발령신청서 [기본-hidden]</label>
 		        	<div class="mb-6 mb-0" style="width: 344px;">
-		            	<select class="form-select" >
+		            	<select id="to-dept-id" class="form-select" >
 		            		<option selected>부서</option>
 							<option th:each="item, iterStat : ${deptList}" 
 							 		th:value="${item.deptId}" 
@@ -197,7 +226,7 @@
 		        <h5 class="d-flex">
 					<label class="p-1" style="width: 200px;">지출종류 - 지출결의서 [기본-hidden]</label>
 		        	<div class="mb-6 mb-0" style="width: 344px;">
-		            	<select class="form-select" >
+		            	<select id="expnd-type" class="form-select" >
 		            		<option selected>지출종류</option>
 		            		<option name="expense" value="고정지출">고정지출</option>
 							<option name="expense" value="변동지출">변동지출</option>
@@ -207,22 +236,21 @@
 		        </h5>
 		        <h5>
 					<label class="p-1" style="width: 200px;">사유내용 -자유양식결재서:[기본-hidden]</label>
-		        	<textarea id="notice-content-write" class="form-control" th:field="*{reason}" rows="10" placeholder="결재사유내용 작성"></textarea>
+		        	<textarea id="reason-write" class="form-control" th:field="*{reason}" rows="10" placeholder="결재사유내용 작성"></textarea>
 		        </h5>
-		        <h5 class="d-flex">결재권한자 변경:
+		        <!--<h5 class="d-flex">결재권한자 변경:
 		        	<input class="form-check-input" type="checkbox" id="opt-in">
 		        
-		        </h5>
+		        </h5>-->
 		        <h5 class="d-flex">
 					<label>결재권한자 : </label> 
 		          	<div id="select-box" style="width: 200px"></div>
 		        </h5>
-     				<div id="approvar" th:value="${empList}" onload="defaultPrint()" style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
+     				<div id="approver" th:value="${empList}"  style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
 					<!-- 결재권한자 버튼 생성 영역 -->
      				</div>	
      				
      				<!-- 전결자 클릭시 추가 태그 -->
-     				
 			      	<div id="jeongyeolja" style="display:none;border:1px solid red;border-radius: 6px;padding: 12px;">
 			      	
 						<div id="jeongyeolja-content">
@@ -255,25 +283,25 @@
 						</div>
 					</div>
 	     				
-		        <div id="editor" style="border: 1px solid black;;"></div>
+		        <!--  <div id="editor" style="border: 1px solid black;;"></div> -->
 		      </div>
 		      <div class="modal-footer">
 		      	<div>
 			     	<button type="button" class="btn btn-primary">첨부파일</button>
-			      	<button type="button" class="btn btn-primary">결재확인</button>
+			     	<button type="button" class="btn btn-primary" id="approvalCompanionBtn">반려</button>
+			      	<button type="button" class="btn btn-primary" id="approvalCheckBtn">결재확인</button>
 			    </div>
 		      	<hr>
 		      	<button type="button" class="btn btn-primary">인쇄</button>
-		        <button type="submit" class="btn btn-primary">저장</button>
+		        <button type="button" class="btn btn-primary" onclick="approvalDocSave()">등록</button>
 		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
 		      </div>
-		</div>
+		</form>
 	    </div>
 	</div>
 	</div>
 
 </th:block>
-	
 </body>
 
 <th:block layout:fragment="myScript"> 

@@ -1,0 +1,168 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
+
+  <th:block layout:fragment="content">
+
+    <div class="container-xxl py-4">
+
+      <h1 class="h3 mb-4 text-primary fw-bold">사원별 급여 계산</h1>
+
+      <!-- 사원 선택 -->
+      <section class="card shadow-sm mb-4">
+        <div class="card-body">
+
+          <div class="row g-3 align-items-center mb-3">
+            <div class="col-auto">
+              <label class="col-form-label fw-semibold fs-5">계산 대상 월</label>
+            </div>
+            <div class="col-auto">
+              <select id="emp_calc_month" class="form-select form-select-lg">
+                <option th:each="m : ${months}"
+                        th:value="${m}"
+                        th:selected="${m==yyyymm}"
+                        th:text="${#strings.substring(m,0,4)} + '년 ' + ${#strings.substring(m,4,6)} + '월'">
+                </option>
+              </select>
+            </div>
+          </div>
+
+        <div class="row g-3 align-items-center mb-4">
+
+    <!-- 사원명 검색 -->
+    <div class="col-auto">
+        <input type="text" id="emp_keyword"
+               class="form-control form-control-lg"
+               placeholder="사원명 검색 (예: 김유리)">
+    </div>
+
+    <!-- 검색 결과 선택 -->
+    <div class="col-auto">
+        <select id="emp_select" class="form-select form-select-lg">
+            <option value="">-- 사원 선택 --</option>
+        </select>
+    </div>
+
+    <div class="col-auto">
+        <button id="btnLoadEmpInfo" class="btn btn-outline-primary btn-lg">
+            사원 정보 불러오기
+        </button>
+        
+    </div>
+    
+    
+    <div class="col-auto">
+        <button id="btnResetEmp" class="btn btn-secondary btn-lg">
+            초기화
+        </button>
+    </div>
+</div>
+
+
+          <!-- 선택된 사원 정보 -->
+          <div id="empInfoBox" class="p-4 rounded-4 bg-light mb-4" style="display:none;">
+            <h5 class="fw-bold mb-3">사원 기본 정보</h5>
+
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="small text-muted">사번</div>
+                <div class="fw-semibold fs-5" id="e-empId"></div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="small text-muted">이름</div>
+                <div class="fw-semibold fs-5" id="e-empName"></div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="small text-muted">부서</div>
+                <div class="fw-semibold fs-5" id="e-deptName"></div>
+              </div>
+              
+              <div class="col-md-4">
+                <div class="small text-muted">직급</div>
+                <div class="fw-semibold fs-5" id="e-posName"></div>
+              </div>
+              
+              <!-- 계산 상태 -->
+			<div id="empStatusBox" class="alert d-flex justify-content-between align-items-center" 
+			     style="display:none;">
+			  <div>
+			    <span class="fw-bold">계산 상태:</span>
+			    <span id="empStatusText" class="badge"></span>
+			  </div>
+			</div>
+			              
+            </div>
+          </div>
+
+          <!-- 계산 버튼 -->
+          <div class="d-flex gap-2 mb-4">
+            <button id="btnSimulateOne" class="btn btn-warning btn-lg" disabled>
+              가계산 실행
+            </button>
+            <button id="btnConfirmOne" class="btn btn-success btn-lg" disabled>
+              확정 실행
+            </button>
+          </div>
+
+          <!-- 계산 결과 -->
+          <div id="empResultBox" style="display:none;">
+            <h5 class="fw-bold mb-3">계산 결과</h5>
+
+            <div class="p-3 border rounded-4 bg-white mb-3">
+              <div class="row text-center">
+                <div class="col">
+                  <div class="small text-muted">기본급</div>
+                  <div class="fw-bold fs-5" id="r-baseAmt"></div>
+                </div>
+                <div class="col">
+                  <div class="small text-muted">수당</div>
+                  <div class="fw-bold fs-5" id="r-alwAmt"></div>
+                </div>
+                <div class="col">
+                  <div class="small text-muted">공제</div>
+                  <div class="fw-bold fs-5 text-danger" id="r-dedAmt"></div>
+                </div>
+                <div class="col">
+                  <div class="small text-muted">실수령</div>
+                  <div class="fw-bold fs-5 text-primary" id="r-netAmt"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 세부항목 -->
+            <div class="row g-4">
+
+              <div class="col-md-6">
+                <div class="p-3 border rounded-4">
+                  <h6 class="fw-bold text-primary mb-2">지급 항목</h6>
+                  <table class="table table-sm">
+                    <tbody id="r-payItems"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="p-3 border rounded-4">
+                  <h6 class="fw-bold text-danger mb-2">공제 항목</h6>
+                  <table class="table table-sm">
+                    <tbody id="r-dedItems"></tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+    
+
+    <script src="/js/pay/pay_calc_emp.js"></script>
+    
+
+  </th:block>
+</th:block>

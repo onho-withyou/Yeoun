@@ -4,6 +4,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yeoun.approval.dto.ApprovalDocDTO;
+
+import com.yeoun.approval.dto.ApprovalFormDTO;
+import com.yeoun.approval.dto.ApproverDTO;
+
 import com.yeoun.approval.service.ApprovalDocService;
 import com.yeoun.auth.dto.LoginDTO;
 
@@ -21,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/approvals")
+@Log4j2
 public class ApprovalRestController {
 	private final ApprovalDocService approvalDocService;
 	
@@ -39,6 +44,55 @@ public class ApprovalRestController {
 		return ResponseEntity.ok(approvalDocDTOPage.getContent());	
 	}
 	
+	@PatchMapping("/{approvalId}")
+	public ResponseEntity<Map<String,String>> approvalCheck(@PathVariable("approvalId") Long approvalId
+			, @AuthenticationPrincipal LoginDTO loginDTO, @RequestParam("btn")String btn) {
+		
+		Map<String, String> result = new HashMap<>();
+		String empId = loginDTO.getEmpId();
+		String msg = "";
+		
+		if("accept".equals(btn)) {
+			msg = "결제 승인";
+		} else {
+			msg = "반려";
+		}
+		try {
+			// 결제확인 버튼을 눌럿을때 작동할 서비스
+			approvalDocService.updateApproval(approvalId, empId, btn);
+			
+			result.put("result", msg + " 완료!!!");
+			return ResponseEntity.ok(result);
+		} catch (Exception e) {
+			result.put("result", msg + " 실패 : " + e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+		}
+	}
+	
+	// 기본 결재권자 가져오기
+	@GetMapping("/defaultApprover")
+	public ResponseEntity<?> getDefaultApprover(@AuthenticationPrincipal LoginDTO loginDTO) {
+		String empId = loginDTO.getEmpId();
+		
+		try {
+			List<ApprovalFormDTO> approvalFormList = approvalDocService.getDefaultApproverList(empId);
+			log.info(">>>>>>>>>>>>>> approvalFormList " + approvalFormList);
+			return ResponseEntity.ok(approvalFormList);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+		}
+	}
+
+	@GetMapping("/approvers/{approvalId}")
+	public ResponseEntity<List<ApproverDTO>> getApproverList(@PathVariable("approvalId") Long approvalId) {
+		
+		List<ApproverDTO> approverDTOList = approvalDocService.getApproverDTOList(approvalId);
+		
+		return ResponseEntity.ok(approverDTOList);
+
+	}
 }
 
 

@@ -15,7 +15,7 @@ public interface AccessLogRepository extends JpaRepository<AccessLog, Long> {
 	// 오늘 날짜의 외근 기록 있는지 조회
 	List<AccessLog> findByEmp_EmpIdAndAccessDate(String empId, LocalDate today);
 
-	// 가장 퇴근 로그 조회
+	// 가장 최근 로그 조회
 	@Query("""
 		    SELECT a
 		      FROM AccessLog a
