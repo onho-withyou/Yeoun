@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.yeoun.approval.dto.ApprovalDocDTO;
 import com.yeoun.approval.dto.ApprovalFormDTO;
 import com.yeoun.approval.repository.ApprovalDocRepository;
@@ -62,14 +63,6 @@ public class ApprovalController {
 										,@RequestParam(name="approval_title") String approval_title) {
 		return approvalDocService.getSearchList(start_date,end_date,emp_name,approval_title);
 	}
-	
-	@ResponseBody
-	@PostMapping("/save")
-	public String setPostSave(@RequestParam Map<String, Object> test) {
-		log.info("test ---------------------->",test);
-		return null;
-	}
-
 
 	//사원목록불러오기 토스트 셀렉트박스
 	@ResponseBody
@@ -109,11 +102,12 @@ public class ApprovalController {
 	 	return approvalDocService.getFinishedApprovalDocs(loginDTO.getEmpId());//"2505823"
 	 }
 
-//	@PostMapping("/approval_doc")
-//	public String postMethodName(@RequestParam Map<String, Object> test) {
-//		log.info(">>>>>>>>>>>>>>>>>> test : " + test);
-//		
-//		return "redirect:/approval/approval_doc";
-//	}
-	
+    @PostMapping("/approval_doc")
+    public String postMethodName(@AuthenticationPrincipal LoginDTO loginDTO, @RequestParam Map<String, String> doc) throws JsonProcessingException {
+        
+        approvalDocService.saveApprovalDoc(loginDTO.getEmpId(),doc);
+        
+        return "redirect:/approval/approval_doc";
+    }
+
 }

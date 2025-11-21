@@ -28,9 +28,8 @@
 	            	<select class="form-select" onchange="draftValFn(this)">
 	            		<option value="기안서" selected>기안서</option>
 	            		 <option th:each="item, iterStat : ${formTypes}" 
-							 		th:value="${item.formCode}" 
+							 		th:value="${item.formName}" 
 							 		th:text="${iterStat.index+1} + ' : ' + ${item.formName}"
-							 		th:data-formname="${item.formName}"
 									name="draft">
 						</option>
 	            	</select>
@@ -102,21 +101,22 @@
 		<!-- 모달 -->
 		<div class="modal fade" id="approval-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
-		    <form class="modal-content" th:action="@{/approval/approval_doc}" method="POST" th:object="${approvalDocDTO}" enctype="multipart/form-data">
+		    <form class="modal-content" th:action="@{/approval/approval_doc}" method="POST" enctype="multipart/form-data">
 		      <div class="modal-header" data-draggable="true">
-		        <h3 class="modal-title" id="Drafting">기안서 작성</h3>
+				<!--<h3 class="modal-title" id="Drafting" value="">기안서 작성</h3>-->
+				<input type="text" id="Drafting" name="drafting" value="">
+		        <!--<p class="modal-title" id="Drafting" name="drafting" style="font-size: 50px;">기안서 작성</p>-->
 		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		      </div>
 		      <div class="modal-body">
 		        <h5 class="d-flex">
 					<label>문서 날짜 : </label>
-					<p id="today-date" th:field="*{createDate}"></p>
+					<p id="today-date"></p>
 				</h5>
 		        <h5 class="d-flex">
 					<label class="p-1" style="width: 200px;"> 문서 제목 </label> 	                 
-		        	<input id="approval-title" class="form-control" type="text" th:field="*{approvalTitle}" placeholder="문서제목" style="width:800px;height: 38.94px;">
+		        	<input id="approval-title" class="form-control" type="text" name="approvalTitle" placeholder="문서제목" style="width:800px;height: 38.94px;">
 				</h5>
-				<div class="error_msg" th:if="${#fields.hasErrors('approvalTitle')}" th:errors="*{approvalTitle}"></div>
 		        <h5 class="d-flex">
 					<label class="p-1" style="width: 200px;">양식 종류 </label> 
 		        	<div class="mb-6 mb-0" style="width: 344px;">
@@ -133,24 +133,14 @@
 		        <h5 class="d-flex">
 					<label class="p-1" style="width: 200px;">결재자명(기안자)</label> 
 		        	<div class="mb-6 mb-0" style="width: 344px;">
-		        		<p id="approver-name" th:text="|${#authentication.principal.empName} (${#authentication.principal.empId})|"></p>
-		        		
-		        				        	
-		            	<!--   <select id="approver-name" class="form-select">
-		            		<option selected>이름(사번)</option>
-		            		 <option id="approverItem" th:each="item, iterStat : ${empList}" 
-							 		th:value="${item.empId}" 
-							 		th:text="${iterStat.index+1} + ' : ' + ${item.empName} + '(' + ${item.empId} + ')'">
-							 </option>
-
-		            	</select> --> 
+		        		<p id="approver-name" name="empId" th:text="|${#authentication.principal.empName} (${#authentication.principal.empId})|"></p> 
 	            	</div>
 		        </h5>
 		        <h5 class="d-flex">
 					<label class="p-1" style="width: 200px;">결재완료기간</label>
 		        	<div class="row flex-nowrap">
 						<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-							<input type="date" name="startDate" id="create-date" class="form-control">
+							<input type="date" name="createdDate" id="create-date" class="form-control">
 						</div>
 		                ~
 		                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
@@ -170,29 +160,10 @@
 		                </div>
 					</div>
 		        </h5>
-		     <!-- <h5 class="d-flex">
-		     	
-		       <label>연차유형 : </label>
-		          <label class="form-check-label" for="radioDefault1">
-						    연차 
-						  </label>
-						  <input class="form-check-input" type="radio" name="leaveDefault" id="radioDefault1" checked>
-						  <label class="form-check-label" for="radioDefault1">
-						    반차  
-						  </label>
-						  <input class="form-check-input" type="radio" name="leaveDefault" id="radioDefault1">
-						  <label class="form-check-label" for="radioDefault2">
-						    오전반차  
-						  </label>
-						  <input class="form-check-input" type="radio" name="leaveDefault" id="radioDefault2">
-						  <label class="form-check-label"  for="radioDefault2">
-						    오후반차 
-						  </label>
-		       	</h5> -->
 		       	<h5 class="d-flex">
 					<label class="p-1" style="width: 200px;">휴가종류-휴가(연차)신청서 [기본-hidden]</label>
 		        	<div class="mb-6 mb-0" style="width: 344px;">
-		  \          	<select id="leave-type" class="form-select"  >
+		           	<select id="leave-type" name="leaveType" class="form-select"  >
 		            		<option selected></option>
 		            		<option name="leave" value="연차">연차</option>
 							<option name="leave" value="오전반차">오전반차</option>
@@ -214,7 +185,7 @@
 		        <h5 class="d-flex">
 					<label class="p-1" style="width: 200px;">발령부서- 인사발령신청서 [기본-hidden]</label>
 		        	<div class="mb-6 mb-0" style="width: 344px;">
-		            	<select id="to-dept-id" class="form-select" >
+		            	<select id="to-dept-id" name="toDeptId" class="form-select" >
 		            		<option selected>부서</option>
 							<option th:each="item, iterStat : ${deptList}" 
 							 		th:value="${item.deptId}" 
@@ -226,7 +197,7 @@
 		        <h5 class="d-flex">
 					<label class="p-1" style="width: 200px;">지출종류 - 지출결의서 [기본-hidden]</label>
 		        	<div class="mb-6 mb-0" style="width: 344px;">
-		            	<select id="expnd-type" class="form-select" >
+		            	<select id="expnd-type" name="expndType" class="form-select" >
 		            		<option selected>지출종류</option>
 		            		<option name="expense" value="고정지출">고정지출</option>
 							<option name="expense" value="변동지출">변동지출</option>
@@ -236,7 +207,7 @@
 		        </h5>
 		        <h5>
 					<label class="p-1" style="width: 200px;">사유내용 -자유양식결재서:[기본-hidden]</label>
-		        	<textarea id="reason-write" class="form-control" th:field="*{reason}" rows="10" placeholder="결재사유내용 작성"></textarea>
+		        	<textarea id="reason-write" class="form-control" name="reason" rows="10" placeholder="결재사유내용 작성"></textarea>
 		        </h5>
 		        <!--<h5 class="d-flex">결재권한자 변경:
 		        	<input class="form-check-input" type="checkbox" id="opt-in">
@@ -257,22 +228,22 @@
 						  <label class="form-check-label" for="radioDefault1">
 						    없음 
 						  </label>
-						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault1" checked>
+						  <input class="form-check-input" type="radio" name="radioJeongyeolja" value="N" checked>
 						  <label class="form-check-label" for="radioDefault1">
 						    전결  
 						  </label>
-						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault1">
+						  <input class="form-check-input" type="radio" name="radioJeongyeolja" value="전결">
 						  <label class="form-check-label" for="radioDefault2">
 						    대결  
 						  </label>
-						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault2">
+						  <input class="form-check-input" type="radio" name="radioJeongyeolja" value="대결">
 						  <label class="form-check-label" for="radioDefault2">
 						    선결  
 						  </label>
-						  <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault2">
+						  <input class="form-check-input" type="radio" name="radioJeongyeolja" value="선결">
 						  <div>
 						 	<h5>전결자 지정 </h5>
-							<select id="emp_id" class="form-select" aria-label="Default select example">
+							<select id="emp_id" name="delegetedApprover" class="form-select" aria-label="Default select example">
 							  <option selected>이름 사원번호</option>
 							  <option th:each="item, iterStat : ${empList}" 
 							 			th:value="${item.empId}" 
@@ -293,7 +264,7 @@
 			    </div>
 		      	<hr>
 		      	<button type="button" class="btn btn-primary">인쇄</button>
-		        <button type="button" class="btn btn-primary" onclick="approvalDocSave()">등록</button>
+		        <button type="submit" class="btn btn-primary">등록</button>
 		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
 		      </div>
 		</form>
