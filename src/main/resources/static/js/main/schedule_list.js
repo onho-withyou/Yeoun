@@ -142,19 +142,22 @@ function initGrid(data) {
 					filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
 				},
 				{
-					header: ' '
+					header: '상세'
 					, name: "btn"
 					, width: 100 // 너비 설정
 					, align: "center"
 					// formatter 속성에 화살표 함수를 활용하여 원하는 태그를 해당 셀에 삽입 가능(각 셀에 반복 삽입됨)
 	//				, formatter: () => "<button type='button' class='btn-detail' >상세정보</button>"
-					, formatter: (cellInfo) => "<button type='button' class='btn-detail' data-row='${cellInfo.rowKey}' >상세정보</button>"
+					, formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary' data-row='${cellInfo.rowKey}' >상세</button>"
 				}
 			],
 			rowHeaders: ['rowNum'],
 			pageOptions: {
 				useClient: true,
 				perPage: 5
+			},
+			columnOptions: {
+			    resizable: true
 			}
 		});
 		grid.resetData(data);

@@ -17,8 +17,8 @@
 			<input type="hidden" th:value="${#authentication.name}" id="currentUserId">
 			<input type="hidden" th:value="${#authentication.principal.empName}" id="currentUserName">
 			<form class="d-flex" style="max-width: 300px;">
-				<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="searchKeyword" th:value="${searchKeyword}">
-				<button class="btn btn-outline-primary" type="submit">Search</button>
+				<input class="form-control me-2" type="search" placeholder="제목&내용 입력" aria-label="Search" name="searchKeyword" th:value="${searchKeyword}">
+				<button class="btn btn-outline-primary" type="submit">검색</button>
 			</form>
 			<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#create-notice">글쓰기</button>
 			</div>
@@ -55,8 +55,8 @@
 									<td th:text="${#temporals.format(notice.createdDate,'yyyy-MM-dd HH:mm')}"></td>
 									<td th:text="${#temporals.format(notice.updatedDate,'yyyy-MM-dd HH:mm')}"></td>
 				                	<td>
-			                            <button type="button" class="btn btn-info btn-sm" th:data-notice-id="*{notice.noticeId}">
-			                                보기
+			                            <button type="button" class="btn btn-primary btn-sm" th:data-notice-id="*{notice.noticeId}">
+			                                상세
 			                            </button>
 				                	</td>
 				                </tr>

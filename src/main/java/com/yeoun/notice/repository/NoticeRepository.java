@@ -17,7 +17,7 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 	@Query("""
 			SELECT n FROM Notice n
 			WHERE n.deleteYN = 'N'
-			and (
+			AND (
 				:searchKeyword is null
 				or :searchKeyword = '' 
 				or n.noticeTitle like concat('%', :searchKeyword, '%')
