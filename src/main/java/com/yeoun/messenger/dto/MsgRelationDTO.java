@@ -1,12 +1,9 @@
 package com.yeoun.messenger.dto;
 
 import com.yeoun.emp.entity.Emp;
-import com.yeoun.messenger.entity.MsgFavorite;
-import com.yeoun.messenger.entity.MsgFavoriteId;
 import com.yeoun.messenger.entity.MsgMessage;
 import com.yeoun.messenger.entity.MsgRelation;
 import com.yeoun.messenger.entity.MsgRoom;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
