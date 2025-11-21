@@ -129,7 +129,7 @@
 			const data = await response.json();
 			let itemData  = [];
 			let obj ={};
-			console.log(data);
+			//console.log(data);
 			data.map((item,index)=>{
 				obj["value"] = item[0]; //사번
 				obj["label"] = (index+1) +" : "+item[1]+"("+item[0]+")"; //이름(사번)
@@ -212,16 +212,12 @@
 					}
 					
 				}
-//				if(rowData.approver != null){ //결제권자가 비어있지 않을 때
-//					selectBox.select(rowData.approver);
-//					print("defalut", selectBox.getSelectedItem().label);
-//				}
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 				
 			});
 
-			grid2.on("click", (ev) => {
+			grid2.on("click", async (ev) => {
 		
 				console.log("ev ------>",ev);
 				const target = ev.nativeEvent.target;
@@ -255,17 +251,30 @@
 				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 				//document.getElementById('approver').value = rowData.approver;//결재권한자
 				
-				if(rowData.approver != null){
-					selectBox.select(rowData.approver);
-					console.log(selectBox.getSelectedItem().label);
-					print("defalut", selectBox.getSelectedItem().label);
+				const approverList = await getApproverList(approvalId);
+				
+				let sortedList; 
+				
+				if(approverList.length > 0) {
+					sortedList = approverList.sort((a, b) => {
+						return Number (a.orderApprovers) - Number(b.orderApprovers);
+					});
+					
+					window.count = 0;
+					approverDiv.innerHTML = "";
+										
+					for (const approver of sortedList) {
+						selectBox.select(approver.empId);
+						print("default", selectBox.getSelectedItem().label);
+					}
+					
 				}
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 			});
 
 
-			grid3.on("click", (ev) => {
+			grid3.on("click", async (ev) => {
 		
 				console.log("ev ------>",ev);
 				const target = ev.nativeEvent.target;
@@ -298,15 +307,29 @@
 				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
 				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 				//document.getElementById('approver').value = rowData.approver;//결재권한자
-				if(rowData.approver != null){
-					selectBox.select(rowData.approver);
-					print("defalut", selectBox.getSelectedItem().label);
+				const approverList = await getApproverList(approvalId);
+				
+				let sortedList; 
+				
+				if(approverList.length > 0) {
+					sortedList = approverList.sort((a, b) => {
+						return Number (a.orderApprovers) - Number(b.orderApprovers);
+					});
+					
+					window.count = 0;
+					approverDiv.innerHTML = "";
+										
+					for (const approver of sortedList) {
+						selectBox.select(approver.empId);
+						print("default", selectBox.getSelectedItem().label);
+					}
+					
 				}
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 			});
 
-		grid4.on("click", (ev) => {
+		grid4.on("click", async (ev) => {
 			
 			console.log("ev ------>",ev);
 			const target = ev.nativeEvent.target;
@@ -339,17 +362,29 @@
 			document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
 			document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 			//document.getElementById('approver').value = rowData.approver;//결재권한자
-			if(rowData.approver != null){
-				selectBox.select(rowData.approver);
-
-				print("defalut", selectBox.getSelectedItem().label);
-
-			}
+			const approverList = await getApproverList(approvalId);
+				
+				let sortedList; 
+				
+				if(approverList.length > 0) {
+					sortedList = approverList.sort((a, b) => {
+						return Number (a.orderApprovers) - Number(b.orderApprovers);
+					});
+					
+					window.count = 0;
+					approverDiv.innerHTML = "";
+										
+					for (const approver of sortedList) {
+						selectBox.select(approver.empId);
+						print("default", selectBox.getSelectedItem().label);
+					}
+					
+				}
 			//document.getElementById('approver').innerText = rowData.approver;//전결자
 			document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 		});
 	
-		grid5.on("click", (ev) => {
+		grid5.on("click", async (ev) => {
 			
 			console.log("ev ------>",ev);
 			const target = ev.nativeEvent.target;
@@ -382,10 +417,24 @@
 			document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
 			document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 			//document.getElementById('approver').value = rowData.approver;//결재권한자
-			if(rowData.approver != null){
-				selectBox.select(rowData.approver);
-				print("defalut", selectBox.getSelectedItem().label);
-			}
+			const approverList = await getApproverList(approvalId);
+				
+				let sortedList; 
+				
+				if(approverList.length > 0) {
+					sortedList = approverList.sort((a, b) => {
+						return Number (a.orderApprovers) - Number(b.orderApprovers);
+					});
+					
+					window.count = 0;
+					approverDiv.innerHTML = "";
+										
+					for (const approver of sortedList) {
+						selectBox.select(approver.empId);
+						print("default", selectBox.getSelectedItem().label);
+					}
+					
+				}
 			//document.getElementById('approver').innerText = rowData.approver;//전결자
 			document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 		});
@@ -656,7 +705,7 @@
 			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
 			,{header: '상세보기' ,name: 'view_details' ,align: 'center'
 				,formatter: (rowInfo) => {
-					console.log("rowInfo.row.rowKey------->",rowInfo.row.rowKey);
+					//console.log("rowInfo.row.rowKey------->",rowInfo.row.rowKey);
  					return `<button type='button' class='btn btn-primary me-2' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
 			}}
 		  ],
@@ -866,9 +915,10 @@
 	//모달창 코드
 	//기안서 셀렉트 박스 변경시 모달창에 텍스트 변경함수
 	function draftValFn(ev){
-		
 		let draft_doc = ev.value;
-		document.getElementById('Drafting').innerText = draft_doc;
+		
+		document.getElementById('Drafting').value = draft_doc;
+		//document.getElementById('Drafting').innerText = draft_doc;
 	}
 	
 	let today = new Date();   

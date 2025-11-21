@@ -1,6 +1,7 @@
 package com.yeoun.approval.entity;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -70,4 +71,5 @@ public class ApprovalDoc {
 	
 	@Column(name="REASON")
 	private String reason; //사유
+
 }
