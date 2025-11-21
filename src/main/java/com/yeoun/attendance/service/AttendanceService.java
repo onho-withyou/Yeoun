@@ -419,6 +419,20 @@ public class AttendanceService {
 		
 		return true;
 	}
+	
+	// 출근 상태 반환 로직 추가
+	public String attendanceStatus(String empId) {
+		LocalDate today = LocalDate.now();
+		
+		Attendance attendance = attendanceRepository.findByEmp_EmpIdAndWorkDate(empId, today)
+				.orElse(null);
+		
+		if (attendance == null) {
+			return "OUT";
+		}
+		
+		return attendance.getStatusCode();
+	}
 
 	// 건물 출입 현황
 	public List<AccessLogDTO> getAccessLogList(LocalDate start, LocalDate end) {
