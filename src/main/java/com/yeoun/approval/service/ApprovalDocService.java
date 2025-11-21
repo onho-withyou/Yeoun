@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.approval.dto.ApprovalDocDTO;
 import com.yeoun.approval.dto.ApprovalFormDTO;
+import com.yeoun.approval.dto.ApproverDTO;
 import com.yeoun.approval.entity.ApprovalForm;
 import com.yeoun.approval.entity.Approver;
 import com.yeoun.approval.entity.ApproverId;
@@ -18,6 +19,7 @@ import com.yeoun.approval.repository.ApprovalDocRepository;
 import com.yeoun.approval.repository.ApproverRepository;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
+import com.yeoun.hr.service.HrActionService;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,7 @@ public class ApprovalDocService {
 	private final ApprovalDocRepository approvalDocRepository;
 	private final ApproverRepository approverRepository;
 	private final ApprovalFormMapper approvalFormMapper;
+	private final HrActionService hrActionService;
 	
 	//기안자 명 불러오기
 	@Transactional(readOnly = true)
@@ -111,6 +114,9 @@ public class ApprovalDocService {
 					 if(Integer.parseInt(approver.getOrderApprovers()) == approverList.size()) {
 						 // approvalDoc의 status를 완료로 변경
 						 approvalDoc.setDocStatus("완료");
+						 
+						 handleAfterFinalApproval(approvalDoc);
+						 
 					 } else { // 현재 로그인 사용자와 승인권자자의 empId가 동일하고, 최종 결재권자가 아닌경우  
 						 // 현재 승인권자 다음 순서 확인( 현재 결재문서, 현재결재순서 + 1)
 						 Long nextApproverOrder = Long.parseLong(approver.getOrderApprovers()) + 1; 
@@ -136,6 +142,25 @@ public class ApprovalDocService {
 		 List<ApprovalFormDTO> list = approvalFormMapper.findDefaultApproverList(empId);
 		 
 		 return list;
+	 }
+	// ------------------------------------------------------------------------------
+	// 전자결재 최종 승인(=완료) 후 도메인별 후처리
+	 private void handleAfterFinalApproval(ApprovalDoc approvalDoc) {
+		 
+		 // 1) 문서가 인사발령 문서인지 확인
+		 if (!"인사발령신청서".equals(approvalDoc.getFormType())) {
+			 return; // 다른 양식이면 종료
+		 }
+		 
+		 // 2) 인사발령 서비스에 해당 결재문서의 발령을 적용
+		 Long approvalId = approvalDoc.getApprovalId();
+		 
+		 hrActionService.applyHrActionByApprovalId(approvalId);
+	 }	 
+	 
+	 // 결제문서 조회시 결제권한자 목록 불러오기
+	 public List<ApproverDTO> getApproverDTOList(Long approvalId) {
+		 return approverRepository.findByApprovalId(approvalId).stream().map(ApproverDTO::fromEntity).toList();
 	 }
 	 
 	// -------------------------------------------------------------------------------

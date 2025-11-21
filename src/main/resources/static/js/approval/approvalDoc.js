@@ -68,6 +68,24 @@
 		 }
 	}
 	
+	//결제상세보기 => 결제권자 정보 불러오기함수
+	async function getApproverList(approvalId) {
+		try {
+			const response = await fetch(`/api/approvals/approvers/${approvalId}`, {method: 'GET'});
+			
+			if(!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.result);
+			}
+			const data = await response.json();
+			return data;
+		} catch(error) {
+			alert("결재권자 목록을 불러올 수 없습니다!");
+			return null;
+		}
+	}
+	
+	
 	//grid - 1.결재사항 - 진행해야할 결재만 - 결재권한자만 볼수있음
 	//grid - 2.전체결재 - 나와관련된 모든 결재문서
 	//grid - 3.내 결재목록 - 내가 기안한 문서
@@ -105,6 +123,7 @@
 			const data = await response.json();
 			let itemData  = [];
 			let obj ={};
+			console.log(data);
 			data.map((item,index)=>{
 				obj["value"] = item[0]; //사번
 				obj["label"] = (index+1) +" : "+item[1]+"("+item[0]+")"; //이름(사번)
@@ -118,17 +137,23 @@
 			});
 			//셀렉트박스 닫힐때
 			selectBox.on('close',(ev)=>{
-				
 				let selectlabel = selectBox.getSelectedItem().label;
+//				let data = selectBox.getData()
+				let approverEmpId = selectBox.getSelectedItem().value;
+				console.log("@@@@@@@@@@@@@@@@@@@@@@", approverEmpId);
 				if(selectlabel != null && approverArr.length < 3){//셀렉트 라벨선택시 3번까지만셈
 					print(ev.type, selectlabel);
-					approverArr.push(this.count);
+					approverArr.push({
+						empId: approverEmpId
+						, approverOrder: this.count
+					});
+					console.log("@@@@@@@@@@@@@@@@@@@@@@",approverArr);
 				}
 				
 			});
 			//const modal = document.getElementById('approval-modal');
 			//그리드 1클릭시 상세버튼
-			grid1.on("click", (ev) => {
+			grid1.on("click", async (ev) => {
 		
 				console.log("ev ------>",ev);
 				const target = ev.nativeEvent.target;
@@ -163,10 +188,28 @@
 				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 				//document.getElementById('approver').value = rowData.approver;//결재권한자
 				
-				if(rowData.approver != null){
-					selectBox.select(rowData.approver);
-					print("defalut", selectBox.getSelectedItem().label);
+				const approverList = await getApproverList(approvalId);
+				
+				let sortedList; 
+				
+				if(approverList.length > 0) {
+					sortedList = approverList.sort((a, b) => {
+						return Number (a.orderApprovers) - Number(b.orderApprovers);
+					});
+					
+					window.count = 0;
+					approverDiv.innerHTML = "";
+										
+					for (const approver of sortedList) {
+						selectBox.select(approver.empId);
+						print("default", selectBox.getSelectedItem().label);
+					}
+					
 				}
+//				if(rowData.approver != null){ //결제권자가 비어있지 않을 때
+//					selectBox.select(rowData.approver);
+//					print("defalut", selectBox.getSelectedItem().label);
+//				}
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 				
@@ -782,6 +825,22 @@
     let defalutapproverArr = ["d-이사랑","d-미미미누","d-김경란"];
     let approverArr = [];//결재권한자 배열 
 	
+	async function defalutapprover() {
+		const res = await fetch("/api/approvals/defaultApprover", {method: "GET"});
+		
+		if (!res.ok) {
+			throw new Error("데이터 로드 실패!");
+		}
+		
+		const data = await res.json();
+		
+		console.log(data);
+		
+		return data;
+	}
+	
+	const defaultApp = await defalutapprover();
+	
     function defaultPrint(){
     	if(this.count === 0){
 	    	for(var i=0;i<defalutapproverArr.length;i++){
@@ -791,9 +850,12 @@
 	    	}
     	}
     }
+	
     function print(type, text) {
 		// 결재권한자변경 div 버튼 생성
+		console.log(window.count, "@@@@@@@@@@@@");
     	if(this.count < 3){
+		console.log(this.count, "this.count:!!!!!!!!!!!!")
 		this.count++;
     	approverDiv.innerHTML +='<div class="btn btn-success"'
       						+'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'

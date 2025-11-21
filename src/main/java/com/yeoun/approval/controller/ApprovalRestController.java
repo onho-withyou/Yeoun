@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yeoun.approval.dto.ApprovalDocDTO;
 import com.yeoun.approval.dto.ApprovalFormDTO;
+import com.yeoun.approval.dto.ApproverDTO;
 import com.yeoun.approval.service.ApprovalDocService;
 import com.yeoun.auth.dto.LoginDTO;
 
@@ -86,6 +87,15 @@ public class ApprovalRestController {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 		}
+	}
+
+	@GetMapping("/approvers/{approvalId}")
+	public ResponseEntity<List<ApproverDTO>> getApproverList(@PathVariable("approvalId") Long approvalId) {
+		
+		List<ApproverDTO> approverDTOList = approvalDocService.getApproverDTOList(approvalId);
+		
+		return ResponseEntity.ok(approverDTOList);
+
 	}
 	
 	
