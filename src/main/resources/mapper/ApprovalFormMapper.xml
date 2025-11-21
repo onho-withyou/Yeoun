@@ -9,22 +9,12 @@
 		        a.form_name AS formName,
 		        a.dept_id AS deptId,
 		        a.approver_1 AS approver1,
-		        e1.emp_name AS approver1Name,
 		        a.approver_2 AS approver2,
-		        e2.emp_name AS approver2Name,
 		        a.approver_3 AS approver3,
-		        e3.emp_name AS approver3Name
+		        e.emp_name
 		    FROM dept d
-		    JOIN approval_form a 
-		    ON d.dept_id = a.dept_id
-		    LEFT JOIN emp e1 
-		    ON a.approver_1 = e1.emp_id
-		    LEFT JOIN emp e2 
-		    ON a.approver_2 = e2.emp_id
-		    LEFT JOIN emp e3 
-		    ON a.approver_3 = e3.emp_id
-		    JOIN emp e 
-		    ON d.dept_id = e.dept_id
+		    JOIN approval_form a ON d.dept_id = a.dept_id
+		    JOIN emp e ON d.dept_id = e.dept_id
 		    WHERE e.emp_id = #{empId}
 	</select>
 	
