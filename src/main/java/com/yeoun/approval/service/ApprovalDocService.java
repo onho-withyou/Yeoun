@@ -1,6 +1,8 @@
 package com.yeoun.approval.service;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -56,6 +58,78 @@ public class ApprovalDocService {
 		//return approvalDocRepository.findPendingApprovalDocs(createDate,finishDate,empName,approvalTitle);
 		return null;
 	}
+	
+    //결재 문서 등록
+    public void saveApprovalDoc(String empId, Map<String,String> doc) {
+        log.info(">>>>>>>>>>>>>>>>>> approvalDoc : " + doc);
+        ApprovalDoc approvalDoc = new ApprovalDoc();
+        Approver approver = new Approver(); 
+        ApprovalDocDTO approvalDocDTO = new ApprovalDocDTO();
+        ApproverDTO approverDTO = new ApproverDTO();
+        //ApprovalDoc approvalDoc = approvalDocDTO.toEntity(approvalDocDTO);
+
+        doc.forEach((key, value) -> {
+            System.out.println(key + " : " + value);
+        });
+
+        LocalDate createdDate = LocalDate.parse(doc.get("createdDate"));
+        LocalDate finishDate = LocalDate.parse(doc.get("finishDate"));
+        LocalDate startDate = LocalDate.parse(doc.get("startDate"));
+        LocalDate endDate = LocalDate.parse(doc.get("endDate"));
+
+        //결재문서
+        approvalDoc.setApprovalId(null);//문서id -자동생성됨
+        approvalDoc.setApprovalTitle(doc.get("approvalTitle")); //문서제목
+        approvalDoc.setEmpId(empId); //기안자 사번번호
+        approvalDoc.setCreatedDate(createdDate);//문서생성일= 결재시작일 =오늘날짜
+        approvalDoc.setFinishDate(finishDate);//결재마감일
+        //if(){
+            approvalDoc.setDocStatus(empId);//1차대기 -결재권한자가있을때
+        //}
+        approvalDoc.setFormType(doc.get("drafting"));//양식종류
+        approvalDoc.setApprover(empId);//결재권한자
+        approvalDoc.setStartDate(startDate);// 휴가시작일
+        approvalDoc.setEndDate(endDate);//휴가종료일
+        approvalDoc.setLeaveType(doc.get("leaveType"));//휴가유형
+        approvalDoc.setToDeptId(doc.get("toDeptId"));//발령부서
+        approvalDoc.setLeaveType(empId);//연차유형
+        approvalDoc.setExpndType(doc.get("expndType"));//지출타입
+        approvalDoc.setReason(doc.get("reason"));//사유
+        
+        //approver.setDelegateStatus(); //본인/전결/대결/선결
+        //approver.setApprovalId(approvalDoc.getApprovalId());//문서id
+        //approver.setEmpId(doc.get("delegetedApprover")); //전결자//사원번호들어감
+        //approver.setApprovalStatus(false);//권한자상태 -필요없어짐
+        //approver.setOrderApprovers();//결재권한자 순서
+        //approver.setViewing();//열람권
+
+    
+        approvalDocDTO.setApprovalId(approvalDoc.getApprovalId());//결재문서id
+        approvalDocDTO.setApprovalTitle(approvalDoc.getApprovalTitle());//문서제목
+        approvalDocDTO.setEmpId(approvalDoc.getEmpId());//로그인한 사람 사원번호
+        approvalDocDTO.setCreateDate(approvalDoc.getCreatedDate());//생성일자
+        approvalDocDTO.setFinishDate(approvalDoc.getFinishDate());//완료예정일자
+        approvalDocDTO.setStartDate(approvalDoc.getStartDate());//시작휴가일자
+        approvalDocDTO.setEndDate(approvalDoc.getEndDate());//종료휴가날짜
+        approvalDocDTO.setFormType(approvalDoc.getFormType());//양식종류
+        approvalDocDTO.setApprover(approvalDoc.getApprover());//결재권한자
+        approvalDocDTO.setDocStatus(approvalDoc.getDocStatus());//문서상태
+        approvalDocDTO.setLeaveType(approvalDoc.getLeaveType());//연차유형
+        approvalDocDTO.setExpndType(approvalDoc.getExpndType());//지출종류
+        approvalDocDTO.setReason(approvalDoc.getReason());//사유
+
+        approverDTO.setApprovalId(approver.getApprovalId());
+        approverDTO.setEmpId(approver.getEmpId());
+        approverDTO.setApprovalStatus(false);//필요없음
+        approverDTO.setDelegateStatus(approver.getDelegateStatus());
+        approverDTO.setOrderApprovers(approver.getOrderApprovers());
+        //approverDTO.setViewing(approver.getViewing());;
+
+        approvalDocRepository.save(approvalDoc);
+        //approverRepository.save(approver);
+
+    }
+
 	//기안서 양식종류
 	@Transactional(readOnly = true)
 	public List<ApprovalForm> getFormTypes(String deptId) {
