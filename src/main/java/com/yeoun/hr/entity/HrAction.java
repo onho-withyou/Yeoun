@@ -98,9 +98,18 @@ public class HrAction {
 	@Column(name="APPROVAL_ID")
 	private Long approvalId;
 	 
-	// 적용일자 (최종 승인 후 실제 발령이 반영된 날짜)
+	// 발령 적용일자 (최종 승인 후 실제 발령이 반영된 날짜)
 	@Column(name = "APPLIED_DATE")
-	private LocalDate appliedDate;
+	private LocalDate appliedDate; 
+
+	// 발령 적용 여부
+	/* N : 아직 발령이 시스템이 적용되지 않음
+	 *     즉 결재 중이거나, 결재는 완료되었지만 효력일이 미래인 상태
+	 * Y : 발령이 실제로 EMP 테이블에 반영 완료
+	 *     즉 스케줄러가 돌면서 해당 발령을 처리한 상태
+	 */
+	@Column(name = "APPLIED_YN", nullable = false)
+	private String appliedYn = "N";
 	
 
 }
