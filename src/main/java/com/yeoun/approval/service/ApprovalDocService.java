@@ -22,6 +22,7 @@ import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.hr.entity.HrAction;
 import com.yeoun.hr.repository.HrActionRepository;
+import com.yeoun.leave.service.LeaveService;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class ApprovalDocService {
 	private final ApproverRepository approverRepository;
 	private final HrActionRepository hrActionRepository;
 	private final ApprovalFormMapper approvalFormMapper;
+	private final LeaveService leaveService;
 	
 	//기안자 명 불러오기
 	@Transactional(readOnly = true)
@@ -101,7 +103,7 @@ public class ApprovalDocService {
 		 ApprovalDoc approvalDoc = approvalDocRepository.findById(approvalId)
 				 					.orElseThrow(() -> new EntityNotFoundException("존재하지 않는 결재문서 입니다."));
 		 
-		 // 결제승인 버튼을 눌렀을 때
+		 // 결재승인 버튼을 눌렀을 때
 		 if("accept".equals(btn)) {
 			 // 해당 문서의 approvalId를 통해 approver 객체에서 승인권자 목록 가져오기
 			 List<Approver> approverList = approverRepository.findByApprovalId(approvalId);
@@ -118,6 +120,11 @@ public class ApprovalDocService {
 						 approvalDoc.setDocStatus("완료");
 						 
 						 handleAfterFinalApproval(approvalDoc);
+						 
+						 // 결재 완료된 문서의 양식이 연차신청서인 경우 동작
+						 if ("연차신청서".equals(approvalDoc.getFormType())) {
+		                      leaveService.createAnnualLeave(approvalDoc.getApprovalId());
+		                   }
 						 
 					 } else { // 현재 로그인 사용자와 승인권자자의 empId가 동일하고, 최종 결재권자가 아닌경우  
 						 // 현재 승인권자 다음 순서 확인( 현재 결재문서, 현재결재순서 + 1)
