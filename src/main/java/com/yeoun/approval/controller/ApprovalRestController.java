@@ -4,10 +4,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yeoun.approval.dto.ApprovalDocDTO;
+import com.yeoun.approval.dto.ApprovalFormDTO;
 import com.yeoun.approval.service.ApprovalDocService;
 import com.yeoun.auth.dto.LoginDTO;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/approvals")
+@Log4j2
 public class ApprovalRestController {
 	private final ApprovalDocService approvalDocService;
 	
@@ -69,6 +72,22 @@ public class ApprovalRestController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
 		}
 	}
+	
+	// 기본 결재권자 가져오기
+	@GetMapping("/defaultApprover")
+	public ResponseEntity<?> getDefaultApprover(@AuthenticationPrincipal LoginDTO loginDTO) {
+		String empId = loginDTO.getEmpId();
+		
+		try {
+			List<ApprovalFormDTO> approvalFormList = approvalDocService.getDefaultApproverList(empId);
+			log.info(">>>>>>>>>>>>>> approvalFormList " + approvalFormList);
+			return ResponseEntity.ok(approvalFormList);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+		}
+	}
+	
 	
 }
 

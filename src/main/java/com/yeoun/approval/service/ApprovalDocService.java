@@ -8,9 +8,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.approval.dto.ApprovalDocDTO;
+import com.yeoun.approval.dto.ApprovalFormDTO;
 import com.yeoun.approval.entity.ApprovalForm;
 import com.yeoun.approval.entity.Approver;
 import com.yeoun.approval.entity.ApproverId;
+import com.yeoun.approval.mapper.ApprovalFormMapper;
 import com.yeoun.approval.entity.ApprovalDoc;
 import com.yeoun.approval.repository.ApprovalDocRepository;
 import com.yeoun.approval.repository.ApproverRepository;
@@ -30,6 +32,8 @@ public class ApprovalDocService {
 
 	private final ApprovalDocRepository approvalDocRepository;
 	private final ApproverRepository approverRepository;
+	private final ApprovalFormMapper approvalFormMapper;
+	
 	//기안자 명 불러오기
 	@Transactional(readOnly = true)
 	public List<Emp> getEmp() {
@@ -126,6 +130,14 @@ public class ApprovalDocService {
 		 }
 	 }
 	 
+	 // 기본 결재권자 가져오기
+	 public List<ApprovalFormDTO> getDefaultApproverList(String empId) {
+		 
+		 List<ApprovalFormDTO> list = approvalFormMapper.findDefaultApproverList(empId);
+		 
+		 return list;
+	 }
+	 
 	// -------------------------------------------------------------------------------
 	// 메인페이지 내가 결제할 결제문서, 내가올린 결제 문서 불러오기
 	public Page<ApprovalDocDTO> getSummaryApproval(String empId) {
@@ -135,6 +147,4 @@ public class ApprovalDocService {
 		
 		return approvalDOCPage.map(ApprovalDocDTO::fromEntity); 
 	}
-	
-
 }
