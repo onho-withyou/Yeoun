@@ -8,10 +8,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.approval.dto.ApprovalDocDTO;
+import com.yeoun.approval.dto.ApprovalFormDTO;
 import com.yeoun.approval.dto.ApproverDTO;
 import com.yeoun.approval.entity.ApprovalForm;
 import com.yeoun.approval.entity.Approver;
 import com.yeoun.approval.entity.ApproverId;
+import com.yeoun.approval.mapper.ApprovalFormMapper;
 import com.yeoun.approval.entity.ApprovalDoc;
 import com.yeoun.approval.repository.ApprovalDocRepository;
 import com.yeoun.approval.repository.ApproverRepository;
@@ -32,6 +34,7 @@ public class ApprovalDocService {
 
 	private final ApprovalDocRepository approvalDocRepository;
 	private final ApproverRepository approverRepository;
+	private final ApprovalFormMapper approvalFormMapper;
 	private final HrActionService hrActionService;
 	
 	//기안자 명 불러오기
@@ -133,6 +136,13 @@ public class ApprovalDocService {
 		 }
 	 }
 	 
+	 // 기본 결재권자 가져오기
+	 public List<ApprovalFormDTO> getDefaultApproverList(String empId) {
+		 
+		 List<ApprovalFormDTO> list = approvalFormMapper.findDefaultApproverList(empId);
+		 
+		 return list;
+	 }
 	// ------------------------------------------------------------------------------
 	// 전자결재 최종 승인(=완료) 후 도메인별 후처리
 	 private void handleAfterFinalApproval(ApprovalDoc approvalDoc) {
@@ -162,5 +172,4 @@ public class ApprovalDocService {
 		
 		return approvalDOCPage.map(ApprovalDocDTO::fromEntity); 
 	}
-
 }
