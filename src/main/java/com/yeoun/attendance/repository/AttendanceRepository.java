@@ -19,7 +19,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 	boolean existsByEmp_EmpIdAndWorkDate(String empId, LocalDate today);
 
 	// 개인 출퇴근 기록 조회
-	List<Attendance> findByEmp_EmpIdAndWorkDateBetween(String empId, LocalDate startDate, LocalDate endDate);
+	List<Attendance> findByEmp_EmpIdAndWorkDateBetweenOrderByWorkDateDesc(String empId, LocalDate startDate, LocalDate endDate);
 
 	// 전체직원 출퇴근 기록 조회
 	@Query("""
@@ -28,6 +28,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 		    JOIN FETCH e.dept
 		    JOIN FETCH e.position
 		    WHERE a.workDate BETWEEN :startDate AND :endDate
+		    ORDER BY a.workDate DESC
 		""")
 	List<Attendance> findByWorkDateBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
@@ -39,6 +40,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 		    JOIN FETCH e.position p
 		    WHERE d.deptId = :deptId
 		      AND a.workDate BETWEEN :startDate AND :endDate
+		    ORDER BY a.workDate DESC
 		""")
 	List<Attendance> findByEmp_Dept_DeptIdAndWorkDateBetween(
 			@Param("deptId") String deptId, 

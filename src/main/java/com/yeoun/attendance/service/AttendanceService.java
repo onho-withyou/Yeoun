@@ -251,7 +251,7 @@ public class AttendanceService {
 	
 	// 개인 출퇴근 기록
 	public List<AttendanceDTO> getMyAttendanceList(String empId, LocalDate startDate, LocalDate endDate) {
-		return attendanceRepository.findByEmp_EmpIdAndWorkDateBetween(empId, startDate, endDate)
+		return attendanceRepository.findByEmp_EmpIdAndWorkDateBetweenOrderByWorkDateDesc(empId, startDate, endDate)
 				.stream()
 				.map(AttendanceDTO::fromEntity)
 				.collect(Collectors.toList());

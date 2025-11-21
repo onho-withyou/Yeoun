@@ -64,14 +64,17 @@ const grid = new tui.Grid({
 			}
 		},
 		{
-			header: " ",
+			header: "수정",
 			name : "btn",
 			formatter: (rowInfo) => {
 				return  `<button class="btn btn-primary" data-id="${rowInfo.row.id}">수정</button>`
 			}
 		},
 	],
-	bodyHeight: 500,
+	bodyHeight: 500,	
+	columnOptions: {
+		resizable: true
+	}
 });
 
 // 버튼 이벤트 감지
@@ -119,7 +122,6 @@ async function loadAttendanceList(startDate, endDate) {
 		
 		grid.resetData(data);
 		
-		grid.sort('workDate', true);
 	} catch(error) {
 		console.error(error);
 		alert("데이터를 불러오는 중 오류가 발생했습니다.");	
@@ -134,7 +136,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	
 	// 이번 달 1일과 말일 계산
 	const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
-	const endDate = new Date(year, month, 0).toISOString().split("T")[0];
+	const endDate = today.toISOString().split("T")[0];
 	
 	// 날짜 input 기본값 설정
 	document.querySelector("#startDate").value = startDate;
