@@ -148,7 +148,7 @@ function initGrid(data) {
 					, align: "center"
 					// formatter 속성에 화살표 함수를 활용하여 원하는 태그를 해당 셀에 삽입 가능(각 셀에 반복 삽입됨)
 	//				, formatter: () => "<button type='button' class='btn-detail' >상세정보</button>"
-					, formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary' data-row='${cellInfo.rowKey}' >상세</button>"
+					, formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary btn-sm' data-row='${cellInfo.rowKey}' >상세</button>"
 				}
 			],
 			rowHeaders: ['rowNum'],
