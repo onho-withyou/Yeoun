@@ -72,6 +72,7 @@ public class PayrollCalcService {
         private BigDecimal incentive;
         private BigDecimal annual;
         private BigDecimal longserv;
+        private BigDecimal bunus;
     }
 
 
@@ -213,13 +214,21 @@ public int runMonthlyBatch(String payYymm,
     final CalcStatus status = simulated ? CalcStatus.SIMULATED : CalcStatus.CALCULATED;
 
     List<PayRule> rules = payRuleRepo.findActiveValidRules(ActiveStatus.ACTIVE, LocalDate.now());
-    List<PayItemMst> items = itemRepo.findAll();
-    List<PayCalcRule> calcRules = calcRuleRepo.findAll();
+    List<PayItemMst> items = itemRepo.findAll();    
+    
+    LocalDate asOf = LocalDate.of(
+            Integer.parseInt(payYymm.substring(0,4)),
+            Integer.parseInt(payYymm.substring(4,6)),
+            1
+    ).withDayOfMonth(20); // 급여규칙 적용시기
+
+    List<PayCalcRule> calcRules = calcRuleRepo.findActiveRules(asOf);
+
     calcRules.sort(Comparator.comparingInt(PayCalcRule::getPriority));
         
     /* -----------------------------
 		    대상 사원 조회
-		   ----------------------------- */
+	 ----------------------------- */
         
         
         List<SimpleEmp> employees;
@@ -282,7 +291,8 @@ public int runMonthlyBatch(String payYymm,
                 BigDecimal alwAmt = ar.getAllowance()
                         .add(ar.getIncentive())
                         .add(ar.getAnnual())
-                		.add(ar.getLongserv());
+                		.add(ar.getLongserv())
+                		.add(ar.getBunus());
                 BigDecimal incAmt = ar.getIncentive();
                 BigDecimal longserv = ar.getLongserv();   
                 BigDecimal dedAmt = calcDeductions(emp, rules, items, calcRules, baseAmt, alwAmt);
@@ -384,6 +394,7 @@ public int runMonthlyBatch(String payYymm,
                             .build());
                 }
                 
+             // 지급: 근속수당
                 if (longserv.compareTo(BigDecimal.ZERO) > 0) {
                     empPayItemRepo.save(EmpPayItem.builder()
                             .payslip(slip)
@@ -391,6 +402,18 @@ public int runMonthlyBatch(String payYymm,
                             .itemCode("LONGSERV")
                             .itemName("근속수당")
                             .amount(safe(longserv))    
+                            .sortNo(sort++)
+                            .build());
+                }
+
+             // 지급: 보너스
+                if (ar.getBunus().compareTo(BigDecimal.ZERO) > 0) {
+                    empPayItemRepo.save(EmpPayItem.builder()
+                            .payslip(slip)
+                            .itemType("ALW")
+                            .itemCode("BONUS")
+                            .itemName("보너스")
+                            .amount(safe(ar.getBunus()))
                             .sortNo(sort++)
                             .build());
                 }
@@ -476,6 +499,8 @@ public int runMonthlyBatch(String payYymm,
                 .alwAmt(slip.getAlwAmt())
                 .dedAmt(slip.getDedAmt())
                 .netAmt(slip.getNetAmt())
+                .confirmUser(slip.getConfirmUser())
+                .confirmDate(slip.getConfirmDate())
                 .items(itemDtos)
                 .build();
     }
@@ -489,7 +514,7 @@ public int runMonthlyBatch(String payYymm,
 
     PayRule rule = rules.stream().findFirst().orElse(null);
     if (rule == null) 
-        return new AllowanceResult(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        return new AllowanceResult(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
 
     BigDecimal meal = BigDecimal.valueOf(Optional.ofNullable(rule.getMealAmt()).orElse(0.0));
     BigDecimal trans = BigDecimal.valueOf(Optional.ofNullable(rule.getTransAmt()).orElse(0.0));
@@ -498,6 +523,7 @@ public int runMonthlyBatch(String payYymm,
     BigDecimal incentiveAmt   = BigDecimal.ZERO;   //직급수당
     BigDecimal annualAmt      = BigDecimal.ZERO;   //연차수당
     BigDecimal LONGSERV      = BigDecimal.ZERO;   //근속수당
+    BigDecimal bonusAmt = BigDecimal.ZERO;  //보너스
     
  // 🔥 근속년수 계산 (입사일 기준 → 급여 계산 대상 월 기준)
     int yearsOfService = 0;
@@ -518,11 +544,17 @@ public int runMonthlyBatch(String payYymm,
 
 
     for (PayCalcRule cr : calcRules) {
+    	log.info("[RULE CHECK] itemCode={}, itemGroup={}, targetType={}, targetCode={}",
+    	        cr.getItem().getItemCode(),
+    	        cr.getItem().getItemGroup(),
+    	        cr.getTargetType(),
+    	        cr.getTargetCode());
+
 
         if (cr.getItem() == null) continue;
         if (cr.getItem().getItemGroup() == null) continue;
 
-        if (!List.of(ItemGroup.ALLOWANCE, ItemGroup.INCENTIVE).contains(cr.getItem().getItemGroup()))
+        if (!List.of(ItemGroup.ALLOWANCE, ItemGroup.INCENTIVE, ItemGroup.BONUS).contains(cr.getItem().getItemGroup()))
             continue;
 
         // 대상 조건 체크
@@ -533,6 +565,9 @@ public int runMonthlyBatch(String payYymm,
             case GRADE -> employeePort.getEmpPosition(emp.empId()).equals(cr.getTargetCode());
         };
         if (!targetPass) continue;
+        
+     // 보너스 체크 로그
+        log.info("[BONUS CHECK] comparing itemCode={} with 'BONUS'", cr.getItem().getItemCode());
 
         // JEXL 수식 계산
         Map<String, Object> vars = new HashMap<>();
@@ -591,6 +626,13 @@ public int runMonthlyBatch(String payYymm,
             incentiveAmt = incentiveAmt.add(result);
             continue;
         }
+        
+     //   보너스
+        if ("BONUS".equals(cr.getItem().getItemCode())) {
+        	bonusAmt = bonusAmt.add(result); 
+            totalAllowance = totalAllowance.add(result);
+            continue;
+        }
 
         // 일반수당
         totalAllowance = totalAllowance.add(result);
@@ -600,7 +642,8 @@ public int runMonthlyBatch(String payYymm,
             safe(totalAllowance),
             safe(incentiveAmt),
             safe(annualAmt),
-            safe(LONGSERV)
+            safe(LONGSERV),
+            safe(bonusAmt)
     );
 }
 
