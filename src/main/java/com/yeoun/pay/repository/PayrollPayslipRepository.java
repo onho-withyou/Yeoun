@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 
 import com.yeoun.pay.entity.PayrollPayslip;
 import com.yeoun.pay.enums.CalcStatus;
-
 import com.yeoun.pay.dto.PayslipViewDTO;
 
 public interface PayrollPayslipRepository extends JpaRepository<PayrollPayslip, Long> {
@@ -144,6 +143,9 @@ public interface PayrollPayslipRepository extends JpaRepository<PayrollPayslip, 
     	       AND p.calcStatus = 'CALCULATED'
     	""")
     	long countCalculated(@Param("yyyymm") String yyyymm);
+    	
+    	
+
     
 }
 
