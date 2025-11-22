@@ -9,8 +9,10 @@
 	  인사 신규 등록
 	</h2>
 
-	  <form th:action="${mode == 'edit'} ? @{/emp/edit} : @{/emp/regist}" 
-	  		th:object="${empDTO}" method="post" enctype="multipart/form-data" novalidate>
+	  <form th:action="@{${formAction}}" th:object="${empDTO}" method="post"
+      		enctype="multipart/form-data" novalidate>
+      		
+       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 	
 	    <!-- 상단 2컬럼 카드 -->
 	    <div class="row g-4 mb-5">

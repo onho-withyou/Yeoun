@@ -89,19 +89,24 @@
 				    (<span sec:authentication="principal.empId"></span>)
 				  </a>
 				
-				  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-				    <!-- 내 정보 모달 -->
-				    <li><a class="dropdown-item" href="#" id="btnMyInfo">내 정보</a></li>
-				    <!-- 비밀번호 변경 -->
-				    <li><a class="dropdown-item" th:href="@{/my/password}">비밀번호 변경</a></li>
-				    <li><hr class="dropdown-divider"></li>
-				    <!-- 로그아웃 -->
-				    <li>
-				      <a class="dropdown-item logout-link" href="#">
-				        로그아웃
-				      </a>
-				    </li>
-				  </ul>
+				 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+				  <!-- 내 정보 모달 -->
+				  <li><a class="dropdown-item" href="#" id="btnMyInfo">내 정보</a></li>
+				
+				  <!-- 내 정보 수정: 여기서 바로 페이지로 이동 -->
+				  <li><a class="dropdown-item" th:href="@{/my/info/edit}">내 정보 수정</a></li>
+				
+				  <!-- 비밀번호 변경 -->
+				  <li><a class="dropdown-item" th:href="@{/my/password}">비밀번호 변경</a></li>
+				  <li><hr class="dropdown-divider"></li>
+				
+				  <!-- 로그아웃 -->
+				  <li>
+				    <a class="dropdown-item logout-link" href="#">
+				      로그아웃
+				    </a>
+				  </li>
+				</ul>
 				</li>
 				<!-- 로그인 안 한 경우에는 그냥 login 링크만 -->
 				<li class="nav-item lh-1 me-3" sec:authorize="!isAuthenticated()">
@@ -128,9 +133,9 @@
 		  });
 		</script>
 	
-	
 		<script>
 		  // ================== 내 정보 모달 열기 ==================
+		  // 화면 공통 전역 변수
 		  document.getElementById('btnMyInfo')?.addEventListener('click', function (e) {
 			  e.preventDefault();
 			
@@ -139,6 +144,9 @@
 			    .then(data => {
 			
 			      document.getElementById('empDetailModalTitle').innerText = '내 정보';
+			      
+			      const editBtn = document.getElementById("editBtn");
+		          if (editBtn) editBtn.style.display = "none";
 			
 			      // 값 세팅
 			      document.getElementById('d-empName').innerText = data.empName;
@@ -152,13 +160,26 @@
 			      document.getElementById('d-address').innerText = data.address;
 			      document.getElementById('d-rrn').innerText = data.rrnMasked;
 			      document.getElementById('d-bank').innerText = data.bankInfo || '';
+			      
+			  	  // 수정 버튼 숨기기
+			      document.getElementById('editBtn').style.display = 'none';
 			
 			      const modalEl = document.getElementById('empDetailModal');
 			      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
 			      modal.show();
-			    });
+			    })
+			    .catch(() => alert("내 정보 불러오기 실패"));
 			});
+		  
+		    // 정보 수정 버튼
+		    document.getElementById('editBtn')?.addEventListener('click', function () {
+		    	if(window.detailMode === 'self') {
+		    		// 본인 정보 수정
+		    		window.location.href = '/my/info/edit';
+		    	}
+		    });
 		</script>
+		<script src="/js/emp/emp.js"></script>	
 
 		  <script>
 			//Resources

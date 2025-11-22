@@ -194,6 +194,7 @@ public class EmpController {
 		// 공통 모델 세팅
 	    model.addAttribute("empDTO", empDTO);
 		model.addAttribute("mode", "edit");
+		model.addAttribute("formAction", "/emp/edit");
 		
 		setupEmpFormCommon(model);
 		
@@ -209,9 +210,6 @@ public class EmpController {
 	    rttr.addFlashAttribute("msg", "정보 수정이 완료되었습니다.");
 	    return "redirect:/emp";  
 	}
-	
-	
-	
 	
 	
 	

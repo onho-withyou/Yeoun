@@ -1,6 +1,7 @@
 package com.yeoun.auth.controller;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,7 +15,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.auth.dto.PasswordChangeDTO;
+import com.yeoun.common.service.CommonCodeService;
+import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpDetailDTO;
+import com.yeoun.emp.repository.DeptRepository;
+import com.yeoun.emp.repository.PositionRepository;
 import com.yeoun.emp.service.EmpService;
 
 import jakarta.validation.Valid;
@@ -27,6 +32,9 @@ public class MyPageController {
 	
 	private final EmpService empService;
     private final BCryptPasswordEncoder encoder;
+    private final DeptRepository deptRepository;
+    private final PositionRepository positionRepository;
+    private final CommonCodeService commonCodeService;
 
     // 1.  내 정보 JSON (모달용)
     @GetMapping("/info")
@@ -38,6 +46,40 @@ public class MyPageController {
         // 기존 상세조회 재활용 (민감정보는 마스킹된 DTO로)
         return empService.getEmpDetail(empId);
     }
+    
+	// 내 정보 수정
+	@GetMapping("/info/edit")
+	public String editMyInfo(@AuthenticationPrincipal LoginDTO loginUser,
+							 Model model) {
+		
+		EmpDTO empDTO = empService.getEmpForEdit(loginUser.getEmpId());
+		
+		model.addAttribute("empDTO", empDTO);
+		model.addAttribute("mode", "edit");
+		
+		model.addAttribute("formAction", "/my/info/edit");
+		
+		// emp_form.html에서 필요한 공통 select box 세팅
+	    model.addAttribute("deptList", deptRepository.findActive());
+	    model.addAttribute("positionList", positionRepository.findActive());
+	    model.addAttribute("bankList", commonCodeService.getBankList());
+	    model.addAttribute("statusList", commonCodeService.getCodes("EMP_STATUS"));
+		
+		return "emp/emp_form";
+	}
+	
+	@PostMapping("/info/edit")
+	public String updateMyInfo(@AuthenticationPrincipal LoginDTO loginUser,
+	                           @ModelAttribute("empDTO") EmpDTO empDTO,
+	                           RedirectAttributes rttr) {
+
+	    empDTO.setEmpId(loginUser.getEmpId()); 
+
+	    empService.updateEmp(empDTO); 
+
+	    rttr.addFlashAttribute("msg", "내 정보가 수정되었습니다.");
+	    return "redirect:/emp";  
+	}
 
     // 2. 비밀번호 변경 폼 
     @GetMapping("/password")
