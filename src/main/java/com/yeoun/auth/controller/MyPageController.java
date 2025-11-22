@@ -67,7 +67,7 @@ public class MyPageController {
 	
 	@PostMapping("/info/update")
 	public String updateMyInfo(@AuthenticationPrincipal LoginDTO loginUser,
-	                           @ModelAttribute("empDTO") @Validated(EmpDTO.Update.class) EmpDTO empDTO,
+	                           @ModelAttribute("empDTO") @Validated(EmpDTO.Edit.class) EmpDTO empDTO,
 	                           BindingResult bindingResult,
 	                           Model model,
 	                           RedirectAttributes rttr) {

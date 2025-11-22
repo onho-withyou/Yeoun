@@ -74,7 +74,7 @@ public class EmpController {
 	// => 체크 결과를 뷰페이지에서 활용하기 위해 뷰페이지에서 접근할 DTO 객체 이름을 @ModelAttribute 어노테이션 속성으로 명시
 	// => 전달된 파라미터들이 EmpDTO 객체에 바인딩되는 시점에 입력값 검증을 수행하고 이 결과를 BindingResult 타입 파라미터에 저장해줌
 	@PostMapping("/regist")
-	public String regist(@ModelAttribute("empDTO") @Validated(EmpDTO.Create.class) EmpDTO empDTO,
+	public String regist(@ModelAttribute("empDTO") @Validated(EmpDTO.Regist.class) EmpDTO empDTO,
 						 BindingResult bindingResult,
 						 RedirectAttributes rttr) {
 		log.info(">>>>>>>>>>>>>> empDTO : " + empDTO);
@@ -206,7 +206,7 @@ public class EmpController {
 	}
 	
 	@PostMapping("/edit")
-	public String updateEmp(@ModelAttribute("empDTO") @Validated(EmpDTO.Update.class) EmpDTO empDTO, 
+	public String updateEmp(@ModelAttribute("empDTO") @Validated(EmpDTO.Edit.class) EmpDTO empDTO, 
 							BindingResult bindingResult,
 							Model model,
 							RedirectAttributes rttr) {
