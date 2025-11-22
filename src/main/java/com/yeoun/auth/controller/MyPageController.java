@@ -39,12 +39,9 @@ public class MyPageController {
     // 1.  내 정보 JSON (모달용)
     @GetMapping("/info")
     @ResponseBody
-    public EmpDetailDTO getMyInfo(Authentication auth) {
-        LoginDTO login = (LoginDTO) auth.getPrincipal();
-        String empId = login.getEmpId();
+    public EmpDetailDTO getMyInfo(@AuthenticationPrincipal LoginDTO loginUser) {
 
-        // 기존 상세조회 재활용 (민감정보는 마스킹된 DTO로)
-        return empService.getEmpDetail(empId);
+        return  empService.getEmpDetail(loginUser.getEmpId());
     }
     
 	// 내 정보 수정
@@ -55,9 +52,8 @@ public class MyPageController {
 		EmpDTO empDTO = empService.getEmpForEdit(loginUser.getEmpId());
 		
 		model.addAttribute("empDTO", empDTO);
+		model.addAttribute("formAction", "/my/info/update");
 		model.addAttribute("mode", "edit");
-		
-		model.addAttribute("formAction", "/my/info/edit");
 		
 		// emp_form.html에서 필요한 공통 select box 세팅
 	    model.addAttribute("deptList", deptRepository.findActive());
@@ -68,9 +64,10 @@ public class MyPageController {
 		return "emp/emp_form";
 	}
 	
-	@PostMapping("/info/edit")
+	@PostMapping("/info/update")
 	public String updateMyInfo(@AuthenticationPrincipal LoginDTO loginUser,
 	                           @ModelAttribute("empDTO") EmpDTO empDTO,
+	                           BindingResult result,
 	                           RedirectAttributes rttr) {
 
 	    empDTO.setEmpId(loginUser.getEmpId()); 
@@ -78,7 +75,7 @@ public class MyPageController {
 	    empService.updateEmp(empDTO); 
 
 	    rttr.addFlashAttribute("msg", "내 정보가 수정되었습니다.");
-	    return "redirect:/emp";  
+	    return "redirect:/main";  
 	}
 
     // 2. 비밀번호 변경 폼 
