@@ -117,12 +117,14 @@
                 </button>
 
                 <!-- 삭제 -->
-                <form th:action="@{'/pay/rule_calc/' + ${c.ruleId}}" method="post"
-                      style="display:inline;"
-                      th:onsubmit="|return confirm('규칙 No. ${c.ruleId} 삭제하시겠습니까?');|">
-                  <input type="hidden" name="_method" value="DELETE">
-                  <button class="btn btn-sm btn-outline-danger" type="submit">삭제</button>
-                </form>
+               <form th:action="@{'/pay/rule_calc/' + ${c.ruleId} + '/delete'}"
+			      method="post"
+			      style="display:inline;"
+			      th:onsubmit="|return confirm('규칙 No. ${c.ruleId} 삭제하시겠습니까?');|">
+			
+			  <button class="btn btn-sm btn-outline-danger" type="submit">삭제</button>
+			</form>
+
 
               </td>
             </tr>
@@ -261,8 +263,11 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
 
-        <form th:action="@{'/pay/rule_calc/' + ${c.ruleId}}" method="post">
-          <input type="hidden" name="_method" value="PUT"/>
+<!--         <form th:action="@{'/pay/rule_calc/' + ${c.ruleId}}" method="post"> -->
+<!--           <input type="hidden" name="_method" value="PUT"/> -->
+          
+          <form th:action="@{'/pay/rule_calc/' + ${c.ruleId} + '/update'}" method="post">
+          
 
           <div class="modal-header">
             <h5 class="modal-title">계산 규칙 수정 - <span th:text="${c.ruleId}"></span></h5>
