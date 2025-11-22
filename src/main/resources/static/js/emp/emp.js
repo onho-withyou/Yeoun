@@ -13,110 +13,108 @@
  * - 부서 선택 유지 / 복원 로직 포함
  * ============================================================
  */
+let allDept = [];
 
-	let allDept = [];
+function initOrgSelects() {
+  const topSel  = document.getElementById('topDept');  // 본부 (상위부서)
+  const deptSel = document.getElementById('deptId');   // 부서
+  const posSel  = document.getElementById('posCode');  // 직급
 
-	function initOrgSelects() {
-	  const pageMode = document.body.dataset.mode;
-	  if (pageMode === 'edit') {
-	     return;
-	   }
-		 
-	  const topSel  = document.getElementById('topDept');  // 본부 (상위부서)
-	  const deptSel = document.getElementById('deptId');   // 부서
-	  const posSel  = document.getElementById('posCode');  // 직급
-	
-	  if (!topSel || !deptSel || !posSel) return; // 다른 화면 대비 가드
-	  
-	  // 부서 option 백업 (placeholder 제외, data-parent 있는 애들만 = 하위부서)
-	  allDept = Array.from(
-	     deptSel.querySelectorAll('option[data-parent]')
-	   );
-	
-	  // 공통: 셀렉트 초기화 + placeholder + disabled 설정 (부서용)
-	  function resetDept(phText, disabled = true) {
-	    deptSel.innerHTML = '';
-	    const ph = document.createElement('option');
-	    ph.value = '';
-	    ph.textContent = phText;
-	    ph.disabled = true;
-	    ph.selected = true;
-	    deptSel.appendChild(ph);
-	    deptSel.disabled = disabled;
-	  }
-	
-	  // 직급 셀렉트의 활성/비활성만 제어 (목록은 그대로 둠)
-	  function updatePosState(deptId) {
-	    const firstOpt = posSel.querySelector('option[value=""]') || posSel.options[0];
-	
-	    if (!deptId) {
-	      // 부서가 없으면 직급 막기
-	      if (firstOpt) firstOpt.textContent = '먼저 부서를 선택하세요';
-	      posSel.value = '';
-	      posSel.disabled = true;
-	    } else {
-	      // 부서가 선택되면 직급 활성화
-	      if (firstOpt) firstOpt.textContent = '직급을 선택하세요';
-	      posSel.disabled = false;
-	    }
-	  }
-	
-	  // 상위부서 선택에 따라 부서 필터링
-	  function filterDeptByTop(topId) {
-	    const prevDept = deptSel.value;
-		
-	    if (!topId) {
-	      // 본부 안 고른 상태
-	      resetDept('먼저 본부를 선택하세요', true);
-	      updatePosState(null); // 직급도 막기
-	      return;
-	    }
-	
-	    // 본부 선택됨 -> 부서 활성화 + 해당 상위부서의 하위부서만 노출
-	    resetDept('부서를 선택하세요', false);
-	
-	    allDept
-	      .filter(o => o.getAttribute('data-parent') === topId)  // data-parent = parentDeptId
-	      .forEach(o => deptSel.appendChild(o.cloneNode(true)));
-	
-	    // 이전에 선택한 부서가 여전히 목록에 있으면 복원
-	    if ([...deptSel.options].some(o => o.value === prevDept)) {
-	      deptSel.value = prevDept;
-	      updatePosState(prevDept);
-	    } else {
-	      updatePosState(null); // 유효한 부서가 없으면 직급도 막기
-	    }
-	  }
-	
-	  // 최초 로드 시 (수정 폼 대비, 안 써도 상관은 없지만 남겨둬도 무해)
-	  const selectedDeptOpt = deptSel.querySelector('option:checked[value]');
-	
-	  if (selectedDeptOpt) {
-	    // 폼에 이미 부서가 선택되어 있는 경우 → 상위부서/부서/직급 상태 맞춰주기
-	    const parentDeptId = selectedDeptOpt.getAttribute('data-parent');
-	    if (parentDeptId) {
-	      topSel.value = parentDeptId;
-	      filterDeptByTop(parentDeptId);
-	      deptSel.value = selectedDeptOpt.value;
-	      updatePosState(selectedDeptOpt.value);
-	    } else {
-	      // parentDeptId 정보가 없으면 그냥 현재 topDept 기준으로만 처리
-	      filterDeptByTop(topSel.value);
-	      updatePosState(deptSel.value);
-	    }
-	  } else {
-	    // 신규 등록 등 -> 기본 상태
-	    filterDeptByTop(topSel.value);     // topDept 값이 비어 있으면 '먼저 본부를...' 상태
-	    updatePosState(deptSel.value);     // 직급도 막혀 있는 상태로 시작
-	  }
-	
-	  // 이벤트 바인딩
-	  topSel.addEventListener('change', e => filterDeptByTop(e.target.value));
-	  deptSel.addEventListener('change', e => updatePosState(e.target.value));
-	}
-	
-	// DOMContentLoaded 시 초기화
-	document.addEventListener('DOMContentLoaded', initOrgSelects);
+  if (!topSel || !deptSel || !posSel) return; // 다른 화면 대비 가드
+
+  const pageMode = document.body.dataset.mode; // body에 data-mode="regist"/"edit" 이런 식으로 있음
+
+  // 1) 하위부서 option 백업 (초기 DOM 기준 한 번만)
+  allDept = Array.from(
+    deptSel.querySelectorAll('option[data-parent]')
+  );
+
+  // 공통: 부서 셀렉트 초기화
+  function resetDept(phText, disabled = true) {
+    deptSel.innerHTML = '';
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = phText;
+    ph.disabled = true;
+    ph.selected = true;
+    deptSel.appendChild(ph);
+    deptSel.disabled = disabled;
+  }
+
+  // 공통: 직급 셀렉트 활성/비활성
+  function updatePosState(deptId) {
+    const firstOpt = posSel.querySelector('option[value=""]') || posSel.options[0];
+
+    if (!deptId) {
+      if (firstOpt) firstOpt.textContent = '먼저 부서를 선택하세요';
+      posSel.value = '';
+      posSel.disabled = true;
+    } else {
+      if (firstOpt) firstOpt.textContent = '직급을 선택하세요';
+      posSel.disabled = false;
+    }
+  }
+
+  // 공통: 본부에 따른 부서 필터링
+  function filterDeptByTop(topId) {
+    const prevDept = deptSel.value;
+
+    if (!topId) {
+      resetDept('먼저 본부를 선택하세요', true);
+      updatePosState(null);
+      return;
+    }
+
+    resetDept('부서를 선택하세요', false);
+
+    allDept
+      .filter(o => o.getAttribute('data-parent') === topId)
+      .forEach(o => deptSel.appendChild(o.cloneNode(true)));
+
+    if ([...deptSel.options].some(o => o.value === prevDept)) {
+      deptSel.value = prevDept;
+      updatePosState(prevDept);
+    } else {
+      updatePosState(null);
+    }
+  }
+
+  // 2) 처음 로드될 때, 선택되어 있는 부서 기준으로 상태 맞추기 (등록/수정 공통)
+  const selectedDeptOpt = deptSel.querySelector('option:checked[value]');
+
+  if (selectedDeptOpt) {
+    const parentDeptId = selectedDeptOpt.getAttribute('data-parent');
+    if (parentDeptId) {
+      // 기존 부서 → 상위 본부 찾아서 셋팅
+      topSel.value = parentDeptId;
+      filterDeptByTop(parentDeptId);
+      deptSel.value = selectedDeptOpt.value;
+      updatePosState(selectedDeptOpt.value);
+    } else {
+      // parent 정보 없으면 topDept 값 기준
+      filterDeptByTop(topSel.value);
+      updatePosState(deptSel.value);
+    }
+  } else {
+    // 신규 등록 등
+    filterDeptByTop(topSel.value);
+    updatePosState(deptSel.value);
+  }
+
+  // 3) 수정 모드라면, 여기서 끝! (값은 보여주되 수정 막기)
+  if (pageMode === 'edit') {
+    topSel.disabled  = true;
+    deptSel.disabled = true;
+    posSel.disabled  = true;
+    return;
+  }
+
+  // 4) 등록 모드일 때만 이벤트 바인딩
+  topSel.addEventListener('change', e => filterDeptByTop(e.target.value));
+  deptSel.addEventListener('change', e => updatePosState(e.target.value));
+}
+
+document.addEventListener('DOMContentLoaded', initOrgSelects);
 
 
 

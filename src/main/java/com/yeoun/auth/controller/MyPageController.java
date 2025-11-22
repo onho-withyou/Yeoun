@@ -1,5 +1,7 @@
 package com.yeoun.auth.controller;
 
+import java.util.List;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,6 +21,7 @@ import com.yeoun.auth.dto.PasswordChangeDTO;
 import com.yeoun.common.service.CommonCodeService;
 import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpDetailDTO;
+import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.PositionRepository;
 import com.yeoun.emp.service.EmpService;
@@ -53,14 +56,21 @@ public class MyPageController {
 		EmpDTO empDTO = empService.getEmpForEdit(loginUser.getEmpId());
 		
 		model.addAttribute("empDTO", empDTO);
-		model.addAttribute("formAction", "/my/info/update");
 		model.addAttribute("mode", "edit");
+		model.addAttribute("formAction", "/my/info/update");
+		
+		// --- 조직/직무 셀렉트 공통 세팅 (EmpController.setupEmpFormCommon 과 동일) ---
+        List<Dept> topDeptList =
+                deptRepository.findByParentDeptIdAndUseYn("DEP999", "Y");
+
+        List<Dept> subDeptList =
+                deptRepository.findByParentDeptIdIsNotNullAndParentDeptIdNotAndUseYn("DEP999", "Y");
 		
 		// emp_form.html에서 필요한 공통 select box 세팅
-	    model.addAttribute("deptList", deptRepository.findActive());
+        model.addAttribute("topDeptList", topDeptList);
+        model.addAttribute("subDeptList", subDeptList);
 	    model.addAttribute("positionList", positionRepository.findActive());
 	    model.addAttribute("bankList", commonCodeService.getBankList());
-	    model.addAttribute("statusList", commonCodeService.getCodes("EMP_STATUS"));
 		
 		return "emp/emp_form";
 	}
@@ -78,12 +88,19 @@ public class MyPageController {
 	    // 1) Bean Validation 실패 폼 다시 보여주기
 	    if (bindingResult.hasErrors()) {
 	    	empDTO.setRrnMasked(empService.maskRrn(empDTO.getRrn()));
+	    	model.addAttribute("mode", "edit");
 	        model.addAttribute("formAction", "/my/info/update");
-	        model.addAttribute("mode", "edit");
-	        model.addAttribute("deptList", deptRepository.findActive());
+	        
+            List<Dept> topDeptList =
+                    deptRepository.findByParentDeptIdAndUseYn("DEP999", "Y");
+            List<Dept> subDeptList =
+                    deptRepository.findByParentDeptIdIsNotNullAndParentDeptIdNotAndUseYn("DEP999", "Y");
+
+            model.addAttribute("topDeptList", topDeptList);
+            model.addAttribute("subDeptList", subDeptList);
+            
 	        model.addAttribute("positionList", positionRepository.findActive());
 	        model.addAttribute("bankList", commonCodeService.getBankList());
-	        model.addAttribute("statusList", commonCodeService.getCodes("EMP_STATUS"));
 
 	        return "emp/emp_form";
 	    }
@@ -108,7 +125,6 @@ public class MyPageController {
 	        model.addAttribute("deptList", deptRepository.findActive());
 	        model.addAttribute("positionList", positionRepository.findActive());
 	        model.addAttribute("bankList", commonCodeService.getBankList());
-	        model.addAttribute("statusList", commonCodeService.getCodes("EMP_STATUS"));
 
 	        return "emp/emp_form";
 	    }
