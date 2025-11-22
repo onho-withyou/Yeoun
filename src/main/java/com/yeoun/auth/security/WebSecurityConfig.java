@@ -42,7 +42,8 @@ public class WebSecurityConfig {
 					.requestMatchers("/", "/login", "/logout").permitAll()
 					
 					// ================== 로그인 한 모든 사원 ==================
-		            .requestMatchers("/org/**", "/hr/actions", "/attendance/my/**", "/leave/my/**", "/attendance/outwork", "/attendance/toggle/**")
+		            .requestMatchers("/org/**", "/hr/actions", "/attendance/my/**", "/leave/my/**", "/attendance/outwork", "/attendance/toggle/**",
+		            				 "/my/**")
 		                .authenticated()
 
 					// ================== 관리자/인사/MES 권한 ==================
@@ -50,7 +51,7 @@ public class WebSecurityConfig {
 		            .requestMatchers("/auth/**")
 		            	.hasAnyRole("SYS_ADMIN")
 		                
-		            // 인사관리 - 부서장도 가능
+		            // 인사관리 - 관리자 및 인사팀, 부서장
 	                .requestMatchers("/emp")
 	                    .hasAnyRole("SYS_ADMIN", "HR_ADMIN", "DEPT_MANAGER")
 
