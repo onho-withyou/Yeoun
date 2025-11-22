@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.yeoun.common.util.CommonUtil;
 import com.yeoun.notice.dto.NoticeDTO;
 import com.yeoun.notice.service.NoticeService;
 
@@ -62,7 +63,14 @@ public class NoticeController {
 	public ResponseEntity<Map<String, String>> notices(@ModelAttribute("noticeDTO") @Valid NoticeDTO noticeDTO, 
 			BindingResult bindingResult, Authentication authentication
 			, @RequestParam("noticeFiles") List<MultipartFile> noticeFiles) {
+		
 		Map<String, String> msg = new HashMap<>();
+		// 서버에서 권한비교 한번더 해주기
+		if(!CommonUtil.hasRole(authentication, "ROLE_NOTICE_WRITER")) {
+			msg.put("msg", "권한이 없습니다!");
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(msg);
+		}
+
 //		System.out.println("noticeDTO : " + noticeDTO);
 		if(bindingResult.hasErrors()) {
 			msg.put("msg", "공지사항 등록에 실패했습니다");
@@ -85,9 +93,16 @@ public class NoticeController {
 	@PatchMapping("/{noticeId}")
 	public ResponseEntity<Map<String, String>> notices( @PathVariable("noticeId")Long noticeId,
 			@ModelAttribute("noticeDTO") @Valid NoticeDTO noticeDTO, BindingResult bindingResult
-			, @RequestParam("noticeFiles") List<MultipartFile> noticeFiles) {
+			, @RequestParam("noticeFiles") List<MultipartFile> noticeFiles, Authentication authentication) {
 	
 		Map<String, String> msg = new HashMap<>();
+		// 서버에서 권한비교 한번더 해주기
+		if(!CommonUtil.hasRole(authentication, "ROLE_NOTICE_WRITER")) {
+			msg.put("msg", "권한이 없습니다!");
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(msg);
+		}
+		
+		String empId = authentication.getName();
 		
 		if(bindingResult.hasErrors()) {
 			msg.put("msg", "공지사항 수정에 실패했습니다");
@@ -96,7 +111,7 @@ public class NoticeController {
 		
 		try {
 			// 공지 수정 수행
-			noticeService.modifyNotice(noticeDTO, noticeFiles);
+			noticeService.modifyNotice(noticeDTO, noticeFiles, empId);
 			msg.put("msg", "공지사항이 수정되었습니다.");
 			return ResponseEntity.ok(msg);
 			
@@ -108,11 +123,19 @@ public class NoticeController {
 	
 	//공지사항 삭제 로직
 	@DeleteMapping("/{noticeId}")
-	public ResponseEntity<Map<String, String>> notices( @PathVariable("noticeId")Long noticeId) {
+	public ResponseEntity<Map<String, String>> notices( @PathVariable("noticeId")Long noticeId
+			, Authentication authentication) {
 		Map<String, String> msg = new HashMap<>();
+		// 서버에서 권한비교 한번더 해주기
+		if(!CommonUtil.hasRole(authentication, "ROLE_NOTICE_WRITER")) {
+			msg.put("msg", "권한이 없습니다!");
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(msg);
+		}
+		String empId = authentication.getName();
+		
 		try {
 			// 공지 삭제 수행
-			noticeService.deleteNotice(noticeId);
+			noticeService.deleteNotice(noticeId, empId);
 			msg.put("msg", "공지사항이 삭제되었습니다.");
 			return ResponseEntity.ok(msg);
 			

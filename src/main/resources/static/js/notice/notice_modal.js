@@ -236,18 +236,20 @@ function inputReadFileData(fileData) {
 		downloadEl.appendChild(downloadImg);
 		fileList.appendChild(downloadEl);
 		
-		// 4) 삭제 아이콘 설정
-		deleteEl.href = '#';                                
-		deleteEl.classList.add('file-delete-link');
-		deleteEl.title = '삭제';
-		deleteEl.dataset.fileId = file.fileId;             
-
-		deleteImg.src = '/img/delete-icon.png';
-		deleteImg.alt = '삭제';
-		deleteImg.classList.add('file-delete-icon', 'img-btn');
-
-		deleteEl.appendChild(deleteImg);
-		fileList.appendChild(deleteEl);
+		// 4) 수정 권한이 있을때만 삭제 아이콘 설정
+		if(hasRole('ROLE_NOTICE_WRITER')) {
+			deleteEl.href = '#';                                
+			deleteEl.classList.add('file-delete-link');
+			deleteEl.title = '삭제';
+			deleteEl.dataset.fileId = file.fileId;             
+			
+			deleteImg.src = '/img/delete-icon.png';
+			deleteImg.alt = '삭제';
+			deleteImg.classList.add('file-delete-icon', 'img-btn');
+	
+			deleteEl.appendChild(deleteImg);
+			fileList.appendChild(deleteEl);
+		}
 							
 		// 미리보기 3-2) 미리보기 영역에 요소 추가
 //		console.log(fileList);
@@ -297,10 +299,19 @@ async function deleteFile(elem) {
 	});
 }
 
+// 권한 배열에서 특정권한이 존재하는지 확인
+function hasRole(role) {
+	if(!userRoles || !Array.isArray(userRoles)) {
+		return false;
+	}
+	
+	return userRoles.includes(role);
+}
 
-// 공지조회 모달 열때 글쓴이와 접속자 동일인물 판별
+// 공지조회 모달 열때 공지쓰기 권한이 있는지 판별
 async function initReadModal(createdUser) {
-	if(currentUserId == createdUser) { // 로그인직원과 글쓴이가 동일인물
+	
+	if(hasRole('ROLE_NOTICE_WRITER')) { // 권한이있을때
 		Array.from(showNoticeForm.elements).forEach(el => {
 			if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
 				el.readOnly = false;
@@ -311,7 +322,7 @@ async function initReadModal(createdUser) {
 		});
 		deleteNoticeBtn.disabled = false;
 		modifyNoticeBtn.disabled = false;
-	} else if(currentUserId != createdUser) { //일치하지 않을떄 수정,삭제 불가능
+	} else { //권한이 없을때 수정,삭제 불가능
 		Array.from(showNoticeForm.elements).forEach(el => {	
 			if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
 				el.readOnly = true;
