@@ -453,12 +453,14 @@ public class EmpService {
 	    empDTO.setDeptId(emp.getDept().getDeptId());
 	    empDTO.setPosCode(emp.getPosition().getPosCode());
 	    empDTO.setRrnMasked(maskRrn(emp.getRrn()));
+	    empDTO.setPhotoFileId(emp.getPhotoFileId());
 	    
 	    // 사원 급여정보
 	    empBankRepository.findByEmpId(empId).ifPresent(bank -> {
 	    	empDTO.setBankCode(bank.getBankCode());
 	    	empDTO.setAccountNo(bank.getAccountNo());
 	    	empDTO.setHolder(bank.getHolder());
+	    	empDTO.setFileId(bank.getFileId());
     	});
 	    
 	    return empDTO;

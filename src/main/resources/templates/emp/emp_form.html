@@ -75,7 +75,27 @@
 
 	              <div class="col-12 col-md-6">
 	                <label class="form-label" for="photoFile">사원 사진</label>
-	                <input type="file" class="form-control" th:field="*{photoFile}" id="photoFile" accept="image/*">
+	                
+		                <div th:if="${mode == 'edit'}" class="mb-2">
+					    <img th:if="${empDTO.photoFileId != null}"
+					         th:src="@{'/files/download/' + ${empDTO.photoFileId}}"
+					         alt="프로필 사진"
+					         class="rounded"
+					         style="width: 120px; height: 120px; object-fit: cover;">
+					    <img th:if="${empDTO.photoFileId == null}"
+					         src="/assets/img/default-profile.png"
+					         alt="기본 프로필"
+					         class="rounded"
+					         style="width: 120px; height: 120px; object-fit: cover;">
+					  </div>
+					  
+					  <!-- 새 파일 업로드 (등록/수정 공통) -->
+					  <input type="file" class="form-control" th:field="*{photoFile}" id="photoFile" accept="image/*">
+					
+					  <!-- 기존 photoFileId 유지용 hidden -->
+					  <input type="hidden" th:field="*{photoFileId}">
+					  <div class="form-text">새 사진을 선택하면 기존 사진이 교체됩니다.</div>
+	                
 	              </div>
 	              
 	            </div>
@@ -223,7 +243,27 @@
 	          
 	          <div class="col-12 col-md-6">
 	            <label class="form-label" for="bankbookFile">통장사본 첨부</label>
-	            <input type="file" class="form-control" th:field="*{bankbookFile}" id="bankbookFile">
+	            
+		        <!-- 새 파일 선택 (등록/수정 공통) -->
+		        <input type="file" class="form-control" th:field="*{bankbookFile}" id="bankbookFile">
+	           
+	            <!-- 수정 모드에서 기존 통장사본 링크 보여주기 -->
+		        <div th:if="${mode == 'edit'}" class="mb-1">
+		          <a th:if="${empDTO.fileId != null}"
+		             th:href="@{'/files/download/' + ${empDTO.fileId}}"
+		             target="_blank"
+		             class="small">
+		            기존 통장 사본 보기
+		          </a>
+		          <span th:if="${empDTO.fileId == null}" class="text-muted small">
+		            등록된 통장 사본이 없습니다.
+		          </span>
+		        </div>
+		
+		
+		        <!-- 기존 fileId 유지용 hidden -->
+		        <input type="hidden" th:field="*{fileId}">
+		        <div class="form-text">새 파일을 선택하면 기존 통장 사본이 교체됩니다.</div>
 	          </div>
 	        </div>
 	      </div>
