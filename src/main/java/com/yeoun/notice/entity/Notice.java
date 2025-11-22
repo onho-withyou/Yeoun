@@ -55,6 +55,10 @@ public class Notice implements FileUploadHelpper{
 	@JoinColumn(name = "CREATED_USER", referencedColumnName = "EMP_ID", nullable = false)
 	private Emp emp;
 	
+	@ManyToOne(fetch = FetchType.LAZY, optional = true)
+	@JoinColumn(name = "UPDATED_USER", referencedColumnName = "EMP_ID", nullable = true)
+	private Emp updateEmp;
+	
 	@CreatedDate
 	private LocalDateTime createdDate; // 공지 작성일
 	
