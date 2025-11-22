@@ -98,7 +98,7 @@ public class ApprovalDocService {
         
         //approver.setDelegateStatus(); //본인/전결/대결/선결
         //approver.setApprovalId(approvalDoc.getApprovalId());//문서id
-        //approver.setEmpId(doc.get("delegetedApprover")); //전결자//사원번호들어감
+        //approver.setEmpId(doc.get("delegetedApprover")); //결재권한자//사원번호들어감
         //approver.setApprovalStatus(false);//권한자상태 -필요없어짐
         //approver.setOrderApprovers();//결재권한자 순서
         //approver.setViewing();//열람권

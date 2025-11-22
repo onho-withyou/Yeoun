@@ -116,46 +116,6 @@
 	}
 	
 	let approverDiv = document.querySelector('#approver');
-
-	
-	// document.getElementById('modal-doc').addEventListener('submit', function(event) {
-    // // 폼의 기본 제출 동작 방지
-    // event.preventDefault();
-
-    // // FormData 객체를 사용하여 폼 데이터 수집
-    // const formData = new FormData(this);
-    
-
-	
- 	// formData.append('userpic', 'aa');
-	
-    // // FormData를 일반 JavaScript 객체로 변환
-    // const dataObject = Object.fromEntries(formData.entries());
-
-	// //const myFileInput = document.getElementById(''); // 실제 파일 입력 요소의 ID로 변경
-	
-    // // JavaScript 객체를 JSON 문자열로 변환
-    // const jsonString = JSON.stringify(dataObject);
-    // console.log("jsonString",jsonString);
-    // // Fetch API를 사용하여 서버에 비동기 POST 요청
-    // fetch('/approval/approval_doc', {
-	// 		method: 'POST', // POST 메소드 지정
-	// 		headers: {
-	// 			[csrfHeaderName]: csrfToken,
-	// 			'Content-Type': 'application/json' // Content-Type 헤더를 application/json으로 설정
-	// 		},
-	// 		body: jsonString // 요청 본문에 JSON 데이터 포함
-	// 	})
-	// 	.then(response => response.json()) // 서버 응답을 JSON으로 파싱
-	// 	.then(data => {
-	// 		console.log('성공:', data);
-	// 		alert('데이터 전송 성공!');
-	// 	})
-	// 	.catch((error) => {
-	// 		console.error('오류:', error);
-	// 		alert('데이터 전송 중 오류 발생');
-	// 	});
-	// });
 	
 	//selectbox - 인사정보 불러오기
 	async function empData() {
@@ -186,7 +146,8 @@
 					print(ev.type, selectlabel);
 					approverArr.push({
 						empId: approverEmpId
-						, approverOrder: this.count
+						, approverOrder: this.count 
+						, delegateStatus : false //여기서 전결상태도 불러오자
 					});
 					console.log("@@@@@@@@@@@@@@@@@@@@@@",approverArr);
 				}
@@ -462,6 +423,55 @@
 		}
 	}	
 
+	//폼 결재권한자 데이터 말아서 보내는 함수
+	document.getElementById('modal-doc').addEventListener('submit', function(event) {
+    // 폼의 기본 제출 동작 방지
+    event.preventDefault();
+
+    // FormData 객체를 사용하여 폼 데이터 수집
+    const formData = new FormData(this);
+    
+
+	console.log("approverArr----결재권한자1 배열--------->",approverArr[0]);
+	console.log("approverArr----결재권한자2 배열--------->",approverArr[1]);
+	console.log("approverArr----결재권한자3 배열--------->",approverArr[2]);
+	//결재문서
+ 	formData.append('docStatus', '1차대기');//문서상태
+	formData.append('approver', null);//결재권한자//1차 empId
+	
+
+	//formData.append('delegateStatus', );//전결상태 3개
+	formData.append('approverEmpId', null); //결재권한자 아이디 3게
+	//formData.append('approvalStatus', false);//권한자상태 필요없음
+	formData.append('orderApprovers', null);//결재권한자 순서 3개
+
+	//if 1차권한자인지 판별후
+	formData.append('viewing',null);//1차결재권한자에게만 y를 줌
+	
+    // FormData를 일반 JavaScript 객체로 변환
+    const dataObject = Object.fromEntries(formData.entries());
+    // JavaScript 객체를 JSON 문자열로 변환
+    const jsonString = JSON.stringify(dataObject);
+    console.log("jsonString",jsonString);
+    // Fetch API를 사용하여 서버에 비동기 POST 요청
+    fetch('/approval/approval_doc', {
+			method: 'POST', // POST 메소드 지정
+			headers: {
+				[csrfHeaderName]: csrfToken,
+				'Content-Type': 'application/json' // Content-Type 헤더를 application/json으로 설정
+			},
+			body: jsonString // 요청 본문에 JSON 데이터 포함
+		})
+		.then(response => response.json()) // 서버 응답을 JSON으로 파싱
+		.then(data => {
+			console.log('성공:', data);
+			alert('데이터 전송 성공!');
+		})
+		.catch((error) => {
+			console.error('오류:', error);
+			alert('데이터 전송 중 오류 발생');
+		});
+	});
 	
 	//1. 결재사항 불러오기
 	async function fetchPendingApprovalDocs() {
@@ -976,6 +986,7 @@
 		
 		window.count = 0;
 		
+		
 		// selectedForm 값이 없을 경우 에러가 생길 수 있어서 에러 처리
 		if (!selectedForm) {
 		    	console.log("선택된 양식이 없습니다.")
@@ -993,12 +1004,17 @@
 		// selectedForm의 approver1, approver2, approver3을 가져오기 위해서 템플릿 문자열 사용
 		    const approver = selectedForm[`approver${i}`] + " " + selectedForm[`approver${i}Name`];
 		
+
 			// 결재권자가 없으면 화면에 출력되지 않도록 처리
 			if (selectedForm[`approver${i}`] == null) {
-				return;
+			 	return;
 			}
 			
-		    if (approver) {
+		    if (approver) {//디폴트 결재권한자 라벨이 null이 아닐때
+				//console.log("디폴트 결재권한자"+i+" 라벨 ------>",approver);
+				//defalutapproverArr=[];
+				//defalutapproverArr.push(approver);
+				//console.log("defalutapproverArr",defalutapproverArr);
 		        print("default", approver);
 		    }
 		}
