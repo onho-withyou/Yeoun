@@ -42,7 +42,8 @@ public class WebSecurityConfig {
 					.requestMatchers("/", "/login", "/logout").permitAll()
 					
 					// ================== 로그인 한 모든 사원 ==================
-		            .requestMatchers("/org/**", "/hr/actions", "/attendance/my/**", "/leave/my/**", "/attendance/outwork", "/attendance/toggle/**")
+		            .requestMatchers("/org/**", "/hr/actions", "/attendance/my/**", "/leave/my/**", "/attendance/outwork", "/attendance/toggle/**",
+		            				 "/my/**")
 		                .authenticated()
 
 					// ================== 관리자/인사/MES 권한 ==================
@@ -50,7 +51,7 @@ public class WebSecurityConfig {
 		            .requestMatchers("/auth/**")
 		            	.hasAnyRole("SYS_ADMIN")
 		                
-		            // 인사관리 - 부서장도 가능
+		            // 인사관리 - 관리자 및 인사팀, 부서장
 	                .requestMatchers("/emp")
 	                    .hasAnyRole("SYS_ADMIN", "HR_ADMIN", "DEPT_MANAGER")
 
@@ -72,12 +73,12 @@ public class WebSecurityConfig {
                     	
 	                // 급여 관리
                     	// 사원용 급여명세서
-                    	.requestMatchers("/pay/emp_pay", "/pay/emp_pay/**")
+                    	.requestMatchers("/pay/emp_pay", "/pay/emp_pay/**" ,"/pay/pdf/**")
                     	    .authenticated()
 
                     	// 급여 관리자 페이지
                     	.requestMatchers("/pay/rule/**", "/pay/rule_calc/**", "/pay/rule_item/**", "/pay/calc/**", "/pay/history/**", "/pay/**" )
-                       	.hasAnyRole("SYS_ADMIN", "HR_ADMIN")
+                       	.hasAnyRole("SYS_ADMIN")
                     	
                     	
 	                // 전자결재 설정(양식/결재선 관리 등)

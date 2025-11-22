@@ -4,6 +4,7 @@
 let empGrid = null;
 let empDetailModal = null;
 let currentEmpId = null;
+let detailMode   = null; 
 
 // 페이징 상태
 let currentPage = 0;   // 0부터 시작 (Spring Page와 맞춤)
@@ -26,16 +27,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const editBtn = document.getElementById('editBtn');
   if (editBtn) {
     editBtn.addEventListener('click', () => {
+	  // 사원 목록에서 뜬 상새 모달
       if (!currentEmpId) {
         alert('선택된 사원이 없습니다.');
         return;
       }
       // 수정 화면으로 이동
       window.location.href = `/emp/edit/${currentEmpId}`;
-      // 컨텍스트 경로 있으면: window.location.href = `${window.contextPath}/emp/edit/${currentEmpId}`;
     });
   }
-
+  
   // 검색 버튼 이벤트
   const searchBtn = document.getElementById('btnSearch');
   if (searchBtn) {
@@ -251,6 +252,10 @@ function renderPagination(totalPages) {
 // ================================
 function showEmpDetail(empId) {
   currentEmpId = empId;	// 수정에 쓸 현재 사번 저장
+  
+  // 수정 버튼 다시 보이기
+  const editBtn = document.getElementById('editBtn');
+  if (editBtn) editBtn.style.display = '';
   
   fetch(`/emp/detail/${empId}`)
     .then(res => res.json())

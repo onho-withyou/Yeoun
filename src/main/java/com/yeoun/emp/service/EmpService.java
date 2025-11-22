@@ -151,11 +151,11 @@ public class EmpService {
 	        bank.setEmpId(savedEmp.getEmpId());
 	        bank.setBankCode(empDTO.getBankCode());
 	        bank.setAccountNo(empDTO.getAccountNo());
-	        bank.setHolder(empDTO.getHolder());
+	        bank.setHolder(savedEmp.getEmpName());
 	        // fileId 는 나중에 파일 업로드 후 세팅
 	        EmpBank savedBank = empBankRepository.saveAndFlush(bank);
 
-	        // 6-1) 🔹 통장 사본 파일 업로드 (있으면)
+	        // 6-1) 통장 사본 파일 업로드
 	        if (empDTO.getBankbookFile() != null && !empDTO.getBankbookFile().isEmpty()) {
 	            try {
 	                List<FileAttachDTO> uploadedList =
@@ -352,7 +352,7 @@ public class EmpService {
 	}
 	
 	// ========= 주민번호 마스킹 =========
-	private String maskRrn(String rrn) {
+	public String maskRrn(String rrn) {
 		if (rrn == null || rrn.isBlank()) {
 			return "";
 		}
@@ -453,12 +453,14 @@ public class EmpService {
 	    empDTO.setDeptId(emp.getDept().getDeptId());
 	    empDTO.setPosCode(emp.getPosition().getPosCode());
 	    empDTO.setRrnMasked(maskRrn(emp.getRrn()));
+	    empDTO.setPhotoFileId(emp.getPhotoFileId());
 	    
 	    // 사원 급여정보
 	    empBankRepository.findByEmpId(empId).ifPresent(bank -> {
 	    	empDTO.setBankCode(bank.getBankCode());
 	    	empDTO.setAccountNo(bank.getAccountNo());
 	    	empDTO.setHolder(bank.getHolder());
+	    	empDTO.setFileId(bank.getFileId());
     	});
 	    
 	    return empDTO;
@@ -469,33 +471,89 @@ public class EmpService {
 		
 		Emp emp = empRepository.findById(empDTO.getEmpId())
 		            .orElseThrow(() -> new IllegalArgumentException("사원 없음"));
+		
+		// 2) 중복 체크 (자기 자신 제외)
+	    if (empRepository.existsByEmailAndEmpIdNot(empDTO.getEmail(), empDTO.getEmpId())) {
+	        throw new IllegalStateException("이미 사용 중인 이메일입니다.");
+	    }
 
-		    // 변경 가능한 필드만 업데이트
-		    emp.setEmpName(empDTO.getEmpName());
-		    emp.setMobile(empDTO.getMobile());
-		    emp.setEmail(empDTO.getEmail());
-		    emp.setStatus(empDTO.getStatus());
-		    emp.setPostCode(empDTO.getPostCode());
-		    emp.setAddress1(empDTO.getAddress1());
-		    emp.setAddress2(empDTO.getAddress2());
+	    if (empRepository.existsByMobileAndEmpIdNot(empDTO.getMobile(), empDTO.getEmpId())) {
+	        throw new IllegalStateException("이미 사용 중인 연락처입니다.");
+	    }
+
+	    // 변경 가능한 필드만 업데이트
+	    emp.setEmpName(empDTO.getEmpName());
+	    emp.setMobile(empDTO.getMobile());
+	    emp.setEmail(empDTO.getEmail());
+	    emp.setStatus(empDTO.getStatus());
+	    emp.setPostCode(empDTO.getPostCode());
+	    emp.setAddress1(empDTO.getAddress1());
+	    emp.setAddress2(empDTO.getAddress2());
 		    
-		    // === 급여계좌 업데이트 ===
-		    if (empDTO.getBankCode() != null && empDTO.getAccountNo() != null) {
-		        EmpBank empBank = empBankRepository.findByEmpId(emp.getEmpId())
-		                .orElseGet(() -> {
-		                    EmpBank bank = new EmpBank();
-		                    bank.setEmpId(emp.getEmpId());
-		                    return bank;
-		                });
+		// ============================
+	    // 1) 프로필 사진 수정 처리
+	    // ============================
+	    if (empDTO.getPhotoFile() != null && !empDTO.getPhotoFile().isEmpty()) {
+	        try {
+	            // 새 파일 업로드
+	            List<FileAttachDTO> uploadedList =
+	                    fileUtil.uploadFile(emp, List.of(empDTO.getPhotoFile()));
 
-		        empBank.setBankCode(empDTO.getBankCode());
-		        empBank.setAccountNo(empDTO.getAccountNo());
-		        empBank.setHolder(empDTO.getHolder());
-		        empBank.setFileId(empDTO.getFileId());
+	            List<FileAttach> attachEntities = uploadedList.stream()
+	                    .map(FileAttachDTO::toEntity)
+	                    .toList();
 
-		        empBankRepository.save(empBank);
-		    }
-		    // 추후 사진 추가
+	            fileAttachRepository.saveAll(attachEntities);
+
+	            // 새 파일의 ID로 교체
+	            Long newFileId = attachEntities.get(0).getFileId();
+	            emp.setPhotoFileId(newFileId);
+
+	        } catch (IOException e) {
+	            throw new RuntimeException("사원 사진 업로드 중 오류가 발생했습니다.", e);
+	        }
+	    }
+	    
+	    // ============================
+	    // 2) 급여계좌 + 통장 사본 수정
+	    // ============================
+	    if (empDTO.getBankCode() != null && empDTO.getAccountNo() != null) {
+	        EmpBank empBank = empBankRepository.findByEmpId(emp.getEmpId())
+	                .orElseGet(() -> {
+	                    EmpBank bank = new EmpBank();
+	                    bank.setEmpId(emp.getEmpId());
+	                    return bank;
+	                });
+
+	        empBank.setBankCode(empDTO.getBankCode());
+	        empBank.setAccountNo(empDTO.getAccountNo());
+	        empBank.setHolder(emp.getEmpName());
+
+	        // --- 통장 사본 파일 수정 ---
+	        if (empDTO.getBankbookFile() != null && !empDTO.getBankbookFile().isEmpty()) {
+	            try {
+	                List<FileAttachDTO> uploadedList =
+	                        fileUtil.uploadFile(empBank, List.of(empDTO.getBankbookFile()));
+
+	                List<FileAttach> attachEntities = uploadedList.stream()
+	                        .map(FileAttachDTO::toEntity)
+	                        .toList();
+
+	                fileAttachRepository.saveAll(attachEntities);
+
+	                Long newBankFileId = attachEntities.get(0).getFileId();
+	                empBank.setFileId(newBankFileId);
+
+	            } catch (IOException e) {
+	                throw new RuntimeException("통장 사본 업로드 중 오류가 발생했습니다.", e);
+	            }
+	        } else {
+	            // 새 파일 안 올리면 기존 fileId 유지
+	            empBank.setFileId(empDTO.getFileId());
+	        }
+
+	        empBankRepository.save(empBank);
+	    }
 	}
 
 	// 비밀번호 변경
