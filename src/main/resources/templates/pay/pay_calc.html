@@ -16,6 +16,20 @@
   .pay-tabs .nav-link.active{color:#0d6efd;background:#fff;box-shadow:0 -2px 8px rgba(13,110,253,.1)}
   .pay-tabs .nav-link.active::after{content:'';position:absolute;left:0;right:0;bottom:-2px;height:3px;background:#0d6efd;border-radius:2px}
   .table td, .table th {white-space: nowrap !important; vertical-align: middle;}
+      .modal-dialog {
+  max-height: 90vh;
+  margin: auto;
+}
+
+.modal-content {
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.modal-body {
+  overflow-y: auto;
+  max-height: calc(90vh - 150px);  /* 헤더 + 푸터 제외한 영역 */
+}
 </style>
 
 
