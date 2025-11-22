@@ -196,8 +196,7 @@
 	            <label class="form-label required" for="topDept">본부</label>
 				<select class="form-select" id="topDept" th:disabled="${mode == 'edit'}">
 				  <option value="">선택</option>
-				  <option th:each="d : ${deptList}"
-				          th:if="${d.parentDeptId == 'DEP999'}"
+				  <option th:each="d : ${topDeptList}"
 				          th:value="${d.deptId}"
 				          th:text="${d.deptAbbr}"></option>
 				</select>
@@ -209,8 +208,7 @@
 	            <!-- 부서 (개발부, 마케팅부, 생산부, 영업부, 인사부 등) -->
 				<select class="form-select" id="deptId" th:field="*{deptId}" th:disabled="${mode == 'edit'}">
 				  <option value="">선택</option>
-				  <option th:each="d : ${deptList}"
-				          th:if="${d.parentDeptId != null and d.parentDeptId != 'DEP999'}"
+				  <option th:each="d : ${subDeptList}"
 				          th:value="${d.deptId}"
 				          th:text="${d.deptName}"
 				          th:attr="data-parent=${d.parentDeptId}">

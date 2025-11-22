@@ -1,5 +1,7 @@
 package com.yeoun.emp.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -20,6 +22,7 @@ import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpDetailDTO;
 import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.dto.EmpPageResponse;
+import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.PositionRepository;
 import com.yeoun.emp.service.EmpService;
@@ -43,7 +46,17 @@ public class EmpController {
 	
 	// 사원 등록/수정 폼 공통 셀렉트 박스 세팅
 	private void setupEmpFormCommon(Model model) {
-		model.addAttribute("deptList", deptRepository.findActive());
+		
+		// 본부(ERP/MES) 리스트
+	    List<Dept> topDeptList = deptRepository.findByParentDeptIdAndUseYn("DEP999", "Y");
+
+	    // 하위부서 리스트
+	    List<Dept> subDeptList =
+	            deptRepository.findByParentDeptIdIsNotNullAndParentDeptIdNotAndUseYn("DEP999", "Y");
+
+	    model.addAttribute("topDeptList", topDeptList);
+	    model.addAttribute("subDeptList", subDeptList);
+	    
 		model.addAttribute("positionList", positionRepository.findActive());
 		model.addAttribute("bankList", commonCodeService.getBankList());
 	}

@@ -5,113 +5,118 @@
  * 2️. 주소검색 API (다음 우편번호)
  */
 
-  /**
-   * ============================================================
-   * 조직/직무 관련 JS
-   * ------------------------------------------------------------
-   * - 상위부서(topDept) 선택 시 하위부서(deptId) 자동 필터링
-   * - 부서 선택 유지 / 복원 로직 포함
-   * ============================================================
-   */
-  function initOrgSelects() {
-    const topSel  = document.getElementById('topDept');  // 본부 (상위부서)
-    const deptSel = document.getElementById('deptId');   // 부서
-    const posSel  = document.getElementById('posCode');  // 직급
+/**
+ * ============================================================
+ * 조직/직무 관련 JS
+ * ------------------------------------------------------------
+ * - 상위부서(topDept) 선택 시 하위부서(deptId) 자동 필터링
+ * - 부서 선택 유지 / 복원 로직 포함
+ * ============================================================
+ */
 
-    if (!topSel || !deptSel || !posSel) return; // 다른 화면 대비 가드
+	let allDept = [];
+
+	function initOrgSelects() {
+	  const pageMode = document.body.dataset.mode;
+	  if (pageMode === 'edit') {
+	     return;
+	   }
+		 
+	  const topSel  = document.getElementById('topDept');  // 본부 (상위부서)
+	  const deptSel = document.getElementById('deptId');   // 부서
+	  const posSel  = document.getElementById('posCode');  // 직급
 	
-	if (topSel.disabled) {
-	    return;
+	  if (!topSel || !deptSel || !posSel) return; // 다른 화면 대비 가드
+	  
+	  // 부서 option 백업 (placeholder 제외, data-parent 있는 애들만 = 하위부서)
+	  allDept = Array.from(
+	     deptSel.querySelectorAll('option[data-parent]')
+	   );
+	
+	  // 공통: 셀렉트 초기화 + placeholder + disabled 설정 (부서용)
+	  function resetDept(phText, disabled = true) {
+	    deptSel.innerHTML = '';
+	    const ph = document.createElement('option');
+	    ph.value = '';
+	    ph.textContent = phText;
+	    ph.disabled = true;
+	    ph.selected = true;
+	    deptSel.appendChild(ph);
+	    deptSel.disabled = disabled;
 	  }
-
-    // 부서 option 백업 (placeholder 제외)
-    const allDept = Array.from(deptSel.querySelectorAll('option')).filter(o => o.value);
-
-    // 공통: 셀렉트 초기화 + placeholder + disabled 설정 (부서용)
-    function resetDept(phText, disabled = true) {
-      deptSel.innerHTML = '';
-      const ph = document.createElement('option');
-      ph.value = '';
-      ph.textContent = phText;
-      ph.disabled = true;
-      ph.selected = true;
-      deptSel.appendChild(ph);
-      deptSel.disabled = disabled;
-    }
-
-    // 직급 셀렉트의 활성/비활성만 제어 (목록은 그대로 둠)
-    function updatePosState(deptId) {
-      const firstOpt = posSel.querySelector('option[value=""]') || posSel.options[0];
-
-      if (!deptId) {
-        // 부서가 없으면 직급 막기
-        if (firstOpt) firstOpt.textContent = '먼저 부서를 선택하세요';
-        posSel.value = '';
-        posSel.disabled = true;
-      } else {
-        // 부서가 선택되면 직급 활성화
-        if (firstOpt) firstOpt.textContent = '직급을 선택하세요';
-        posSel.disabled = false;
-      }
-    }
-
-    // 상위부서 선택에 따라 부서 필터링
-    function filterDeptByTop(topId) {
-      const prevDept = deptSel.value;
-
-      if (!topId) {
-        // 본부 안 고른 상태
-        resetDept('먼저 본부를 선택하세요', true);
-        updatePosState(null); // 직급도 막기
-        return;
-      }
-
-      // 본부 선택됨 -> 부서 활성화 + 해당 상위부서의 하위부서만 노출
-      resetDept('부서를 선택하세요', false);
-
-      allDept
-        .filter(o => o.getAttribute('data-parent') === topId)  // data-parent = parentDeptId
-        .forEach(o => deptSel.appendChild(o.cloneNode(true)));
-
-      // 이전에 선택한 부서가 여전히 목록에 있으면 복원
-      if ([...deptSel.options].some(o => o.value === prevDept)) {
-        deptSel.value = prevDept;
-        updatePosState(prevDept);
-      } else {
-        updatePosState(null); // 유효한 부서가 없으면 직급도 막기
-      }
-    }
-
-    // 최초 로드 시 (수정 폼 대비)
-    const selectedDeptOpt = deptSel.querySelector('option:checked[value]');
-
-    if (selectedDeptOpt) {
-      // 폼에 이미 부서가 선택되어 있는 경우 → 상위부서/부서/직급 상태 맞춰주기
-      const parentDeptId = selectedDeptOpt.getAttribute('data-parent');
-      if (parentDeptId) {
-        topSel.value = parentDeptId;
-        filterDeptByTop(parentDeptId);
-        deptSel.value = selectedDeptOpt.value;
-        updatePosState(selectedDeptOpt.value);
-      } else {
-        // parentDeptId 정보가 없으면 그냥 현재 topDept 기준으로만 처리
-        filterDeptByTop(topSel.value);
-        updatePosState(deptSel.value);
-      }
-    } else {
-      // 신규 등록 등 -> 기본 상태
-      filterDeptByTop(topSel.value);
-      updatePosState(deptSel.value);
-    }
-
-    // 이벤트 바인딩
-    topSel.addEventListener('change', e => filterDeptByTop(e.target.value));
-    deptSel.addEventListener('change', e => updatePosState(e.target.value));
-  }
-
-  // DOMContentLoaded 시 초기화
-  document.addEventListener('DOMContentLoaded', initOrgSelects);
-
+	
+	  // 직급 셀렉트의 활성/비활성만 제어 (목록은 그대로 둠)
+	  function updatePosState(deptId) {
+	    const firstOpt = posSel.querySelector('option[value=""]') || posSel.options[0];
+	
+	    if (!deptId) {
+	      // 부서가 없으면 직급 막기
+	      if (firstOpt) firstOpt.textContent = '먼저 부서를 선택하세요';
+	      posSel.value = '';
+	      posSel.disabled = true;
+	    } else {
+	      // 부서가 선택되면 직급 활성화
+	      if (firstOpt) firstOpt.textContent = '직급을 선택하세요';
+	      posSel.disabled = false;
+	    }
+	  }
+	
+	  // 상위부서 선택에 따라 부서 필터링
+	  function filterDeptByTop(topId) {
+	    const prevDept = deptSel.value;
+		
+	    if (!topId) {
+	      // 본부 안 고른 상태
+	      resetDept('먼저 본부를 선택하세요', true);
+	      updatePosState(null); // 직급도 막기
+	      return;
+	    }
+	
+	    // 본부 선택됨 -> 부서 활성화 + 해당 상위부서의 하위부서만 노출
+	    resetDept('부서를 선택하세요', false);
+	
+	    allDept
+	      .filter(o => o.getAttribute('data-parent') === topId)  // data-parent = parentDeptId
+	      .forEach(o => deptSel.appendChild(o.cloneNode(true)));
+	
+	    // 이전에 선택한 부서가 여전히 목록에 있으면 복원
+	    if ([...deptSel.options].some(o => o.value === prevDept)) {
+	      deptSel.value = prevDept;
+	      updatePosState(prevDept);
+	    } else {
+	      updatePosState(null); // 유효한 부서가 없으면 직급도 막기
+	    }
+	  }
+	
+	  // 최초 로드 시 (수정 폼 대비, 안 써도 상관은 없지만 남겨둬도 무해)
+	  const selectedDeptOpt = deptSel.querySelector('option:checked[value]');
+	
+	  if (selectedDeptOpt) {
+	    // 폼에 이미 부서가 선택되어 있는 경우 → 상위부서/부서/직급 상태 맞춰주기
+	    const parentDeptId = selectedDeptOpt.getAttribute('data-parent');
+	    if (parentDeptId) {
+	      topSel.value = parentDeptId;
+	      filterDeptByTop(parentDeptId);
+	      deptSel.value = selectedDeptOpt.value;
+	      updatePosState(selectedDeptOpt.value);
+	    } else {
+	      // parentDeptId 정보가 없으면 그냥 현재 topDept 기준으로만 처리
+	      filterDeptByTop(topSel.value);
+	      updatePosState(deptSel.value);
+	    }
+	  } else {
+	    // 신규 등록 등 -> 기본 상태
+	    filterDeptByTop(topSel.value);     // topDept 값이 비어 있으면 '먼저 본부를...' 상태
+	    updatePosState(deptSel.value);     // 직급도 막혀 있는 상태로 시작
+	  }
+	
+	  // 이벤트 바인딩
+	  topSel.addEventListener('change', e => filterDeptByTop(e.target.value));
+	  deptSel.addEventListener('change', e => updatePosState(e.target.value));
+	}
+	
+	// DOMContentLoaded 시 초기화
+	document.addEventListener('DOMContentLoaded', initOrgSelects);
 
 
 
