@@ -436,10 +436,6 @@
     // FormData 객체를 사용하여 폼 데이터 수집
     const formData = new FormData(this);
     
-
-	console.log("approverArr----결재권한자1 배열--------->",approverArr[0]);
-	console.log("approverArr----결재권한자2 배열--------->",approverArr[1]);
-	console.log("approverArr----결재권한자3 배열--------->",approverArr[2]);
 	//결재문서
 	if(approverArr.length != 0){ //결재권한자가 있으면
  		formData.append('docStatus', '1차대기');//문서상태
@@ -467,8 +463,6 @@
     // FormData를 일반 JavaScript 객체로 변환
     const dataObject = Object.fromEntries(formData.entries());
 
-
-	//document.getElementById("modal-doc").action = dynamicUrl;
     await fetch("/approval/approval_doc", {
 			method: 'POST', // POST 메소드 지정
 			headers: {

@@ -248,7 +248,7 @@
 						  <div>
 						 	<h5>전결자 지정 </h5>
 							<select id="emp_id" name="delegetedApprover" class="form-select" aria-label="Default select example">
-							  <option selected>이름 사원번호</option>
+							  <option selected></option>
 							  <option th:each="item, iterStat : ${empList}" 
 							 			th:value="${item.empId}" 
 							 			th:text="${iterStat.index+1} + ' : ' + ${item.empName} + '(' + ${item.empId} + ')'">
