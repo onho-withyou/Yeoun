@@ -1,7 +1,7 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{/layouts/layout.html}">
-<body>
+
 <th:block layout:fragment="content">
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
 	
@@ -196,8 +196,7 @@
 	            <label class="form-label required" for="topDept">본부</label>
 				<select class="form-select" id="topDept" th:disabled="${mode == 'edit'}">
 				  <option value="">선택</option>
-				  <option th:each="d : ${deptList}"
-				          th:if="${d.parentDeptId == 'DEP999'}"
+				  <option th:each="d : ${topDeptList}"
 				          th:value="${d.deptId}"
 				          th:text="${d.deptAbbr}"></option>
 				</select>
@@ -209,8 +208,7 @@
 	            <!-- 부서 (개발부, 마케팅부, 생산부, 영업부, 인사부 등) -->
 				<select class="form-select" id="deptId" th:field="*{deptId}" th:disabled="${mode == 'edit'}">
 				  <option value="">선택</option>
-				  <option th:each="d : ${deptList}"
-				          th:if="${d.parentDeptId != null and d.parentDeptId != 'DEP999'}"
+				  <option th:each="d : ${subDeptList}"
 				          th:value="${d.deptId}"
 				          th:text="${d.deptName}"
 				          th:attr="data-parent=${d.parentDeptId}">
@@ -252,16 +250,18 @@
 	          
 	          <div class="col-12 col-md-6">
 	            <label class="form-label required" for="accountNo">계좌번호</label>
-	            <input type="text" class="form-control" id="accountNo" th:field="*{accountNo}" placeholder="123-456-789012" maxlength="25">
+	            <input type="text" class="form-control" id="accountNo" th:field="*{accountNo}" placeholder="123-456-789012" maxlength="20">
 	          	<div class="text-danger small" th:if="${#fields.hasErrors('accountNo')}" th:errors="*{accountNo}"></div>
 	          </div>
 	        </div>
 	
 	        <div class="row g-3 mt-0">
 	          <div class="col-12 col-md-6">
-	            <label class="form-label required" for="holder">예금주</label>
-	            <input type="text" class="form-control" id="holder"  name="holder" th:field="*{holder}" placeholder="김여운">
-	            <div class="text-danger small" th:if="${#fields.hasErrors('holder')}" th:errors="*{holder}"></div>
+	            <label class="form-label" for="holder">예금주</label>
+	            <input type="text" class="form-control" id="holder"  name="holder" th:value="${empDTO.empName}" readonly>
+	                <div class="form-text text-muted">
+				      본인 명의 계좌만 등록 가능합니다.
+				    </div>
 	          </div>
 	          
 	          <div class="col-12 col-md-6">
@@ -312,7 +312,6 @@
 	</div>
 	
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js" defer></script>	
-<script src="/js/emp/emp.js"></script>
 
 </th:block>
 </body>

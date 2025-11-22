@@ -151,7 +151,7 @@ public class EmpService {
 	        bank.setEmpId(savedEmp.getEmpId());
 	        bank.setBankCode(empDTO.getBankCode());
 	        bank.setAccountNo(empDTO.getAccountNo());
-	        bank.setHolder(empDTO.getHolder());
+	        bank.setHolder(savedEmp.getEmpName());
 	        // fileId 는 나중에 파일 업로드 후 세팅
 	        EmpBank savedBank = empBankRepository.saveAndFlush(bank);
 
@@ -352,7 +352,7 @@ public class EmpService {
 	}
 	
 	// ========= 주민번호 마스킹 =========
-	private String maskRrn(String rrn) {
+	public String maskRrn(String rrn) {
 		if (rrn == null || rrn.isBlank()) {
 			return "";
 		}
@@ -471,6 +471,15 @@ public class EmpService {
 		
 		Emp emp = empRepository.findById(empDTO.getEmpId())
 		            .orElseThrow(() -> new IllegalArgumentException("사원 없음"));
+		
+		// 2) 중복 체크 (자기 자신 제외)
+	    if (empRepository.existsByEmailAndEmpIdNot(empDTO.getEmail(), empDTO.getEmpId())) {
+	        throw new IllegalStateException("이미 사용 중인 이메일입니다.");
+	    }
+
+	    if (empRepository.existsByMobileAndEmpIdNot(empDTO.getMobile(), empDTO.getEmpId())) {
+	        throw new IllegalStateException("이미 사용 중인 연락처입니다.");
+	    }
 
 	    // 변경 가능한 필드만 업데이트
 	    emp.setEmpName(empDTO.getEmpName());
@@ -500,9 +509,6 @@ public class EmpService {
 	            Long newFileId = attachEntities.get(0).getFileId();
 	            emp.setPhotoFileId(newFileId);
 
-	            // 필요하면 이전 파일 삭제 or 사용여부 플래그 처리도 가능
-	            // Long oldFileId = empDTO.getPhotoFileId(); 이런 식으로 넘겨받아서 삭제
-
 	        } catch (IOException e) {
 	            throw new RuntimeException("사원 사진 업로드 중 오류가 발생했습니다.", e);
 	        }
@@ -521,7 +527,7 @@ public class EmpService {
 
 	        empBank.setBankCode(empDTO.getBankCode());
 	        empBank.setAccountNo(empDTO.getAccountNo());
-	        empBank.setHolder(empDTO.getHolder());
+	        empBank.setHolder(emp.getEmpName());
 
 	        // --- 통장 사본 파일 수정 ---
 	        if (empDTO.getBankbookFile() != null && !empDTO.getBankbookFile().isEmpty()) {
@@ -537,9 +543,6 @@ public class EmpService {
 
 	                Long newBankFileId = attachEntities.get(0).getFileId();
 	                empBank.setFileId(newBankFileId);
-
-	                // 필요하면 이전 파일 삭제 처리도 가능
-	                // Long oldBankFileId = empDTO.getFileId(); 이런 식으로 받아와서 삭제
 
 	            } catch (IOException e) {
 	                throw new RuntimeException("통장 사본 업로드 중 오류가 발생했습니다.", e);

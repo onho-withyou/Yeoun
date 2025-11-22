@@ -1,11 +1,14 @@
 package com.yeoun.auth.controller;
 
+import java.util.List;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +21,7 @@ import com.yeoun.auth.dto.PasswordChangeDTO;
 import com.yeoun.common.service.CommonCodeService;
 import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpDetailDTO;
+import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.PositionRepository;
 import com.yeoun.emp.service.EmpService;
@@ -52,28 +56,80 @@ public class MyPageController {
 		EmpDTO empDTO = empService.getEmpForEdit(loginUser.getEmpId());
 		
 		model.addAttribute("empDTO", empDTO);
-		model.addAttribute("formAction", "/my/info/update");
 		model.addAttribute("mode", "edit");
+		model.addAttribute("formAction", "/my/info/update");
+		
+		// --- 조직/직무 셀렉트 공통 세팅 (EmpController.setupEmpFormCommon 과 동일) ---
+        List<Dept> topDeptList =
+                deptRepository.findByParentDeptIdAndUseYn("DEP999", "Y");
+
+        List<Dept> subDeptList =
+                deptRepository.findByParentDeptIdIsNotNullAndParentDeptIdNotAndUseYn("DEP999", "Y");
 		
 		// emp_form.html에서 필요한 공통 select box 세팅
-	    model.addAttribute("deptList", deptRepository.findActive());
+        model.addAttribute("topDeptList", topDeptList);
+        model.addAttribute("subDeptList", subDeptList);
 	    model.addAttribute("positionList", positionRepository.findActive());
 	    model.addAttribute("bankList", commonCodeService.getBankList());
-	    model.addAttribute("statusList", commonCodeService.getCodes("EMP_STATUS"));
 		
 		return "emp/emp_form";
 	}
 	
 	@PostMapping("/info/update")
 	public String updateMyInfo(@AuthenticationPrincipal LoginDTO loginUser,
-	                           @ModelAttribute("empDTO") EmpDTO empDTO,
-	                           BindingResult result,
+	                           @ModelAttribute("empDTO") @Validated(EmpDTO.Edit.class) EmpDTO empDTO,
+	                           BindingResult bindingResult,
+	                           Model model,
 	                           RedirectAttributes rttr) {
 
+		// 로그인한 본인 아이디 강제 세팅
 	    empDTO.setEmpId(loginUser.getEmpId()); 
+	    
+	    // 1) Bean Validation 실패 폼 다시 보여주기
+	    if (bindingResult.hasErrors()) {
+	    	empDTO.setRrnMasked(empService.maskRrn(empDTO.getRrn()));
+	    	model.addAttribute("mode", "edit");
+	        model.addAttribute("formAction", "/my/info/update");
+	        
+            List<Dept> topDeptList =
+                    deptRepository.findByParentDeptIdAndUseYn("DEP999", "Y");
+            List<Dept> subDeptList =
+                    deptRepository.findByParentDeptIdIsNotNullAndParentDeptIdNotAndUseYn("DEP999", "Y");
 
-	    empService.updateEmp(empDTO); 
+            model.addAttribute("topDeptList", topDeptList);
+            model.addAttribute("subDeptList", subDeptList);
+            
+	        model.addAttribute("positionList", positionRepository.findActive());
+	        model.addAttribute("bankList", commonCodeService.getBankList());
 
+	        return "emp/emp_form";
+	    }
+	    
+	    // 2) 중복 검사 등 비즈니스 에러 처리
+	    try {
+	        empService.updateEmp(empDTO);
+	    } catch (IllegalStateException e) {
+
+	        String msg = e.getMessage();
+
+	        if (msg.contains("이메일")) {
+	            bindingResult.rejectValue("email", "duplicate", msg);
+	        } else if (msg.contains("연락처")) {
+	            bindingResult.rejectValue("mobile", "duplicate", msg);
+	        } else {
+	            bindingResult.reject("empEditError", msg);
+	        }
+
+	        model.addAttribute("formAction", "/my/info/update");
+	        model.addAttribute("mode", "edit");
+	        model.addAttribute("deptList", deptRepository.findActive());
+	        model.addAttribute("positionList", positionRepository.findActive());
+	        model.addAttribute("bankList", commonCodeService.getBankList());
+
+	        return "emp/emp_form";
+	    }
+
+	    // 3) 성공
 	    rttr.addFlashAttribute("msg", "내 정보가 수정되었습니다.");
 	    return "redirect:/main";  
 	}
