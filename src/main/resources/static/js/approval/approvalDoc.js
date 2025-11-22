@@ -36,7 +36,7 @@
 	// 현재 로그인한 사용자와 결재권자 비교
 	function checkApprover() {
 		if(currentApprover != LOGIN_USER_ID) {
-			alert("반려권한이 없습니다."); 
+			alert("승인 또는 반려권한이 없습니다."); 
 			return true;
 		}
 	}
@@ -116,10 +116,6 @@
 	}
 	
 	let approverDiv = document.querySelector('#approver');
-
-	// let width = 150;
-    // let height = 70;
-    // let grid = createGrid(width, height);
 	
 	//selectbox - 인사정보 불러오기
 	async function empData() {
@@ -150,7 +146,8 @@
 					print(ev.type, selectlabel);
 					approverArr.push({
 						empId: approverEmpId
-						, approverOrder: this.count
+						, approverOrder: this.count 
+						, delegateStatus : false //여기서 전결상태도 불러오자
 					});
 					console.log("@@@@@@@@@@@@@@@@@@@@@@",approverArr);
 				}
@@ -164,6 +161,7 @@
 				const rowData = grid1.getRow(ev.rowKey);
 				$('#approval-modal').modal('show');
 				//formReset();
+				document.getElementById('saveBtn').style.display = "none";
 				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 				approvalId = rowData.approval_id;
 				// 문서 열릴때 현재 결재권자(approval) 저장
@@ -219,6 +217,7 @@
 				const rowData = grid2.getRow(ev.rowKey);
 				$('#approval-modal').modal('show');
 				
+				document.getElementById('saveBtn').style.display = "none";
 				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 				approvalId = rowData.approval_id;
 				// 문서 열릴때 현재 결재권자(approval) 저장
@@ -272,6 +271,7 @@
 				const rowData = grid3.getRow(ev.rowKey);
 				$('#approval-modal').modal('show');
 				
+				document.getElementById('saveBtn').style.display = "none";
 				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 				approvalId = rowData.approval_id;
 				// 문서 열릴때 현재 결재권자(approval) 저장
@@ -323,6 +323,7 @@
 			const rowData = grid4.getRow(ev.rowKey);
 			$('#approval-modal').modal('show');
 			
+			document.getElementById('saveBtn').style.display = "none";
 			// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 			approvalId = rowData.approval_id;
 			// 문서 열릴때 현재 결재권자(approval) 저장
@@ -375,6 +376,7 @@
 			const rowData = grid5.getRow(ev.rowKey);
 			$('#approval-modal').modal('show');
 			
+			document.getElementById('saveBtn').style.display = "none";
 			// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 			approvalId = rowData.approval_id;
 			// 문서 열릴때 현재 결재권자(approval) 저장
@@ -426,6 +428,59 @@
 		}
 	}	
 
+	// //폼 결재권한자 데이터 말아서 보내는 함수
+	document.getElementById('modal-doc').addEventListener('submit', async function(event) {
+    // 폼의 기본 제출 동작 방지
+    event.preventDefault();
+
+    // FormData 객체를 사용하여 폼 데이터 수집
+    const formData = new FormData(this);
+    
+	//결재문서
+	if(approverArr.length != 0){ //결재권한자가 있으면
+ 		formData.append('docStatus', '1차대기');//문서상태
+		formData.append('docApprover', approverArr[0].empId);//결재권한자//1차 empId
+	}
+
+	if(approverArr.length > 0){
+		
+		//formData.append('delegateStatus', );//전결상태 3개
+		if(approverArr[0] !== undefined) 
+			formData.append('approverEmpIdOV1', approverArr[0].empId +","+ approverArr[0].approverOrder + "," + "Y"); //결재권한자 아이디 3게
+		if(approverArr[1] !== undefined) 
+			formData.append('approverEmpIdOV2', approverArr[1].empId +","+ approverArr[1].approverOrder +"," + "N");
+		if(approverArr[2] !== undefined) 
+			formData.append('approverEmpIdOV3', approverArr[2].empId +","+ approverArr[2].approverOrder +"," + "N");
+		//formData.append('approvalStatus', false);//권한자상태 필요없음
+		//formData.append('orderApprovers', null);//결재권한자 순서 3개
+		//if 1차권한자인지 판별후
+		// if(approverArr[0].empId != undefined){
+		// 	formData.append('viewing','y');//1차결재권한자에게만 y를 줌
+		// }
+	}
+
+
+    // FormData를 일반 JavaScript 객체로 변환
+    const dataObject = Object.fromEntries(formData.entries());
+
+    await fetch("/approval/approval_doc", {
+			method: 'POST', // POST 메소드 지정
+			headers: {
+				[csrfHeaderName]: csrfToken
+				,'Content-Type': 'application/json' // Content-Type 헤더를 application/json으로 설정
+			},
+			body:  JSON.stringify(dataObject) // 요청 본문에 JSON 데이터 포함
+		})
+		.then(response => response.text()) // 서버 응답을 JSON으로 파싱
+		.then(data => {
+			console.log('성공:', data);
+			alert('데이터 전송 성공!');
+		})
+		.catch((error) => {
+			console.error('오류:', error);
+			alert('데이터 전송 중 오류 발생');
+		});
+	});
 	
 	//1. 결재사항 불러오기
 	async function fetchPendingApprovalDocs() {
@@ -859,7 +914,7 @@
 	function draftValFn(ev){
 		let draft_doc = ev.value;
 
-		//document.getElementById('Drafting').value = draft_doc;
+		document.getElementById('Drafting').value = draft_doc;
 		//document.getElementById('Drafting').innerText = draft_doc;
 
 		// html에서 th:data-formname="${item.formName}" 값을 가져와서 이름으로 사용
@@ -933,12 +988,43 @@
     let defalutapproverArr = ["d-이사랑","d-미미미누","d-김경란"];
     let approverArr = [];//결재권한자 배열 
 	
+
+	// function defaultPrint(){
+	// 	// 모달을 닫고 다시 작성 버튼을 클릭하면 이전 데이터가 남아있어서 초기화 진행
+	// 	approverDiv.innerHTML = "";
+		
+	// 	window.count = 0;
+    // 	if(this.count === 0){
+	//     	for(var i=0;i<defalutapproverArr.length;i++){
+	    		
+	// 	    	print("defalut",defalutapproverArr[i]);
+    // 			approverArr.push(defalutapproverArr[i]);
+	//     	}
+    // 	}
+
+	// 	// selectedForm 값이 없을 경우 에러가 생길 수 있어서 에러 처리
+	// 	if (!selectedForm) {
+	// 	    	console.log("선택된 양식이 없습니다.")
+	// 			//alert("선택된 양식이 없습니다.");
+			
+	// 			document.getElementById('leavePeriodForm').style.display = 'flex';
+	// 			document.getElementById('leaveTypeForm').style.display = 'flex';
+	// 			document.getElementById('expndTypeForm').style.display = 'flex';
+	// 			document.getElementById('toDeptForm').style.display = 'flex';
+			
+	// 	    return;
+	// 	}
+    // }
+
+
+
 	// 작성 버튼 클릭 시 실행되는 함수
   	function defaultPrint(){
 		// 모달을 닫고 다시 작성 버튼을 클릭하면 이전 데이터가 남아있어서 초기화 진행
 		approverDiv.innerHTML = "";
 		
 		window.count = 0;
+		
 		
 		// selectedForm 값이 없을 경우 에러가 생길 수 있어서 에러 처리
 		if (!selectedForm) {
@@ -956,13 +1042,17 @@
 		for (let i = 1; i <= 3; i++) {
 		// selectedForm의 approver1, approver2, approver3을 가져오기 위해서 템플릿 문자열 사용
 		    const approver = selectedForm[`approver${i}`] + " " + selectedForm[`approver${i}Name`];
-		    //const approver = selectedForm[`approver${i}`];
+
 			// 결재권자가 없으면 화면에 출력되지 않도록 처리
 			if (selectedForm[`approver${i}`] == null) {
-				return;
+			 	return;
 			}
 			
-		    if (approver) {
+		    if (approver) {//디폴트 결재권한자 라벨이 null이 아닐때
+				//console.log("디폴트 결재권한자"+i+" 라벨 ------>",approver);
+				//defalutapproverArr=[];
+				//defalutapproverArr.push(approver);
+				//console.log("defalutapproverArr",defalutapproverArr);
 		        print("default", approver);
 		    }
 		}
