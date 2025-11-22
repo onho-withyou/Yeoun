@@ -117,9 +117,45 @@
 	
 	let approverDiv = document.querySelector('#approver');
 
-	// let width = 150;
-    // let height = 70;
-    // let grid = createGrid(width, height);
+	
+	// document.getElementById('modal-doc').addEventListener('submit', function(event) {
+    // // 폼의 기본 제출 동작 방지
+    // event.preventDefault();
+
+    // // FormData 객체를 사용하여 폼 데이터 수집
+    // const formData = new FormData(this);
+    
+
+	
+ 	// formData.append('userpic', 'aa');
+	
+    // // FormData를 일반 JavaScript 객체로 변환
+    // const dataObject = Object.fromEntries(formData.entries());
+
+	// //const myFileInput = document.getElementById(''); // 실제 파일 입력 요소의 ID로 변경
+	
+    // // JavaScript 객체를 JSON 문자열로 변환
+    // const jsonString = JSON.stringify(dataObject);
+    // console.log("jsonString",jsonString);
+    // // Fetch API를 사용하여 서버에 비동기 POST 요청
+    // fetch('/approval/approval_doc', {
+	// 		method: 'POST', // POST 메소드 지정
+	// 		headers: {
+	// 			[csrfHeaderName]: csrfToken,
+	// 			'Content-Type': 'application/json' // Content-Type 헤더를 application/json으로 설정
+	// 		},
+	// 		body: jsonString // 요청 본문에 JSON 데이터 포함
+	// 	})
+	// 	.then(response => response.json()) // 서버 응답을 JSON으로 파싱
+	// 	.then(data => {
+	// 		console.log('성공:', data);
+	// 		alert('데이터 전송 성공!');
+	// 	})
+	// 	.catch((error) => {
+	// 		console.error('오류:', error);
+	// 		alert('데이터 전송 중 오류 발생');
+	// 	});
+	// });
 	
 	//selectbox - 인사정보 불러오기
 	async function empData() {

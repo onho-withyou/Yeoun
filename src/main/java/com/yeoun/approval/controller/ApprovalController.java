@@ -104,8 +104,9 @@ public class ApprovalController {
 
     @PostMapping("/approval_doc")
     public String postMethodName(@AuthenticationPrincipal LoginDTO loginDTO, @RequestParam Map<String, String> doc) throws JsonProcessingException {
-        
+        log.info(doc);
         approvalDocService.saveApprovalDoc(loginDTO.getEmpId(),doc);
+		
         
         return "redirect:/approval/approval_doc";
     }
