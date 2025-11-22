@@ -98,7 +98,7 @@
 				  <li><a class="dropdown-item" href="#" id="btnMyInfo">내 정보</a></li>
 				
 				  <!-- 내 정보 수정: 여기서 바로 페이지로 이동 -->
-				  <li><a class="dropdown-item" th:href="@{/my/info/edit}">내 정보 수정</a></li>
+				  <li><a class="dropdown-item" th:href="@{/my/info/edit}">개인정보 수정</a></li>
 				
 				  <!-- 비밀번호 변경 -->
 				  <li><a class="dropdown-item" th:href="@{/my/password}">비밀번호 변경</a></li>
@@ -139,51 +139,81 @@
 	
 		<script>
 		  // ================== 내 정보 모달 열기 ==================
-		  // 화면 공통 전역 변수
 		  document.getElementById('btnMyInfo')?.addEventListener('click', function (e) {
-			  e.preventDefault();
-			
-			  fetch('/my/info')
-			    .then(res => res.json())
-			    .then(data => {
-			
-			      document.getElementById('empDetailModalTitle').innerText = '내 정보';
-			      
-			      const editBtn = document.getElementById("editBtn");
-		          if (editBtn) editBtn.style.display = "none";
-			
-			      // 값 세팅
-			      document.getElementById('d-empName').innerText = data.empName;
-			      document.getElementById('d-empId').innerText = data.empId;
-			      document.getElementById('d-deptName').innerText = data.deptName;
-			      document.getElementById('d-posName').innerText = data.posName;
-			      document.getElementById('d-gender').innerText = data.gender;
-			      document.getElementById('d-hireDate').innerText = data.hireDate || '';
-			      document.getElementById('d-mobile').innerText = data.mobile;
-			      document.getElementById('d-email').innerText = data.email;
-			      document.getElementById('d-address').innerText = data.address;
-			      document.getElementById('d-rrn').innerText = data.rrnMasked;
-			      document.getElementById('d-bank').innerText = data.bankInfo || '';
-			      
-			  	  // 수정 버튼 숨기기
-			      document.getElementById('editBtn').style.display = 'none';
-			
-			      const modalEl = document.getElementById('empDetailModal');
-			      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-			      modal.show();
-			    })
-			    .catch(() => alert("내 정보 불러오기 실패"));
-			});
-		  
-		    // 정보 수정 버튼
-		    document.getElementById('editBtn')?.addEventListener('click', function () {
-		    	if(window.detailMode === 'self') {
-		    		// 본인 정보 수정
-		    		window.location.href = '/my/info/edit';
-		    	}
-		    });
+		    e.preventDefault();
+		
+		    fetch('/my/info')
+		      .then(res => {
+		        if (!res.ok) {
+		          throw new Error('HTTP ' + res.status);
+		        }
+		        return res.json();
+		      })
+		      .then(data => {
+		
+		        const titleEl = document.getElementById('empDetailModalTitle');
+		        const modalEl = document.getElementById('empDetailModal');
+		        const editBtn = document.getElementById('editBtn');
+		
+		        // 모달 요소 없으면 경고 후 중단
+		        if (!modalEl || !titleEl) {
+		          alert('상세 보기 모달을 찾을 수 없습니다. 레이아웃 설정을 확인해주세요.');
+		          return;
+		        }
+		
+		        // 제목
+		        titleEl.innerText = '내 정보';
+		
+		        // 수정 버튼 숨기기
+		        if (editBtn) {
+		          editBtn.style.display = 'none';
+		        }
+		
+		        // 모든 필드 세팅 (필드 존재할 때만)
+		        const fields = {
+		          empName: document.getElementById('d-empName'),
+		          empId: document.getElementById('d-empId'),
+		          deptName: document.getElementById('d-deptName'),
+		          posName: document.getElementById('d-posName'),
+		          gender: document.getElementById('d-gender'),
+		          hireDate: document.getElementById('d-hireDate'),
+		          mobile: document.getElementById('d-mobile'),
+		          email: document.getElementById('d-email'),
+		          address: document.getElementById('d-address'),
+		          rrn: document.getElementById('d-rrn'),
+		          bank: document.getElementById('d-bank'),
+		        };
+		
+		        if (fields.empName)  fields.empName.innerText  = data.empName  ?? '';
+		        if (fields.empId)    fields.empId.innerText    = data.empId    ?? '';
+		        if (fields.deptName) fields.deptName.innerText = data.deptName ?? '';
+		        if (fields.posName)  fields.posName.innerText  = data.posName  ?? '';
+		        if (fields.gender)   fields.gender.innerText   = data.gender   ?? '';
+		        if (fields.hireDate) fields.hireDate.innerText = data.hireDate ?? '';
+		        if (fields.mobile)   fields.mobile.innerText   = data.mobile   ?? '';
+		        if (fields.email)    fields.email.innerText    = data.email    ?? '';
+		        if (fields.address)  fields.address.innerText  = data.address  ?? '';
+		        if (fields.rrn)      fields.rrn.innerText      = data.rrnMasked ?? '';
+		        if (fields.bank)     fields.bank.innerText     = data.bankInfo ?? '';
+		
+		        // 모달 표시
+		        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+		        modal.show();
+		      })
+		      .catch(() => {
+		        alert("내 정보 불러오기 실패");
+		      });
+		  });
+		
+		  // ================== 정보 수정 버튼 ==================
+		  document.getElementById('editBtn')?.addEventListener('click', function () {
+		    if (window.detailMode === 'self') {
+		      window.location.href = '/my/info/edit';
+		    }
+		  });
 		</script>
-		<script src="/js/emp/emp.js"></script>	
+		<script src="/js/emp/emp.js"></script>
+
 
 		  <script>
 			//Resources

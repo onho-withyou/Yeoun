@@ -81,7 +81,7 @@
 	            </div>
 	            
 	            <!-- 상태값: 수정 모드에서만 노출 -->
-				<div class="row g-3 mt-0" th:if="${mode == 'edit'}">
+				<div class="row g-3 mt-0" th:if="${mode == 'edit'}" sec:authorize="hasAnyRole('SYS_ADMIN','HR_ADMIN')">
 				  <div class="col-12 col-md-6">
 				    <label class="form-label" for="status">상태</label>
 				    <select class="form-select" id="status" th:field="*{status}">
