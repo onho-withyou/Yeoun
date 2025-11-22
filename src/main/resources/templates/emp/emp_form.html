@@ -76,7 +76,13 @@
 	              <div class="col-12 col-md-6">
 	                <label class="form-label" for="photoFile">사원 사진</label>
 	                
-		                <div th:if="${mode == 'edit'}" class="mb-2">
+					  <!-- 새 파일 업로드 (등록/수정 공통) -->
+					  <input type="file" class="form-control" th:field="*{photoFile}" id="photoFile" accept="image/*">
+					  <!-- 기존 photoFileId 유지용 hidden -->
+					  <input type="hidden" th:field="*{photoFileId}">
+					  <div class="form-text">새 사진을 선택하면 기존 사진이 교체됩니다.</div>
+		              <br>
+		              <div th:if="${mode == 'edit'}" class="mb-2">
 					    <img th:if="${empDTO.photoFileId != null}"
 					         th:src="@{'/files/download/' + ${empDTO.photoFileId}}"
 					         alt="프로필 사진"
@@ -89,12 +95,7 @@
 					         style="width: 120px; height: 120px; object-fit: cover;">
 					  </div>
 					  
-					  <!-- 새 파일 업로드 (등록/수정 공통) -->
-					  <input type="file" class="form-control" th:field="*{photoFile}" id="photoFile" accept="image/*">
 					
-					  <!-- 기존 photoFileId 유지용 hidden -->
-					  <input type="hidden" th:field="*{photoFileId}">
-					  <div class="form-text">새 사진을 선택하면 기존 사진이 교체됩니다.</div>
 	                
 	              </div>
 	              
