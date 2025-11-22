@@ -312,8 +312,14 @@ function initCalendar() {
 //			} else {
 			// 연차 일정이 있을때
 			html += '<ul class="leave-tooltip__list">';
+			const leaveTypeMap = {
+			    ANNUAL: '연차',
+			    SICK: '병가',
+			    HALF: '반차',
+			};
 			leaves.forEach((l) => {
-		    	html += `<li>${l.emp_name} - ${l.startDate} ~ ${l.endDate} / ${l.usedDays}일</li>`;
+				const leaveTypeKor = leaveTypeMap[l.leaveType] || '기타';
+		    	html += `<li>${l.emp_name}(${leaveTypeKor}) - ${l.startDate} ~ ${l.endDate} / ${l.usedDays}일</li>`;
 			});
 			html += '</ul>';
 //			}
@@ -518,7 +524,7 @@ function convertGroupedLeavesToSchedules(dateLeaveMap) {
     return Object.entries(dateLeaveMap).map(([date, leaves]) => {
         // 당일 연차자 이름만 모아서 표시
         const names = leaves.map(leave => leave.emp_name);
-        const title = `연차: ${names.join(', ')} (${leaves.length}명)`;
+        const title = `휴무: ${names.join(', ')} (${leaves.length}명)`;
         return {
             id: `leave-summary-${date}`,
             calendarId: 'leave',
