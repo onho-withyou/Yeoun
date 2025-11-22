@@ -77,9 +77,9 @@ public class MyPageController {
 	    
 	    // 1) Bean Validation 실패 폼 다시 보여주기
 	    if (bindingResult.hasErrors()) {
+	    	empDTO.setRrnMasked(empService.maskRrn(empDTO.getRrn()));
 	        model.addAttribute("formAction", "/my/info/update");
 	        model.addAttribute("mode", "edit");
-
 	        model.addAttribute("deptList", deptRepository.findActive());
 	        model.addAttribute("positionList", positionRepository.findActive());
 	        model.addAttribute("bankList", commonCodeService.getBankList());

@@ -213,6 +213,7 @@ public class EmpController {
 		
 		// 입력값 검증 실패 시
 		if (bindingResult.hasErrors()) {
+			empDTO.setRrnMasked(empService.maskRrn(empDTO.getRrn()));
 			model.addAttribute("mode", "edit");
 			model.addAttribute("formAction", "/emp/edit");
 			setupEmpFormCommon(model); 

@@ -352,7 +352,7 @@ public class EmpService {
 	}
 	
 	// ========= 주민번호 마스킹 =========
-	private String maskRrn(String rrn) {
+	public String maskRrn(String rrn) {
 		if (rrn == null || rrn.isBlank()) {
 			return "";
 		}
