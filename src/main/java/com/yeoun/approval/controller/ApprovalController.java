@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -102,13 +103,13 @@ public class ApprovalController {
 	 	return approvalDocService.getFinishedApprovalDocs(loginDTO.getEmpId());//"2505823"
 	 }
 
+	
     @PostMapping("/approval_doc")
-    public String postMethodName(@AuthenticationPrincipal LoginDTO loginDTO, @RequestParam Map<String, String> doc) throws JsonProcessingException {
+    public String postMethodName(@AuthenticationPrincipal LoginDTO loginDTO, @RequestParam Map<String, String> doc) {
         log.info(doc);
-        approvalDocService.saveApprovalDoc(loginDTO.getEmpId(),doc);
-		
-        
-        return "redirect:/approval/approval_doc";
+        log.info("받은 JSON: {}", doc);
+		approvalDocService.saveApprovalDoc(loginDTO.getEmpId(),doc); 
+    	return "redirect:/approval/approval_doc";
     }
 
 }
