@@ -1,6 +1,7 @@
 package com.yeoun.approval.service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -66,26 +67,51 @@ public class ApprovalDocService {
         Approver approver = new Approver(); 
         ApprovalDocDTO approvalDocDTO = new ApprovalDocDTO();
         ApproverDTO approverDTO = new ApproverDTO();
-        //ApprovalDoc approvalDoc = approvalDocDTO.toEntity(approvalDocDTO);
+        
 
         doc.forEach((key, value) -> {
             System.out.println(key + " : " + value);
         });
 
-        LocalDate createdDate = LocalDate.parse(doc.get("createdDate"));
-        LocalDate finishDate = LocalDate.parse(doc.get("finishDate"));
-        LocalDate startDate = LocalDate.parse(doc.get("startDate"));
-        LocalDate endDate = LocalDate.parse(doc.get("endDate"));
-
+		
+      	LocalDate createdDate = null;
+		LocalDate finishDate = null;
+		LocalDate startDate =null;
+		LocalDate endDate =null;
+		if (doc.get("createdDate") != null && !doc.get("createdDate").trim().isEmpty()) {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); 
+			 
+			createdDate = LocalDate.parse(doc.get("createdDate"),formatter);	
+		} else {
+			System.err.println(" createdDate날짜 데이터가 누락되었습니다.");
+		}
+		if (doc.get("finishDate") != null && !doc.get("finishDate").trim().isEmpty()) {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); 
+			finishDate = LocalDate.parse(doc.get("finishDate"),formatter);
+			
+		} else {
+			System.err.println("finishDate날짜 데이터가 누락되었습니다.");
+		}
+		if (doc.get("startDate") != null && !doc.get("startDate").trim().isEmpty()) {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); 
+			startDate = LocalDate.parse(doc.get("startDate"),formatter);
+			
+		} else {
+			System.err.println(" startDate날짜 데이터가 누락되었습니다.");
+		}
+		if (doc.get("endDate") != null && !doc.get("endDate").trim().isEmpty()) {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); 
+			endDate = LocalDate.parse(doc.get("endDate"),formatter);
+		} else {
+			System.err.println(" endDate 날짜 데이터가 누락되었습니다.");
+		}
         //결재문서
         approvalDoc.setApprovalId(null);//문서id -자동생성됨
         approvalDoc.setApprovalTitle(doc.get("approvalTitle")); //문서제목
         approvalDoc.setEmpId(empId); //기안자 사번번호
         approvalDoc.setCreatedDate(createdDate);//문서생성일= 결재시작일 =오늘날짜
         approvalDoc.setFinishDate(finishDate);//결재마감일
-        //if(){
-            approvalDoc.setDocStatus(empId);//1차대기 -결재권한자가있을때
-        //}
+        approvalDoc.setDocStatus(empId);//1차대기 -결재권한자가있을때
         approvalDoc.setFormType(doc.get("drafting"));//양식종류
         approvalDoc.setApprover(empId);//결재권한자
         approvalDoc.setStartDate(startDate);// 휴가시작일
@@ -96,14 +122,27 @@ public class ApprovalDocService {
         approvalDoc.setExpndType(doc.get("expndType"));//지출타입
         approvalDoc.setReason(doc.get("reason"));//사유
         
-        //approver.setDelegateStatus(); //본인/전결/대결/선결
-        //approver.setApprovalId(approvalDoc.getApprovalId());//문서id
-        //approver.setEmpId(doc.get("delegetedApprover")); //결재권한자//사원번호들어감
-        //approver.setApprovalStatus(false);//권한자상태 -필요없어짐
-        //approver.setOrderApprovers();//결재권한자 순서
-        //approver.setViewing();//열람권
 
-    
+		approvalDocRepository.save(approvalDoc);
+
+		String[] approverEmpIdOV1 = doc.get("approverEmpIdOV1").split(",");
+
+		System.out.println(approverEmpIdOV1[0]); // 출력: apple
+		System.out.println(approverEmpIdOV1[1]); // 출력: banana
+		System.out.println(approverEmpIdOV1[2]); 
+
+
+		//if(doc.get("delegetedApprover") != "이름 사원번호"){
+			//doc.put("delegetedApprover", null);
+        	approver.setDelegateStatus(doc.get("delegetedApprover")); //본인/전결/대결/선결
+        	approver.setApprovalId(approvalDoc.getApprovalId());//문서id
+        	approver.setEmpId(doc.get("delegetedApprover")); //결재권한자//사원번호들어감
+        	approver.setApprovalStatus(false);//권한자상태 -필요없어짐
+			
+        	approver.setOrderApprovers(approverEmpIdOV1[1]);//결재권한자 순서
+        	approver.setViewing(approverEmpIdOV1[2]);//열람권
+
+		//}	
         approvalDocDTO.setApprovalId(approvalDoc.getApprovalId());//결재문서id
         approvalDocDTO.setApprovalTitle(approvalDoc.getApprovalTitle());//문서제목
         approvalDocDTO.setEmpId(approvalDoc.getEmpId());//로그인한 사람 사원번호
@@ -123,10 +162,10 @@ public class ApprovalDocService {
         approverDTO.setApprovalStatus(false);//필요없음
         approverDTO.setDelegateStatus(approver.getDelegateStatus());
         approverDTO.setOrderApprovers(approver.getOrderApprovers());
-        //approverDTO.setViewing(approver.getViewing());;
+        approverDTO.setViewing(approver.getViewing());;
 
-        approvalDocRepository.save(approvalDoc);
-        //approverRepository.save(approver);
+        
+        approverRepository.save(approver);
 		
 
     }
