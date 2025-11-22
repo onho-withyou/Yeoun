@@ -203,28 +203,36 @@ public class PayrollCalcService {
     - targetEmpId = null → 전체 계산
     - editableEmpIds = 확정 제외한 사원 목록 (전체 계산일 때만 사용)
    ===================================================================== */
-@Transactional
-public int runMonthlyBatch(String payYymm,
-                           boolean overwrite,
-                           Long jobId,
-                           boolean simulated,
-                           String targetEmpId,
-                           List<String> editableEmpIds) {
+    @Transactional
+    public int runMonthlyBatch(String payYymm,
+                               boolean overwrite,
+                               Long jobId,
+                               boolean simulated,
+                               String targetEmpId,
+                               List<String> editableEmpIds) {
 
-    final CalcStatus status = simulated ? CalcStatus.SIMULATED : CalcStatus.CALCULATED;
+        final CalcStatus status = simulated ? CalcStatus.SIMULATED : CalcStatus.CALCULATED;
 
-    List<PayRule> rules = payRuleRepo.findActiveValidRules(ActiveStatus.ACTIVE, LocalDate.now());
-    List<PayItemMst> items = itemRepo.findAll();    
-    
-    LocalDate asOf = LocalDate.of(
-            Integer.parseInt(payYymm.substring(0,4)),
-            Integer.parseInt(payYymm.substring(4,6)),
-            1
-    ).withDayOfMonth(20); // 급여규칙 적용시기
+        // 1) 급여월 기준 asOf 날짜 먼저 생성
+        LocalDate asOf = LocalDate.of(
+                Integer.parseInt(payYymm.substring(0,4)),
+                Integer.parseInt(payYymm.substring(4,6)),
+                1
+        ).withDayOfMonth(20); // 급여규칙 적용 기준 날짜
 
-    List<PayCalcRule> calcRules = calcRuleRepo.findActiveRules(asOf);
+        // 2) 급여 기준정보(PayRule)를 "해당 급여월의 규칙" 기준으로 조회
+        List<PayRule> rules = payRuleRepo.findActiveValidRules(
+                ActiveStatus.ACTIVE, asOf);
 
-    calcRules.sort(Comparator.comparingInt(PayCalcRule::getPriority));
+        // 3) 급여항목 마스터 조회
+        List<PayItemMst> items = itemRepo.findAll();
+
+        // 4) 급여 계산 규칙(PayCalcRule)도 동일한 asOf 기준으로 조회
+        List<PayCalcRule> calcRules = calcRuleRepo.findActiveRules(asOf);
+
+        // 5) 우선순위 정렬
+        calcRules.sort(Comparator.comparingInt(PayCalcRule::getPriority));
+
         
     /* -----------------------------
 		    대상 사원 조회

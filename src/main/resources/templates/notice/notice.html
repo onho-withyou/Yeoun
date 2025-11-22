@@ -14,13 +14,15 @@
 	<th:block layout:fragment="content">
 		<div class="custom-body container-xxl flex-grow-1 container-p-y">
 			<div class="d-flex justify-content-between">
-			<input type="hidden" th:value="${#authentication.name}" id="currentUserId">
-			<input type="hidden" th:value="${#authentication.principal.empName}" id="currentUserName">
-			<form class="d-flex" style="max-width: 300px;">
-				<input class="form-control me-2" type="search" placeholder="제목&내용 입력" aria-label="Search" name="searchKeyword" th:value="${searchKeyword}">
-				<button class="btn btn-outline-primary" type="submit">검색</button>
-			</form>
-			<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#create-notice">글쓰기</button>
+				<input type="hidden" th:value="${#authentication.name}" id="currentUserId">
+				<input type="hidden" th:value="${#authentication.principal.empName}" id="currentUserName">
+				
+				<form class="d-flex" style="max-width: 300px;">
+					<input class="form-control me-2" type="search" placeholder="제목&내용 입력" aria-label="Search" name="searchKeyword" th:value="${searchKeyword}">
+					<button class="btn btn-outline-primary" type="submit">검색</button>
+				</form>
+				
+				<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#create-notice" sec:authorize="hasRole('ROLE_NOTICE_WRITER')">글쓰기</button>
 			</div>
 			<br>
 			<!-- Basic Bootstrap Table -->
@@ -97,5 +99,8 @@
 		</div>
 		<!-- custombody 끝 -->	
 		<script src="/js/notice/notice.js"></script>
+		<script th:inline="javascript">
+		    const userRoles = /*[[${#authentication.authorities.?[true].![authority]}]]*/ [];
+		</script>
 	</th:block>
 </body>

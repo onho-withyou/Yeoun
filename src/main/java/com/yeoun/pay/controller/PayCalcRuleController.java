@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.yeoun.pay.entity.PayCalcRule;
-import com.yeoun.pay.service.PayCalcRuleService; // **Service Layer 추가**
+import com.yeoun.pay.service.PayCalcRuleService; 
 
 @Controller
 @RequestMapping("/pay/rule_calc")
@@ -28,7 +28,7 @@ import com.yeoun.pay.service.PayCalcRuleService; // **Service Layer 추가**
 @Log4j2
 public class PayCalcRuleController {
 
-    // Repository 대신 Service 주입
+    
     private final PayCalcRuleService payCalcRuleService; 
 
     /** 계산 규칙 등록 (CREATE) */
@@ -66,7 +66,7 @@ public class PayCalcRuleController {
     }
 
     /** 계산 규칙 수정 (UPDATE) */
-    @PutMapping("/{id}") // **HTTP Method를 PUT으로 변경**
+    @PostMapping("/{id}/update")
     public String update(@PathVariable("id") Long id,
                          @Valid @ModelAttribute("newCalc") PayCalcRule form,
                          BindingResult br,
@@ -102,7 +102,7 @@ public class PayCalcRuleController {
     }
 
     /** 계산 규칙 삭제 (DELETE) */
-    @DeleteMapping("/{id}") // **HTTP Method를 DELETE로 변경 (URL도 단순화)**
+    @PostMapping("/{id}/delete")
     public String delete(@PathVariable("id") Long id, RedirectAttributes ra) {
         try {
             // Service 호출로 변경

@@ -6,6 +6,8 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,11 +17,14 @@ import com.yeoun.common.entity.FileAttach;
 import com.yeoun.common.repository.FileAttachRepository;
 import com.yeoun.common.service.FileAttachService;
 import com.yeoun.common.util.FileUtil;
+import com.yeoun.emp.entity.Emp;
+import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.notice.dto.NoticeDTO;
 import com.yeoun.notice.entity.Notice;
 import com.yeoun.notice.repository.NoticeRepository;
 
 import groovy.util.logging.Log4j2;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +36,7 @@ public class NoticeService {
 	private final NoticeRepository noticeRepository;
 	private final FileAttachRepository fileAttachRepository;
 	private final FileAttachService fileAttachService;
+	private final EmpRepository empRepository;
 	
 	private final FileUtil fileUtil;
 	
@@ -91,16 +97,19 @@ public class NoticeService {
 	
 	//공지사항 수정하기
 	@Transactional
-	public void modifyNotice(@Valid NoticeDTO noticeDTO, List<MultipartFile> noticeFiles) throws IOException {
+	public void modifyNotice(@Valid NoticeDTO noticeDTO, List<MultipartFile> noticeFiles, String empId) throws IOException {
 		Long noticeId = noticeDTO.getNoticeId();
-		Notice notice = noticeRepository.findById(noticeId).orElseThrow();
+		Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 존재하지 않습니다."));
+		Emp emp = empRepository.findById(empId).orElseThrow(() -> new EntityNotFoundException("존재하지않는 사원입니다"));
 		
+		notice.setUpdateEmp(emp);
 		notice.setNoticeTitle(noticeDTO.getNoticeTitle()); //변경된 제목 적용
 		notice.setNoticeContent(noticeDTO.getNoticeContent()); //변경된 내용 적용
 		
 		if(noticeDTO.getNoticeYN() == null) {
 			noticeDTO.setNoticeYN("N"); // 고정여부 값설정
 		}
+		
 		notice.setNoticeYN(noticeDTO.getNoticeYN()); // 고정여부 변경값 적용
 		// 트랜잭션이 끝날때 변경사항 자동 적용(더티체킹)
 		
@@ -116,9 +125,10 @@ public class NoticeService {
 	
 	// 공지사항 삭제하기
 	@Transactional
-	public void deleteNotice(Long noticeId) {
-		Notice notice = noticeRepository.findById(noticeId).orElseThrow();
-		
+	public void deleteNotice(Long noticeId, String empId) {
+		Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new EntityNotFoundException("공지사항이 존재하지 않습니다."));
+		Emp emp = empRepository.findById(empId).orElseThrow(() -> new EntityNotFoundException("존재하지않는 사원입니다"));
+		notice.setUpdateEmp(emp);
 		notice.setDeleteYN("Y");
 		
 		// ======================================
@@ -135,6 +145,7 @@ public class NoticeService {
 		
 		return fileList.stream().map(FileAttachDTO::fromEntity).toList(); 
 	}
+	
 	
 
 

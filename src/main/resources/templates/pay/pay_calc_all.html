@@ -27,17 +27,17 @@
                 </option>
               </select>
             </div>
-          </div>
+          </div>   
 
           <!-- 액션 버튼 -->
       <div class="d-flex flex-wrap gap-2 mb-3">
 
 		  <button id="btnSimulateAll" class="btn btn-warning">
-		    계산 시뮬레이션 (가계산)
+		    가계산 
 		  </button>
 		
 		  <button id="btnConfirmAll" class="btn btn-success">
-		    계산 결과 확정
+		    결과 확정
 		  </button>
 		
 		  <!-- 숨겨진 yyyymm 값 -->
@@ -46,40 +46,74 @@
 		</div>
 
 
-          <!-- 상태 박스 -->
-          <div id="statusBox"
-               class="alert d-flex justify-content-between align-items-center"
-               th:classappend="${status.calculated} ? ' alert-success' : ' alert-warning'">
+          <div class="row g-3 mb-4">
 
-            <div>
-              선택 월(<span id="statMonth" th:text="${yyyymm}">YYYYMM</span>) 계산 상태:
-<!--               <strong id="statCalc" th:switch="${status.calcStatus}"> -->
-<!--                 <span th:case="'CONFIRMED'">확정 완료</span> -->
-<!--                 <span th:case="'CALCULATED'">계산 완료</span> -->
-<!--                 <span th:case="'SIMULATED'">가계산</span> -->
-<!--                 <span th:case="*">미계산</span> -->
-<!--               </strong> -->
+  <!-- ================================
+       ① 계산 상태 카드 (왼쪽: ALERT 효과)
+  ================================= -->
+  <div class="col-md-6">
+      
+         <div id="statusBox"
+     class="alert d-flex justify-content-between align-items-center h-100"
+     th:classappend="${status.confirmedCount == status.totalCount} ? ' alert-success' : ' alert-warning'">
+         
 
-               <span class="badge bg-primary">총 [[${status.totalCount}]]건</span>
-		      <span class="badge bg-success">확정 [[${status.confirmedCount}]]건</span>
-		      <span class="badge bg-warning text-dark">가계산 [[${status.simulatedCount}]]건</span>
-<!-- 		      <span class="badge bg-info text-dark">계산완료 [[${status.calculatedCount}]]건</span> -->
+      <div>
+        선택 월(<span id="statMonth" th:text="${yyyymm}">YYYYMM</span>) 계산 상태:
 
-            </div>
+        <span class="badge bg-primary">
+          총 [[${status.totalCount}]]건
+        </span>
 
-            <div>
-              총지급: <span id="statTot" class="text-primary fw-bold ms-1"
-                         th:text="${#numbers.formatInteger(status.totAmt,0)}">0</span> 원
-              · 공제:
-              <span id="statDed" class="text-danger fw-bold ms-1"
-                    th:text="${#numbers.formatInteger(status.dedAmt,0)}">0</span> 원
-              · 실수령:
-              <span id="statNet" class="fw-bold ms-1"
-                    th:text="${#numbers.formatInteger(status.netAmt,0)}">0</span> 원
-            </div>
+        <span class="badge bg-success">
+          확정 [[${status.confirmedCount}]]건
+        </span>
 
-          </div>
-          
+        <span class="badge bg-warning text-dark">
+          가계산 [[${status.simulatedCount}]]건
+        </span>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ================================
+       ② 급여 요약 카드 (오른쪽: 일반 카드)
+  ================================= -->
+  <div class="col-md-6">
+  <div class="card shadow-sm h-100 bg-light">
+    <div class="card-body">
+
+      <div class="text-center">
+  <div class="text-muted fw-semibold">총지급:</div>
+
+  <div class="fs-4 fw-bold text-primary">
+    <span id="statTot"
+          th:text="${#numbers.formatDecimal(status.totAmt,0,'COMMA',0,'POINT')}">
+      0
+    </span>
+    <span>원</span>
+  </div>
+</div>
+      <hr>
+
+      <div class="text-center">
+       · 공제:
+        <span id="statDed" class="text-danger fw-bold ms-1"
+              th:text="${#numbers.formatDecimal(status.dedAmt, 0, 'COMMA', 0, 'POINT')}">0</span> 원
+        · 실수령:
+        <span id="statNet" class="fw-bold ms-1"
+              th:text="${#numbers.formatDecimal(status.netAmt, 0, 'COMMA', 0, 'POINT')}">0</span> 원
+      </div>
+
+    </div>
+  </div>
+</div>
+  
+
+</div>
+         
         
           <!-- AG Grid -->
           <h6 class="fw-semibold mt-3">계산 결과 검토</h6>
