@@ -257,9 +257,11 @@
 	
 	        <div class="row g-3 mt-0">
 	          <div class="col-12 col-md-6">
-	            <label class="form-label required" for="holder">예금주</label>
-	            <input type="text" class="form-control" id="holder"  name="holder" th:field="*{holder}" placeholder="김여운">
-	            <div class="text-danger small" th:if="${#fields.hasErrors('holder')}" th:errors="*{holder}"></div>
+	            <label class="form-label" for="holder">예금주</label>
+	            <input type="text" class="form-control" id="holder"  name="holder" th:value="${empDTO.empName}" readonly>
+	                <div class="form-text text-muted">
+				      본인 명의 계좌만 등록 가능합니다.
+				    </div>
 	          </div>
 	          
 	          <div class="col-12 col-md-6">

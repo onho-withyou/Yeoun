@@ -16,16 +16,15 @@
 let allDept = [];
 
 function initOrgSelects() {
+  const pageMode = document.body.dataset.mode; 
   const topSel  = document.getElementById('topDept');  // 본부 (상위부서)
   const deptSel = document.getElementById('deptId');   // 부서
   const posSel  = document.getElementById('posCode');  // 직급
 
   if (!topSel || !deptSel || !posSel) return; // 다른 화면 대비 가드
 
-  const pageMode = document.body.dataset.mode; // body에 data-mode="regist"/"edit" 이런 식으로 있음
-
   // 1) 하위부서 option 백업 (초기 DOM 기준 한 번만)
-  allDept = Array.from(
+  const allDept = Array.from(
     deptSel.querySelectorAll('option[data-parent]')
   );
 
@@ -207,5 +206,21 @@ document.addEventListener('DOMContentLoaded', initOrgSelects);
       el.value = v;                           // ######-####### 형태
     });
   });
+  
+  
+  document.addEventListener('DOMContentLoaded', function () {
+     const empNameInput  = document.getElementById('empName');   // 이름 입력칸
+     const bankOwnerInput = document.getElementById('bankOwner'); // 예금주 칸
+
+     if (!empNameInput || !bankOwnerInput) return;
+
+     // 초기 로딩 시 한 번 동기화
+     bankOwnerInput.value = empNameInput.value;
+
+     // 이름 입력할 때마다 예금주 자동 복사
+     empNameInput.addEventListener('input', function () {
+       bankOwnerInput.value = empNameInput.value;
+     });
+   });
   
   

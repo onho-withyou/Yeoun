@@ -116,7 +116,6 @@ public class EmpDTO {
 	private String accountNo;  
 
 	// 예금주명
-	@NotBlank(message = "예금주명을 입력해주세요.", groups = {Regist.class, Edit.class})
 	private String holder; 
 
 	// 통장 사본 파일 ID 

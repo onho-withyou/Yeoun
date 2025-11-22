@@ -151,7 +151,7 @@ public class EmpService {
 	        bank.setEmpId(savedEmp.getEmpId());
 	        bank.setBankCode(empDTO.getBankCode());
 	        bank.setAccountNo(empDTO.getAccountNo());
-	        bank.setHolder(empDTO.getHolder());
+	        bank.setHolder(savedEmp.getEmpName());
 	        // fileId 는 나중에 파일 업로드 후 세팅
 	        EmpBank savedBank = empBankRepository.saveAndFlush(bank);
 
@@ -527,7 +527,7 @@ public class EmpService {
 
 	        empBank.setBankCode(empDTO.getBankCode());
 	        empBank.setAccountNo(empDTO.getAccountNo());
-	        empBank.setHolder(empDTO.getHolder());
+	        empBank.setHolder(emp.getEmpName());
 
 	        // --- 통장 사본 파일 수정 ---
 	        if (empDTO.getBankbookFile() != null && !empDTO.getBankbookFile().isEmpty()) {
