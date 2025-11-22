@@ -101,16 +101,17 @@
 	            </div>
 	            
 	            <!-- 상태값: 수정 모드에서만 노출 -->
-				<div class="row g-3 mt-0" th:if="${mode == 'edit'}" sec:authorize="hasAnyRole('SYS_ADMIN','HR_ADMIN')">
-				  <div class="col-12 col-md-6">
-				    <label class="form-label" for="status">상태</label>
-				    <select class="form-select" id="status" th:field="*{status}">
-					  <option value="">선택</option>
-					  <option th:each="s : ${statusList}" th:value="${s.codeId}" th:text="${s.codeName}"></option>
-					</select>
-				  </div>
+				<div class="col-12 col-md-6" sec:authorize="hasAnyRole('SYS_ADMIN','HR_ADMIN')">
+				  <label class="form-label required" for="status">상태</label>
+				  <select class="form-select" id="status" th:field="*{status}">
+				    <option value="ACTIVE">재직</option>
+				    <option value="LEAVE">휴직</option>
+				    <option value="RETIRE">퇴직</option>
+				  </select>
 				</div>
-	            
+				
+				<!-- 일반 사원일 때는 상태를 수정 못하지만, 값은 그대로 보내기 -->
+				<input type="hidden" th:field="*{status}" sec:authorize="!hasAnyRole('SYS_ADMIN','HR_ADMIN')"/>
 	            
 	          </div>
 	        </div>
