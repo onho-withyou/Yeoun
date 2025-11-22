@@ -5,6 +5,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -73,7 +74,7 @@ public class EmpController {
 	// => 체크 결과를 뷰페이지에서 활용하기 위해 뷰페이지에서 접근할 DTO 객체 이름을 @ModelAttribute 어노테이션 속성으로 명시
 	// => 전달된 파라미터들이 EmpDTO 객체에 바인딩되는 시점에 입력값 검증을 수행하고 이 결과를 BindingResult 타입 파라미터에 저장해줌
 	@PostMapping("/regist")
-	public String regist(@ModelAttribute("empDTO") @Valid EmpDTO empDTO,
+	public String regist(@ModelAttribute("empDTO") @Validated(EmpDTO.Create.class) EmpDTO empDTO,
 						 BindingResult bindingResult,
 						 RedirectAttributes rttr) {
 		log.info(">>>>>>>>>>>>>> empDTO : " + empDTO);
@@ -205,7 +206,7 @@ public class EmpController {
 	}
 	
 	@PostMapping("/edit")
-	public String updateEmp(@ModelAttribute("empDTO") @Valid EmpDTO empDTO, 
+	public String updateEmp(@ModelAttribute("empDTO") @Validated(EmpDTO.Update.class) EmpDTO empDTO, 
 							BindingResult bindingResult,
 							Model model,
 							RedirectAttributes rttr) {
@@ -228,9 +229,7 @@ public class EmpController {
 	        String msg = e.getMessage();
 
 	        // 등록이랑 패턴 맞춰서 필드별 에러 매핑
-	        if (msg.contains("주민등록번호")) {
-	            bindingResult.rejectValue("rrn", "duplicate", msg);
-	        } else if (msg.contains("이메일")) {
+	        if (msg.contains("이메일")) {
 	            bindingResult.rejectValue("email", "duplicate", msg);
 	        } else if (msg.contains("연락처")) {
 	            bindingResult.rejectValue("mobile", "duplicate", msg);

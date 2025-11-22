@@ -6,6 +6,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -66,7 +67,7 @@ public class MyPageController {
 	
 	@PostMapping("/info/update")
 	public String updateMyInfo(@AuthenticationPrincipal LoginDTO loginUser,
-	                           @ModelAttribute("empDTO") @Valid EmpDTO empDTO,
+	                           @ModelAttribute("empDTO") @Validated(EmpDTO.Update.class) EmpDTO empDTO,
 	                           BindingResult bindingResult,
 	                           Model model,
 	                           RedirectAttributes rttr) {
@@ -74,7 +75,7 @@ public class MyPageController {
 		// 로그인한 본인 아이디 강제 세팅
 	    empDTO.setEmpId(loginUser.getEmpId()); 
 	    
-	    // 1) Bean Validation 실패 → 폼 다시 보여주기
+	    // 1) Bean Validation 실패 폼 다시 보여주기
 	    if (bindingResult.hasErrors()) {
 	        model.addAttribute("formAction", "/my/info/update");
 	        model.addAttribute("mode", "edit");
@@ -94,9 +95,7 @@ public class MyPageController {
 
 	        String msg = e.getMessage();
 
-	        if (msg.contains("주민등록번호")) {
-	            bindingResult.rejectValue("rrn", "duplicate", msg);
-	        } else if (msg.contains("이메일")) {
+	        if (msg.contains("이메일")) {
 	            bindingResult.rejectValue("email", "duplicate", msg);
 	        } else if (msg.contains("연락처")) {
 	            bindingResult.rejectValue("mobile", "duplicate", msg);

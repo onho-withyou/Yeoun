@@ -25,6 +25,10 @@ import lombok.ToString;
 @ToString
 public class EmpDTO {
 	
+	 // === 검증 그룹 인터페이스 ===
+    public interface Create {}  // 등록용
+    public interface Update {}  // 수정용
+	
 	// ========================
 	// 기본정보
 	// ========================
@@ -42,10 +46,10 @@ public class EmpDTO {
 	private String gender;  
     
     // 주민번호 
-	@NotBlank(message = "주민등록번호는 필수 입력입니다.")
+	@NotBlank(message = "주민등록번호는 필수 입력입니다.", groups = Create.class)
     @Pattern(
       regexp = "^(\\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01]))-[1-4]\\d{6}$",
-      message = "주민등록번호 형식은 000000-0000000 입니다."
+      message = "주민등록번호 형식은 000000-0000000 입니다.", groups = Create.class
     )
     private String rrn;
 	

@@ -26,7 +26,6 @@ public interface EmpRepository extends JpaRepository<Emp, String> {
 	boolean existsByRrn(String rrn);			// 주민등록번호
 	
 	// 수정용(내 empId는 제외)
-    boolean existsByRrnAndEmpIdNot(String rrn, String empId);
     boolean existsByEmailAndEmpIdNot(String email, String empId);
     boolean existsByMobileAndEmpIdNot(String mobile, String empId);
 	

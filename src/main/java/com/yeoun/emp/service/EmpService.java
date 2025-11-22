@@ -473,10 +473,6 @@ public class EmpService {
 		            .orElseThrow(() -> new IllegalArgumentException("사원 없음"));
 		
 		// 2) 중복 체크 (자기 자신 제외)
-	    if (empRepository.existsByRrnAndEmpIdNot(empDTO.getRrn(), empDTO.getEmpId())) {
-	        throw new IllegalStateException("이미 사용 중인 주민등록번호입니다.");
-	    }
-
 	    if (empRepository.existsByEmailAndEmpIdNot(empDTO.getEmail(), empDTO.getEmpId())) {
 	        throw new IllegalStateException("이미 사용 중인 이메일입니다.");
 	    }
