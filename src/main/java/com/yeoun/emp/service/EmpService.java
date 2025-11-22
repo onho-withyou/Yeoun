@@ -471,6 +471,19 @@ public class EmpService {
 		
 		Emp emp = empRepository.findById(empDTO.getEmpId())
 		            .orElseThrow(() -> new IllegalArgumentException("사원 없음"));
+		
+		// 2) 중복 체크 (자기 자신 제외)
+	    if (empRepository.existsByRrnAndEmpIdNot(empDTO.getRrn(), empDTO.getEmpId())) {
+	        throw new IllegalStateException("이미 사용 중인 주민등록번호입니다.");
+	    }
+
+	    if (empRepository.existsByEmailAndEmpIdNot(empDTO.getEmail(), empDTO.getEmpId())) {
+	        throw new IllegalStateException("이미 사용 중인 이메일입니다.");
+	    }
+
+	    if (empRepository.existsByMobileAndEmpIdNot(empDTO.getMobile(), empDTO.getEmpId())) {
+	        throw new IllegalStateException("이미 사용 중인 연락처입니다.");
+	    }
 
 	    // 변경 가능한 필드만 업데이트
 	    emp.setEmpName(empDTO.getEmpName());
@@ -499,9 +512,6 @@ public class EmpService {
 	            // 새 파일의 ID로 교체
 	            Long newFileId = attachEntities.get(0).getFileId();
 	            emp.setPhotoFileId(newFileId);
-
-	            // 필요하면 이전 파일 삭제 or 사용여부 플래그 처리도 가능
-	            // Long oldFileId = empDTO.getPhotoFileId(); 이런 식으로 넘겨받아서 삭제
 
 	        } catch (IOException e) {
 	            throw new RuntimeException("사원 사진 업로드 중 오류가 발생했습니다.", e);
@@ -537,9 +547,6 @@ public class EmpService {
 
 	                Long newBankFileId = attachEntities.get(0).getFileId();
 	                empBank.setFileId(newBankFileId);
-
-	                // 필요하면 이전 파일 삭제 처리도 가능
-	                // Long oldBankFileId = empDTO.getFileId(); 이런 식으로 받아와서 삭제
 
 	            } catch (IOException e) {
 	                throw new RuntimeException("통장 사본 업로드 중 오류가 발생했습니다.", e);

@@ -205,12 +205,53 @@ public class EmpController {
 	}
 	
 	@PostMapping("/edit")
-	public String updateEmp(@ModelAttribute("empDTO") EmpDTO empDTO, RedirectAttributes rttr) {
-	    empService.updateEmp(empDTO);
+	public String updateEmp(@ModelAttribute("empDTO") @Valid EmpDTO empDTO, 
+							BindingResult bindingResult,
+							Model model,
+							RedirectAttributes rttr) {
+		
+		// 입력값 검증 실패 시
+		if (bindingResult.hasErrors()) {
+			model.addAttribute("mode", "edit");
+			model.addAttribute("formAction", "/emp/edit");
+			setupEmpFormCommon(model); 
+			model.addAttribute("statusList", commonCodeService.getCodes("EMP_STATUS"));
+			
+			return "emp/emp_form";
+		}
+		
+		try {
+	        // 2) 서비스 호출 (이메일/연락처 중복 검사 등)
+	        empService.updateEmp(empDTO);
+
+	    } catch (IllegalStateException e) {
+	        String msg = e.getMessage();
+
+	        // 등록이랑 패턴 맞춰서 필드별 에러 매핑
+	        if (msg.contains("주민등록번호")) {
+	            bindingResult.rejectValue("rrn", "duplicate", msg);
+	        } else if (msg.contains("이메일")) {
+	            bindingResult.rejectValue("email", "duplicate", msg);
+	        } else if (msg.contains("연락처")) {
+	            bindingResult.rejectValue("mobile", "duplicate", msg);
+	        } else {
+	            bindingResult.reject("empEditError", msg);
+	        }
+
+	        // 에러난 상태로 다시 폼
+	        model.addAttribute("mode", "edit");
+	        model.addAttribute("formAction", "/emp/edit");
+	        setupEmpFormCommon(model);
+	        model.addAttribute("statusList", commonCodeService.getCodes("EMP_STATUS"));
+
+	        return "emp/emp_form";
+	    }
+
+	    // 3) 정상 수정 시
 	    rttr.addFlashAttribute("msg", "정보 수정이 완료되었습니다.");
-	    return "redirect:/emp";  
+	    return "redirect:/emp";
 	}
-	
+
 	
 	
 }
