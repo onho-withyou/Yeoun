@@ -231,7 +231,18 @@
 	
 	    <!-- 버튼 -->
 	    <div class="d-flex justify-content-end gap-2">
-	      <a href="/emp" class="btn btn-outline-secondary">취소</a>
+	    
+		  <!-- 관리자 / 인사 / 부서장 : 사원 목록으로 -->
+		  <a sec:authorize="hasAnyRole('SYS_ADMIN','HR_ADMIN','DEPT_MANAGER')"
+		     href="/emp" class="btn btn-outline-secondary">
+		    취소
+		  </a>
+		
+		  <!-- 일반 사원 : 메인으로 (권한 없음 = 이쪽으로 옴) -->
+		  <a sec:authorize="isAuthenticated() and !hasAnyRole('SYS_ADMIN','HR_ADMIN','DEPT_MANAGER')"
+		     href="/main" class="btn btn-outline-secondary">
+		    취소
+		  </a>
 	      <button type="submit" class="btn btn-primary" th:text="${mode == 'edit'} ? '수정 완료' : '저장'">저장</button>
 	    </div>
 	  </form>
