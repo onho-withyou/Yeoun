@@ -41,11 +41,20 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 	}
 	
-	// 발령 등록 버튼 이벤트 - DOMContentLoaded에서 바로 등록!
+	// 발령 등록 버튼 이벤트 - DOMContentLoaded에서 바로 등록
 	const btnSubmit = document.getElementById('btnSubmit');
 	if (btnSubmit) {
 		btnSubmit.addEventListener('click', handleSubmitAction);
 	}
+	
+	// 발령 구분 변경 시 부서/직급 막기
+	const selActionType = document.querySelector("select[name='actionType']");
+    if (selActionType) {
+        selActionType.addEventListener('change', handleActionTypeChange);
+    }
+	
+	// 페이지 로딩 시 초기상태도 통일
+    handleActionTypeChange();
 });
 
 // 0. 검색 실행 함수
@@ -146,10 +155,12 @@ function buildEmpGrid(rows) {
 function handleSubmitAction(e) {
 	e.preventDefault(); // 폼 기본 제출 막기
 	
+	const actionType = document.querySelector("select[name='actionType']").value;
+	
 	// DTO 구성
 	const dto = {
 		empId: document.getElementById("empId").value,
-		actionType: document.querySelector("select[name='actionType']").value,
+		actionType: actionType,
 		effectiveDate: document.querySelector("input[name='effectiveDate']").value,
 		toDeptId: document.querySelector("select[name='toDeptId']").value,
 		toPosCode: document.querySelector("select[name='toPosCode']").value,
@@ -169,14 +180,18 @@ function handleSubmitAction(e) {
 		alert("발령일자를 입력하세요!");
 		return;
 	}
-	if (!dto.toDeptId) {
-		alert("부서를 선택하세요!");
-		return;
-	}
-	if (!dto.toPosCode) {
-		alert("직급을 선택하세요!");
-		return;
-	}
+	
+	// 퇴직이 아닐 때만 부서/직급 필수
+    if (actionType !== 'RETIRE_ACT') {
+      if (!dto.toDeptId) {
+        alert("부서를 선택하세요!");
+        return;
+      }
+      if (!dto.toPosCode) {
+        alert("직급을 선택하세요!");
+        return;
+      }
+    }
 	
 	
 	// REST API POST
@@ -258,3 +273,26 @@ function initApproverView() {
   if (a2) a2.textContent = "-";
   if (a3) a3.textContent = "-";
 }
+
+function handleActionTypeChange() {
+    const actionType = document.querySelector("select[name='actionType']").value;
+    const deptSelect = document.querySelector("select[name='toDeptId']");
+    const posSelect = document.querySelector("select[name='toPosCode']");
+
+    if (!deptSelect || !posSelect) return;
+
+    if (actionType === 'RETIRE_ACT') {
+        // 퇴직일 때 선택 막기
+        deptSelect.disabled = true;
+        posSelect.disabled = true;
+
+        // 값도 비워놓기 (원치 않으면 지워도 됨)
+        deptSelect.value = '';
+        posSelect.value = '';
+    } else {
+        // 다른 발령일 때 되돌리기
+        deptSelect.disabled = false;
+        posSelect.disabled = false;
+    }
+}
+
