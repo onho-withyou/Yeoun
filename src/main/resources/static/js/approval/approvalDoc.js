@@ -430,57 +430,186 @@
 
 	// //폼 결재권한자 데이터 말아서 보내는 함수
 	document.getElementById('modal-doc').addEventListener('submit', async function(event) {
-    // 폼의 기본 제출 동작 방지
-    event.preventDefault();
+    	// 폼의 기본 제출 동작 방지
+    	event.preventDefault();
 
-    // FormData 객체를 사용하여 폼 데이터 수집
-    const formData = new FormData(this);
-    
-	//결재문서
-	if(approverArr.length != 0){ //결재권한자가 있으면
- 		formData.append('docStatus', '1차대기');//문서상태
-		formData.append('docApprover', approverArr[0].empId);//결재권한자//1차 empId
-	}
-
-	if(approverArr.length > 0){
+    	// FormData 객체를 사용하여 폼 데이터 수집
+    	const formData = new FormData(this);
 		
-		//formData.append('delegateStatus', );//전결상태 3개
-		if(approverArr[0] !== undefined) 
-			formData.append('approverEmpIdOV1', approverArr[0].empId +","+ approverArr[0].approverOrder + "," + "Y"); //결재권한자 아이디 3게
-		if(approverArr[1] !== undefined) 
-			formData.append('approverEmpIdOV2', approverArr[1].empId +","+ approverArr[1].approverOrder +"," + "N");
-		if(approverArr[2] !== undefined) 
-			formData.append('approverEmpIdOV3', approverArr[2].empId +","+ approverArr[2].approverOrder +"," + "N");
-		//formData.append('approvalStatus', false);//권한자상태 필요없음
-		//formData.append('orderApprovers', null);//결재권한자 순서 3개
-		//if 1차권한자인지 판별후
-		// if(approverArr[0].empId != undefined){
-		// 	formData.append('viewing','y');//1차결재권한자에게만 y를 줌
+		//결재문서
+		if(approverArr.length != 0){ //결재권한자가 있으면
+ 			formData.append('docStatus', '1차대기');//문서상태
+			formData.append('docApprover', approverArr[0].empId);//결재권한자//1차 empId
+		}
+
+		if (approverArr.length === 0) {
+        	console.log("결재자 배열이 비어있습니다.");
+        	return;
+    	}
+
+
+
+		// 배열을 순회하며 FormData에 데이터 추가
+		approverArr.forEach((approver, index) => {
+			// 서버에서 요구하는 키 이름 (approverEmpIdOV1, approverEmpIdOV2, ...)
+			// 결재 순서는 1부터 시작하므로 index + 1을 사용합니다.
+			const keyName = `approverEmpIdOV${index + 1}`;
+			
+			// 1. 전결 상태 반영: boolean 값을 "Y" 또는 "N" 문자열로 변환
+			// (기존 코드처럼 무조건 "Y"나 "N"을 하드코딩하지 않습니다.)
+			const delegateStatusString = approver.delegateStatus ? "Y" : "N";
+			
+			// 2. 데이터 조합: "사번,순서,전결상태(Y/N)"
+			// approverOrder를 사용하거나, 현재 순서(index + 1)를 사용할 수 있지만, 
+			// 데이터 객체에 저장된 순서(approver.approverOrder)를 사용하는 것이 안전합니다.
+			const value = `${approver.empId},${approver.approverOrder},${delegateStatusString}`;
+
+			// 3. FormData에 값 추가
+			formData.append(keyName, value);
+
+			// 4. (선택적) 3명을 초과하는 결재자에 대한 경고 (필요하다면)
+			if (index >= 3) {
+				console.warn(`경고: ${index + 1}번째 결재자가 추가되었습니다. 서버에서 3명 초과 처리가 가능한지 확인하세요.`);
+			}
+		});
+
+		// if(approverArr.length > 0){
+
+		// 	//formData.append('delegateStatus', );//전결상태 3개
+		// 	if(approverArr[0] !== undefined) 
+		// 		formData.append('approverEmpIdOV1', approverArr[0].empId +","+ approverArr[0].approverOrder + "," + "Y"); //결재권한자 아이디 3게
+		// 	if(approverArr[1] !== undefined) 
+		// 		formData.append('approverEmpIdOV2', approverArr[1].empId +","+ approverArr[1].approverOrder +"," + "N");
+		// 	if(approverArr[2] !== undefined) 
+		// 		formData.append('approverEmpIdOV3', approverArr[2].empId +","+ approverArr[2].approverOrder +"," + "N");
+		// 	//formData.append('approvalStatus', false);//권한자상태 필요없음
+		// 	//formData.append('orderApprovers', null);//결재권한자 순서 3개
+		// 	//if 1차권한자인지 판별후
+		// 	// if(approverArr[0].empId != undefined){
+		// 	// 	formData.append('viewing','y');//1차결재권한자에게만 y를 줌
+		// 	// }
 		// }
+
+
+    	// FormData를 일반 JavaScript 객체로 변환
+    	const dataObject = Object.fromEntries(formData.entries());
+
+    	await fetch("/approval/approval_doc", {
+				method: 'POST', // POST 메소드 지정
+				headers: {
+					[csrfHeaderName]: csrfToken
+					,'Content-Type': 'application/json' // Content-Type 헤더를 application/json으로 설정
+				},
+				body:  JSON.stringify(dataObject) // 요청 본문에 JSON 데이터 포함
+			})
+			.then(response => response.text()) // 서버 응답을 JSON으로 파싱
+			.then(data => {
+				console.log('성공:', data);
+				alert('데이터 전송 성공!');
+			})
+			.catch((error) => {
+				console.error('오류:', error);
+				alert('데이터 전송 중 오류 발생');
+			});
+	});
+
+
+	// 결재권한자 변경/전결 적용 함수
+	function applyDelegateChange(button) {
+
+		//전결에 필요한 로직추가 approverArr 배열에 delegateStatus 값 변경
+		// 라디오 버튼값 가져오기
+		const radioJeongyeolja = document.getElementsByName('radioJeongyeolja');
+		let selectedValue;
+		for (const radio of radioJeongyeolja) {
+			console.log("radio value:", radio.value, "checked:", radio.checked);
+			if (radio.checked) {
+				selectedValue = radio.value;
+				break;
+			}
+		}
+
+    	const count = Number(button.dataset.count); // 버튼 자체의 data-count 사용
+    	const parentDiv = button.parentNode;        // 부모 div
+    	const id = parentDiv.id || "jeongyeoljaDiv"; // 부모 div id
+
+    	//alert(count + "번 결재권한자를 전결자로 지정\n부모 div id: " + id);
+    	console.log("적용 버튼 클릭 div id:", id);
+    	console.log("적용 버튼 클릭 div count:", count);
+		console.log("선택된 전결 상태:", selectedValue);
+
+		console.log("이전의 approverArr:", approverArr);
+
+		// toastui selectbox에서 선택된 사번 가져오기#select-box
+		const selectBoxElement = document.getElementById('delegetedApprover');
+		const selectedEmpId = selectBoxElement.value;
+		const selectedEmpName = selectBoxElement.options[selectBoxElement.selectedIndex].text;
+		const targetDiv = document.getElementById(`approver_${count}`);
+		console.log("선택된 사번:", selectedEmpId);
+		console.log("선택된 이름", selectedEmpName);
+		// approverArr 배열에서 해당 결재권한자의 delegateStatus 값 변경
+		approverArr.forEach((value,key) => {
+			console.log("비교 중인 approverOrder:", value.approverOrder, "==", count);
+			if(value.approverOrder === count) {
+				// 선택된 전결 상태에 따라 delegateStatus 값 설정
+				value.empId = selectedEmpId;//셀렉트 박스 값을 가져와서 넣어야함
+				value.delegateStatus = selectedValue;
+			
+				console.log("매핑된 결재권한자:", value);
+				console.log(`결재권한자 순서 ${count}의 전결상태가 ${selectedValue}로 변경되었습니다.`);
+
+			}
+			
+			return approver;
+		});
+		console.log("Updated approverArr:", approverArr);
+
+		//const radios = document.getElementsByName('radioJeongyeolja');
+
+		approverArr = approverArr.map(a => ({
+    		...a,
+    		originalEmpId: a.empId   // 초기 사번 저장
+		}));
+
+		document.addEventListener("change", function(event) {
+
+		    if (!event.target.matches('input[name="radioJeongyeolja"]')) return;
+
+		    const radio = event.target;
+		    const selectedValue = radio.value;
+
+		    console.log("선택된 전결 상태:", selectedValue);
+
+		    if (selectedValue === 'N') {
+			
+		        alert("전결자가 없습니다.");
+			
+		        approverArr.forEach(approver => {
+		            const targetDiv = document.getElementById(`approver_${approver.approverOrder}`);
+				
+		            if (targetDiv) {
+		                targetDiv.querySelectorAll('span').forEach(span => span.remove());
+		            }
+				
+		            approver.delegateStatus = 'N';
+					approver.empId = approver.originalEmpId;  // 원래 사번 복구
+
+		            console.log(`결재권한자 ${approver.approverOrder} delegateStatus = N`);
+		        });
+		    }
+		});
+		//<div id="approver_${count}"의 선택된 div에 전결자 표시
+		if(targetDiv) {
+			// 새로운 전결자 표시
+			if(selectedValue !== 'N') {
+				targetDiv.querySelectorAll('span').forEach(span => span.remove());
+				targetDiv.innerHTML += `<span style="color:red;"> ${selectedValue} : ${selectedEmpName} </span>`;
+			}
+		}
+
 	}
 
 
-    // FormData를 일반 JavaScript 객체로 변환
-    const dataObject = Object.fromEntries(formData.entries());
-
-    await fetch("/approval/approval_doc", {
-			method: 'POST', // POST 메소드 지정
-			headers: {
-				[csrfHeaderName]: csrfToken
-				,'Content-Type': 'application/json' // Content-Type 헤더를 application/json으로 설정
-			},
-			body:  JSON.stringify(dataObject) // 요청 본문에 JSON 데이터 포함
-		})
-		.then(response => response.text()) // 서버 응답을 JSON으로 파싱
-		.then(data => {
-			console.log('성공:', data);
-			alert('데이터 전송 성공!');
-		})
-		.catch((error) => {
-			console.error('오류:', error);
-			alert('데이터 전송 중 오류 발생');
-		});
-	});
 	
 	//1. 결재사항 불러오기
 	async function fetchPendingApprovalDocs() {
@@ -1083,6 +1212,13 @@
 		jeongyeoljaDiv.innerHTML = '<button onClick="approverDivclose(this,'+ "'"+ type + "'"+','+ count +')" class="btn-close" style="float:right;margin-right: 8px;"></button>'
 	   		 			+ '<h5>'+ count + "차 결재권한자 : "+ text +" 변경"+'</h5>';
 		jeongyeoljaDiv.innerHTML += jeongyeoljaContent.innerHTML;	
+		jeongyeoljaDiv.insertAdjacentHTML('beforeend', `<button id="approvalBtn_${count}" 
+																	type="button" class="btn btn-primary" 
+																	data-count="${count}" 
+																	onclick="applyDelegateChange(this)">
+        													전결자로 지정
+    													 </button>
+			`);
 	   
 	   	if(jeongyeoljaDiv.style.display === 'none'){
 	  	jeongyeoljaDiv.style.display = 'block';  
