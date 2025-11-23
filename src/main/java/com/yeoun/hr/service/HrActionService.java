@@ -58,13 +58,11 @@ public class HrActionService {
     @Transactional
     public Long createAction(HrActionRequestDTO hrActionRequestDTO) {
 
-    	// ==========================
-        // 0. 로그인 사용자 정보
-        // ==========================
+    	// 0. 로그인 사용자
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         LoginDTO loginUser = (LoginDTO) auth.getPrincipal();
         String loginEmpId = loginUser.getEmpId();
-
+        
         // 0-1. 등록자 Emp 조회 (신청자)
         Emp creator = empRepository.findById(loginEmpId)
                 .orElseThrow(() -> new IllegalArgumentException("등록자 사원을 찾을 수 없습니다. empId=" + loginEmpId));
@@ -72,15 +70,23 @@ public class HrActionService {
         // ==========================
         // 1. 발령 대상 및 부서/직급 조회
         // ==========================
+        String actionType = hrActionRequestDTO.getActionType();
+        
         Emp emp = empRepository.findById(hrActionRequestDTO.getEmpId())
                 .orElseThrow(() -> new IllegalArgumentException("사원을 찾을 수 없습니다. empId=" + hrActionRequestDTO.getEmpId()));
 
-        Dept toDept = deptRepository.findById(hrActionRequestDTO.getToDeptId())
-                .orElseThrow(() -> new IllegalArgumentException("부서를 찾을 수 없습니다. deptId=" + hrActionRequestDTO.getToDeptId()));
+        // 1-1. 부서/직급은 RETIRE_ACT 가 아닐 때만 조회
+        Dept toDept = null;
+        Position toPos = null;
+        
+        if (!"RETIRE_ACT".equals(actionType)) {
+            toDept = deptRepository.findById(hrActionRequestDTO.getToDeptId())
+                    .orElseThrow(() -> new IllegalArgumentException("부서를 찾을 수 없습니다. deptId=" + hrActionRequestDTO.getToDeptId()));
 
-        Position toPos = positionRepository.findById(hrActionRequestDTO.getToPosCode())
-                .orElseThrow(() -> new IllegalArgumentException("직급을 찾을 수 없습니다. posCode=" + hrActionRequestDTO.getToPosCode()));
-
+            toPos = positionRepository.findById(hrActionRequestDTO.getToPosCode())
+                    .orElseThrow(() -> new IllegalArgumentException("직급을 찾을 수 없습니다. posCode=" + hrActionRequestDTO.getToPosCode()));
+        }
+        
         // ==========================
         // 2. HR_ACTION 엔티티 생성
         // ==========================
@@ -90,16 +96,16 @@ public class HrActionService {
         action.setEmp(emp);	
         action.setFromDept(emp.getDept());			// 이전 부서
         action.setFromPosition(emp.getPosition());	// 이전 직급
-        action.setToDept(toDept); 					// 이후 부서
-        action.setToPosition(toPos);				// 이후 직급
-        action.setCreatedUser(creator); 			// 등록자
-        
-        // 발령 상태 기본값 (요청 상태)
-        action.setStatus("대기");
-        
-        action.setAppliedYn("N");     // 발령은 처음 생성될 때 무조건 미적용
-        action.setAppliedDate(null);  // 적용일자 없음
+        // 퇴직 아닐 때만 toDept / toPos 세팅
+        if (!"RETIRE_ACT".equals(actionType)) {
+            action.setToDept(toDept);
+            action.setToPosition(toPos);
+        }
 
+        action.setCreatedUser(creator);  // 등록자
+        action.setStatus("대기");	  	 // 발령 상태 기본값 (요청 상태)
+        action.setAppliedYn("N");     	 // 발령은 처음 생성될 때 무조건 미적용
+        action.setAppliedDate(null);     // 적용일자 없음
 
         // 발령(HR_ACTION) 저장
         HrAction saved = hrActionRepository.save(action);
@@ -108,16 +114,25 @@ public class HrActionService {
         // 3. 전자결재 문서(approval_doc) 생성
         // ==========================
         // 3-1. 문서 제목 자동 생성
-        String actionTypeName = getActionTypeName(hrActionRequestDTO.getActionType()); 
+        String actionTypeName = getActionTypeName(actionType);
         
-        String title = String.format(
-    	    "[인사발령/%s] %s %s -> %s (%s)",
-    	    actionTypeName,                      // 승진, 전보, 발령 등
-    	    emp.getEmpName(),                    // 홍길동
-    	    emp.getPosition().getPosName(),      // 대리
-    	    toPos.getPosName(),                  // 과장
-    	    toDept.getDeptName()                 // 영업팀
-    	);
+        String title;
+        if ("RETIRE_ACT".equals(actionType)) {
+        	title = String.format("[인사발령/%s] %s (%s %s)",
+        			actionTypeName,
+        			emp.getEmpName(),
+        			emp.getDept().getDeptName(),
+        			emp.getPosition().getPosName());
+        } else {
+        	title = String.format(
+    			"[인사발령/%s] %s %s -> %s (%s)",
+    			actionTypeName,                      // 승진, 전보, 발령 등
+    			emp.getEmpName(),                    // 홍길동
+    			emp.getPosition().getPosName(),      // 대리
+    			toPos.getPosName(),                  // 과장
+    			toDept.getDeptName()                 // 영업팀
+			);
+        }
         
         // ==========================
         // 4. 결재선(approver) 생성
@@ -138,7 +153,14 @@ public class HrActionService {
         approvalDoc.setCreatedDate(LocalDate.now());					// 생성일자
         approvalDoc.setDocStatus("1차대기");							// 문서상태
         approvalDoc.setFormType("인사발령신청서");						// 양식종류
-        approvalDoc.setToDeptId(toDept.getDeptId());					// 발령부서
+        // 퇴직일 때는 현재 부서 or null 등 선택
+        if (!"RETIRE_ACT".equals(actionType) && toDept != null) {
+            approvalDoc.setToDeptId(toDept.getDeptId());
+        } else {
+            // 그냥 현재 소속부서를 넣고 싶으면:
+            approvalDoc.setToDeptId(emp.getDept().getDeptId());
+            // 아니면 컬럼이 nullable이면 setToDeptId(null) 도 가능
+        }
         approvalDoc.setReason(hrActionRequestDTO.getActionReason());	// 발령사유
         
         // 3-3. 현재 결재자(1차 결재자) 세팅
@@ -209,6 +231,7 @@ public class HrActionService {
         return switch (actionType) {
             case "PROMOTION"  -> "승진";
             case "TRANSFER"   -> "전보";
+            case "RETIRE_ACT" -> "퇴직";
             default           -> "인사발령";
         };
     }
@@ -268,6 +291,13 @@ public class HrActionService {
                                 action.getToPosition().getPosName());
     				}
     				break;
+    				
+    			case "RETIRE_ACT":
+    				emp.setStatus("RETIRE");
+    				emp.setRetireDate(action.getEffectiveDate());
+    				log.info("[발령적용] 퇴직 적용 - 사번:{} / 퇴사일:{}",
+    	                     emp.getEmpId(), action.getEffectiveDate());
+    	            break;
     				
 				default:
 					log.warn("[발령적용] 미지원 발령타입: {} (ACTION_ID={})",
