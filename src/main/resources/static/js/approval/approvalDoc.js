@@ -113,6 +113,8 @@
 			grid5.resetData(data);
 		});		
 		empData();
+
+		
 	}
 	
 	let approverDiv = document.querySelector('#approver');
@@ -141,13 +143,13 @@
 				let selectlabel = selectBox.getSelectedItem().label;
 				let approverEmpId = selectBox.getSelectedItem().value;
 
-				console.log("@@@@@@@@@@@@@@@@@@@@@@", approverEmpId);
 				if(selectlabel != null && approverArr.length < 3){//셀렉트 라벨선택시 3번까지만셈
 					print(ev.type, selectlabel);
 					approverArr.push({
 						empId: approverEmpId
 						, approverOrder: window.count 
 						, delegateStatus : false //여기서 전결상태도 불러오자
+						, originalEmpId: approverEmpId // 초기 사번 저장
 					});
 					console.log("@@@@@@@@@@@@@@@@@@@@@@",approverArr);
 				}
@@ -166,13 +168,14 @@
 				approvalId = rowData.approval_id;
 				// 문서 열릴때 현재 결재권자(approval) 저장
 				currentApprover = rowData.approver;
-				
+				console.log("rowData",rowData);
 				document.getElementById('Drafting').innerText = rowData.approval_title;
+				//document.getElementById('Drafting').value = rowData.approval_title;
 				document.getElementById('today-date').innerText = toDateStr(rowData.created_date) ;//결재 작성날짜 = 결재시작일
 				document.getElementById('approval-title').value = rowData.approval_title;
 				//양식종류 form-menu
 				document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
-				
+				document.getElementById('form-menu').value = rowData.form_type;//양식종류
 				//const createdDate = rowData.created_date;
 				document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
 				document.getElementById('finish-date').value = toDateStr(rowData.finish_date);//결재완료날짜
@@ -186,7 +189,6 @@
 				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
 				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 				//document.getElementById('approver').value = rowData.approver;//결재권한자
-				
 				const approverList = await getApproverList(approvalId);
 				
 				let sortedList; 
@@ -207,6 +209,8 @@
 				}
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+				selectBox.disable();
+				formDisable()
 				
 			});
 
@@ -226,7 +230,7 @@
 				document.getElementById('Drafting').innerText = rowData.approval_title;
 				document.getElementById('today-date').innerText = toDateStr(rowData.created_date);//결재 작성날짜 = 결재시작일
 				//document.getElementById('approval-title').value = rowData.approval_title;
-				//양식종류form-menu
+				document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
 				document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
 				
 				const createdDate = rowData.created_date;
@@ -262,6 +266,8 @@
 				}
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+				selectBox.disable();
+				formDisable();
 			});
 
 
@@ -280,7 +286,7 @@
 				document.getElementById('Drafting').innerText = rowData.approval_title;
 				document.getElementById('today-date').innerText = toDateStr(rowData.created_date);//결재 작성날짜 = 결재시작일
 				//document.getElementById('approval-title').value = rowData.approval_title;
-				//양식종류form-menu
+				document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
 				document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
 				console.log("rowData.created_date",toDateStr(rowData.created_date) );
 				const createdDate = rowData.created_date;
@@ -315,6 +321,8 @@
 				}
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+				selectBox.disable();
+				formDisable();
 			});
 
 			grid4.on("click", async (ev) => {
@@ -332,7 +340,7 @@
 			document.getElementById('Drafting').innerText = rowData.approval_title;
 			document.getElementById('today-date').innerText = toDateStr(rowData.created_date);//결재 작성날짜 = 결재시작일
 			//document.getElementById('approval-title').value = rowData.approval_title;
-			//양식종류form-menu
+			document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
 			document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
 			
 			const createdDate = rowData.created_date;
@@ -367,6 +375,8 @@
 				}
 			//document.getElementById('approver').innerText = rowData.approver;//전결자
 			document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+			selectBox.disable();
+			formDisable();
 			});
 	
 			grid5.on("click", async (ev) => {
@@ -385,7 +395,7 @@
 			document.getElementById('Drafting').innerText = rowData.approval_title;
 			document.getElementById('today-date').innerText = rowData.created_date.split('T')[0] ;//결재 작성날짜 = 결재시작일
 			//document.getElementById('approval-title').value = rowData.approval_title;
-			//양식종류form-menu
+			document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
 			document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
 			
 			const createdDate = rowData.created_date;
@@ -420,6 +430,8 @@
 				}
 			//document.getElementById('approver').innerText = rowData.approver;//전결자
 			document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+			selectBox.disable();
+			formDisable();
 			});
 	
 			return itemData;
@@ -427,6 +439,24 @@
 			console.error('Error fetching data:', error);
 		}
 	}	
+	//그리드 클릭시 상세보기 document.getElementById('myInput').disabled = true;
+	function formDisable(){
+		document.getElementById('approval-title').disabled = true;
+		document.getElementById('approver-name').disabled = true;
+		document.getElementById('form-menu').disabled = true;
+		document.getElementById('today-date').disabled = true;
+		document.getElementById('Drafting').disabled = true;
+		document.getElementById('DraftingHidden').disabled = true;
+		document.getElementById('create-date').disabled = true;
+		document.getElementById('finish-date').disabled = true;
+		document.getElementById('start-date').disabled = true;
+		document.getElementById('end-date').disabled = true;
+		document.getElementById('leave-type').disabled = true;
+		document.getElementById('to-dept-id').disabled = true;
+		document.getElementById('expnd-type').disabled = true;
+		document.getElementById('reason-write').disabled = true;
+		selectBox.disable();
+	}
 
 	// //폼 결재권한자 데이터 말아서 보내는 함수
 	document.getElementById('modal-doc').addEventListener('submit', async function(event) {
@@ -449,46 +479,47 @@
 
 
 
-		// 배열을 순회하며 FormData에 데이터 추가
-		approverArr.forEach((approver, index) => {
-			// 서버에서 요구하는 키 이름 (approverEmpIdOV1, approverEmpIdOV2, ...)
-			// 결재 순서는 1부터 시작하므로 index + 1을 사용합니다.
-			const keyName = `approverEmpIdOV${index + 1}`;
+		// // 배열을 순회하며 FormData에 데이터 추가
+		// approverArr.forEach((approver, index) => {
+		// 	// 서버에서 요구하는 키 이름 (approverEmpIdOV1, approverEmpIdOV2, ...)
+		// 	// 결재 순서는 1부터 시작하므로 index + 1을 사용합니다.
+		// 	const keyName = `approverEmpIdOV${index + 1}`;
 			
-			// 1. 전결 상태 반영: boolean 값을 "Y" 또는 "N" 문자열로 변환
-			// (기존 코드처럼 무조건 "Y"나 "N"을 하드코딩하지 않습니다.)
-			const delegateStatusString = approver.delegateStatus ? "Y" : "N";
+		// 	// 1. 전결 상태 반영: boolean 값을 "Y" 또는 "N" 문자열로 변환
+		// 	// (기존 코드처럼 무조건 "Y"나 "N"을 하드코딩하지 않습니다.)
+		// 	const delegateStatusString = approver.delegateStatus ? "Y" : "N";
 			
-			// 2. 데이터 조합: "사번,순서,전결상태(Y/N)"
-			// approverOrder를 사용하거나, 현재 순서(index + 1)를 사용할 수 있지만, 
-			// 데이터 객체에 저장된 순서(approver.approverOrder)를 사용하는 것이 안전합니다.
-			const value = `${approver.empId},${approver.approverOrder},${delegateStatusString}`;
+		// 	// 2. 데이터 조합: "사번,순서,전결상태(Y/N)"
+		// 	// approverOrder를 사용하거나, 현재 순서(index + 1)를 사용할 수 있지만, 
+		// 	// 데이터 객체에 저장된 순서(approver.approverOrder)를 사용하는 것이 안전합니다.
+		
+		// 	const value = `${approver.empId},${approver.approverOrder},${delegateStatusString}`;
+			
+		// 	// 3. FormData에 값 추가
+		// 	formData.append(keyName, value);
 
-			// 3. FormData에 값 추가
-			formData.append(keyName, value);
+		// 	// 4. (선택적) 3명을 초과하는 결재자에 대한 경고 (필요하다면)
+		// 	if (index >= 3) {
+		// 		console.warn(`경고: ${index + 1}번째 결재자가 추가되었습니다. 서버에서 3명 초과 처리가 가능한지 확인하세요.`);
+		// 	}
+		// });
 
-			// 4. (선택적) 3명을 초과하는 결재자에 대한 경고 (필요하다면)
-			if (index >= 3) {
-				console.warn(`경고: ${index + 1}번째 결재자가 추가되었습니다. 서버에서 3명 초과 처리가 가능한지 확인하세요.`);
-			}
-		});
+		if(approverArr.length > 0){
 
-		// if(approverArr.length > 0){
-
-		// 	//formData.append('delegateStatus', );//전결상태 3개
-		// 	if(approverArr[0] !== undefined) 
-		// 		formData.append('approverEmpIdOV1', approverArr[0].empId +","+ approverArr[0].approverOrder + "," + "Y"); //결재권한자 아이디 3게
-		// 	if(approverArr[1] !== undefined) 
-		// 		formData.append('approverEmpIdOV2', approverArr[1].empId +","+ approverArr[1].approverOrder +"," + "N");
-		// 	if(approverArr[2] !== undefined) 
-		// 		formData.append('approverEmpIdOV3', approverArr[2].empId +","+ approverArr[2].approverOrder +"," + "N");
-		// 	//formData.append('approvalStatus', false);//권한자상태 필요없음
-		// 	//formData.append('orderApprovers', null);//결재권한자 순서 3개
-		// 	//if 1차권한자인지 판별후
-		// 	// if(approverArr[0].empId != undefined){
-		// 	// 	formData.append('viewing','y');//1차결재권한자에게만 y를 줌
-		// 	// }
-		// }
+			//formData.append('delegateStatus', );//전결상태 3개
+			if(approverArr[0] !== undefined) 
+				formData.append('approverEmpIdOV1', approverArr[0].empId +","+ approverArr[0].approverOrder + "," + "Y"); //결재권한자 아이디 3게
+			if(approverArr[1] !== undefined) 
+				formData.append('approverEmpIdOV2', approverArr[1].empId +","+ approverArr[1].approverOrder +"," + "N");
+			if(approverArr[2] !== undefined) 
+				formData.append('approverEmpIdOV3', approverArr[2].empId +","+ approverArr[2].approverOrder +"," + "N");
+			//formData.append('approvalStatus', false);//권한자상태 필요없음
+			//formData.append('orderApprovers', null);//결재권한자 순서 3개
+			//if 1차권한자인지 판별후
+			// if(approverArr[0].empId != undefined){
+			// 	formData.append('viewing','y');//1차결재권한자에게만 y를 줌
+			// }
+		}
 
 
     	// FormData를 일반 JavaScript 객체로 변환
@@ -516,6 +547,7 @@
 
 	// 결재권한자 변경/전결 적용 함수
 	function applyDelegateChange(button) {
+
 
 		//전결에 필요한 로직추가 approverArr 배열에 delegateStatus 값 변경
 		// 라디오 버튼값 가져오기
@@ -547,7 +579,7 @@
 		const targetDiv = document.getElementById(`approver_${count}`);
 		console.log("선택된 사번:", selectedEmpId);
 		console.log("선택된 이름", selectedEmpName);
-		// approverArr 배열에서 해당 결재권한자의 delegateStatus 값 변경
+	
 		approverArr.forEach((value,key) => {
 			console.log("비교 중인 approverOrder:", value.approverOrder, "==", count);
 			if(value.approverOrder === count) {
@@ -566,11 +598,7 @@
 
 		//const radios = document.getElementsByName('radioJeongyeolja');
 
-		approverArr = approverArr.map(a => ({
-    		...a,
-    		originalEmpId: a.empId   // 초기 사번 저장
-		}));
-
+		
 		document.addEventListener("change", function(event) {
 
 		    if (!event.target.matches('input[name="radioJeongyeolja"]')) return;
@@ -580,7 +608,7 @@
 
 		    console.log("선택된 전결 상태:", selectedValue);
 
-		    if (selectedValue === 'N') {
+		    if (selectedValue == 'N') {
 			
 		        alert("전결자가 없습니다.");
 			
@@ -590,22 +618,22 @@
 		            if (targetDiv) {
 		                targetDiv.querySelectorAll('span').forEach(span => span.remove());
 		            }
-				
 		            approver.delegateStatus = 'N';
 					approver.empId = approver.originalEmpId;  // 원래 사번 복구
 
 		            console.log(`결재권한자 ${approver.approverOrder} delegateStatus = N`);
 		        });
 		    }
-		});
-		//<div id="approver_${count}"의 선택된 div에 전결자 표시
-		if(targetDiv) {
+			if(targetDiv) {
 			// 새로운 전결자 표시
-			if(selectedValue !== 'N') {
+			if(selectedValue != 'N') {
 				targetDiv.querySelectorAll('span').forEach(span => span.remove());
 				targetDiv.innerHTML += `<span style="color:red;"> ${selectedValue} : ${selectedEmpName} </span>`;
 			}
 		}
+		});
+		//<div id="approver_${count}"의 선택된 div에 전결자 표시
+		
 
 	}
 
@@ -826,12 +854,12 @@
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
 			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
-			,{header: '휴가시작일자' ,name: 'start_date' ,align: 'center'}
-			,{header: '휴가종료일자' ,name: 'end_date' ,align: 'center'}
-			,{header: '연차유형' ,name: 'leave_type' ,align: 'center'}
-			,{header: '발령부서' ,name: 'to_dept_id' ,align: 'center'}
-			,{header: '지출종류' ,name: 'expnd_type' ,align: 'center'}
-			,{header: '결재사유내용' ,name: 'reason' ,align: 'center'}
+			,{header: '휴가시작일자' ,name: 'start_date' ,align: 'center',hidden: true}
+			,{header: '휴가종료일자' ,name: 'end_date' ,align: 'center',hidden: true}
+			,{header: '연차유형' ,name: 'leave_type' ,align: 'center',hidden: true}
+			,{header: '발령부서' ,name: 'to_dept_id' ,align: 'center',hidden: true}
+			,{header: '지출종류' ,name: 'expnd_type' ,align: 'center',hidden: true}
+			,{header: '결재사유내용' ,name: 'reason' ,align: 'center',hidden: true}
 			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
 			,{header: '상세보기' ,name: 'view_details' ,align: 'center', width: 100
 				,formatter: (rowInfo) => {
@@ -862,14 +890,14 @@
 			,{header: '결재권한자 이름' ,name: 'approver_name' ,align: 'center'}
 			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
-			,{header: '생성일' ,name: 'created_date' ,align: 'center',width:300}
+			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
 			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
-			,{header: '휴가시작일자' ,name: 'start_date' ,align: 'center'}
-			,{header: '휴가종료일자' ,name: 'end_date' ,align: 'center'}
-			,{header: '연차유형' ,name: 'leave_type' ,align: 'center'}
-			,{header: '발령부서' ,name: 'to_dept_id' ,align: 'center'}
-			,{header: '지출종류' ,name: 'expnd_type' ,align: 'center'}
-			,{header: '결재사유내용' ,name: 'reason' ,align: 'center'}
+			,{header: '휴가시작일자' ,name: 'start_date' ,align: 'center',hidden: true}
+			,{header: '휴가종료일자' ,name: 'end_date' ,align: 'center',hidden: true}
+			,{header: '연차유형' ,name: 'leave_type' ,align: 'center',hidden: true}
+			,{header: '발령부서' ,name: 'to_dept_id' ,align: 'center',hidden: true}
+			,{header: '지출종류' ,name: 'expnd_type' ,align: 'center',hidden: true}
+			,{header: '결재사유내용' ,name: 'reason' ,align: 'center',hidden: true}
 			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
 			,{header: '상세보기' ,name: 'view_details' ,align: 'center'
 				,formatter: (rowInfo) => {
@@ -900,13 +928,13 @@
 			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
-			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
-			,{header: '휴가시작일자' ,name: 'start_date' ,align: 'center'}
-			,{header: '휴가종료일자' ,name: 'end_date' ,align: 'center'}
-			,{header: '연차유형' ,name: 'leave_type' ,align: 'center'}
-			,{header: '발령부서' ,name: 'to_dept_id' ,align: 'center'}
-			,{header: '지출종류' ,name: 'expnd_type' ,align: 'center'}
-			,{header: '결재사유내용' ,name: 'reason' ,align: 'center'}
+			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center',hidden: true}
+			,{header: '휴가시작일자' ,name: 'start_date' ,align: 'center',hidden: true}
+			,{header: '휴가종료일자' ,name: 'end_date' ,align: 'center',hidden: true}
+			,{header: '연차유형' ,name: 'leave_type' ,align: 'center',hidden: true}
+			,{header: '발령부서' ,name: 'to_dept_id' ,align: 'center',hidden: true}
+			,{header: '지출종류' ,name: 'expnd_type' ,align: 'center',hidden: true}
+			,{header: '결재사유내용' ,name: 'reason' ,align: 'center',hidden: true}
 			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
 			,{header: '상세보기' ,name: 'view_details' ,align: 'center'
 				,formatter: (rowInfo) => {
@@ -937,13 +965,13 @@
 			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
-			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
-			,{header: '휴가시작일자' ,name: 'start_date' ,align: 'center'}
-			,{header: '휴가종료일자' ,name: 'end_date' ,align: 'center'}
-			,{header: '연차유형' ,name: 'leave_type' ,align: 'center'}
-			,{header: '발령부서' ,name: 'to_dept_id' ,align: 'center'}
-			,{header: '지출종류' ,name: 'expnd_type' ,align: 'center'}
-			,{header: '결재사유내용' ,name: 'reason' ,align: 'center'}
+			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center',hidden: true}
+			,{header: '휴가시작일자' ,name: 'start_date' ,align: 'center',hidden: true}
+			,{header: '휴가종료일자' ,name: 'end_date' ,align: 'center',hidden: true}
+			,{header: '연차유형' ,name: 'leave_type' ,align: 'center',hidden: true}
+			,{header: '발령부서' ,name: 'to_dept_id' ,align: 'center',hidden: true}
+			,{header: '지출종류' ,name: 'expnd_type' ,align: 'center',hidden: true}
+			,{header: '결재사유내용' ,name: 'reason' ,align: 'center',hidden: true}
 			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
 			,{header: '상세보기' ,name: 'view_details' ,align: 'center'
 				,formatter: (rowInfo) => {
@@ -973,12 +1001,12 @@
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
 			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
-			,{header: '휴가시작일자' ,name: 'start_date' ,align: 'center'}
-			,{header: '휴가종료일자' ,name: 'end_date' ,align: 'center'}
-			,{header: '연차유형' ,name: 'leave_type' ,align: 'center'}
-			,{header: '발령부서' ,name: 'to_dept_id' ,align: 'center'}
-			,{header: '지출종류' ,name: 'expnd_type' ,align: 'center'}
-			,{header: '결재사유내용' ,name: 'reason' ,align: 'center'}
+			,{header: '휴가시작일자' ,name: 'start_date' ,align: 'center',hidden: true}
+			,{header: '휴가종료일자' ,name: 'end_date' ,align: 'center',hidden: true}
+			,{header: '연차유형' ,name: 'leave_type' ,align: 'center',hidden: true}
+			,{header: '발령부서' ,name: 'to_dept_id' ,align: 'center',hidden: true}
+			,{header: '지출종류' ,name: 'expnd_type' ,align: 'center',hidden: true}
+			,{header: '결재사유내용' ,name: 'reason' ,align: 'center',hidden: true}
 			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
 			,{header: '상세보기' ,name: 'view_details' ,align: 'center'
 				,formatter: (rowInfo) => {
@@ -1041,45 +1069,61 @@
 	function draftValFn(ev){
 		let draft_doc = ev.value;
 
-		document.getElementById('Drafting').value = draft_doc;
-		//document.getElementById('Drafting').innerText = draft_doc;
+		//document.getElementById('DraftingHidden').value = draft_doc;
+		
 
 		// html에서 th:data-formname="${item.formName}" 값을 가져와서 이름으로 사용
 		const formName = ev.selectedOptions[0].dataset.formname;
 		console.log("ev.selectedOptions[0].dataset.formname",ev.selectedOptions[0].dataset.formname);
 		
-		document.getElementById('Drafting').value = formName;
-		
+		document.getElementById('DraftingHidden').value = formName;
+		document.getElementById('Drafting').innerText = formName;
 		// 선택한 결재 양식과 서버에서 받아온 데이터 중 일치하는 값 찾기
 		selectedForm = formList.find(item => item.formName === draft_doc);
 		console.log("draft_doc",draft_doc);
 		//양식종류에따라 보여지는 화면이 다름
 		if(draft_doc == "지출결의서"){
+			 $('#approval-modal').modal('show');
 			document.getElementById('expndTypeForm').style.display = 'flex';
 			document.getElementById('leavePeriodForm').style.display = 'none';
 			document.getElementById('leaveTypeForm').style.display = 'none';
 			document.getElementById('toDeptForm').style.display = 'none';
+			
 		}else if(draft_doc == "연차신청서"){
+			 $('#approval-modal').modal('show');
 			document.getElementById('leavePeriodForm').style.display = 'flex';
 			document.getElementById('leaveTypeForm').style.display = 'flex';
 			document.getElementById('expndTypeForm').style.display = 'none';
 			document.getElementById('toDeptForm').style.display = 'none';
 		}else if(draft_doc == "반차신청서"){
+			 $('#approval-modal').modal('show');
 			document.getElementById('leaveTypeForm').style.display = 'flex';
 			document.getElementById('leavePeriodForm').style.display = 'none';
 			document.getElementById('expndTypeForm').style.display = 'none';
 			document.getElementById('toDeptForm').style.display = 'none';
 		}else if(draft_doc == "인사발령신청서"){
+			 $('#approval-modal').modal('show');
 			document.getElementById('leavePeriodForm').style.display = 'none';
 			document.getElementById('leaveTypeForm').style.display = 'none';
 			document.getElementById('expndTypeForm').style.display = 'none';
 			document.getElementById('toDeptForm').style.display = 'flex';
 		}else if(draft_doc == "자유양식결재서"){//결재권한자만없음
+			 $('#approval-modal').modal('show');
 			document.getElementById('leavePeriodForm').style.display = 'none';
 			document.getElementById('leaveTypeForm').style.display = 'none';
 			document.getElementById('expndTypeForm').style.display = 'none';
 			document.getElementById('toDeptForm').style.display = 'none';
-		} 
+		}
+		if(draft_doc == "기안서"){//결재권한자만없음
+			alert("양식을 선택해주세요.");
+			$('#approval-modal').on('show.bs.modal', function (e) {
+				
+					// 모달을 열지 않도록 강제로 닫기
+					e.preventDefault();
+					console.log('모달을 열 수 없습니다.');
+				
+			});
+		}
 		formReset();
 		defaultPrint();
 	}
@@ -1127,12 +1171,13 @@
 		
 		// selectedForm 값이 없을 경우 에러가 생길 수 있어서 에러 처리
 		if (!selectedForm) {
-		    	console.log("선택된 양식이 없습니다.")
+		    console.log("선택된 양식이 없습니다.")
 			
-				document.getElementById('leavePeriodForm').style.display = 'flex';
-				document.getElementById('leaveTypeForm').style.display = 'flex';
-				document.getElementById('expndTypeForm').style.display = 'flex';
-				document.getElementById('toDeptForm').style.display = 'flex';
+
+				//document.getElementById('leavePeriodForm').style.display = 'flex';
+				//document.getElementById('leaveTypeForm').style.display = 'flex';
+				//document.getElementById('expndTypeForm').style.display = 'flex';
+				//document.getElementById('toDeptForm').style.display = 'flex';
 			
 		    return;
 		}
@@ -1159,13 +1204,9 @@
 		// 4. 기본 결재 라인 설정 (this.count가 0일 때만 실행)
     	// 이 로직은 결재 라인에 아무도 없을 때만 기본값을 넣어주기 위한 로직입니다.
     	if (window.count === 0) {
-			//console.log("defalutapproverArr 실행:", defalutapproverArr);
-			//console.log("defalutapproverArr.length:", defalutapproverArr.length);
-			//console.log("approverArr 실행 전:", approverArr);
+	
         	defalutapproverArr.forEach(approver => {
 
-				///console.log("approver:", approver);
-				//console.log("window.count:", window.count);
 				const approverParts = approver.split(" ");
 				const approverEmpId = approverParts[0];
 				print("defalut", approver);
@@ -1173,9 +1214,11 @@
 				approverArr.push({
 					empId: approverEmpId,
 					approverOrder: window.count,
-					delegateStatus: false 
+					delegateStatus: false, 
+					originalEmpId: approverEmpId
 				});
         	});
+			console.log("approverArr 실행 후:", approverArr);
 		}	
 
 	}
@@ -1186,9 +1229,7 @@
 
 	function print(type, text) {
     	// 결재권한자변경 div 버튼 생성
-    	console.log(window.count, "@@@@@@@@@@@@");
     	if(this.count < 3){
-    		console.log(this.count, "this.count:!!!!!!!!!!!!")
     		this.count++;
     		approverDiv.innerHTML +='<div class="btn btn-success"'
     		                      +'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
@@ -1205,7 +1246,7 @@
 	    if (jeongyeoljaDiv) {
 	        // div 초기화
 	        jeongyeoljaDiv.innerHTML = `
-	            <button onClick="approverDivclose(this, '${type}', ${count})" class="btn-close" style="float:right;margin-right: 8px;"></button>
+	            <button type="button" onClick="approverDivclose(this, '${type}', ${count})" class="btn-close" style="float:right;margin-right: 8px;"></button>
 	            <h5>${count}차 결재권한자 : ${text} 변경</h5>
 	            ${jeongyeoljaContent.innerHTML}
 	            <button id="approvalBtn_${count}" 
@@ -1221,31 +1262,31 @@
 	//결재권한자,결재권한자변경(전결자) 닫기버튼
 	function approverDivclose(buttonDiv,type,count){
 		const divElement = buttonDiv.parentNode; // 버튼의 부모인 div를 찾음
+		console.log("type",type);
 		
-		if(jeongyeoljaDiv){
-			jeongyeoljaDiv.style.display = 'none';
+		jeongyeoljaDiv.style.display = 'none';
+		//defalut 태그 닫기 버튼시 
+		if (buttonDiv.parentElement.id === "" || type === "defalut") {//결재권한자
+		    divElement.remove(); //자신의 div 제거
+		
+		    if(divElement.innerText !== null){ //defalut 태그가 있을때
+				// console.log("defalutapproverArr",defalutapproverArr);
+				approverArr = approverArr.filter((ev) => ev.approverOrder !== count);
+				// console.log("approverArr defalut 닫기후:", approverArr);	
+		    }
+			approverArr = approverArr.filter((ev) => ev !== count);
+			this.count = count-1; //제거 라벨 카운트 원상복기
 		}
-		
-		divElement.remove(); //자신의 div 제거
-		const indexToRemove = count - 1; 
-		console.log("제거할 인덱스:", indexToRemove);
-
-        // 인덱스가 유효한 범위 내에 있는지 확인 후 제거
-        if (indexToRemove > -1 && indexToRemove < approverArr.length) {
-        // splice(시작 인덱스, 제거할 요소 수)
-        	approverArr.splice(indexToRemove, 1); 
-        }
-		this.count = count-1; //제거 라벨 카운트 원상복기
-	  
-		
-		
+		if(type === "close"){ //전결자 변경 닫기버튼시
+			divElement.remove(); //자신의 div 제거
+			//전결자 변경시 결재권한자 배열에서 해당 결재권한자 제거
+			console.log("count:",count-1);
+			approverArr = approverArr.filter((ev) => ev.approverOrder !== count);
+			console.log("approverArr 닫기후:", approverArr);
+		}
 		if(approverArr.length === 0){
-    		this.count = 0;
-    	}	
-		console.log("닫기버튼 클릭된 defalutapproverArr:", defalutapproverArr);
-		console.log("업데이트된 approverArr:", approverArr);
-		console.log("현재 this.count:", this.count+1);
-
+	    	this.count = 0;
+	    }	
 	}
 
 	//에디터-없앰

@@ -91,9 +91,9 @@ public class ApprovalDocService {
         approvalDoc.setEndDate(endDate);//휴가종료일
         approvalDoc.setLeaveType(doc.get("leaveType"));//휴가유형
         approvalDoc.setToDeptId(doc.get("toDeptId"));//발령부서
-        approvalDoc.setLeaveType(doc.get("docStatus"));//연차유형
         approvalDoc.setExpndType(doc.get("expndType"));//지출타입
         approvalDoc.setReason(doc.get("reason"));//사유
+		
 
         //결재문서
             
