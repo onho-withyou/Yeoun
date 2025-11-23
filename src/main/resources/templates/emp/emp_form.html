@@ -1,7 +1,7 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{/layouts/layout.html}">
-<body>
+
 <th:block layout:fragment="content">
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
 	
@@ -9,90 +9,135 @@
 	  인사 신규 등록
 	</h2>
 
-	  <form th:action="${mode == 'edit'} ? @{/emp/edit} : @{/emp/regist}" 
-	  		th:object="${empDTO}" method="post" enctype="multipart/form-data" novalidate>
+	  <form th:action="@{${formAction}}" th:object="${empDTO}" method="post"
+      		enctype="multipart/form-data" novalidate>
+      		
+       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 	
 	    <!-- 상단 2컬럼 카드 -->
 	    <div class="row g-4 mb-5">
 	      <!-- 기본정보 -->
-	      <div class="col-md-6">
-	        <div class="card h-100">
-	          <div class="card-body">
-	            <h5 class="card-title mb-3">기본정보</h5>
-	
-	            <div class="row g-3">
-	              <div class="col-12 col-md-6">
-	                <label class="form-label required" for="empName">이름</label>
-	                <input type="text" class="form-control" id="empName" th:field="*{empName}" placeholder="김여운">
-	                <div class="text-danger small" th:if="${#fields.hasErrors('empName')}" th:errors="*{empName}"></div>
-				  </div>
-				  
-				  <!-- 사번은 서비스에서 생성됨: 입력받지 않기 or 읽기전용(바인딩X) -->
-	              <div class="col-12 col-md-6">
-	                <label class="form-label" for="empNo">사번</label>
-	                <input type="text" class="form-control" id="empNo" th:field="*{empId}"
-	                       th:placeholder="${mode == 'edit'} ? '' : '자동생성'" readonly>
-	              </div>
-	            </div>
-	
-	            <div class="row g-3 mt-0">
-	              <div class="col-12 col-md-6">
-	                <label class="form-label required" for="gender">성별</label>
-	                <select class="form-select" id="gender" th:field="*{gender}" th:disabled="${mode == 'edit'}">
-	                  <option value="">선택</option>
-	                  <option value="M">남</option>
-	                  <option value="F">여</option>
-	                </select>
-	                <input type="hidden" th:if="${mode == 'edit'}" th:field="*{gender}">
-	                <div class="text-danger small" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></div>
-	              </div>
-	              <div class="col-12 col-md-6">
-	                <label class="form-label required" for="hireDate">입사일</label>
-	                <input type="date" class="form-control" id="hireDate" th:field="*{hireDate}" th:disabled="${mode == 'edit'}">
-	                <input type="hidden" th:if="${mode == 'edit'}" th:field="*{hireDate}">
-	                <div class="text-danger small" th:if="${#fields.hasErrors('hireDate')}" th:errors="*{hireDate}"></div>
-	              </div>
-	            </div>
-	
-	            <div class="row g-3 mt-0">
-	            
-	              <div class="col-12 col-md-6">
-					  <label class="form-label required" for="rrn">주민등록번호</label>
-					  <!-- 등록 모드 -->
-					  <input th:if="${mode == 'create'}" type="text" class="form-control" id="rrn" th:field="*{rrn}"
-					         maxlength="14" placeholder="900101-1234567" autocomplete="off">
-					  <!-- 수정 모드 -->
-					  <div th:if="${mode == 'edit'}">
-					    <!-- 화면 표시용 (마스킹) -->
-					    <input type="text" class="form-control mb-1" id="rrnDisplay" th:value="*{rrnMasked}"  readonly>
-					    <!-- 실제 값 전송용 -->
-					    <input type="hidden" th:field="*{rrn}">
-					  </div>
-					  <div class="text-danger small" th:if="${#fields.hasErrors('rrn')}" th:errors="*{rrn}"></div>
-					</div>
+			<div class="col-md-6">
+			  <div class="card h-100">
+			    <div class="card-body">
+			      <h5 class="card-title mb-3">기본정보</h5>
+			
+			      <!-- 1행: 이름 / 사번 -->
+			      <div class="row g-3">
+			        <div class="col-12 col-md-6">
+			          <label class="form-label required" for="empName">이름</label>
+			          <input type="text" class="form-control" id="empName"
+			                 th:field="*{empName}" placeholder="김여운">
+			          <div class="text-danger small"
+			               th:if="${#fields.hasErrors('empName')}"
+			               th:errors="*{empName}"></div>
+			        </div>
+			
+			        <!-- 사번은 서비스에서 생성됨: 입력받지 않기 or 읽기전용(바인딩X) -->
+			        <div class="col-12 col-md-6">
+			          <label class="form-label" for="empNo">사번</label>
+			          <input type="text" class="form-control" id="empNo"
+			                 th:field="*{empId}"
+			                 th:placeholder="${mode == 'edit'} ? '' : '자동생성'"
+			                 readonly>
+			        </div>
+			      </div>
+			
+			      <!-- 2행: 성별 / 입사일 -->
+			      <div class="row g-3 mt-0">
+			        <div class="col-12 col-md-6">
+			          <label class="form-label required" for="gender">성별</label>
+			          <select class="form-select" id="gender"
+			                  th:field="*{gender}" th:disabled="${mode == 'edit'}">
+			            <option value="">선택</option>
+			            <option value="M">남</option>
+			            <option value="F">여</option>
+			          </select>
+			          <input type="hidden" th:if="${mode == 'edit'}" th:field="*{gender}">
+			          <div class="text-danger small"
+			               th:if="${#fields.hasErrors('gender')}"
+			               th:errors="*{gender}"></div>
+			        </div>
+			
+			        <div class="col-12 col-md-6">
+			          <label class="form-label required" for="hireDate">입사일</label>
+			          <input type="date" class="form-control" id="hireDate"
+			                 th:field="*{hireDate}" th:disabled="${mode == 'edit'}">
+			          <input type="hidden" th:if="${mode == 'edit'}" th:field="*{hireDate}">
+			          <div class="text-danger small"
+			               th:if="${#fields.hasErrors('hireDate')}"
+			               th:errors="*{hireDate}"></div>
+			        </div>
+			      </div>
+			
+			      <!-- 3행: 주민번호 / 상태  ★ 상태를 이 줄로 올림 -->
+			      <div class="row g-3 mt-0">
+			        <div class="col-12 col-md-6">
+			          <label class="form-label required" for="rrn">주민등록번호</label>
+			          <!-- 등록 모드 -->
+			          <input th:if="${mode == 'create'}" type="text"
+			                 class="form-control" id="rrn" th:field="*{rrn}"
+			                 maxlength="14" placeholder="900101-1234567" autocomplete="off">
+			          <!-- 수정 모드 -->
+			          <div th:if="${mode == 'edit'}">
+			            <!-- 화면 표시용 (마스킹) -->
+			            <input type="text" class="form-control mb-1" id="rrnDisplay"
+			                   th:value="*{rrnMasked}" readonly>
+			            <!-- 실제 값 전송용 -->
+			            <input type="hidden" th:field="*{rrn}">
+			          </div>
+			          <div class="text-danger small"
+			               th:if="${#fields.hasErrors('rrn')}"
+			               th:errors="*{rrn}"></div>
+			        </div>
+			
+			        <!-- 상태: 관리자/인사만 보임 -->
+			        <div class="col-12 col-md-6"
+			             sec:authorize="hasAnyRole('SYS_ADMIN','HR_ADMIN')">
+			          <label class="form-label required" for="status">상태</label>
+			          <select class="form-select" id="status" th:field="*{status}">
+			            <option value="ACTIVE">재직</option>
+			            <option value="LEAVE">휴직</option>
+			            <option value="RETIRE">퇴직</option>
+			          </select>
+			        </div>
+			      </div>
+			
+			      <!-- 일반 사원일 때는 상태를 수정 못하지만, 값은 그대로 보내기 -->
+			      <input type="hidden" th:field="*{status}"
+			             sec:authorize="!hasAnyRole('SYS_ADMIN','HR_ADMIN')"/>
+			
+			      <!-- 4행: 사원 사진  ★ 따로 한 줄로 빼줌 -->
+			      <div class="row g-3 mt-0">
+			        <div class="col-12 col-md-6">
+			          <label class="form-label" for="photoFile">사원 사진</label>
+			
+			          <!-- 새 파일 업로드 (등록/수정 공통) -->
+			          <input type="file" class="form-control"
+			                 th:field="*{photoFile}" id="photoFile" accept="image/*">
+			          <!-- 기존 photoFileId 유지용 hidden -->
+			          <input type="hidden" th:field="*{photoFileId}">
+			          <div class="form-text">새 사진을 선택하면 기존 사진이 교체됩니다.</div>
+			
+			          <div th:if="${mode == 'edit'}" class="mt-2">
+			            <img th:if="${empDTO.photoFileId != null}"
+			                 th:src="@{'/files/download/' + ${empDTO.photoFileId}}"
+			                 alt="프로필 사진"
+			                 class="rounded"
+			                 style="width: 120px; height: 120px; object-fit: cover;">
+			            <img th:if="${empDTO.photoFileId == null}"
+			                 src="/assets/img/default-profile.png"
+			                 alt="기본 프로필"
+			                 class="rounded"
+			                 style="width: 120px; height: 120px; object-fit: cover;">
+			          </div>
+			        </div>
+			      </div>
+			
+			    </div>
+			  </div>
+			</div>
 
-	              <div class="col-12 col-md-6">
-	                <label class="form-label" for="photoFile">사원 사진</label>
-	                <input type="file" class="form-control" th:field="*{photoFile}" id="photoFile" accept="image/*">
-	              </div>
-	              
-	            </div>
-	            
-	            <!-- 상태값: 수정 모드에서만 노출 -->
-				<div class="row g-3 mt-0" th:if="${mode == 'edit'}">
-				  <div class="col-12 col-md-6">
-				    <label class="form-label" for="status">상태</label>
-				    <select class="form-select" id="status" th:field="*{status}">
-					  <option value="">선택</option>
-					  <option th:each="s : ${statusList}" th:value="${s.codeId}" th:text="${s.codeName}"></option>
-					</select>
-				  </div>
-				</div>
-	            
-	            
-	          </div>
-	        </div>
-	      </div>
 	
 	      <!-- 연락/계정 -->
 			<div class="col-md-6">
@@ -151,8 +196,7 @@
 	            <label class="form-label required" for="topDept">본부</label>
 				<select class="form-select" id="topDept" th:disabled="${mode == 'edit'}">
 				  <option value="">선택</option>
-				  <option th:each="d : ${deptList}"
-				          th:if="${d.parentDeptId == 'DEP999'}"
+				  <option th:each="d : ${topDeptList}"
 				          th:value="${d.deptId}"
 				          th:text="${d.deptAbbr}"></option>
 				</select>
@@ -164,8 +208,7 @@
 	            <!-- 부서 (개발부, 마케팅부, 생산부, 영업부, 인사부 등) -->
 				<select class="form-select" id="deptId" th:field="*{deptId}" th:disabled="${mode == 'edit'}">
 				  <option value="">선택</option>
-				  <option th:each="d : ${deptList}"
-				          th:if="${d.parentDeptId != null and d.parentDeptId != 'DEP999'}"
+				  <option th:each="d : ${subDeptList}"
 				          th:value="${d.deptId}"
 				          th:text="${d.deptName}"
 				          th:attr="data-parent=${d.parentDeptId}">
@@ -207,21 +250,43 @@
 	          
 	          <div class="col-12 col-md-6">
 	            <label class="form-label required" for="accountNo">계좌번호</label>
-	            <input type="text" class="form-control" id="accountNo" th:field="*{accountNo}" placeholder="123-456-789012" maxlength="25">
+	            <input type="text" class="form-control" id="accountNo" th:field="*{accountNo}" placeholder="123-456-789012" maxlength="20">
 	          	<div class="text-danger small" th:if="${#fields.hasErrors('accountNo')}" th:errors="*{accountNo}"></div>
 	          </div>
 	        </div>
 	
 	        <div class="row g-3 mt-0">
 	          <div class="col-12 col-md-6">
-	            <label class="form-label required" for="holder">예금주</label>
-	            <input type="text" class="form-control" id="holder"  name="holder" th:field="*{holder}" placeholder="김여운">
-	            <div class="text-danger small" th:if="${#fields.hasErrors('holder')}" th:errors="*{holder}"></div>
+	            <label class="form-label" for="holder">예금주</label>
+	            <input type="text" class="form-control" id="holder"  name="holder" th:value="${empDTO.empName}" readonly>
+	                <div class="form-text text-muted">
+				      본인 명의 계좌만 등록 가능합니다.
+				    </div>
 	          </div>
 	          
 	          <div class="col-12 col-md-6">
 	            <label class="form-label" for="bankbookFile">통장사본 첨부</label>
-	            <input type="file" class="form-control" th:field="*{bankbookFile}" id="bankbookFile">
+	            
+		        <!-- 새 파일 선택 (등록/수정 공통) -->
+		        <input type="file" class="form-control" th:field="*{bankbookFile}" id="bankbookFile">
+	           
+	            <!-- 수정 모드에서 기존 통장사본 링크 보여주기 -->
+		        <div th:if="${mode == 'edit'}" class="mb-1">
+		          <a th:if="${empDTO.fileId != null}"
+		             th:href="@{'/files/download/' + ${empDTO.fileId}}"
+		             target="_blank"
+		             class="small">
+		            기존 통장 사본 보기
+		          </a>
+		          <span th:if="${empDTO.fileId == null}" class="text-muted small">
+		            등록된 통장 사본이 없습니다.
+		          </span>
+		        </div>
+		
+		
+		        <!-- 기존 fileId 유지용 hidden -->
+		        <input type="hidden" th:field="*{fileId}">
+		        <div class="form-text">새 파일을 선택하면 기존 통장 사본이 교체됩니다.</div>
 	          </div>
 	        </div>
 	      </div>
@@ -229,14 +294,24 @@
 	
 	    <!-- 버튼 -->
 	    <div class="d-flex justify-content-end gap-2">
-	      <a href="/emp" class="btn btn-outline-secondary">취소</a>
+	    
+		  <!-- 관리자 / 인사 / 부서장 : 사원 목록으로 -->
+		  <a sec:authorize="hasAnyRole('SYS_ADMIN','HR_ADMIN','DEPT_MANAGER')"
+		     href="/emp" class="btn btn-outline-secondary">
+		    취소
+		  </a>
+		
+		  <!-- 일반 사원 : 메인으로 (권한 없음 = 이쪽으로 옴) -->
+		  <a sec:authorize="isAuthenticated() and !hasAnyRole('SYS_ADMIN','HR_ADMIN','DEPT_MANAGER')"
+		     href="/main" class="btn btn-outline-secondary">
+		    취소
+		  </a>
 	      <button type="submit" class="btn btn-primary" th:text="${mode == 'edit'} ? '수정 완료' : '저장'">저장</button>
 	    </div>
 	  </form>
 	</div>
 	
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js" defer></script>	
-<script src="/js/emp/emp.js"></script>
 
 </th:block>
 </body>

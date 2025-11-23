@@ -1,10 +1,14 @@
 package com.yeoun.auth.controller;
 
+import java.util.List;
+
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,7 +18,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.auth.dto.PasswordChangeDTO;
+import com.yeoun.common.service.CommonCodeService;
+import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpDetailDTO;
+import com.yeoun.emp.entity.Dept;
+import com.yeoun.emp.repository.DeptRepository;
+import com.yeoun.emp.repository.PositionRepository;
 import com.yeoun.emp.service.EmpService;
 
 import jakarta.validation.Valid;
@@ -27,17 +36,103 @@ public class MyPageController {
 	
 	private final EmpService empService;
     private final BCryptPasswordEncoder encoder;
+    private final DeptRepository deptRepository;
+    private final PositionRepository positionRepository;
+    private final CommonCodeService commonCodeService;
 
     // 1.  내 정보 JSON (모달용)
     @GetMapping("/info")
     @ResponseBody
-    public EmpDetailDTO getMyInfo(Authentication auth) {
-        LoginDTO login = (LoginDTO) auth.getPrincipal();
-        String empId = login.getEmpId();
+    public EmpDetailDTO getMyInfo(@AuthenticationPrincipal LoginDTO loginUser) {
 
-        // 기존 상세조회 재활용 (민감정보는 마스킹된 DTO로)
-        return empService.getEmpDetail(empId);
+        return  empService.getEmpDetail(loginUser.getEmpId());
     }
+    
+	// 내 정보 수정
+	@GetMapping("/info/edit")
+	public String editMyInfo(@AuthenticationPrincipal LoginDTO loginUser,
+							 Model model) {
+		
+		EmpDTO empDTO = empService.getEmpForEdit(loginUser.getEmpId());
+		
+		model.addAttribute("empDTO", empDTO);
+		model.addAttribute("mode", "edit");
+		model.addAttribute("formAction", "/my/info/update");
+		
+		// --- 조직/직무 셀렉트 공통 세팅 (EmpController.setupEmpFormCommon 과 동일) ---
+        List<Dept> topDeptList =
+                deptRepository.findByParentDeptIdAndUseYn("DEP999", "Y");
+
+        List<Dept> subDeptList =
+                deptRepository.findByParentDeptIdIsNotNullAndParentDeptIdNotAndUseYn("DEP999", "Y");
+		
+		// emp_form.html에서 필요한 공통 select box 세팅
+        model.addAttribute("topDeptList", topDeptList);
+        model.addAttribute("subDeptList", subDeptList);
+	    model.addAttribute("positionList", positionRepository.findActive());
+	    model.addAttribute("bankList", commonCodeService.getBankList());
+		
+		return "emp/emp_form";
+	}
+	
+	@PostMapping("/info/update")
+	public String updateMyInfo(@AuthenticationPrincipal LoginDTO loginUser,
+	                           @ModelAttribute("empDTO") @Validated(EmpDTO.Edit.class) EmpDTO empDTO,
+	                           BindingResult bindingResult,
+	                           Model model,
+	                           RedirectAttributes rttr) {
+
+		// 로그인한 본인 아이디 강제 세팅
+	    empDTO.setEmpId(loginUser.getEmpId()); 
+	    
+	    // 1) Bean Validation 실패 폼 다시 보여주기
+	    if (bindingResult.hasErrors()) {
+	    	empDTO.setRrnMasked(empService.maskRrn(empDTO.getRrn()));
+	    	model.addAttribute("mode", "edit");
+	        model.addAttribute("formAction", "/my/info/update");
+	        
+            List<Dept> topDeptList =
+                    deptRepository.findByParentDeptIdAndUseYn("DEP999", "Y");
+            List<Dept> subDeptList =
+                    deptRepository.findByParentDeptIdIsNotNullAndParentDeptIdNotAndUseYn("DEP999", "Y");
+
+            model.addAttribute("topDeptList", topDeptList);
+            model.addAttribute("subDeptList", subDeptList);
+            
+	        model.addAttribute("positionList", positionRepository.findActive());
+	        model.addAttribute("bankList", commonCodeService.getBankList());
+
+	        return "emp/emp_form";
+	    }
+	    
+	    // 2) 중복 검사 등 비즈니스 에러 처리
+	    try {
+	        empService.updateEmp(empDTO);
+	    } catch (IllegalStateException e) {
+
+	        String msg = e.getMessage();
+
+	        if (msg.contains("이메일")) {
+	            bindingResult.rejectValue("email", "duplicate", msg);
+	        } else if (msg.contains("연락처")) {
+	            bindingResult.rejectValue("mobile", "duplicate", msg);
+	        } else {
+	            bindingResult.reject("empEditError", msg);
+	        }
+
+	        model.addAttribute("formAction", "/my/info/update");
+	        model.addAttribute("mode", "edit");
+	        model.addAttribute("deptList", deptRepository.findActive());
+	        model.addAttribute("positionList", positionRepository.findActive());
+	        model.addAttribute("bankList", commonCodeService.getBankList());
+
+	        return "emp/emp_form";
+	    }
+
+	    // 3) 성공
+	    rttr.addFlashAttribute("msg", "내 정보가 수정되었습니다.");
+	    return "redirect:/main";  
+	}
 
     // 2. 비밀번호 변경 폼 
     @GetMapping("/password")

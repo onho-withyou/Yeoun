@@ -83,7 +83,7 @@
 
 </head>
 
-<body>
+<body th:attr="data-mode=${mode}">
 	<!-- Layout wrapper -->
 	<div class="layout-wrapper layout-content-navbar">
 		<div class="layout-container">
@@ -137,5 +137,8 @@
 	
     <!-- 개별 페이지의 자바스크립트 영역 -->
 	<th:block layout:fragment="myScript"></th:block>
+	
+	<!-- 공통 사원 상세 모달 (내 정보/사원 상세 모두 여기 사용) -->
+	<th:block th:replace="~{/emp/emp_detail_modal :: emp-detail-modal}"></th:block>
 </body>
 </html>

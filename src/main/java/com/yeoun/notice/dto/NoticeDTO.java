@@ -26,6 +26,7 @@ public class NoticeDTO {
 	
 	private String noticeYN;
 	private String createdUser;
+	private String updatedUser;
 	private LocalDateTime createdDate;
 	private LocalDateTime updatedDate;
 	
@@ -33,6 +34,10 @@ public class NoticeDTO {
 	private String empName;
 	private String deptId;
 	private String deptName;
+	private String updatedEmpId;
+	private String updatedEmpName;
+	private String updatedDeptId;
+	private String updatedDeptName;
 	
 	private static ModelMapper modelMapper = new ModelMapper();
 	
@@ -50,6 +55,17 @@ public class NoticeDTO {
 			}
 			notice.setEmp(emp);
 		}
+		if( this.getUpdatedUser() != null) {
+			Emp emp = new Emp();
+			emp.setEmpId(this.getUpdatedUser());
+			
+			if(this.getDeptId() != null) {
+				Dept dept = new Dept();
+				dept.setDeptId(this.getDeptId());
+				emp.setDept(dept);
+			}
+			notice.setUpdateEmp(emp);
+		}
 		return notice;
 	}
 	
@@ -60,6 +76,14 @@ public class NoticeDTO {
 		noticeDTO.empName = notice.getEmp().getEmpName();
 		noticeDTO.deptId = notice.getEmp().getDept().getDeptId();
 		noticeDTO.deptName = notice.getEmp().getDept().getDeptName();
+
+		if(notice.getUpdateEmp() != null) {
+			noticeDTO.updatedUser = notice.getUpdateEmp().getEmpId();
+			noticeDTO.empId = notice.getUpdateEmp().getEmpId();
+			noticeDTO.empName = notice.getUpdateEmp().getEmpName();
+			noticeDTO.deptId = notice.getUpdateEmp().getDept().getDeptId();
+			noticeDTO.deptName = notice.getUpdateEmp().getDept().getDeptName();
+		}
 		
 		return noticeDTO;
 	}

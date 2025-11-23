@@ -46,6 +46,21 @@
       from {width: 0; margin-left: 50%;}
       to {width: 100%; margin-left: 0;}
     }
+    .modal-dialog {
+  max-height: 90vh;
+  margin: auto;
+}
+
+.modal-content {
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.modal-body {
+  overflow-y: auto;
+  max-height: calc(90vh - 150px);  /* 헤더 + 푸터 제외한 영역 */
+}
+    
   </style>
   <div class="container-xxl py-4">
   <!-- ===================== 상단 탭 ===================== -->
@@ -56,15 +71,16 @@
 </ul>
   
    <!-- 메 세 지 -->
-<div th:if="${msg}" class="alert alert-success alert-dismissible fade show" role="alert">
-  <span th:text="${msg}">성공 메시지</span>
-  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div th:if="${pageMsg}" class="alert alert-success alert-dismissible fade show" role="alert">
+  <span th:text="${pageMsg}"></span>
+  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 
-<div th:if="${err}" class="alert alert-danger alert-dismissible fade show" role="alert">
-  <span th:text="${err}">에러 메시지</span>
-  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div th:if="${pageMsgErr}" class="alert alert-danger alert-dismissible fade show" role="alert">
+  <span th:text="${pageMsgErr}"></span>
+  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
+
  
  
  <div th:if="${activeTab}=='rule'">
@@ -108,16 +124,22 @@
               수정
             </button>
 
-            <button class="btn btn-sm btn-outline-danger btn-delete-rule"
-                    th:attr="data-href=@{'/pay/rule/delete/' + ${r.ruleId}}, data-rule-id=${r.ruleId}">
-              삭제
-            </button>
+<!--             <button class="btn btn-sm btn-outline-danger btn-delete-rule" -->
+<!--                     th:attr="data-href=@{'/pay/rule/delete/' + ${r.ruleId}}, data-rule-id=${r.ruleId}"> -->
+<!--               삭제 -->
+<!--             </button> -->
+            
+            <form th:action="@{'/pay/rule/delete/' + ${r.ruleId}}" method="post"
+		      onsubmit="return confirm('해당 기준을 삭제하시겠습니까?');">
+		    <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
+		</form>
+            
           </div>
         </div>
 
         <div class="row g-3 pt-3">
           <div class="col-lg-5 col-md-6 border-end">
-            <span class="d-block fw-semibold text-secondary mb-2">💰 지급 정보</span>
+            <span class="d-block fw-semibold text-secondary mb-2">지급 정보</span>
 
             <div class="d-flex justify-content-between small mb-1">
               <span class="text-muted">기본급:</span>
@@ -144,7 +166,7 @@
           </div>
 
           <div class="col-lg-7 col-md-6">
-            <span class="d-block fw-semibold text-secondary mb-2">📉 공제율 기준</span>
+            <span class="d-block fw-semibold text-secondary mb-2">공제율 기준</span>
 
             <div class="row row-cols-2 g-2">
               <div class="col">
@@ -195,9 +217,12 @@
 </div>
 
     <!-- [등록] 모달 -->
+    
     <div class="modal fade" id="createModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content">
+        <div class="modal-content">    
+
+        
           <form th:action="@{/pay/rule}" th:object="${newRule}" method="post" class="needs-validation" id="create-rule-form" novalidate>
             <div class="modal-header">
               <h5 class="modal-title">급여 기준 등록</h5>
@@ -205,6 +230,11 @@
             </div>
 
             <div class="modal-body">
+            <div id="create-error-box"
+		     class="alert alert-danger modal-error-box d-none"
+		     th:classappend="${createErrorMsg} ? '' : 'd-none'">
+		  <span th:text="${createErrorMsg}"></span>
+		</div>
               <div class="row g-4">
                 <div class="col-lg-7">
                   <h6 class="mb-3 text-secondary">기본/수당 기준</h6>
@@ -332,13 +362,18 @@
           </form>
         </div>
       </div>
+   
     </div>
 
     <!-- [수정] 모달들 -->
+    
     <div th:each="r : ${rules}">
       <div class="modal fade" th:id="${'editModal-' + r.ruleId}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
           <div class="modal-content">
+          
+
+
             <form th:action="@{'/pay/rule/' + ${r.ruleId}}" method="post" class="needs-validation" novalidate
                   th:id="${'edit-rule-form-' + r.ruleId}">
               <div class="modal-header">
@@ -347,6 +382,11 @@
               </div>
 
               <div class="modal-body">
+              <div th:id="'edit-error-' + ${r.ruleId}"
+		     class="alert alert-danger modal-error-box d-none"
+		     th:classappend="${editErrorMsg} ? '' : 'd-none'">
+		  <span th:text="${editErrorMsg}"></span>
+		</div>
                 <div class="row g-4">
                   <div class="col-lg-7">
                     <h6 class="mb-3 text-secondary">기본/수당 기준</h6>
@@ -496,8 +536,13 @@
       </div><!-- /tab-content -->
 
   </div><!-- /container -->
+
+<!-- 에러발생시 모달창 유지 -->
+<input type="hidden" id="openCreateModal" th:value="${openCreateModal}">
+<input type="hidden" id="openEditModalId" th:value="${openEditModalId}">
 <!-- JS 파일 분리 -->
-  <script src="/js/pay/pay_rule.js"></script>
+<script src="/js/pay/pay_rule.js"></script>
+
   
 </th:block>
 </th:block>

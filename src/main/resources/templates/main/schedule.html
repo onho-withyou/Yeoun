@@ -68,7 +68,7 @@
 		font-weight: 600 !important;
 	}
 	</style>
-
+	
 </head>
 <body>
 <th:block layout:fragment="content">
@@ -76,6 +76,7 @@
 	<input type="hidden" th:value="${currentUserName}" id="currentUserName">
 	<!-- custom-body 시작 -->
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
+	<div th:if="${msg}" th:data-msg="${msg}" id="flashMsg" style="display:none;"></div>
 	    <!-- custom-content -->
 	    <div class="container mt-4">
 	        <div class="row">
@@ -200,6 +201,19 @@
 	
 	<script src="/js/main/schedule.js"></script>
 	<script src="/js/attendance/attendance.js"></script>
+	<script th:inline="javascript">
+	    const userRoles = /*[[${#authentication.authorities.?[true].![authority]}]]*/ [];
+	</script>
+	
+	<script>
+	  document.addEventListener("DOMContentLoaded", () => {
+	      const el = document.getElementById("flashMsg");
+	      if (el) {
+	          alert(el.dataset.msg);
+	      }
+	  });
+	</script>
+	
 </th:block>
 
 </body>
