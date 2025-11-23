@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.security.core.Authentication;
@@ -20,11 +21,15 @@ import com.yeoun.leave.dto.LeaveDTO;
 import com.yeoun.leave.dto.LeaveHistoryDTO;
 import com.yeoun.leave.entity.AnnualLeaveHistory;
 import com.yeoun.leave.repository.LeaveHistoryRepository;
+import com.yeoun.main.dto.RepeatScheduleDTO;
 import com.yeoun.main.dto.ScheduleDTO;
 import com.yeoun.main.dto.ScheduleSharerDTO;
+import com.yeoun.main.dto.ScheduleWithRepeatDTO;
+import com.yeoun.main.entity.RepeatSchedule;
 import com.yeoun.main.entity.Schedule;
 import com.yeoun.main.entity.ScheduleSharer;
 import com.yeoun.main.mapper.ScheduleMapper;
+import com.yeoun.main.repository.RepeatScheduleRepository;
 import com.yeoun.main.repository.ScheduleRepository;
 import com.yeoun.main.repository.ScheduleSharerRepository;
 
@@ -32,9 +37,11 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class ScheduleService {
 	private final ScheduleRepository scheduleRepository;
 	private final DeptRepository deptRepository;
@@ -42,6 +49,7 @@ public class ScheduleService {
 	private final LeaveHistoryRepository leaveHistoryRepository;
 	private final ScheduleMapper scheduleMapper;
 	private final ScheduleSharerRepository scheduleSharerRepository;
+	private final RepeatScheduleRepository repeatScheduleRepository;
 	// --------------------------------------------------
 	
 	//일정 등록모달 부서리스트 가져오기
@@ -55,26 +63,52 @@ public class ScheduleService {
 	
 	// 일정 등록로직
 	@Transactional
-	public void createSchedule(@Valid ScheduleDTO scheduleDTO, List<ScheduleSharerDTO> list) {
+	public void createSchedule(@Valid ScheduleWithRepeatDTO scheduleWithRepeatDTO) {
+		ScheduleDTO scheduleDTO = scheduleWithRepeatDTO.getScheduleDTO();
+		List<ScheduleSharerDTO> scheduleSharerDTOList = scheduleWithRepeatDTO.getSharedEmpList();
+		RepeatScheduleDTO repeatScheduleDTO = scheduleWithRepeatDTO.getRepeatScheduleDTO();
+		
 		Emp emp = empRepository.findById(scheduleDTO.getCreatedUser()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다.111"));
 
 		Schedule schedule = scheduleDTO.toEntity();
 		schedule.setEmp(emp);
 		// 여기서 Schedule테이블 정보 저장
+		log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ schedule : " + schedule);
 		scheduleRepository.save(schedule);
+		log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ schedule : " + schedule.getScheduleId());
 		
-		// Schedule테이블에 저장된 정보를 토대로 ScheduleSharer테이블에 정보저장
-		for(ScheduleSharerDTO DTO : list) {
-			// save할 객체 생성
-			ScheduleSharer scheduleSharer = new ScheduleSharer();
-			// sharer에 공유된 empId로 emp객체 찾기
-			Emp sharerEmp = empRepository.findById(DTO.getEmpId()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다.111"));;
+		// 공유자목록의 사이즈가 0보다크고, 일정타입이 "share"일때
+		if(scheduleSharerDTOList.size() > 0 && "share".equals(schedule.getScheduleType())) {
+			for(ScheduleSharerDTO DTO : scheduleSharerDTOList) {
+				// save할 공유자목록 객체 생성
+				ScheduleSharer scheduleSharer = new ScheduleSharer();
+				// sharer에 공유된 empId로 emp객체 찾기
+				Emp sharerEmp = empRepository.findById(DTO.getEmpId()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다.111"));;
+				
+				// scheduleSharer엔티티에 schedule객체, emp 객체 추가 
+				scheduleSharer.setSchedule(schedule);
+				scheduleSharer.setSharedEmp(sharerEmp);
+				// 엔티티 값 저장
+				log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scheduleSharer : " + scheduleSharer);
+				scheduleSharerRepository.save(scheduleSharer);
+			}
+		}
+
+//		 recurrentType이 none이 아닐경우 = 반복일정인 경우
+		if(!"none".equals(schedule.getRecurrenceType())) {
 			
-			// scheduleSharer엔티티에 schedule객체, emp 객체 추가 
-			scheduleSharer.setSchedule(schedule);
-			scheduleSharer.setSharedEmp(sharerEmp);
-			// 엔티티 값 저장
-			scheduleSharerRepository.save(scheduleSharer);
+			RepeatSchedule repeatSchedule = repeatScheduleDTO.toEntity();
+			
+			// repeatSchedule의 타입이 yearly가 아니면 yearMonth null로 변경
+			if(!"yearly".equals(repeatSchedule.getRecurrenceType())) {
+				repeatSchedule.setYearMonth(null);
+			}
+			
+			repeatSchedule.setSchedule(schedule);
+			
+			// 반복일정 정보 저장
+			log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ repeatSchedule : " + repeatSchedule);
+			repeatScheduleRepository.save(repeatSchedule);
 		}
 		
 		

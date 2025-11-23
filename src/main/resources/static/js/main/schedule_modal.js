@@ -133,36 +133,76 @@ document.addEventListener('DOMContentLoaded', function() {
 	const addScheduleForm = document.getElementById('add-schedule-form')
 	const addScheduleBtn = document.getElementById('add-schedule-btn');
 	
-	addScheduleForm.addEventListener('submit', function(event) {
+	addScheduleForm.addEventListener('submit', async function(event) {
 		event.preventDefault(); // 기본제출 막기
 
 		// 일정 등록 일때 구분
 		if(addScheduleBtn.value == 'add') {
-			// 폼데이터 지정
-			const formData = new FormData(addScheduleForm);
-			if (!addScheduleForm) {
-			    alert('add-schedule-form 폼 엘리먼트가 존재하지 않습니다!');
-			    return;
+			// 일정등록폼 지정
+			const form = event.target;
+			// 일정등록 데이터 생성
+			const scheduleWithRepeatDTO = {
+				scheduleDTO: {
+					scheduleTitle: form.scheduleTitle.value
+					, createdUser: form.createdUser.value
+					, scheduleType: form.scheduleType.value
+					, scheduleStart: form.scheduleStart.value
+					, scheduleFinish: form.scheduleFinish.value
+					, alldayYN: form.alldayYN.value
+					, recurrenceType: form.recurrenceType.value
+					, scheduleContent: form.scheduleContent.value
+				},
+				repeatScheduleDTO: null,
+				sharedEmpList:[]
+			};
+			// 반복일정 정보 있을 경우에만 반복일정 값 세팅
+			if(form.recurrenceType && form.recurrenceType.value !== 'none') {
+				const byDayArr = Array.from(form.querySelectorAll('input[name="byDay"]:checked'))
+				    .map(el => el.value); 
+				scheduleWithRepeatDTO.repeatScheduleDTO = {
+					recurrenceType: form.recurrenceType.value
+					, interval: parseInt(form.interval?.value) || 1
+					, byDay: byDayArr.length ? byDayArr : null
+					, monthDay: form.monthDay?.value ? parseInt(form.monthDay.value) : null
+					, yearMonth: form.yearMonth?.value ? parseInt(form.yearMonth.value) : null
+					, yearDay: form.yearDay?.value ? parseInt(form.yearDay.value) : null
+					, recurrenceEndType: form.recurrenceEndType?.value || null
+					, recurrenceUntil: form.recurrenceUntil?.value || null
+				}
 			}
+			
+			// 공유일정일경우 공유자명단 데이터
+			if(form.scheduleType.value === 'share' && checkedUpEmpList && checkedUpEmpList.length > 0) {
+				scheduleWithRepeatDTO.sharedEmpList = checkedUpEmpList;
+			}
+			
+			// 폼데이터 지정
+//			const formData = new FormData(addScheduleForm);
+//			if (!addScheduleForm) {
+//			    alert('add-schedule-form 폼 엘리먼트가 존재하지 않습니다!');
+//			    return;
+//			}
 			// 등록일때는 scheduleId의 name값 제거 [jpa에 id가 null이어야 자동생성가능]
-			addScheduleForm.scheduleId.removeAttribute('name');
+//			addScheduleForm.scheduleId.removeAttribute('name');
 			// scheduleType이 share일 때공유자명단을 formData에 추가
 			const scheduleType = document.getElementById('schedule-type');
 			if (scheduleType.value === 'share') {
 				if (!checkedUpEmpList || checkedUpEmpList.length === 0) {
 					alert('공유자 명단을 1명 이상 선택해야 합니다.');
 					return;
-				} else {
-					formData.append('sharedEmpList', JSON.stringify(checkedUpEmpList));
-				}
+				} 
+//				else {
+//					formData.append('sharedEmpList', JSON.stringify(checkedUpEmpList));
+//				}
 			}
 			
 			fetch('/main/schedule', {
 				method: 'POST'
 				, headers: {
 					[csrfHeaderName]: csrfToken
+					, 'Content-Type': 'application/json' 
 				}
-				, body: formData
+				, body: JSON.stringify(scheduleWithRepeatDTO)
 			})
 			.then(response => {
 				if (!response.ok) {
@@ -644,7 +684,24 @@ async function checkSharers(scheduleType, scheduleId) {
 	}
 }
 
+// ----------------------------------------------------------
+// 반복일정 관련 js 만들기
+function onRecurrenceTypeChange() {
+    const type = document.getElementById('recurrenceType').value;
+    document.getElementById('weekday-options').style.display = (type === 'weekly') ? 'block' : 'none';
+    document.getElementById('monthly-options').style.display = (type === 'monthly') ? 'block' : 'none';
+    document.getElementById('yearly-options').style.display = (type === 'yearly') ? 'block' : 'none';
+}
 
+function onRecurrenceEndTypeChange() {
+    const type = document.getElementById('recurrenceEndType').value;
+    document.getElementById('recurrence-until').style.display = (type === 'until') ? 'block' : 'none';
+}
+
+window.onload = function() {
+    onRecurrenceTypeChange();
+    onRecurrenceEndTypeChange();
+};
 
 
 

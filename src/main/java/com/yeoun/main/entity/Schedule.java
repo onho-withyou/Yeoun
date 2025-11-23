@@ -71,6 +71,9 @@ public class Schedule {
 	@LastModifiedDate
 	private LocalDateTime updatedDate; // 수정 일시
 	
+	@Column(length = 20, nullable = false)
+    private String recurrenceType = "none";
+	
 	// ------------------------------------------------------------------------
 	@OneToMany(mappedBy = "schedule", fetch = FetchType.LAZY)
 	private List<ScheduleSharer> scheduleSharers;

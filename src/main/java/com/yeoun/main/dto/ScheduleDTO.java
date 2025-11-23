@@ -12,6 +12,7 @@ import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.main.entity.Schedule;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -52,6 +53,8 @@ public class ScheduleDTO {
 	
 	@JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
 	private LocalDateTime updatedDate; // 수정 일시
+	
+    private String recurrenceType; // 반복타입
 	
 	private String empId;
 	private String empName;

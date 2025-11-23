@@ -61,10 +61,82 @@
 					        <button type="button" id="select-sharer-btn" class="btn btn-secondary" >+ 조직도 선택</button>
 					    </div>
 					</div>
+					<!-- 반복 일정 입력 영역 추가 시작 -->
+					<div class="col mb-6 d-flex" style="width: 90%; gap:8px;">
+						<div class="col mb-6" style="width: 30%;">
+	                        <label for="recurrenceType" class="form-label">반복 여부</label>
+	                        <select id="recurrenceType" class="form-select" name="recurrenceType" onchange="onRecurrenceTypeChange()">
+	                            <option value="none" selected>반복 없음</option>
+	                            <option value="daily">매일</option>
+	                            <option value="weekly">매주</option>
+	                            <option value="monthly">매월</option>
+	                            <option value="yearly">매년</option>
+	                        </select>
+	                    </div>
+                        <!-- 반복 종료 옵션 -->
+	                    <div class="col mb-6" style="width: 30%">
+	                        <label for="recurrenceEndType" class="form-label">반복 종료</label>
+	                        <select id="recurrenceEndType" class="form-select" name="recurrenceEndType" onchange="onRecurrenceEndTypeChange()">
+	                            <option value="none" selected>제한 없음</option>
+	                            <option value="until">특정 날짜까지</option>
+	                        </select>
+	                    </div>
+	                    <div class="col mb-6" id="recurrence-until" style="display:none; width: 30%;">
+	                        <label for="recurrenceUntil" class="form-label">반복 종료일</label>
+	                        <input id="recurrenceUntil" class="form-control" name="recurrenceUntil" type="date"/>
+	                    </div>
+					</div>
+                    <!-- 반복 주기가 WEEKLY일 때 -->
+                    <div class="col mb-6" id="weekday-options" style="display:none;">
+                        <label class="form-label">반복 요일</label>
+                        <div>
+                            <label><input type="checkbox" name="byDay" value="MO"/>월</label>
+                            <label><input type="checkbox" name="byDay" value="TU"/>화</label>
+                            <label><input type="checkbox" name="byDay" value="WE"/>수</label>
+                            <label><input type="checkbox" name="byDay" value="TH"/>목</label>
+                            <label><input type="checkbox" name="byDay" value="FR"/>금</label>
+                            <label><input type="checkbox" name="byDay" value="SA"/>토</label>
+                            <label><input type="checkbox" name="byDay" value="SU"/>일</label>
+                        </div>
+                    </div>
+
+                    <!-- 반복 주기가 MONTHLY일 때 -->
+                    <div class="col mb-6" id="monthly-options" style="display:none; width:30%;">
+                        <label class="form-label">반복 월 옵션</label>
+                        <input type="number" name="monthDay" class="form-control" min="1" max="31" placeholder="매월 N일"/>
+                        <!-- 필요시: '매달 N번째 요일' 등 추가 -->
+                    </div>
+
+                    <!-- 반복 주기가 YEARLY일 때 -->
+                    <div class="col mb-6" id="yearly-options" style="display:none;">
+                        <label class="form-label">반복 연 옵션</label>
+                        <div style="display:flex; gap:8px; width:50%;">
+	                        <select name="yearMonth" class="form-select">
+	                            <option value="1">1월</option>
+	                            <option value="2">2월</option>
+	                            <option value="3">3월</option>
+	                            <option value="4">4월</option>
+	                            <option value="5">5월</option>
+	                            <option value="6">6월</option>
+	                            <option value="7">7월</option>
+	                            <option value="8">8월</option>
+	                            <option value="9">9월</option>
+	                            <option value="10">10월</option>
+	                            <option value="11">11월</option>
+	                            <option value="12">12월</option>
+	                        </select>
+	                        <input type="number" name="yearDay" min="1" max="31" placeholder="일"/>
+                        </div>
+                    </div>
+
+                    <!-- 반복 일정 입력 영역 추가 끝 -->
+                    
 					<div class="col mb-6">
 						<label for="schedule-content" class="form-label">내용</label>
 						<textarea id="schedule-content" class="form-control" rows="5" name="scheduleContent"></textarea>
 					</div>
+					
+					
 					
 					<div class="modal-footer mt-3 p-0">
 						<button type="button" id="delete-schedule-btn" class="btn btn-outline-danger d-none">삭제</button>
