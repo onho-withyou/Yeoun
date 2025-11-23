@@ -264,7 +264,7 @@ public class EmpService {
 	
 	// =============================================================================
 	// 사원 목록 조회 (검색 + 페이징 포함)
-	public Page<EmpListDTO> getEmpList(int page, int size, String keyword, String deptId) {
+	public List<EmpListDTO> getEmpList(String keyword, String deptId) {
 		
 		// 공백 정리
         if (keyword != null) {
@@ -274,11 +274,11 @@ public class EmpService {
             deptId = null;
         }
 
-		// 정렬 기준은 입사일 최신순 예시
-	    Pageable pageable = PageRequest.of(page, size,
-	            Sort.by(Sort.Direction.DESC, "hireDate"));
-		
-		return empRepository.searchEmpList(keyword, deptId, pageable);
+        // Pageable.unpaged() 사용해서 기존 searchEmpList 재활용
+        Page<EmpListDTO> page =
+                empRepository.searchEmpList(keyword, deptId, Pageable.unpaged());
+
+        return page.getContent();
 	}
 	
 	// 인사발령 화면에서 쓰는 전체 사원 목록
