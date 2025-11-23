@@ -78,6 +78,10 @@ public class Emp implements FileUploadHelpper {
 	@Column(name = "HIRE_DATE")
 	private LocalDate hireDate;	
 	
+	// 퇴사일
+	@Column(name = "RETIRE_DATE")
+	private LocalDate retireDate;
+	
     // 부서ID (FK: DEPT.DEPT_ID)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "DEPT_ID", nullable = false)
