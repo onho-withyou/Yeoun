@@ -42,6 +42,10 @@ const grid = new tui.Grid({
 	columnOptions: {
 		resizable: true
 	},	
+	pageOptions: { 
+		useClient: true,
+		perPage: 10 
+	}
 });
 
 // 데이터 가져오기
