@@ -247,7 +247,7 @@
 						  <input class="form-check-input" type="radio" name="radioJeongyeolja" value="선결">
 						  <div>
 						 	<h5>전결자 지정 </h5>
-							<select id="emp_id" name="delegetedApprover" class="form-select" aria-label="Default select example">
+							<select id="delegetedApprover" name="delegetedApprover" class="form-select" aria-label="Default select example">
 							  <option selected></option>
 							  <option th:each="item, iterStat : ${empList}" 
 							 			th:value="${item.empId}" 
