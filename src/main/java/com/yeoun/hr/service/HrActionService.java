@@ -2,6 +2,7 @@ package com.yeoun.hr.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -319,8 +320,7 @@ public class HrActionService {
 	// ==========================
     // 3. 인사 발령 목록
     // ==========================
-    public Page<HrActionDTO> getHrActionList(int page, int size, String keyword,
-            								 String actionType, String startDate, String endDate) {
+    public List<HrActionDTO> getHrActionList(String keyword, String actionType, String startDate, String endDate) {
 
 		// 0) 검색값 정리
 		if (keyword != null) keyword = keyword.trim();
@@ -335,47 +335,47 @@ public class HrActionService {
 			end = LocalDate.parse(endDate);
 		}
 		
-		Pageable pageable = PageRequest.of(page, size,
-										   Sort.by(Sort.Direction.DESC, "effectiveDate")  // 발령일자 최신순
-		);
-		
-		// 1) 인사발령 유형 공통코드 → Map
+		// 1) 공통코드 Map
 		Map<String, String> actionTypeMap = commonCodeService.getHrActionTypeList()
 				.stream()
 				.collect(Collectors.toMap(
-						 CommonCode::getCodeId,   // ex) PROMOTION, TRANSFER
-						 CommonCode::getCodeName  // ex) 승진, 전보
+						 CommonCode::getCodeId,   
+						 CommonCode::getCodeName  
 				));
 		
-		// 2) 조건 + 페이징 걸어서 엔티티 조회
-		Page<HrAction> actionPage =
-				hrActionRepository.searchHrActions(keyword, actionType, start, end, pageable);
+		// 2) 조건 걸어서 엔티티 조회
+		List<HrAction> actionList =
+				hrActionRepository.searchHrActions(keyword, actionType, start, end);
 		
-		// 3) Page<HrAction> -> Page<HrActionDTO> 매핑
-		Page<HrActionDTO> dtoPage = actionPage.map(a -> {
-			String typeCode = a.getActionType(); // 예: "PROMOTION"
-			String typeName = actionTypeMap.getOrDefault(typeCode, typeCode);
+		// 3) 날짜 정렬(내림차순)
+	    actionList.sort(
+	            Comparator.comparing(HrAction::getEffectiveDate, Comparator.nullsLast(Comparator.naturalOrder()))
+	                      .reversed()
+	    );
 		
-			return new HrActionDTO(
-						a.getActionId(),
-						a.getEmp().getEmpId(),
-						a.getEmp().getEmpName(),
-						typeCode,
-						typeName,
-						a.getEffectiveDate(),
-						a.getFromDept() != null ? a.getFromDept().getDeptName() : null,
-						a.getToDept() != null ? a.getToDept().getDeptName() : null,
-						a.getFromPosition() != null ? a.getFromPosition().getPosName() : null,
-						a.getToPosition() != null ? a.getToPosition().getPosName() : null,
-						a.getStatus(),
-						a.getCreatedDate()
-					);
-			});
-		
-			return dtoPage;
-		}
+	    // 4) DTO 변환해서 List 로 반환
+	    return actionList.stream()
+	            .map(a -> {
+	                String typeCode = a.getActionType();
+	                String typeName = actionTypeMap.getOrDefault(typeCode, typeCode);
 
-
+	                return new HrActionDTO(
+	                        a.getActionId(),
+	                        a.getEmp().getEmpId(),
+	                        a.getEmp().getEmpName(),
+	                        typeCode,
+	                        typeName,
+	                        a.getEffectiveDate(),
+	                        a.getFromDept() != null ? a.getFromDept().getDeptName() : null,
+	                        a.getToDept() != null ? a.getToDept().getDeptName() : null,
+	                        a.getFromPosition() != null ? a.getFromPosition().getPosName() : null,
+	                        a.getToPosition() != null ? a.getToPosition().getPosName() : null,
+	                        a.getStatus(),
+	                        a.getCreatedDate()
+	                );
+	            })
+	            .collect(Collectors.toList());
+	}
 
 
         
