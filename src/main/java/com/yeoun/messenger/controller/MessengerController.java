@@ -5,14 +5,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.yeoun.common.dto.FileAttachDTO;
+import com.yeoun.common.entity.FileAttach;
+import com.yeoun.common.util.FileUtil;
+import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.messenger.dto.*;
 import com.yeoun.messenger.entity.MsgMessage;
 import com.yeoun.messenger.entity.MsgRelation;
+import com.yeoun.messenger.entity.MsgRoom;
 import com.yeoun.messenger.repository.MsgMessageRepository;
 import com.yeoun.messenger.repository.MsgRelationRepository;
+import com.yeoun.messenger.repository.MsgRoomRepository;
 import com.yeoun.messenger.repository.MsgStatusRepository;
 
+import com.yeoun.messenger.service.ChatService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -32,19 +39,22 @@ import lombok.extern.log4j.Log4j2;
 @RequiredArgsConstructor
 @Log4j2
 public class MessengerController {
-	
+
+	private final ChatService chatService;
 	private final MessengerService messengerService;
 	private final MsgMessageRepository msgMessageRepository;
 	private final MsgStatusRepository msgStatusRepository;
 	private final MsgRelationRepository msgRelationRepository;
 	private final EmpRepository empRepository;
+	private final MsgRoomRepository msgRoomRepository;
+	private final FileUtil fileUtil;
 
 	// ==========================================================================
-	// 메신저 큰 화면 (보류)
-	@GetMapping(value = {"/", "/index"})
-	public String index(Model model) {
-		return "/messenger/index";
-	}
+	// 메신저 큰 화면 (보류) => MES 끝나고 시간 남으면 다시 만나 ...
+//	@GetMapping(value = {"/", "/index"})
+//	public String index(Model model) {
+//		return "/messenger/index";
+//	}
 	
 	// ==========================================================================
 	// 메신저 팝업 목록 - 친구목록 / 대화목록
@@ -98,13 +108,16 @@ public class MessengerController {
 		// 진짜 기존 방을 발견했다면
 		if (roomId != 0)
 			return "redirect:/messenger/room/" + roomId;
-		
+
+		Emp target = empRepository.findByEmpId(id).get();
+		String groupName = target.getEmpName() + " " + target.getPosition().getPosName();
+
+		log.info("groupName ::: " + groupName);
 		// 첫 대화인 경우
 		model.addAttribute("targetEmpId", id);
 		model.addAttribute("groupYn", "N");
 		model.addAttribute("targetName", empRepository.findById(id).get().getEmpName());
-		//model.addAttribute("targetPos", empRepository.findById(id).get().get());
-		log.info(">>>>>>>>>>>>>>> chat controller... : " + roomId);
+		model.addAttribute("groupName", groupName);
 		return "/messenger/chat";
 	}
 
@@ -113,58 +126,33 @@ public class MessengerController {
 	@GetMapping("/room/{id}")
 	public String openRoom(Authentication authentication, Model model, @PathVariable("id") Long id){
 
-		// 1) 엔티티 리스트 가져오기
-		List<MsgMessage> entityList =
-				msgMessageRepository.findByRoomId_RoomIdOrderBySentDate(id);
+		// 1) 메시지 불러오기
+		List<MsgMessageDTO> msgList = messengerService.getMessages(id);
 
-		// 2) DTO 리스트 변환
-		List<MsgMessageDTO> dtoList = new ArrayList<>();
-		for (MsgMessage msg : entityList) {
-			MsgMessageDTO dto = MsgMessageDTO.fromEntity(msg);
+		// 2) 멤버 불러오기
+		List<RoomMemberDTO> memberList = messengerService.getMembers(id);
 
-			String senderId = msg.getSenderId().getEmpId();
+		// 3) 방 정보 불러오기
+		MsgRoom room = msgRoomRepository.findById(id).get();
+		String groupName = messengerService.resolveRoomName(id, authentication.getName());
 
-			// MsgStatus에서 프로필 조회
-			Integer profile = msgStatusRepository.findById(senderId)
-					.orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다"))
-					.getMsgProfile();
-
-			dto.setSenderId(senderId);
-			dto.setSenderName(msg.getSenderId().getEmpName());
-			dto.setSenderProfile(profile);
-
-			dtoList.add(dto);
-		}
-		
-		// 3) 방 소속 멤버 조회
-	    List<MsgRelation> relationList = msgRelationRepository.findByRoomId_RoomId(id);
-	    List<RoomMemberDTO> memberList = new ArrayList<>();
-	    for (MsgRelation relation : relationList) {
-	        String memberId = relation.getEmpId().getEmpId();  // 사번 뽑기
-	        memberList.add(messengerService.buildRoomMember(memberId));
-	    }
-
-		// 3) 모델에 담기
+		// 5) 방 이름 모델에 담기
 		model.addAttribute("roomId", id);
-		model.addAttribute("msgList", dtoList);
-		//model.addAttribute("targetEmpId", id);
-		model.addAttribute("groupYn", "N");
-		//model.addAttribute("targetPos", empRepository.findById(id).get().getPosition());
+		model.addAttribute("msgList", msgList);
+		model.addAttribute("groupYn", room.getGroupYn());
+		model.addAttribute("groupName", groupName);
 		model.addAttribute("members", memberList);
 		return "/messenger/chat";
 	}
 
 	// ==========================================================================
 	// 메신저 팝업 채팅방 - 새로운 방 생성
-	@PostMapping("/chat")
-	public ResponseEntity<?> createRoom(Authentication authentication,
-										@RequestBody RoomCreateRequest roomCreateRequest) throws IOException{
-		String empId = authentication.getName();
-
-		roomCreateRequest.setCreatedUser(empId);
-		roomCreateRequest.getMembers().add(empId);
-		Long roomId = messengerService.createRoom(roomCreateRequest);
-		return ResponseEntity.ok(Map.of("roomId", roomId));
+	@ResponseBody
+	@PostMapping(value="/chat")
+	public ResponseEntity<?> createRoom(@RequestBody RoomCreateRequest roomCreateRequest) {
+		MsgRoomDTO dto = messengerService.createRoom(roomCreateRequest);
+		// =============================> 파일.. 추가해야함... 잊지말것..
+		return ResponseEntity.ok(dto);
 	}
 
 	// ==========================================================================
@@ -173,13 +161,19 @@ public class MessengerController {
 				 consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> sendMessage(Authentication authentication,
 										 @PathVariable("id") Long id,
-										 @RequestPart("message") MsgMessageDTO msgMessageDTO,
+										 @RequestPart("message") MsgSendRequest dto,
 										 @RequestPart(value = "files", required = false) List<MultipartFile> files)
 		throws IOException{
-		
-		msgMessageDTO.setRoomId(id);
-		msgMessageDTO.setSenderId(authentication.getName());
-		messengerService.sendMessage(msgMessageDTO, files);
+
+		// roomId 지정
+		dto.setRoomId(id);
+
+		// DB 저장 + 파일 저장
+		MessageSaveResult result = messengerService.saveMessage(dto, files);
+
+		// STOMP 브로드캐스트
+		chatService.broadcastMessage(result.getMessage(), result.getFiles());
+
 		return ResponseEntity.ok().build();
 	}
 	
@@ -211,6 +205,20 @@ public class MessengerController {
 	@GetMapping("/rooms/search")
 	public ResponseEntity<?> searchRooms(Authentication authentication, @RequestParam("keyword") String keyword) {
 	    return ResponseEntity.ok(messengerService.searchRooms(authentication.getName(), keyword));
+	}
+
+	// ==========================================================================
+	// 방 이름 수정
+	@PatchMapping("/room/{roomId}/rename")
+	public ResponseEntity<String> renameRoom(
+			@PathVariable Long roomId,
+			@RequestBody Map<String, String> request
+	) {
+		log.info("방 이름 수정 컨트롤러....");
+		String newName = request.get("groupName");
+		messengerService.renameRoom(roomId, newName);
+
+		return ResponseEntity.ok("updated");
 	}
 
 

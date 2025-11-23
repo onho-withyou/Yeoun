@@ -7,31 +7,31 @@
 // ===============================
 //  전역 변수
 // ===============================
-let stompClient = null;
-let connected   = false;
+let stompClient  = null;
+let connected = false;
 
 
 //===============================
 //	STOMP 연결 설정
 //===============================
-function connectWebSocket(onConnectedCallback) {
+function connectWebSocket(onConnected) {
 	const socket = new SockJS("/websocket");  
 	stompClient = Stomp.over(socket);
 
 	stompClient.connect({
 		// CSRF 토큰 정보를 헤더에 포함
-		"[[${_csrf.headerName}]]" : "[[${_csrf.token}]]"
+		[csrfHeaderName]: csrfToken
 	}, function () {
 	    connected = true;
 	    console.log("STOMP 연결 성공!!!!!!!!!!!!!");
 	    
-	    if(onConnectedCallback) onConnectedCallback();
+	    if(onConnected) onConnected();
 	    
 	}, function (error) {
 	    connected = false;
 	    console.error("❌ STOMP 연결 오류!!!!!!!!!!!:", error);
 	
 	    // 재연결 시도
-	    setTimeout(() => connectWebSocket(onConnectedCallback), 3000);
+	    setTimeout(() => connectWebSocket(onConnected), 3000);
 	});
 }

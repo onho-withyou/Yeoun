@@ -34,13 +34,13 @@ public interface MsgMessageRepository extends JpaRepository<MsgMessage, Long> {
 
 	// 가장 최근 메시지 1개 찾기
 	@Query("""
-		select m.msgContent
+		select m.msgId
 		from MsgMessage m
 		where m.roomId.roomId = :roomId
 		order by m.sentDate desc
 		fetch first 1 rows only
 		""")
-	String findLastMessage(@Param("roomId") Long roomId);
+	Long findLastMessage(@Param("roomId") Long roomId);
 
 	// 특정 메시지 시간
 	@Query("""
