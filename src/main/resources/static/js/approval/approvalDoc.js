@@ -124,7 +124,7 @@
 			const data = await response.json();
 			let itemData  = [];
 			let obj ={};
-			console.log(data);
+			//console.log(data);
 			data.map((item,index)=>{
 				obj["value"] = item[0]; //사번
 				obj["label"] = (index+1) +" : "+item[1]+"("+item[0]+")"; //이름(사번)
@@ -139,14 +139,14 @@
 			//셀렉트박스 닫힐때
 			selectBox.on('close',(ev)=>{
 				let selectlabel = selectBox.getSelectedItem().label;
-//				let data = selectBox.getData()
 				let approverEmpId = selectBox.getSelectedItem().value;
+
 				console.log("@@@@@@@@@@@@@@@@@@@@@@", approverEmpId);
 				if(selectlabel != null && approverArr.length < 3){//셀렉트 라벨선택시 3번까지만셈
 					print(ev.type, selectlabel);
 					approverArr.push({
 						empId: approverEmpId
-						, approverOrder: this.count 
+						, approverOrder: window.count 
 						, delegateStatus : false //여기서 전결상태도 불러오자
 					});
 					console.log("@@@@@@@@@@@@@@@@@@@@@@",approverArr);
@@ -317,7 +317,7 @@
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 			});
 
-		grid4.on("click", async (ev) => {
+			grid4.on("click", async (ev) => {
 			
 			const target = ev.nativeEvent.target;
 			const rowData = grid4.getRow(ev.rowKey);
@@ -367,9 +367,9 @@
 				}
 			//document.getElementById('approver').innerText = rowData.approver;//전결자
 			document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-		});
+			});
 	
-		grid5.on("click", async (ev) => {
+			grid5.on("click", async (ev) => {
 			
 			const target = ev.nativeEvent.target;
 			
@@ -420,7 +420,7 @@
 				}
 			//document.getElementById('approver').innerText = rowData.approver;//전결자
 			document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-		});
+			});
 	
 			return itemData;
 		} catch (error) {
@@ -609,8 +609,6 @@
 
 	}
 
-
-	
 	//1. 결재사항 불러오기
 	async function fetchPendingApprovalDocs() {
 		try {
@@ -1118,34 +1116,6 @@
     let approverArr = [];//결재권한자 배열 
 	
 
-	// function defaultPrint(){
-	// 	// 모달을 닫고 다시 작성 버튼을 클릭하면 이전 데이터가 남아있어서 초기화 진행
-	// 	approverDiv.innerHTML = "";
-		
-	// 	window.count = 0;
-    // 	if(this.count === 0){
-	//     	for(var i=0;i<defalutapproverArr.length;i++){
-	    		
-	// 	    	print("defalut",defalutapproverArr[i]);
-    // 			approverArr.push(defalutapproverArr[i]);
-	//     	}
-    // 	}
-
-	// 	// selectedForm 값이 없을 경우 에러가 생길 수 있어서 에러 처리
-	// 	if (!selectedForm) {
-	// 	    	console.log("선택된 양식이 없습니다.")
-	// 			//alert("선택된 양식이 없습니다.");
-			
-	// 			document.getElementById('leavePeriodForm').style.display = 'flex';
-	// 			document.getElementById('leaveTypeForm').style.display = 'flex';
-	// 			document.getElementById('expndTypeForm').style.display = 'flex';
-	// 			document.getElementById('toDeptForm').style.display = 'flex';
-			
-	// 	    return;
-	// 	}
-    // }
-
-
 
 	// 작성 버튼 클릭 시 실행되는 함수
   	function defaultPrint(){
@@ -1153,12 +1123,11 @@
 		approverDiv.innerHTML = "";
 		
 		window.count = 0;
-		
+		approverArr = [];
 		
 		// selectedForm 값이 없을 경우 에러가 생길 수 있어서 에러 처리
 		if (!selectedForm) {
 		    	console.log("선택된 양식이 없습니다.")
-				//alert("선택된 양식이 없습니다.");
 			
 				document.getElementById('leavePeriodForm').style.display = 'flex';
 				document.getElementById('leaveTypeForm').style.display = 'flex';
@@ -1168,94 +1137,123 @@
 		    return;
 		}
 		
+		defalutapproverArr = []; //기존 배열 초기화
 		for (let i = 1; i <= 3; i++) {
 		// selectedForm의 approver1, approver2, approver3을 가져오기 위해서 템플릿 문자열 사용
 		    const approver = selectedForm[`approver${i}`] + " " + selectedForm[`approver${i}Name`];
 
 			// 결재권자가 없으면 화면에 출력되지 않도록 처리
 			if (selectedForm[`approver${i}`] == null) {
-			 	return;
+			 	break;
 			}
 			
 		    if (approver) {//디폴트 결재권한자 라벨이 null이 아닐때
-				//console.log("디폴트 결재권한자"+i+" 라벨 ------>",approver);
-				//defalutapproverArr=[];
-				//defalutapproverArr.push(approver);
-				//console.log("defalutapproverArr",defalutapproverArr);
-		        print("default", approver);
+				defalutapproverArr.push(approver);
+				console.log("defalutapproverArr",defalutapproverArr);
 		    }
-		}
-    }
 
+			console.log("추출된 기본 결재자:", defalutapproverArr);
+
+    	
+    	}
+		// 4. 기본 결재 라인 설정 (this.count가 0일 때만 실행)
+    	// 이 로직은 결재 라인에 아무도 없을 때만 기본값을 넣어주기 위한 로직입니다.
+    	if (window.count === 0) {
+			//console.log("defalutapproverArr 실행:", defalutapproverArr);
+			//console.log("defalutapproverArr.length:", defalutapproverArr.length);
+			//console.log("approverArr 실행 전:", approverArr);
+        	defalutapproverArr.forEach(approver => {
+
+				///console.log("approver:", approver);
+				//console.log("window.count:", window.count);
+				const approverParts = approver.split(" ");
+				const approverEmpId = approverParts[0];
+				print("defalut", approver);
+
+				approverArr.push({
+					empId: approverEmpId,
+					approverOrder: window.count,
+					delegateStatus: false 
+				});
+        	});
+		}	
+
+	}
 
 	defalutapprover();
 	
-    function print(type, text) {
-		// 결재권한자변경 div 버튼 생성
-		console.log(window.count, "@@@@@@@@@@@@");
-    	if(this.count < 3){
-		console.log(this.count, "this.count:!!!!!!!!!!!!")
-		this.count++;
-    	approverDiv.innerHTML +='<div class="btn btn-success"'
-      						+'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
-      						+'<p onclick="approverDivclose(this,' + "'"+ type + "'"+ ','+ count +')" style="float:right;margin-right: 8px;">&times;</p>'
-      						+'<p onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
-    						+'</div>';
-    	}
 
-    } 
+
+	function print(type, text) {
+    	// 결재권한자변경 div 버튼 생성
+    	console.log(window.count, "@@@@@@@@@@@@");
+    	if(this.count < 3){
+    		console.log(this.count, "this.count:!!!!!!!!!!!!")
+    		this.count++;
+    		approverDiv.innerHTML +='<div class="btn btn-success"'
+    		                      +'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
+    		                      +'<p onclick="approverDivclose(this,' + "'"+ type + "'"+ ','+ count +')" style="float:right;margin-right: 8px;">&times;</p>'
+    		                      +'<p onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
+    		                    	+'</div>';
+		}
+    }
+
 	
-	//결재권한자 버튼 클릭시 결재권한자변경 div 태그 생성
-	function approvalNo(count,text){
-	   //해당태그 클릭시 전결자 div 나오기
-		let type = "change";
-		jeongyeoljaDiv.innerHTML = '<button onClick="approverDivclose(this,'+ "'"+ type + "'"+','+ count +')" class="btn-close" style="float:right;margin-right: 8px;"></button>'
-	   		 			+ '<h5>'+ count + "차 결재권한자 : "+ text +" 변경"+'</h5>';
-		jeongyeoljaDiv.innerHTML += jeongyeoljaContent.innerHTML;	
-		jeongyeoljaDiv.insertAdjacentHTML('beforeend', `<button id="approvalBtn_${count}" 
-																	type="button" class="btn btn-primary" 
-																	data-count="${count}" 
-																	onclick="applyDelegateChange(this)">
-        													전결자로 지정
-    													 </button>
-			`);
-	   
-	   	if(jeongyeoljaDiv.style.display === 'none'){
-	  	jeongyeoljaDiv.style.display = 'block';  
-	   	  						  
-		}	
-    } 
-	
+	//결재권한자 버튼 클릭시 결재권한자변경 div 태그 생성//전결자
+	function approvalNo(count, text) {
+	    let type = "change";
+	    if (jeongyeoljaDiv) {
+	        // div 초기화
+	        jeongyeoljaDiv.innerHTML = `
+	            <button onClick="approverDivclose(this, '${type}', ${count})" class="btn-close" style="float:right;margin-right: 8px;"></button>
+	            <h5>${count}차 결재권한자 : ${text} 변경</h5>
+	            ${jeongyeoljaContent.innerHTML}
+	            <button id="approvalBtn_${count}" 
+	                    type="button" class="btn btn-primary" 
+	                    data-count="${count}" 
+	                    onclick="applyDelegateChange(this)">
+	                전결자로 지정
+	            </button>
+	        `;
+	        jeongyeoljaDiv.style.display = 'block';
+	    }
+	}
 	//결재권한자,결재권한자변경(전결자) 닫기버튼
 	function approverDivclose(buttonDiv,type,count){
 		const divElement = buttonDiv.parentNode; // 버튼의 부모인 div를 찾음
 		
-		// console.log("type",type);
-		// console.log("jeongyeoljaDiv.style.display",jeongyeoljaDiv.style.display);
-		jeongyeoljaDiv.style.display = 'none';
-		//defalut 태그 닫기 버튼시 
-		if (buttonDiv.parentElement.id === '' || type === 'defalut') {//결재권한자
-	        divElement.remove(); //자신의 div 제거
-	        
-	        if(divElement.innerText !== null){ //defalut 태그가 있을때
-	        	approverArr = approverArr.filter((ev) => ev !== defalutapproverArr[count-1]);	
-	        }
-			approverArr = approverArr.filter((ev) => ev !== count);
-			this.count = count-1; //제거 라벨 카운트 원상복기
-	    }
+		if(jeongyeoljaDiv){
+			jeongyeoljaDiv.style.display = 'none';
+		}
+		
+		divElement.remove(); //자신의 div 제거
+		const indexToRemove = count - 1; 
+		console.log("제거할 인덱스:", indexToRemove);
+
+        // 인덱스가 유효한 범위 내에 있는지 확인 후 제거
+        if (indexToRemove > -1 && indexToRemove < approverArr.length) {
+        // splice(시작 인덱스, 제거할 요소 수)
+        	approverArr.splice(indexToRemove, 1); 
+        }
+		this.count = count-1; //제거 라벨 카운트 원상복기
+	  
 		
 		
 		if(approverArr.length === 0){
     		this.count = 0;
     	}	
+		console.log("닫기버튼 클릭된 defalutapproverArr:", defalutapproverArr);
+		console.log("업데이트된 approverArr:", approverArr);
+		console.log("현재 this.count:", this.count+1);
+
 	}
 
 	//에디터-없앰
-	 const editor = new toastui.Editor({
-	  el: document.querySelector('#editor'),
-	  height: '500px',
-	  initialEditType: 'markdown',
-	  previewStyle: 'vertical'
+	const editor = new toastui.Editor({
+		el: document.querySelector('#editor'),
+	  	height: '500px',
+	  	initialEditType: 'markdown',
+	  	previewStyle: 'vertical'
 	});
 	
 	editor.getMarkdown();
