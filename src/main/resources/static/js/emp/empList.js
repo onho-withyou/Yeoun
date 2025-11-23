@@ -132,7 +132,6 @@ function loadEmpList(page) {
     .catch(() => alert('사원 목록 불러오기 실패'));
 }
 
-
 // ================================
 //  Toast Grid 생성 함수
 // ================================
@@ -143,10 +142,9 @@ function initEmpGrid() {
     scrollX: true,                       // 가로 스크롤
     scrollY: true,                       // 세로 스크롤
     editable: false,                     // 읽기 전용
-//    pageOptions: { 
-//      useClient: false,   // 서버 페이징
-//      perPage: pageSize
-//    },
+ 	columnOptions: {
+       resizable: true
+   	},
     columns: [
       { 
 		header: '입사일자', 

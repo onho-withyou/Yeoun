@@ -92,6 +92,9 @@ function initHrGrid() {
     rowHeaders: ['rowNum'],
     scrollX: true,
     scrollY: true,
+	columnOptions: {
+	  resizable: true
+	},
     columns: [
       { 
         header: '사원번호',
