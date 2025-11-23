@@ -42,7 +42,7 @@ public class WebSecurityConfig {
 					.requestMatchers("/", "/login", "/logout").permitAll()
 					
 					// ================== 로그인 한 모든 사원 ==================
-		            .requestMatchers("/org/**", "/hr/actions", "/attendance/my/**", "/leave/my/**", "/attendance/outwork", "/attendance/toggle/**",
+		            .requestMatchers("/orgchart/**", "/hr/actions", "/attendance/my/**", "/leave/my/**", "/attendance/outwork", "/attendance/toggle/**",
 		            				 "/my/**")
 		                .authenticated()
 
