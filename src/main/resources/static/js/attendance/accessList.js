@@ -43,6 +43,10 @@ const grid = new tui.Grid({
 	bodyHeight: 500,
 	columnOptions: {
 		resizable: true
+	},
+	pageOptions: { 
+		useClient: true,
+		perPage: 10 
 	}
 });
 
