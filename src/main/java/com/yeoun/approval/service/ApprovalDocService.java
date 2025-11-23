@@ -292,7 +292,7 @@ public class ApprovalDocService {
 				approver.setViewing(parts[2]); // 열람 권한 (세 번째 요소, String 타입)
 				
 				// 기타 필드 설정
-				approver.setDelegateStatus(doc.get("delegetedApprover")); // 위임자
+				approver.setDelegateStatus(doc.get("delegateStatus")); // 위임자
 				approver.setApprovalStatus(false); // 기본 상태: 미결재
 				
 				// Approver 엔티티 저장
