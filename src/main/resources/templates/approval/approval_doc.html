@@ -102,7 +102,7 @@
 		<!-- 모달 -->
 		<div class="modal fade" id="approval-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
-		    <form class="modal-content" th:action="@{/approval/approval_doc}" method="POST" enctype="multipart/form-data">
+		    <form class="modal-content" id="modal-doc" th:action="@{/approval/approval_doc}" method="POST" enctype="multipart/form-data">
 		      <div class="modal-header" data-draggable="true">
 				<!--<h3 class="modal-title" id="Drafting" value="">기안서 작성</h3>-->
 				<input type="text" id="Drafting" name="drafting" value="">
@@ -248,7 +248,7 @@
 						  <div>
 						 	<h5>전결자 지정 </h5>
 							<select id="emp_id" name="delegetedApprover" class="form-select" aria-label="Default select example">
-							  <option selected>이름 사원번호</option>
+							  <option selected></option>
 							  <option th:each="item, iterStat : ${empList}" 
 							 			th:value="${item.empId}" 
 							 			th:text="${iterStat.index+1} + ' : ' + ${item.empName} + '(' + ${item.empId} + ')'">
@@ -262,13 +262,13 @@
 		      </div>
 		      <div class="modal-footer">
 		      	<div>
-			     	<button type="button" class="btn btn-primary">첨부파일</button>
-			     	<button type="button" class="btn btn-primary" id="approvalCompanionBtn">반려</button>
-			      	<button type="button" class="btn btn-primary" id="approvalCheckBtn">결재확인</button>
+			     	<button type="button" id="attachmentBtn" class="btn btn-primary" style="display: none;">첨부파일</button>
+			     	<button type="button" id="approvalCompanionBtn" class="btn btn-primary" >반려</button>
+			      	<button type="button" id="approvalCheckBtn" class="btn btn-primary" >결재확인</button>
 			    </div>
 		      	<hr>
-		      	<button type="button" class="btn btn-primary">인쇄</button>
-		        <button type="submit" class="btn btn-primary">등록</button>
+		      	<button type="button" id="printBtn" class="btn btn-primary" style="display: none;">인쇄</button>
+		        <button type="submit" id="saveBtn" class="btn btn-primary">등록</button>
 		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
 		      </div>
 		</form>

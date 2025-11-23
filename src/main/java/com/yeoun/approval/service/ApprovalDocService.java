@@ -1,6 +1,7 @@
 package com.yeoun.approval.service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.yeoun.approval.dto.ApprovalDocDTO;
 
@@ -41,7 +43,8 @@ public class ApprovalDocService {
 	private final HrActionRepository hrActionRepository;
 	private final ApprovalFormMapper approvalFormMapper;
 	private final LeaveService leaveService;
-	
+	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
 	//기안자 명 불러오기
 	@Transactional(readOnly = true)
 	public List<Emp> getEmp() {
@@ -63,48 +66,38 @@ public class ApprovalDocService {
     public void saveApprovalDoc(String empId, Map<String,String> doc) {
         log.info(">>>>>>>>>>>>>>>>>> approvalDoc : " + doc);
         ApprovalDoc approvalDoc = new ApprovalDoc();
-        Approver approver = new Approver(); 
         ApprovalDocDTO approvalDocDTO = new ApprovalDocDTO();
-        ApproverDTO approverDTO = new ApproverDTO();
-        //ApprovalDoc approvalDoc = approvalDocDTO.toEntity(approvalDocDTO);
-
         doc.forEach((key, value) -> {
             System.out.println(key + " : " + value);
         });
 
-        LocalDate createdDate = LocalDate.parse(doc.get("createdDate"));
-        LocalDate finishDate = LocalDate.parse(doc.get("finishDate"));
-        LocalDate startDate = LocalDate.parse(doc.get("startDate"));
-        LocalDate endDate = LocalDate.parse(doc.get("endDate"));
+		
+      	// 날짜 파싱 헬퍼 메서드 사용 (코드가 간결하고 효율적)
+      	LocalDate createdDate = parseDateSafely(doc.get("createdDate"));
+		LocalDate finishDate = parseDateSafely(doc.get("finishDate"));
+		LocalDate startDate = parseDateSafely(doc.get("startDate"));
+		LocalDate endDate = parseDateSafely(doc.get("endDate"));
 
-        //결재문서
-        approvalDoc.setApprovalId(null);//문서id -자동생성됨
+
+		approvalDoc.setApprovalId(null);//문서id -자동생성됨
         approvalDoc.setApprovalTitle(doc.get("approvalTitle")); //문서제목
         approvalDoc.setEmpId(empId); //기안자 사번번호
         approvalDoc.setCreatedDate(createdDate);//문서생성일= 결재시작일 =오늘날짜
         approvalDoc.setFinishDate(finishDate);//결재마감일
-        //if(){
-            approvalDoc.setDocStatus(empId);//1차대기 -결재권한자가있을때
-        //}
+		approvalDoc.setDocStatus(doc.get("docStatus"));//1차대기 -결재권한자가있을때
         approvalDoc.setFormType(doc.get("drafting"));//양식종류
-        approvalDoc.setApprover(empId);//결재권한자
+        approvalDoc.setApprover(doc.get("docApprover"));//결재권한자
         approvalDoc.setStartDate(startDate);// 휴가시작일
         approvalDoc.setEndDate(endDate);//휴가종료일
         approvalDoc.setLeaveType(doc.get("leaveType"));//휴가유형
         approvalDoc.setToDeptId(doc.get("toDeptId"));//발령부서
-        approvalDoc.setLeaveType(empId);//연차유형
+        approvalDoc.setLeaveType(doc.get("docStatus"));//연차유형
         approvalDoc.setExpndType(doc.get("expndType"));//지출타입
         approvalDoc.setReason(doc.get("reason"));//사유
-        
-        //approver.setDelegateStatus(); //본인/전결/대결/선결
-        //approver.setApprovalId(approvalDoc.getApprovalId());//문서id
-        //approver.setEmpId(doc.get("delegetedApprover")); //전결자//사원번호들어감
-        //approver.setApprovalStatus(false);//권한자상태 -필요없어짐
-        //approver.setOrderApprovers();//결재권한자 순서
-        //approver.setViewing();//열람권
 
-    
-        approvalDocDTO.setApprovalId(approvalDoc.getApprovalId());//결재문서id
+        //결재문서
+            
+		approvalDocDTO.setApprovalId(approvalDoc.getApprovalId());//결재문서id
         approvalDocDTO.setApprovalTitle(approvalDoc.getApprovalTitle());//문서제목
         approvalDocDTO.setEmpId(approvalDoc.getEmpId());//로그인한 사람 사원번호
         approvalDocDTO.setCreateDate(approvalDoc.getCreatedDate());//생성일자
@@ -118,15 +111,16 @@ public class ApprovalDocService {
         approvalDocDTO.setExpndType(approvalDoc.getExpndType());//지출종류
         approvalDocDTO.setReason(approvalDoc.getReason());//사유
 
-        approverDTO.setApprovalId(approver.getApprovalId());
-        approverDTO.setEmpId(approver.getEmpId());
-        approverDTO.setApprovalStatus(false);//필요없음
-        approverDTO.setDelegateStatus(approver.getDelegateStatus());
-        approverDTO.setOrderApprovers(approver.getOrderApprovers());
-        //approverDTO.setViewing(approver.getViewing());;
+		approvalDocRepository.save(approvalDoc);
 
-        approvalDocRepository.save(approvalDoc);
-        //approverRepository.save(approver);
+
+
+		Long generatedApprovalId = approvalDoc.getApprovalId();
+		
+        String[] approverKeys = {"approverEmpIdOV1", "approverEmpIdOV2", "approverEmpIdOV3"};
+        for (String key : approverKeys) {
+            processApprover(generatedApprovalId, doc, key);
+        }		
 
     }
 
@@ -270,4 +264,45 @@ public class ApprovalDocService {
 		return approvalDOCPage.map(ApprovalDocDTO::fromEntity); 
 	}
 
+	 // 문자열을 LocalDate로 안전하게 파싱하는 헬퍼 메서드
+    private LocalDate parseDateSafely(String dateString) {
+        if (StringUtils.hasText(dateString)) {
+            try {
+                return LocalDate.parse(dateString, FORMATTER);
+            } catch (Exception e) {
+                System.err.println(dateString + " 날짜 파싱 오류 발생: " + e.getMessage());
+            }
+        }
+        return null; 
+    }
+
+	private void processApprover(Long approvalId, Map<String, String> doc, String docKey) {
+		String approverString = doc.get(docKey); 
+
+		// NullPointerException 방지를 위해 StringUtils.hasText로 확인
+		if (StringUtils.hasText(approverString)) {
+			String[] parts = approverString.split(","); // 예: ["2506864", "1", "Y"]
+
+			if (parts.length >= 3) {
+				Approver approver = new Approver();
+
+				approver.setApprovalId(approvalId); // 생성된 문서 ID 설정
+				approver.setEmpId(parts[0]);         // 사번 (첫 번째 요소)
+				approver.setOrderApprovers(parts[1]); // 순서 (두 번째 요소)
+				approver.setViewing(parts[2]); // 열람 권한 (세 번째 요소, String 타입)
+				
+				// 기타 필드 설정
+				approver.setDelegateStatus(doc.get("delegetedApprover")); // 위임자
+				approver.setApprovalStatus(false); // 기본 상태: 미결재
+				
+				// Approver 엔티티 저장
+				approverRepository.save(approver);
+
+			} else {
+				log.warn("결재자 데이터 형식이 올바르지 않습니다 ({}): {}", docKey, approverString);
+			}
+		}
+	}
 }
+
+

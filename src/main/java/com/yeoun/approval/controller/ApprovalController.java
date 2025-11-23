@@ -2,15 +2,19 @@ package com.yeoun.approval.controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -102,12 +106,22 @@ public class ApprovalController {
 	 	return approvalDocService.getFinishedApprovalDocs(loginDTO.getEmpId());//"2505823"
 	 }
 
+	
     @PostMapping("/approval_doc")
-    public String postMethodName(@AuthenticationPrincipal LoginDTO loginDTO, @RequestParam Map<String, String> doc) throws JsonProcessingException {
+    public ResponseEntity<Map<String, Object>> postMethodName(@AuthenticationPrincipal LoginDTO loginDTO, @RequestBody Map<String, String> doc) {
         
-        approvalDocService.saveApprovalDoc(loginDTO.getEmpId(),doc);
-        
-        return "redirect:/approval/approval_doc";
+		//System.out.print("doc---------------------->",doc);
+		log.info(doc);
+        log.info("받은 JSON: {}", doc);
+		approvalDocService.saveApprovalDoc(loginDTO.getEmpId(),doc); 
+    	//return "redirect:/approval/approval_doc";
+		Map<String, Object> response = new HashMap<>();
+    	response.put("status", "success");
+    	response.put("message", "결재 문서가 성공적으로 등록되었습니다.");
+
+		
+    
+    	return ResponseEntity.ok(response); 
     }
 
 }
