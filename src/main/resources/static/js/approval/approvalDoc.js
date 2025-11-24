@@ -153,7 +153,7 @@
 					approverArr.push({
 						empId: approverEmpId
 						, approverOrder: window.count 
-						, delegateStatus : false //여기서 전결상태도 불러오자
+						, delegateStatus : 'N' //여기서 전결상태도 불러오자
 						, originalEmpId: approverEmpId // 초기 사번 저장
 					});
 					console.log("@@@@@@@@@@@@@@@@@@@@@@",approverArr);
@@ -495,15 +495,15 @@
     	}
 	}
 
-	// //폼 결재권한자 데이터 말아서 보내는 함수
+	//폼 결재권한자 데이터 말아서 보내는 함수
 	document.getElementById('modal-doc').addEventListener('submit', async function(event) {
     	// 폼의 기본 제출 동작 방지
     	event.preventDefault();
 
     	// FormData 객체를 사용하여 폼 데이터 수집
     	const formData = new FormData(this);
-		
-		//결재문서
+
+			//결재문서
 		if(approverArr.length != 0){ //결재권한자가 있으면
  			formData.append('docStatus', '1차대기');//문서상태
 			formData.append('docApprover', approverArr[0].empId);//결재권한자//1차 empId
@@ -516,13 +516,16 @@
 		//결재권한자 3명까지
 		if(approverArr.length > 0){
 
-			//formData.append('delegateStatus', );//전결상태 3개
+			//결재권한자 사번,오더순서,열람여부,전결상태
 			if(approverArr[0] !== undefined) 
-				formData.append('approverEmpIdOV1', approverArr[0].empId +","+ approverArr[0].approverOrder + "," + "Y"); //결재권한자 아이디 3게
+				formData.append('approverEmpIdOVD1', approverArr[0].empId +","
+					+ approverArr[0].approverOrder + "," + "Y" +","+approverArr[0].delegateStatus); //결재권한자 아이디 3게
 			if(approverArr[1] !== undefined) 
-				formData.append('approverEmpIdOV2', approverArr[1].empId +","+ approverArr[1].approverOrder +"," + "N");
+				formData.append('approverEmpIdOVD2', approverArr[1].empId +","
+					+ approverArr[1].approverOrder +"," + "N"+","+approverArr[1].delegateStatus);
 			if(approverArr[2] !== undefined) 
-				formData.append('approverEmpIdOV3', approverArr[2].empId +","+ approverArr[2].approverOrder +"," + "N");
+				formData.append('approverEmpIdOVD3', approverArr[2].empId +"," 
+					+ approverArr[2].approverOrder +"," + "N"+"," + approverArr[2].delegateStatus);
 			//formData.append('approvalStatus', false);//권한자상태 필요없음
 			//formData.append('orderApprovers', null);//결재권한자 순서 3개
 		}
@@ -560,7 +563,6 @@
 		const targetDiv = document.getElementById(`approver_${elemApproverIdNum}`);
 	    const radio = event.target;
 	    const selectedValue = radio.value;
-		console.log("count--------------------------------------------------------------->",count);
 		console.log("선택된 이름", selectedEmpName);
 	    console.log("선택된 전결 상태:", selectedValue);
 		//console.log("targetDiv");
@@ -580,7 +582,7 @@
 	        });
 			//console.log(" approverArr----------------->:", approverArr);
 	    }
-		console.log("targetDiv:------------------------------------>", targetDiv);
+		// console.log("targetDiv:------------------------------------>", targetDiv);
 		if(targetDiv) {
 			// 새로운 전결자 표시
 			if(selectedValue != 'N') {
@@ -592,6 +594,8 @@
 	// 결재권한자 변경/전결 적용 함수
 	function applyDelegateChange(button) {
 
+		console.log("적용 버튼이 클릭되었습니다.");
+		console.log("button.dataset.count ---------->", button.dataset.count);
 		const count = Number(button.dataset.count); // 버튼 자체의 data-count 사용
 		const parentDiv = button.parentNode;        // 부모 div
 		const id = parentDiv.id || "jeongyeoljaDiv"; // 부모 div id
@@ -600,7 +604,7 @@
 		//전결에 필요한 로직추가 approverArr 배열에 delegateStatus 값 변경
 		// 라디오 버튼값 가져오기
 		const radioJeongyeolja = document.getElementsByName('radioJeongyeolja');
-		const targetDiv = document.getElementById(`approver_${count}`);
+		const targetDiv = document.getElementById(`approver_${elemApproverIdNum}`);
 
 		let selectedValue;
 		for (const radio of radioJeongyeolja) {
@@ -642,9 +646,6 @@
 			return approver;
 		});
 		console.log("Updated approverArr:", approverArr);
-
-		//const radios = document.getElementsByName('radioJeongyeolja');
-		//<div id="approver_${count}"의 선택된 div에 전결자 표시
 	}
 
 	//1. 결재사항 불러오기

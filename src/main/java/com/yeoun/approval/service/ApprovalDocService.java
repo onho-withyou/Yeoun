@@ -72,7 +72,7 @@ public class ApprovalDocService {
         });
 
 		
-      	// 날짜 파싱 헬퍼 메서드 사용 (코드가 간결하고 효율적)
+      	// 날짜 파싱 
       	LocalDate createdDate = parseDateSafely(doc.get("createdDate"));
 		LocalDate finishDate = parseDateSafely(doc.get("finishDate"));
 		LocalDate startDate = parseDateSafely(doc.get("startDate"));
@@ -113,11 +113,9 @@ public class ApprovalDocService {
 
 		approvalDocRepository.save(approvalDoc);
 
-
-
 		Long generatedApprovalId = approvalDoc.getApprovalId();
 		
-        String[] approverKeys = {"approverEmpIdOV1", "approverEmpIdOV2", "approverEmpIdOV3"};
+        String[] approverKeys = {"approverEmpIdOVD1", "approverEmpIdOVD2", "approverEmpIdOVD3"};
         for (String key : approverKeys) {
             processApprover(generatedApprovalId, doc, key);
         }		
@@ -280,16 +278,17 @@ public class ApprovalDocService {
 		if (StringUtils.hasText(approverString)) {
 			String[] parts = approverString.split(","); // 예: ["2506864", "1", "Y"]
 
+			// parts 배열의 길이가 3 이상인지 확인
 			if (parts.length >= 3) {
 				Approver approver = new Approver();
 
 				approver.setApprovalId(approvalId); // 생성된 문서 ID 설정
-				approver.setEmpId(parts[0]);         // 사번 (첫 번째 요소)
-				approver.setOrderApprovers(parts[1]); // 순서 (두 번째 요소)
-				approver.setViewing(parts[2]); // 열람 권한 (세 번째 요소, String 타입)
+				approver.setEmpId(parts[0]);         // 사번 
+				approver.setOrderApprovers(parts[1]); // 순서 
+				approver.setViewing(parts[2]); // 열람 권한 
+				approver.setDelegateStatus(parts[3]); //결재권한자변경여부//전결자 상태
 				
 				// 기타 필드 설정
-				approver.setDelegateStatus(doc.get("delegetedApprover")); // 위임자
 				approver.setApprovalStatus(false); // 기본 상태: 미결재
 				
 				// Approver 엔티티 저장
