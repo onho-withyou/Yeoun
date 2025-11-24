@@ -835,7 +835,6 @@ async function initApprovalGrid(data) {
 				el.disabled = true;
 			}
 		});
-		selectBox.disable();
 		
 		document.getElementById('Drafting').value = rowData.formType;
 		console.log(rowData.approvaTitle);
@@ -858,9 +857,11 @@ async function initApprovalGrid(data) {
 		document.getElementById('expnd-type').value = rowData.expndType;//지출종류EXPND_TYPE
 		//document.getElementById('approver').value = rowData.approver;//결재권한자
 		const approverList = await getApproverList(approvalId);
-		
+		selectBox.enable();
 		let sortedList; 
-		
+		console.log(approverList, "@@@@@@@@@@@@@@@@@@@@@approverList");
+
+		approverDiv.innerHTML = "";
 		if(approverList.length > 0) {
 			
 			sortedList = approverList.sort((a, b) => {
@@ -868,8 +869,9 @@ async function initApprovalGrid(data) {
 			});
 			
 			window.count = 0;
-			approverDiv.innerHTML = "";
 								
+			console.log(sortedList, "@@@@@@@@@@@@@@@@@@@@@sortedList");
+			
 			for (const approver of sortedList) {
 				selectBox.select(approver.empId);
 				print("default", selectBox.getSelectedItem().label);
@@ -885,6 +887,7 @@ async function initApprovalGrid(data) {
 		});
 		//document.getElementById('approver').innerText = rowData.approver;//전결자
 		document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+		selectBox.disable();
 			
 	});
 	// 결재 문서 모달 열기 끝
