@@ -291,6 +291,7 @@ async function openScheduleModal(mode, data = null) {
 	if(mode === 'add') {
 		deleteBtn.disabled = false;
 		submitBtn.disabled = false;
+		submitBtn.classList.remove('d-none');
 		//폼요소 입력가능하게 변경
 		Array.from(form.elements).forEach(el => {
 		    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
@@ -330,11 +331,13 @@ async function openScheduleModal(mode, data = null) {
 		form.alldayYN.value = "Y";
 		
 		organizeInput.disabled = true;
+		organizeInput.value = '';
 		organizeBtn.disabled = false;
 
 	} else if (mode === 'edit' && data) {
 		modalTitle.textContent = '일정조회';
 		deleteBtn.classList.remove('d-none');
+		submitBtn.classList.remove('d-none');
 	    submitBtn.textContent = '수정';
 		submitBtn.value ='edit';
 		form.scheduleId.value = data.scheduleId || '';
@@ -373,7 +376,9 @@ async function openScheduleModal(mode, data = null) {
 		    // 권한 없음: 조직선택, 삭제, 수정 버튼 비활성화
 			organizeBtn.disabled = true;
 		    deleteBtn.disabled = true;
+			deleteBtn.classList.add('d-none');
 		    submitBtn.disabled = true;
+			submitBtn.classList.add('d-none');
 			// 데이트피커 비활성화
 			sp.enable && sp.disable();
 			ep.enable && ep.disable();

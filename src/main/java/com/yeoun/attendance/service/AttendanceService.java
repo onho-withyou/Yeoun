@@ -76,9 +76,6 @@ public class AttendanceService {
 			return processAccessLog(empId, now, today, emp, attendance);
 		}
 		
-		// 퇴근 처리 안했을 경우 자동으로 퇴근 처리
-		autoCloseYesterdayWork(empId, today, workPolicy);
-		
 		// 출근 기록이 있고 이미 퇴근을 완료한 경우
 		if (attendance != null && attendance.getWorkOut() != null) {
 			return processAccessLog(empId, now, today, emp, attendance);

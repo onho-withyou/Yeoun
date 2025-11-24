@@ -92,26 +92,6 @@ public class ScheduleService {
 	    LocalDateTime endOfDay   = endDate.with(java.time.LocalTime.MAX);//해당일자의 23시59분59초
 		// 일정목록 조회
 	    List<Schedule> scheduleList = scheduleRepository.getIndividualSchedule(empId, startOfDay, endOfDay);
-	    System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" + scheduleList);
-		// 일정목록 데이터 변환후 저장할 객체
-//		List<Schedule> scheduleList2 = new ArrayList<>();
-
-		// scheduleType 판별후 보여줄 데이터로 변환
-//		if(!scheduleList.isEmpty()) {
-//			for(Schedule schedule : scheduleList) {
-//				String scheduleType = schedule.getScheduleType();
-//				
-//				if("company".equals(scheduleType)) {
-//					schedule.setScheduleType("회사");
-//				} else if(empId.equals(scheduleType)) {
-//					schedule.setScheduleType("개인");
-//				} else {
-//					Dept dept = deptRepository.findById(scheduleType).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 부서입니다.222222"));
-//					schedule.setScheduleType(dept.getDeptName());
-//				}
-//				scheduleList2.add(schedule);
-//			}
-//		}
 		
 		return scheduleList.stream().map(ScheduleDTO::fromEntity).collect(Collectors.toList());
 	}

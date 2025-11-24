@@ -116,7 +116,20 @@ function changeCalendarType(type) {
 	}
 	calendar.changeView(type, true);
 	calendarType = type;
+	
 }
+const buttons = document.querySelectorAll('button[data-view]');
+buttons.forEach(btn => {
+	btn.addEventListener('click', function() {
+		// 이전에 선택된 버튼이 있다면 
+		const prevActive = document.querySelector('button[data-view].active');
+		// active클래스 제거
+		if(prevActive) prevActive.classList.remove('active');
+		console.log("this : " , this)
+		this.classList.add('active');	
+	});
+	
+});
 
 // MONTH, WEEK, DAY, LIST 버튼 이벤트리스너
 document.getElementById('type-month').addEventListener('click', function() {
@@ -124,7 +137,7 @@ document.getElementById('type-month').addEventListener('click', function() {
 	if (!calendar) initCalendar();
     changeCalendarType('month');
 	updateCurrentDate();
-	checkCalendarType();
+//	checkCalendarType();
 });
 
 document.getElementById('type-week').addEventListener('click', function() {
@@ -132,7 +145,7 @@ document.getElementById('type-week').addEventListener('click', function() {
 	if (!calendar) initCalendar();
     changeCalendarType('week');	
 	updateCurrentDate();
-	checkCalendarType();
+//	checkCalendarType();
 });
 
 document.getElementById('type-day').addEventListener('click', function() {
@@ -140,13 +153,14 @@ document.getElementById('type-day').addEventListener('click', function() {
 	if (!calendar) initCalendar();
     changeCalendarType('day');
 	updateCurrentDate();
-	checkCalendarType();
+//	checkCalendarType();
 });
 
 // list 버튼 클릭시 페이지 이동
 document.getElementById('type-list').addEventListener('click', function() {
 	location.href = "/main/schedule"
 });
+
 // ------캘린더 위 버튼관련 함수 끝
 
 
@@ -157,6 +171,7 @@ document.getElementById('type-list').addEventListener('click', function() {
 
 // 캘린더 생성함수
 function initCalendar() {
+	showCalendarLoading();
 	calendarEl.innerHTML = ""; // 기존 내용 제거
 	// 만약 이미 달력이 있으면 제거
 	if (calendar) {
@@ -286,7 +301,7 @@ function initCalendar() {
 	});
 
 	// 캘린더에 등록된 일정 클릭시 이벤트
-	calendar.on('clickEvent', (eventInfo) => {
+	calendar.on('clickEvent', async (eventInfo) => {
 		const event = eventInfo.event;
 		const nativeEvent = eventInfo.nativeEvent; // 마우스이벤트
 		const tooltip = document.getElementById('leave_tooltip');
@@ -340,22 +355,31 @@ function initCalendar() {
 		} else { // 선택한 일정이 연차도, 휴일도 아닐때 = 일정관리에 등록된 일정일 때
 			
 			const scheduleId = event.id;
-			
+			showCalendarLoading();
+			console.log("스피너열기");
 			// 등록된 일정정보 조회
 			fetch(`/api/schedules/${scheduleId}`, {method: 'GET'})
 			.then(response => {
 				if (!response.ok) throw new Error(response.text());
 				return response.json();  //JSON 파싱
 			})
-			.then(data => { // response가 ok일때
+			.then(async data => { // response가 ok일때
 				// 조회한 일정정보와 함께 일정조회모달 열기
-				openScheduleModal("edit", data);
-			}).catch(error => {
+				await openScheduleModal("edit", data);
+				
+			}).then(async () => {
+				console.log("스피너닫기");
+				hideCalendarLoading()
+			})
+			.catch(error => {
 				console.error('에러', error)
 				alert("데이터 조회 실패");
 			});
+			
 		}
 	});
+	
+	hideCalendarLoading();
 
 }
 
@@ -400,6 +424,7 @@ function formatDate(locdate) {
 
 //해당월의 달력일정 불러오기
 async function loadMonthSchedule() {
+	showCalendarLoading();
 	// 현재 바뀐 날짜 정보에서 그해의 월초, 월말 날자 설정
 	const loadDate = calendar.getDate();
 	const startDate = new Date(
@@ -438,6 +463,7 @@ async function loadMonthSchedule() {
 	// 저장된 그달의 일정데이터 입력
 	await calendar.createEvents(monthlyScheduleData);
 	checkFilter();
+	hideCalendarLoading();
 	
 }
 
@@ -748,9 +774,13 @@ async function updateCurrentDate() {
 	calendarMonth = month;
 }
 	
-	
-
-
+// 스피너 보이기 끄기
+function showCalendarLoading() {
+	document.getElementById('calendar-loading-overlay').style.display = 'flex';
+}
+function hideCalendarLoading() {
+	document.getElementById('calendar-loading-overlay').style.display = 'none';
+}
 
 
 
