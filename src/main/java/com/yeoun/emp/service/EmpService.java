@@ -98,7 +98,7 @@ public class EmpService {
 	    emp.setEmpId(empId);                               // 자동 사번
 	    emp.setEmpPwd(encoder.encode("1234"));             // 초기 비밀번호
 	    emp.setHireDate(empDTO.getHireDate() != null ? empDTO.getHireDate() : LocalDate.now());
-	    emp.setStatus(empDTO.getStatus() != null ? empDTO.getStatus() : "ACTIVE");
+	    emp.setStatus("ACTIVE");
 	    emp.setDept(dept);
 	    emp.setPosition(position);
 
@@ -444,7 +444,6 @@ public class EmpService {
 	    empDTO.setGender(emp.getGender());
 	    empDTO.setRrn(emp.getRrn());
 	    empDTO.setHireDate(emp.getHireDate());
-	    empDTO.setStatus(emp.getStatus());
 	    empDTO.setEmail(emp.getEmail());
 	    empDTO.setMobile(emp.getMobile());
 	    empDTO.setPostCode(emp.getPostCode());
@@ -485,7 +484,6 @@ public class EmpService {
 	    emp.setEmpName(empDTO.getEmpName());
 	    emp.setMobile(empDTO.getMobile());
 	    emp.setEmail(empDTO.getEmail());
-	    emp.setStatus(empDTO.getStatus());
 	    emp.setPostCode(empDTO.getPostCode());
 	    emp.setAddress1(empDTO.getAddress1());
 	    emp.setAddress2(empDTO.getAddress2());

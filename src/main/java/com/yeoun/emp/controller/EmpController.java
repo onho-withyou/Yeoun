@@ -202,9 +202,6 @@ public class EmpController {
 		
 		setupEmpFormCommon(model);
 		
-		// 상태 셀렉트용 공통코드 (재직/휴직/퇴직 등) 
-		model.addAttribute("statusList", commonCodeService.getCodes("EMP_STATUS"));
-		
 		return "emp/emp_form";
 	}
 	
@@ -214,13 +211,18 @@ public class EmpController {
 							Model model,
 							RedirectAttributes rttr) {
 		
+		// 공통: 원본 DTO 한 번 가져오기 (사진/통장 파일 id 유지용)
+	    EmpDTO original = empService.getEmpForEdit(empDTO.getEmpId());
+		
 		// 입력값 검증 실패 시
 		if (bindingResult.hasErrors()) {
-			empDTO.setRrnMasked(empService.maskRrn(empDTO.getRrn()));
+			empDTO.setRrnMasked(original.getRrnMasked());
+			empDTO.setPhotoFileId(original.getPhotoFileId());
+			empDTO.setFileId(original.getFileId());
+			model.addAttribute("empDTO", empDTO);
 			model.addAttribute("mode", "edit");
 			model.addAttribute("formAction", "/emp/edit");
 			setupEmpFormCommon(model); 
-			model.addAttribute("statusList", commonCodeService.getCodes("EMP_STATUS"));
 			
 			return "emp/emp_form";
 		}
@@ -242,10 +244,14 @@ public class EmpController {
 	        }
 
 	        // 에러난 상태로 다시 폼
+	        empDTO.setRrnMasked(original.getRrnMasked());
+	        empDTO.setPhotoFileId(original.getPhotoFileId());
+	        empDTO.setFileId(original.getFileId());
+	        
+	        model.addAttribute("empDTO", empDTO);
 	        model.addAttribute("mode", "edit");
 	        model.addAttribute("formAction", "/emp/edit");
 	        setupEmpFormCommon(model);
-	        model.addAttribute("statusList", commonCodeService.getCodes("EMP_STATUS"));
 
 	        return "emp/emp_form";
 	    }
