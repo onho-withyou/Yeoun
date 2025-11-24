@@ -776,6 +776,7 @@ async function initApprovalGrid(data) {
 		]
 	});
 	approvalGrid.resetData(data);
+	console.log(data,"@@@@@@@@@@@@@@@@!!!!!!!!!!!!!!!!@###########");
 	
 	const response = await fetch("/approval/empList");
 	const selectData = await response.json();
