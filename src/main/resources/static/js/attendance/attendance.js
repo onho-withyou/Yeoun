@@ -43,8 +43,9 @@ const handleAttendanceToggle = async (empId) => {
 	} else {
 		attendanceBtn.disabled = false;
 	}
-	
 	alert(msg);
+	
+	location.reload();
 }
 
 // 사원번호로 사원 조회
