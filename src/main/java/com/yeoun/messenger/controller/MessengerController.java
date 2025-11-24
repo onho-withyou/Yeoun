@@ -70,11 +70,14 @@ public class MessengerController {
 	
 	// ==========================================================================
 	// 메신저 상태 실시간 변경
-//	@PatchMapping("/status")
-//	public ResponseEntity<?> changeStatus(Authentication authentication, @RequestBody MsgStatusDTO msgStatusDTO){
-//		messengerService.updateStatus(statusChangeRequest);
-//		return ResponseEntity.noContent().build();
-//	}
+	@PatchMapping("/status")
+	public ResponseEntity<?> changeStatus(Authentication authentication,
+										@RequestBody StatusChangeRequest statusChangeRequest){
+		statusChangeRequest.setEmpId(authentication.getName());
+		messengerService.updateStatus(statusChangeRequest);
+		chatService.changeStatus(statusChangeRequest);
+		return ResponseEntity.noContent().build();
+	}
 	
 	// ==========================================================================
 	// 친구목록 즐겨찾기 토글

@@ -24,7 +24,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.yeoun.approval.service.ApprovalDocService;
 import com.yeoun.attendance.service.AttendanceService;
 
 import com.yeoun.auth.dto.LoginDTO;
@@ -42,6 +42,7 @@ import lombok.RequiredArgsConstructor;
 public class MainController {
 	private final ScheduleService scheduleService;
 	private final AttendanceService attendanceService;
+	private final ApprovalDocService approvalDocService;
 	
 	@GetMapping("/test")
 	public String test() {
@@ -68,7 +69,7 @@ public class MainController {
 		
 		model.addAttribute("buttonEnabled", attendanceService.isAttendanceButtonEnabled(loginUser.getEmpId()));
 		model.addAttribute("status", attendanceService.attendanceStatus(loginUser.getEmpId()));
-		
+		model.addAttribute("deptList", approvalDocService.getDept());
 		return "/main/schedule";
 	}
 	

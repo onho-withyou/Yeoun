@@ -70,7 +70,7 @@
                  th:src="|@{/img/msg_img_}${friend.msgProfile}.png|">
             <span class="status-dot" th:data-status="${friend.status}"></span> <!-- 상태 표시 추가 -->
           </div>
-          <div>
+         <div>
             <p class="mb-0 fw-bold" th:text="${friend.empName}"></p>
             <small class="text-muted" th:text="|${friend.deptName} / ${friend.posName} |"></small>
           </div>
@@ -218,6 +218,7 @@
   <!-- 소켓 JS -->
   <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+  <script th:src="@{/js/common/connectSocket.js}"></script>
   <script th:src="@{/js/messenger/createRoom.js}"></script>
   <script th:src="@{/js/messenger/list.js}"></script>
 </body>

@@ -39,8 +39,6 @@ public class ChatService {
 
 		boolean isFile = (files != null && !files.isEmpty());
 
-		Emp emp = empRepository.findByEmpId(saved.getSenderId().getEmpId())
-				.orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다...."));
 		MsgStatus status = msgStatusRepository.findById(saved.getSenderId().getEmpId())
 				.orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다...."));
 
@@ -85,9 +83,12 @@ public class ChatService {
 	
 	// 3) 상태 변경 처리
 	public void changeStatus(StatusChangeRequest statusChangeRequest) {
+		log.info("changeStatus 진입......... EMPID	  ::: " + statusChangeRequest.getEmpId());
+		log.info("changeStatus 진입......... AVLBSTAT ::: " + statusChangeRequest.getAvlbStat());
+		log.info("changeStatus 진입......... WORKSTAT ::: " + statusChangeRequest.getWorkStat());
 
 		simpMessagingTemplate.convertAndSend(
-				"/topic/status",
+				"/topic/status/change/",
 				statusChangeRequest);
 		
 		log.info("************** STOMP! 상태 변경" + statusChangeRequest);

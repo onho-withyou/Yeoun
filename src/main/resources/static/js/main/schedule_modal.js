@@ -641,7 +641,7 @@ async function checkSharers(scheduleType, scheduleId) {
 		if(!response.ok) throw new Error(await response.text());
 		
 		const data = await response.json();
-		console.log(data);
+//		console.log(data);
 		return data;
 	} catch(error) {
 		console.error('에러', error)

@@ -51,7 +51,7 @@
          th:attr="data-msg-id=${msg.msgId}">
 
       <!-- SYSTEM 메시지 -->
-      <th:block th:if="${msg.msgType}=='SYSTEM'">
+      <th:block th:if="${msg.msgType=='SYSTEM'}">
         <div class="system-text" th:text="${msg.msgContent}"></div>
       </th:block>
 
@@ -75,12 +75,14 @@
                   <img th:src="@{|/uploads/${f.filePath}/${f.fileName}|}" class="file-thumb">
                 </a>
                 <span th:text="${f.originFileName}" class="file-name"></span>
+                <a th:href="@{|/files/download/${f.fileId}|}">다운로드</a>
               </th:block>
 
               <!-- 그 외 -->
               <th:block th:unless="${f.category.startsWith('image')}">
                 <i class="bi bi-file-earmark"></i>
                 <span class="file-name" th:text="${f.originFileName}"></span>
+                <a th:href="@{|/files/download/${f.fileId}|}">다운로드</a>
               </th:block>
             </div>
           </div>
@@ -110,11 +112,13 @@
                 <img th:src="@{|/uploads/${f.filePath}/${f.fileName}|}" class="file-thumb">
               </a>
               <span class="file-name" th:text="${f.originFileName}"></span>
+              <a th:href="@{|/files/download/${f.fileId}|}">다운로드</a>
             </th:block>
 
             <th:block th:unless="${f.category.startsWith('image')}">
               <i class="bi bi-file-earmark"></i>
               <span class="file-name" th:text="${f.originFileName}"></span>
+              <a th:href="@{|/files/download/${f.fileId}|}">다운로드</a>
             </th:block>
           </div>
         </div>

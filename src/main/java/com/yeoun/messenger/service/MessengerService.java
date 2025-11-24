@@ -40,7 +40,6 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class MessengerService {
 
-	private final ChatService chatService;
 	private final MessengerMapper messengerMapper;
 	private final MsgRoomRepository msgRoomRepository;
 	private final MsgStatusRepository msgStatusRepository;
@@ -163,6 +162,10 @@ public class MessengerService {
 					.map(FileAttachDTO::toEntity)
 					.toList());
 		}
+		
+		for (FileAttachDTO f : uploaded) {
+			f.setFileId(fileAttachRepository.findByFileName(f.getFileName()).getFileId());
+		}
 
 		return new MessageSaveResult(savedMessage, uploaded);
 	}
@@ -260,9 +263,9 @@ public class MessengerService {
 		
 		if (statusChangeRequest.getWorkStat() != null) {
 			msgStatus.setManualWorkStat(statusChangeRequest.getWorkStat());
+			msgStatus.setWorkStatSource("MANUAL");
 		}
 		
-		msgStatus.setWorkStatSource("MANUAL");
 		msgStatus.setWorkStatUpdated(LocalDateTime.now());
 	}
 

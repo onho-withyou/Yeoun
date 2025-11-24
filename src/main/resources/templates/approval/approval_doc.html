@@ -167,22 +167,22 @@
 		       	<h5 id="leaveTypeForm" style="display: none;">
 					<label class="p-1" style="width: 200px;">휴가종류</label><!---휴가(연차)신청서-->
 		        	<div class="mb-6 mb-0" style="width: 344px;">
-		           	<select id="leave-type" name="leaveType" class="form-select">
+		           		<select id="leave-type" name="leaveType" class="form-select">
 		            		<option selected></option>
-		            		<option name="leave" value="연차">연차</option>
-							<option name="leave" value="오전반차">오전반차</option>
-							<option name="leave" value="오후반차">오후반차</option>
-							<option name="leave" value="병가">병가</option>
-							<option name="leave" value="공가">공가</option>
-							<option name="leave" value="연차유급휴가">연차유급휴가</option>
-							<option name="leave" value="출산전후휴가">출산전후휴가</option>
-							<option name="leave" value="배우자출산휴가">배우자출산휴가</option>
-							<option name="leave" value="생리휴가">생리휴가</option>
-							<option name="leave" value="가족돌봄휴가">가족돌봄휴가</option>
-							<option name="leave" value="경조사휴가">경조사휴가</option>
-							<option name="leave" value="여름휴가">여름휴가</option>
-							<option name="leave" value="개인사정">개인사정</option>
-							<option name="leave" value="기타">기타</option>
+		            		<option value="연차">연차</option>
+							<option value="오전반차">오전반차</option>
+							<option value="오후반차">오후반차</option>
+							<option value="병가">병가</option>
+							<option value="공가">공가</option>
+							<option value="연차유급휴가">연차유급휴가</option>
+							<option value="출산전후휴가">출산전후휴가</option>
+							<option value="배우자출산휴가">배우자출산휴가</option>
+							<option value="생리휴가">생리휴가</option>
+							<option value="가족돌봄휴가">가족돌봄휴가</option>
+							<option value="경조사휴가">경조사휴가</option>
+							<option value="여름휴가">여름휴가</option>
+							<option value="개인사정">개인사정</option>
+							<option value="기타">기타</option>
 		            	</select>
 	            	</div>
 		        </h5>
@@ -247,7 +247,7 @@
 						  <input class="form-check-input" type="radio" name="radioJeongyeolja" value="선결">
 						  <div>
 						 	<h5>전결자 지정 </h5>
-							<select id="delegetedApprover" name="delegetedApprover" class="form-select" aria-label="Default select example">
+							<select id="delegetedApprover" name="delegetedApprover" class="form-select" aria-label="Default select example" style="display:none;">
 							  <option selected></option>
 							  <option th:each="item, iterStat : ${empList}" 
 							 			th:value="${item.empId}" 
@@ -263,12 +263,12 @@
 		      <div class="modal-footer">
 		      	<div>
 			     	<button type="button" id="attachmentBtn" class="btn btn-primary" style="display: none;">첨부파일</button>
-			     	<button type="button" id="approvalCompanionBtn" class="btn btn-primary">반려</button>
-			      	<button type="button" id="approvalCheckBtn" class="btn btn-primary">결재확인</button>
+			     	<button type="button" id="approvalCompanionBtn" class="btn btn-primary" style="display:none;">반려</button>
+			      	<button type="button" id="approvalCheckBtn" class="btn btn-primary" style="display:none;">결재확인</button>
 			    </div>
 		      	<hr>
 		      	<button type="button" id="printBtn" class="btn btn-primary" style="display: none;">인쇄</button>
-		        <button type="submit" id="saveBtn" class="btn btn-primary">등록</button>
+		        <button type="submit" id="saveBtn" class="btn btn-primary" >등록</button>
 		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
 		      </div>
 		</form>
