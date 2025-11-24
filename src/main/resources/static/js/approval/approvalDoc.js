@@ -168,9 +168,9 @@
 				const rowData = grid1.getRow(ev.rowKey);
 				$('#approval-modal').modal('show');
 				//formReset();
-				document.getElementById('saveBtn').style.display = "none";
-				//document.getElementById('approvalCompanionBtn').style.display = "block";
-				//document.getElementById('approvalCheckBtn').style.display = "block";
+				document.getElementById('saveBtn').style.display = "none";//approvalCompanionBtn//approvalCheckBtn
+				document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
+				document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
 				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 				approvalId = rowData.approval_id;
 				// 문서 열릴때 현재 결재권자(approval) 저장
@@ -218,8 +218,9 @@
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 				//selectBox.disable();
-				formDisable();
-				
+				// 상세버튼 양식종류에 따른 form 보이기/숨기기
+				formChange(rowData.form_type);
+				formDisable();		
 			});
 
 			grid2.on("click", async (ev) => {
@@ -230,6 +231,8 @@
 				$('#approval-modal').modal('show');
 				
 				document.getElementById('saveBtn').style.display = "none";
+				document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
+				document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
 			
 				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 				approvalId = rowData.approval_id;
@@ -277,6 +280,7 @@
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 				//selectBox.disable();
+				formChange(rowData.form_type);
 				formDisable();
 			});
 
@@ -288,6 +292,8 @@
 				$('#approval-modal').modal('show');
 				
 				document.getElementById('saveBtn').style.display = "none";
+				document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
+				document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
 			
 				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 				approvalId = rowData.approval_id;
@@ -334,6 +340,7 @@
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 				//selectBox.disable();
+				formChange(rowData.form_type);
 				formDisable();
 			});
 
@@ -343,7 +350,9 @@
 			const rowData = grid4.getRow(ev.rowKey);
 			$('#approval-modal').modal('show');
 			
-			document.getElementById('saveBtn').style.display = "none";
+			document.getElementById('saveBtn').style.display = "none";//등록버튼
+			document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려버튼
+			document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인버튼
 			
 			// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 			approvalId = rowData.approval_id;
@@ -401,6 +410,8 @@
 				$('#approval-modal').modal('show');
 				
 				document.getElementById('saveBtn').style.display = "none";
+				document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
+				document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
 				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 				approvalId = rowData.approval_id;
 				// 문서 열릴때 현재 결재권자(approval) 저장
@@ -446,6 +457,7 @@
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 				//selectBox.disable();
+				formChange(rowData.form_type);
 				formDisable();
 			});
 	
@@ -454,6 +466,35 @@
 			console.error('Error fetching data:', error);
 		}
 	}	
+	//결재양식에따른 form 활성화/비활성화 함수
+	function formChange(formType){
+		if(formType == '지출결의서'){
+			document.getElementById('expndTypeForm').style.display = 'flex';//지출종류
+			document.getElementById('leavePeriodForm').style.display = 'none';// 휴가기간
+			document.getElementById('leaveTypeForm').style.display = 'none';//휴가종류	
+			document.getElementById('toDeptForm').style.display = 'none'; //발령부서
+		}else if(formType == '연차신청서'){
+			document.getElementById('expndTypeForm').style.display = 'none';//지출종류
+			document.getElementById('leavePeriodForm').style.display = 'flex';// 휴가기간
+			document.getElementById('leaveTypeForm').style.display = 'flex';//휴가종류	
+			document.getElementById('toDeptForm').style.display = 'none'; //발령부서
+		}else if(formType == '반차신청서'){
+			document.getElementById('expndTypeForm').style.display = 'none';//지출종류
+			document.getElementById('leavePeriodForm').style.display = 'flex';// 휴가기간
+			document.getElementById('leaveTypeForm').style.display = 'flex';//휴가종류	
+			document.getElementById('toDeptForm').style.display = 'none'; //발령부서
+		}else if(formType == '인사발령신청서'){
+			document.getElementById('expndTypeForm').style.display = 'none';//지출종류
+			document.getElementById('leavePeriodForm').style.display = 'none';// 휴가기간
+			document.getElementById('leaveTypeForm').style.display = 'none';//휴가종류	
+			document.getElementById('toDeptForm').style.display = 'flex'; //발령부
+		}else if(formType == '자유양식결재서'){
+			document.getElementById('expndTypeForm').style.display = 'none';//지출종류
+			document.getElementById('leavePeriodForm').style.display = 'none';// 휴가기간
+			document.getElementById('leaveTypeForm').style.display = 'none';//휴가종류	
+			document.getElementById('toDeptForm').style.display = 'none'; //발령부서
+		}
+	}
 	//그리드 클릭시 상세보기 document.getElementById('myInput').disabled = true;
 	function formDisable(){
 		document.getElementById('approval-title').disabled = true;
@@ -527,7 +568,6 @@
 				formData.append('approverEmpIdOVD3', approverArr[2].empId +"," 
 					+ approverArr[2].approverOrder +"," + "N"+"," + approverArr[2].delegateStatus);
 			//formData.append('approvalStatus', false);//권한자상태 필요없음
-			//formData.append('orderApprovers', null);//결재권한자 순서 3개
 		}
 
 
@@ -535,7 +575,7 @@
     	const dataObject = Object.fromEntries(formData.entries());
 
     	await fetch("/approval/approval_doc", {
-				method: 'POST', // POST 메소드 지정
+				method: 'POST', 
 				headers: {
 					[csrfHeaderName]: csrfToken
 					,'Content-Type': 'application/json' // Content-Type 헤더를 application/json으로 설정
@@ -556,20 +596,72 @@
 
 	document.addEventListener("change", function(event) {
 
-	    if (!event.target.matches('input[name="radioJeongyeolja"]')) return;
+        if (!event.target.matches('input[name="radioJeongyeolja"]')) return;
 
-		const selectBoxElement = document.getElementById('delegetedApprover');
-		const selectedEmpName = selectBoxElement.options[selectBoxElement.selectedIndex].text;
+        const selectBoxElement = document.getElementById('delegetedApprover');
+        const selectedEmpName = selectBoxElement.options[selectBoxElement.selectedIndex].text;
+        const targetDiv = document.getElementById(`approver_${elemApproverIdNum}`);
+        const selectedValue = event.target.value;
+        console.log("선택된 이름", selectedEmpName);
+        console.log("선택된 전결 상태:", selectedValue);
+		console.log("클릭될때", event.target.clicked);
+        //console.log("targetDiv");
+        if (selectedValue === 'N') {// 결재권한자변경상태가 없음일때
+        
+           //alert("전결자가 없습니다.");
+        
+            approverArr.forEach(approver => {
+            
+                if (targetDiv) {
+                    targetDiv.querySelectorAll('span').forEach(span => span.remove());
+                }
+                approver.delegateStatus = 'N';
+                approver.empId = approver.originalEmpId;  // 원래 사번 복구
+                
+                console.log(`결재권한자 ${approver.approverOrder} delegateStatus = N`);
+            });
+			document.getElementById('delegetedApprover').style.display = "none";
+			document.getElementById(`approvalBtn_${elemApproverIdNum}`).style.display = "none";
+	 	}else{
+			document.getElementById('delegetedApprover').style.display = "block";
+			document.getElementById(`approvalBtn_${elemApproverIdNum}`).style.display = "block";
+		}
+	});
+	// 결재권한자 변경/전결 적용 함수
+	function applyDelegateChange(button) {
+
+		console.log("적용 버튼이 클릭되었습니다.");
+		const count = Number(button.dataset.count); // 버튼 자체의 data-count 사용
+		console.log();
+
+		//전결에 필요한 로직추가 approverArr 배열에 delegateStatus 값 변경
+		// 라디오 버튼값 가져오기
+		const radioJeongyeolja = document.getElementsByName('radioJeongyeolja');
 		const targetDiv = document.getElementById(`approver_${elemApproverIdNum}`);
-	    const radio = event.target;
-	    const selectedValue = radio.value;
-		console.log("선택된 이름", selectedEmpName);
-	    console.log("선택된 전결 상태:", selectedValue);
-		//console.log("targetDiv");
-	    if (selectedValue == 'N') {
+
+		let selectedValue;
+		for (const radio of radioJeongyeolja) {
+			// console.log("radio value:", radio.value, "checked:", radio.checked);
+			if (radio.checked) {
+				selectedValue = radio.value;
+				break;
+			}
+		}
+
+    	//alert(count + "번 결재권한자를 전결자로 지정\n부모 div id: " + id);
+    	// console.log("적용 버튼 클릭 div id:", id);
+    	// console.log("적용 버튼 클릭 div count:", count);
+		// console.log("선택된 전결 상태:", selectedValue);
+
+		// console.log("이전의 approverArr:", approverArr);
+
+		// toastui selectbox에서 선택된 사번 가져오기#select-box
+		const selectBoxElement = document.getElementById('delegetedApprover');
+		const selectedEmpId = selectBoxElement.value;//선택된 사번
+		const selectedEmpName = selectBoxElement.options[selectBoxElement.selectedIndex].text;
 		
-	       //alert("전결자가 없습니다.");
-		
+		if (selectedValue == 'N') {
+				
 	        approverArr.forEach(approver => {
 			
 	            if (targetDiv) {
@@ -580,9 +672,7 @@
 				
 	            console.log(`결재권한자 ${approver.approverOrder} delegateStatus = N`);
 	        });
-			//console.log(" approverArr----------------->:", approverArr);
 	    }
-		// console.log("targetDiv:------------------------------------>", targetDiv);
 		if(targetDiv) {
 			// 새로운 전결자 표시
 			if(selectedValue != 'N') {
@@ -590,60 +680,17 @@
 				targetDiv.innerHTML += `<span style="color:red;"> ${selectedValue} : ${selectedEmpName} </span>`;
 			}
 		}
-	});
-	// 결재권한자 변경/전결 적용 함수
-	function applyDelegateChange(button) {
-
-		console.log("적용 버튼이 클릭되었습니다.");
-		console.log("button.dataset.count ---------->", button.dataset.count);
-		const count = Number(button.dataset.count); // 버튼 자체의 data-count 사용
-		const parentDiv = button.parentNode;        // 부모 div
-		const id = parentDiv.id || "jeongyeoljaDiv"; // 부모 div id
-		console.log();
-
-		//전결에 필요한 로직추가 approverArr 배열에 delegateStatus 값 변경
-		// 라디오 버튼값 가져오기
-		const radioJeongyeolja = document.getElementsByName('radioJeongyeolja');
-		const targetDiv = document.getElementById(`approver_${elemApproverIdNum}`);
-
-		let selectedValue;
-		for (const radio of radioJeongyeolja) {
-			console.log("radio value:", radio.value, "checked:", radio.checked);
-			if (radio.checked) {
-				selectedValue = radio.value;
-				break;
-			}
-		}
-
-    	//alert(count + "번 결재권한자를 전결자로 지정\n부모 div id: " + id);
-    	console.log("적용 버튼 클릭 div id:", id);
-    	console.log("적용 버튼 클릭 div count:", count);
-		console.log("선택된 전결 상태:", selectedValue);
-
-		console.log("이전의 approverArr:", approverArr);
-
-		// toastui selectbox에서 선택된 사번 가져오기#select-box
-		const selectBoxElement = document.getElementById('delegetedApprover');
-		console.log("selectBoxElement:---------------->", selectBoxElement);
-		const selectedEmpId = selectBoxElement.value;
-		//const selectedEmpName = selectBoxElement.options[selectBoxElement.selectedIndex].text;
-		
-		console.log("선택된 사번:", selectedEmpId);
-		
-	
 		approverArr.forEach((value,key) => {
 			console.log("비교 중인 approverOrder:", value.approverOrder, "==", count);
-			if(value.approverOrder === count) {
+			if(value.approverOrder === count && selectedValue != 'N') {
 				// 선택된 전결 상태에 따라 delegateStatus 값 설정
 				value.empId = selectedEmpId;//셀렉트 박스 값을 가져와서 넣어야함
-				value.delegateStatus = selectedValue;
+				value.delegateStatus = selectedValue;//전결상태 변경
 			
 				console.log("매핑된 결재권한자:", value);
 				console.log(`결재권한자 순서 ${count}의 전결상태가 ${selectedValue}로 변경되었습니다.`);
 
 			}
-			
-			return approver;
 		});
 		console.log("Updated approverArr:", approverArr);
 	}
@@ -1082,7 +1129,6 @@
 
 		document.getElementById('saveBtn').style.display = "block";
 		//document.getElementById('DraftingHidden').value = draft_doc;
-		
 
 		// html에서 th:data-formname="${item.formName}" 값을 가져와서 이름으로 사용
 		const formName = ev.selectedOptions[0].dataset.formname;
@@ -1094,38 +1140,9 @@
 		selectedForm = formList.find(item => item.formName === draft_doc);
 		console.log("draft_doc",draft_doc);
 		//양식종류에따라 보여지는 화면이 다름
-		if(draft_doc == "지출결의서"){
-			 $('#approval-modal').modal('show');
-			document.getElementById('expndTypeForm').style.display = 'flex';
-			document.getElementById('leavePeriodForm').style.display = 'none';
-			document.getElementById('leaveTypeForm').style.display = 'none';
-			document.getElementById('toDeptForm').style.display = 'none';
-			
-		}else if(draft_doc == "연차신청서"){
-			 $('#approval-modal').modal('show');
-			document.getElementById('leavePeriodForm').style.display = 'flex';
-			document.getElementById('leaveTypeForm').style.display = 'flex';
-			document.getElementById('expndTypeForm').style.display = 'none';
-			document.getElementById('toDeptForm').style.display = 'none';
-		}else if(draft_doc == "반차신청서"){
-			 $('#approval-modal').modal('show');
-			document.getElementById('leaveTypeForm').style.display = 'flex';
-			document.getElementById('leavePeriodForm').style.display = 'none';
-			document.getElementById('expndTypeForm').style.display = 'none';
-			document.getElementById('toDeptForm').style.display = 'none';
-		}else if(draft_doc == "인사발령신청서"){
-			 $('#approval-modal').modal('show');
-			document.getElementById('leavePeriodForm').style.display = 'none';
-			document.getElementById('leaveTypeForm').style.display = 'none';
-			document.getElementById('expndTypeForm').style.display = 'none';
-			document.getElementById('toDeptForm').style.display = 'flex';
-		}else if(draft_doc == "자유양식결재서"){//결재권한자만없음
-			 $('#approval-modal').modal('show');
-			document.getElementById('leavePeriodForm').style.display = 'none';
-			document.getElementById('leaveTypeForm').style.display = 'none';
-			document.getElementById('expndTypeForm').style.display = 'none';
-			document.getElementById('toDeptForm').style.display = 'none';
-		}
+		document.getElementById('approvalCompanionBtn').style.display = "none";//반려
+		document.getElementById('approvalCheckBtn').style.display = "none";//결재확인
+		formChange(draft_doc);
 		if(draft_doc == "기안서"){//결재권한자만없음
 			alert("양식을 선택해주세요.");
 			// $('#approval-modal').on('show.bs.modal', function (e) {
@@ -1245,16 +1262,16 @@
 	}
 
 	defalutapprover();
-
+	// 결재권한자 div 버튼 생성 함수
 	function print(type, text) {
-    	// 결재권한자변경 div 버튼 생성 
+    	
 		console.log("this-------->",this);
     	if(this.count < 3){
     		this.count++;
     		approverDiv.innerHTML +='<div class="btn btn-success"'
     		                      +'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
     		                      +'<p onclick="approverDivclose(this,' + "'"+ type + "'"+ ','+ count +')" style="float:right;margin-right: 8px;">&times;</p>'
-    		                      +'<p id="approver_'+count+'" onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
+    		                      +'<p id="approver_'+count+'" onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 :' + text + ' 변경</p>'
     		                    	+'</div>';
 		}
     }
@@ -1263,7 +1280,7 @@
 	//결재권한자 버튼 클릭시 결재권한자변경 div 태그 생성//전결자
 	function approvalNo(count, text) {
 		elemApproverIdNum = count;
-		console.log("count ------------------------------------------>",count, ", approvalIdNum : ", elemApproverIdNum);
+		//console.log("count ------------------------------------------>",count, ", approvalIdNum : ", elemApproverIdNum);
 	    let type = "change";
 	    if (jeongyeoljaDiv) {
 	        // div 초기화
@@ -1274,7 +1291,8 @@
 	            <button id="approvalBtn_${count}" 
 	                    type="button" class="btn btn-primary" 
 	                    data-count="${count}" 
-	                    onclick="applyDelegateChange(this)">
+	                    onclick="applyDelegateChange(this)"
+						style="display:none;">
 	                전결자로 지정
 	            </button>
 	        `;
