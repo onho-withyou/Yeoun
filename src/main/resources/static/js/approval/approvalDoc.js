@@ -118,13 +118,14 @@
 	}
 	
 	let approverDiv = document.querySelector('#approver');
-	
+	let selectBox;
+	let itemData;
 	//selectbox - 인사정보 불러오기
 	async function empData() {
 		try {
 			const response = await fetch("/approval/empList");
 			const data = await response.json();
-			let itemData  = [];
+			itemData  = [];
 			let obj ={};
 			//console.log(data);
 			data.map((item,index)=>{
@@ -135,7 +136,7 @@
 			});
 			
 			//셀렉트박스 - 토스트유아이
-			let selectBox = new tui.SelectBox('#select-box', {
+			selectBox = new tui.SelectBox('#select-box', {
 			  data: itemData
 			});
 			//셀렉트박스 닫힐때
@@ -164,12 +165,15 @@
 				$('#approval-modal').modal('show');
 				//formReset();
 				document.getElementById('saveBtn').style.display = "none";
+				//document.getElementById('approvalCompanionBtn').style.display = "block";
+				//document.getElementById('approvalCheckBtn').style.display = "block";
 				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 				approvalId = rowData.approval_id;
 				// 문서 열릴때 현재 결재권자(approval) 저장
 				currentApprover = rowData.approver;
-				console.log("rowData",rowData);
+				console.log("rowData",rowData);//DraftingHidden
 				document.getElementById('Drafting').innerText = rowData.approval_title;
+				document.getElementById('DraftingHidden').value = rowData.approval_title;
 				//document.getElementById('Drafting').value = rowData.approval_title;
 				document.getElementById('today-date').innerText = toDateStr(rowData.created_date) ;//결재 작성날짜 = 결재시작일
 				document.getElementById('approval-title').value = rowData.approval_title;
@@ -209,8 +213,8 @@
 				}
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-				selectBox.disable();
-				formDisable()
+				//selectBox.disable();
+				formDisable();
 				
 			});
 
@@ -222,12 +226,14 @@
 				$('#approval-modal').modal('show');
 				
 				document.getElementById('saveBtn').style.display = "none";
+			
 				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 				approvalId = rowData.approval_id;
 				// 문서 열릴때 현재 결재권자(approval) 저장
 				currentApprover = rowData.approver;
 				
 				document.getElementById('Drafting').innerText = rowData.approval_title;
+				document.getElementById('DraftingHidden').value = rowData.approval_title;
 				document.getElementById('today-date').innerText = toDateStr(rowData.created_date);//결재 작성날짜 = 결재시작일
 				//document.getElementById('approval-title').value = rowData.approval_title;
 				document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
@@ -266,7 +272,7 @@
 				}
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-				selectBox.disable();
+				//selectBox.disable();
 				formDisable();
 			});
 
@@ -278,12 +284,14 @@
 				$('#approval-modal').modal('show');
 				
 				document.getElementById('saveBtn').style.display = "none";
+			
 				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 				approvalId = rowData.approval_id;
 				// 문서 열릴때 현재 결재권자(approval) 저장
 				currentApprover = rowData.approver;
 				
 				document.getElementById('Drafting').innerText = rowData.approval_title;
+				document.getElementById('DraftingHidden').value = rowData.approval_title;
 				document.getElementById('today-date').innerText = toDateStr(rowData.created_date);//결재 작성날짜 = 결재시작일
 				//document.getElementById('approval-title').value = rowData.approval_title;
 				document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
@@ -321,7 +329,7 @@
 				}
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-				selectBox.disable();
+				//selectBox.disable();
 				formDisable();
 			});
 
@@ -332,12 +340,14 @@
 			$('#approval-modal').modal('show');
 			
 			document.getElementById('saveBtn').style.display = "none";
+			
 			// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 			approvalId = rowData.approval_id;
 			// 문서 열릴때 현재 결재권자(approval) 저장
 			currentApprover = rowData.approver;
 			
 			document.getElementById('Drafting').innerText = rowData.approval_title;
+			document.getElementById('DraftingHidden').value = rowData.approval_title;
 			document.getElementById('today-date').innerText = toDateStr(rowData.created_date);//결재 작성날짜 = 결재시작일
 			//document.getElementById('approval-title').value = rowData.approval_title;
 			document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
@@ -375,7 +385,7 @@
 				}
 			//document.getElementById('approver').innerText = rowData.approver;//전결자
 			document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-			selectBox.disable();
+			//electBox.disable();
 			formDisable();
 			});
 	
@@ -393,6 +403,7 @@
 			currentApprover = rowData.approver;
 			
 			document.getElementById('Drafting').innerText = rowData.approval_title;
+			document.getElementById('DraftingHidden').value = rowData.approval_title;
 			document.getElementById('today-date').innerText = rowData.created_date.split('T')[0] ;//결재 작성날짜 = 결재시작일
 			//document.getElementById('approval-title').value = rowData.approval_title;
 			document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
@@ -430,7 +441,7 @@
 				}
 			//document.getElementById('approver').innerText = rowData.approver;//전결자
 			document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-			selectBox.disable();
+			//selectBox.disable();
 			formDisable();
 			});
 	
@@ -455,7 +466,29 @@
 		document.getElementById('to-dept-id').disabled = true;
 		document.getElementById('expnd-type').disabled = true;
 		document.getElementById('reason-write').disabled = true;
-		selectBox.disable();
+		if (selectBox) { 
+			selectBox.disable();
+		}
+	}
+	function formEnable(){
+		document.getElementById('approval-title').disabled = false;
+		document.getElementById('approver-name').disabled = false;
+		document.getElementById('form-menu').disabled = false;
+		document.getElementById('today-date').disabled = false;
+		document.getElementById('Drafting').disabled = false;
+		document.getElementById('DraftingHidden').disabled = false;
+		document.getElementById('create-date').disabled = false;
+		document.getElementById('finish-date').disabled = false;
+		document.getElementById('start-date').disabled = false;
+		document.getElementById('end-date').disabled = false;
+		document.getElementById('leave-type').disabled = false;
+		document.getElementById('to-dept-id').disabled = false;
+		document.getElementById('expnd-type').disabled = false;
+		document.getElementById('reason-write').disabled = false;
+		
+		if (selectBox) { // 인스턴스가 존재하는지 확인
+        	selectBox.enable(); 
+    	}
 	}
 
 	// //폼 결재권한자 데이터 말아서 보내는 함수
@@ -1069,6 +1102,7 @@
 	function draftValFn(ev){
 		let draft_doc = ev.value;
 
+		document.getElementById('saveBtn').style.display = "block";
 		//document.getElementById('DraftingHidden').value = draft_doc;
 		
 
@@ -1116,19 +1150,23 @@
 		}
 		if(draft_doc == "기안서"){//결재권한자만없음
 			alert("양식을 선택해주세요.");
-			$('#approval-modal').on('show.bs.modal', function (e) {
+			// $('#approval-modal').on('show.bs.modal', function (e) {
 				
-					// 모달을 열지 않도록 강제로 닫기
-					e.preventDefault();
-					console.log('모달을 열 수 없습니다.');
+			// 		// 모달을 열지 않도록 강제로 닫기
+			// 		e.preventDefault();
+			// 		console.log('모달을 열 수 없습니다.');
 				
-			});
+			// });
 		}
 		formReset();
 		defaultPrint();
 	}
 	//양식 모달 리셋함수
-	function formReset(){
+	function formReset(ev){
+		//console.log("formReset ev:",ev);
+		//console.log("formReset selectedForm:",selectedForm);
+		//document.getElementById('Drafting').innerText = ev.value;
+		//document.getElementById("DraftingHidden").value = ev.value;//양식종류 숨은값
 		document.getElementById("approval-title").value = "";//문서제목
 		//document.getElementById("approver-name").value ="";//결재자명 - 로그인정보에서 불러옴
 		document.getElementById("create-date").value = null;//문서 생성일자
@@ -1139,7 +1177,12 @@
 		document.getElementById("to-dept-id").selectedIndex = 0;//발령부서
 		document.getElementById("expnd-type").selectedIndex = 0;//지출종류
 		document.getElementById("reason-write").value = "";//사유내용
+		//selectBox.resetItems();
+		//selectBox.setItems(itemData);
 
+		//const originalSelect = document.getElementById('select-box');
+		//originalSelect.value = '';
+		//selectBox.select(null);
 	}
 	
 	let today = new Date();   
@@ -1160,12 +1203,13 @@
     let approverArr = [];//결재권한자 배열 
 	
 
-
 	// 작성 버튼 클릭 시 실행되는 함수
   	function defaultPrint(){
 		// 모달을 닫고 다시 작성 버튼을 클릭하면 이전 데이터가 남아있어서 초기화 진행
 		approverDiv.innerHTML = "";
-		
+		formReset();
+		formEnable();
+		selectBox.enable();
 		window.count = 0;
 		approverArr = [];
 		
@@ -1173,7 +1217,6 @@
 		if (!selectedForm) {
 		    console.log("선택된 양식이 없습니다.")
 			
-
 				//document.getElementById('leavePeriodForm').style.display = 'flex';
 				//document.getElementById('leaveTypeForm').style.display = 'flex';
 				//document.getElementById('expndTypeForm').style.display = 'flex';

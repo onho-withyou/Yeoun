@@ -78,7 +78,7 @@ public class ApprovalDocService {
 		LocalDate startDate = parseDateSafely(doc.get("startDate"));
 		LocalDate endDate = parseDateSafely(doc.get("endDate"));
 
-
+		log.info(">>>>>>>>>>>>>>>>>> doc.get(\"docStatus\") : " + doc.get("docStatus"));
 		approvalDoc.setApprovalId(null);//문서id -자동생성됨
         approvalDoc.setApprovalTitle(doc.get("approvalTitle")); //문서제목
         approvalDoc.setEmpId(empId); //기안자 사번번호

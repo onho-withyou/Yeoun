@@ -190,7 +190,7 @@
 					<label class="p-1" style="width: 200px;">발령부서</label><!--- 인사발령신청서-->
 		        	<div class="mb-6 mb-0" style="width: 344px;">
 		            	<select id="to-dept-id" name="toDeptId" class="form-select" >
-		            		<option selected>부서</option>
+		            		<option value="" selected>부서</option>
 							<option th:each="item, iterStat : ${deptList}" 
 							 		th:value="${item.deptId}" 
 							 		th:text="${iterStat.index+1} + ' : ' + ${item.deptName} + '(' + ${item.deptId} + ')'">
@@ -263,8 +263,8 @@
 		      <div class="modal-footer">
 		      	<div>
 			     	<button type="button" id="attachmentBtn" class="btn btn-primary" style="display: none;">첨부파일</button>
-			     	<button type="button" id="approvalCompanionBtn" class="btn btn-primary" >반려</button>
-			      	<button type="button" id="approvalCheckBtn" class="btn btn-primary" >결재확인</button>
+			     	<button type="button" id="approvalCompanionBtn" class="btn btn-primary">반려</button>
+			      	<button type="button" id="approvalCheckBtn" class="btn btn-primary">결재확인</button>
 			    </div>
 		      	<hr>
 		      	<button type="button" id="printBtn" class="btn btn-primary" style="display: none;">인쇄</button>
