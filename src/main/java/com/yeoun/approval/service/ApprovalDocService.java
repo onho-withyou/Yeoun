@@ -78,7 +78,7 @@ public class ApprovalDocService {
 		LocalDate startDate = parseDateSafely(doc.get("startDate"));
 		LocalDate endDate = parseDateSafely(doc.get("endDate"));
 
-
+		log.info(">>>>>>>>>>>>>>>>>> doc.get(\"docStatus\") : " + doc.get("docStatus"));
 		approvalDoc.setApprovalId(null);//문서id -자동생성됨
         approvalDoc.setApprovalTitle(doc.get("approvalTitle")); //문서제목
         approvalDoc.setEmpId(empId); //기안자 사번번호
@@ -91,9 +91,9 @@ public class ApprovalDocService {
         approvalDoc.setEndDate(endDate);//휴가종료일
         approvalDoc.setLeaveType(doc.get("leaveType"));//휴가유형
         approvalDoc.setToDeptId(doc.get("toDeptId"));//발령부서
-        approvalDoc.setLeaveType(doc.get("docStatus"));//연차유형
         approvalDoc.setExpndType(doc.get("expndType"));//지출타입
         approvalDoc.setReason(doc.get("reason"));//사유
+		
 
         //결재문서
             
