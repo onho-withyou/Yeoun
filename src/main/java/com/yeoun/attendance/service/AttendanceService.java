@@ -65,15 +65,8 @@ public class AttendanceService {
 		// 오늘자 외근 기록 조회
 		List<AccessLog> accessLogs = accessLogRepository.findByEmp_EmpIdAndAccessDate(empId, today);
 		
-		LocalTime lunchStart = LocalTime.parse(workPolicy.getLunchIn());
-		LocalTime lunchEnd = LocalTime.parse(workPolicy.getLunchOut());
 		LocalTime standardIn  = LocalTime.parse(workPolicy.getInTime());
 		LocalTime standardOut  = LocalTime.parse(workPolicy.getOutTime());
-		
-		// 점심시간에는 출입 기록 하지 않음
-		if (now.isAfter(lunchStart) && now.isBefore(lunchEnd)) {
-			return "LUNCH_TIME";
-		}
 		
 		// 오늘 날짜 기준으로 휴무인지 확인
 		boolean isHoliday = leaveHistoryRepository.existsByEmp_EmpIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(empId, today, today);
