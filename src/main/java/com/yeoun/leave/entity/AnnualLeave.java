@@ -108,7 +108,7 @@ public class AnnualLeave {
 			return (int) Math.min(month, 11); // 법적 최대치(11) 초과하지 않도록 제한
 		} else {
 			int extra = (int) ((year - 1) / 2); // 2년마다 1일씩 추가
-			return Math.min(15 + extra, 25); // 최대 25일까지 부여
+			return Math.min(15 + extra, 25); // 법적으로 근속 연수에 따라서 최소한 25일까지 부여
 		}
 	}
 	
@@ -154,8 +154,10 @@ public class AnnualLeave {
 		// 증감에 따라 총 연차 수정
 		if (leaveChangeRequestDTO.getChangeType().equals("increase")) {
 			this.totalDays += leaveChangeRequestDTO.getChangeDays();
+			this.remainDays = this.totalDays - this.usedDays;
 		} else {
 			this.totalDays -= leaveChangeRequestDTO.getChangeDays();
+			this.remainDays = this.totalDays - this.usedDays;
 		}
 		
 		this.updatedUser = userId;

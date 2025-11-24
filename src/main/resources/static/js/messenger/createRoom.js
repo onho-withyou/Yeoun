@@ -42,7 +42,7 @@ async function createRoom ({
 			  });
 	    
 	    const data = await res.json();
-	    return data.roomId;
+	    return data;
 	    
 	  } 
 	  

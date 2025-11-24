@@ -31,8 +31,8 @@ public interface MsgRelationRepository extends JpaRepository<MsgRelation, Long> 
     @Query("""
         UPDATE MsgRelation r 
         SET r.lastReadId = :lastReadId 
-        WHERE r.empId = :empId 
-        AND r.roomId = :roomId
+        WHERE r.empId.empId = :empId 
+        AND r.roomId.roomId = :roomId
     """)
     void updateLastRead(@Param("empId")String empId, @Param("roomId")Long roomId, @Param("lastReadId")Long lastReadId);
 

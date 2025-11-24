@@ -21,7 +21,6 @@ import com.yeoun.common.service.CommonCodeService;
 import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpDetailDTO;
 import com.yeoun.emp.dto.EmpListDTO;
-import com.yeoun.emp.dto.EmpPageResponse;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.PositionRepository;
@@ -165,9 +164,7 @@ public class EmpController {
 	// AJAX 데이터 로딩 + 검색 + 페이징
 	@ResponseBody
 	@GetMapping("/data")
-	public EmpPageResponse getEmpList (@AuthenticationPrincipal LoginDTO user,
-									   @RequestParam(defaultValue = "0", name = "page") int page,
-									   @RequestParam(defaultValue = "10", name = "size") int size,
+	public List<EmpListDTO> getEmpList (@AuthenticationPrincipal LoginDTO user,
 									   @RequestParam(defaultValue = "", name = "keyword") String keyword,
 									   @RequestParam(required = false, name = "deptId") String deptId) {
 		
@@ -178,14 +175,7 @@ public class EmpController {
 	        deptId = user.getDeptId(); // 부서장은 자기 부서만
 	    }
 		
-		// 서비스에서 Page<EmpListDTO> 받아오기
-		Page<EmpListDTO> empPage = empService.getEmpList(page, size, keyword, deptId);
-		
-		return new EmpPageResponse(empPage.getContent(),
-								   empPage.getNumber(),
-								   empPage.getSize(),
-								   empPage.getTotalElements(),
-								   empPage.getTotalPages());
+	    return empService.getEmpList(keyword, deptId);
 	}
 	
 	
@@ -212,9 +202,6 @@ public class EmpController {
 		
 		setupEmpFormCommon(model);
 		
-		// 상태 셀렉트용 공통코드 (재직/휴직/퇴직 등) 
-		model.addAttribute("statusList", commonCodeService.getCodes("EMP_STATUS"));
-		
 		return "emp/emp_form";
 	}
 	
@@ -224,13 +211,18 @@ public class EmpController {
 							Model model,
 							RedirectAttributes rttr) {
 		
+		// 공통: 원본 DTO 한 번 가져오기 (사진/통장 파일 id 유지용)
+	    EmpDTO original = empService.getEmpForEdit(empDTO.getEmpId());
+		
 		// 입력값 검증 실패 시
 		if (bindingResult.hasErrors()) {
-			empDTO.setRrnMasked(empService.maskRrn(empDTO.getRrn()));
+			empDTO.setRrnMasked(original.getRrnMasked());
+			empDTO.setPhotoFileId(original.getPhotoFileId());
+			empDTO.setFileId(original.getFileId());
+			model.addAttribute("empDTO", empDTO);
 			model.addAttribute("mode", "edit");
 			model.addAttribute("formAction", "/emp/edit");
 			setupEmpFormCommon(model); 
-			model.addAttribute("statusList", commonCodeService.getCodes("EMP_STATUS"));
 			
 			return "emp/emp_form";
 		}
@@ -252,10 +244,14 @@ public class EmpController {
 	        }
 
 	        // 에러난 상태로 다시 폼
+	        empDTO.setRrnMasked(original.getRrnMasked());
+	        empDTO.setPhotoFileId(original.getPhotoFileId());
+	        empDTO.setFileId(original.getFileId());
+	        
+	        model.addAttribute("empDTO", empDTO);
 	        model.addAttribute("mode", "edit");
 	        model.addAttribute("formAction", "/emp/edit");
 	        setupEmpFormCommon(model);
-	        model.addAttribute("statusList", commonCodeService.getCodes("EMP_STATUS"));
 
 	        return "emp/emp_form";
 	    }

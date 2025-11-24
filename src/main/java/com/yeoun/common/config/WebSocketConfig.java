@@ -17,8 +17,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/websocket")	// 클라이언트에서 웹소켓 연결 요청 주소 등록하여 엔드포인트 연결 (new SockJS("/ws") 형태로 설정된 주소)
-        		.setAllowedOriginPatterns("http://localhost:8080")
-              //.setAllowedOrigins("http://c4d2510t1p1.itwillbs.com/")  
+        		.setAllowedOrigins(
+        		"http://c4d2510t1p1.itwillbs.com",
+        		"http://localhost:8080"
+        		)  
                 .withSockJS();	// SockJS의 Fallback 기능 활성화
     }
 	// => 이 메서드 정의 시 기본적인 웹소켓 연결 처리 완료

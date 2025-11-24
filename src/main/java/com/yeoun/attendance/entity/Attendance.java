@@ -141,7 +141,7 @@ public class Attendance {
 	}
 	
 	// 퇴근 처리
-	public void recordWorkOut(LocalTime now, LocalTime standardOut) {
+	public void recordWorkOut(LocalTime now) {
 		LocalTime  outTime = now;
 		
 	    if (outTime != null) {

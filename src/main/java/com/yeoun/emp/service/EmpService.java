@@ -98,7 +98,7 @@ public class EmpService {
 	    emp.setEmpId(empId);                               // 자동 사번
 	    emp.setEmpPwd(encoder.encode("1234"));             // 초기 비밀번호
 	    emp.setHireDate(empDTO.getHireDate() != null ? empDTO.getHireDate() : LocalDate.now());
-	    emp.setStatus(empDTO.getStatus() != null ? empDTO.getStatus() : "ACTIVE");
+	    emp.setStatus("ACTIVE");
 	    emp.setDept(dept);
 	    emp.setPosition(position);
 
@@ -264,7 +264,7 @@ public class EmpService {
 	
 	// =============================================================================
 	// 사원 목록 조회 (검색 + 페이징 포함)
-	public Page<EmpListDTO> getEmpList(int page, int size, String keyword, String deptId) {
+	public List<EmpListDTO> getEmpList(String keyword, String deptId) {
 		
 		// 공백 정리
         if (keyword != null) {
@@ -274,11 +274,11 @@ public class EmpService {
             deptId = null;
         }
 
-		// 정렬 기준은 입사일 최신순 예시
-	    Pageable pageable = PageRequest.of(page, size,
-	            Sort.by(Sort.Direction.DESC, "hireDate"));
-		
-		return empRepository.searchEmpList(keyword, deptId, pageable);
+        // Pageable.unpaged() 사용해서 기존 searchEmpList 재활용
+        Page<EmpListDTO> page =
+                empRepository.searchEmpList(keyword, deptId, Pageable.unpaged());
+
+        return page.getContent();
 	}
 	
 	// 인사발령 화면에서 쓰는 전체 사원 목록
@@ -444,7 +444,6 @@ public class EmpService {
 	    empDTO.setGender(emp.getGender());
 	    empDTO.setRrn(emp.getRrn());
 	    empDTO.setHireDate(emp.getHireDate());
-	    empDTO.setStatus(emp.getStatus());
 	    empDTO.setEmail(emp.getEmail());
 	    empDTO.setMobile(emp.getMobile());
 	    empDTO.setPostCode(emp.getPostCode());
@@ -485,7 +484,6 @@ public class EmpService {
 	    emp.setEmpName(empDTO.getEmpName());
 	    emp.setMobile(empDTO.getMobile());
 	    emp.setEmail(empDTO.getEmail());
-	    emp.setStatus(empDTO.getStatus());
 	    emp.setPostCode(empDTO.getPostCode());
 	    emp.setAddress1(empDTO.getAddress1());
 	    emp.setAddress2(empDTO.getAddress2());

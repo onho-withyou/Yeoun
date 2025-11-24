@@ -10,7 +10,7 @@
             id="layout-navbar"
           >
             <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-            <!-- 📌 모바일 메뉴 토글 버튼 -->
+            <!-- 모바일 메뉴 토글 버튼 -->
 			    <a href="javascript:void(0);" class="nav-link layout-menu-toggle d-xl-none">
 			        <i class="bx bx-menu bx-sm"></i>
 			    </a>
@@ -81,42 +81,42 @@
 					  <li><a class="dropdown-item" href="#">헤이즐럿라떼요</a></li>
 					</ul>
                 </li>
+                
 				<!-- 로그인한 경우에만 프로필 드롭다운 보이게 -->
 				<li class="nav-item dropdown lh-1 me-3" sec:authorize="isAuthenticated()">
-				  <a class="nav-link dropdown-toggle nav-font-size d-flex align-items-center"
-				     href="#"
-				     id="userDropdown"
-				     role="button"
-				     data-bs-toggle="dropdown"
-				     aria-expanded="false">
-				    <span class="me-1" sec:authentication="principal.empName"></span>
-				    (<span sec:authentication="principal.empId"></span>)
-				  </a>
-				
-				 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-				  <!-- 내 정보 모달 -->
-				  <li><a class="dropdown-item" href="#" id="btnMyInfo">내 정보</a></li>
-				
-				  <!-- 내 정보 수정: 여기서 바로 페이지로 이동 -->
-				  <li><a class="dropdown-item" th:href="@{/my/info/edit}">개인정보 수정</a></li>
-				
-				  <!-- 비밀번호 변경 -->
-				  <li><a class="dropdown-item" th:href="@{/my/password}">비밀번호 변경</a></li>
-				  <li><hr class="dropdown-divider"></li>
-				
-				  <!-- 로그아웃 -->
-				  <li>
-				    <a class="dropdown-item logout-link" href="#">
-				      로그아웃
-				    </a>
-				  </li>
-				</ul>
+					<a class="nav-link dropdown-toggle nav-font-size d-flex align-items-center" href="#"
+				       id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+				    	<span class="me-1" sec:authentication="principal.empName"></span>
+				    	(<span sec:authentication="principal.empId"></span>)
+				  	</a>
+				  	
+				  	<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+				  		<!-- 내 정보 모달 -->
+				  		<li>
+				  			<a class="dropdown-item" href="#" id="btnMyInfo">내 정보</a>
+		  				</li>
+				  		<!-- 내 정보 수정: 여기서 바로 페이지로 이동 -->
+					 	<li>
+					 		<a class="dropdown-item" th:href="@{/my/info/edit}">개인정보 수정</a>
+			 			</li>
+				  		<!-- 비밀번호 변경 -->
+				  		<li>
+				  			<a class="dropdown-item" th:href="@{/my/password}">비밀번호 변경</a>
+		  				</li>
+				  		<li>
+				  			<hr class="dropdown-divider">
+			  			</li>
+				  		<!-- 로그아웃 -->
+				  		<li>
+				    		<a class="dropdown-item logout-link" href="#">로그아웃</a>
+				  		</li>
+					</ul>
 				</li>
 				<!-- 로그인 안 한 경우에는 그냥 login 링크만 -->
 				<li class="nav-item lh-1 me-3" sec:authorize="!isAuthenticated()">
 				  <a class="nav-font-size" id="login-link" th:href="@{/login}">login</a>
 				</li>
-
+				<!-- 프로필 드롭다운 끝 -->
 
               </ul>
             </div>
@@ -126,80 +126,9 @@
 		  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 		</form>
 		
-		<script>
-		  document.querySelectorAll('.logout-link').forEach(link => {
-		    link.addEventListener('click', function (e) {
-		      e.preventDefault();
-		      if (confirm('로그아웃 하시겠습니까?')) {
-		        document.getElementById('hiddenLogoutForm').submit();
-		      }
-		    });
-		  });
-		</script>
-	
-		<script>
-		  // ================== 내 정보 모달 열기 ==================
-document.getElementById('btnMyInfo')?.addEventListener('click', function (e) {
-  e.preventDefault();
-
-  fetch('/my/info')
-    .then(res => {
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json();
-    })
-    .then(data => {
-      const titleEl = document.getElementById('empDetailModalTitle');
-      const modalEl = document.getElementById('empDetailModal');
-      const editBtn = document.getElementById('editBtn');
-
-      if (!modalEl || !titleEl) {
-        alert('상세 보기 모달을 찾을 수 없습니다. 레이아웃 설정을 확인해주세요.');
-        return;
-      }
-
-      titleEl.innerText = '내 정보';
-
-      // 수정 버튼 숨기기
-      if (editBtn) editBtn.style.display = 'none';
-
-      // 텍스트 필드들 세팅
-      document.getElementById('d-empName').innerText  = data.empName  ?? '';
-      document.getElementById('d-empId').innerText    = data.empId    ?? '';
-      document.getElementById('d-deptName').innerText = data.deptName ?? '';
-      document.getElementById('d-posName').innerText  = data.posName  ?? '';
-      document.getElementById('d-gender').innerText   = data.gender === 'M' ? '남' : data.gender === 'F' ? '여' : '—';
-      document.getElementById('d-hireDate').innerText = data.hireDate ?? '';
-      document.getElementById('d-mobile').innerText   = data.mobile   ?? '';
-      document.getElementById('d-email').innerText    = data.email    ?? '';
-      document.getElementById('d-address').innerText  = data.address  ?? '';
-      document.getElementById('d-rrn').innerText      = data.rrnMasked ?? '';
-      document.getElementById('d-bank').innerText     = data.bankInfo ?? '';
-
-      // ✅ 사진도 목록 상세랑 똑같이 처리
-      const photo = document.getElementById('d-photo');
-      if (photo) {
-        photo.onerror = () => { photo.src = '/img/default-profile.png'; };
-        photo.src = data.photoPath || '/img/default-profile.png';
-      }
-
-      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-      modal.show();
-    })
-    .catch(() => {
-      alert("내 정보 불러오기 실패");
-    });
-});
-
-		  // ================== 정보 수정 버튼 ==================
-		  document.getElementById('editBtn')?.addEventListener('click', function () {
-		    if (window.detailMode === 'self') {
-		      window.location.href = '/my/info/edit';
-		    }
-		  });
-		</script>
-		<script src="/js/emp/emp.js"></script>
-
-
+		<!-- 상단바 (내 정보, 개인정보 수정, 로그아웃) -->
+		<script src="/js/auth/myInfo.js"></script>
+		
 		  <script>
 			//Resources
 		  

@@ -127,7 +127,7 @@
                       </div>
 
                       <div class="col-md-6">
-                        <label class="form-label required">발령 부서</label>
+                        <label class="form-label">발령 부서</label>
                         <select class="form-select" th:field="*{toDeptId}">
                           <option value="">부서 선택</option>
                           <option th:each="d : ${deptList}"
@@ -137,7 +137,7 @@
                         </select>
                       </div>
                       <div class="col-md-6">
-                        <label class="form-label required">발령 직급</label>
+                        <label class="form-label">발령 직급</label>
                         <select class="form-select" th:field="*{toPosCode}">
                           <option value="">직급 선택</option>
                           <option th:each="p : ${posList}"
