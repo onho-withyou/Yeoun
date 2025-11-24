@@ -112,5 +112,10 @@ public class PayCalcRuleController {
             ra.addFlashAttribute("err", "삭제 중 오류");
         }
         return "redirect:/pay/rule_calc";
-    }
+    
+    
+    }       
+    
 }
+
+

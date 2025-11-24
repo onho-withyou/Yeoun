@@ -200,3 +200,22 @@ document.addEventListener("show.bs.modal", (evt)=>{
     });
 
 });
+
+/* =====================================================
+   저장 직전 콤마 제거 (등록 + 수정 공통)
+===================================================== */
+document.addEventListener("submit", (e) => {
+
+    const form = e.target;
+    if (!form.matches("form")) return; // 폼이 아니면 무시
+
+    console.log("💾 submit 시 콤마 제거 실행");
+
+    const valueInput = form.querySelector("input[name='valueNum']");
+    if (valueInput && valueInput.value) {
+        // 콤마 제거
+        valueInput.value = valueInput.value.replace(/,/g, "");
+        console.log("➡ valueNum cleaned:", valueInput.value);
+    }
+});
+
