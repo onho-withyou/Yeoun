@@ -87,10 +87,8 @@
   					<div class="col-12 col-md-6 text-center">
     				  <label class="form-label">사진 미리보기</label>
     				  <div class="mt-1">
-      					<img id="photoPreview" th:if="${empDTO.photoFileId != null}" th:src="@{'/files/download/' + ${empDTO.photoFileId}}"
-           							alt="프로필 사진" class="rounded shadow-sm" style="width:140px; height:140px; object-fit:cover;">
-      					<img id="photoPreview" th:if="${empDTO.photoFileId == null}" th:src="@{/img/default-profile.png}"
-          							alt="기본 프로필" class="rounded shadow-sm" style="width:140px; height:140px; object-fit:cover;">
+      					<img id="photoPreview" th:src="${empDTO.photoFileId != null} ? @{'/files/download/' + ${empDTO.photoFileId}} : @{/img/default-profile.png}"
+        						 alt="프로필 사진" class="rounded shadow-sm" style="width:140px; height:140px; object-fit:cover;">
     				  </div>
   					</div>
 				  </div>
@@ -272,6 +270,7 @@
 	</div>
 	
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js" defer></script>	
+<script src="/js/emp/emp.js"></script>
 
 </th:block>
 </body>
