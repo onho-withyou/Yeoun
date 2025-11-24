@@ -128,6 +128,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if(createModal){
         const form = document.getElementById("createRuleForm");
+		
+		/* 🔥 모달 닫힐 때 초기화 */
+		        createModal.addEventListener("hidden.bs.modal", () => {
+		            form.reset();
+
+		            // 오류 메시지 초기화
+		            const box = document.getElementById("create-error-box");
+		            if (box) {
+		                box.classList.add("d-none");
+		                box.querySelector("span").innerText = "";
+		            }
+
+		            // 대상 선택 UI 초기화
+		            const targetInput = document.getElementById("create-target-code-input");
+		            const targetDept  = document.getElementById("create-target-dept");
+		            const targetGrade = document.getElementById("create-target-grade");
+
+		            if (targetInput) targetInput.classList.add("d-none");
+		            if (targetDept)  targetDept.classList.add("d-none");
+		            if (targetGrade) targetGrade.classList.add("d-none");
+
+		            if (targetInput) targetInput.removeAttribute("name");
+		            if (targetDept)  targetDept.removeAttribute("name");
+		            if (targetGrade) targetGrade.removeAttribute("name");
+
+		            // 스위처 다시 초기화
+		            bindTargetSwitcher("create");
+
+		            console.log("🔄 등록 모달 reset 완료");
+		        });
 
         createModal.addEventListener("input", (e)=>{
             if(e.target.matches(".amount-input")){
@@ -158,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* =====================================================
-   수정 모달 (여기서 진짜 핵심!)
+   수정 모달 
 ===================================================== */
 document.addEventListener("show.bs.modal", (evt)=>{
 
@@ -231,4 +261,6 @@ document.addEventListener("submit", (e) => {
         console.log("➡ valueNum cleaned:", valueInput.value);
     }
 });
+
+
 

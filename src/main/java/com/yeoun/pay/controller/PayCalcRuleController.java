@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Controller
 @RequestMapping("/pay/rule_calc")
@@ -34,19 +33,16 @@ public class PayCalcRuleController {
     public String page(Model model) {
 
         model.addAttribute("activeTab", "calc");
-        model.addAttribute("newCalc", new PayCalcRule());
 
         model.addAttribute("calcRules", service.findAllOrderByPriority());
         model.addAttribute("items", itemRepo.findAll());
         model.addAttribute("ruleTypes", RuleType.values());
         model.addAttribute("targetTypes", TargetType.values());
         model.addAttribute("statuses", ActiveStatus.values());
-        model.addAttribute("depts", deptRepo.findActive());    
-        model.addAttribute("positions", positionRepo.findActive()); 
+        model.addAttribute("depts", deptRepo.findActive());
+        model.addAttribute("positions", positionRepo.findActive());
 
-
-
-        // 등록폼 바인딩 객체
+        // 등록폼 기본값
         if (!model.containsAttribute("createForm")) {
             PayCalcRule blank = PayCalcRule.builder()
                     .startDate(LocalDate.now())
@@ -62,45 +58,64 @@ public class PayCalcRuleController {
     /** 등록 */
     @PostMapping("/create")
     public String create(@ModelAttribute("createForm") PayCalcRule form,
-                         RedirectAttributes ra) {
+                         Model model) {
 
         try {
             service.save(form);
-            ra.addFlashAttribute("msg", "등록되었습니다.");
+            return "redirect:/pay/rule_calc";
 
         } catch (Exception e) {
-            ra.addFlashAttribute("createErrorMsg", e.getMessage());
-            ra.addFlashAttribute("createForm", form);
-            ra.addFlashAttribute("openCreateModal", true);
-        }
+            log.error("등록 오류", e);
 
-        return "redirect:/pay/rule_calc";
+            // 모달 유지 + 에러 메시지 표시
+            model.addAttribute("createErrorMsg", e.getMessage());
+            model.addAttribute("openCreateModal", true);
+
+            // 페이지 렌더링에 필요한 데이터 다시 주입
+            model.addAttribute("activeTab", "calc");
+            model.addAttribute("calcRules", service.findAllOrderByPriority());
+            model.addAttribute("items", itemRepo.findAll());
+            model.addAttribute("ruleTypes", RuleType.values());
+            model.addAttribute("targetTypes", TargetType.values());
+            model.addAttribute("statuses", ActiveStatus.values());
+            model.addAttribute("depts", deptRepo.findActive());
+            model.addAttribute("positions", positionRepo.findActive());
+
+            return "pay/pay_calc"; // 리다이렉트 ❌
+        }
     }
 
     /** 수정 */
     @PostMapping("/{id}/update")
     public String update(@PathVariable("id") Long id,
-    				     @ModelAttribute("editForm") PayCalcRule form,
-                         RedirectAttributes ra) {
+                         @ModelAttribute("editForm") PayCalcRule form,
+                         Model model) {
 
         try {
             form.setRuleId(id);
             service.save(form);
-            ra.addFlashAttribute("msg", "수정되었습니다.");
+            return "redirect:/pay/rule_calc";
 
         } catch (Exception e) {
+            log.error("수정 오류", e);
 
-            // valueNum 파싱 문제, DB 오류 등 실제 저장 오류만 메시지 전달
-            if (!e.getMessage().contains("targetCode") ) {
-                ra.addFlashAttribute("editErrorMsg", e.getMessage());
-            }
+            model.addAttribute("editErrorMsg", e.getMessage());
+            model.addAttribute("openEditModalId", id);
 
-            ra.addFlashAttribute("openEditModalId", id);
+            // 다시 렌더링에 필요한 데이터
+            model.addAttribute("activeTab", "calc");
+            model.addAttribute("calcRules", service.findAllOrderByPriority());
+            model.addAttribute("items", itemRepo.findAll());
+            model.addAttribute("ruleTypes", RuleType.values());
+            model.addAttribute("targetTypes", TargetType.values());
+            model.addAttribute("statuses", ActiveStatus.values());
+            model.addAttribute("depts", deptRepo.findActive());
+            model.addAttribute("positions", positionRepo.findActive());
+
+            return "pay/pay_calc"; // redirect ❌
         }
-
-
-        return "redirect:/pay/rule_calc";
     }
+
 
     /** 삭제 */
     @PostMapping("/{id}/delete")
@@ -112,10 +127,6 @@ public class PayCalcRuleController {
             ra.addFlashAttribute("err", "삭제 중 오류");
         }
         return "redirect:/pay/rule_calc";
-    
-    
-    }       
-    
+    }
+
 }
-
-

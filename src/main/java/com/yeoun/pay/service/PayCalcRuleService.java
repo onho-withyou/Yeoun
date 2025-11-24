@@ -28,17 +28,15 @@ public class PayCalcRuleService {
      */
     public PayCalcRule save(PayCalcRule form) {
 
-        // 1) ITEM_CODE → 영속 엔티티 매핑
         normalizeItemReference(form);
 
         PayCalcRule entity;
 
         if (form.getRuleId() != null) {
-            // 2) 기존 엔티티 조회 (수정모드)
+
             entity = payCalcRuleRepository.findById(form.getRuleId())
                     .orElseThrow(() -> new IllegalArgumentException("규칙이 존재하지 않습니다."));
 
-            // **💥 완전 덮어쓰기 핵심**
             entity.setItem(form.getItem());
             entity.setRuleType(form.getRuleType());
             entity.setPriority(form.getPriority());
@@ -48,29 +46,26 @@ public class PayCalcRuleService {
             entity.setCalcFormula(form.getCalcFormula());
             entity.setRemark(form.getRemark());
 
-            // 🔥 대상구분 설정
             entity.setTargetType(form.getTargetType());
+            entity.setTargetCode(form.getTargetType() == TargetType.ALL ? "" : form.getTargetCode());
 
-            // 🔥 targetCode 완전 덮어쓰기 (가장 중요!)
-            if (form.getTargetType() == TargetType.ALL) {
-                entity.setTargetCode("");
-            } else {
-                entity.setTargetCode(form.getTargetCode()); // 새로운 값만 저장
-            }
-
-            // 🔥 숫자값 덮어쓰기
             entity.setValueNum(form.getValueNum());
 
         } else {
-            // 신규 저장
             entity = form;
         }
 
-        // 3) 날짜 등 비즈니스 검증
+        // 비즈니스 검증 (기간, 대상 등)
         validateBusiness(entity, entity.getRuleId());
+
+        // 🔥 우선순위 중복 검사
+        if (payCalcRuleRepository.existsByPriorityAndRuleIdNot(entity.getPriority(), entity.getRuleId())) {
+            throw new IllegalArgumentException("이미 사용 중인 우선순위입니다. 다른 번호를 입력하세요.");
+        }
 
         return payCalcRuleRepository.save(entity);
     }
+
 
     // =============================== 아래 기존 메서드 동일 ===============================
 
