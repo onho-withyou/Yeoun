@@ -329,6 +329,7 @@ async function openScheduleModal(mode, data = null) {
 	// -------------------------------------------------------------------
 	// 모달이 열릴때 add, edit 구분
 	if(mode === 'add') {
+//		form.reset(); // 폼 입력값 초기화
 		deleteBtn.disabled = false;
 		submitBtn.disabled = false;
 		//폼요소 입력가능하게 변경
@@ -347,7 +348,6 @@ async function openScheduleModal(mode, data = null) {
 	    submitBtn.textContent = '등록';
 		submitBtn.value ='add';
 		
-//		form.reset(); // 폼 입력값 초기화
 		form.scheduleId.value = '';
 		form.scheduleTitle.value = '';
 		createdUserName.value = currentUserName || '';

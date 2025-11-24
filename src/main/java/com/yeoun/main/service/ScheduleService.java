@@ -126,7 +126,7 @@ public class ScheduleService {
 	    LocalDateTime endOfDay   = endDate.with(java.time.LocalTime.MAX);//해당일자의 23시59분59초
 		// 일정목록 조회
 	    List<Schedule> scheduleList = scheduleRepository.getIndividualSchedule(empId, startOfDay, endOfDay);
-	    System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" + scheduleList);
+//	    System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" + scheduleList);
 		// 일정목록 데이터 변환후 저장할 객체
 //		List<Schedule> scheduleList2 = new ArrayList<>();
 
