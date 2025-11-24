@@ -629,11 +629,14 @@ public class PayrollCalcService {
             continue;
         }
 
-        // 직급수당
-        if (cr.getTargetType().name().equals("GRADE")) {
+     // 직급수당: 단, 보너스(BONUS)는 제외
+        if (cr.getTargetType().name().equals("GRADE")
+                && !"BONUS".equals(cr.getItem().getItemCode())) {
+
             incentiveAmt = incentiveAmt.add(result);
             continue;
         }
+
         
      //   보너스
         if ("BONUS".equals(cr.getItem().getItemCode())) {
