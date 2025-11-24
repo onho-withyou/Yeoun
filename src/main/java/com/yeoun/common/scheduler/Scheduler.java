@@ -1,8 +1,11 @@
 package com.yeoun.common.scheduler;
 
+import java.time.LocalDate;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.yeoun.attendance.service.AttendanceService;
 import com.yeoun.hr.service.HrActionService;
 import com.yeoun.leave.service.LeaveService;
 
@@ -16,11 +19,20 @@ public class Scheduler {
 	
 	private final LeaveService leaveService;
 	private final HrActionService hrActionService;
+	private final AttendanceService attendanceService;
 	
 	// 매년 1월 1일에 연차 초기화
 	@Scheduled(cron = "0 0 0 1 1 *")
 	public void test() {
 		leaveService.updateAllAnnualLeaves();
+	}
+	
+	// 자동 퇴근 처리
+	@Scheduled(cron = "0 5 0 * * *")
+	public void autoCloseYesterdayAttendance() {
+		LocalDate yesterday = LocalDate.now().minusDays(1);
+		
+		attendanceService.autoCloseAttendance(yesterday);
 	}
 	
 	
