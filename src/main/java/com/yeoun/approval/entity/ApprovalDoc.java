@@ -70,4 +70,5 @@ public class ApprovalDoc {
 	
 	@Column(name="REASON")
 	private String reason; //사유
+
 }
