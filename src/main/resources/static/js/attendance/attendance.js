@@ -37,15 +37,25 @@ const handleAttendanceToggle = async (empId) => {
 		msg = "외출입니다.";
 	}
 	
+	console.log("result:", result);
+	console.log("status:", result?.status);
+	console.log("comparison:", result?.status === "WORKIN", result?.status === "WORK_OUT");
+	
 	// 버튼 활성화/비활성화 적용
 	if (result.buttonEnabled === false) {
 		attendanceBtn.disabled = true;
 	} else {
 		attendanceBtn.disabled = false;
 	}
+	
 	alert(msg);
 	
-	location.reload();
+	setTimeout(() => {
+	    if (result.status === "WORKIN" || result.status === "WORK_OUT" || result.status === "LATE") {
+	        location.reload();
+	    }
+	}, 10); 
+	
 }
 
 // 사원번호로 사원 조회
