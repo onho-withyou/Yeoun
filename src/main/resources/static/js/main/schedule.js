@@ -47,6 +47,49 @@ const approvalCheckBtn = document.getElementById('approvalCheckBtn');
 // 반려 버튼
 const approvalCompanionBtn = document.getElementById('approvalCompanionBtn');
 
+// 결재확인 버튼 눌렀을때 동작할 함수
+approvalCheckBtn.addEventListener('click', () => {
+	patchApproval("accept");
+});
+
+// 반려버튼 눌렀을때 동작할 함수
+approvalCompanionBtn.addEventListener('click', () => {
+	patchApproval("deny")		
+});
+
+// 결재 패치 보내기 함수
+function patchApproval(btn) {
+	// 현재 로그인한 사용자와 결재권자 비교
+	if(checkApprover()) return;
+	let msg = "";
+	btn == 'accept' ? msg = "승인하시겠습니까?" : msg = "반려하시겠습니까?"
+	 
+	
+	// 결재권한자와 사용자가 동일인물일 때
+	if(confirm(msg)) {
+		//결재 확인 동작함수
+		fetch(`/api/approvals/${approvalId}?btn=${btn}` , {
+			method: 'PATCH'
+			, headers: {
+				[csrfHeaderName]: csrfToken
+			}
+		})
+		.then(response => {
+			if (!response.ok) return response.json().then(err => { throw new Error(err.result); });
+			return response.json();
+		})
+		.then(data => {
+			alert(data.result);
+			// 결제승인완료시 새로고침
+			location.reload();
+			
+		}).catch(error => {
+			console.error('에러', error)
+			alert("결재 승인 실패!!");
+		});
+	 }
+}
+
 // 현재 로그인한 사용자와 결재권자 비교
 function checkApprover() {
 	if(currentApprover != currentUserId) {
@@ -828,6 +871,7 @@ async function initApprovalGrid(data) {
 		currentApprover = rowData.approver;
 		const approvalForm = document.getElementById('modal-doc');
 		
+		
 		Array.from(approvalForm.elements).forEach(el => {
 			if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
 				el.readOnly = true;
@@ -836,6 +880,27 @@ async function initApprovalGrid(data) {
 				el.disabled = true;
 			}
 		});
+		
+		// 모든 폼 display 초기화
+		document.getElementById('leavePeriodForm').style.display = 'none';
+		document.getElementById('leaveTypeForm').style.display = 'none';
+		document.getElementById('expndTypeForm').style.display = 'none';
+		document.getElementById('toDeptForm').style.display = 'none';
+		
+		// formType별 display 제어
+		if (rowData.formType === '연차신청서') {
+		  document.getElementById('leavePeriodForm').style.display = 'block';
+		  document.getElementById('start-date').value = rowData.startDate;
+		  document.getElementById('end-date').value = rowData.endDate;
+		  document.getElementById('leaveTypeForm').style.display = 'block';
+		  document.getElementById('leave-type').value = rowData.leaveType;
+		} else if (rowData.formType === '지출결의서') {
+		  document.getElementById('expndTypeForm').style.display = 'block';
+		  document.getElementById('expnd-type').value = rowData.expndType;
+		} else if (rowData.formType === '인사발령신청서') {
+		  document.getElementById('toDeptForm').style.display = 'block';
+		  document.getElementById('to-dept-id').value = rowData.toDeptId;
+		}
 		
 		document.getElementById('Drafting').value = rowData.formType;
 		console.log(rowData.approvaTitle);

@@ -100,7 +100,7 @@ public class ApprovalDocService {
 		approvalDocDTO.setApprovalId(approvalDoc.getApprovalId());//결재문서id
         approvalDocDTO.setApprovalTitle(approvalDoc.getApprovalTitle());//문서제목
         approvalDocDTO.setEmpId(approvalDoc.getEmpId());//로그인한 사람 사원번호
-        approvalDocDTO.setCreateDate(approvalDoc.getCreatedDate());//생성일자
+        approvalDocDTO.setCreatedDate(approvalDoc.getCreatedDate());//생성일자
         approvalDocDTO.setFinishDate(approvalDoc.getFinishDate());//완료예정일자
         approvalDocDTO.setStartDate(approvalDoc.getStartDate());//시작휴가일자
         approvalDocDTO.setEndDate(approvalDoc.getEndDate());//종료휴가날짜
