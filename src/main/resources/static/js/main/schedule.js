@@ -36,7 +36,66 @@ const nextMonthBtn = document.getElementById("nextMonth");
 // 캘린더 엘리먼트 지정
 const calendarEl = document.getElementById('calendar');
 
+// ----------------------------------
+// 결재관련 전역변수, 함수 
+// 현재 열린 문서의 approvalId
+let approvalId;
+// 현재 열린 문서의 결재권자(approval) 
+let currentApprover;
+// 결제확인 버튼
+const approvalCheckBtn = document.getElementById('approvalCheckBtn');
+// 반려 버튼
+const approvalCompanionBtn = document.getElementById('approvalCompanionBtn');
 
+// 현재 로그인한 사용자와 결재권자 비교
+function checkApprover() {
+	if(currentApprover != currentUserId) {
+		alert("승인 또는 반려권한이 없습니다."); 
+		return true;
+	}
+}
+
+// null-safe 날짜 변환 함수
+function toDateStr(value) {
+  if (!value) return '';              // null, undefined, '' 전부 빈 문자열 처리
+  return String(value).split('T')[0]; // 혹시 문자열 아니어도 방어
+
+}
+
+//결제상세보기 => 결제권자 정보 불러오기함수
+async function getApproverList(approvalId) {
+	try {
+		const response = await fetch(`/api/approvals/approvers/${approvalId}`, {method: 'GET'});
+		
+		if(!response.ok) {
+			const errorData = await response.json();
+			throw new Error(errorData.result);
+		}
+		const data = await response.json();
+		return data;
+	} catch(error) {
+		alert("결재권자 목록을 불러올 수 없습니다!");
+		return null;
+	}
+}
+
+async function print(type, text) {
+	// 결재권한자변경 div 버튼 생성
+	console.log(window.count, "@@@@@@@@@@@@");
+	if(this.count < 3){
+	console.log(this.count, "this.count:!!!!!!!!!!!!")
+	this.count++;
+	approverDiv.innerHTML +='<div class="btn btn-success approvers"'
+  						+'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
+//  						+'<p onclick="approverDivclose(this,' + "'"+ type + "'"+ ','+ count +')" style="float:right;margin-right: 8px;">&times;</p>'
+//  						+'<p onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
+  						+'<p style="float:right;margin-right: 8px;">&times;</p>'
+  						+'<p style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
+						+'</div>';
+	}
+
+} 
+// -----------------------------------------------------------------
 //---------------------------------------------------------
 // 캘린더위 버튼, 날짜 함수
 //---------------------------------------------------------
@@ -118,6 +177,7 @@ function changeCalendarType(type) {
 	calendarType = type;
 	
 }
+// 캘린더 타입 버튼 active표시함수
 const buttons = document.querySelectorAll('button[data-view]');
 buttons.forEach(btn => {
 	btn.addEventListener('click', function() {
@@ -125,7 +185,7 @@ buttons.forEach(btn => {
 		const prevActive = document.querySelector('button[data-view].active');
 		// active클래스 제거
 		if(prevActive) prevActive.classList.remove('active');
-		console.log("this : " , this)
+//		console.log("this : " , this)
 		this.classList.add('active');	
 	});
 	
@@ -356,7 +416,6 @@ function initCalendar() {
 			
 			const scheduleId = event.id;
 			showCalendarLoading();
-			console.log("스피너열기");
 			// 등록된 일정정보 조회
 			fetch(`/api/schedules/${scheduleId}`, {method: 'GET'})
 			.then(response => {
@@ -368,7 +427,6 @@ function initCalendar() {
 				await openScheduleModal("edit", data);
 				
 			}).then(async () => {
-				console.log("스피너닫기");
 				hideCalendarLoading()
 			})
 			.catch(error => {
@@ -475,7 +533,6 @@ async function getScheduleData(params) {
 		return response.json();  //JSON 파싱
 	})
 	.then(data => { // response가 ok일때
-		console.log("한달일정데이터",data);
 		// 조회한 월단위 일정을 캘린더 데이터로 변환
 		monthlyScheduleData = convertScheduleDataToSchedules(data);
 	}).catch(error => {
@@ -628,7 +685,7 @@ async function getLastNoticeList() {
 		if (!response.ok) throw new Error(response.text());
 		return response.json();  //JSON 파싱
 	}).then(data => {
-		console.log(data, "공지데이터");
+//		console.log(data, "공지데이터");
 		initNoticeGrid(data);
 	}).catch(error => {
 		console.error('에러', error)
@@ -656,7 +713,7 @@ async function initNoticeGrid(data) {
 	});
 	// 그리드 데이터 추가
 	noticeGrid.resetData(data);
-	console.log(noticeGrid.gridEl, "노티스그리드");
+//	console.log(noticeGrid.gridEl, "노티스그리드");
 	const rows = noticeGrid.getData();
 	
 	rows.forEach(row => {
@@ -696,10 +753,11 @@ async function getApprovalList() {
 
 let approvalGrid = null;
 let selectedApprovalId = null;
+let approverDiv = document.querySelector('#approver');
 // 결제그리드 그리기 함수
 async function initApprovalGrid(data) {
 	const Pagination = tui.Pagination;
-	console.log(data, "공지데이터");
+//	console.log(data, "공지데이터");
 	approvalGrid = new tui.Grid({
 		el: document.getElementById("approvalGrid"),
 		editable: true,
@@ -719,18 +777,118 @@ async function initApprovalGrid(data) {
 	});
 	approvalGrid.resetData(data);
 	
-	// 상세보기 버튼 이벤트
-	await approvalGrid.on("click", (event) => {
+	const response = await fetch("/approval/empList");
+	const selectData = await response.json();
+	let itemData  = [];
+	let obj ={};
+	console.log(selectData);
+	selectData.map((item,index)=>{
+		obj["value"] = item[0]; //사번
+		obj["label"] = (index+1) +" : "+item[1]+"("+item[0]+")"; //이름(사번)
+		itemData.push(obj);
+		obj = {};
+	});
+	
+	//셀렉트박스 - 토스트유아이
+	let selectBox = new tui.SelectBox('#select-box', {
+	  data: itemData
+	});
+	//셀렉트박스 닫힐때
+	selectBox.on('close',(ev)=>{
+		let selectlabel = selectBox.getSelectedItem().label;
+		let approverEmpId = selectBox.getSelectedItem().value;
+		if(selectlabel != null && approverArr.length < 3){//셀렉트 라벨선택시 3번까지만셈
+			print(ev.type, selectlabel);
+			approverArr.push({
+				empId: approverEmpId
+				, approverOrder: this.count 
+				, delegateStatus : false //여기서 전결상태도 불러오자
+			});
+		}
+		
+	});
+	
+	// 결재문서 상세보기 이벤트
+	await approvalGrid.on("click", async (event) => {
 //		console.log(event);
 		const rowData = approvalGrid.getRow(event.rowKey);
-		const approvalId = rowData.approvalId;
-		
 		selectedApprovalId = approvalId;
-		alert("선택된 approvalId : " + approvalId);
+		console.log("rowData : ", rowData);
+//		
+//		alert("선택된 approvalId : " + approvalId);
 //		const modalEl = document.getElementById('show-notice');
 //		new bootstrap.Modal(modalEl).show();
+		$('#approval-modal').modal('show');
+		//formReset();
+		document.getElementById('saveBtn').style.display = "none";
+		// 문서 열릴때 approvalId에 현재 열린 문서id 저장
+		approvalId = rowData.approvalId;
+		// 문서 열릴때 현재 결재권자(approval) 저장
+		currentApprover = rowData.approver;
+		const approvalForm = document.getElementById('modal-doc');
+		
+		Array.from(approvalForm.elements).forEach(el => {
+			if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+				el.readOnly = true;
+			}
+			if(el.tagName === 'SELECT' || el.type === 'CHECKBOX') {
+				el.disabled = true;
+			}
+		});
+		selectBox.disable();
+		
+		document.getElementById('Drafting').value = rowData.formType;
+		console.log(rowData.approvaTitle);
+		document.getElementById('today-date').innerText = toDateStr(rowData.createdDate) ;//결재 작성날짜 = 결재시작일
+		document.getElementById('approval-title').value = rowData.approvalTitle;
+		//양식종류 form-menu
+		document.getElementById('approver-name').value  = rowData.empId;//결재자명
+		
+		//const createdDate = rowData.created_date;
+		document.getElementById('create-date').value = toDateStr(rowData.createdDate);//결재시작일 =결재 작성날짜 
+		document.getElementById('finish-date').value = toDateStr(rowData.finishDate);//결재완료날짜
+		//휴가 연차신청서 
+		document.getElementById('start-date').value = toDateStr(rowData.startDate); //휴가시작날짜
+		document.getElementById('end-date').value = toDateStr(rowData.endDate); //휴가종료날짜
+		//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
+		document.getElementById('leave-type').value = rowData.leaveType;//휴가종류
+		
+		console.log("rowData.to_dept_id",rowData.to_deptId);
+		document.getElementById('to-dept-id').value = rowData.toDeptId;//발령부서,디비잘못넣음
+		document.getElementById('expnd-type').value = rowData.expndType;//지출종류EXPND_TYPE
+		//document.getElementById('approver').value = rowData.approver;//결재권한자
+		const approverList = await getApproverList(approvalId);
+		
+		let sortedList; 
+		
+		if(approverList.length > 0) {
+			
+			sortedList = approverList.sort((a, b) => {
+				return Number(a.orderApprovers) - Number(b.orderApprovers);
+			});
+			
+			window.count = 0;
+			approverDiv.innerHTML = "";
+								
+			for (const approver of sortedList) {
+				selectBox.select(approver.empId);
+				print("default", selectBox.getSelectedItem().label);
+			}
+			
+		}
+		
+		const approverBtns = document.querySelectorAll('.btn.approvers');
+		
+		approverBtns.forEach(btn => {
+			btn.classList.add('disabled');
+			btn.onclick = null; // 클릭 이벤트 해제
+		});
+		//document.getElementById('approver').innerText = rowData.approver;//전결자
+		document.getElementById('reason-write').value = rowData.reason;//결재사유내용
 			
 	});
+	// 결재 문서 모달 열기 끝
+	// ----------------------------------------------------------------------------
 }
 // ------------------------------------------------------------------
 // 공지사항, 결제문서 목록 불러와 그리드 그리기 끝
@@ -781,10 +939,6 @@ function showCalendarLoading() {
 function hideCalendarLoading() {
 	document.getElementById('calendar-loading-overlay').style.display = 'none';
 }
-
-
-
-
 
 
 
