@@ -37,10 +37,6 @@ const handleAttendanceToggle = async (empId) => {
 		msg = "외출입니다.";
 	}
 	
-	console.log("result:", result);
-	console.log("status:", result?.status);
-	console.log("comparison:", result?.status === "WORKIN", result?.status === "WORK_OUT");
-	
 	// 버튼 활성화/비활성화 적용
 	if (result.buttonEnabled === false) {
 		attendanceBtn.disabled = true;
