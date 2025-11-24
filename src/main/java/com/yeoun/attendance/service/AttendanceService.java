@@ -236,8 +236,6 @@ public class AttendanceService {
 		for (Attendance attendance : list) {
 			String empId = attendance.getEmp().getEmpId();
 			
-			log.info(">>>>>>>>>> empID : " + empId);
-			
 			// 마지막 OUTWORK 조회
 			LocalTime lastOut = accessLogRepository.findLastOutTime(empId, targetDate)
 					.map(AccessLog::getOutTime)
@@ -248,11 +246,7 @@ public class AttendanceService {
 			
 			LocalTime finalOutTime  = (lastOut != null) ? lastOut : standardOut;
 			
-			log.info(">>>>>>>>>>>>>>>> finalOutTime " + finalOutTime);
-			
 			attendance.recordWorkOut(finalOutTime);
-			
-			log.info(">>>>>>>>>>>>>>>> attendance " + attendance);
 			
 			// 총근무시간 다시 계산
 			int finalMinutes = calculateWorkDuration(attendance.getWorkIn(), finalOutTime, false, workPolicy);
