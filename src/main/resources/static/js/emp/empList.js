@@ -5,7 +5,6 @@ let empGrid = null;
 let empDetailModal = null;
 let currentEmpId = null;
 let detailMode   = null; 
-let posSortAsc = true; 
 
 document.addEventListener('DOMContentLoaded', () => {
 	const holder = document.getElementById('empMsgHolder');
@@ -132,19 +131,11 @@ function initEmpGrid() {
 			header: '부서',     
 			name: 'deptName', 
 			align: 'center', 
-			sortable: true 
-		},
-      	{ 
-			header: '직급서열',     
-			name: 'rankOrder',  
-			hidden: true,  
-			sortable: true 
 		},
       	{ 
 			header: '직급',     
 			name: 'posName',  
 			align: 'center', 
-			sortable: true 
 		},
       	{ 
 			header: '상태',     
@@ -177,36 +168,6 @@ function initEmpGrid() {
     const row = empGrid.getRow(ev.rowKey);
     if (!row || !row.empId) return;
     showEmpDetail(row.empId);
-  });
-
-  // 직급 헤더 클릭하면 rankOrder 기준으로 정렬
-  empGrid.on('beforeSort', ev => {
-    const { columnName } = ev;
-
-    if (columnName !== 'posName') {
-      // 다른 컬럼은 토스트 기본 정렬 그대로 사용
-      return;
-    }
-
-    // 기본 posName 정렬 막기
-    ev.stop();
-
-    // 방향 토글 (클릭할 때마다 오름/내림 바꾸기)
-    posSortAsc = !posSortAsc;
-
-    // 현재 데이터 가져와서 복사
-    const data = empGrid.getData().slice();
-
-    // rankOrder 숫자 기준으로 정렬
-    data.sort((a, b) => {
-      const ao = Number(a.rankOrder ?? 0);
-      const bo = Number(b.rankOrder ?? 0);
-
-      return posSortAsc ? (ao - bo) : (bo - ao);
-    });
-
-    // 정렬된 데이터로 다시 세팅
-    empGrid.resetData(data);
   });
 
 }

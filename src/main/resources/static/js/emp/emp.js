@@ -207,7 +207,11 @@ document.addEventListener('DOMContentLoaded', initOrgSelects);
     });
   });
   
-  
+  /**
+	* ============================================================
+	* 이름 = 예금주
+	* ============================================================
+	*/
   document.addEventListener('DOMContentLoaded', function () {
      const empNameInput  = document.getElementById('empName');   // 이름 입력칸
      const bankOwnerInput = document.getElementById('bankOwner'); // 예금주 칸
@@ -224,3 +228,25 @@ document.addEventListener('DOMContentLoaded', initOrgSelects);
    });
   
   
+  /**
+	* ============================================================
+	* 프로필 사진 미리보기
+	* ============================================================
+	*/
+	document.addEventListener("DOMContentLoaded", () => {
+	  const fileInput = document.getElementById('photoFile');
+	  const preview   = document.getElementById('photoPreview');
+
+	  if (!fileInput || !preview) return;   // 다른 화면일 때 가드
+
+	  fileInput.addEventListener('change', (event) => {
+	    const file = event.target.files[0];
+	    if (!file) return; // 선택 취소 시
+
+	    const reader = new FileReader();
+	    reader.onload = (e) => {
+	      preview.src = e.target.result;    // 미리보기 이미지 교체
+	    };
+	    reader.readAsDataURL(file);
+	  });
+	});

@@ -42,7 +42,7 @@ public class WebSecurityConfig {
 					.requestMatchers("/", "/login", "/logout").permitAll()
 					
 					// ================== 로그인 한 모든 사원 ==================
-		            .requestMatchers("/org/**", "/hr/actions", "/attendance/my/**", "/leave/my/**", "/attendance/outwork", "/attendance/toggle/**",
+		            .requestMatchers("/orgchart/**", "/hr/actions", "/attendance/my/**", "/leave/my/**", "/attendance/outwork", "/attendance/toggle/**",
 		            				 "/my/**")
 		                .authenticated()
 
@@ -104,6 +104,9 @@ public class WebSecurityConfig {
 				.logout(logout -> logout
 					.logoutUrl("/logout") 				// 로그아웃 요청 URL 지정(POST 방식 요청으로 취급함)
 					.logoutSuccessUrl("/login?logout") 	// 로그아웃 성공 후 리디렉션 할 URL 지정
+					.invalidateHttpSession(true)		// 로그아웃 시 세션을 무효화(세션 데이터 모두 삭제)
+					.deleteCookies("JSESSIONID", "remember-me")  // 로그아웃 시 삭제할 쿠키 지정 (JESSIONID = 세션 ID를 담고 있는 기본 쿠키)
+					.clearAuthentication(true) 			// 로그아웃 시 인증 정보를 완전히 제거
 					.permitAll()
 				)
 				// ---------- 접근 권한 오류 --------------

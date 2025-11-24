@@ -607,7 +607,7 @@ document.getElementById('create-group-btn')
   const groupName = groupNameInput ? groupNameInput.value.trim() : null;
 
   // 3) createRoom 호출
-  const roomId = await createRoom({
+  const data = await createRoom({
     members: members,
     groupYn: 'Y',              // 그룹 채팅
     groupName: groupName,      // 입력값 또는 null
@@ -616,12 +616,14 @@ document.getElementById('create-group-btn')
     csrfHeaderName: csrfHeaderName,
     csrfToken: csrfToken
   });
-  
-  console.log("roomId :: ", roomId);
-  console.log("members :: ", members);
-  console.log("groupName :: ", groupName);
 
-  if (!roomId) {
+  console.log(data);
+  console.log("type!!!!!!!", typeof data);
+  console.log("roomId :: ", data.roomId);
+  console.log("groupName :: ", data.groupName);
+  console.log("groupYn :: ", data.groupYn);
+
+  if (!data.roomId) {
     alert("그룹 채팅방 생성에 실패했습니다.");
     return;
   }
@@ -632,7 +634,7 @@ document.getElementById('create-group-btn')
 
   // 5) 생성된 그룹 채팅방 오픈
   window.open(
-    '/messenger/room/' + roomId,
+    '/messenger/room/' + data.roomId + '?groupYn=' + data.groupYn,
     '_blank',
     'width=500,height=700,resizable=no,scrollbars=no'
   );
