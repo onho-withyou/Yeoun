@@ -104,8 +104,8 @@
 		  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
 		    <form class="modal-content" id="modal-doc" th:action="@{/approval/approval_doc}" method="POST" enctype="multipart/form-data">
 		      <div class="modal-header" data-draggable="true">
-				<!--<h3 class="modal-title" id="Drafting" value="">기안서 작성</h3>-->
-				<input type="text" id="Drafting" name="drafting" value="">
+				<h3 class="modal-title" id="Drafting" value="">기안서 작성</h3>
+				<input type="hidden" id="DraftingHidden" name="drafting" value="">
 		        <!--<p class="modal-title" id="Drafting" name="drafting" style="font-size: 50px;">기안서 작성</p>-->
 		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		      </div>
@@ -190,7 +190,7 @@
 					<label class="p-1" style="width: 200px;">발령부서</label><!--- 인사발령신청서-->
 		        	<div class="mb-6 mb-0" style="width: 344px;">
 		            	<select id="to-dept-id" name="toDeptId" class="form-select" >
-		            		<option selected>부서</option>
+		            		<option value="" selected>부서</option>
 							<option th:each="item, iterStat : ${deptList}" 
 							 		th:value="${item.deptId}" 
 							 		th:text="${iterStat.index+1} + ' : ' + ${item.deptName} + '(' + ${item.deptId} + ')'">
@@ -247,7 +247,7 @@
 						  <input class="form-check-input" type="radio" name="radioJeongyeolja" value="선결">
 						  <div>
 						 	<h5>전결자 지정 </h5>
-							<select id="emp_id" name="delegetedApprover" class="form-select" aria-label="Default select example">
+							<select id="delegetedApprover" name="delegetedApprover" class="form-select" aria-label="Default select example">
 							  <option selected></option>
 							  <option th:each="item, iterStat : ${empList}" 
 							 			th:value="${item.empId}" 
@@ -263,8 +263,8 @@
 		      <div class="modal-footer">
 		      	<div>
 			     	<button type="button" id="attachmentBtn" class="btn btn-primary" style="display: none;">첨부파일</button>
-			     	<button type="button" id="approvalCompanionBtn" class="btn btn-primary" >반려</button>
-			      	<button type="button" id="approvalCheckBtn" class="btn btn-primary" >결재확인</button>
+			     	<button type="button" id="approvalCompanionBtn" class="btn btn-primary">반려</button>
+			      	<button type="button" id="approvalCheckBtn" class="btn btn-primary">결재확인</button>
 			    </div>
 		      	<hr>
 		      	<button type="button" id="printBtn" class="btn btn-primary" style="display: none;">인쇄</button>

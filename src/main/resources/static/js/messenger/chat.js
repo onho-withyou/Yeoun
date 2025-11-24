@@ -12,9 +12,6 @@
  * #chat-body, #message, #send, #fileInput, #attachment-preview, #groupYn
  *
  */
-document.addEventListener("DOMContentLoaded", () => {
-	initChatJS();
-});
 
 // ===============================
 //  전역 변수
@@ -156,7 +153,7 @@ function renderMyMessage(eventDTO) {
 							<img src="/uploads/${file.filePath}/${file.fileName}" class="file-thumb">
 						</a>
 						<span class="file-name">${file.originFileName}</span>
-						<a class="file-download" href="/files/download/" + ${file.fileId} + "}">
+						<a class="file-download" href="/files/download/${file.fileId}">
 							다운로드
 						</a>
 					</div>

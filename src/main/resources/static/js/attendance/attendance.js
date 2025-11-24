@@ -33,12 +33,13 @@ const handleAttendanceToggle = async (empId) => {
 		msg = "지각입니다.";
 	} else if (result.status === "IN") {
 		msg = "복귀합니다.";
-	} else if (result.status === "LUNCH_TIME") {
-		msg = "점심시간입니다.";
 	} else {
-		console.log(result.status);
 		msg = "외출입니다.";
 	}
+	
+	console.log("result:", result);
+	console.log("status:", result?.status);
+	console.log("comparison:", result?.status === "WORKIN", result?.status === "WORK_OUT");
 	
 	// 버튼 활성화/비활성화 적용
 	if (result.buttonEnabled === false) {
@@ -48,6 +49,13 @@ const handleAttendanceToggle = async (empId) => {
 	}
 	
 	alert(msg);
+	
+	setTimeout(() => {
+	    if (result.status === "WORKIN" || result.status === "WORK_OUT" || result.status === "LATE") {
+	        location.reload();
+	    }
+	}, 10); 
+	
 }
 
 // 사원번호로 사원 조회
@@ -171,3 +179,65 @@ function resetModal() {
 	document.querySelector("#endTime").value = "";
 	document.querySelector("select[name='statusCode']").value = "";
 }
+
+// -----------------------------------------------------
+// 외근 등록 유효성 검사
+const form = document.querySelector("#outworkForm");
+const dateInput = document.querySelector("#inTime");
+const typeSelect = document.querySelector("select[name='accessType']");
+const outTimeInput = document.querySelector("#outTime");
+const reasonTextarea = document.querySelector("#reason");
+
+form.addEventListener("submit", (event) => {
+	// 근무날짜 미선택 시 전송 안됨
+	if (!dateInput.value) {
+		event.preventDefault();
+		dateInput.classList.add("is-invalid");
+	}
+	
+	// 근무유형 미선택 시 전송 안됨
+	if (!typeSelect.value) {
+		event.preventDefault();
+		typeSelect.classList.add("is-invalid");
+	}
+	
+	// 외근 시작 시간 미입력 했을 경우 전송 안됨
+	if (!outTimeInput.value) {
+		event.preventDefault();
+		outTimeInput.classList.add("is-invalid");
+	}
+	
+	// 외근 사유 2글자 미만일 경우 전송 안됨
+	if (reasonTextarea.value.trim().length < 2) {
+		event.preventDefault();
+		reasonTextarea.classList.add("is-invalid");
+	}
+});
+
+// 근무 날짜 입력 또는 선택 시 에러 문구 삭제
+dateInput.addEventListener("change", () => {
+	if (dateInput.value) {
+		dateInput.classList.remove("is-invalid");
+	}
+});
+
+// 근무유형을 선택했을 경우 에러 문구 삭제
+typeSelect.addEventListener("change", () => {
+	if (typeSelect.value) {
+		typeSelect.classList.remove("is-invalid");
+	}
+});
+
+// 외근 사유 2글자 이상 입력 시 에러 문구 삭제
+reasonTextarea.addEventListener("input", () => {
+	if (reasonTextarea.value.trim().length >= 2) {
+		reasonTextarea.classList.remove("is-invalid");
+	}
+});
+
+// 외근 시작 시간 입력 시 에러 문구 삭제됨
+outTimeInput.addEventListener("input", () => {
+	if (outTimeInput.value) {
+		outTimeInput.classList.remove("is-invalid");
+	}
+});

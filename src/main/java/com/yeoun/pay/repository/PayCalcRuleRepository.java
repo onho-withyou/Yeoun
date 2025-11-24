@@ -57,6 +57,11 @@ public interface PayCalcRuleRepository extends JpaRepository<PayCalcRule, Long> 
     	    """, nativeQuery = true)
     	List<PayCalcRule> findActiveRules(@Param("asOf") LocalDate asOf);
 
+    
+    boolean existsByPriorityAndRuleIdNot(Integer priority, Long ruleId);
+
+
+
 
 
 

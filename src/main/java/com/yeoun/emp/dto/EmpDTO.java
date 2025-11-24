@@ -25,7 +25,7 @@ import lombok.ToString;
 @ToString
 public class EmpDTO {
 	
-	 // === 검증 그룹 인터페이스 ===
+	// === 검증 그룹 인터페이스 ===
     public interface Regist {}  // 등록용
     public interface Edit {}  // 수정용
 	
@@ -100,7 +100,7 @@ public class EmpDTO {
 	
     // 재직 상태		
 	private String status; 
-	
+
 	// ========================
 	// 급여통장 정보
 	// ========================

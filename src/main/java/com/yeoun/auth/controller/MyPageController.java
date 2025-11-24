@@ -85,10 +85,19 @@ public class MyPageController {
 		// 로그인한 본인 아이디 강제 세팅
 	    empDTO.setEmpId(loginUser.getEmpId()); 
 	    
+	    // 원본 DTO 한 번 조회 (기존 사진 / 통장 사본 유지용)
+	    EmpDTO original = empService.getEmpForEdit(loginUser.getEmpId());
+	    
 	    // 1) Bean Validation 실패 폼 다시 보여주기
 	    if (bindingResult.hasErrors()) {
-	    	empDTO.setRrnMasked(empService.maskRrn(empDTO.getRrn()));
-	    	model.addAttribute("mode", "edit");
+	    	
+	    	// 주민번호 마스킹, 파일 id 등 원본 기준으로 복원
+	        empDTO.setRrnMasked(original.getRrnMasked());
+	        empDTO.setPhotoFileId(original.getPhotoFileId());
+	        empDTO.setFileId(original.getFileId()); 
+
+	        model.addAttribute("empDTO", empDTO);
+	        model.addAttribute("mode", "edit");
 	        model.addAttribute("formAction", "/my/info/update");
 	        
             List<Dept> topDeptList =
@@ -98,7 +107,6 @@ public class MyPageController {
 
             model.addAttribute("topDeptList", topDeptList);
             model.addAttribute("subDeptList", subDeptList);
-            
 	        model.addAttribute("positionList", positionRepository.findActive());
 	        model.addAttribute("bankList", commonCodeService.getBankList());
 
@@ -120,9 +128,21 @@ public class MyPageController {
 	            bindingResult.reject("empEditError", msg);
 	        }
 
+	        empDTO.setRrnMasked(original.getRrnMasked());
+	        empDTO.setPhotoFileId(original.getPhotoFileId());
+	        empDTO.setFileId(original.getFileId());
+
+	        model.addAttribute("empDTO", empDTO);
 	        model.addAttribute("formAction", "/my/info/update");
 	        model.addAttribute("mode", "edit");
-	        model.addAttribute("deptList", deptRepository.findActive());
+	        
+	        List<Dept> topDeptList =
+	                deptRepository.findByParentDeptIdAndUseYn("DEP999", "Y");
+	        List<Dept> subDeptList =
+	                deptRepository.findByParentDeptIdIsNotNullAndParentDeptIdNotAndUseYn("DEP999", "Y");
+	        
+	        model.addAttribute("topDeptList", topDeptList);
+            model.addAttribute("subDeptList", subDeptList);
 	        model.addAttribute("positionList", positionRepository.findActive());
 	        model.addAttribute("bankList", commonCodeService.getBankList());
 
