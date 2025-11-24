@@ -15,8 +15,12 @@
 	// 반려 버튼
 	const approvalCompanionBtn = document.getElementById('approvalCompanionBtn');
 	
+	// ========================================================
+	// v - 결재권한자
+	let elemApproverIdNum = null;//결재권한자 count
+	// ========================================================
 	
-	// 결재확인 버튼 눌렀을때 동작할 함수
+	// f - 결재확인 버튼 눌렀을때 동작할 함수
 	approvalCheckBtn.addEventListener('click', () => {
 		patchApproval("accept");
 	});
@@ -553,11 +557,13 @@
 
 		const selectBoxElement = document.getElementById('delegetedApprover');
 		const selectedEmpName = selectBoxElement.options[selectBoxElement.selectedIndex].text;
-		const targetDiv = document.getElementById(`approver_${count}`);
+		const targetDiv = document.getElementById(`approver_${elemApproverIdNum}`);
 	    const radio = event.target;
 	    const selectedValue = radio.value;
+		console.log("count--------------------------------------------------------------->",count);
 		console.log("선택된 이름", selectedEmpName);
 	    console.log("선택된 전결 상태:", selectedValue);
+		//console.log("targetDiv");
 	    if (selectedValue == 'N') {
 		
 	       //alert("전결자가 없습니다.");
@@ -572,7 +578,7 @@
 				
 	            console.log(`결재권한자 ${approver.approverOrder} delegateStatus = N`);
 	        });
-			console.log(" approverArr----------------->:", approverArr);
+			//console.log(" approverArr----------------->:", approverArr);
 	    }
 		console.log("targetDiv:------------------------------------>", targetDiv);
 		if(targetDiv) {
@@ -586,6 +592,10 @@
 	// 결재권한자 변경/전결 적용 함수
 	function applyDelegateChange(button) {
 
+		const count = Number(button.dataset.count); // 버튼 자체의 data-count 사용
+		const parentDiv = button.parentNode;        // 부모 div
+		const id = parentDiv.id || "jeongyeoljaDiv"; // 부모 div id
+		console.log();
 
 		//전결에 필요한 로직추가 approverArr 배열에 delegateStatus 값 변경
 		// 라디오 버튼값 가져오기
@@ -600,10 +610,6 @@
 				break;
 			}
 		}
-
-    	const count = Number(button.dataset.count); // 버튼 자체의 data-count 사용
-    	const parentDiv = button.parentNode;        // 부모 div
-    	const id = parentDiv.id || "jeongyeoljaDiv"; // 부모 div id
 
     	//alert(count + "번 결재권한자를 전결자로 지정\n부모 div id: " + id);
     	console.log("적용 버튼 클릭 div id:", id);
@@ -1188,10 +1194,10 @@
 		if (!selectedForm) {
 		    console.log("선택된 양식이 없습니다.")
 			
-				//document.getElementById('leavePeriodForm').style.display = 'flex';
-				//document.getElementById('leaveTypeForm').style.display = 'flex';
-				//document.getElementById('expndTypeForm').style.display = 'flex';
-				//document.getElementById('toDeptForm').style.display = 'flex';
+				document.getElementById('leavePeriodForm').style.display = 'flex';
+				document.getElementById('leaveTypeForm').style.display = 'flex';
+				document.getElementById('expndTypeForm').style.display = 'flex';
+				document.getElementById('toDeptForm').style.display = 'flex';
 			
 		    return;
 		}
@@ -1240,7 +1246,8 @@
 	defalutapprover();
 
 	function print(type, text) {
-    	// 결재권한자변경 div 버튼 생성
+    	// 결재권한자변경 div 버튼 생성 
+		console.log("this-------->",this);
     	if(this.count < 3){
     		this.count++;
     		approverDiv.innerHTML +='<div class="btn btn-success"'
@@ -1254,6 +1261,8 @@
 	
 	//결재권한자 버튼 클릭시 결재권한자변경 div 태그 생성//전결자
 	function approvalNo(count, text) {
+		elemApproverIdNum = count;
+		console.log("count ------------------------------------------>",count, ", approvalIdNum : ", elemApproverIdNum);
 	    let type = "change";
 	    if (jeongyeoljaDiv) {
 	        // div 초기화
