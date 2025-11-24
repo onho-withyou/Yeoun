@@ -37,6 +37,12 @@
 			    아이디 또는 비밀번호가 올바르지 않습니다.
 			  </div>
 			  
+			  <!-- 정상 로그아웃 -->
+			  <div th:if="${param.logout}" class="alert alert-success small">
+				정상적으로 로그아웃되었습니다.
+			  </div>
+			  
+			  <!-- 세션 만료 (타임아웃, 서버 재시작 등) -->
 			  <div th:if="${param.session}" class="alert alert-warning small">
 			     세션이 만료되었습니다. 다시 로그인해주세요.
 			  </div>
