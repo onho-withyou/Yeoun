@@ -50,6 +50,12 @@ function validateCalcRule(form) {
     else if(!calcFormula?.value)
       msg = "계산공식은 필수입니다.";
 
+	    if(!msg && targetType.value === "EMP") {
+	        if(!targetCode?.value || targetCode.value.length !== 7) {
+	            msg = "사원코드는 7자리여야 합니다.";
+	        }
+	    }
+
     return msg;
 }
 
@@ -65,18 +71,14 @@ function bindTargetSwitcher(prefix) {
     const deptSel  = document.getElementById(`${prefix}-target-dept`);
     const gradeSel = document.getElementById(`${prefix}-target-grade`);
 
-    if(!typeSel){
-        console.warn(`⚠ bindTargetSwitcher 실패: ${prefix}-target-type 없음`);
-        return;
-    }
+    if(!typeSel) return;
 
     console.log(`🎯 bindTargetSwitcher 실행됨: ${prefix}`);
 
     const updateUI = () => {
         const type = typeSel.value;
 
-        console.log(`👉 대상구분 변경: ${type}`);
-
+        // 모든 요소 숨기고 name 제거
         [inputEl, deptSel, gradeSel].forEach(el=>{
             if(el){
                 el.classList.add("d-none");
@@ -84,19 +86,31 @@ function bindTargetSwitcher(prefix) {
             }
         });
 
+        // 1) EMP 선택 → 입력칸만 보여주고 name 설정 (값 절대 건드리지 않음)
         if(type === "EMP"){
             inputEl.classList.remove("d-none");
-            inputEl.setAttribute("name","targetCode");
+            inputEl.setAttribute("name", "targetCode");
+            return;
         }
-        else if(type === "DEPT"){
+
+        // 2) DEPT 선택 → deptSelect 표시 + 사번칸 비우기
+        if(type === "DEPT"){
             deptSel.classList.remove("d-none");
-            deptSel.setAttribute("name","targetCode");
+            deptSel.setAttribute("name", "targetCode");
+            if(inputEl) inputEl.value = "";
+            return;
         }
-        else if(type === "GRADE"){
+
+        // 3) GRADE 선택 → gradeSelect 표시 + 사번칸 비우기
+        if(type === "GRADE"){
             gradeSel.classList.remove("d-none");
-            gradeSel.setAttribute("name","targetCode");
+            gradeSel.setAttribute("name", "targetCode");
+            if(inputEl) inputEl.value = "";
+            return;
         }
-        // ALL: targetCode 없음
+
+        // 4) ALL 선택 → 사번칸 비우기 + 모두 숨김
+        if(inputEl) inputEl.value = "";
     };
 
     updateUI();
@@ -150,11 +164,10 @@ document.addEventListener("show.bs.modal", (evt)=>{
 
     const modal = evt.target;
     const id = modal.getAttribute("id");
-
     if(!id || !id.startsWith("calcEditModal-")) return;
 
     const ruleId = id.replace("calcEditModal-", "");
-
+    
     console.log(`🔧 수정 모달 표시됨: ruleId=${ruleId}`);
 
     /* 대상 스위처 활성화 */

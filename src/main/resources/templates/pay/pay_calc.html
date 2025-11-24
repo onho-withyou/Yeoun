@@ -260,7 +260,8 @@
 			  <!-- 사원 입력 -->
 			  <input type="text" id="create-target-code-input"
 			         name="targetCode"
-			         class="form-control target-input d-none">
+			         class="form-control target-input d-none"
+			         placeholder="사원번호 7자리를 입력하세요">
 			
 			  <!-- 부서 선택 -->
 			  <select id="create-target-dept"  name="targetCode"
@@ -407,7 +408,14 @@
 
 <div class="col-md-8">
   <label class="form-label">대상코드</label>
-
+  
+ <input type="text"
+       th:id="'edit-' + ${c.ruleId} + '-target-code-input'"
+       class="form-control target-input"
+       th:classappend="${c.targetType?.name()=='EMP'} ? '' : 'd-none'"
+       name="targetCode"
+       th:placeholder="'사원번호를 입력하세요'">    
+  				
   <!-- EMP: 사원 입력 -->
   <input type="text"
          th:id="'edit-' + ${c.ruleId} + '-target-code-input'"
