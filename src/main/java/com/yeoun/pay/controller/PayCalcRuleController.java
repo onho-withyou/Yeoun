@@ -1,34 +1,22 @@
 package com.yeoun.pay.controller;
 
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.jexl3.JexlBuilder;
-import org.apache.commons.jexl3.JexlContext;
-import org.apache.commons.jexl3.JexlEngine;
-import org.apache.commons.jexl3.JexlExpression;
-import org.apache.commons.jexl3.MapContext;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import com.yeoun.emp.repository.DeptRepository;
+import com.yeoun.emp.repository.PositionRepository;
 import com.yeoun.pay.entity.PayCalcRule;
 import com.yeoun.pay.enums.ActiveStatus;
 import com.yeoun.pay.enums.RuleType;
 import com.yeoun.pay.enums.TargetType;
-import com.yeoun.pay.enums.YesNo;
 import com.yeoun.pay.repository.PayItemMstRepository;
-import com.yeoun.pay.service.PayCalcRuleService; 
+import com.yeoun.pay.service.PayCalcRuleService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Controller
 @RequestMapping("/pay/rule_calc")
@@ -36,168 +24,93 @@ import com.yeoun.pay.service.PayCalcRuleService;
 @Log4j2
 public class PayCalcRuleController {
 
-    
-    private final PayCalcRuleService payCalcRuleService; 
-    private final PayItemMstRepository payItemMstRepository;
-    
-    /** 급여계산 페이지 */
+    private final PayCalcRuleService service;
+    private final PayItemMstRepository itemRepo;
+    private final DeptRepository deptRepo;
+    private final PositionRepository positionRepo;
+
+    /** 페이지 */
     @GetMapping
-    public String calcPage(Model model,
-                           @RequestParam(value = "itemCode", required = false) String itemCode,
-                           @RequestParam(value = "msg", required = false) String msg,
-                           @RequestParam(value = "err", required = false) String err) {
+    public String page(Model model) {
 
         model.addAttribute("activeTab", "calc");
+        model.addAttribute("newCalc", new PayCalcRule());
 
-        // ===== 목록 조회 (itemCode 필터 선택적) =====
-        // 서비스 사용 버전 (권장)
-        List<PayCalcRule> calcRules = (itemCode != null && !itemCode.isBlank())
-                ? payCalcRuleService.findByItem(itemCode)
-                : payCalcRuleService.findAllOrderByPriority(); // 아래 주석 참고
-        model.addAttribute("calcRules", calcRules);
-
-        // ===== 메시지 처리 =====
-        if (msg != null) model.addAttribute("msg", msg);
-        if (err != null) model.addAttribute("err", err);
-
-        // ===== 등록 폼 바인딩 객체 (기본값 포함) =====
-        if (!model.containsAttribute("newCalc")) {
-            PayCalcRule blank = PayCalcRule.builder()
-                    .status(ActiveStatus.ACTIVE)
-                    .priority(100)
-                    .startDate(LocalDate.now())
-                    .build();
-            model.addAttribute("newCalc", blank);
-        }
-
-        // ===== 폼 선택 소스 (드롭다운 등) =====
-        model.addAttribute("items", payItemMstRepository.findByUseYnOrderBySortNoAsc(YesNo.Y)); // 활성 항목만
+        model.addAttribute("calcRules", service.findAllOrderByPriority());
+        model.addAttribute("items", itemRepo.findAll());
         model.addAttribute("ruleTypes", RuleType.values());
         model.addAttribute("targetTypes", TargetType.values());
         model.addAttribute("statuses", ActiveStatus.values());
-        model.addAttribute("selectedItemCode", itemCode); // 필터 유지용
+        model.addAttribute("depts", deptRepo.findActive());    
+        model.addAttribute("positions", positionRepo.findActive()); 
+
+
+
+        // 등록폼 바인딩 객체
+        if (!model.containsAttribute("createForm")) {
+            PayCalcRule blank = PayCalcRule.builder()
+                    .startDate(LocalDate.now())
+                    .priority(100)
+                    .status(ActiveStatus.ACTIVE)
+                    .build();
+            model.addAttribute("createForm", blank);
+        }
 
         return "pay/pay_calc";
     }
 
-    /** 계산 규칙 등록 (CREATE) */
-    @PostMapping // POST: /pay/rule_calc
-    public String create(@Valid @ModelAttribute("newCalc") PayCalcRule form,
-                         BindingResult br,
+    /** 등록 */
+    @PostMapping("/create")
+    public String create(@ModelAttribute("createForm") PayCalcRule form,
                          RedirectAttributes ra) {
-        
-        if (br.hasErrors()) {
-            log.warn("create() validation errors: {}", br.getAllErrors());
-            ra.addFlashAttribute("err", "입력값을 확인하세요.");
-            ra.addFlashAttribute("newCalc", form);
-            ra.addFlashAttribute("openCreateCalcModal", true);
-            return "redirect:/pay/rule_calc";
-        }
-        
+
         try {
-            // Service 호출로 변경
-            payCalcRuleService.save(form); 
-            ra.addFlashAttribute("msg", "계산규칙이 등록되었습니다.");
-            
-        } catch (IllegalArgumentException iae) {
-            // ✅ 여기서 잡아서 모달 열고 값 유지
-            log.error("create() biz validation error: {}", iae.getMessage());
-            ra.addFlashAttribute("err", iae.getMessage()); // ex) item(ITEM_CODE)은 필수입니다.
-            ra.addFlashAttribute("newCalc", form);
-            ra.addFlashAttribute("openCreateCalcModal", true);
+            service.save(form);
+            ra.addFlashAttribute("msg", "등록되었습니다.");
+
         } catch (Exception e) {
-            log.error("create() error", e);
-            ra.addFlashAttribute("err", "계산규칙 등록 중 오류가 발생했습니다.");
-            ra.addFlashAttribute("newCalc", form);
-            ra.addFlashAttribute("openCreateCalcModal", true);
+            ra.addFlashAttribute("createErrorMsg", e.getMessage());
+            ra.addFlashAttribute("createForm", form);
+            ra.addFlashAttribute("openCreateModal", true);
         }
+
         return "redirect:/pay/rule_calc";
     }
 
-    /** 계산 규칙 수정 (UPDATE) */
+    /** 수정 */
     @PostMapping("/{id}/update")
     public String update(@PathVariable("id") Long id,
-                         @Valid @ModelAttribute("newCalc") PayCalcRule form,
-                         BindingResult br,
+    				     @ModelAttribute("editForm") PayCalcRule form,
                          RedirectAttributes ra) {
-        
-        if (br.hasErrors()) {
-            log.warn("update() validation errors: {}", br.getAllErrors());
-            ra.addFlashAttribute("err", "입력값을 확인하세요.");
-            ra.addFlashAttribute("openEditCalcModalId", id);
-            ra.addFlashAttribute("newCalc", form);
-            return "redirect:/pay/rule_calc";
-        }
-        
+
         try {
-            form.setRuleId(id); // PK 설정
-            // Service 호출로 변경
-            payCalcRuleService.save(form); 
-            ra.addFlashAttribute("msg", "계산규칙이 수정되었습니다.");
-            
-        } catch (DataIntegrityViolationException e) {
-            log.error("update() DataIntegrityViolationException", e);
-            ra.addFlashAttribute("err", "필수 항목 누락 또는 중복된 값이 있습니다. (DB 제약 조건 오류)");
-            ra.addFlashAttribute("openEditCalcModalId", id);
-            ra.addFlashAttribute("newCalc", form);
+            form.setRuleId(id);
+            service.save(form);
+            ra.addFlashAttribute("msg", "수정되었습니다.");
+
         } catch (Exception e) {
-            log.error("update() error", e);
-            ra.addFlashAttribute("err", "계산규칙 수정 중 일반적인 오류가 발생했습니다.");
-            ra.addFlashAttribute("openEditCalcModalId", id);
-            ra.addFlashAttribute("newCalc", form);
+
+            // valueNum 파싱 문제, DB 오류 등 실제 저장 오류만 메시지 전달
+            if (!e.getMessage().contains("targetCode") ) {
+                ra.addFlashAttribute("editErrorMsg", e.getMessage());
+            }
+
+            ra.addFlashAttribute("openEditModalId", id);
         }
-        
+
+
         return "redirect:/pay/rule_calc";
     }
 
-    /** 계산 규칙 삭제 (DELETE) */
+    /** 삭제 */
     @PostMapping("/{id}/delete")
     public String delete(@PathVariable("id") Long id, RedirectAttributes ra) {
         try {
-            // Service 호출로 변경
-            payCalcRuleService.delete(id); 
-            ra.addFlashAttribute("msg", "계산규칙이 삭제되었습니다.");
+            service.delete(id);
+            ra.addFlashAttribute("msg", "삭제되었습니다.");
         } catch (Exception e) {
-            log.error("delete() error", e);
-            ra.addFlashAttribute("err", "계산규칙 삭제 중 오류가 발생했습니다.");
+            ra.addFlashAttribute("err", "삭제 중 오류");
         }
         return "redirect:/pay/rule_calc";
     }
-    
-    
-    /**서버 계산테스트*/
-    @PostMapping("/testExpr")
-    @ResponseBody
-    public Map<String,Object> testExpression(@RequestParam String expr,
-                                             @RequestParam(required=false) String empId) {
-
-        Map<String,Object> result = new HashMap<>();
-        try {
-            // 테스트용 변수 세팅
-            BigDecimal base = BigDecimal.valueOf(3000000);
-            BigDecimal rate = BigDecimal.valueOf(0.1);
-            int usedAnnual = 2;
-
-            JexlEngine jexl = new JexlBuilder().create();
-            JexlExpression e = jexl.createExpression(expr);
-
-            JexlContext ctx = new MapContext();
-            ctx.set("baseSalary", base);
-            ctx.set("rate", rate);
-            ctx.set("value", rate);
-            ctx.set("usedAnnual", usedAnnual);
-
-            Object val = e.evaluate(ctx);
-
-            result.put("ok", true);
-            result.put("value", val.toString());
-            return result;
-
-        } catch (Exception ex) {
-            result.put("ok", false);
-            result.put("error", ex.getMessage());
-            return result;
-        }
-    }
-
 }
