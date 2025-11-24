@@ -2,6 +2,8 @@
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{/layouts/layout.html}">
 <head>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
 	<link rel="stylesheet" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css">
 	<link rel="stylesheet" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@toast-ui/calendar@2.1.3/dist/toastui-calendar.min.css" />
@@ -67,6 +69,10 @@
 		background-color: #008dff1a !important;
 		font-weight: 600 !important;
 	}
+	
+	.toastui-calendar-see-more {
+		height: 200px;
+	}
 	</style>
 	
 </head>
@@ -81,13 +87,13 @@
 	    <div class="container mt-4">
 	        <div class="row">
 				<!-- 왼쪽 열: 달력/탭(View 변환) -->
-	            <div class="col-md-7 col-lg-8">
+	            <div class="col-md-7 col-lg-8" >
 	                <section class="panel calendar border">
 	                    <div class="calendar-header d-flex align-items-center pb-2">
 	                        <!-- 달력 타입변환 -->
 	                        <div class="btn-group" role="group">
 	                            <button type="button" class="btn btn-outline-secondary btn-sm " data-view="list" id="type-list">List</button>
-	                            <button type="button" class="btn btn-outline-secondary btn-sm " data-view="month" id="type-month">Month</button>
+	                            <button type="button" class="btn btn-outline-secondary btn-sm active" data-view="month" id="type-month">Month</button>
 	                            <button type="button" class="btn btn-outline-secondary btn-sm " data-view="week" id="type-week">Week</button>
 	                            <button type="button" class="btn btn-outline-secondary btn-sm " data-view="day" id="type-day">Day</button>
 	                        </div>
@@ -133,6 +139,18 @@
 	                    <div id="mainContent"> 
 		                    <div id="calendar" style="height: 700px; border: solid;"></div>
 	                    </div>
+                   		<!-- 스피너 -->
+						<div id="calendar-loading-overlay" style="display:none; 
+					    position:absolute; top:0; left:0; width:100%; height:100%; 
+					    background:rgba(255,255,255,0.6); 
+					    z-index:99; text-align:center; display:flex; align-items:center; justify-content:center;">
+							<div style="margin-top:30vh;">
+								<div class="spinner-border text-primary" role="status">
+								</div>
+								<br>
+								<span class="visually">데이터 불러오는 중...</span>
+							</div>
+						</div>
 	                </section>
 	            </div>
 	            
@@ -183,6 +201,7 @@
 	<!-- /custom-body 끝 -->
 	<!-- 연차툴팁 -->
 	<div id="leave_tooltip" class="leave-tooltip" style="background-color: white; border:black solid; padding:10px; z-index: 99; display: none;"></div>
+
 	<!-- 모달창 삽입 -->
 	<th:block th:insert="~{main/schedule_modal}"></th:block>
 	<th:block th:insert="~{notice/notice_modal}"></th:block>
