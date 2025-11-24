@@ -159,9 +159,6 @@ public class ApprovalDocService {
 	 public List<Object[]> getFinishedApprovalDocs(String empId) {
 	 	return approvalDocRepository.findFinishedApprovalDocs(empId);
 	 }
-	 
-	 
-	 
 
 	 // --------------------------------------------------------------------------------------
 	 // 결재 승인 메서드 

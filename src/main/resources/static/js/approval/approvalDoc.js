@@ -391,58 +391,58 @@
 	
 			grid5.on("click", async (ev) => {
 			
-			const target = ev.nativeEvent.target;
-			
-			const rowData = grid5.getRow(ev.rowKey);
-			$('#approval-modal').modal('show');
-			
-			document.getElementById('saveBtn').style.display = "none";
-			// 문서 열릴때 approvalId에 현재 열린 문서id 저장
-			approvalId = rowData.approval_id;
-			// 문서 열릴때 현재 결재권자(approval) 저장
-			currentApprover = rowData.approver;
-			
-			document.getElementById('Drafting').innerText = rowData.approval_title;
-			document.getElementById('DraftingHidden').value = rowData.approval_title;
-			document.getElementById('today-date').innerText = rowData.created_date.split('T')[0] ;//결재 작성날짜 = 결재시작일
-			//document.getElementById('approval-title').value = rowData.approval_title;
-			document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
-			document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
-			
-			const createdDate = rowData.created_date;
-			document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
-			document.getElementById('finish-date').value = toDateStr(rowData.finish_date);//결재완료날짜
-			//휴가 연차신청서 
-			document.getElementById('start-date').value = toDateStr(rowData.start_date); //휴가시작날짜
-			document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
-			//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
-			document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
-		
-			document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
-			document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
-			//document.getElementById('approver').value = rowData.approver;//결재권한자
-			const approverList = await getApproverList(approvalId);
+				const target = ev.nativeEvent.target;
 				
-				let sortedList; 
+				const rowData = grid5.getRow(ev.rowKey);
+				$('#approval-modal').modal('show');
 				
-				if(approverList.length > 0) {
-					sortedList = approverList.sort((a, b) => {
-						return Number (a.orderApprovers) - Number(b.orderApprovers);
-					});
+				document.getElementById('saveBtn').style.display = "none";
+				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
+				approvalId = rowData.approval_id;
+				// 문서 열릴때 현재 결재권자(approval) 저장
+				currentApprover = rowData.approver;
+				
+				document.getElementById('Drafting').innerText = rowData.approval_title;
+				document.getElementById('DraftingHidden').value = rowData.approval_title;
+				document.getElementById('today-date').innerText = rowData.created_date.split('T')[0] ;//결재 작성날짜 = 결재시작일
+				//document.getElementById('approval-title').value = rowData.approval_title;
+				document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
+				document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
+				
+				const createdDate = rowData.created_date;
+				document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
+				document.getElementById('finish-date').value = toDateStr(rowData.finish_date);//결재완료날짜
+				//휴가 연차신청서 
+				document.getElementById('start-date').value = toDateStr(rowData.start_date); //휴가시작날짜
+				document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
+				//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
+				document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
+			
+				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
+				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
+				//document.getElementById('approver').value = rowData.approver;//결재권한자
+				const approverList = await getApproverList(approvalId);
 					
-					window.count = 0;
-					approverDiv.innerHTML = "";
-										
-					for (const approver of sortedList) {
-						selectBox.select(approver.empId);
-						print("default", selectBox.getSelectedItem().label);
+					let sortedList; 
+					
+					if(approverList.length > 0) {
+						sortedList = approverList.sort((a, b) => {
+							return Number (a.orderApprovers) - Number(b.orderApprovers);
+						});
+						
+						window.count = 0;
+						approverDiv.innerHTML = "";
+											
+						for (const approver of sortedList) {
+							selectBox.select(approver.empId);
+							print("default", selectBox.getSelectedItem().label);
+						}
+						
 					}
-					
-				}
-			//document.getElementById('approver').innerText = rowData.approver;//전결자
-			document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-			//selectBox.disable();
-			formDisable();
+				//document.getElementById('approver').innerText = rowData.approver;//전결자
+				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+				//selectBox.disable();
+				formDisable();
 			});
 	
 			return itemData;
@@ -509,34 +509,7 @@
         	console.log("결재자 배열이 비어있습니다.");
         	return;
     	}
-
-
-
-		// // 배열을 순회하며 FormData에 데이터 추가
-		// approverArr.forEach((approver, index) => {
-		// 	// 서버에서 요구하는 키 이름 (approverEmpIdOV1, approverEmpIdOV2, ...)
-		// 	// 결재 순서는 1부터 시작하므로 index + 1을 사용합니다.
-		// 	const keyName = `approverEmpIdOV${index + 1}`;
-			
-		// 	// 1. 전결 상태 반영: boolean 값을 "Y" 또는 "N" 문자열로 변환
-		// 	// (기존 코드처럼 무조건 "Y"나 "N"을 하드코딩하지 않습니다.)
-		// 	const delegateStatusString = approver.delegateStatus ? "Y" : "N";
-			
-		// 	// 2. 데이터 조합: "사번,순서,전결상태(Y/N)"
-		// 	// approverOrder를 사용하거나, 현재 순서(index + 1)를 사용할 수 있지만, 
-		// 	// 데이터 객체에 저장된 순서(approver.approverOrder)를 사용하는 것이 안전합니다.
-		
-		// 	const value = `${approver.empId},${approver.approverOrder},${delegateStatusString}`;
-			
-		// 	// 3. FormData에 값 추가
-		// 	formData.append(keyName, value);
-
-		// 	// 4. (선택적) 3명을 초과하는 결재자에 대한 경고 (필요하다면)
-		// 	if (index >= 3) {
-		// 		console.warn(`경고: ${index + 1}번째 결재자가 추가되었습니다. 서버에서 3명 초과 처리가 가능한지 확인하세요.`);
-		// 	}
-		// });
-
+		//결재권한자 3명까지
 		if(approverArr.length > 0){
 
 			//formData.append('delegateStatus', );//전결상태 3개
@@ -548,10 +521,6 @@
 				formData.append('approverEmpIdOV3', approverArr[2].empId +","+ approverArr[2].approverOrder +"," + "N");
 			//formData.append('approvalStatus', false);//권한자상태 필요없음
 			//formData.append('orderApprovers', null);//결재권한자 순서 3개
-			//if 1차권한자인지 판별후
-			// if(approverArr[0].empId != undefined){
-			// 	formData.append('viewing','y');//1차결재권한자에게만 y를 줌
-			// }
 		}
 
 
@@ -578,6 +547,42 @@
 	});
 
 
+	document.addEventListener("change", function(event) {
+
+	    if (!event.target.matches('input[name="radioJeongyeolja"]')) return;
+
+		const selectBoxElement = document.getElementById('delegetedApprover');
+		const selectedEmpName = selectBoxElement.options[selectBoxElement.selectedIndex].text;
+		const targetDiv = document.getElementById(`approver_${count}`);
+	    const radio = event.target;
+	    const selectedValue = radio.value;
+		console.log("선택된 이름", selectedEmpName);
+	    console.log("선택된 전결 상태:", selectedValue);
+	    if (selectedValue == 'N') {
+		
+	       //alert("전결자가 없습니다.");
+		
+	        approverArr.forEach(approver => {
+			
+	            if (targetDiv) {
+	                targetDiv.querySelectorAll('span').forEach(span => span.remove());
+	            }
+	            approver.delegateStatus = 'N';
+				approver.empId = approver.originalEmpId;  // 원래 사번 복구
+				
+	            console.log(`결재권한자 ${approver.approverOrder} delegateStatus = N`);
+	        });
+			console.log(" approverArr----------------->:", approverArr);
+	    }
+		console.log("targetDiv:------------------------------------>", targetDiv);
+		if(targetDiv) {
+			// 새로운 전결자 표시
+			if(selectedValue != 'N') {
+				targetDiv.querySelectorAll('span').forEach(span => span.remove());
+				targetDiv.innerHTML += `<span style="color:red;"> ${selectedValue} : ${selectedEmpName} </span>`;
+			}
+		}
+	});
 	// 결재권한자 변경/전결 적용 함수
 	function applyDelegateChange(button) {
 
@@ -585,6 +590,8 @@
 		//전결에 필요한 로직추가 approverArr 배열에 delegateStatus 값 변경
 		// 라디오 버튼값 가져오기
 		const radioJeongyeolja = document.getElementsByName('radioJeongyeolja');
+		const targetDiv = document.getElementById(`approver_${count}`);
+
 		let selectedValue;
 		for (const radio of radioJeongyeolja) {
 			console.log("radio value:", radio.value, "checked:", radio.checked);
@@ -607,11 +614,12 @@
 
 		// toastui selectbox에서 선택된 사번 가져오기#select-box
 		const selectBoxElement = document.getElementById('delegetedApprover');
+		console.log("selectBoxElement:---------------->", selectBoxElement);
 		const selectedEmpId = selectBoxElement.value;
-		const selectedEmpName = selectBoxElement.options[selectBoxElement.selectedIndex].text;
-		const targetDiv = document.getElementById(`approver_${count}`);
+		//const selectedEmpName = selectBoxElement.options[selectBoxElement.selectedIndex].text;
+		
 		console.log("선택된 사번:", selectedEmpId);
-		console.log("선택된 이름", selectedEmpName);
+		
 	
 		approverArr.forEach((value,key) => {
 			console.log("비교 중인 approverOrder:", value.approverOrder, "==", count);
@@ -630,44 +638,7 @@
 		console.log("Updated approverArr:", approverArr);
 
 		//const radios = document.getElementsByName('radioJeongyeolja');
-
-		
-		document.addEventListener("change", function(event) {
-
-		    if (!event.target.matches('input[name="radioJeongyeolja"]')) return;
-
-		    const radio = event.target;
-		    const selectedValue = radio.value;
-
-		    console.log("선택된 전결 상태:", selectedValue);
-
-		    if (selectedValue == 'N') {
-			
-		        alert("전결자가 없습니다.");
-			
-		        approverArr.forEach(approver => {
-		            const targetDiv = document.getElementById(`approver_${approver.approverOrder}`);
-				
-		            if (targetDiv) {
-		                targetDiv.querySelectorAll('span').forEach(span => span.remove());
-		            }
-		            approver.delegateStatus = 'N';
-					approver.empId = approver.originalEmpId;  // 원래 사번 복구
-
-		            console.log(`결재권한자 ${approver.approverOrder} delegateStatus = N`);
-		        });
-		    }
-			if(targetDiv) {
-			// 새로운 전결자 표시
-			if(selectedValue != 'N') {
-				targetDiv.querySelectorAll('span').forEach(span => span.remove());
-				targetDiv.innerHTML += `<span style="color:red;"> ${selectedValue} : ${selectedEmpName} </span>`;
-			}
-		}
-		});
 		//<div id="approver_${count}"의 선택된 div에 전결자 표시
-		
-
 	}
 
 	//1. 결재사항 불러오기
@@ -1257,7 +1228,7 @@
 				approverArr.push({
 					empId: approverEmpId,
 					approverOrder: window.count,
-					delegateStatus: false, 
+					delegateStatus: 'N', 
 					originalEmpId: approverEmpId
 				});
         	});
@@ -1267,8 +1238,6 @@
 	}
 
 	defalutapprover();
-	
-
 
 	function print(type, text) {
     	// 결재권한자변경 div 버튼 생성
@@ -1277,7 +1246,7 @@
     		approverDiv.innerHTML +='<div class="btn btn-success"'
     		                      +'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
     		                      +'<p onclick="approverDivclose(this,' + "'"+ type + "'"+ ','+ count +')" style="float:right;margin-right: 8px;">&times;</p>'
-    		                      +'<p onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
+    		                      +'<p id="approver_'+count+'" onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
     		                    	+'</div>';
 		}
     }
