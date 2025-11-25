@@ -425,7 +425,8 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 	
 	@Query("select a from ApprovalDoc a " 
 			+ "where (a.docStatus not in ('완료', '반려') and a.approver = :empId)" 
-			+ "or a.empId = :empId")
+			+ "or a.empId = :empId "
+			+ "order by createdDate desc")
 	Page<ApprovalDoc> getSummaryApprovalPage(@Param("empId") String empId, Pageable pageable);
 			
 
