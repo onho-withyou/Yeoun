@@ -83,6 +83,8 @@ const searchEmp = async () => {
 
 let currentMode = "regist";
 let currentAttendanceId = null;
+// 수정 모달에서 기존 시간과 변경된 시간 비교하기 위한 변수
+let originalInTime = null;
 
 // 출퇴근 수기 등록 및 수정 모달
 const openModalAttendance = async (mode, attendanceId = null) => {
@@ -111,7 +113,10 @@ const openModalAttendance = async (mode, attendanceId = null) => {
 		await searchEmp();
 		
 		if (data.workIn != null) {
-			document.querySelector("#inTime").value = data.workIn.slice(0, 5);
+			originalInTime = data.workIn.slice(0, 5);
+			document.querySelector("#inTime").value = originalInTime;
+		} else {
+			originalInTime = null;
 		}
 		
 		if (data.workOut != null) {
@@ -122,11 +127,11 @@ const openModalAttendance = async (mode, attendanceId = null) => {
 	} else { // 등록 모드
 		modalTitle.textContent = "출/퇴근 등록";
 		saveBtn.textContent = "등록";
+		originalInTime = null;
 		resetModal(); // 모달 초기화
 	}
 	modalInstance.show();
 }
-
 
 // 등록 및 수정 공용 함수 
 const saveAttendance = async () => {
@@ -159,10 +164,14 @@ const saveAttendance = async () => {
 	}
 	
 	const inDate = new Date(`2000-01-01T${workIn}`);
-
-	if (inDate < min || inDate > max) {
-		alert("출근시간은 09:00 ~ 18:00 사이여야 합니다.");
-		return;
+	
+	// 수정모드에서 시간 변경되었을 때 동작
+	if (originalInTime !== null && workIn !== originalInTime) {
+		
+		if (inDate < min || inDate > max) {
+			alert("출근시간은 09:00 ~ 18:00 사이여야 합니다.");
+			return;
+		}
 	}
 	
 	// 퇴근 시간이 있을 때 출근 시간과 비교
