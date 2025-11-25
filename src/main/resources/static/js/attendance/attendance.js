@@ -138,6 +138,21 @@ const saveAttendance = async () => {
 	const url = currentMode === "edit" ? `/attendance/${currentAttendanceId}` : "/attendance";
 	const method = currentMode === "edit" ? "PATCH" : "POST";
 	
+	// 출근 시간을 입력하지 않았을 때
+	if (!workIn) {
+		document.querySelector("#inTime").classList.add("is-invalid");
+		return;
+	} else {
+		document.querySelector("#inTime").classList.remove("is-invalid");
+	}
+	
+	if (!workOut) {
+		document.querySelector("#endTime").classList.add("is-invalid");
+		return;
+	} else {
+		document.querySelector("#inTime").classList.add("is-invalid");
+	}
+	
 	try {
 		const response = await fetch(url, {
 			method,

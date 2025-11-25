@@ -50,11 +50,13 @@
 							</div>
 							<div class="col mb-6">
 								<label for="inTime" class="form-label">출근시간</label>
-								<input type="time" id="inTime" class="form-control" name="workIn"/>
+								<input type="time" id="inTime" class="form-control" name="workIn" required/>
+								<div class="invalid-feedback">출근 시간을 입력해주세요.</div>
 							</div>
 							<div class="col mb-6">
 								<label for="endTime" class="form-label">퇴근시간</label>
 								<input type="time" id="endTime" class="form-control" name="workOut"/>
+								<div class="invalid-feedback">퇴근시간을 입력해주세요.</div>
 							</div>
 							<div class="col mb-6">
 								<label class="form-label">상태</label>
