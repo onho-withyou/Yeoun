@@ -206,7 +206,7 @@ function handleSubmitAction(e) {
 	
 	
 	// 퇴직이 아닐 때만 부서/직급 필수
-    if (actionType !== 'RETIRE_ACT' && actionType !== 'LEAVE_ACT') {
+    if (actionType !== 'RETIRE_ACT' && actionType !== 'LEAVE_ACT' && actionType !== 'RETURN_ACT') {
       if (!dto.toDeptId) {
         alert("부서를 선택하세요!");
         return;

@@ -40,6 +40,7 @@ public class HrActionRequestDTO {
         HrAction action = new HrAction();
         action.setActionType(this.actionType);
         action.setEffectiveDate(this.effectiveDate);
+        action.setLeaveEndDate(this.leaveEndDate);
         action.setActionReason(this.actionReason);
         action.setStatus("대기");       
         return action;
