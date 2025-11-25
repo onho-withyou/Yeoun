@@ -124,9 +124,9 @@ async function getApproverList(approvalId) {
 
 async function print(type, text) {
 	// 결재권한자변경 div 버튼 생성
-	console.log(window.count, "@@@@@@@@@@@@");
+//	console.log(window.count, "@@@@@@@@@@@@");
 	if(this.count < 3){
-	console.log(this.count, "this.count:!!!!!!!!!!!!")
+//	console.log(this.count, "this.count:!!!!!!!!!!!!")
 	this.count++;
 	approverDiv.innerHTML +='<div class="btn btn-success approvers"'
   						+'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
@@ -819,13 +819,11 @@ async function initApprovalGrid(data) {
 		]
 	});
 	approvalGrid.resetData(data);
-	console.log(data,"@@@@@@@@@@@@@@@@!!!!!!!!!!!!!!!!@###########");
 	
 	const response = await fetch("/approval/empList");
 	const selectData = await response.json();
 	let itemData  = [];
 	let obj ={};
-	console.log(selectData);
 	selectData.map((item,index)=>{
 		obj["value"] = item[0]; //사번
 		obj["label"] = (index+1) +" : "+item[1]+"("+item[0]+")"; //이름(사번)
@@ -858,7 +856,7 @@ async function initApprovalGrid(data) {
 		const rowData = approvalGrid.getRow(event.rowKey);
 		selectedApprovalId = approvalId;
 		console.log("rowData : ", rowData);
-//		
+		
 //		alert("선택된 approvalId : " + approvalId);
 //		const modalEl = document.getElementById('show-notice');
 //		new bootstrap.Modal(modalEl).show();
@@ -903,7 +901,7 @@ async function initApprovalGrid(data) {
 		}
 		
 		document.getElementById('Drafting').value = rowData.formType;
-		console.log(rowData.approvaTitle);
+//		console.log(rowData.approvaTitle);
 		document.getElementById('today-date').innerText = toDateStr(rowData.createdDate) ;//결재 작성날짜 = 결재시작일
 		document.getElementById('approval-title').value = rowData.approvalTitle;
 		//양식종류 form-menu
@@ -918,14 +916,13 @@ async function initApprovalGrid(data) {
 		//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
 		document.getElementById('leave-type').value = rowData.leaveType;//휴가종류
 		
-		console.log("rowData.to_dept_id",rowData.to_deptId);
+//		console.log("rowData.to_dept_id",rowData.to_deptId);
 		document.getElementById('to-dept-id').value = rowData.toDeptId;//발령부서,디비잘못넣음
 		document.getElementById('expnd-type').value = rowData.expndType;//지출종류EXPND_TYPE
 		//document.getElementById('approver').value = rowData.approver;//결재권한자
 		const approverList = await getApproverList(approvalId);
 		selectBox.enable();
 		let sortedList; 
-		console.log(approverList, "@@@@@@@@@@@@@@@@@@@@@approverList");
 
 		approverDiv.innerHTML = "";
 		if(approverList.length > 0) {
@@ -936,7 +933,6 @@ async function initApprovalGrid(data) {
 			
 			window.count = 0;
 								
-			console.log(sortedList, "@@@@@@@@@@@@@@@@@@@@@sortedList");
 			
 			for (const approver of sortedList) {
 				selectBox.select(approver.empId);
