@@ -1,0 +1,22 @@
+/* 알림 있을 때 붙는 빨간 점 */
+
+.nav-item.lh-1.me-3 {
+    position: relative;
+}
+
+#badge_chat {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 9px;
+    height: 9px;
+    background: #ff4d4f;
+    border-radius: 50%;
+    display: none;   /* 기본은 숨김 */
+}
+
+/* 알림 있을 때 */
+#badge_chat.has-alert {
+    display: block;
+}
+

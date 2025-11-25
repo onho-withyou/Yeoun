@@ -60,15 +60,15 @@ public class ApprovalController {
  	}
   
 	//날짜,기안자,검색구현
-  	@ResponseBody
-	@GetMapping("/search")
-	public List<Object[]> getMethodName(@RequestParam(name="createDate") String createDate
-										,@RequestParam(name="finishDate") String finishDate
-										,@RequestParam(name="empName") String empName
-										,@RequestParam(name="approvalTitle") String approvalTitle) {
-		log.info("서치중입니다.",createDate+","+finishDate+","+empName+","+approvalTitle);
-		return approvalDocService.getSearchList(createDate,finishDate,empName,approvalTitle);
-	}
+//  	@ResponseBody
+//	@GetMapping("/search")
+//	public List<Object[]> getMethodName(@RequestParam(name="createDate") String createDate
+//										,@RequestParam(name="finishDate") String finishDate
+//										,@RequestParam(name="empName") String empName
+//										,@RequestParam(name="approvalTitle") String approvalTitle) {
+//		log.info("서치중입니다.",createDate+","+finishDate+","+empName+","+approvalTitle);
+//		return approvalDocService.getSearchList(createDate,finishDate,empName,approvalTitle);
+//	}
 
 	//사원목록불러오기 토스트 셀렉트박스
 	@ResponseBody
