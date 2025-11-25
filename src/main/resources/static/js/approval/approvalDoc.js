@@ -1081,17 +1081,17 @@
 	const searchBtn = document.getElementById("searchBtn");
     if (searchBtn) {
         searchBtn.addEventListener("click", (ev) => {
-			//alert(" 날짜,기안자,문서이름조회 구현중")
+			//alert(" 날짜,기안자,문서양식조회 구현중")
 			console.log(ev);
-			const params = new URLSearchParams({
+			const params = {
 				
 			 	createDate: document.getElementById("searchStartDate").value ?? "",
 	    	 	finishDate: document.getElementById("searchEndDate").value ?? "",
 	    	 	empName: document.getElementById("searchEmpIdAndformType").value ?? "",
 				approvalTitle: document.getElementById("searchEmpIdAndformType").value ?? ""
-			});
+			};
 
-			fetch('/api/approval/approvalDoc/search', {
+			fetch('/api/approvals/approvalDoc/searchAllGrids', {
 				method: 'POST',
 				headers:{
 					[csrfHeaderName]: csrfToken,
@@ -1099,14 +1099,29 @@
 				},
 				body: JSON.stringify(params)
 			})
-        	.then(res => res.json())
+        	.then(res => {
+      			if (!res.ok) {
+            		throw new Error(`HTTP error! status: ${res.status}`);
+        		}
+        		return res.json();
+    		})
         	.then(data => {
-            	//grid2.resetData(data);
+            	grid1.resetData(data.grid1Data);
+				grid2.resetData(data.grid2Data);
+				grid3.resetData(data.grid3Data);
+				grid4.resetData(data.grid4Data);
+				grid5.resetData(data.grid5Data);
+				console.log("검색데이터:",data);
         	})
         	.catch(err => {
             	console.error("조회오류", err);
+				grid1.resetData([]);
+				grid2.resetData([]);
+				grid3.resetData([]);
+				grid4.resetData([]);
+				grid5.resetData([]);
         	});
-			
+			console.log("params:",params);
 		});
 
     }
