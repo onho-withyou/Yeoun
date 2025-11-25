@@ -607,9 +607,7 @@
 		console.log("클릭될때", event.target.clicked);
         //console.log("targetDiv");
         if (selectedValue === 'N') {// 결재권한자변경상태가 없음일때
-        
-           //alert("전결자가 없습니다.");
-        
+                
             approverArr.forEach(approver => {
             
                 if (targetDiv) {
@@ -1086,17 +1084,24 @@
 			//alert(" 날짜,기안자,문서이름조회 구현중")
 			console.log(ev);
 			const params = new URLSearchParams({
-	    
-			 	start_date: document.getElementById("searchStartDate").value ?? "",
-	    	 	end_date: document.getElementById("searchEndDate").value ?? "",
-	    	 	emp_name: document.getElementById("searchEmpIdAndformType").value ?? "",
-				approval_title: document.getElementById("searchEmpIdAndformType").value ?? ""
+				
+			 	createDate: document.getElementById("searchStartDate").value ?? "",
+	    	 	finishDate: document.getElementById("searchEndDate").value ?? "",
+	    	 	empName: document.getElementById("searchEmpIdAndformType").value ?? "",
+				approvalTitle: document.getElementById("searchEmpIdAndformType").value ?? ""
 			});
 
-			fetch('/approval/search?' + params.toString())
+			fetch('/api/approval/approvalDoc/search', {
+				method: 'POST',
+				headers:{
+					[csrfHeaderName]: csrfToken,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(params)
+			})
         	.then(res => res.json())
         	.then(data => {
-            	grid2.resetData(data);
+            	//grid2.resetData(data);
         	})
         	.catch(err => {
             	console.error("조회오류", err);
@@ -1265,7 +1270,6 @@
 	// 결재권한자 div 버튼 생성 함수
 	function print(type, text) {
     	
-		console.log("this-------->",this);
     	if(this.count < 3){
     		this.count++;
     		approverDiv.innerHTML +='<div class="btn btn-success"'
@@ -1280,7 +1284,6 @@
 	//결재권한자 버튼 클릭시 결재권한자변경 div 태그 생성//전결자
 	function approvalNo(count, text) {
 		elemApproverIdNum = count;
-		//console.log("count ------------------------------------------>",count, ", approvalIdNum : ", elemApproverIdNum);
 	    let type = "change";
 	    if (jeongyeoljaDiv) {
 	        // div 초기화

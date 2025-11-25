@@ -18,6 +18,7 @@ import com.yeoun.approval.dto.ApproverDTO;
 import com.yeoun.approval.entity.ApprovalForm;
 import com.yeoun.approval.entity.Approver;
 import com.yeoun.approval.entity.ApproverId;
+import com.yeoun.approval.mapper.ApprovalDocMapper;
 import com.yeoun.approval.mapper.ApprovalFormMapper;
 import com.yeoun.approval.entity.ApprovalDoc;
 import com.yeoun.approval.repository.ApprovalDocRepository;
@@ -42,6 +43,7 @@ public class ApprovalDocService {
 	private final ApproverRepository approverRepository;
 	private final HrActionRepository hrActionRepository;
 	private final ApprovalFormMapper approvalFormMapper;
+	private final ApprovalDocMapper approvalDocMapper;
 	private final LeaveService leaveService;
 	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -57,9 +59,9 @@ public class ApprovalDocService {
 	}
 	//검색 조회
 	@Transactional(readOnly = true)
-	public List<Object[]> getSearchList(String createDate,String finishDate,String empName,String approvalTitle){
-		//return approvalDocRepository.findPendingApprovalDocs(createDate,finishDate,empName,approvalTitle);
-		return null;
+	public List<ApprovalDocDTO> getSearchList(Map<String,Object> searchParams){
+		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>그리드검색조회중",searchParams);
+		return approvalDocMapper.searchApprvalDocGrid1(searchParams);
 	}
 	
     //결재 문서 등록
