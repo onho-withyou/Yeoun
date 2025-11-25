@@ -1,4 +1,5 @@
-//결재.js
+	//결재.js
+	//변수는 v- ,함수는 f-,그리드는 g- 주석 
 	// 현재 로그인한 사용자 EMP_ID
 	const LOGIN_USER_ID = document.getElementById('currentUserId').value;
 	const LOGIN_USER_NAME = document.getElementById('currentUserName').value;
@@ -16,11 +17,11 @@
 	const approvalCompanionBtn = document.getElementById('approvalCompanionBtn');
 	
 	// ========================================================
-	// v - 결재권한자
+	// v- 결재권한자
 	let elemApproverIdNum = null;//결재권한자 count
 	// ========================================================
 	
-	// f - 결재확인 버튼 눌렀을때 동작할 함수
+	// f- 결재확인 버튼 눌렀을때 동작할 함수
 	approvalCheckBtn.addEventListener('click', () => {
 		patchApproval("accept");
 	});
@@ -30,14 +31,14 @@
 		patchApproval("deny")		
 	});
 	
-	// null-safe 날짜 변환 함수
+	// f- null-safe 날짜 변환 함수
 	function toDateStr(value) {
 	  if (!value) return '';              // null, undefined, '' 전부 빈 문자열 처리
 	  return String(value).split('T')[0]; // 혹시 문자열 아니어도 방어
 	}
 	
 		
-	// 현재 로그인한 사용자와 결재권자 비교
+	// f- 현재 로그인한 사용자와 결재권자 비교
 	function checkApprover() {
 		if(currentApprover != LOGIN_USER_ID) {
 			alert("승인 또는 반려권한이 없습니다."); 
@@ -45,7 +46,7 @@
 		}
 	}
 	
-	// 결재 패치 보내기 함수
+	// f- 결재 패치 보내기 함수
 	function patchApproval(btn) {
 		// 현재 로그인한 사용자와 결재권자 비교
 		if(checkApprover()) return;
@@ -78,7 +79,7 @@
 		 }
 	}
 	
-	//결제상세보기 => 결제권자 정보 불러오기함수
+	// f- 결제상세보기 => 결제권자 정보 불러오기함수
 	async function getApproverList(approvalId) {
 		try {
 			const response = await fetch(`/api/approvals/approvers/${approvalId}`, {method: 'GET'});
@@ -124,7 +125,7 @@
 	let approverDiv = document.querySelector('#approver');
 	let selectBox;
 	let itemData;
-	//selectbox - 인사정보 불러오기
+	// f- selectbox - 인사정보 불러오기
 	async function empData() {
 		try {
 			const response = await fetch("/approval/empList");
@@ -466,7 +467,8 @@
 			console.error('Error fetching data:', error);
 		}
 	}	
-	//결재양식에따른 form 활성화/비활성화 함수
+
+	// f- 결재양식에따른 form 활성화/비활성화 함수
 	function formChange(formType){
 		if(formType == '지출결의서'){
 			document.getElementById('expndTypeForm').style.display = 'flex';//지출종류
@@ -495,7 +497,7 @@
 			document.getElementById('toDeptForm').style.display = 'none'; //발령부서
 		}
 	}
-	//그리드 클릭시 상세보기 document.getElementById('myInput').disabled = true;
+	// f- 그리드 클릭시 상세보기 document.getElementById('myInput').disabled = true;
 	function formDisable(){
 		document.getElementById('approval-title').disabled = true;
 		document.getElementById('approver-name').disabled = true;
@@ -515,6 +517,7 @@
 			selectBox.disable();
 		}
 	}
+	//f- 기안서작성 클릭시 활성화 시켜주는 함수
 	function formEnable(){
 		document.getElementById('approval-title').disabled = false;
 		document.getElementById('approver-name').disabled = false;
@@ -536,7 +539,7 @@
     	}
 	}
 
-	//폼 결재권한자 데이터 말아서 보내는 함수
+	//f- 폼 결재권한자 데이터 말아서 보내는 함수
 	document.getElementById('modal-doc').addEventListener('submit', async function(event) {
     	// 폼의 기본 제출 동작 방지
     	event.preventDefault();
@@ -593,7 +596,7 @@
 			});
 	});
 
-
+	//f- 결재권한자변경(전결자) 라디오버튼에 관련된 함수
 	document.addEventListener("change", function(event) {
 
         if (!event.target.matches('input[name="radioJeongyeolja"]')) return;
@@ -625,7 +628,8 @@
 			document.getElementById(`approvalBtn_${elemApproverIdNum}`).style.display = "block";
 		}
 	});
-	// 결재권한자 변경/전결 적용 함수
+
+	//f- 결재권한자 변경/전결 적용 함수
 	function applyDelegateChange(button) {
 
 		console.log("적용 버튼이 클릭되었습니다.");
@@ -693,7 +697,7 @@
 		console.log("Updated approverArr:", approverArr);
 	}
 
-	//1. 결재사항 불러오기
+	//f- 1. 결재사항 불러오기
 	async function fetchPendingApprovalDocs() {
 		try {
 			const response = await fetch('/approval/pendingApprovalDocGrid');
@@ -731,7 +735,7 @@
 			console.error('Error fetching approval documents:', error);
 		}
 	}
-	//2. 전체결재 목록 불러오기
+	//f- 2. 전체결재 목록 불러오기
 	async function fetchApprovalDocs() {
 		try {
 			const response = await fetch('/approval/approvalDocGrid');
@@ -769,7 +773,7 @@
 			console.error('Error fetching approval documents:', error);
 		}
 	}
-	//3.내 결재목록 불러오기
+	//f- 3.내 결재목록 불러오기
 	async function fetchMyApprovalDocs() {
 		try {
 			const response = await fetch('/approval/myApprovalDocGrid');
@@ -808,7 +812,7 @@
 			console.error('Error fetching approval documents:', error);
 		}
 	}
-	//4.결재대기 불러오기 -- 1차반려,2차반려,3차반려,1차완료,2차완료,3차완료, 종료
+	//f- 4.결재대기 불러오기 -- 1차반려,2차반려,3차반려,1차완료,2차완료,3차완료, 종료
 	async function fetchWaitingApprovalDocs() {
 		try {
 			const response = await fetch('/approval/waitingApprovalDocGrid');
@@ -849,7 +853,7 @@
 			console.error('Error fetching approval documents:', error);
 		}
 	}
-	//5.결재완료 불러오기
+	//f- 5.결재완료 불러오기
 	async function fetchDoneApprovalDocs() {
 		try {
 			const response = await fetch('/approval/finishedApprovalDocGrid');
@@ -892,8 +896,9 @@
 	}
 
 	const Grid = tui.Grid;
+	// g- 결재사항
 	const grid1 = new Grid({
-		  el: document.getElementById('approvalGrid'), // 결재사항
+		  el: document.getElementById('approvalGrid'), 
 		  columns: [
 	
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
@@ -930,6 +935,7 @@
 		});
 	
 	// 	Grid.applyTheme('clean'); // Call API of static method
+	// g- 전체결재
 	const grid2 = new Grid({
 	    el: document.getElementById('allApprovalGrid'), // 전체결재
 	    columns: [
@@ -966,7 +972,7 @@
         	resizable: true
       		}
 	});
-
+	//g- 내결재목록
 	const grid3 = new Grid({
 	    el: document.getElementById('myApprovalGrid'), // 내 결재목록
 	    columns: [
@@ -1003,7 +1009,7 @@
         	resizable: true
       	  }
 	});
-
+	//g- 결재대기
 	const grid4 = new Grid({
 	    el: document.getElementById('waitingApprovalGrid'), //결재대기
 	    columns: [
@@ -1038,7 +1044,7 @@
 		  ,bodyHeight: 500
 		  ,draggable: true
 	});
-
+	//g- 결재완료
 	const grid5 = new Grid({
 	    el: document.getElementById('doneApprovalGrid'), //결재완료
 	    columns: [
@@ -1077,11 +1083,10 @@
 	});
 	
 	
-	//조회버튼
+	//f- 날짜,기안자,문서양식 조회 불러오는 함수
 	const searchBtn = document.getElementById("searchBtn");
     if (searchBtn) {
         searchBtn.addEventListener("click", (ev) => {
-			//alert(" 날짜,기안자,문서양식조회 구현중")
 			console.log(ev);
 			const params = {
 				
@@ -1131,7 +1136,7 @@
 	// 선택한 양식을 담을 변수
 	let selectedForm = null;
 
-	// default 결재권자 가져오는 함수
+	// f- default 결재권자 가져오는 함수
 	async function defalutapprover() {
 		const res = await fetch("/api/approvals/defaultApprover", {method: "GET"});
 		
@@ -1143,7 +1148,7 @@
 	}
 
 	//모달창 코드
-	//기안서 셀렉트 박스 변경시 모달창에 텍스트 변경함수
+	//f- 기안서 셀렉트 박스 변경시 모달창에 텍스트 변경함수
 	function draftValFn(ev){
 		let draft_doc = ev.value;
 
@@ -1167,7 +1172,7 @@
 		formReset();
 		defaultPrint();
 	}
-	//양식 모달 리셋함수
+	//f- 양식 모달 리셋함수
 	function formReset(ev){
 		//console.log("formReset ev:",ev);
 		//console.log("formReset selectedForm:",selectedForm);
@@ -1209,7 +1214,7 @@
     let approverArr = [];//결재권한자 배열 
 	
 
-	// 작성 버튼 클릭 시 실행되는 함수
+	//f- 작성 버튼 클릭 시 실행되는 함수
   	function defaultPrint(){
 		// 모달을 닫고 다시 작성 버튼을 클릭하면 이전 데이터가 남아있어서 초기화 진행
 		approverDiv.innerHTML = "";
@@ -1241,7 +1246,7 @@
 		    return;
 		}
 		
-		defalutapproverArr = []; //기존 배열 초기화
+		defalutapproverArr = []; //디폴트 결재권한자 초기화
 		for (let i = 1; i <= 3; i++) {
 		// selectedForm의 approver1, approver2, approver3을 가져오기 위해서 템플릿 문자열 사용
 		    const approver = selectedForm[`approver${i}`] + " " + selectedForm[`approver${i}Name`];
@@ -1258,7 +1263,6 @@
 
 			console.log("추출된 기본 결재자:", defalutapproverArr);
 
-    	
     	}
 		// 4. 기본 결재 라인 설정 (this.count가 0일 때만 실행)
     	// 이 로직은 결재 라인에 아무도 없을 때만 기본값을 넣어주기 위한 로직입니다.
@@ -1283,7 +1287,7 @@
 	}
 
 	defalutapprover();
-	// 결재권한자 div 버튼 생성 함수
+	//f- 결재권한자 div 버튼 생성 함수
 	function print(type, text) {
     	
     	if(this.count < 3){
@@ -1297,7 +1301,7 @@
     }
 
 	
-	//결재권한자 버튼 클릭시 결재권한자변경 div 태그 생성//전결자
+	//f- 결재권한자 버튼 클릭시 결재권한자변경 div 태그 생성//전결자
 	function approvalNo(count, text) {
 		elemApproverIdNum = count;
 	    let type = "change";
@@ -1318,7 +1322,7 @@
 	        jeongyeoljaDiv.style.display = 'block';
 	    }
 	}
-	//결재권한자,결재권한자변경(전결자) 닫기버튼
+	//f- 결재권한자,결재권한자변경(전결자) 닫기버튼
 	function approverDivclose(buttonDiv,type,count){
 		const divElement = buttonDiv.parentNode; // 버튼의 부모인 div를 찾음
 		console.log("type",type);
