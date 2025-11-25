@@ -2,6 +2,8 @@ package com.yeoun.approval.service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.yeoun.approval.dto.ApprovalDocDTO;
-
+import com.yeoun.approval.dto.ApprovalDocGridDTO;
 import com.yeoun.approval.dto.ApprovalFormDTO;
 import com.yeoun.approval.dto.ApproverDTO;
 import com.yeoun.approval.entity.ApprovalForm;
@@ -59,9 +61,43 @@ public class ApprovalDocService {
 	}
 	//검색 조회
 	@Transactional(readOnly = true)
-	public List<ApprovalDocDTO> getSearchList(Map<String,Object> searchParams){
-		log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>그리드검색조회중",searchParams);
-		return approvalDocMapper.searchApprvalDocGrid1(searchParams);
+	public  Map<String, List<ApprovalDocGridDTO>> getAllGridsData(String empId,Map<String,Object> searchParams){
+		log.info("searchParams 맵 전체 확인: {}", searchParams);
+		searchParams.put("empId",empId );
+    
+		String createDate = (String) searchParams.get("createDate");
+    	String finishDate = (String) searchParams.get("finishDate");
+    	String empName = (String) searchParams.get("empName");
+    	String approvalTitle = (String) searchParams.get("approvalTitle");
+
+		// 날짜 필터 xml 스타일(createDate -> createDateFilter)
+    	if (createDate != null && !createDate.trim().isEmpty()) {
+    	    searchParams.put("createDateFilter", createDate);
+    	}
+    	if (finishDate != null && !finishDate.trim().isEmpty()) {
+    	    searchParams.put("finishDateFilter", finishDate);
+    	}
+	
+    	// 기안자및 문서양식 필터 통합 xml 스타일
+    	String unifiedFilterValue = null;
+    	if (empName != null && !empName.trim().isEmpty()) {
+    	    unifiedFilterValue = empName;
+    	} else if (approvalTitle != null && !approvalTitle.trim().isEmpty()) {
+    	    unifiedFilterValue = approvalTitle;
+    	}
+	
+    	if (unifiedFilterValue != null) {
+    	    searchParams.put("empNameTitleFilter", unifiedFilterValue);
+    	}
+
+		Map<String, List<ApprovalDocGridDTO>> results = new HashMap<>();
+		results.put("grid1Data", approvalDocMapper.searchApprovalItems(searchParams));//결재사항
+		results.put("grid2Data", approvalDocMapper.searchAllApproval(searchParams));//전체결재
+		results.put("grid3Data", approvalDocMapper.searchMyApprovalList(searchParams));//내결재목록
+		results.put("grid4Data", approvalDocMapper.searchPendingApproval(searchParams));//결재대기
+		results.put("grid5Data", approvalDocMapper.searchCompletedApproval(searchParams));//결재완료
+    
+		return results;
 	}
 	
     //결재 문서 등록
@@ -96,7 +132,6 @@ public class ApprovalDocService {
         approvalDoc.setExpndType(doc.get("expndType"));//지출타입
         approvalDoc.setReason(doc.get("reason"));//사유
 		
-
         //결재문서
             
 		approvalDocDTO.setApprovalId(approvalDoc.getApprovalId());//결재문서id
