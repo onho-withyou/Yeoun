@@ -166,278 +166,43 @@
 			grid1.on("click", async (ev) => {
 		
 				const target = ev.nativeEvent.target;
-				const rowData = grid1.getRow(ev.rowKey);
-				$('#approval-modal').modal('show');
-				//formReset();
-				document.getElementById('saveBtn').style.display = "none";//approvalCompanionBtn//approvalCheckBtn
-				document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
-				document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
-				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
-				approvalId = rowData.approval_id;
-				// 문서 열릴때 현재 결재권자(approval) 저장
-				currentApprover = rowData.approver;
-				console.log("rowData",rowData);//DraftingHidden
-				document.getElementById('Drafting').innerText = rowData.approval_title;
-				document.getElementById('DraftingHidden').value = rowData.approval_title;
-				//document.getElementById('Drafting').value = rowData.approval_title;
-				document.getElementById('today-date').innerText = toDateStr(rowData.created_date) ;//결재 작성날짜 = 결재시작일
-				document.getElementById('approval-title').value = rowData.approval_title;
-				//양식종류 form-menu
-				document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
-				document.getElementById('form-menu').value = rowData.form_type;//양식종류
-				//const createdDate = rowData.created_date;
-				document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
-				document.getElementById('finish-date').value = toDateStr(rowData.finish_date);//결재완료날짜
-				//휴가 연차신청서 
-				document.getElementById('start-date').value = toDateStr(rowData.start_date); //휴가시작날짜
-				document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
-				//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
-				document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
-			
-				console.log("rowData.to_dept_id",rowData.to_dept_id);
-				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
-				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
-				//document.getElementById('approver').value = rowData.approver;//결재권한자
-				const approverList = await getApproverList(approvalId);
-				
-				let sortedList; 
-				
-				if(approverList.length > 0) {
-					sortedList = approverList.sort((a, b) => {
-						return Number (a.orderApprovers) - Number(b.orderApprovers);
-					});
+				// const targetElement = ev.nativeEvent.target; 이 줄이 빠진 경우
+				console.log("ev.targetType",ev.targetType)
+				if (ev.targetType === 'cell' && target.tagName === 'BUTTON') {
 					
-					window.count = 0;
-					approverDiv.innerHTML = "";
-										
-					for (const approver of sortedList) {
-						selectBox.select(approver.empId);
-						print("default", selectBox.getSelectedItem().label);
-					}
+					const rowData = grid1.getRow(ev.rowKey);
+					$('#approval-modal').modal('show');
+					//formReset();
+					document.getElementById('saveBtn').style.display = "none";//approvalCompanionBtn//approvalCheckBtn
+					document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
+					document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
+					// 문서 열릴때 approvalId에 현재 열린 문서id 저장
+					approvalId = rowData.approval_id;
+					// 문서 열릴때 현재 결재권자(approval) 저장
+					currentApprover = rowData.approver;
+					console.log("rowData",rowData);//DraftingHidden
+					document.getElementById('Drafting').innerText = rowData.approval_title;
+					document.getElementById('DraftingHidden').value = rowData.approval_title;
+					//document.getElementById('Drafting').value = rowData.approval_title;
+					document.getElementById('today-date').innerText = toDateStr(rowData.created_date) ;//결재 작성날짜 = 결재시작일
+					document.getElementById('approval-title').value = rowData.approval_title;
+					//양식종류 form-menu
+					document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
+					document.getElementById('form-menu').value = rowData.form_type;//양식종류
+					//const createdDate = rowData.created_date;
+					document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
+					document.getElementById('finish-date').value = toDateStr(rowData.finish_date);//결재완료날짜
+					//휴가 연차신청서 
+					document.getElementById('start-date').value = toDateStr(rowData.start_date); //휴가시작날짜
+					document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
+					//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
+					document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
 					
-				}
-				//document.getElementById('approver').innerText = rowData.approver;//전결자
-				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-				//selectBox.disable();
-				// 상세버튼 양식종류에 따른 form 보이기/숨기기
-				formChange(rowData.form_type);
-				formDisable();		
-			});
-
-			grid2.on("click", async (ev) => {
-		
-				const target = ev.nativeEvent.target;
-				
-				const rowData = grid2.getRow(ev.rowKey);
-				$('#approval-modal').modal('show');
-				
-				document.getElementById('saveBtn').style.display = "none";
-				document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
-				document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
-			
-				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
-				approvalId = rowData.approval_id;
-				// 문서 열릴때 현재 결재권자(approval) 저장
-				currentApprover = rowData.approver;
-				
-				document.getElementById('Drafting').innerText = rowData.approval_title;
-				document.getElementById('DraftingHidden').value = rowData.approval_title;
-				document.getElementById('today-date').innerText = toDateStr(rowData.created_date);//결재 작성날짜 = 결재시작일
-				//document.getElementById('approval-title').value = rowData.approval_title;
-				document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
-				document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
-				
-				const createdDate = rowData.created_date;
-				document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
-				document.getElementById('finish-date').value = toDateStr(rowData.finish_date);//결재완료날짜
-				//휴가 연차신청서 
-				document.getElementById('start-date').value = toDateStr(rowData.start_date); //휴가시작날짜
-				document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
-				//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
-				document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
-			
-				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
-				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
-				//document.getElementById('approver').value = rowData.approver;//결재권한자
-				
-				const approverList = await getApproverList(approvalId);
-				
-				let sortedList; 
-				
-				if(approverList.length > 0) {
-					sortedList = approverList.sort((a, b) => {
-						return Number (a.orderApprovers) - Number(b.orderApprovers);
-					});
-					
-					window.count = 0;
-					approverDiv.innerHTML = "";
-										
-					for (const approver of sortedList) {
-						selectBox.select(approver.empId);
-						print("default", selectBox.getSelectedItem().label);
-					}
-					
-				}
-				//document.getElementById('approver').innerText = rowData.approver;//전결자
-				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-				//selectBox.disable();
-				formChange(rowData.form_type);
-				formDisable();
-			});
-
-
-			grid3.on("click", async (ev) => {
-		
-				const target = ev.nativeEvent.target;
-				const rowData = grid3.getRow(ev.rowKey);
-				$('#approval-modal').modal('show');
-				
-				document.getElementById('saveBtn').style.display = "none";
-				document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
-				document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
-			
-				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
-				approvalId = rowData.approval_id;
-				// 문서 열릴때 현재 결재권자(approval) 저장
-				currentApprover = rowData.approver;
-				
-				document.getElementById('Drafting').innerText = rowData.approval_title;
-				document.getElementById('DraftingHidden').value = rowData.approval_title;
-				document.getElementById('today-date').innerText = toDateStr(rowData.created_date);//결재 작성날짜 = 결재시작일
-				//document.getElementById('approval-title').value = rowData.approval_title;
-				document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
-				document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
-				console.log("rowData.created_date",toDateStr(rowData.created_date) );
-				const createdDate = rowData.created_date;
-				document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
-				document.getElementById('finish-date').value = toDateStr(rowData.finish_date);//결재완료날짜
-				//휴가 연차신청서 
-				document.getElementById('start-date').value = toDateStr(rowData.start_date); //휴가시작날짜
-				document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
-				//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
-				document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
-			
-				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
-				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
-				//document.getElementById('approver').value = rowData.approver;//결재권한자
-				const approverList = await getApproverList(approvalId);
-				
-				let sortedList; 
-				
-				if(approverList.length > 0) {
-					sortedList = approverList.sort((a, b) => {
-						return Number (a.orderApprovers) - Number(b.orderApprovers);
-					});
-					
-					window.count = 0;
-					approverDiv.innerHTML = "";
-										
-					for (const approver of sortedList) {
-						selectBox.select(approver.empId);
-						print("default", selectBox.getSelectedItem().label);
-					}
-					
-				}
-				//document.getElementById('approver').innerText = rowData.approver;//전결자
-				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-				//selectBox.disable();
-				formChange(rowData.form_type);
-				formDisable();
-			});
-
-			grid4.on("click", async (ev) => {
-			
-			const target = ev.nativeEvent.target;
-			const rowData = grid4.getRow(ev.rowKey);
-			$('#approval-modal').modal('show');
-			
-			document.getElementById('saveBtn').style.display = "none";//등록버튼
-			document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려버튼
-			document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인버튼
-			
-			// 문서 열릴때 approvalId에 현재 열린 문서id 저장
-			approvalId = rowData.approval_id;
-			// 문서 열릴때 현재 결재권자(approval) 저장
-			currentApprover = rowData.approver;
-			
-			document.getElementById('Drafting').innerText = rowData.approval_title;
-			document.getElementById('DraftingHidden').value = rowData.approval_title;
-			document.getElementById('today-date').innerText = toDateStr(rowData.created_date);//결재 작성날짜 = 결재시작일
-			//document.getElementById('approval-title').value = rowData.approval_title;
-			document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
-			document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
-			
-			const createdDate = rowData.created_date;
-			document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
-			document.getElementById('finish-date').value = toDateStr(rowData.finish_date);//결재완료날짜
-			//휴가 연차신청서 
-			document.getElementById('start-date').value = toDateStr(rowData.start_date); //휴가시작날짜
-			document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
-			//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
-			document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
-		
-			document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
-			document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
-			//document.getElementById('approver').value = rowData.approver;//결재권한자
-			const approverList = await getApproverList(approvalId);
-				
-				let sortedList; 
-				
-				if(approverList.length > 0) {
-					sortedList = approverList.sort((a, b) => {
-						return Number (a.orderApprovers) - Number(b.orderApprovers);
-					});
-					
-					window.count = 0;
-					approverDiv.innerHTML = "";
-										
-					for (const approver of sortedList) {
-						selectBox.select(approver.empId);
-						print("default", selectBox.getSelectedItem().label);
-					}
-					
-				}
-			//document.getElementById('approver').innerText = rowData.approver;//전결자
-			document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-			//electBox.disable();
-			formDisable();
-			});
-	
-			grid5.on("click", async (ev) => {
-			
-				const target = ev.nativeEvent.target;
-				
-				const rowData = grid5.getRow(ev.rowKey);
-				$('#approval-modal').modal('show');
-				
-				document.getElementById('saveBtn').style.display = "none";
-				document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
-				document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
-				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
-				approvalId = rowData.approval_id;
-				// 문서 열릴때 현재 결재권자(approval) 저장
-				currentApprover = rowData.approver;
-				
-				document.getElementById('Drafting').innerText = rowData.approval_title;
-				document.getElementById('DraftingHidden').value = rowData.approval_title;
-				document.getElementById('today-date').innerText = rowData.created_date.split('T')[0] ;//결재 작성날짜 = 결재시작일
-				//document.getElementById('approval-title').value = rowData.approval_title;
-				document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
-				document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
-				
-				const createdDate = rowData.created_date;
-				document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
-				document.getElementById('finish-date').value = toDateStr(rowData.finish_date);//결재완료날짜
-				//휴가 연차신청서 
-				document.getElementById('start-date').value = toDateStr(rowData.start_date); //휴가시작날짜
-				document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
-				//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
-				document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
-			
-				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
-				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
-				//document.getElementById('approver').value = rowData.approver;//결재권한자
-				const approverList = await getApproverList(approvalId);
+					console.log("rowData.to_dept_id",rowData.to_dept_id);
+					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
+					document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
+					//document.getElementById('approver').value = rowData.approver;//결재권한자
+					const approverList = await getApproverList(approvalId);
 					
 					let sortedList; 
 					
@@ -445,21 +210,267 @@
 						sortedList = approverList.sort((a, b) => {
 							return Number (a.orderApprovers) - Number(b.orderApprovers);
 						});
-						
+
 						window.count = 0;
 						approverDiv.innerHTML = "";
-											
+
 						for (const approver of sortedList) {
 							selectBox.select(approver.empId);
 							print("default", selectBox.getSelectedItem().label);
 						}
-						
+
 					}
-				//document.getElementById('approver').innerText = rowData.approver;//전결자
-				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-				//selectBox.disable();
-				formChange(rowData.form_type);
-				formDisable();
+					//document.getElementById('approver').innerText = rowData.approver;//전결자
+					document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+					//selectBox.disable();
+					// 상세버튼 양식종류에 따른 form 보이기/숨기기
+					formChange(rowData.form_type);
+					formDisable();	
+				}	
+			});
+
+			grid2.on("click", async (ev) => {
+		
+				const target = ev.nativeEvent.target;
+				if (ev.targetType === 'cell' && target.tagName === 'BUTTON') {
+					const rowData = grid2.getRow(ev.rowKey);
+					$('#approval-modal').modal('show');
+					
+					document.getElementById('saveBtn').style.display = "none";
+					document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
+					document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
+					
+					// 문서 열릴때 approvalId에 현재 열린 문서id 저장
+					approvalId = rowData.approval_id;
+					// 문서 열릴때 현재 결재권자(approval) 저장
+					currentApprover = rowData.approver;
+					
+					document.getElementById('Drafting').innerText = rowData.approval_title;
+					document.getElementById('DraftingHidden').value = rowData.approval_title;
+					document.getElementById('today-date').innerText = toDateStr(rowData.created_date);//결재 작성날짜 = 결재시작일
+					//document.getElementById('approval-title').value = rowData.approval_title;
+					document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
+					document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
+					
+					const createdDate = rowData.created_date;
+					document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
+					document.getElementById('finish-date').value = toDateStr(rowData.finish_date);//결재완료날짜
+					//휴가 연차신청서 
+					document.getElementById('start-date').value = toDateStr(rowData.start_date); //휴가시작날짜
+					document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
+					//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
+					document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
+					
+					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
+					document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
+					//document.getElementById('approver').value = rowData.approver;//결재권한자
+					
+					const approverList = await getApproverList(approvalId);
+					
+					let sortedList; 
+					
+					if(approverList.length > 0) {
+						sortedList = approverList.sort((a, b) => {
+							return Number (a.orderApprovers) - Number(b.orderApprovers);
+						});
+
+						window.count = 0;
+						approverDiv.innerHTML = "";
+
+						for (const approver of sortedList) {
+							selectBox.select(approver.empId);
+							print("default", selectBox.getSelectedItem().label);
+						}
+
+					}
+					//document.getElementById('approver').innerText = rowData.approver;//전결자
+					document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+					//selectBox.disable();
+					formChange(rowData.form_type);
+					formDisable();
+				}
+			});
+
+
+			grid3.on("click", async (ev) => {
+		
+				const target = ev.nativeEvent.target;
+				if (ev.targetType === 'cell' && target.tagName === 'BUTTON') {
+					const rowData = grid3.getRow(ev.rowKey);
+					$('#approval-modal').modal('show');
+					
+					document.getElementById('saveBtn').style.display = "none";
+					document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
+					document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
+					
+					// 문서 열릴때 approvalId에 현재 열린 문서id 저장
+					approvalId = rowData.approval_id;
+					// 문서 열릴때 현재 결재권자(approval) 저장
+					currentApprover = rowData.approver;
+					
+					document.getElementById('Drafting').innerText = rowData.approval_title;
+					document.getElementById('DraftingHidden').value = rowData.approval_title;
+					document.getElementById('today-date').innerText = toDateStr(rowData.created_date);//결재 작성날짜 = 결재시작일
+					//document.getElementById('approval-title').value = rowData.approval_title;
+					document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
+					document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
+					console.log("rowData.created_date",toDateStr(rowData.created_date) );
+					const createdDate = rowData.created_date;
+					document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
+					document.getElementById('finish-date').value = toDateStr(rowData.finish_date);//결재완료날짜
+					//휴가 연차신청서 
+					document.getElementById('start-date').value = toDateStr(rowData.start_date); //휴가시작날짜
+					document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
+					//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
+					document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
+					
+					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
+					document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
+					//document.getElementById('approver').value = rowData.approver;//결재권한자
+					const approverList = await getApproverList(approvalId);
+					
+					let sortedList; 
+					
+					if(approverList.length > 0) {
+						sortedList = approverList.sort((a, b) => {
+							return Number (a.orderApprovers) - Number(b.orderApprovers);
+						});
+
+						window.count = 0;
+						approverDiv.innerHTML = "";
+
+						for (const approver of sortedList) {
+							selectBox.select(approver.empId);
+							print("default", selectBox.getSelectedItem().label);
+						}
+
+					}
+					//document.getElementById('approver').innerText = rowData.approver;//전결자
+					document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+					//selectBox.disable();
+					formChange(rowData.form_type);
+					formDisable();
+				}
+			});	
+
+			grid4.on("click", async (ev) => {
+				
+			const target = ev.nativeEvent.target;
+			if (ev.targetType === 'cell' && target.tagName === 'BUTTON') {
+				const rowData = grid4.getRow(ev.rowKey);
+				$('#approval-modal').modal('show');
+				
+				document.getElementById('saveBtn').style.display = "none";//등록버튼
+				document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려버튼
+				document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인버튼
+				
+				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
+				approvalId = rowData.approval_id;
+				// 문서 열릴때 현재 결재권자(approval) 저장
+				currentApprover = rowData.approver;
+				
+				document.getElementById('Drafting').innerText = rowData.approval_title;
+				document.getElementById('DraftingHidden').value = rowData.approval_title;
+				document.getElementById('today-date').innerText = toDateStr(rowData.created_date);//결재 작성날짜 = 결재시작일
+				//document.getElementById('approval-title').value = rowData.approval_title;
+				document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
+				document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
+				
+				const createdDate = rowData.created_date;
+				document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
+				document.getElementById('finish-date').value = toDateStr(rowData.finish_date);//결재완료날짜
+				//휴가 연차신청서 
+				document.getElementById('start-date').value = toDateStr(rowData.start_date); //휴가시작날짜
+				document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
+				//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
+				document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
+				
+				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
+				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
+				//document.getElementById('approver').value = rowData.approver;//결재권한자
+				const approverList = await getApproverList(approvalId);
+
+					let sortedList; 
+
+					if(approverList.length > 0) {
+						sortedList = approverList.sort((a, b) => {
+							return Number (a.orderApprovers) - Number(b.orderApprovers);
+						});
+
+						window.count = 0;
+						approverDiv.innerHTML = "";
+
+						for (const approver of sortedList) {
+							selectBox.select(approver.empId);
+							print("default", selectBox.getSelectedItem().label);
+						}
+
+					}
+					//document.getElementById('approver').innerText = rowData.approver;//전결자
+					document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+					//electBox.disable();
+					formDisable();
+				}
+			});
+	
+			grid5.on("click", async (ev) => {
+			
+				const target = ev.nativeEvent.target;
+				if (ev.targetType === 'cell' && target.tagName === 'BUTTON') {
+					const rowData = grid5.getRow(ev.rowKey);
+					$('#approval-modal').modal('show');
+					
+					document.getElementById('saveBtn').style.display = "none";
+					document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
+					document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
+					// 문서 열릴때 approvalId에 현재 열린 문서id 저장
+					approvalId = rowData.approval_id;
+					// 문서 열릴때 현재 결재권자(approval) 저장
+					currentApprover = rowData.approver;
+					
+					document.getElementById('Drafting').innerText = rowData.approval_title;
+					document.getElementById('DraftingHidden').value = rowData.approval_title;
+					document.getElementById('today-date').innerText = rowData.created_date.split('T')[0] ;//결재 작성날짜 = 결재시작일
+					//document.getElementById('approval-title').value = rowData.approval_title;
+					document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
+					document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
+					
+					const createdDate = rowData.created_date;
+					document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
+					document.getElementById('finish-date').value = toDateStr(rowData.finish_date);//결재완료날짜
+					//휴가 연차신청서 
+					document.getElementById('start-date').value = toDateStr(rowData.start_date); //휴가시작날짜
+					document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
+					//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
+					document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
+					
+					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
+					document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
+					//document.getElementById('approver').value = rowData.approver;//결재권한자
+					const approverList = await getApproverList(approvalId);
+						
+						let sortedList; 
+						
+						if(approverList.length > 0) {
+							sortedList = approverList.sort((a, b) => {
+								return Number (a.orderApprovers) - Number(b.orderApprovers);
+							});
+							
+							window.count = 0;
+							approverDiv.innerHTML = "";
+												
+							for (const approver of sortedList) {
+								selectBox.select(approver.empId);
+								print("default", selectBox.getSelectedItem().label);
+							}
+							
+						}
+					//document.getElementById('approver').innerText = rowData.approver;//전결자
+					document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+					//selectBox.disable();
+					formChange(rowData.form_type);
+					formDisable();
+				}
 			});
 	
 			return itemData;
@@ -901,16 +912,16 @@
 		  el: document.getElementById('approvalGrid'), 
 		  columns: [
 	
-		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
+		    {header: '순번' ,name: 'row_no' ,align: 'center'}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 200}
 			,{header: '양식' ,name: 'form_type' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
-			,{header: '결재권한자id' ,name: 'approver' ,align: 'center'}
-			,{header: '결재권한자 이름' ,name: 'approver_name' ,align: 'center'}
+			,{header: '결재권한자id' ,name: 'approver' ,align: 'center',hidden: true}
+			,{header: '결재권한자' ,name: 'approver_name' ,align: 'center'}
 			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
@@ -929,12 +940,17 @@
 		  ],
 		  data: []
 		  ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
+		  ,height:100
 		  ,columnOptions: {
         		resizable: true
-      		}
+      	  }
+		  ,pageOptions: {
+        		useClient: true,
+        		perPage: 10
+      	  }
 		});
 	
-	// 	Grid.applyTheme('clean'); // Call API of static method
+		
 	// g- 전체결재
 	const grid2 = new Grid({
 	    el: document.getElementById('allApprovalGrid'), // 전체결재
@@ -942,14 +958,14 @@
 	
 		   {header: '결재순번' ,name: 'row_no' ,align: 'center'}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 200}
 			,{header: '양식' ,name: 'form_type' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
-			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
-			,{header: '결재권한자 이름' ,name: 'approver_name' ,align: 'center'}
+			,{header: '결재권한자id' ,name: 'approver' ,align: 'center',hidden: true}
+			,{header: '결재권한자' ,name: 'approver_name' ,align: 'center'}
 			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
@@ -970,7 +986,11 @@
 		  ,bodyHeight: 500
 		  ,columnOptions: {
         	resizable: true
-      		}
+      	  }
+		  ,pageOptions: {
+        		useClient: true,
+        		perPage: 10
+      	  }
 	});
 	//g- 내결재목록
 	const grid3 = new Grid({
@@ -979,14 +999,14 @@
 	
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 200}
 			,{header: '양식' ,name: 'form_type' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
-			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
-			,{header: '결재권한자 이름' ,name: 'approver_name' ,align: 'center'}
+			,{header: '결재권한자id' ,name: 'approver' ,align: 'center',hidden: true}
+			,{header: '결재권한자' ,name: 'approver_name' ,align: 'center'}
 			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
@@ -999,7 +1019,7 @@
 			,{header: '결재사유내용' ,name: 'reason' ,align: 'center',hidden: true}
 			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
 			,{header: '상세보기' ,name: 'view_details' ,align: 'center'
-				,formatter: (rowInfo) => {
+				,formatter: function(rowInfo) {
  					return `<button type='button' class='btn btn-primary me-2' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
 			}}
 		  ],
@@ -1007,6 +1027,10 @@
 		  ,bodyHeight: 500
 		  ,columnOptions: {
         	resizable: true
+      	  }
+		  ,pageOptions: {
+        		useClient: true,
+        		perPage: 10
       	  }
 	});
 	//g- 결재대기
@@ -1016,14 +1040,14 @@
 	
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 200}
 			,{header: '양식' ,name: 'form_type' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
-			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
-			,{header: '결재권한자 이름' ,name: 'approver_name' ,align: 'center'}
+			,{header: '결재권한자id' ,name: 'approver' ,align: 'center',hidden: true}
+			,{header: '결재권한자' ,name: 'approver_name' ,align: 'center'}
 			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
@@ -1036,13 +1060,19 @@
 			,{header: '결재사유내용' ,name: 'reason' ,align: 'center',hidden: true}
 			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
 			,{header: '상세보기' ,name: 'view_details' ,align: 'center'
-				,formatter: (rowInfo) => {
+				,formatter: function(rowInfo) {
  					return `<button type='button' class='btn btn-primary me-2' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
 			}}
 		  ],
 		  data: []
 		  ,bodyHeight: 500
-		  ,draggable: true
+		  ,columnOptions: {
+        	resizable: true
+      	  }
+		  ,pageOptions: {
+        	useClient: true,
+        	perPage: 10
+      	  }
 	});
 	//g- 결재완료
 	const grid5 = new Grid({
@@ -1051,14 +1081,14 @@
 	
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 200}
 			,{header: '양식' ,name: 'form_type' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
-			,{header: '결재권한자' ,name: 'approver' ,align: 'center'}
-			,{header: '결재권한자 이름' ,name: 'approver_name' ,align: 'center'}
+			,{header: '결재권한자id' ,name: 'approver' ,align: 'center',hidden: true}
+			,{header: '결재권한자' ,name: 'approver_name' ,align: 'center'}
 			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
 			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
@@ -1071,8 +1101,8 @@
 			,{header: '결재사유내용' ,name: 'reason' ,align: 'center',hidden: true}
 			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
 			,{header: '상세보기' ,name: 'view_details' ,align: 'center'
-				,formatter: (rowInfo) => {
- 					return `<button type='button'  class='btn btn-primary me-2' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
+				,formatter: function(rowInfo) {
+ 					return `<button type='button' class='btn btn-primary me-2' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
 			}}
 		  ],
 		  data: []
@@ -1080,9 +1110,13 @@
 		  ,columnOptions: {
         	resizable: true
       	  }
+		  ,pageOptions: {
+        		useClient: true,
+        		perPage: 10
+      	  }
 	});
 	
-	
+	Grid.applyTheme('clean'); // Call API of static method
 	//f- 날짜,기안자,문서양식 조회 불러오는 함수
 	const searchBtn = document.getElementById("searchBtn");
     if (searchBtn) {
