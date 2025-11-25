@@ -6,7 +6,7 @@
 	<head>
 	    <style type="text/css">
 			.tui-calendar-container, .tui-datepicker, .tui-timepicker  {
-				z-index: 10 !important; 
+				z-index: 100 !important; 
 			}
 	    </style>
 	    <link rel="stylesheet" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css">
@@ -21,6 +21,7 @@
 		<input type="hidden" th:value="${#authentication.principal.empName}" id="currentUserName">
 		
 			<div class="custom-body container-xxl flex-grow-1 container-p-y">
+				<h2>일정관리</h2>
 				<div class="d-flex align-items-center">
 					<button class="btn-sm btn-outline-primary" type="button" onclick="location.href='/main'">뒤로</button>
 				</div>

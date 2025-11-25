@@ -37,10 +37,6 @@ const handleAttendanceToggle = async (empId) => {
 		msg = "외출입니다.";
 	}
 	
-	console.log("result:", result);
-	console.log("status:", result?.status);
-	console.log("comparison:", result?.status === "WORKIN", result?.status === "WORK_OUT");
-	
 	// 버튼 활성화/비활성화 적용
 	if (result.buttonEnabled === false) {
 		attendanceBtn.disabled = true;
@@ -87,11 +83,15 @@ const searchEmp = async () => {
 
 let currentMode = "regist";
 let currentAttendanceId = null;
+// 수정 모달에서 기존 시간과 변경된 시간 비교하기 위한 변수
+let originalInTime = null;
 
 // 출퇴근 수기 등록 및 수정 모달
 const openModalAttendance = async (mode, attendanceId = null) => {
 	const modalTitle = document.querySelector("#modalCenterTitle");
 	const saveBtn = document.querySelector("#saveBtn");
+	const searchBtn = document.querySelector("#searchBtn");
+	const searchEmpId = document.querySelector("#nameWithTitle");
 	const modalElement = document.querySelector("#modalCenter");
 	const modalInstance = new bootstrap.Modal(modalElement);
 	
@@ -104,6 +104,9 @@ const openModalAttendance = async (mode, attendanceId = null) => {
 		modalTitle.textContent = "출/퇴근 수정";
 		saveBtn.textContent = "수정";
 		
+		// 수정 모달에서는 사원번호 조회 기능 비활성화
+		searchEmpId.disabled = true
+		searchBtn.disabled = true;
 		
 		// 선택한 데이터 불러오기
 		const response = await fetch(ATTENDANCE_DETAIL_URL);
@@ -115,7 +118,10 @@ const openModalAttendance = async (mode, attendanceId = null) => {
 		await searchEmp();
 		
 		if (data.workIn != null) {
-			document.querySelector("#inTime").value = data.workIn.slice(0, 5);
+			originalInTime = data.workIn.slice(0, 5);
+			document.querySelector("#inTime").value = originalInTime;
+		} else {
+			originalInTime = null;
 		}
 		
 		if (data.workOut != null) {
@@ -126,11 +132,16 @@ const openModalAttendance = async (mode, attendanceId = null) => {
 	} else { // 등록 모드
 		modalTitle.textContent = "출/퇴근 등록";
 		saveBtn.textContent = "등록";
+		originalInTime = null;
+		
+		// 등록 모달에서는 사원번호 조회 활성화
+		searchEmpId.disabled = false;
+		searchBtn.disabled = false;
+		
 		resetModal(); // 모달 초기화
 	}
 	modalInstance.show();
 }
-
 
 // 등록 및 수정 공용 함수 
 const saveAttendance = async () => {
@@ -141,6 +152,52 @@ const saveAttendance = async () => {
 	
 	const url = currentMode === "edit" ? `/attendance/${currentAttendanceId}` : "/attendance";
 	const method = currentMode === "edit" ? "PATCH" : "POST";
+	
+	// 오전 9시부터 오후 6시까지만 시간 제한을 두기 위한 범위 체크 상수
+	const MIN_TIME = "09:00";
+	const MAX_TIME = "18:00";
+	
+	// 범위 체크 상수를 사용하여 Date 객체로 변환
+	const min = new Date(`2000-01-01T${MIN_TIME}`);
+	const max = new Date(`2000-01-01T${MAX_TIME}`);
+	
+	
+	// 출근 시간을 입력하지 않았을 때
+	if (!workIn) {
+		alert("출근 시간은 필수 입력입니다.");
+		return;
+	}
+	
+	if (!statusCode) {
+		alert("근태 상태는 필수 선택입니다.");
+		return;
+	}
+	
+	const inDate = new Date(`2000-01-01T${workIn}`);
+	
+	// 수정모드에서 시간 변경되었을 때 동작
+	if (originalInTime !== null && workIn !== originalInTime) {
+		
+		if (inDate < min || inDate > max) {
+			alert("출근시간은 09:00 ~ 18:00 사이여야 합니다.");
+			return;
+		}
+	}
+	
+	// 퇴근 시간이 있을 때 출근 시간과 비교
+	if (workOut) {
+		const outDate = new Date(`2000-01-01T${workOut}`);
+		
+		if (outDate < inDate) {
+			alert("퇴근시간은 출근시간 이후여야 합니다.");
+			return;
+		}
+		
+		if (outDate < min || outDate > max) {
+			alert("퇴근시간은 09:00 ~ 18:00 사이여야 합니다.");
+			return;
+		}
+	}
 	
 	try {
 		const response = await fetch(url, {
@@ -179,65 +236,3 @@ function resetModal() {
 	document.querySelector("#endTime").value = "";
 	document.querySelector("select[name='statusCode']").value = "";
 }
-
-// -----------------------------------------------------
-// 외근 등록 유효성 검사
-const form = document.querySelector("#outworkForm");
-const dateInput = document.querySelector("#inTime");
-const typeSelect = document.querySelector("select[name='accessType']");
-const outTimeInput = document.querySelector("#outTime");
-const reasonTextarea = document.querySelector("#reason");
-
-form.addEventListener("submit", (event) => {
-	// 근무날짜 미선택 시 전송 안됨
-	if (!dateInput.value) {
-		event.preventDefault();
-		dateInput.classList.add("is-invalid");
-	}
-	
-	// 근무유형 미선택 시 전송 안됨
-	if (!typeSelect.value) {
-		event.preventDefault();
-		typeSelect.classList.add("is-invalid");
-	}
-	
-	// 외근 시작 시간 미입력 했을 경우 전송 안됨
-	if (!outTimeInput.value) {
-		event.preventDefault();
-		outTimeInput.classList.add("is-invalid");
-	}
-	
-	// 외근 사유 2글자 미만일 경우 전송 안됨
-	if (reasonTextarea.value.trim().length < 2) {
-		event.preventDefault();
-		reasonTextarea.classList.add("is-invalid");
-	}
-});
-
-// 근무 날짜 입력 또는 선택 시 에러 문구 삭제
-dateInput.addEventListener("change", () => {
-	if (dateInput.value) {
-		dateInput.classList.remove("is-invalid");
-	}
-});
-
-// 근무유형을 선택했을 경우 에러 문구 삭제
-typeSelect.addEventListener("change", () => {
-	if (typeSelect.value) {
-		typeSelect.classList.remove("is-invalid");
-	}
-});
-
-// 외근 사유 2글자 이상 입력 시 에러 문구 삭제
-reasonTextarea.addEventListener("input", () => {
-	if (reasonTextarea.value.trim().length >= 2) {
-		reasonTextarea.classList.remove("is-invalid");
-	}
-});
-
-// 외근 시작 시간 입력 시 에러 문구 삭제됨
-outTimeInput.addEventListener("input", () => {
-	if (outTimeInput.value) {
-		outTimeInput.classList.remove("is-invalid");
-	}
-});

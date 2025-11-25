@@ -227,6 +227,5 @@ public class LeaveService {
 			// 연차 업데이트
 			leave.updateAnnual(newStart, newEnd, currentYear, workPolicy.getAnnualBasis());
 		}
-		
 	}
 }
