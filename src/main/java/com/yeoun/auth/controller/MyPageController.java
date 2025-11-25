@@ -190,11 +190,17 @@ public class MyPageController {
             bindingResult.rejectValue("currentPassword", "invalid", "현재 비밀번호가 올바르지 않습니다.");
             return "auth/password_change";
         }
+        
+        // 4) 현재 비밀번호와 새 비밀번호 일치 확인
+        if (encoder.matches(dto.getNewPassword(), currentEncodedPwd)) {
+        	bindingResult.rejectValue("newPassword", "sameAsCurrent", "현재 사용 중인 비밀번호와 다른 비밀번호를 입력해 주세요.");
+        	return "auth/password_change";
+        }
 
-        // 4) 실제 비밀번호 변경
+        // 5) 실제 비밀번호 변경
         empService.changePassword(empId, dto.getNewPassword());
         
-        // 5) 성공 메시지 + 로그아웃 플래그를 플래시 속성으로 전달
+        // 성공 메시지 + 로그아웃 플래그를 플래시 속성으로 전달
         rttr.addFlashAttribute("successMessage", "비밀번호가 변경되었습니다. 다시 로그인해주세요.");
         rttr.addFlashAttribute("logoutAfterChange", true);
 
