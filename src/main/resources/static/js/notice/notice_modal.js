@@ -322,6 +322,8 @@ async function initReadModal(createdUser) {
 		});
 		deleteNoticeBtn.disabled = false;
 		modifyNoticeBtn.disabled = false;
+		deleteNoticeBtn.style.display = 'block';
+		modifyNoticeBtn.style.disabled = 'block';
 	} else { //권한이 없을때 수정,삭제 불가능
 		Array.from(showNoticeForm.elements).forEach(el => {	
 			if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
@@ -333,6 +335,9 @@ async function initReadModal(createdUser) {
 		});
 		deleteNoticeBtn.disabled = true;
 		modifyNoticeBtn.disabled = true;
+		deleteNoticeBtn.style.display = 'none';
+		modifyNoticeBtn.style.display = 'none';
+		
 	}
 }
 

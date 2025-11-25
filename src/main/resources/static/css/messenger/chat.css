@@ -452,6 +452,14 @@ body {
   margin-bottom: 10px;
 }
 
+.file-name {
+  display: block;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .file-thumb {
   width: 120px;
   height: auto;

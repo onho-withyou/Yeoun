@@ -50,7 +50,7 @@ public class EmpListDTO {
         );
     }
     
-    // searchEmpList, searchActiveEmpList 에서 사용
+    // searchActiveEmpList 에서 사용
     public EmpListDTO(LocalDate hireDate,
                       String empId,
                       String empName,
