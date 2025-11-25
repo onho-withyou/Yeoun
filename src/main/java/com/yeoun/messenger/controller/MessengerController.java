@@ -63,6 +63,9 @@ public class MessengerController {
 		LoginDTO loginDTO = (LoginDTO)authentication.getPrincipal();
 		List<MsgStatusDTO> msgStatusDTOList = messengerService.getUsers(loginDTO.getUsername());
 		List<MsgRoomListDTO> msgRoomsDTOList = messengerService.getChatRooms(loginDTO.getUsername());
+		
+		log.info("이거 왜 갑자기 안보이지?" + msgRoomsDTOList);
+		
 		model.addAttribute("friends", msgStatusDTOList);
 		model.addAttribute("rooms", msgRoomsDTOList);
 		return "/messenger/list";
