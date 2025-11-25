@@ -138,19 +138,46 @@ const saveAttendance = async () => {
 	const url = currentMode === "edit" ? `/attendance/${currentAttendanceId}` : "/attendance";
 	const method = currentMode === "edit" ? "PATCH" : "POST";
 	
+	// 오전 9시부터 오후 6시까지만 시간 제한을 두기 위한 범위 체크 상수
+	const MIN_TIME = "09:00";
+	const MAX_TIME = "18:00";
+	
+	// 범위 체크 상수를 사용하여 Date 객체로 변환
+	const min = new Date(`2000-01-01T${MIN_TIME}`);
+	const max = new Date(`2000-01-01T${MAX_TIME}`);
+	
+	
 	// 출근 시간을 입력하지 않았을 때
 	if (!workIn) {
-		document.querySelector("#inTime").classList.add("is-invalid");
+		alert("출근 시간은 필수 입력입니다.");
 		return;
-	} else {
-		document.querySelector("#inTime").classList.remove("is-invalid");
 	}
 	
-	if (!workOut) {
-		document.querySelector("#endTime").classList.add("is-invalid");
+	if (!statusCode) {
+		alert("근태 상태는 필수 선택입니다.");
 		return;
-	} else {
-		document.querySelector("#inTime").classList.add("is-invalid");
+	}
+	
+	const inDate = new Date(`2000-01-01T${workIn}`);
+
+	if (inDate < min || inDate > max) {
+		alert("출근시간은 09:00 ~ 18:00 사이여야 합니다.");
+		return;
+	}
+	
+	// 퇴근 시간이 있을 때 출근 시간과 비교
+	if (workOut) {
+		const outDate = new Date(`2000-01-01T${workOut}`);
+		
+		if (outDate < inDate) {
+			alert("퇴근시간은 출근시간 이후여야 합니다.");
+			return;
+		}
+		
+		if (outDate < min || outDate > max) {
+			alert("퇴근시간은 09:00 ~ 18:00 사이여야 합니다.");
+			return;
+		}
 	}
 	
 	try {
