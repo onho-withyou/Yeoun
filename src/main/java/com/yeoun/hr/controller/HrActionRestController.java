@@ -59,8 +59,9 @@ public class HrActionRestController {
 	@GetMapping("/employees")
 	public List<EmpListDTO> getEmployeesForAction(@RequestParam(required = false, name = "deptId") String deptId,
 	        									  @RequestParam(required = false, name = "posCode") String posCode,
+	        									  @RequestParam(required = false, name = "status") String status,
 	        									  @RequestParam(required = false, name = "keyword") String keyword) {
-		return empService.getEmpListForHrAction(deptId, posCode, keyword);
+		return empService.getEmpListForHrAction(deptId, posCode, status, keyword);
 	}
 	
 	// 결재자 목록 API (발령 대상자 기준)
