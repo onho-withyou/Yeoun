@@ -1163,16 +1163,7 @@
 		document.getElementById('approvalCompanionBtn').style.display = "none";//반려
 		document.getElementById('approvalCheckBtn').style.display = "none";//결재확인
 		formChange(draft_doc);
-		if(draft_doc == "기안서"){//결재권한자만없음
-			alert("양식을 선택해주세요.");
-			// $('#approval-modal').on('show.bs.modal', function (e) {
-				
-			// 		// 모달을 열지 않도록 강제로 닫기
-			// 		e.preventDefault();
-			// 		console.log('모달을 열 수 없습니다.');
-				
-			// });
-		}
+		
 		formReset();
 		defaultPrint();
 	}
@@ -1229,13 +1220,23 @@
 		approverArr = [];
 		
 		// selectedForm 값이 없을 경우 에러가 생길 수 있어서 에러 처리
-		if (!selectedForm) {
-		    console.log("선택된 양식이 없습니다.")
+		// 모달이 작성 클릭 두번째부터 안열림
+		//<option selected>기안서</option> 해당구문 없앨시에 마지막인덱스로됨
+		if (selectedForm === null || selectedForm === undefined) {
+			// $('#approval-modal').on('show.bs.modal', function (e) {
+				
+			// 		// 모달을 열지 않도록 강제로 닫기
+			// 		e.preventDefault();
+			// 		console.log('모달을 열 수 없습니다.');
+				
+			// });
+			alert("양식을 선택해주세요.");
 			
-				document.getElementById('leavePeriodForm').style.display = 'flex';
-				document.getElementById('leaveTypeForm').style.display = 'flex';
-				document.getElementById('expndTypeForm').style.display = 'flex';
-				document.getElementById('toDeptForm').style.display = 'flex';
+		
+			// document.getElementById('leavePeriodForm').style.display = 'flex';
+			// document.getElementById('leaveTypeForm').style.display = 'flex';
+			// document.getElementById('expndTypeForm').style.display = 'flex';
+			// document.getElementById('toDeptForm').style.display = 'flex';
 			
 		    return;
 		}
