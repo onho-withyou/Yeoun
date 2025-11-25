@@ -564,6 +564,7 @@ async function renderOrgGrid() {
         data: toastTreeData, // 트리화 데이터
         rowHeaders: ['checkbox'],
         bodyHeight: 300,
+		filter: true,
         treeColumnOptions: {
             name: 'name',
             useCascadingCheckbox: true
@@ -573,8 +574,9 @@ async function renderOrgGrid() {
 			, name: 'name'
 			, treeColumn: true
 			, align: 'left'
-//			, width: 200
+			, filter: { type: 'text', showApplyBtn: true, showClearBtn: true }			
 			, formatter: function({row}) {
+				console.log(row, "@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 				if(row.empId != null){
 					return `${row.name}(${row.empId})`
 				} else {
