@@ -455,8 +455,8 @@ box-shadow: none;
 #tab-chats.has-alert::after {
   content: "";
   position: absolute;
-  top: 4px;    
-  right: 6px;
+  top: 1px;
+  right: -8px;
   width: 9px;
   height: 9px;
   border-radius: 50%;
