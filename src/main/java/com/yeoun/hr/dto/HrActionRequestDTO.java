@@ -20,6 +20,9 @@ public class HrActionRequestDTO {
     
  	// 발령 일자
     private LocalDate effectiveDate;  
+    
+	// 휴직 종료 예정일
+	private LocalDate leaveEndDate;
 
     // 발령 부서
     private String toDeptId;      
