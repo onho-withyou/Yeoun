@@ -90,6 +90,8 @@ let originalInTime = null;
 const openModalAttendance = async (mode, attendanceId = null) => {
 	const modalTitle = document.querySelector("#modalCenterTitle");
 	const saveBtn = document.querySelector("#saveBtn");
+	const searchBtn = document.querySelector("#searchBtn");
+	const searchEmpId = document.querySelector("#nameWithTitle");
 	const modalElement = document.querySelector("#modalCenter");
 	const modalInstance = new bootstrap.Modal(modalElement);
 	
@@ -102,6 +104,9 @@ const openModalAttendance = async (mode, attendanceId = null) => {
 		modalTitle.textContent = "출/퇴근 수정";
 		saveBtn.textContent = "수정";
 		
+		// 수정 모달에서는 사원번호 조회 기능 비활성화
+		searchEmpId.disabled = true
+		searchBtn.disabled = true;
 		
 		// 선택한 데이터 불러오기
 		const response = await fetch(ATTENDANCE_DETAIL_URL);
@@ -128,6 +133,11 @@ const openModalAttendance = async (mode, attendanceId = null) => {
 		modalTitle.textContent = "출/퇴근 등록";
 		saveBtn.textContent = "등록";
 		originalInTime = null;
+		
+		// 등록 모달에서는 사원번호 조회 활성화
+		searchEmpId.disabled = false;
+		searchBtn.disabled = false;
+		
 		resetModal(); // 모달 초기화
 	}
 	modalInstance.show();

@@ -269,6 +269,14 @@ public class AttendanceService {
 		Emp emp = empRepository.findById(attendanceDTO.getEmpId())
 				.orElseThrow(() -> new NoSuchElementException("사원을 찾을 수 없습니다."));
 		
+		// 오늘 날짜 기준으로 휴무인지 확인
+		boolean isHoliday = leaveHistoryRepository.existsByEmp_EmpIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(emp.getEmpId(), today, today);
+		
+		// 휴무라면 근태 근록 안됨
+		if (isHoliday) {
+			throw new IllegalStateException("해당 날짜는 휴무일이므로 출퇴근 기록을 등록할 수 없습니다.");
+		}
+		
 		attendanceDTO.setWorkDate(today);
 		attendanceDTO.setCreatedUser(loginDTO.getEmpId());
 		
