@@ -151,6 +151,10 @@ public class MessengerService {
 				.build();
 
 		MsgMessage savedMessage = msgMessageRepository.save(message);
+		MsgRelation update = msgRelationRepository.findByRoomId_RoomIdAndEmpId_EmpId
+							(room.getRoomId(), sender.getEmpId())
+							.orElseThrow(() -> new RuntimeException("대상 관계를 찾을 수 없음"));
+		update.setParticipantYn("Y");
 
 		// 2) 파일 업로드
 		List<FileAttachDTO> uploaded = new ArrayList<>();
@@ -228,7 +232,7 @@ public class MessengerService {
 		log.info("empId / roomId / lastreadId :::: " + dto);
 
 		// 마지막 메시지 조회
-		Long lastMsgId = msgMessageRepository.findLastMessage(dto.getRoomId());
+		Long lastMsgId = msgMessageRepository.findTop1ByRoomId_RoomIdOrderByMsgIdDesc(dto.getRoomId()).getMsgId();
 		msgRelationRepository.updateLastRead(dto.getReaderId(), dto.getRoomId(), lastMsgId);
 	}
 	
@@ -318,7 +322,11 @@ public class MessengerService {
 			MsgRoomListDTO room = messengerMapper.selectChat(empId, roomId);
 
 			// b) 메시지 내용에서 매칭되는 문장 찾기
-			String message = msgMessageRepository.findMatchedMessage(roomId, keyword);
+			String message = msgMessageRepository
+			        .findMatchedMessages(roomId, keyword)
+			        .stream()
+			        .findFirst()
+			        .orElse(null);
 
 			// 검색어가 있을 경우 해당 메시지를 보여주고 하이라이트 처리
 			if (message != null) {

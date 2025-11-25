@@ -11,7 +11,7 @@ const grid = new tui.Grid({
 		{
 			header: "연차유형",
 			name : "leaveType",
-			filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
+			filter: "select"
 		},
 		{
 			header: "휴가시작일",

@@ -76,11 +76,11 @@ public class HrActionService {
         Emp emp = empRepository.findById(hrActionRequestDTO.getEmpId())
                 .orElseThrow(() -> new IllegalArgumentException("사원을 찾을 수 없습니다. empId=" + hrActionRequestDTO.getEmpId()));
 
-        // 1-1. 부서/직급은 RETIRE_ACT 가 아닐 때만 조회
+        // 1-1. 부서/직급은 퇴직/휴직/복직 아닐 때만 조회
         Dept toDept = null;
         Position toPos = null;
         
-        if (!"RETIRE_ACT".equals(actionType)) {
+        if (!"RETIRE_ACT".equals(actionType) && !"LEAVE_ACT".equals(actionType) && !"RETURN_ACT".equals(actionType)) {
             toDept = deptRepository.findById(hrActionRequestDTO.getToDeptId())
                     .orElseThrow(() -> new IllegalArgumentException("부서를 찾을 수 없습니다. deptId=" + hrActionRequestDTO.getToDeptId()));
 
@@ -97,8 +97,8 @@ public class HrActionService {
         action.setEmp(emp);	
         action.setFromDept(emp.getDept());			// 이전 부서
         action.setFromPosition(emp.getPosition());	// 이전 직급
-        // 퇴직 아닐 때만 toDept / toPos 세팅
-        if (!"RETIRE_ACT".equals(actionType)) {
+        // 퇴직/휴직/복직 아닐 때만 toDept / toPos 세팅
+        if (!"RETIRE_ACT".equals(actionType) && !"LEAVE_ACT".equals(actionType) && !"RETURN_ACT".equals(actionType)) {
             action.setToDept(toDept);
             action.setToPosition(toPos);
         }
@@ -118,7 +118,7 @@ public class HrActionService {
         String actionTypeName = getActionTypeName(actionType);
         
         String title;
-        if ("RETIRE_ACT".equals(actionType)) {
+        if ("RETIRE_ACT".equals(actionType) || "LEAVE_ACT".equals(actionType) || "RETURN_ACT".equals(actionType)) {
         	title = String.format("[인사발령/%s] %s (%s %s)",
         			actionTypeName,
         			emp.getEmpName(),
@@ -223,6 +223,7 @@ public class HrActionService {
         return saved.getActionId();
     }
     
+    // 발령 코드에 맞는 이름
     private String getActionTypeName(String actionType) {
 
         if (actionType == null || actionType.isBlank()) {
@@ -233,6 +234,8 @@ public class HrActionService {
             case "PROMOTION"  -> "승진";
             case "TRANSFER"   -> "전보";
             case "RETIRE_ACT" -> "퇴직";
+            case "LEAVE_ACT"  -> "휴직";
+            case "RETURN_ACT" -> "복직";
             default           -> "인사발령";
         };
     }
@@ -251,8 +254,8 @@ public class HrActionService {
     	List<HrAction> targetList =
     			hrActionRepository.findByStatusAndAppliedYnAndEffectiveDateLessThanEqual(
     				"승인완료",		// 최종 승인 상태
-    				"N", 		// 아직 적용 안 됨
-    				today		// 효력일이 오늘 이전/오늘
+    				"N", 			// 아직 적용 안 됨
+    				today			// 효력일이 오늘 이전/오늘
 				);
     	
     	if(targetList.isEmpty()) {
@@ -299,6 +302,14 @@ public class HrActionService {
     				log.info("[발령적용] 퇴직 적용 - 사번:{} / 퇴사일:{}",
     	                     emp.getEmpId(), action.getEffectiveDate());
     	            break;
+    	            
+    			case "LEAVE_ACT":
+    				emp.setStatus("LEAVE");
+    				break;
+    				
+    			case "RETURN_ACT":
+    				emp.setStatus("ACTIVE");
+    				break;
     				
 				default:
 					log.warn("[발령적용] 미지원 발령타입: {} (ACTION_ID={})",
@@ -366,6 +377,7 @@ public class HrActionService {
 	                        typeCode,
 	                        typeName,
 	                        a.getEffectiveDate(),
+	                        a.getLeaveEndDate(),
 	                        a.getFromDept() != null ? a.getFromDept().getDeptName() : null,
 	                        a.getToDept() != null ? a.getToDept().getDeptName() : null,
 	                        a.getFromPosition() != null ? a.getFromPosition().getPosName() : null,

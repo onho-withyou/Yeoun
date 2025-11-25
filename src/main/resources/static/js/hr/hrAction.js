@@ -32,6 +32,12 @@ document.addEventListener('DOMContentLoaded', function() {
 	if (selPos) {
 		selPos.addEventListener('change', () => onSearchEmp());
 	}
+	
+	// 재직상태 선택 바뀌면 바로 필터링
+	const selStatus = document.getElementById('searchStatus');
+	if (selStatus) {
+		selStatus.addEventListener('change', () => onSearchEmp());
+	}
 
 	// 이름/사번 입력 후 엔터 누르면 검색
 	const inputKeyword = document.getElementById('searchKeyword');
@@ -67,11 +73,13 @@ function loadEmpListForHrAction() {
 
 	const dept = document.getElementById('searchDept')?.value || '';
 	const pos = document.getElementById('searchPos')?.value || '';
+	const status  = document.getElementById('searchStatus')?.value || '';
 	const keyword = document.getElementById('searchKeyword')?.value.trim() || '';
 
 	const params = new URLSearchParams();
 	if (dept) params.append('deptId', dept);
 	if (pos) params.append('posCode', pos);
+	if (status)  params.append('status', status);
 	if (keyword) params.append('keyword', keyword);
 
 	const url = '/api/hr/employees' + (params.toString() ? ('?' + params.toString()) : '');
@@ -106,6 +114,9 @@ function buildEmpGrid(rows) {
 		scrollY: true,
 		bodyHeight: 500,
 		rowHeaders: ['rowNum'],
+		columnOptions: {
+		  resizable: true
+		},
 		columns: [
 			{ 
 				header: '사번', 
@@ -125,6 +136,11 @@ function buildEmpGrid(rows) {
 			{ 
 				header: '직급', 
 				name: 'posName',
+				align: 'center'
+			},
+			{
+				header: '상태',
+				name: 'statusName',
 				align: 'center'
 			},
 			{ 
@@ -162,6 +178,7 @@ function handleSubmitAction(e) {
 		empId: document.getElementById("empId").value,
 		actionType: actionType,
 		effectiveDate: document.querySelector("input[name='effectiveDate']").value,
+		leaveEndDate: document.querySelector("input[name='leaveEndDate']").value,
 		toDeptId: document.querySelector("select[name='toDeptId']").value,
 		toPosCode: document.querySelector("select[name='toPosCode']").value,
 		actionReason: document.querySelector("textarea[name='actionReason']").value,
@@ -177,12 +194,19 @@ function handleSubmitAction(e) {
 		return;
 	}
 	if (!dto.effectiveDate) {
-		alert("발령일자를 입력하세요!");
+		alert("발령 효력일을 입력하세요!");
 		return;
 	}
+
+	// 휴직일 때는 종료 예정일 필수
+	if (actionType === 'LEAVE_ACT' && !dto.leaveEndDate) {
+		alert("휴직 종료 예정일을 입력하세요!")
+		return;
+	}	
+	
 	
 	// 퇴직이 아닐 때만 부서/직급 필수
-    if (actionType !== 'RETIRE_ACT') {
+    if (actionType !== 'RETIRE_ACT' && actionType !== 'LEAVE_ACT' && actionType !== 'RETURN_ACT') {
       if (!dto.toDeptId) {
         alert("부서를 선택하세요!");
         return;
@@ -278,15 +302,14 @@ function handleActionTypeChange() {
     const actionType = document.querySelector("select[name='actionType']").value;
     const deptSelect = document.querySelector("select[name='toDeptId']");
     const posSelect = document.querySelector("select[name='toPosCode']");
+	const leaveEndInput = document.querySelector("input[name='leaveEndDate']");
 
-    if (!deptSelect || !posSelect) return;
+    if (!deptSelect || !posSelect || !leaveEndInput) return;
 
-    if (actionType === 'RETIRE_ACT') {
-        // 퇴직일 때 선택 막기
+	// 퇴직 및 휴직일 때 부서/직급 비활성화
+    if (actionType === 'RETIRE_ACT' || actionType === 'LEAVE_ACT' || actionType === 'RETURN_ACT') {
         deptSelect.disabled = true;
         posSelect.disabled = true;
-
-        // 값도 비워놓기 (원치 않으면 지워도 됨)
         deptSelect.value = '';
         posSelect.value = '';
     } else {
@@ -294,5 +317,14 @@ function handleActionTypeChange() {
         deptSelect.disabled = false;
         posSelect.disabled = false;
     }
+	
+	// 휴직일 때만 휴직 종료 예정일 활성화
+	if (actionType === 'LEAVE_ACT') {
+		leaveEndInput.disabled = false;
+	} else {
+		leaveEndInput.disabled = true;
+		leaveEndInput.value = "";
+	}
+	
 }
 

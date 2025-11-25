@@ -123,7 +123,7 @@ public class ScheduleService {
 				// save할 객체 생성
 				ScheduleSharer scheduleSharer = new ScheduleSharer();
 				// sharer에 공유된 empId로 emp객체 찾기
-				Emp sharerEmp = empRepository.findById(DTO.getEmpId()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다.111"));;
+				Emp sharerEmp = empRepository.findById(DTO.getEmpId()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 직원입니다."));;
 				
 				// scheduleSharer엔티티에 schedule객체, emp 객체 추가 
 				scheduleSharer.setSchedule(schedule);
@@ -137,7 +137,8 @@ public class ScheduleService {
 	//일정 정보 삭제
 	@Transactional
 	public void deleteSchedule(@Valid ScheduleDTO scheduleDTO, Authentication authentication) {
-		Schedule schedule = scheduleDTO.toEntity();
+		Schedule schedule = scheduleRepository.findById(scheduleDTO.getScheduleId()).orElseThrow(() -> new EntityNotFoundException("존재하지않는 일정입니다!!"));
+		
 		scheduleRepository.delete(schedule);
 	}
 	

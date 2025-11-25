@@ -490,6 +490,7 @@ async function getOrganizationChart() {
 		return response.json();  //JSON 파싱
 	}).then(async data => {
 		toastTreeData = await buildDeptTree(data.data);
+		console.log("toastTreeData : " , toastTreeData)
 		await renderOrgGrid();
 	}).catch(error => {
 		console.error('에러', error)
@@ -563,7 +564,8 @@ async function renderOrgGrid() {
         el: document.getElementById('organizationChartGrid'),
         data: toastTreeData, // 트리화 데이터
         rowHeaders: ['checkbox'],
-        bodyHeight: 300,
+        bodyHeight: 'auto',
+		filter: true,
         treeColumnOptions: {
             name: 'name',
             useCascadingCheckbox: true
@@ -573,8 +575,9 @@ async function renderOrgGrid() {
 			, name: 'name'
 			, treeColumn: true
 			, align: 'left'
-//			, width: 200
+			, filter: { type: 'text', showApplyBtn: true, showClearBtn: true }	
 			, formatter: function({row}) {
+				console.log(row, "@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 				if(row.empId != null){
 					return `${row.name}(${row.empId})`
 				} else {
@@ -584,6 +587,7 @@ async function renderOrgGrid() {
 			 }
         ]
     });
+		
 }
 
 document.getElementById('select-sharer-btn').addEventListener('click', function(){

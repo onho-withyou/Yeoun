@@ -282,7 +282,7 @@ public class EmpService {
 	}
 	
 	// 인사발령 화면에서 쓰는 전체 사원 목록
-	public List<EmpListDTO> getEmpListForHrAction(String deptId, String posCode, String keyword) {
+	public List<EmpListDTO> getEmpListForHrAction(String deptId, String posCode, String status, String keyword) {
 
 		if (keyword != null) {
 	        keyword = keyword.trim();
@@ -291,7 +291,7 @@ public class EmpService {
 	    if (deptId != null && deptId.isBlank()) deptId = null;
 	    if (posCode != null && posCode.isBlank()) posCode = null;
 	    
-	    return empRepository.searchActiveEmpList(deptId, posCode, keyword);
+	    return empRepository.searchEmpForHrAction(deptId, posCode, status, keyword);
 	}
 
 	// ==============================================================================

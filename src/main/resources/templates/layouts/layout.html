@@ -32,7 +32,7 @@
 <title>여운</title>
 <meta name="description" content="" />
 <!-- FontAweosome -->
-<script src="https://kit.fontawesome.com/6ceaa42ac0.js" crossorigin="anonymous"></script>
+<!-- <script src="https://kit.fontawesome.com/6ceaa42ac0.js" crossorigin="anonymous"></script> -->
 
 <!-- Favicon -->
 <link rel="icon" type="image/x-icon" th:href="@{/icon/favicon.png}" />
@@ -131,6 +131,9 @@
 	<!-- Place this tag in your head or just before your close body tag. -->
 	<script async defer src="https://buttons.github.io/buttons.js"></script>
 	<script th:src="@{/custom_bg/custom_bg.js}"></script>
+	
+	<!-- 소켓 -->
+	<script th:src="@{/js/common/connectSocket.js}"></script>
 	
 	<!-- 내 정보 모달 -->
 	<th:block th:replace="~{/emp/emp_detail_modal :: emp-detail-modal}"></th:block>
