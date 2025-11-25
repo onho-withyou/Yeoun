@@ -76,18 +76,18 @@
           </div>
           <div>
           	<!-- ======== 업무 사유 상태메시지 표시 ======== -->
-			<small class="status-msg"
+			<small class="status-msg" th:data-id="${friend.empId}"
 			       th:switch="${friend.manualWorkStat}">
 			       
-			    <span th:case="'WORKING'">근무 중</span>
-			    <span th:case="'MEETING'">회의 중</span>
-			    <span th:case="'CALL'">통화 중</span>
-			    <span th:case="'FOCUS'">집중 업무 중</span>
-			    <span th:case="'LUNCH'">식사 중</span>
-			    <span th:case="'OUTING'">외출 중</span>
-			    <span th:case="'FIELDWORK'">외근 중</span>
-			    <span th:case="'WFH'">재택근무 중</span>
-			    <span th:case="'VACATION'">휴가 중</span>
+			    <th:block th:case="WORKING">근무 중</th:block>
+			    <th:block th:case="MEETING">회의 중</th:block>
+			    <th:block th:case="CALL">통화 중</th:block>
+			    <th:block th:case="FOCUS">집중 업무 중</th:block>
+			    <th:block th:case="LUNCH">식사 중</th:block>
+			    <th:block th:case="OUTING">외출 중</th:block>
+			    <th:block th:case="FIELDWORK">외근 중</th:block>
+			    <th:block th:case="WFH">재택근무 중</th:block>
+			    <th:block th:case="VACATION">휴가 중</th:block>
 			
 			    <!-- 값 없을 때 -->
 			    <span th:case="*">-</span>

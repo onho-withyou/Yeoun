@@ -127,11 +127,6 @@ public class Emp implements FileUploadHelpper {
 		// 사용자 권한 목록 객체(List<EmpRole>)에 1개의 권한이 저장된 EmpRole 엔티티 추가
 		empRoles.add(empRole);
 	}
-
-	// ---------------------------------------------------------------
-	// 연차 테이블과 연동
-	@OneToOne(mappedBy = "emp", cascade = CascadeType.ALL, orphanRemoval = true)
-	private AnnualLeave annualLeave;
 	
 	// ---------------------------------------------------------------
 	@Override

@@ -32,7 +32,7 @@ public class ChatController {
 	
 	// ====================================================
 	// 1. 메시지 전송 
-	// 클라이언트 -> pub/chat/send
+	// 클라이언트 -> app/chat/send
 	@MessageMapping("/chat/send")
 	public void sendMessage (MsgSendRequest msgSendRequest) throws IOException {
 
@@ -45,7 +45,7 @@ public class ChatController {
 	
 	// ====================================================
 	// 2. 메시지 읽음
-	// 클라이언트 -> pub/chat/read
+	// 클라이언트 -> app/chat/read
 	@MessageMapping("/chat/read")
 	public void readMessage(MsgReadRequest msgReadRequest) {
 
@@ -58,7 +58,7 @@ public class ChatController {
 	
 	// ====================================================
 	// 3. 상태 변경 처리
-	// 클라이언트 -> pub/status/change
+	// 클라이언트 -> app/status/change
 	@MessageMapping("/status/change")
 	public void changeStatus(StatusChangeRequest statusChangeRequest) {
 
@@ -71,6 +71,7 @@ public class ChatController {
 	
 	// ====================================================
 	// 4. 방 퇴장 알림
+	// 클라이언트 -> app/room/leave
 	@MessageMapping("/room/leave")
 	public void leaveRoom(RoomLeaveRequest roomLeaveRequest) {
 

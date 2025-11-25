@@ -1,6 +1,8 @@
 package com.yeoun.messenger.service;
 
+import java.security.Principal;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.yeoun.common.dto.FileAttachDTO;
@@ -8,13 +10,16 @@ import com.yeoun.messenger.dto.*;
 import com.yeoun.messenger.entity.MsgStatus;
 import com.yeoun.messenger.repository.MsgStatusRepository;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.messenger.entity.MsgMessage;
+import com.yeoun.messenger.entity.MsgRelation;
 import com.yeoun.messenger.entity.MsgRoom;
 import com.yeoun.messenger.repository.MsgMessageRepository;
+import com.yeoun.messenger.repository.MsgRelationRepository;
 import com.yeoun.messenger.repository.MsgRoomRepository;
 
 import jakarta.transaction.Transactional;
@@ -27,6 +32,7 @@ import lombok.extern.log4j.Log4j2;
 public class ChatService {
 	
 	private final SimpMessagingTemplate simpMessagingTemplate;
+	private final MsgRelationRepository msgRelationRepository;
 	private final MsgMessageRepository msgMessageRepository;
 	private final EmpRepository empRepository;
 	private final MsgRoomRepository msgRoomRepository;
@@ -59,13 +65,42 @@ public class ChatService {
 
 		log.info("브로드캐스트 dto....... 왜 안나오니... :: " + event);
 
-		 // 메시지 전송
+		 // 메시지 전송 1) (방을 대상으로)
 		 simpMessagingTemplate.convertAndSend(
 				   "/topic/chat/room/" + saved.getRoomId().getRoomId(),
 				   event
 		 );
 		 
 		log.info("************** STOMP! 메시지 전송" + event);
+		
+		// =======================================================================
+		
+		List<String> members = new ArrayList<>();
+		List<MsgRelation> relationList = msgRelationRepository.findByRoomId_RoomId(event.getRoomId());
+		for (MsgRelation relation : relationList) {
+			members.add(relation.getEmpId().getEmpId());
+		}
+		members.remove(event.getSenderId());
+		
+		for (String member : members) {
+			int unread = msgMessageRepository.countUnreadMessage(event.getRoomId(), member, event.getMsgId());
+			MessageNotifyDTO notify = MessageNotifyDTO.builder()
+					.roomId(event.getRoomId())
+					.preview(event.getMsgContent())
+					.senderId(event.getSenderId())
+					.senderName(event.getSenderName())
+					.sentTime(event.getSentTime())
+					.unreadCount(unread)
+					.build();
+			
+			// 메시지 전송 2) (외부를 대상으로)
+			simpMessagingTemplate.convertAndSendToUser(
+					member, 
+					"/queue/messenger", 
+					notify
+			);
+		}
+		
 	}
 	
 	
@@ -88,7 +123,7 @@ public class ChatService {
 		log.info("changeStatus 진입......... WORKSTAT ::: " + statusChangeRequest.getWorkStat());
 
 		simpMessagingTemplate.convertAndSend(
-				"/topic/status/change/",
+				"/topic/status/change",
 				statusChangeRequest);
 		
 		log.info("************** STOMP! 상태 변경" + statusChangeRequest);
@@ -120,7 +155,6 @@ public class ChatService {
 		
 		log.info("************** STOMP! 방 퇴장" + roomLeaveRequest);
 	}
-
 
 }
 

@@ -168,21 +168,26 @@ function initGrid(data) {
 	// 상세보기 버튼 이벤트
 	grid.on("click", (event) => {
 		if(event.columnName == "btn") {
-			const rowData = grid.getRow(event.rowKey);
-			const scheduleId = rowData.scheduleId;
-			
-			fetch(`/api/schedules/${scheduleId}`, {method: 'GET'})
-			.then(response => {
-				if (!response.ok) throw new Error(response.text());
-				return response.json();  //JSON 파싱
-			})
-			.then(data => { // response가 ok일때
-				openScheduleModal("edit", data);
-			}).catch(error => {
-				console.error('에러', error)
-				alert("데이터 조회 실패");
-			});
+			const target = event.nativeEvent.target;
+			if (target && target.tagName === "BUTTON") {
+				
+				const rowData = grid.getRow(event.rowKey);
+				const scheduleId = rowData.scheduleId;
+				
+				fetch(`/api/schedules/${scheduleId}`, {method: 'GET'})
+				.then(response => {
+					if (!response.ok) throw new Error(response.text());
+					return response.json();  //JSON 파싱
+				})
+				.then(data => { // response가 ok일때
+					openScheduleModal("edit", data);
+				}).catch(error => {
+					console.error('에러', error)
+					alert("데이터 조회 실패");
+				});
+			}
 		}
+		
 	});
 }
 

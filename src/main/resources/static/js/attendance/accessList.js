@@ -87,10 +87,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 	const today = new Date();
 	const year = today.getFullYear();
 	const month = today.getMonth() + 1;
+	const day = today.getDate();
 	
-	// 이번 달 1일과 말일 계산
+	// 이번 달 1일과 오늘 날짜 계산
 	const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
-	const endDate = today.toISOString().split("T")[0];
+	const endDate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 	
 	// 날짜 input 기본값 설정
 	document.querySelector("#startDate").value = startDate;

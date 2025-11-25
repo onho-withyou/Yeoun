@@ -33,7 +33,7 @@ connectWebSocket(() => {
 });
 
 //===============================
-//  방 구독
+//  구독
 //===============================
 
 function subscribeEvent() {
@@ -50,10 +50,74 @@ function subscribeEvent() {
 	});
 	
 	// 2) 메시지 수신 구독
-/*	stompClient.subscribe(`/topic/chat/room/${roomId}`, (message) => {
-	    renderMyMessage(JSON.parse(message.body));
-	});*/
+	stompClient.subscribe(`/user/queue/messenger`, (message) => {
+	    receiveNewMessage(JSON.parse(message.body));
+	});
 }
+
+// ==========================
+// 상태 실시간 변화 구독
+// ==========================
+function changeStatus(req){
+	
+	console.log("changeStatus 진입............... ", req);
+	
+	// 해당 친구 DOM 찾기
+	const item = document.querySelector(`.friend-item [data-id="${req.empId}"]`);
+	console.log("changeStatus 안의 item.......... ", item);
+	if (!item) return;
+
+	const dot = item.closest(".friend-item").querySelector(".status-dot");
+	console.log("changeStatus 안의 dot.......... ", dot);
+	if (!dot) return;
+
+	// 1) dot 색상 변경
+	dot.classList.remove("online", "offline", "away", "busy");
+	
+	switch (req.avlbStat) {
+	    case "ONLINE":  dot.classList.add("online");  break;
+	    case "AWAY":    dot.classList.add("away");    break;
+	    case "BUSY":    dot.classList.add("busy");    break;
+	    case "OFFLINE": dot.classList.add("offline"); break;
+	}
+
+	// 2) 상태 변경 => 왜인지는 모르겠지만 ITEM 자체가 status-msg라서 필요없어진 코드!
+	//const msg = item.getElementsByClassName("status-msg");
+	//if (!msg) return;
+
+	// 백엔드에서 보내는 workStat → UI 문구 매핑
+	const workMap = {
+	    WORKING: "근무 중",
+	    MEETING: "회의 중",
+	    CALL: "통화 중",
+	    FOCUS: "집중 업무 중",
+	    LUNCH: "식사 중",
+	    OUTING: "외출 중",
+	    FIELDWORK: "외근 중",
+	    WFH: "재택근무 중",
+	    VACATION: "휴가 중"
+	};
+
+	console.log("req.workStat::::::::::", req.workStat);
+	// workStat이 null이면 "-"
+	item.textContent = workMap[req.workStat] || "-";
+}
+
+// ==========================
+// 상태 실시간 변화 구독
+// ==========================
+function receiveNewMessage(req){
+	
+	console.log("일단 여기까지만 오면 성공인데!!");
+	
+	if (currentMode == 'friend'){
+		
+	} else if (currentMode == 'chat'){
+		
+	}
+
+}
+
 
 // ==========================
 // 각 친구의 상태
@@ -83,54 +147,6 @@ document.querySelectorAll('.friend-item').forEach(item => {
       dot.classList.add("offline");
   }
 });
-
-// ==========================
-// 상태 실시간 변화 구독
-// ==========================
-function changeStatus(req){
-	
-	console.log("changeStatus 진입............... ", req);
-	
-	// 해당 친구 DOM 찾기
-	const item = document.querySelector(`.friend-item [data-id="${req.empId}"]`);
-	console.log("changeStatus 안의 item.......... ", item);
-	if (!item) return;
-
-	const dot = item.closest(".friend-item").querySelector(".status-dot");
-	console.log("changeStatus 안의 dot.......... ", dot);
-	if (!dot) return;
-
-	// 1) dot 색상 변경
-	dot.classList.remove("online", "offline", "away", "busy");
-	
-	switch (req.avlbStat) {
-	    case "ONLINE":  dot.classList.add("online");  break;
-	    case "AWAY":    dot.classList.add("away");    break;
-	    case "BUSY":    dot.classList.add("busy");    break;
-	    case "OFFLINE": dot.classList.add("offline"); break;
-	}
-
-	// 2) 상태 변경
-	const msg = item.querySelector(".status-msg");
-	if (!msg) return;
-
-	// 백엔드에서 보내는 workStat → UI 문구 매핑
-	const workMap = {
-	    WORKING: "근무 중",
-	    MEETING: "회의 중",
-	    CALL: "통화 중",
-	    FOCUS: "집중 업무 중",
-	    LUNCH: "식사 중",
-	    OUTING: "외출 중",
-	    FIELDWORK: "외근 중",
-	    WFH: "재택근무 중",
-	    VACATION: "휴가 중"
-	};
-
-	// workStat이 null이면 "-"
-	msg.textContent = req.workStat ? (workMap[req.workStat] || req.workStat) : "-";
-	
-}
 
 //==========================
 // 대화창 검색 동작 후 대화창 렌더링
