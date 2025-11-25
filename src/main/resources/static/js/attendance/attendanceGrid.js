@@ -17,7 +17,7 @@ const grid = new tui.Grid({
 		{
 			header: "상태",
 			name : "statusCode",
-			sortable: true
+			filter: "select"
 		},
 		{
 			header: "총근무시간",
