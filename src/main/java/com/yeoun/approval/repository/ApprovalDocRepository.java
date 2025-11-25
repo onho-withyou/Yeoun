@@ -25,11 +25,11 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 	Optional<Emp> findByEmpId(String empId);
 	
 	// 사원 목록 조회
-	@Query("SELECT m FROM Emp m")
+	@Query("SELECT m FROM Emp m WHERE status='ACTIVE'")
     List<Emp> findAllMember();
 
 	@Query(value ="""
-			SELECT m.emp_id,m.emp_name FROM Emp m
+			 SELECT emp_id,emp_name FROM emp WHERE status='ACTIVE'
 			""",nativeQuery = true)
     List<Object[]> findAllMember2();
 	
@@ -269,7 +269,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 				WHERE ad.emp_id = e.emp_id 
 				AND e.dept_id = d.dept_id
 				AND e.pos_code = p.pos_code
-				AND e.emp_id = '2001752') adre, emp e
+				AND e.emp_id = :empId) adre, emp e
             WHERE adre.approver = e.emp_id
                 
 				
