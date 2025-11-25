@@ -144,6 +144,7 @@
 			selectBox = new tui.SelectBox('#select-box', {
 			  data: itemData
 			});
+			
 			//셀렉트박스 닫힐때
 			selectBox.on('close',(ev)=>{
 				let selectlabel = selectBox.getSelectedItem().label;
@@ -167,7 +168,6 @@
 		
 				const target = ev.nativeEvent.target;
 				// const targetElement = ev.nativeEvent.target; 이 줄이 빠진 경우
-				console.log("ev.targetType",ev.targetType)
 				if (ev.targetType === 'cell' && target.tagName === 'BUTTON') {
 					
 					const rowData = grid1.getRow(ev.rowKey);
@@ -197,11 +197,11 @@
 					document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
 					//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
 					document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
-					
 					console.log("rowData.to_dept_id",rowData.to_dept_id);
-					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
+					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서
 					document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 					//document.getElementById('approver').value = rowData.approver;//결재권한자
+					//상세버튼 클릭시 디폴트 결재권한자 div 생기게하는 로직
 					const approverList = await getApproverList(approvalId);
 					
 					let sortedList; 
@@ -251,8 +251,6 @@
 					//document.getElementById('approval-title').value = rowData.approval_title;
 					document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
 					document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
-					
-					const createdDate = rowData.created_date;
 					document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
 					document.getElementById('finish-date').value = toDateStr(rowData.finish_date);//결재완료날짜
 					//휴가 연차신청서 
@@ -260,8 +258,7 @@
 					document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
 					//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
 					document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
-					
-					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
+					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서
 					document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 					//document.getElementById('approver').value = rowData.approver;//결재권한자
 					
@@ -324,7 +321,7 @@
 					//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
 					document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
 					
-					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
+					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서
 					document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 					//document.getElementById('approver').value = rowData.approver;//결재권한자
 					const approverList = await getApproverList(approvalId);
@@ -385,7 +382,7 @@
 				//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
 				document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
 				
-				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
+				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서
 				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 				//document.getElementById('approver').value = rowData.approver;//결재권한자
 				const approverList = await getApproverList(approvalId);
@@ -444,7 +441,7 @@
 					//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
 					document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
 					
-					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
+					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서
 					document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 					//document.getElementById('approver').value = rowData.approver;//결재권한자
 					const approverList = await getApproverList(approvalId);
