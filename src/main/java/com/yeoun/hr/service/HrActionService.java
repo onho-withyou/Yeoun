@@ -30,6 +30,7 @@ import com.yeoun.emp.entity.Position;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.emp.repository.PositionRepository;
+import com.yeoun.emp.service.EmpService;
 import com.yeoun.hr.dto.HrActionDTO;
 import com.yeoun.hr.dto.HrActionRequestDTO;
 import com.yeoun.hr.entity.HrAction;
@@ -45,6 +46,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class HrActionService {
 
+	private final EmpService empService;
     private final HrActionRepository hrActionRepository;
     private final EmpRepository empRepository;
     private final DeptRepository deptRepository;
@@ -279,6 +281,9 @@ public class HrActionService {
                                 emp.getEmpId(),
                                 action.getToPosition().getPosName());
 				}
+    				
+    			// 승진 후 권한 싱크
+    			empService.syncRolesByDeptAndPos(emp);
     			break;
     			
     			case "TRANSFER":
@@ -294,6 +299,9 @@ public class HrActionService {
                                 emp.getEmpId(),
                                 action.getToPosition().getPosName());
     				}
+    				
+    				// 전보 후 권한 싱크
+        			empService.syncRolesByDeptAndPos(emp);
     				break;
     				
     			case "RETIRE_ACT":
@@ -301,6 +309,10 @@ public class HrActionService {
     				emp.setRetireDate(action.getEffectiveDate());
     				log.info("[발령적용] 퇴직 적용 - 사번:{} / 퇴사일:{}",
     	                     emp.getEmpId(), action.getEffectiveDate());
+    				
+    				// 퇴직 시 권한 전부 삭제
+    				empService.removeAllRoles(emp);
+    				
     	            break;
     	            
     			case "LEAVE_ACT":
