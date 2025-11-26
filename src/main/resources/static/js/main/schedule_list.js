@@ -2,8 +2,8 @@
 	일정게시판 JavaScript 
 **/
 
-const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
-const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
+//const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
+//const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
 
 const currentUserId = document.getElementById('currentUserId')?.value;
 const currentUserName = document.getElementById('currentUserName')?.value;
