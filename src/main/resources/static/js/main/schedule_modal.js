@@ -276,7 +276,7 @@ async function openScheduleModal(mode, data = null) {
 	const alldayCheckbox = document.getElementById('all-day-checkbox');
 	const organizeInput = document.getElementById('schedule-sharer');
 	const organizeBtn = document.getElementById('select-sharer-btn');
-	
+	const shareEl = document.getElementById('shareField');
 //	const createdUser = document.getElementById('schedule-writer')
 //	const startpickerInput = document.getElementById('startpicker-input');
 //	const endpickerInput = document.getElementById('endpicker-input');
@@ -326,6 +326,8 @@ async function openScheduleModal(mode, data = null) {
 		
 		// 등록모달은 개인으로 기본값설정
 		select.value = 'share';
+		shareEl.style.display = "block";
+		
 		// 종일 체크 해제
 		alldayCheckbox.checked = true
 		form.alldayYN.value = "Y";
@@ -490,7 +492,6 @@ async function getOrganizationChart() {
 		return response.json();  //JSON 파싱
 	}).then(async data => {
 		toastTreeData = await buildDeptTree(data.data);
-		console.log("toastTreeData : " , toastTreeData)
 		await renderOrgGrid();
 	}).catch(error => {
 		console.error('에러', error)
@@ -577,7 +578,6 @@ async function renderOrgGrid() {
 			, align: 'left'
 			, filter: { type: 'text', showApplyBtn: true, showClearBtn: true }	
 			, formatter: function({row}) {
-				console.log(row, "@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 				if(row.empId != null){
 					return `${row.name}(${row.empId})`
 				} else {

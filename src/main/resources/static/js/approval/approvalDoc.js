@@ -9,8 +9,6 @@
 	let currentApprover;
 	// 모달의 결재확인 버튼
 	
-	//const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
-	//const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]')?.content;
 	// 결제확인 버튼
 	const approvalCheckBtn = document.getElementById('approvalCheckBtn');
 	// 반려 버튼
@@ -18,7 +16,7 @@
 	
 	// ========================================================
 	// v- 결재권한자
-	let elemApproverIdNum = null;//결재권한자 count
+	let elemApproverIdNum = null;//결재권한자 count 중요! 꼬이면안됨
 	// ========================================================
 	
 	// f- 결재확인 버튼 눌렀을때 동작할 함수
@@ -162,7 +160,7 @@
 					});
 					console.log("@@@@@@@@@@@@@@@@@@@@@@",approverArr);
 				}
-				
+				formReset();
 			});
 			//const modal = document.getElementById('approval-modal');
 			//그리드 1클릭시 상세버튼
@@ -1202,7 +1200,7 @@
 	}
 	//f- 양식 모달 리셋함수
 	function formReset(ev){
-		
+    
     	// Null 체크 추가
     	const draftingElement = document.getElementById('Drafting');
     	if (draftingElement) { // draftingElement가 null인지 체크
@@ -1218,6 +1216,7 @@
 		//document.getElementById("DraftingHidden").value = selectedForm.formName;//양식종류 숨은값
 		//document.getElementById('Drafting').innerText = selectedForm.formName;
 		//document.getElementById("DraftingHidden").value = selectedForm.formName;//양식종류 숨은값
+
 		document.getElementById("approval-title").value = "";//문서제목
 		//document.getElementById("approver-name").value ="";//결재자명 - 로그인정보에서 불러옴
 		document.getElementById("create-date").value = null;//문서 생성일자
@@ -1271,25 +1270,22 @@
 	//f- 작성 버튼 클릭 시 실행되는 함수
   	function defaultPrint(){
 		// 모달을 닫고 다시 작성 버튼을 클릭하면 이전 데이터가 남아있어서 초기화 진행
-		approverDiv.innerHTML = "";
+		//approverDiv.innerHTML = "";
 		formReset();
 		formEnable();
-		selectBox.enable();
+		//selectBox.enable();
 		window.count = 0;
 		approverArr = [];
-		
 		// selectedForm 값이 없을 경우 에러가 생길 수 있어서 에러 처리
 		//<option selected>기안서</option> 해당구문 없앨시에 마지막인덱스로됨
 		if (!selectedForm) {
-			
-			
 			console.log('모달을 열 수 없습니다.');
+			return;
+
 			// document.getElementById('leavePeriodForm').style.display = 'flex';
 			// document.getElementById('leaveTypeForm').style.display = 'flex';
 			// document.getElementById('expndTypeForm').style.display = 'flex';
 			// document.getElementById('toDeptForm').style.display = 'flex';
-			
-		    return;
 		}
 		
 		defalutapproverArr = []; //디폴트 결재권한자 초기화
@@ -1403,6 +1399,7 @@
 	// });
 	
 	// editor.getMarkdown();
+
 	
 	//모달 움직이게 하기
 	const modalHeader = document.querySelector(".modal-header");

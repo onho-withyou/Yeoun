@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class HomeController {
 	@GetMapping("/home")
 	public String home(Model model) {
-		return "mainSample";
+		return "main/main.html";
 	}
 	
 }

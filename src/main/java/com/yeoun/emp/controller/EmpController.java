@@ -144,19 +144,35 @@ public class EmpController {
 							  @RequestParam(value = "keyword", required = false) String keyword,
 							  @RequestParam(value = "deptId", required = false) String deptId) {
 		
-		boolean isHr  = user.hasRole("HR_ADMIN") || user.hasRole("SYS_ADMIN");
-	    boolean isMgr = user.hasRole("DEPT_MANAGER");
+		// 권한 체크
+		boolean isHrAdmin  = user.hasRole("HR_ADMIN");
+		boolean isSystemAdmin = user.hasRole("SYS_ADMIN");
+	    boolean isDeptManager = user.hasRole("DEPT_MANAGER");
+	    
+	    boolean isAdmin = isHrAdmin || isSystemAdmin;
 		
-	    if (isMgr && !isHr) {
-	        deptId = user.getDeptId(); // 부서장은 자기 부서만
+	    // 부서장은 자기 부서만 조회 가능
+	    if (isDeptManager && !isAdmin) {
+	        deptId = user.getDeptId();
+	    }
+	    
+	    // 부서 셀렉트 목록
+	    List<Dept> deptList = deptRepository.findActive();
+	    
+	    // 부서장만 있고 관리자 아님 → 자기 부서만 보여주기
+	    if (isDeptManager && !isAdmin) {
+	        String myDeptId = user.getDeptId();
+	        deptList = deptList.stream()
+	                .filter(d -> myDeptId.equals(d.getDeptId()))
+	                .toList();
 	    }
 	    
 	    // 부서 셀렉트 옵션용
-	    model.addAttribute("deptList", deptRepository.findActive());
+	    model.addAttribute("deptList", deptList);
 	    model.addAttribute("keyword", keyword);
 	    model.addAttribute("deptId", deptId);
-	    model.addAttribute("isHr", isHr);
-	    model.addAttribute("isMgr", isMgr);
+	    model.addAttribute("isDeptManager", isDeptManager);
+	    model.addAttribute("isAdmin", isAdmin);
 	    
 		return "/emp/emp_list";
 	}
@@ -168,11 +184,13 @@ public class EmpController {
 									   @RequestParam(defaultValue = "", name = "keyword") String keyword,
 									   @RequestParam(required = false, name = "deptId") String deptId) {
 		
-		boolean isHr  = user.hasRole("HR_ADMIN") || user.hasRole("SYS_ADMIN");
-	    boolean isMgr = user.hasRole("DEPT_MANAGER");
+		boolean isHrAdmin  = user.hasRole("HR_ADMIN");
+		boolean isSystemAdmin = user.hasRole("SYS_ADMIN");
+	    boolean isDeptManager = user.hasRole("DEPT_MANAGER");
+	    boolean isAdmin = isHrAdmin || isSystemAdmin;
 
-	    if (isMgr && !isHr) {
-	        deptId = user.getDeptId(); // 부서장은 자기 부서만
+	    if (isDeptManager && !isAdmin) {
+	        deptId = user.getDeptId();
 	    }
 		
 	    return empService.getEmpList(keyword, deptId);

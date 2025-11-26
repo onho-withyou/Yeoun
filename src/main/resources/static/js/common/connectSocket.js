@@ -20,7 +20,7 @@ function connectWebSocket(onConnected) {
 
 	stompClient.connect({
 		// CSRF 토큰 정보를 헤더에 포함
-		[csrfHeaderName]: csrfToken
+		[csrfHeader]: csrfToken
 	}, function () {
 	    connected = true;
 	    console.log("STOMP 연결 성공!!!!!!!!!!!!!");
@@ -35,3 +35,4 @@ function connectWebSocket(onConnected) {
 	    setTimeout(() => connectWebSocket(onConnected), 3000);
 	});
 }
+

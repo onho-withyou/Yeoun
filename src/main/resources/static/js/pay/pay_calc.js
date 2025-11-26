@@ -55,6 +55,23 @@ function validateCalcRule(form) {
         }
     }
 
+    // ⭐ 비율 검증 추가!
+    if(!msg && ruleType.value === "RATE"){
+        const num = parseFloat(valueNum.value);
+        if(isNaN(num) || num < 0 || num > 1){
+            msg = "비율은 0~1 사이 값만 입력 가능합니다. (예: 0.1 = 10%)";
+        }
+    }
+	
+	// ⭐ 금액 검증 추가! (1000원 이상)
+	if(!msg && ruleType.value === "AMT"){
+	    const num = parseAmount(valueNum.value);
+	    if(isNaN(num) || num < 1000){
+	        msg = "금액은 1,000원 이상 입력해야 합니다.";
+	    }
+	}
+
+
     return msg;
 }
 
@@ -76,7 +93,6 @@ function bindTargetSwitcher(prefix) {
     const updateUI = () => {
         const type = typeSel.value;
 
-        // 모든 요소 숨기고 name 제거
         [inputEl, deptSel, gradeSel].forEach(el=>{
             if(el){
                 el.classList.add("d-none");
@@ -87,25 +103,24 @@ function bindTargetSwitcher(prefix) {
         if(type === "EMP"){
             inputEl.classList.remove("d-none");
             inputEl.setAttribute("name", "targetCode");
+
+            // ⭐ 자동완성 항상 바인딩 ⭐
+            bindEmpAutocomplete(inputEl);
+
             return;
         }
 
         if(type === "DEPT"){
             deptSel.classList.remove("d-none");
             deptSel.setAttribute("name", "targetCode");
-            if(inputEl) inputEl.value = "";
             return;
         }
 
         if(type === "GRADE"){
             gradeSel.classList.remove("d-none");
             gradeSel.setAttribute("name", "targetCode");
-            if(inputEl) inputEl.value = "";
             return;
         }
-
-        // ALL 선택 시
-        if(inputEl) inputEl.value = "";
     };
 
     updateUI();
@@ -123,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if(createModal){
         const form = document.getElementById("createRuleForm");
 
-        /*  모달 닫힐 때 초기화 */
+        /* 모달 닫힐 때 초기화 */
         createModal.addEventListener("hidden.bs.modal", () => {
             form.reset();
 
@@ -132,32 +147,35 @@ document.addEventListener("DOMContentLoaded", () => {
                 box.classList.add("d-none");
                 box.querySelector("span").innerText = "";
             }
-
-            const targetInput = document.getElementById("create-target-code-input");
-            const targetDept  = document.getElementById("create-target-dept");
-            const targetGrade = document.getElementById("create-target-grade");
-
-            if (targetInput) targetInput.classList.add("d-none");
-            if (targetDept)  targetDept.classList.add("d-none");
-            if (targetGrade) targetGrade.classList.add("d-none");
-
-            if (targetInput) targetInput.removeAttribute("name");
-            if (targetDept)  targetDept.removeAttribute("name");
-            if (targetGrade) targetGrade.removeAttribute("name");
-
-            bindTargetSwitcher("create");
-
-            console.log("🔄 등록 모달 reset 완료");
         });
 
         createModal.addEventListener("input", (e)=>{
             if(e.target.matches(".amount-input")){
                 const rt = form.querySelector('select[name="ruleType"]').value;
-                if(rt === "AMT"){
-                    e.target.value = formatAmount(parseAmount(e.target.value));
-                } else {
-                    e.target.value = onlyDigitsDot(e.target.value);
+                e.target.value = (rt === "AMT")
+                    ? formatAmount(parseAmount(e.target.value))
+                    : onlyDigitsDot(e.target.value);
+
+                // ⭐ 실시간 비율 검증
+                if(rt === "RATE"){
+                    const num = parseFloat(e.target.value);
+                    if(isNaN(num) || num < 0 || num > 1){
+                        e.target.classList.add("is-invalid");
+                    } else {
+                        e.target.classList.remove("is-invalid");
+                    }
                 }
+				// ⭐ 실시간 금액 검증 (1000 미만 → invalid)
+				if(rt === "AMT"){
+				    const num = parseAmount(e.target.value);
+				    if(isNaN(num) || num < 1000){
+				        e.target.classList.add("is-invalid");
+				    } else {
+				        e.target.classList.remove("is-invalid");
+				    }
+				}
+
+				
             }
         });
 
@@ -178,7 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* =====================================================
-   수정 모달 
+   수정 모달
 ===================================================== */
 document.addEventListener("show.bs.modal", (evt)=>{
 
@@ -187,41 +205,56 @@ document.addEventListener("show.bs.modal", (evt)=>{
     if(!id || !id.startsWith("calcEditModal-")) return;
 
     const ruleId = id.replace("calcEditModal-", "");
-    
+
     console.log(`🔧 수정 모달 표시됨: ruleId=${ruleId}`);
 
+    // UI 스위치 먼저 실행
     bindTargetSwitcher(`edit-${ruleId}`);
 
     const form = modal.querySelector("form");
 
+    /* ⭐ 자동완성 바인딩 추가 ⭐ */  
+    const empInput = modal.querySelector("input[name='targetCode']");
+    if(empInput) {
+        console.log("✨ EMP 자동완성 활성화");
+        bindEmpAutocomplete(empInput);
+    }
+
     modal.addEventListener("input", (e)=>{
         if(e.target.matches(".amount-input")){
             const rt = form.querySelector('select[name="ruleType"]').value;
+            e.target.value = (rt === "AMT")
+                ? formatAmount(parseAmount(e.target.value))
+                : onlyDigitsDot(e.target.value);
+
+            // ⭐ 실시간 비율 검증
+            if(rt === "RATE"){
+                const num = parseFloat(e.target.value);
+                if(isNaN(num) || num < 0 || num > 1){
+                    e.target.classList.add("is-invalid");
+                } else {
+                    e.target.classList.remove("is-invalid");
+                }
+            }
+
+            // ⭐ 실시간 금액 검증
             if(rt === "AMT"){
-                e.target.value = formatAmount(parseAmount(e.target.value));
-            } else {
-                e.target.value = onlyDigitsDot(e.target.value);
+                const num = parseAmount(e.target.value);
+                if(isNaN(num) || num < 1000){
+                    e.target.classList.add("is-invalid");
+                } else {
+                    e.target.classList.remove("is-invalid");
+                }
             }
         }
     });
 
     form.addEventListener("submit", (e)=>{
         const msg = validateCalcRule(form);
-
-        const targetType = form.querySelector('select[name="targetType"]').value;
-        const targetCode = form.querySelector('[name="targetCode"]');
-
-        if(targetType !== "ALL" && !targetCode){
-            e.preventDefault();
-            const box = modal.querySelector(".modal-error-box");
-            box.classList.remove("d-none");
-            box.querySelector("span").innerText = "대상구분이 전체가 아닐 경우 대상코드는 필수입니다.";
-            return;
-        }
+        const box = modal.querySelector(".modal-error-box");
 
         if(msg){
             e.preventDefault();
-            const box = modal.querySelector(".modal-error-box");
             box.classList.remove("d-none");
             box.querySelector("span").innerText = msg;
             return;
@@ -232,7 +265,7 @@ document.addEventListener("show.bs.modal", (evt)=>{
 
 
 /* =====================================================
-   저장 직전 콤마 제거 (등록 + 수정 공통)
+   콤마 제거 (등록+수정 공통)
 ===================================================== */
 document.addEventListener("submit", (e) => {
 
@@ -244,16 +277,14 @@ document.addEventListener("submit", (e) => {
     const valueInput = form.querySelector("input[name='valueNum']");
     if (valueInput && valueInput.value) {
         valueInput.value = valueInput.value.replace(/,/g, "");
-        console.log("➡ valueNum cleaned:", valueInput.value);
     }
 });
 
 
 /* =====================================================
-    계산공식 공백 자동 제거 (등록 + 수정 + 모든 모달)
+   계산공식 공백 제거
 ===================================================== */
 document.addEventListener("DOMContentLoaded", () => {
-    // textarea[name='calcFormula'] 전부 적용
     document.querySelectorAll("textarea[name='calcFormula']").forEach(el => {
         el.addEventListener("input", (e) => {
             e.target.value = e.target.value.replace(/\s+/g, "");
@@ -261,11 +292,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+
 /* =====================================================
-    시작일 종료일 설정하기
+   날짜 조건 처리 (시작일 ≤ 종료일)
 ===================================================== */
-
-
 document.addEventListener("change", (e) => {
     if (e.target.matches('input[name="startDate"]')) {
 
@@ -275,13 +305,81 @@ document.addEventListener("change", (e) => {
 
         if (!endInput) return;
 
-        // 종료일 최소 날짜 제한
         endInput.min = startInput.value;
 
-        // 이미 선택된 종료일이 시작일보다 빠르면 자동 수정
         if (endInput.value && endInput.value < startInput.value) {
             endInput.value = startInput.value;
         }
     }
 });
+/* =====================================================
+   사원 자동완성 (등록 / 수정)
+===================================================== */
+function bindEmpAutocomplete(input) {
+    if (!input) return;
 
+    const box = input.closest(".autocomplete-box");
+    const listUI = box.querySelector(".autocomplete-list");
+
+    input.addEventListener("input", async (e) => {
+        const keyword = e.target.value.trim();
+        if (!keyword || keyword.length < 1) {
+            listUI.classList.add("d-none");
+            return;
+        }
+
+        try {
+            const res = await fetch(`/pay/rule_calc/searchEmployee?keyword=${encodeURIComponent(keyword)}`);
+            const arr = await res.json();
+
+            listUI.innerHTML = ""; // 초기화
+
+            if (arr.length === 0) {
+                listUI.classList.add("d-none");
+                return;
+            }
+
+            arr.forEach(emp => {
+                const li = document.createElement("li");
+                li.className = "list-group-item list-group-item-action";
+                li.style.cursor = "pointer";
+                li.innerHTML = `${emp.empName} <small class="text-muted">${emp.empId}</small>`;
+                li.addEventListener("click", () => {
+                    input.value = emp.empId; // 사번 입력
+                    listUI.classList.add("d-none");
+                });
+                listUI.appendChild(li);
+            });
+
+            listUI.classList.remove("d-none");
+
+        } catch (err) {
+            console.error("자동완성 오류", err);
+        }
+    });
+
+    // 외부 클릭 → 자동완성 닫기
+    document.addEventListener("click", (evt) => {
+        if (!box.contains(evt.target)) {
+            listUI.classList.add("d-none");
+        }
+    });
+}
+
+
+/* ⬇ 등록 모달에 활성화 */
+document.addEventListener("DOMContentLoaded", () => {
+    const createEmpInput = document.getElementById("create-target-code-input");
+    bindEmpAutocomplete(createEmpInput);
+});
+
+
+/* ⬇ 수정 모달에 활성화 */
+document.addEventListener("show.bs.modal", (evt) => {
+    const modal = evt.target;
+    const id = modal.getAttribute("id");
+    if (!id || !id.startsWith("calcEditModal-")) return;
+
+    const input = modal.querySelector("input[name='targetCode']");
+    bindEmpAutocomplete(input);
+});

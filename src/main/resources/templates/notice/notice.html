@@ -78,7 +78,7 @@
 								</li>
 								<!-- 앞뒤로 2페이지씩 보이기 -->
 								<li class="page-item"
-								    th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+								    th:each="i : ${#numbers.sequence(0, totalPages > 0 ? totalPages - 1 : 0)}"
 								    th:if="${i >= currentPage - 2 and i <= currentPage + 2}"
 								    th:classappend="${i == currentPage} ? 'active'">
 								    <a class="page-link" th:href="@{/notices(page=${i}, searchKeyword=${searchKeyword}, orderKey=${orderKey}, orderMethod=${orderMethod})}" th:text="${i + 1}"></a>

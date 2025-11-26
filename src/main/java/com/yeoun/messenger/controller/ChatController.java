@@ -1,7 +1,6 @@
 package com.yeoun.messenger.controller;
 
 import com.yeoun.messenger.dto.*;
-import com.yeoun.messenger.entity.MsgMessage;
 import com.yeoun.messenger.service.MessengerService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
