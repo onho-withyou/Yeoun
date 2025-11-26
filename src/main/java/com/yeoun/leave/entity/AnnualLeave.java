@@ -151,12 +151,25 @@ public class AnnualLeave {
 	
 	// 연차 수정했을 경우
 	public void modifyAnnual(String userId, LeaveChangeRequestDTO leaveChangeRequestDTO) {
+		
+		// 증감을 알 수 있는 타입
+		String type = leaveChangeRequestDTO.getChangeType();
+		// 변경된 연차 갯수
+		int changeDays = leaveChangeRequestDTO.getChangeDays();
+		
+		// 차감일 경우 총 연차에서 변경된 연차 갯수 비교해서 부족한 경우 에러 처리
+		if ("decrease".equals(type)) {
+			if (this.totalDays - changeDays < this.usedDays) {
+				throw new IllegalArgumentException("차감할 수 있는 연차가 부족합니다.");
+			}
+		}
+		
 		// 증감에 따라 총 연차 수정
-		if (leaveChangeRequestDTO.getChangeType().equals("increase")) {
-			this.totalDays += leaveChangeRequestDTO.getChangeDays();
+		if ("increase".equals(type)) {
+			this.totalDays += changeDays;
 			this.remainDays = this.totalDays - this.usedDays;
 		} else {
-			this.totalDays -= leaveChangeRequestDTO.getChangeDays();
+			this.totalDays -= changeDays;
 			this.remainDays = this.totalDays - this.usedDays;
 		}
 		
