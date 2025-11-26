@@ -76,7 +76,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 	List<Dept> findAllDepartments();
 
 	// 그리드 - 1.결재사항 - 진행해야할 결재만 - 결재권한자만 볼수있음
-	// 열람권한이 있는지에대해생각해보기
+	// 열람권한은 무조건 대문자 Y여야함
 	  @Query(value = """
 		         SELECT 
 		               ROWNUM AS row_no
@@ -199,7 +199,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 						FROM approval_doc ad,approver ar
 						WHERE (ad.approver is not null
 							and ad.approver = ar.emp_id 
-							and ar.viewing = 'y'
+							and ar.viewing = 'Y'
 							and ar.emp_id= :empId) 
 						OR ad.emp_id= :empId ) adr
 						WHERE e.emp_id = adr.emp_id 
@@ -265,7 +265,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 	
 	// 그리드 - 4.결재대기 - 나와관련된 모든 결재대기문서
 	@Query(value = """
-		SELECT  rownum AS row_no
+		 SELECT  rownum AS row_no
             	,adre.approval_id
             	,adre.approval_title
             	,adre.form_type
@@ -308,28 +308,28 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 						,adr.doc_status
 						,adr.viewing
 			FROM emp e, dept d, position p, 
-                (SELECT ad.approval_id
-							,ad.approval_title
-                            ,ad.form_type
-							,ad.emp_id
-							,ad.approver 
-							,ad.created_date
-							,ad.finish_date
+               ( SELECT  distinct
+                            ad.approval_id -- 문서id
+							,ad.approval_title --문서제목
+                            ,ad.form_type -- 문서양식
+							,ad.emp_id --문서작성자
+							,ad.approver  -- 결재권한자
+							,ad.created_date --결재시작일시
+							,ad.finish_date --결재완료일시
                             ,ad.start_date -- 휴가시작날짜
                             ,ad.end_date -- 휴가종료날짜
                             ,ad.leave_type-- 연차유형,휴가종류
                             ,ad.to_dept_id-- 발령부서
                             ,ad.expnd_type-- 지출종류
                             ,ad.reason-- 결재사유내용
-							,ad.doc_status
-							,ar.viewing
-					FROM approval_doc ad,approver ar
-					WHERE (ad.doc_status != '완료'
-					AND ad.approval_id = ar.approval_id
-                    AND ar.viewing ='y' and ar.emp_id = :empId)
-                    OR ( ad.doc_status != '완료'  
-                    AND ad.approval_id = ar.approval_id
-                    AND ad.emp_id = :empId)) adr
+							,ad.doc_status --결재문서상태
+                            ,ar.viewing -- 결재권한자의 문서열람권한
+					FROM approval_doc ad                     
+                    INNER JOIN approver ar
+                    ON ad.doc_status NOT LIKE '%완료%'  -- 공통- 문서작성자이면서, 결재권한자 일때
+                    WHERE (ar.viewing ='Y' and ad.emp_id = :empId)--문서작성자일떄--ar.viewing의 경우에는 Y나N을 안걸어주면 뻥튀기되서2배로나옴
+                    OR (ad.approval_id = ar.approval_id       -- 결재권한자일때  3개
+                    AND ar.viewing ='Y' AND ar.emp_id = :empId)) adr -- 박경찬 문서작성자이면서, 결재권한자일떄 
             WHERE adr.emp_id = e.emp_id
 			AND e.dept_id = d.dept_id
 			AND e.pos_code = p.pos_code) adre, emp e
@@ -399,7 +399,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 							WHERE (ad.doc_status = '완료'
 							AND ad.approval_id = ar.approval_id 
 							AND ar.emp_id = :empId
-							AND ar.viewing = 'y')
+							AND ar.viewing = 'Y')
 							OR(ad.doc_status = '완료' and ad.emp_id = :empId)) adr
 					WHERE e.emp_id = adr.emp_id
 					AND e.dept_id = d.dept_id

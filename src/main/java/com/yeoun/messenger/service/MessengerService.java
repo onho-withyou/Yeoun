@@ -40,6 +40,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class MessengerService {
 
+	private final ChatService chatService;
 	private final MessengerMapper messengerMapper;
 	private final MsgRoomRepository msgRoomRepository;
 	private final MsgStatusRepository msgStatusRepository;
@@ -151,6 +152,10 @@ public class MessengerService {
 				.build();
 
 		MsgMessage savedMessage = msgMessageRepository.save(message);
+		log.info("이게 왜 안 될까? >>>>>>>>>>>>>" + room);
+		log.info("이게 왜 안 될까? >>>>>>>>>>>>>" + sender);
+		log.info("이게 왜 안 될까? >>>>>>>>>>>>>" + message);
+		log.info("이게 왜 안 될까? >>>>>>>>>>>>>" + dto);
 		List<MsgRelation> update = msgRelationRepository.findByRoomId_RoomId(room.getRoomId());
 		if (update.size() == 2) {
 			for (MsgRelation relation : update) {
@@ -179,7 +184,7 @@ public class MessengerService {
 	// ========================================================
 	// 새 방 생성
 	@Transactional
-	public MsgRoomDTO createRoom(RoomCreateRequest roomCreateRequestDTO) {
+	public MsgRoomDTO createRoom(RoomCreateRequest roomCreateRequestDTO) throws IOException {
 		////////////////////////////////// 파일추가 잊지말것...... /////////////////////////////////
 		boolean hasText = roomCreateRequestDTO.getFirstMessage() != null
 				&& !roomCreateRequestDTO.getFirstMessage().isBlank();
@@ -197,25 +202,27 @@ public class MessengerService {
 			MsgRelation relation = new MsgRelation();
 			relation.setRoomId(newRoom);
 			relation.setEmpId(empRepository.getReferenceById(empId));
+			relation.setPinnedYn("N");
 			msgRelationRepository.save(relation);
 		}
 
-//		// 3) 첫 메시지 전송
-//		if (hasText || hasFiles) {
-//
-//			MsgSendRequest dto = new MsgSendRequest();
-//			dto.setRoomId(newRoom.getRoomId());
-//			dto.setSenderId(roomCreateRequestDTO.getCreatedUser());
-//			dto.setMsgContent(roomCreateRequestDTO.getFirstMessage());
-//			dto.setMsgType(files != null && !files.isEmpty() ? "FILE" : "TEXT");
-//
-//			MessageSaveResult result = saveMessage(dto, files);
-//			MsgMessage saved = result.getMessage();
-//			List<FileAttachDTO> uploaded = new ArrayList<>();
-//
-//			// 소켓 broadcast
-//			chatService.broadcastMessage(saved, uploaded);
-//		}
+		// 3) 첫 메시지 전송
+		if (hasText) { //|| hasFiles) {	==============> 파일추가 잊지 말것 ==================
+
+			MsgSendRequest dto = new MsgSendRequest();
+			dto.setRoomId(newRoom.getRoomId());
+			dto.setSenderId(roomCreateRequestDTO.getCreatedUser());
+			dto.setMsgContent(roomCreateRequestDTO.getFirstMessage());
+			dto.setMsgType("TEXT");
+			//dto.setMsgType(files != null && !files.isEmpty() ? "FILE" : "TEXT"); ==========> 파일추가 잊지 말것
+
+			MessageSaveResult result = saveMessage(dto, null);	// 두번째 null 파일추가 잊지 말것
+			MsgMessage saved = result.getMessage();
+			//List<FileAttachDTO> uploaded = new ArrayList<>();
+
+			// 소켓 broadcast
+			chatService.broadcastMessage(saved, null); //uploaded);
+		}
 
 		MsgRoomDTO newRoomDTO = new MsgRoomDTO();
 		newRoomDTO.setRoomId(newRoom.getRoomId());

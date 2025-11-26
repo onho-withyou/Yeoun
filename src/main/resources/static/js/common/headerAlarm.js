@@ -23,4 +23,18 @@ function subscribeEvent() {
     stompClient.subscribe(`/user/queue/messenger`, (message) => {
         receiveNewMessage(JSON.parse(message.body));
     });
+	
+	// 2)
+	
+}
+
+
+//===============================
+//	메시지 수신 이벤트
+//===============================
+function receiveNewMessage(req){
+	
+	const chatBadge = document.querySelector("#badge_chat");
+	chatBadge.style.display = "flex";
+
 }

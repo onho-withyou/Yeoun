@@ -267,7 +267,7 @@ function inputReadFileData(fileData) {
 }
 // 파일 삭제 함수
 async function deleteFile(elem) {
-	if(!confirm("상품을 삭제하시겠습니까?")) {
+	if(!confirm("파일을 삭제하시겠습니까?")) {
 		return;
 	}
 

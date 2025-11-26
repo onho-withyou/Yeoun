@@ -9,8 +9,6 @@
 	let currentApprover;
 	// 모달의 결재확인 버튼
 	
-	const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
-	const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
 	// 결제확인 버튼
 	const approvalCheckBtn = document.getElementById('approvalCheckBtn');
 	// 반려 버튼
@@ -18,7 +16,7 @@
 	
 	// ========================================================
 	// v- 결재권한자
-	let elemApproverIdNum = null;//결재권한자 count
+	let elemApproverIdNum = null;//결재권한자 count 중요! 꼬이면안됨
 	// ========================================================
 	
 	// f- 결재확인 버튼 눌렀을때 동작할 함수
@@ -60,7 +58,7 @@
 			fetch(`/api/approvals/${approvalId}?btn=${btn}` , {
 				method: 'PATCH'
 				, headers: {
-					[csrfHeaderName]: csrfToken
+					[csrfHeader]: csrfToken
 				}
 			})
 			.then(response => {
@@ -144,6 +142,7 @@
 			selectBox = new tui.SelectBox('#select-box', {
 			  data: itemData
 			});
+			
 			//셀렉트박스 닫힐때
 			selectBox.on('close',(ev)=>{
 				let selectlabel = selectBox.getSelectedItem().label;
@@ -159,7 +158,7 @@
 					});
 					console.log("@@@@@@@@@@@@@@@@@@@@@@",approverArr);
 				}
-				
+				formReset();
 			});
 			//const modal = document.getElementById('approval-modal');
 			//그리드 1클릭시 상세버튼
@@ -167,7 +166,6 @@
 		
 				const target = ev.nativeEvent.target;
 				// const targetElement = ev.nativeEvent.target; 이 줄이 빠진 경우
-				console.log("ev.targetType",ev.targetType)
 				if (ev.targetType === 'cell' && target.tagName === 'BUTTON') {
 					
 					const rowData = grid1.getRow(ev.rowKey);
@@ -197,11 +195,11 @@
 					document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
 					//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
 					document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
-					
 					console.log("rowData.to_dept_id",rowData.to_dept_id);
-					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
+					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서
 					document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 					//document.getElementById('approver').value = rowData.approver;//결재권한자
+					//상세버튼 클릭시 디폴트 결재권한자 div 생기게하는 로직
 					const approverList = await getApproverList(approvalId);
 					
 					let sortedList; 
@@ -251,8 +249,6 @@
 					//document.getElementById('approval-title').value = rowData.approval_title;
 					document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
 					document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
-					
-					const createdDate = rowData.created_date;
 					document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
 					document.getElementById('finish-date').value = toDateStr(rowData.finish_date);//결재완료날짜
 					//휴가 연차신청서 
@@ -260,8 +256,7 @@
 					document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
 					//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
 					document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
-					
-					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
+					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서
 					document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 					//document.getElementById('approver').value = rowData.approver;//결재권한자
 					
@@ -324,7 +319,7 @@
 					//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
 					document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
 					
-					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
+					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서
 					document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 					//document.getElementById('approver').value = rowData.approver;//결재권한자
 					const approverList = await getApproverList(approvalId);
@@ -385,7 +380,7 @@
 				//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
 				document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
 				
-				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
+				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서
 				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 				//document.getElementById('approver').value = rowData.approver;//결재권한자
 				const approverList = await getApproverList(approvalId);
@@ -444,7 +439,7 @@
 					//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
 					document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
 					
-					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서,디비잘못넣음
+					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서
 					document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 					//document.getElementById('approver').value = rowData.approver;//결재권한자
 					const approverList = await getApproverList(approvalId);
@@ -591,7 +586,7 @@
     	await fetch("/approval/approval_doc", {
 				method: 'POST', 
 				headers: {
-					[csrfHeaderName]: csrfToken
+					[csrfHeader]: csrfToken
 					,'Content-Type': 'application/json' // Content-Type 헤더를 application/json으로 설정
 				},
 				body:  JSON.stringify(dataObject) // 요청 본문에 JSON 데이터 포함
@@ -1133,7 +1128,7 @@
 			fetch('/api/approvals/approvalDoc/searchAllGrids', {
 				method: 'POST',
 				headers:{
-					[csrfHeaderName]: csrfToken,
+					[csrfHeader]: csrfToken,
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify(params)
@@ -1208,10 +1203,21 @@
 	}
 	//f- 양식 모달 리셋함수
 	function formReset(ev){
-		//console.log("formReset ev:",ev);
-		//console.log("formReset selectedForm:",selectedForm);
-		//document.getElementById('Drafting').innerText = ev.value;
-		//document.getElementById("DraftingHidden").value = ev.value;//양식종류 숨은값
+		console.log("formReset ev:",ev);
+		
+		approverDiv.innerHTML = "";
+		if(selectedForm){
+			
+			console.log("formReset 11111selectedForm:",selectedForm.formName);
+			document.getElementById('Drafting').innerText = selectedForm.formName;
+			document.getElementById("DraftingHidden").value = selectedForm.formName;//양식종류 숨은값
+			
+		}else{
+			//console.log("formReset222222 selectedForm:",selectedForm);
+			document.getElementById('Drafting').innerText = '기안서 작성';
+			document.getElementById("DraftingHidden").value = '기안서 작성';
+
+		}
 		document.getElementById("approval-title").value = "";//문서제목
 		//document.getElementById("approver-name").value ="";//결재자명 - 로그인정보에서 불러옴
 		document.getElementById("create-date").value = null;//문서 생성일자
@@ -1251,33 +1257,30 @@
 	//f- 작성 버튼 클릭 시 실행되는 함수
   	function defaultPrint(){
 		// 모달을 닫고 다시 작성 버튼을 클릭하면 이전 데이터가 남아있어서 초기화 진행
-		approverDiv.innerHTML = "";
+		//approverDiv.innerHTML = "";
 		formReset();
 		formEnable();
-		selectBox.enable();
+		//selectBox.enable();
 		window.count = 0;
 		approverArr = [];
-		
 		// selectedForm 값이 없을 경우 에러가 생길 수 있어서 에러 처리
 		// 모달이 작성 클릭 두번째부터 안열림
 		//<option selected>기안서</option> 해당구문 없앨시에 마지막인덱스로됨
-		if (selectedForm === null || selectedForm === undefined) {
-			// $('#approval-modal').on('show.bs.modal', function (e) {
+		if (!selectedForm) {
+			$('#approval-modal').on('shown.bs.modal', function (ev) {
 				
-			// 		// 모달을 열지 않도록 강제로 닫기
-			// 		e.preventDefault();
-			// 		console.log('모달을 열 수 없습니다.');
-				
-			// });
-			alert("양식을 선택해주세요.");
-			
-		
+			 		// 모달을 열지 않도록 강제로 닫기
+					alert("양식을 선택해주세요.");
+			 		ev.preventDefault();
+			 		console.log('모달을 열 수 없습니다.');
+			});
+			return;
+		}else{
+			//$('#approval-modal').modal('show');
 			// document.getElementById('leavePeriodForm').style.display = 'flex';
 			// document.getElementById('leaveTypeForm').style.display = 'flex';
 			// document.getElementById('expndTypeForm').style.display = 'flex';
 			// document.getElementById('toDeptForm').style.display = 'flex';
-			
-		    return;
 		}
 		
 		defalutapproverArr = []; //디폴트 결재권한자 초기화
@@ -1387,14 +1390,14 @@
 	}
 
 	//에디터-없앰
-	const editor = new toastui.Editor({
-		el: document.querySelector('#editor'),
-	  	height: '500px',
-	  	initialEditType: 'markdown',
-	  	previewStyle: 'vertical'
-	});
+//	const editor = new toastui.Editor({
+//		el: document.querySelector('#editor'),
+//	  	height: '500px',
+//	  	initialEditType: 'markdown',
+//	  	previewStyle: 'vertical'
+//	});
 	
-	editor.getMarkdown();
+	//editor.getMarkdown();
 	
 	//모달 움직이게 하기
 	const modalHeader = document.querySelector(".modal-header");

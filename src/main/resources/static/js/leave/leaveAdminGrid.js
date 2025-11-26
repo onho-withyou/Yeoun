@@ -132,8 +132,23 @@ document.querySelector("#modifyBtn").addEventListener("click", async () => {
 	}
 	
 	const changeType = getChangeType();
+	const currentLeave = document.querySelector("#currentLeave").value;
 	const changeDays = document.querySelector("#changeDays").value;
 	const reason = document.querySelector("#reason").value;
+	
+	// 총연차가 0일 때 마이너스가 되지 않도록 처리
+	if (changeType === "decrease") {
+		if (currentLeave - changeDays < 0) {
+			alert("차감할 수 있는 연차가 부족합니다.");
+			return;
+		}
+	}
+	
+	// 사유를 입력하지 않았을 경우 전송되지 않도록 처리
+	if (reason.trim().length === 0) {
+		alert("사유는 필수 입력입니다.");
+		return;
+	}
 	
 	const url = `${LEAVE_API_BASE}/${currentLeaveId}`;
 	const response = await fetch(url, {
