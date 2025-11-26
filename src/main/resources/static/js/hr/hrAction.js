@@ -3,10 +3,6 @@
 let empGrid = null;
 //let originalEmpList = [];
 
-// CSRF 토큰 읽기 (전역)
-const csrfToken = document.querySelector("meta[name='_csrf_token']")?.content;
-const csrfHeader = document.querySelector("meta[name='_csrf_headerName']")?.content;
-
 document.addEventListener('DOMContentLoaded', function() {
 	
 	// 페이지 로드되면 사원 목록 불러오기
