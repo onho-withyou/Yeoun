@@ -123,7 +123,7 @@
 	}
 	
 	let approverDiv = document.querySelector('#approver');
-	let selectBox;
+	
 	let itemData;
 
 
@@ -141,7 +141,7 @@
 				itemData.push(obj);
 				obj = {};
 			});
-			
+			let selectBox;
 			//셀렉트박스 - 토스트유아이
 			selectBox = new tui.SelectBox('#select-box', {
 			  data: itemData
@@ -204,23 +204,25 @@
 					document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 					//document.getElementById('approver').value = rowData.approver;//결재권한자
 					//상세버튼 클릭시 디폴트 결재권한자 div 생기게하는 로직
+					//여러번 누르면 한번씩 이전값을가지고있음
 					const approverList = await getApproverList(approvalId);
-					
+					console.log("approverList ---------->",approverList);
 					let sortedList; 
-					console.log("approverList---------------->",approverList);
+					
 					if(approverList.length > 0) {
 						sortedList = approverList.sort((a, b) => {
 							return Number (a.orderApprovers) - Number(b.orderApprovers);
 						});
+						console.log("approverList---------------->",approverList);
 
 						window.count = 0;
 						approverDiv.innerHTML = "";
-
+						console.log("sortedList---->",sortedList);
 						for (const approver of sortedList) {
 							selectBox.select(approver.empId);
 							print("default", selectBox.getSelectedItem()?.label);
 						}
-						//console.log("approver-------->",approver);
+
 					}
 					//document.getElementById('approver').innerText = rowData.approver;//전결자
 					document.getElementById('reason-write').value = rowData.reason;//결재사유내용
@@ -267,16 +269,13 @@
 					const approverList = await getApproverList(approvalId);
 					
 					let sortedList; 
-					
 					if(approverList.length > 0) {
 						sortedList = approverList.sort((a, b) => {
 							return Number (a.orderApprovers) - Number(b.orderApprovers);
 						});
-						console.log("approverList---------------->",approverList);
 
 						window.count = 0;
 						approverDiv.innerHTML = "";
-
 						for (const approver of sortedList) {
 							selectBox.select(approver.empId);
 							print("default", selectBox.getSelectedItem()?.label);
@@ -409,7 +408,7 @@
 					}
 					//document.getElementById('approver').innerText = rowData.approver;//전결자
 					document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-					//electBox.disable();
+					//selectBox.disable();
 					formDisable();
 				}
 			});
@@ -525,9 +524,7 @@
 		document.getElementById('to-dept-id').disabled = true;
 		document.getElementById('expnd-type').disabled = true;
 		document.getElementById('reason-write').disabled = true;
-		if (selectBox) { 
-			selectBox.disable();
-		}
+		
 	}
 	//f- 기안서작성 클릭시 활성화 시켜주는 함수
 	function formEnable(){
@@ -545,10 +542,6 @@
 		document.getElementById('to-dept-id').disabled = false;
 		document.getElementById('expnd-type').disabled = false;
 		document.getElementById('reason-write').disabled = false;
-		
-		if (selectBox) { // 인스턴스가 존재하는지 확인
-        	selectBox.enable(); 
-    	}
 	}
 
 	//f- 폼 결재권한자 데이터 말아서 보내는 함수
