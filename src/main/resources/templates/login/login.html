@@ -34,7 +34,8 @@
 			
 			  	<!-- 로그인 실패 시 에러 메시지 출력 -->
 			  	<div th:if="${param.error}" class="alert alert-danger small">
-			    	아이디 또는 비밀번호가 올바르지 않습니다.
+			    	<div class="fw-semibold">사번 또는 비밀번호를 다시 확인해 주세요.</div>
+			    	<div class="small">비밀번호를 잊으신 경우 인사팀으로 문의바랍니다.</div>
 			 	</div>
 			  
 			  	<!-- 정상 로그아웃 -->
@@ -103,6 +104,8 @@
 	          		  일반 사원 로그인
           		  </button>
 		        </div>
+		        
+		        
 		        
 		        
 		      </form>

@@ -22,6 +22,7 @@ import com.yeoun.common.service.CommonCodeService;
 import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpDetailDTO;
 import com.yeoun.emp.entity.Dept;
+import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.PositionRepository;
 import com.yeoun.emp.service.EmpService;
@@ -163,9 +164,20 @@ public class MyPageController {
 
     // 2. 비밀번호 변경 폼 
     @GetMapping("/password")
-    public String changePasswordForm(Model model) {
-        model.addAttribute("passwordChangeDTO", new PasswordChangeDTO());
-        return "auth/password_change";   // templates/auth/password_change.html
+    public String changePasswordForm(@AuthenticationPrincipal LoginDTO login, Model model) {
+    	if (!model.containsAttribute("passwordChangeDTO")) {
+            model.addAttribute("passwordChangeDTO", new PasswordChangeDTO());
+        }
+    	
+    	// 초기 비밀번호인지(Y) 여부 확인
+    	String empId = login.getEmpId();
+    	 
+    	Emp emp = empService.getEmpEntity(empId);
+    	boolean forceChange = "Y".equals(emp.getPwdChangeReq());
+    	 
+    	model.addAttribute("forceChange", forceChange);
+    	 
+        return "auth/password_change";   
     }
 
     // 3. 비밀번호 변경 처리 
