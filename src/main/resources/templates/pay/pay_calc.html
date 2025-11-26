@@ -290,9 +290,9 @@
               <label class="form-label">숫자값</label>
               <input type="text" name="valueNum" class="form-control amount-input"
                      th:value="*{valueNum}">
-                      <div class="form-text text-muted">
-					    비율은 0~1사이 숫자를 입력하세요
-					  </div>
+                     <div class="form-text text-muted">
+				    비율은 0~1사이의 숫자만 입력하세요
+				  </div>
             </div>
 
             <!-- 계산공식 -->
@@ -301,6 +301,9 @@
               <textarea name="calcFormula" class="form-control" rows="3" required
                         th:text="*{calcFormula}"
                         placeholder="value 또는 계산규칙을 입력하세요"></textarea>
+                        <div class="form-text text-muted">
+				    오타필수확인! 공백은 불가능합니다.
+				  </div>
             </div>
 
             <!-- 상세 -->
@@ -461,8 +464,8 @@
                 <label class="form-label">숫자값</label>
                 <input type="text" name="valueNum" th:value="${c.valueNum}" class="form-control amount-input">
                 <div class="form-text text-muted">
-					   비율은 0~1사이 숫자를 입력하세요
-					  </div>
+				    비율은 0~1사이의 숫자만 입력하세요
+				  </div>
               </div>
 
               <!-- 계산공식 -->
@@ -470,6 +473,9 @@
                 <label class="form-label">계산공식</label>
                 <textarea name="calcFormula" class="form-control" rows="3"                 
                           th:text="${c.calcFormula}" required placeholder="vaule 또는 계산규칙을 입력하세요"></textarea>
+              <div class="form-text text-muted">
+				    오타필수확인! 공백은 불가능합니다.
+				  </div>
               </div>
 
               <!-- 상세 -->
