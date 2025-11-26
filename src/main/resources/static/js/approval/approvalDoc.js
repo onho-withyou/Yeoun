@@ -26,7 +26,7 @@
 		patchApproval("accept");
 	});
 	
-	// 반려버튼 눌렀을때 동작할 함수
+	// f- 반려버튼 눌렀을때 동작할 함수
 	approvalCompanionBtn.addEventListener('click', () => {
 		patchApproval("deny")		
 	});
@@ -1244,7 +1244,17 @@
     let defalutapproverArr = ["d-이사랑","d-미미미누","d-김경란"];
     let approverArr = [];//결재권한자 배열 
 	
-
+	//f- 기안서작성 모달이 열리기전에 이벤트를 감지
+	$('#approval-modal').on('show.bs.modal', function (e) {
+		if (!selectedForm) {
+			// 모달을 열지 않도록 강제로 닫기
+			e.preventDefault();
+			alert("양식을 선택해주세요.");	
+		}else{
+			console.log("모달열기");
+		}
+	 });
+			
 	//f- 작성 버튼 클릭 시 실행되는 함수
   	function defaultPrint(){
 		// 모달을 닫고 다시 작성 버튼을 클릭하면 이전 데이터가 남아있어서 초기화 진행
@@ -1258,17 +1268,10 @@
 		// selectedForm 값이 없을 경우 에러가 생길 수 있어서 에러 처리
 		// 모달이 작성 클릭 두번째부터 안열림
 		//<option selected>기안서</option> 해당구문 없앨시에 마지막인덱스로됨
-		if (selectedForm === null || selectedForm === undefined) {
-			// $('#approval-modal').on('show.bs.modal', function (e) {
-				
-			// 		// 모달을 열지 않도록 강제로 닫기
-			// 		e.preventDefault();
-			// 		console.log('모달을 열 수 없습니다.');
-				
-			// });
-			alert("양식을 선택해주세요.");
+		if (!selectedForm) {
 			
-		
+			
+			console.log('모달을 열 수 없습니다.');
 			// document.getElementById('leavePeriodForm').style.display = 'flex';
 			// document.getElementById('leaveTypeForm').style.display = 'flex';
 			// document.getElementById('expndTypeForm').style.display = 'flex';
@@ -1364,9 +1367,7 @@
 		    divElement.remove(); //자신의 div 제거
 		
 		    if(divElement.innerText !== null){ //defalut 태그가 있을때
-				// console.log("defalutapproverArr",defalutapproverArr);
 				approverArr = approverArr.filter((ev) => ev.approverOrder !== count);
-				// console.log("approverArr defalut 닫기후:", approverArr);	
 		    }
 			approverArr = approverArr.filter((ev) => ev !== count);
 			this.count = count-1; //제거 라벨 카운트 원상복기
@@ -1374,9 +1375,7 @@
 		if(type === "close"){ //전결자 변경 닫기버튼시
 			divElement.remove(); //자신의 div 제거
 			//전결자 변경시 결재권한자 배열에서 해당 결재권한자 제거
-			console.log("count:",count-1);
 			approverArr = approverArr.filter((ev) => ev.approverOrder !== count);
-			console.log("approverArr 닫기후:", approverArr);
 		}
 		if(approverArr.length === 0){
 	    	this.count = 0;
@@ -1384,14 +1383,14 @@
 	}
 
 	//에디터-없앰
-	const editor = new toastui.Editor({
-		el: document.querySelector('#editor'),
-	  	height: '500px',
-	  	initialEditType: 'markdown',
-	  	previewStyle: 'vertical'
-	});
+	// const editor = new toastui.Editor({
+	// 	el: document.querySelector('#editor'),
+	//   	height: '500px',
+	//   	initialEditType: 'markdown',
+	//   	previewStyle: 'vertical'
+	// });
 	
-	editor.getMarkdown();
+	// editor.getMarkdown();
 	
 	//모달 움직이게 하기
 	const modalHeader = document.querySelector(".modal-header");

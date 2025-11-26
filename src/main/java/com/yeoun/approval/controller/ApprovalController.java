@@ -91,15 +91,15 @@ public class ApprovalController {
 		return approvalDocService.getWaitingApprovalDocs(loginDTO.getEmpId());//"2104502"
 	}
 	//그리드 - 5.결재완료
-	 @ResponseBody
-	 @GetMapping("/finishedApprovalDocGrid")
-	 public List<Object[]> getFinishedApprovalDocs(@AuthenticationPrincipal LoginDTO loginDTO) {
-	 	return approvalDocService.getFinishedApprovalDocs(loginDTO.getEmpId());//"2505823"
-	 }
+	@ResponseBody
+	@GetMapping("/finishedApprovalDocGrid")
+	public List<Object[]> getFinishedApprovalDocs(@AuthenticationPrincipal LoginDTO loginDTO) {
+		return approvalDocService.getFinishedApprovalDocs(loginDTO.getEmpId());//"2505823"
+	}
 
-	
+	//기안서 등록(저장)
     @PostMapping("/approval_doc")
-    public ResponseEntity<Map<String, Object>> postMethodName(@AuthenticationPrincipal LoginDTO loginDTO, @RequestBody Map<String, String> doc) {
+    public ResponseEntity<Map<String, Object>> approvalDocSave(@AuthenticationPrincipal LoginDTO loginDTO, @RequestBody Map<String, String> doc) {
         
         log.info("받은 JSON: {}", doc);
 		approvalDocService.saveApprovalDoc(loginDTO.getEmpId(),doc); 
