@@ -263,7 +263,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 				""", nativeQuery = true)
 	List<Object[]> findMyApprovalDocs(@Param("empId") String empId);
 	
-	// 그리드 - 4.결재대기 - 나와관련된 모든 결재대기문서
+	// 그리드 - 4.결재대기 - 나와관련된 모든 결재대기문서(내가결재권한자인것,내가올린문서)
 	@Query(value = """
 		 SELECT  rownum AS row_no
             	,adre.approval_id
@@ -409,7 +409,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 	 """, nativeQuery = true)
 	 List<Object[]> findFinishedApprovalDocs(@Param("empId") String empId);
 	 
-	//main에사용하는쿼리 결재해야할 것과 내가 올린 결재
+	//main에사용하는쿼리 현재결재권한자로서 결재해야할 것과 내가 올린 결재만
 	@Query("select a from ApprovalDoc a " 
 			+ "where (a.docStatus not in ('완료', '반려') and a.approver = :empId)" 
 			+ "or a.empId = :empId "
