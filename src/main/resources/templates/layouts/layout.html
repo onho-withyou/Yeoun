@@ -83,7 +83,10 @@
 
 <!-- 개별 페이지 head 영역 -->
 <th:block layout:fragment="head"></th:block>
-
+<script>
+	const csrfToken  = document.querySelector('meta[name="_csrf_token"]').content;
+	const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]').content;
+</script>
 </head>
 
 <body th:attr="data-mode=${mode}">
@@ -141,10 +144,7 @@
 	소켓
 	<script th:src="@{/js/common/connectSocket.js}"></script>
 	<script th:src="@{/js/common/headerAlarm.js}"></script> -->
-	<script>
-		const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
-		const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
-	</script>
+
 
 	<!-- 내 정보 모달 -->
 	<th:block th:replace="~{/emp/emp_detail_modal :: emp-detail-modal}"></th:block>
