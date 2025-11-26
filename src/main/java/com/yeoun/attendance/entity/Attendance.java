@@ -131,7 +131,7 @@ public class Attendance {
 			
 			attendance.remark = outWorkLog.getReason();
 		} else {
-			// 최근 없는 일반 출근 처리
+			// 외근 없는 일반 출근 처리
 			attendance.statusCode = now.isAfter(standardIn.plusMinutes(lateLimit)) ? "LATE" : "WORKIN";
 			
 			attendance.workIn = now;
