@@ -1,23 +1,14 @@
 package com.yeoun.messenger.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.yeoun.common.dto.FileAttachDTO;
-import com.yeoun.common.entity.FileAttach;
-import com.yeoun.common.util.FileUtil;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.messenger.dto.*;
-import com.yeoun.messenger.entity.MsgMessage;
-import com.yeoun.messenger.entity.MsgRelation;
 import com.yeoun.messenger.entity.MsgRoom;
-import com.yeoun.messenger.repository.MsgMessageRepository;
-import com.yeoun.messenger.repository.MsgRelationRepository;
 import com.yeoun.messenger.repository.MsgRoomRepository;
-import com.yeoun.messenger.repository.MsgStatusRepository;
 
 import com.yeoun.messenger.service.ChatService;
 import org.springframework.http.MediaType;
@@ -42,12 +33,8 @@ public class MessengerController {
 
 	private final ChatService chatService;
 	private final MessengerService messengerService;
-	private final MsgMessageRepository msgMessageRepository;
-	private final MsgStatusRepository msgStatusRepository;
-	private final MsgRelationRepository msgRelationRepository;
 	private final EmpRepository empRepository;
 	private final MsgRoomRepository msgRoomRepository;
-	private final FileUtil fileUtil;
 
 	// ==========================================================================
 	// 메신저 큰 화면 (보류) => MES 끝나고 시간 남으면 다시 만나 ...
@@ -155,9 +142,15 @@ public class MessengerController {
 	// 메신저 팝업 채팅방 - 새로운 방 생성
 	@ResponseBody
 	@PostMapping(value="/chat")
-	public ResponseEntity<?> createRoom(@RequestBody RoomCreateRequest roomCreateRequest) {
+	public ResponseEntity<?> createRoom(@RequestBody RoomCreateRequest roomCreateRequest) throws IOException {
 		MsgRoomDTO dto = messengerService.createRoom(roomCreateRequest);
-		// =============================> 파일.. 추가해야함... 잊지말것..
+		// =============================> 파일 추가해야함... 잊지말것..
+		// =============================> 파일 추가해야함... 잊지말것..
+		// =============================> 파일 추가해야함... 잊지말것..
+		// =============================> 파일 추가해야함... 잊지말것..
+		// =============================> 파일 추가해야함... 잊지말것..
+		// =============================> 파일 추가해야함... 잊지말것..
+		// =============================> 파일 추가해야함... 잊지말것..
 		return ResponseEntity.ok(dto);
 	}
 

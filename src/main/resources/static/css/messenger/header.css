@@ -7,23 +7,18 @@
     position: absolute;
     top: 0px;
     right: 195px;
-    width: 15px;
-    height: 15px;
+    width: 10px;
+    height: 10px;
     background: #ff4d4f;
     border-radius: 50%;
     color: white;
     font-size: 9px; /* 갯수알림 부분 */
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     font-weight: 600;
     line-height: 1;
 }
-
-#badge_chat.has-alert {
-    display: block;
-}
-
 
 /*
 #badge_bell {
