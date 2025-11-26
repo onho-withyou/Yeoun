@@ -903,7 +903,7 @@ async function initApprovalGrid(data) {
 		  document.getElementById('to-dept-id').value = rowData.toDeptId;
 		}
 		
-		document.getElementById('Drafting').value = rowData.formType;
+		document.getElementById('Drafting').innerHTML = rowData.formType;
 //		console.log(rowData.approvaTitle);
 		document.getElementById('today-date').innerText = toDateStr(rowData.createdDate) ;//결재 작성날짜 = 결재시작일
 		document.getElementById('approval-title').value = rowData.approvalTitle;
@@ -966,6 +966,7 @@ async function initApprovalGrid(data) {
 
 // 달력, 데이트피커에 현재 날짜 업데이트 함수
 async function updateCurrentDate() {
+	showCalendarLoading();
 	// 현재날짜 표시 할 위치 지정
 	const currentDateEl = document.getElementById('calendar-date');
     // 현재날짜 저장
@@ -998,6 +999,7 @@ async function updateCurrentDate() {
 	// 바뀐 년월 정보 저장
 	calendarYear = year;
 	calendarMonth = month;
+	hideCalendarLoading(); 
 }
 	
 // 스피너 보이기 끄기
