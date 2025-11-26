@@ -1,7 +1,3 @@
-// 메타 태그에서 CSRF 값 가져오기
-const csrfToken = document.querySelector('meta[name="_csrf_token"]').getAttribute('content');
-const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]').getAttribute('content');
-
 const LEAVE_API_BASE = "/leave"
 
 const grid = new tui.Grid({
