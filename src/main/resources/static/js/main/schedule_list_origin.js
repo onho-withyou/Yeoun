@@ -2,8 +2,8 @@
 	일정게시판 JavaScript 
 **/
 
-const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
-const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
+//const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
+//const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
 
 const currentUserId = document.getElementById('currentUserId')?.value;
 const currentUserName = document.getElementById('currentUserName')?.value;
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			fetch('/main/schedule', {
 				method: 'POST'
 				, headers: {
-					[csrfHeaderName]: csrfToken
+					[csrfHeader]: csrfToken
 				}
 				, body: new FormData(addScheduleForm)
 			})
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				fetch('/main/schedule', {
 					method: 'PATCH'
 					, headers: {
-						[csrfHeaderName]: csrfToken
+						[csrfHeader]: csrfToken
 					}
 					, body: new FormData(addScheduleForm)
 				})
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		fetch('/main/schedule', {
 			method: 'DELETE'
 			, headers: {
-				[csrfHeaderName]: csrfToken
+				[csrfHeader]: csrfToken
 			}
 			, body: new FormData(addScheduleForm)
 		})
