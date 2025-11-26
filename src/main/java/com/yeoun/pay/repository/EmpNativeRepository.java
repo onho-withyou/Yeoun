@@ -16,8 +16,7 @@ public interface EmpNativeRepository extends JpaRepository<Emp, String> {
 	 @Query(value = """
 		        SELECT
 		            e.EMP_ID      AS empId,
-		            e.EMP_NAME    AS empName,
-		            e.ROLE_CODE   AS roleCode,
+		            e.EMP_NAME    AS empName,		            
 		            e.STATUS      AS status,
 		            e.HIRE_DATE   AS hireDate,
 		            e.DEPT_ID     AS deptId
@@ -34,8 +33,7 @@ public interface EmpNativeRepository extends JpaRepository<Emp, String> {
 	 @Query(value = """
 	         SELECT
 	             e.EMP_ID      AS empId,
-	             e.EMP_NAME    AS empName,
-	             e.ROLE_CODE   AS roleCode,
+	             e.EMP_NAME    AS empName,	            
 	             e.STATUS      AS status,
 	             e.HIRE_DATE   AS hireDate,
 	             e.DEPT_ID     AS deptId,
