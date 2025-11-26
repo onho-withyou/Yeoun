@@ -52,122 +52,7 @@ SELECT 'ROLE_MES_MANAGER', 'MES 관리자', 'MES 운영 및 전체 생산관리'
 INSERT INTO ROLE (ROLE_CODE, ROLE_NAME, ROLE_DESC, USE_YN, CREATED_DATE)
 SELECT 'ROLE_MES_USER', 'MES 사용자', 'MES 기능 사용 (작업지시·실적 입력)', 'Y', SYSDATE FROM DUAL;
 
--- 결재문서 APPROVAL_DOC
-INSERT INTO approval_doc(
-            APPROVAL_ID	  -- 결재 문서ID
-            ,APPROVAL_TITLE	-- 문서제목
-            ,APPROVER	--결재권한자
-            ,CREATED_DATE	--생성일자
-            ,DOC_STATUS	--문서상태
-            ,EMP_ID	--사원번호
-            ,EXPND_TYPE	 --지출종류
-            ,FINISH_DATE --완료 예정일자	
-            ,FORM_TYPE --양식종류
-            ,REASON	--사유
-            ,START_DATE --시작 휴가일자
-            ,END_DATE -- 종료 휴가일자
-            ,TO_DEPT_ID --발령부서
-            )
-VALUES(202511150101,'테스트용 문서제목','2511491',sysdate,'','2511491','고정지출',sysdate,'지출결의서','테스트용입니다.',sysdate,sysdate,'개발부');
-INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
-VALUES(202511150102,'개발부용 테스트 문서제목','',sysdate,'','2103347','변동지출',sysdate,'자유양식결재서','테스트용입니다.',sysdate,sysdate,'마케팅부');
-INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
-VALUES(202511150103,'마케팅부용 테스트 문서제목','',sysdate,'','1907475','변동지출',sysdate,'인사발령신청서','테스트용입니다.',sysdate,sysdate,'생산부');
-INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
-VALUES(202511150104,'생산부용 테스트 문서제목','',sysdate,'','1707923','비정기지출',sysdate,'휴가연차신청서','테스트용입니다.',sysdate,sysdate,'영업부');
-INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
-VALUES(202511150105,'영업부용 테스트 문서제목','',sysdate,'','1209349','고정지출',sysdate,'지출결의서','테스트용입니다.',sysdate,sysdate,'인사부');
-INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
-VALUES(202511150106,'인사부용 테스트 문서제목','',sysdate,'','2511733','고정지출',sysdate,'자유양식결재서','테스트용입니다.',sysdate,sysdate,'ERP본부');
-INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
-VALUES(202511150107,'인사부용 테스트 전도연 문서제목','2401300',sysdate,'','2104502','고정지출',sysdate,'자유양식결재서','테스트용전도연입니다.',sysdate,sysdate,'MES본부');
-INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
-VALUES(202511150108,'인사부용 테스트 전도연2 문서제목','',sysdate,'','2104502','비정기지출',sysdate,'자유양식결재서','테스트용 2 입니다.',sysdate,sysdate,'개발3팀본부');
-INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
-VALUES(202511150109,'인사부용 테스트 전도연3 문서제목','',sysdate,'','2104502','정기지출',sysdate,'자유양식결재서','테스트용 3 입니다.',sysdate,sysdate,'개발2팀본부');
-INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
-VALUES(202511150110,'영업부 김구1 문서제목 테스트','1306178',sysdate,'1차대기','2505823','비정기지출',sysdate,'자유양식결재서','테스트용 김구1 입니다.',sysdate,sysdate,'개발2팀본부');
-INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
-VALUES(202511150111,'영업부 김구2 문서제목 테스트','1306178',sysdate,'완료','2505823','고정지출',sysdate,'지출결의서','테스트용 김구2 종료 입니다.',sysdate,sysdate,'개발2팀본부');
-INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID)
-VALUES(202511150112,'영업부 김구3 문서제목 테스트','',sysdate,'완료','2505823','비정지출',sysdate,'지출결의서','테스트용 김구3 종료 입니다.',sysdate,sysdate,'개발2팀본부');
-INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID,leave_type)
-VALUES(202511150113,'개발부 박경찬1 문서제목 테스트','2506589',sysdate,'1차대기','2001752','',sysdate,'연차신청서','테스트용 개발부 박경찬1 입니다.',sysdate,sysdate+10,'','연차');
-INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID,leave_type)
-VALUES(202511150114,'개발부 박경찬2 문서제목 테스트','2506589',sysdate,'1차대기','2001752','',sysdate,'반차신청서','테스트용 개발부 박경찬2 입니다.',sysdate,sysdate,'','반차');
-INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID,leave_type)
-VALUES(202511150115,'개발부 박경찬3 문서제목 테스트','2506589',sysdate,'1차대기','2001752','',sysdate,'반차신청서','테스트용 개발부 박경찬3 입니다.',sysdate,sysdate,'','병가');
-INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID,leave_type)
-VALUES(202511150116,'개발부 박경찬4 문서제목 테스트','2506589',sysdate,'완료','2001752','',sysdate,'지출결의서','테스트용 개발부 박경찬4 입니다.',sysdate,sysdate+10,'','');
-INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID,leave_type)
-VALUES(202511150117,'개발부 박경찬5 문서제목 테스트','2511793',sysdate,'완료','2001752','',sysdate,'인사발령신청서','테스트용 개발부 박경찬5 입니다.',sysdate,sysdate,'인사부','');
-INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID,leave_type)
-VALUES(202511150118,'개발부 박경찬6 문서제목 테스트','1904184',sysdate,'완료','2001752','',sysdate,'자유양식결재서','테스트용 개발부 박경찬6 입니다.',sysdate,sysdate,'','');
-INSERT INTO approval_doc(APPROVAL_ID ,APPROVAL_TITLE ,APPROVER	,CREATED_DATE ,DOC_STATUS,EMP_ID ,EXPND_TYPE ,FINISH_DATE ,FORM_TYPE ,REASON,START_DATE,END_DATE,TO_DEPT_ID,leave_type)
-VALUES(202511150119,'개발부 박경찬7 문서제목 테스트','2001752',sysdate,'1차대기','2001752','',sysdate,'자유양식결재서','테스트용 개발부 박경찬6 입니다.',sysdate,sysdate,'','');
-
-
--- 결재권한자
-INSERT INTO approver(
-            emp_id, -- 결재자 사원 id
-            approval_id, -- 결재서류 id
-            approval_status, --결재 상태 
-            delegate_status, --전결자 상태
-            order_approvers, --결재순서
-            viewing)  --열람권한
-VALUES('2511491',202511150101,1,'본인','1','Y');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('2511733',202511150101,0,'전결','2','');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('2407628',202511150101,0,'대결','3','');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('2401300',202511150101,0,'선결','','');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('2110664',202511150101,0,'','','');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('0009236',202511150102,0,'','3','');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('1707705',202511150102,0,'','2','');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('1301823',202511150102,0,'','1','');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('2511793',202511150107,0,'','3','');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('2401300',202511150107,0,'','2','y');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('2104502',202511150107,0,'','1','');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('2012978',202511150110,0,'','3','');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('2410807',202511150110,0,'','2','');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('1306178',202511150110,0,'','1','y');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('2012978',202511150111,0,'','3','y');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('2410807',202511150111,0,'','2','y');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('1306178',202511150111,0,'','1','y');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('2506589',202511150113,0,'','1','y');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('2506589',202511150114,0,'','1','y');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('2506589',202511150115,0,'','1','y');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('2506589',202511150116,0,'','1','y');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('2511793',202511150117,0,'','3','y');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('1904184',202511150117,0,'','2','y');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('2506589',202511150117,0,'','1','y');
-INSERT INTO approver(emp_id, approval_id, approval_status, delegate_status, order_approvers, viewing) 
-VALUES('1904184',202511150118,0,'','1','y');
-
-
 -- 결재양식 - 결재권한자 디폴트값 지정
-
 -- ERP 본부(DEP000)
 -- 연차신청서 = 결재권한자 1 :이지현(이사)
 -- 반차신청서 = 결재권한자 1: 이지현(이사)
@@ -483,3 +368,57 @@ INSERT INTO NOTICE (NOTICE_ID, CREATED_DATE, CREATED_USER, NOTICE_CONTENT, NOTIC
 -- 근태 정책관리 데이터
 INSERT INTO WORK_POLICY (POLICY_ID, ANNUAL_BASIS, CREATED_DATE, IN_TIME, LATE_LIMIT, LUNCH_IN, LUNCH_OUT, OUT_TIME, UPDATED_DATE)
 VALUES (1, 'FY', TO_DATE('25/11/12','RR/MM/DD'), '09:00', 5, '12:00', '13:00', '18:00', TO_DATE('25/11/24','RR/MM/DD'));
+
+-- 은행 공통코드
+-- 루트 그룹
+INSERT INTO COMMON_CODE (CODE_ID, PARENT_CODE_ID, CODE_NAME, CODE_SEQ, CODE_DESC, LEVEL_NO, USE_YN, SYS_TYPE, CREATED_USER, CREATED_DATE)
+VALUES ('BANK', NULL, '은행', 1, '은행 코드 그룹', 1, 'Y', 'COMMON', 'SYSTEM', SYSDATE);
+-- 주요 은행 10개
+INSERT INTO COMMON_CODE (CODE_ID, PARENT_CODE_ID, CODE_NAME, CODE_SEQ, CODE_DESC, LEVEL_NO, USE_YN, SYS_TYPE, CREATED_USER, CREATED_DATE)
+VALUES ('BANK_004', 'BANK', '국민은행', 1, '004', 2, 'Y', 'COMMON', 'SYSTEM', SYSDATE);
+INSERT INTO COMMON_CODE (CODE_ID, PARENT_CODE_ID, CODE_NAME, CODE_SEQ, CODE_DESC, LEVEL_NO, USE_YN, SYS_TYPE, CREATED_USER, CREATED_DATE)
+VALUES ('BANK_011', 'BANK', '농협은행', 2, '011', 2, 'Y', 'COMMON', 'SYSTEM', SYSDATE);
+INSERT INTO COMMON_CODE (CODE_ID, PARENT_CODE_ID, CODE_NAME, CODE_SEQ, CODE_DESC, LEVEL_NO, USE_YN, SYS_TYPE, CREATED_USER, CREATED_DATE)
+VALUES ('BANK_020', 'BANK', '우리은행', 3, '020', 2, 'Y', 'COMMON', 'SYSTEM', SYSDATE);
+INSERT INTO COMMON_CODE (CODE_ID, PARENT_CODE_ID, CODE_NAME, CODE_SEQ, CODE_DESC, LEVEL_NO, USE_YN, SYS_TYPE, CREATED_USER, CREATED_DATE)
+VALUES ('BANK_081', 'BANK', '하나은행', 4, '081', 2, 'Y', 'COMMON', 'SYSTEM', SYSDATE);
+INSERT INTO COMMON_CODE (CODE_ID, PARENT_CODE_ID, CODE_NAME, CODE_SEQ, CODE_DESC, LEVEL_NO, USE_YN, SYS_TYPE, CREATED_USER, CREATED_DATE)
+VALUES ('BANK_088', 'BANK', '신한은행', 5, '088', 2, 'Y', 'COMMON', 'SYSTEM', SYSDATE);
+INSERT INTO COMMON_CODE (CODE_ID, PARENT_CODE_ID, CODE_NAME, CODE_SEQ, CODE_DESC, LEVEL_NO, USE_YN, SYS_TYPE, CREATED_USER, CREATED_DATE)
+VALUES ('BANK_089', 'BANK', '케이뱅크', 6, '089', 2, 'Y', 'COMMON', 'SYSTEM', SYSDATE);
+INSERT INTO COMMON_CODE (CODE_ID, PARENT_CODE_ID, CODE_NAME, CODE_SEQ, CODE_DESC, LEVEL_NO, USE_YN, SYS_TYPE, CREATED_USER, CREATED_DATE)
+VALUES ('BANK_090', 'BANK', '카카오뱅크', 7, '090', 2, 'Y', 'COMMON', 'SYSTEM', SYSDATE);
+INSERT INTO COMMON_CODE (CODE_ID, PARENT_CODE_ID, CODE_NAME, CODE_SEQ, CODE_DESC, LEVEL_NO, USE_YN, SYS_TYPE, CREATED_USER, CREATED_DATE)
+VALUES ('BANK_092', 'BANK', '토스뱅크', 8, '092', 2, 'Y', 'COMMON', 'SYSTEM', SYSDATE);
+INSERT INTO COMMON_CODE (CODE_ID, PARENT_CODE_ID, CODE_NAME, CODE_SEQ, CODE_DESC, LEVEL_NO, USE_YN, SYS_TYPE, CREATED_USER, CREATED_DATE)
+VALUES ('BANK_003', 'BANK', '기업은행', 9, '003', 2, 'Y', 'COMMON', 'SYSTEM', SYSDATE);
+INSERT INTO COMMON_CODE (CODE_ID, PARENT_CODE_ID, CODE_NAME, CODE_SEQ, CODE_DESC, LEVEL_NO, USE_YN, SYS_TYPE, CREATED_USER, CREATED_DATE)
+VALUES ('BANK_007', 'BANK', '수협은행', 10, '007', 2, 'Y', 'COMMON', 'SYSTEM', SYSDATE);
+
+-- 재직 상태 공통코드
+-- 재직 상태
+INSERT INTO COMMON_CODE (CODE_ID, CODE_DESC, CODE_NAME, CODE_SEQ, CREATED_DATE, CREATED_USER, LEVEL_NO, SYS_TYPE, USE_YN, PARENT_CODE_ID) 
+VALUES ('EMP_STATUS','사원 재직 상태 그룹','사원 재직 상태',1,SYSDATE,'SYSTEM',1,'COMMON','Y',NULL);
+
+INSERT INTO COMMON_CODE (CODE_ID,CODE_DESC,CODE_NAME,CODE_SEQ,CREATED_DATE,CREATED_USER,LEVEL_NO,SYS_TYPE,USE_YN,PARENT_CODE_ID) 
+VALUES ('ACTIVE','정상 근무 상태','재직',1,SYSDATE,'SYSTEM',2,'COMMON','Y','EMP_STATUS');
+INSERT INTO COMMON_CODE (CODE_ID,CODE_DESC,CODE_NAME,CODE_SEQ,CREATED_DATE,CREATED_USER,LEVEL_NO,SYS_TYPE,USE_YN,PARENT_CODE_ID) 
+VALUES ('LEAVE','일시적 휴직 상태','휴직',2,SYSDATE,'SYSTEM',2,'COMMON','Y','EMP_STATUS');
+INSERT INTO COMMON_CODE (CODE_ID,CODE_DESC,CODE_NAME,CODE_SEQ,CREATED_DATE,CREATED_USER,LEVEL_NO,SYS_TYPE,USE_YN,PARENT_CODE_ID) 
+VALUES ('RETIRE','퇴직 상태','퇴직',3,SYSDATE,'SYSTEM',2,'COMMON','Y','EMP_STATUS');
+
+-- 인사 발령 공통코드
+-- 인사 발령 구분
+INSERT INTO COMMON_CODE (CODE_ID, CODE_DESC, CODE_NAME, CODE_SEQ, CREATED_DATE, CREATED_USER, LEVEL_NO, SYS_TYPE, USE_YN, PARENT_CODE_ID)
+VALUES ('HR_ACTION_TYPE', '인사 발령 구분 그룹', '인사 발령 구분', 1, SYSDATE, 'SYSTEM', 1, 'COMMON', 'Y', NULL);
+
+INSERT INTO COMMON_CODE (CODE_ID, CODE_DESC, CODE_NAME, CODE_SEQ, CREATED_DATE, CREATED_USER, LEVEL_NO, SYS_TYPE, USE_YN, PARENT_CODE_ID)
+VALUES ('PROMOTION', '인사 발령 구분 코드', '승진', 1, SYSDATE, 'SYSTEM', 2, 'COMMON', 'Y', 'HR_ACTION_TYPE');
+INSERT INTO COMMON_CODE (CODE_ID, CODE_DESC, CODE_NAME, CODE_SEQ, CREATED_DATE, CREATED_USER, LEVEL_NO, SYS_TYPE, USE_YN, PARENT_CODE_ID)
+VALUES ('TRANSFER', '인사 발령 구분 코드', '전보', 2, SYSDATE, 'SYSTEM', 2, 'COMMON', 'Y', 'HR_ACTION_TYPE');
+INSERT INTO COMMON_CODE (CODE_ID, CODE_DESC, CODE_NAME, CODE_SEQ, CREATED_DATE, CREATED_USER, LEVEL_NO, SYS_TYPE, USE_YN, PARENT_CODE_ID)
+VALUES ('RETIRE_ACT', '인사 발령 구분 코드', '퇴직', 3, SYSDATE, 'SYSTEM', 2, 'COMMON', 'Y', 'HR_ACTION_TYPE');
+INSERT INTO COMMON_CODE (CODE_ID, CODE_DESC, CODE_NAME, CODE_SEQ, CREATED_DATE, CREATED_USER, LEVEL_NO, SYS_TYPE, USE_YN, PARENT_CODE_ID)
+VALUES ('LEAVE_ACT', '인사 발령 구분 코드', '휴직', 4, SYSDATE, 'SYSTEM', 2, 'COMMON', 'Y', 'HR_ACTION_TYPE');
+INSERT INTO COMMON_CODE (CODE_ID, CODE_DESC, CODE_NAME, CODE_SEQ, CREATED_DATE, CREATED_USER, LEVEL_NO, SYS_TYPE, USE_YN, PARENT_CODE_ID)
+VALUES ('RETURN_ACT', '인사 발령 구분 코드', '복직', 5, SYSDATE, 'SYSTEM', 2, 'COMMON', 'Y', 'HR_ACTION_TYPE');
