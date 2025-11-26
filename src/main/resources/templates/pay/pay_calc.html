@@ -290,6 +290,9 @@
               <label class="form-label">숫자값</label>
               <input type="text" name="valueNum" class="form-control amount-input"
                      th:value="*{valueNum}">
+                      <div class="form-text text-muted">
+					    규칙유형 : 비율은 0~1사이 숫자를 입력하세요
+					  </div>
             </div>
 
             <!-- 계산공식 -->
@@ -457,6 +460,9 @@
               <div class="col-md-6">
                 <label class="form-label">숫자값</label>
                 <input type="text" name="valueNum" th:value="${c.valueNum}" class="form-control amount-input">
+                <div class="form-text text-muted">
+					    규칙유형 : 비율은 0~1사이 숫자를 입력하세요
+					  </div>
               </div>
 
               <!-- 계산공식 -->
