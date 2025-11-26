@@ -6,7 +6,7 @@
  * window.targetEmpId
  * window.senderId
  * window.csrfToken
- * window.csrfHeaderName
+ * window.csrfHeader
  *
  * HTML 요소 :
  * #chat-body, #message, #send, #fileInput, #attachment-preview, #groupYn
@@ -432,7 +432,7 @@ async function sendMessageWithFiles() {
 		const res = await fetch(`/messenger/chat/${roomId}`, {
 			method: "POST",
 			headers: {
-				[csrfHeaderName]: csrfToken
+				[csrfHeader]: csrfToken
 			},
 			body: formData
 		});
@@ -484,7 +484,7 @@ async function sendChatMessage() {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				[csrfHeaderName]: csrfToken
+				[csrfHeader]: csrfToken
 			},
 			body: JSON.stringify({
 				members: [targetEmpId, senderId],

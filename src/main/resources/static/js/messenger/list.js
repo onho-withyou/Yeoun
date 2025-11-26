@@ -407,7 +407,7 @@ async function sendStatusToServer(presence, reason) {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                [csrfHeaderName]: csrfToken
+                [csrfHeader]: csrfToken
             },
             body: JSON.stringify({
                 avlbStat: presence,     // ONLINE / AWAY / BUSY / OFFLINE
@@ -636,7 +636,7 @@ document.addEventListener("click", (event) => {
   fetch(`/messenger/favorite/${id}`, {
     method: "PATCH",
     headers: {
-    	[csrfHeaderName] : csrfToken
+    	[csrfHeader] : csrfToken
     },
     credentials: "include"
   })
@@ -757,7 +757,7 @@ document.getElementById('create-group-btn')
     groupName: groupName,      // 입력값 또는 null
     firstMessage: null,        // 그룹은 firstMessage 없음
     msgType: null,             // 그룹은 msgType 없음
-    csrfHeaderName: csrfHeaderName,
+    csrfHeader: csrfHeader,
     csrfToken: csrfToken
   });
 

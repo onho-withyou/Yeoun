@@ -236,13 +236,13 @@
   window.roomId         = /*[[${roomId}]]*/ null;
   window.targetEmpId    = /*[[${targetEmpId}]]*/ null;
   window.csrfToken      = /*[[${_csrf.token}]]*/ '';
-  window.csrfHeaderName = /*[[${_csrf.headerName}]]*/ '';
+  window.csrfHeader = /*[[${_csrf.headerName}]]*/ '';
   window.senderId       = /*[[${#authentication.principal.empId}]]*/ '';
 
   console.log("roomId.... : ", roomId);
   console.log("target..... : ", targetEmpId);
   console.log("token..... : ", csrfToken);
-  console.log("headerName..... : ", csrfHeaderName);
+  console.log("header..... : ", csrfHeader);
 
 
 
@@ -314,7 +314,7 @@ if (closeBtn && memberPanel) {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        [csrfHeaderName]: csrfToken
+        [csrfHeader]: csrfToken
       },
       body: JSON.stringify({ groupName: newName })
     })
@@ -354,7 +354,7 @@ document.getElementById('exitSubmit').addEventListener('click', async () => {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                [csrfHeaderName]: csrfToken
+                [csrfHeader]: csrfToken
             }
         });
 
