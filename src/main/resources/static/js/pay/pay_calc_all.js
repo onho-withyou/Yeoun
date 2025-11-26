@@ -1,6 +1,3 @@
-const csrfToken = document.querySelector('meta[name="_csrf_token"]').content;
-const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]').content;
-
 
 /* ============================
    월 선택 시 페이지와 hidden input 업데이트

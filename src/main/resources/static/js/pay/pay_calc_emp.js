@@ -1,5 +1,3 @@
-const csrfToken = document.querySelector('meta[name="_csrf_token"]').content;
-const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]').content;
 
 /* ===============================
     사원 기본 정보 로드
@@ -227,3 +225,28 @@ document.getElementById("btnResetEmp").addEventListener("click", () => {
     const statusBox = document.getElementById("empStatusBox");
     if (statusBox) statusBox.style.display = "none";
 });
+
+
+/* ===============================
+   계산 대상 월 변경 시 페이지 이동
+================================ */
+document.addEventListener("DOMContentLoaded", () => {
+
+    const monthSelect = document.getElementById("emp_calc_month");
+
+    if (!monthSelect) {
+        console.log("❌ emp_calc_month 요소가 없습니다.");
+        return;
+    }
+
+    monthSelect.addEventListener("change", (e) => {
+        const yyyymm = e.target.value;  // 예: 202511
+        const empId = document.getElementById("emp_select").value || "";
+
+        console.log("월 변경됨:", yyyymm, empId);
+
+        location.href = `pay/emp_pay?yyyymm=${yyyymm}`;
+    });
+
+});
+
