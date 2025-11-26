@@ -1,22 +1,56 @@
-/* 알림 있을 때 붙는 빨간 점 */
-
-.nav-item.lh-1.me-3 {
+.nav-item .icon-wrapper {
     position: relative;
+    display: inline-block;
 }
 
 #badge_chat {
     position: absolute;
-    top: -2px;
-    right: -2px;
-    width: 9px;
-    height: 9px;
+    top: 0px;
+    right: 195px;
+    width: 15px;
+    height: 15px;
     background: #ff4d4f;
     border-radius: 50%;
-    display: none;   /* 기본은 숨김 */
+    color: white;
+    font-size: 9px; /* 갯수알림 부분 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    line-height: 1;
 }
 
-/* 알림 있을 때 */
 #badge_chat.has-alert {
     display: block;
 }
 
+
+/*
+#badge_bell {
+ position: relative;
+ top: -12px;
+ left: 45px;
+ background-color: red;
+ color: rgb(255, 255, 255);
+ border-radius: 15px;
+ padding: 3px 8px;
+ border-color: rgb(255, 255, 255);
+ font-size: 12px;
+ display: none;
+}
+*/
+
+/*
+#badge_payment {
+	position: relative;
+    top: -12px;
+    left: 45px;
+    background-color: red;
+    color: rgb(255, 255, 255);
+    border-radius: 15px;
+    padding: 3px 8px;
+    border-color: rgb(255, 255, 255);
+    font-size: 12px;
+    display: none;
+}
+*/
