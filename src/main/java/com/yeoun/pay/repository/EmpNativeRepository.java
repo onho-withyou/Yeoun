@@ -16,8 +16,7 @@ public interface EmpNativeRepository extends JpaRepository<Emp, String> {
 	 @Query(value = """
 		        SELECT
 		            e.EMP_ID      AS empId,
-		            e.EMP_NAME    AS empName,
-		            e.ROLE_CODE   AS roleCode,
+		            e.EMP_NAME    AS empName,		            
 		            e.STATUS      AS status,
 		            e.HIRE_DATE   AS hireDate,
 		            e.DEPT_ID     AS deptId
@@ -30,12 +29,11 @@ public interface EmpNativeRepository extends JpaRepository<Emp, String> {
 		        """, nativeQuery = true)
 		    List<EmpForPayrollProjection> findActiveEmpForPayroll();
 	 
-	 /** 특정 사원 1명 급여계산용 조회 */
+	 /** 특정 사원 1명 급여계산용 조회   */
 	 @Query(value = """
 	         SELECT
 	             e.EMP_ID      AS empId,
-	             e.EMP_NAME    AS empName,
-	             e.ROLE_CODE   AS roleCode,
+	             e.EMP_NAME    AS empName,	            
 	             e.STATUS      AS status,
 	             e.HIRE_DATE   AS hireDate,
 	             e.DEPT_ID     AS deptId,
