@@ -33,7 +33,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 			""",nativeQuery = true)
     List<Object[]> findAllMember2();
 	
-	//기안서 양식종류
+	//기안서 양식종류 - 부서별 다름
     @Query(value ="""
     		SELECT afede.form_code
 				 ,afede.form_name
@@ -74,18 +74,6 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 	//부서목록조회
 	@Query("SELECT d FROM Dept d")
 	List<Dept> findAllDepartments();
-
-	//기안서 작성 저장버튼
-	@Query(value = """
-				INSERT INTO approval_doc (approval_id, approval_title, emp_id, approver, form_type, created_date, doc_status)
-				VALUES (:approvalId, :approvalTitle, :empId, :approver, :formType, SYSDATE, '진행중')
-						
-				""", nativeQuery = true)
-	void saveApprovalDoc(@Param("approvalId") String approvalId,
-						 @Param("approvalTitle") String approvalTitle,
-						 @Param("empId") String empId,
-						 @Param("approver") String approver,
-						 @Param("formType") String formType);
 
 	// 그리드 - 1.결재사항 - 진행해야할 결재만 - 결재권한자만 볼수있음
 	// 열람권한이 있는지에대해생각해보기
@@ -272,7 +260,6 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 				AND e.emp_id = :empId) adre, emp e
             WHERE adre.approver = e.emp_id
                 
-				
 				""", nativeQuery = true)
 	List<Object[]> findMyApprovalDocs(@Param("empId") String empId);
 	

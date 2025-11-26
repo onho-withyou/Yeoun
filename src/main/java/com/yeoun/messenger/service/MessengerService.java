@@ -151,10 +151,12 @@ public class MessengerService {
 				.build();
 
 		MsgMessage savedMessage = msgMessageRepository.save(message);
-		MsgRelation update = msgRelationRepository.findByRoomId_RoomIdAndEmpId_EmpId
-							(room.getRoomId(), sender.getEmpId())
-							.orElseThrow(() -> new RuntimeException("대상 관계를 찾을 수 없음"));
-		update.setParticipantYn("Y");
+		List<MsgRelation> update = msgRelationRepository.findByRoomId_RoomId(room.getRoomId());
+		if (update.size() == 2) {
+			for (MsgRelation relation : update) {
+				relation.setParticipantYn("Y");
+			}
+		}
 
 		// 2) 파일 업로드
 		List<FileAttachDTO> uploaded = new ArrayList<>();
@@ -232,7 +234,9 @@ public class MessengerService {
 		log.info("empId / roomId / lastreadId :::: " + dto);
 
 		// 마지막 메시지 조회
-		Long lastMsgId = msgMessageRepository.findTop1ByRoomId_RoomIdOrderByMsgIdDesc(dto.getRoomId()).getMsgId();
+		MsgMessage lastMsg = msgMessageRepository.findTop1ByRoomId_RoomIdOrderByMsgIdDesc(dto.getRoomId());
+		if (lastMsg == null) return;
+		Long lastMsgId = lastMsg.getMsgId();
 		msgRelationRepository.updateLastRead(dto.getReaderId(), dto.getRoomId(), lastMsgId);
 	}
 	

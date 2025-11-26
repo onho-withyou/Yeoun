@@ -2,14 +2,16 @@
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{/layouts/layout.html}">
 <head>
+<link rel="stylesheet" href="https://uicdn.toast.com/select-box/latest/toastui-select-box.css">
+<link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css" />
 <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
-<link rel="stylesheet" href="https://uicdn.toast.com/select-box/latest/toastui-select-box.css">
 
+
+<script src="https://uicdn.toast.com/select-box/latest/toastui-select-box.js"></script>
+<script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
-<script src="https://uicdn.toast.com/select-box/latest/toastui-select-box.js"></script>
-
 </head>
 <style>
 	
@@ -48,15 +50,16 @@
 	                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
 		                <input id="searchEndDate" type="date" name="endDate" class="form-control">
 	                </div>
-	                 <input id="searchEmpIdAndformType" class="form-control" type="text" placeholder="기안자및문서이름" style="width: 200px;height: 38.94px;">
+	                 <input id="searchEmpIdAndformType" class="form-control" type="text" placeholder="기안자및문서양식" style="width: 200px;height: 38.94px;">
 	                <div class="mb-6 col-lg-6 col-xl-3 col-12 mb-0">
-		             	<button id="searchBtn" class="btn btn-primary">검색</button>
+		             	<button id="searchBtn" class="btn btn-primary">조회</button>
 	                </div>
 				</div>
 			</div>
 		</div>
 		<hr>
-		<div style="margin-top: 15px;">
+		<!--
+		<div>
 			<nav>
 			  <div class="nav nav-tabs" id="nav-tab" role="tablist">
 			    <button class="nav-link active" id="nav-approval-tab" data-bs-toggle="tab" data-bs-target="#nav-approval" type="button" role="tab" aria-controls="nav-home" aria-selected="true">
@@ -81,23 +84,77 @@
 			  	<h2>결재사항</h2>
 			  	<div id="approvalGrid"></div>
 			  </div>
-			  <div class="tab-pane fade active" id="nav-all" role="tabpanel" aria-labelledby="nav-all-tab">
+			  <div class="tab-pane fade" id="nav-all" role="tabpanel" aria-labelledby="nav-all-tab">
 			  		<h2>전체결재</h2>
 			  		<div id="allApprovalGrid"></div>
 			  </div>
-			  <div class="tab-pane fade active" id="nav-my" role="tabpanel" aria-labelledby="nav-my-tab">
+			  <div class="tab-pane fade" id="nav-my" role="tabpanel" aria-labelledby="nav-my-tab">
 			  		<h2>내 결재목록</h2>
 			  		<div id="myApprovalGrid"></div>
 			  </div>
-			  <div class="tab-pane fade active" id="nav-waiting" role="tabpanel" aria-labelledby="nav-waiting-tab">
+			  <div class="tab-pane fade" id="nav-waiting" role="tabpanel" aria-labelledby="nav-waiting-tab">
 			  		<h2>결재대기</h2>
 					<div id="waitingApprovalGrid"></div>
 			  </div>
-			  <div class="tab-pane fade active" id="nav-done" role="tabpanel" aria-labelledby="nav-done-tab">
+			  <div class="tab-pane fade" id="nav-done" role="tabpanel" aria-labelledby="nav-done-tab">
 			  		<h2>결재완료</h2>
 					<div id="doneApprovalGrid"></div>
 			  </div>
 			</div>
+		</div> 
+	-->
+		<div class="col-xl-15">
+          <div class="nav-align-top mb-4">
+            <ul class="nav nav-tabs" role="tablist">
+              <li class="nav-item">
+                <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab" data-bs-target="#nav-approval-tab" aria-controls="navs-approval-tab" aria-selected="true">
+                  결재사항
+                </button>
+              </li>
+              <li class="nav-item">
+                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-all-tab" aria-controls="navs-all-tab" aria-selected="false">
+                  전체결재
+                </button>
+              </li>
+              <li class="nav-item">
+                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-my-tab" aria-controls="navs-my-tab" aria-selected="false">
+                  내 결재목록
+                </button>
+              </li>
+			   <li class="nav-item">
+                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-waiting-tab" aria-controls="navs-waiting-tab" aria-selected="false">
+                  결재대기
+                </button>
+              </li>
+			   <li class="nav-item">
+                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-done-tab" aria-controls="navs-done-tab" aria-selected="false">
+                  결재완료
+                </button>
+              </li>
+            </ul>
+            <div class="tab-content" style="height: 700px;">
+              <div class="tab-pane fade show active"  id="nav-approval-tab" role="tabpanel">
+                <h2>결재사항</h2>
+			  	<div id="approvalGrid" ></div>
+              </div>
+              <div class="tab-pane fade active" id="navs-all-tab" role="tabpanel">
+                <h2>전체결재</h2>
+			  	<div id="allApprovalGrid"></div>
+              </div>
+              <div class="tab-pane fade active" id="navs-my-tab" role="tabpanel">
+                <h2>내 결재목록</h2>
+			  	<div id="myApprovalGrid"></div>
+              </div>
+			  <div class="tab-pane fade active" id="navs-waiting-tab" role="tabpanel">
+                <h2>결재대기</h2>
+				<div id="waitingApprovalGrid" ></div>
+              </div>
+			  <div class="tab-pane fade active" id="navs-done-tab" role="tabpanel">
+                <h2>결재완료</h2>
+				<div id="doneApprovalGrid"></div>
+              </div>
+            </div>
+          </div>
 		</div>
 		<!-- 모달 -->
 		<div class="modal fade" id="approval-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">

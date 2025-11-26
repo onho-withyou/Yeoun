@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yeoun.approval.dto.ApprovalDocDTO;
-
+import com.yeoun.approval.dto.ApprovalDocGridDTO;
 import com.yeoun.approval.dto.ApprovalFormDTO;
 import com.yeoun.approval.dto.ApproverDTO;
 
@@ -25,6 +25,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 
@@ -97,6 +99,13 @@ public class ApprovalRestController {
 		
 		return ResponseEntity.ok(approverDTOList);
 
+	}
+	//날짜,제목 기안자 조회
+	@PostMapping("/approvalDoc/searchAllGrids")
+	public Map<String, List<ApprovalDocGridDTO>> searchApprovalDocGrid1(@AuthenticationPrincipal LoginDTO loginDTO ,@RequestBody Map<String,Object> searchParams){
+		Map<String, List<ApprovalDocGridDTO>> allGridsData = approvalDocService.getAllGridsData(loginDTO.getEmpId(), searchParams);
+		return allGridsData;
+		
 	}
 }
 

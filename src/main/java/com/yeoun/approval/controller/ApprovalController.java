@@ -58,15 +58,6 @@ public class ApprovalController {
 		model.addAttribute("currentUserName", loginDTO.getEmpName());
 		return "approval/approval_doc";
  	}
-  
-	//날짜,기안자,검색구현
-	@GetMapping("/search")
-	public List<Object[]> getMethodName(@RequestParam(name="start_date") String start_date
-										,@RequestParam(name="end_date") String end_date
-										,@RequestParam(name="emp_name") String emp_name
-										,@RequestParam(name="approval_title") String approval_title) {
-		return approvalDocService.getSearchList(start_date,end_date,emp_name,approval_title);
-	}
 
 	//사원목록불러오기 토스트 셀렉트박스
 	@ResponseBody
@@ -110,16 +101,11 @@ public class ApprovalController {
     @PostMapping("/approval_doc")
     public ResponseEntity<Map<String, Object>> postMethodName(@AuthenticationPrincipal LoginDTO loginDTO, @RequestBody Map<String, String> doc) {
         
-		//System.out.print("doc---------------------->",doc);
-		log.info(doc);
         log.info("받은 JSON: {}", doc);
 		approvalDocService.saveApprovalDoc(loginDTO.getEmpId(),doc); 
-    	//return "redirect:/approval/approval_doc";
 		Map<String, Object> response = new HashMap<>();
     	response.put("status", "success");
     	response.put("message", "결재 문서가 성공적으로 등록되었습니다.");
-
-		
     
     	return ResponseEntity.ok(response); 
     }
