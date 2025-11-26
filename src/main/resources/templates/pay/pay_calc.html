@@ -194,15 +194,16 @@
 
             <!-- 항목 -->
             <div class="col-md-6">
-              <label class="form-label">항목 코드</label>
-              <select class="form-select" name="item.itemCode" required
-                      th:value="${createForm.item != null ? createForm.item.itemCode : ''}">
-                <option value="">-- 선택 --</option>
-                <option th:each="i : ${items}" th:value="${i.itemCode}"
-                        th:text="${i.itemCode + ' · ' + i.itemName}">
-                </option>
-              </select>
-            </div>
+			    <label class="form-label">항목 코드</label>
+			    <select class="form-select" name="item.itemCode" required
+			            th:value="${createForm?.item?.itemCode}">
+			        <option value="">-- 선택 --</option>
+			        <option th:each="i : ${items}" th:value="${i.itemCode}"
+			                th:text="${i.itemCode + ' · ' + i.itemName}">
+			        </option>
+			    </select>
+			</div>
+
 
             <!-- 유형 -->
             <div class="col-md-3">
@@ -345,11 +346,20 @@
 
           <div class="modal-body">
           
-         <div id="edit-error-[[${c.ruleId}]]"
-		     class="alert alert-danger d-none modal-error-box"
-		     th:classappend="${editErrorMsg} ? '' : 'd-none'">
-		    <span th:text="${editErrorMsg}"></span>
-		</div>
+<!--          <div id="edit-error-[[${c.ruleId}]]" -->
+<!-- 		     class="alert alert-danger d-none modal-error-box" -->
+<!-- 		     th:classappend="${editErrorMsg} ? '' : 'd-none'"> -->
+<!-- 		    <span th:text="${editErrorMsg}"></span> -->
+<!-- 		</div> -->
+		
+		<div class="alert alert-danger modal-error-box"
+     th:id="'edit-error-' + ${c.ruleId}"
+     th:classappend="${openEditModalId == c.ruleId} ? '' : 'd-none'">
+    <span th:text="${editErrorMsg}"></span>
+</div>
+		
+		
+				
 
           
             <div class="row g-3">

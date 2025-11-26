@@ -58,14 +58,24 @@ public class PayCalcRuleService {
         // 비즈니스 검증 (기간, 대상 등)
         validateBusiness(entity, entity.getRuleId());
 
-        // 🔥 우선순위 중복 검사
-        if (payCalcRuleRepository.existsByPriorityAndRuleIdNot(entity.getPriority(), entity.getRuleId())) {
-            throw new IllegalArgumentException("이미 사용 중인 우선순위입니다. 다른 번호를 입력하세요.");
+        // 🔥 우선순위 중복 검사 (NEW)
+        String itemCode = entity.getItem().getItemCode();
+        Integer priority = entity.getPriority();
+
+        if (entity.getRuleId() == null) {
+            // 신규 생성: 단순 존재 여부 체크
+            if (payCalcRuleRepository.existsByItem_ItemCodeAndPriority(itemCode, priority)) {
+                throw new IllegalArgumentException("이미 사용 중인 우선순위입니다.");
+            }
+        } else {
+            // 수정: 자기 자신 제외 후 체크
+            if (payCalcRuleRepository.existsByPriorityAndRuleIdNot(priority, entity.getRuleId())) {
+                throw new IllegalArgumentException("이미 사용 중인 우선순위입니다.");
+            }
         }
 
         return payCalcRuleRepository.save(entity);
     }
-
 
     // =============================== 아래 기존 메서드 동일 ===============================
 
@@ -102,12 +112,24 @@ public class PayCalcRuleService {
     }
 
     private void validateBusiness(PayCalcRule r, Long excludeId) {
+
         if (r.getEndDate() != null && r.getEndDate().isBefore(r.getStartDate()))
             throw new IllegalArgumentException("종료일은 시작일보다 빠를 수 없습니다.");
 
+        // 🔥 RULE_TYPE == RATE → valueNum must be between 0~1
+        if (r.getRuleType() == RuleType.RATE) {
+            if (r.getValueNum() == null)
+                throw new IllegalArgumentException("비율(RATE)은 0~1 사이 숫자를 입력해야 합니다.");
+
+            if (r.getValueNum().doubleValue() < 0 || r.getValueNum().doubleValue() > 1)
+                throw new IllegalArgumentException("비율(RATE)은 반드시 0~1 사이여야 합니다.");
+        }
+
+        // 🔥 FORMULA 외 타입에서는 valueNum 반드시 필요
         if (r.getRuleType() != RuleType.FORMULA && r.getValueNum() == null)
             throw new IllegalArgumentException("숫자값을 입력하세요.");
 
+        // 기존 기간/대상 중복 검사
         String targetCodeSafe =
                 (r.getTargetType() == TargetType.ALL) ? "" : nullToEmpty(r.getTargetCode());
 
