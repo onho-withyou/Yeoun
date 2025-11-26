@@ -24,7 +24,7 @@
 			      <div class="row g-3">
 			        <div class="col-12 col-md-6">
 			          <label class="form-label required" for="empName">이름</label>
-			          <input type="text" class="form-control" id="empName" th:field="*{empName}" placeholder="김여운">
+			          <input type="text" class="form-control" id="empName" th:field="*{empName}" placeholder="김여운" th:readonly="${mode == 'edit'}">
 			          <div class="text-danger small" th:if="${#fields.hasErrors('empName')}" th:errors="*{empName}"></div>
 			        </div>
 			        <!-- 사번은 서비스에서 생성됨: 입력받지 않기 -->
