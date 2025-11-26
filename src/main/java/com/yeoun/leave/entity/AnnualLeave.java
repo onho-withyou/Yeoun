@@ -39,7 +39,7 @@ import lombok.Setter;
 @SequenceGenerator(
 		name = "ANNUAL_LEAVE_SEQ_GENERATOR",
 		sequenceName = "ANNUAL_LEAVE_SEQ", 
-		initialValue = 1,
+		initialValue = 70,
 		allocationSize = 1
 )
 @Getter

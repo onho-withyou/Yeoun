@@ -54,7 +54,8 @@ public class NoticeController {
 	    model.addAttribute("orderKey", orderKey);
 	    model.addAttribute("orderMethod", orderMethod);
 	    
-//	    System.out.println("노티스페이지" + noticePage.getContent());
+	    System.out.println("노티스페이지" + noticePage.getContent());
+	    System.out.println("totalPages" + noticePage.getTotalPages());
 		return "/notice/notice";
 	}
 	
