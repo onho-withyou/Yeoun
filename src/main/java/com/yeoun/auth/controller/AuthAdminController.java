@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,10 +18,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.yeoun.auth.service.AuthAdminService;
 import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.repository.DeptRepository;
+import com.yeoun.emp.service.EmpService;
 
 import lombok.RequiredArgsConstructor;
 
-// 관리자 - 접근권한 부여
+// 관리자 - 접근권한 부여 및 비밀번호 초기화
 @Controller
 @RequestMapping("/auth/manage")
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ public class AuthAdminController {
 	
 	private final AuthAdminService authAdminService;
     private final DeptRepository deptRepository;
+    private final EmpService empService;
 	
 	// 권한관리 메인 화면
 	@GetMapping("")
@@ -78,6 +81,23 @@ public class AuthAdminController {
 		authAdminService.updateEmpRoles(empId, roleCodes);
 		rttr.addFlashAttribute("msg", "권한이 저장되었습니다.");
 		return "redirect:/auth/manage";
+	}
+	
+	// ==================================
+	// 비밀번호를 초기값(1234)으로 재설정
+	@PostMapping("/emp/{empId}/pwdResetDefault")
+	@PreAuthorize("hasAnyRole('SYS_ADMIN', 'HR_ADMIN')")
+	public String resetPwdToDefault(@PathVariable("empId") String empId,
+								    RedirectAttributes rttr) {
+		
+		empService.resetPwdToDefaultByAdmin(empId);
+		
+		rttr.addFlashAttribute("msg", "비밀번호를 초기값(1234)으로 재설정했습니다.");
+		rttr.addFlashAttribute("infoMsg", "사원에게 초기 비밀번호(1234)로 로그인 후 반드시 변경하도록 안내해 주세요.");
+		
+		
+		return "redirect:/emp/edit/" + empId;
+		
 	}
 	
 	

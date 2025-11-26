@@ -64,7 +64,8 @@ public class EmpController {
 	// 뷰페이지로 포워딩 시 입력값 검증으로 활용되는 DTO 객체(빈 객체)를 Model 객체에 담아 함께 전달
 	// GET : 사원 등록 폼
 	@GetMapping("/regist")
-	public String registEmp(Model model) {
+	public String registEmp(@AuthenticationPrincipal LoginDTO user,
+							Model model) {
 		
 		if (!model.containsAttribute("empDTO")) {
 	        model.addAttribute("empDTO", new EmpDTO());
@@ -72,9 +73,16 @@ public class EmpController {
 	    if (!model.containsAttribute("mode")) {
 	        model.addAttribute("mode", "create");
 	    }
+	    
+	 	// 급여정보 수정 가능 권한: HR, SYS 관리자만
+	    boolean isHrAdmin     = user.hasRole("HR_ADMIN");
+	    boolean isSystemAdmin = user.hasRole("SYS_ADMIN");
+	    boolean canEditBankInfo = isHrAdmin || isSystemAdmin;
+	    model.addAttribute("canEditBankInfo", canEditBankInfo);
+	    
+	    model.addAttribute("formAction", "/emp/regist");
 
-		
-		setupEmpFormCommon(model);
+	    setupEmpFormCommon(model);
 		
 		return "emp/emp_form";
 	}
@@ -208,10 +216,18 @@ public class EmpController {
 	// ====================================================================================
 	// 사원 정보 수정
 	@GetMapping("/edit/{empId}")
-	public String editEmp(@PathVariable("empId") String empId, Model model) {
+	public String editEmp(@PathVariable("empId") String empId, 
+						  @AuthenticationPrincipal LoginDTO user,
+						  Model model) {
 		
 		// 수정용 DTO 조회
 	    EmpDTO empDTO = empService.getEmpForEdit(empId);
+	    
+	    // 급여정보 수정 가능 권한: HR, SYS 관리자만
+	    boolean isHrAdmin     = user.hasRole("HR_ADMIN");
+	    boolean isSystemAdmin = user.hasRole("SYS_ADMIN");
+	    boolean canEditBankInfo = isHrAdmin || isSystemAdmin;
+	    model.addAttribute("canEditBankInfo", canEditBankInfo);
 	    
 		// 공통 모델 세팅
 	    model.addAttribute("empDTO", empDTO);
@@ -224,13 +240,19 @@ public class EmpController {
 	}
 	
 	@PostMapping("/edit")
-	public String updateEmp(@ModelAttribute("empDTO") @Validated(EmpDTO.Edit.class) EmpDTO empDTO, 
+	public String updateEmp(@AuthenticationPrincipal LoginDTO user,
+							@ModelAttribute("empDTO") @Validated(EmpDTO.Edit.class) EmpDTO empDTO, 
 							BindingResult bindingResult,
 							Model model,
 							RedirectAttributes rttr) {
 		
 		// 공통: 원본 DTO 한 번 가져오기 (사진/통장 파일 id 유지용)
 	    EmpDTO original = empService.getEmpForEdit(empDTO.getEmpId());
+	    
+	    // 급여정보 수정 가능 여부
+	    boolean isHrAdmin     = user.hasRole("HR_ADMIN");
+	    boolean isSystemAdmin = user.hasRole("SYS_ADMIN");
+	    boolean canEditBankInfo = isHrAdmin || isSystemAdmin;
 		
 		// 입력값 검증 실패 시
 		if (bindingResult.hasErrors()) {
@@ -240,10 +262,21 @@ public class EmpController {
 			model.addAttribute("empDTO", empDTO);
 			model.addAttribute("mode", "edit");
 			model.addAttribute("formAction", "/emp/edit");
+			model.addAttribute("canEditBankInfo", canEditBankInfo);
 			setupEmpFormCommon(model); 
 			
 			return "emp/emp_form";
 		}
+		
+		// ===========================
+	    // 2) 급여정보 수정 권한 없는 경우 → 원본 값으로 돌려놓기
+	    // ===========================
+	    if (!canEditBankInfo) {
+	        empDTO.setBankCode(original.getBankCode());
+	        empDTO.setAccountNo(original.getAccountNo());
+	        empDTO.setFileId(original.getFileId());
+	        empDTO.setBankbookFile(null);   // 새 파일 업로드 무시
+	    }
 		
 		try {
 	        // 2) 서비스 호출 (이메일/연락처 중복 검사 등)
@@ -269,6 +302,7 @@ public class EmpController {
 	        model.addAttribute("empDTO", empDTO);
 	        model.addAttribute("mode", "edit");
 	        model.addAttribute("formAction", "/emp/edit");
+	        model.addAttribute("canEditBankInfo", canEditBankInfo);
 	        setupEmpFormCommon(model);
 
 	        return "emp/emp_form";
