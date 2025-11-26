@@ -44,18 +44,24 @@ public class MessengerController {
 //	}
 	
 	// ==========================================================================
-	// 메신저 팝업 목록 - 친구목록 / 대화목록
+	// 메신저 팝업 목록 - 친구목록
 	@GetMapping("/list")
 	public String list(Authentication authentication, Model model) {
 		LoginDTO loginDTO = (LoginDTO)authentication.getPrincipal();
 		List<MsgStatusDTO> msgStatusDTOList = messengerService.getUsers(loginDTO.getUsername());
-		List<MsgRoomListDTO> msgRoomsDTOList = messengerService.getChatRooms(loginDTO.getUsername());
-		
-		log.info("이거 왜 갑자기 안보이지?" + msgRoomsDTOList);
-		
+
 		model.addAttribute("friends", msgStatusDTOList);
-		model.addAttribute("rooms", msgRoomsDTOList);
 		return "/messenger/list";
+	}
+
+	// ==========================================================================
+	// 대화목록 새로 렌더링
+	@PostMapping("/list/chat")
+	public ResponseEntity<?> getChatRooms (Authentication authentication){
+		LoginDTO loginDTO = (LoginDTO)authentication.getPrincipal();
+		List<MsgRoomListDTO> msgRoomsDTOList = messengerService.getChatRooms(loginDTO.getUsername());
+		log.info("왜안돼!!!!!!!!!!!!!!!!!!!! " + msgRoomsDTOList);
+		return ResponseEntity.ok().body(msgRoomsDTOList);
 	}
 	
 	// ==========================================================================

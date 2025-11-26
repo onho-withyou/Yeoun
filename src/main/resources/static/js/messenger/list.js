@@ -56,6 +56,79 @@ function subscribeEvent() {
 }
 
 // ==========================
+// 채팅 목록 AJAX 불러오기
+// ==========================
+async function loadChatList() {
+
+    try {
+        const res = await fetch("/messenger/list/chat", {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                [csrfHeader] : csrfToken
+            }
+        });
+
+        if (!res.ok) {
+            console.error("채팅 목록 로딩 실패", res.status);
+            return;
+        }
+
+        const list = await res.json();
+        // 서버 응답 예상: [{ roomId, groupName, previewMessage, previewTime, unreadCount, profileImg }, ... ]
+
+        const panel = document.querySelector("#chats-panel");
+        panel.innerHTML = ""; // 기존꺼 지움
+
+        if (list.length === 0) {
+            panel.innerHTML = `<p class="text-muted p-3">대화 내역이 없습니다.</p>`;
+            return;
+        }
+
+        list.forEach(room => {
+            const item = document.createElement("div");
+            item.className = "chat-item";
+            item.dataset.id = room.roomId;
+
+            item.innerHTML = `
+        <img class="rounded-circle" src="/img/msg_img_${room.profileImg}.png">
+
+        <div class="chat-center">
+          <p class="chat-title">${room.groupName ?? ''}</p>
+          <p class="chat-last">${room.previewMessage ?? ''}</p>
+        </div>
+
+        <div class="chat-right">
+          <span class="chat-time">${room.previewTime ?? ''}</span>
+          ${
+                room.unreadCount > 0
+                    ? `<span class="badge-unread">${room.unreadCount}</span>`
+                    : ""
+            }
+        </div>
+      `;
+
+            // ==========================
+            // 더블클릭 → 기존 list.js 규칙 유지
+            // ==========================
+            item.addEventListener("dblclick", () => {
+                window.open(
+                    `/messenger/room/${room.roomId}`,
+                    "_blank",
+                    "width=500,height=700,resizable=no,scrollbars=no"
+                );
+            });
+
+            panel.appendChild(item);
+        });
+
+    } catch (err) {
+        console.error("채팅 목록 불러오기 에러:", err);
+    }
+}
+
+
+// ==========================
 // 상태 실시간 변화 구독
 // ==========================
 function changeStatus(req){
@@ -340,6 +413,10 @@ function activeChatsTab() {
 	document.querySelectorAll('.chat-item').forEach(item => {
 		item.style.display = 'flex';
 	});
+
+    // ========= 추가 ==========
+    loadChatList();
+
 }
 	
 // 친구 탭 클릭
@@ -784,6 +861,22 @@ document.getElementById('create-group-btn')
   );
 });
 
+// ==========================
+// 채팅방 클릭 → 해당 unread 제거
+// ==========================
+chatsPanel.addEventListener("click", (e) => {
+
+    // 가장 가까운 chat-item 찾기
+    const item = e.target.closest(".chat-item");
+    if (!item) return;
+
+    // 채팅방 안의 unread badge 찾기
+    const badge = item.querySelector(".badge-unread");
+    if (badge) {
+        badge.remove();
+    }
+
+});
 
 
 

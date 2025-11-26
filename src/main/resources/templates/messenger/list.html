@@ -104,9 +104,9 @@
       	
       	<!-- JS가 렌더링할 자리 -->
     	<div class="chat-list"></div>
-        
+
         <!-- 1) 대화방 목록 있는 경우 -->
-        <div th:if="${rooms.size() > 0}">
+        <!--<div th:if="${rooms.size() > 0}">
           <div class="chat-item"
                th:each="room : ${rooms}"
                th:data-id="${room.roomId}">
@@ -130,12 +130,12 @@
           </div>
         </div>
 
-        <!-- 2) 대화방 목록이 아예 없을 때 -->
+         2) 대화방 목록이 아예 없을 때
         <div th:if="${rooms.size() == 0}" class="empty-chat">
           <img th:src="@{/img/empty_chat.png}" alt="empty" class="empty-icon">
           <p class="empty-title">대화방이 없습니다</p>
           <p class="empty-sub">새로운 대화를 시작해보세요.</p>
-        </div>
+        </div>-->
       </div>
     </div>
   </div>
