@@ -9,8 +9,8 @@
 	let currentApprover;
 	// 모달의 결재확인 버튼
 	
-	const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
-	const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
+	//const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
+	//const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]')?.content;
 	// 결제확인 버튼
 	const approvalCheckBtn = document.getElementById('approvalCheckBtn');
 	// 반려 버튼
@@ -60,7 +60,7 @@
 			fetch(`/api/approvals/${approvalId}?btn=${btn}` , {
 				method: 'PATCH'
 				, headers: {
-					[csrfHeaderName]: csrfToken
+					[csrfHeader]: csrfToken
 				}
 			})
 			.then(response => {
@@ -588,7 +588,7 @@
     	await fetch("/approval/approval_doc", {
 				method: 'POST', 
 				headers: {
-					[csrfHeaderName]: csrfToken
+					[csrfHeader]: csrfToken
 					,'Content-Type': 'application/json' // Content-Type 헤더를 application/json으로 설정
 				},
 				body:  JSON.stringify(dataObject) // 요청 본문에 JSON 데이터 포함
@@ -1130,7 +1130,7 @@
 			fetch('/api/approvals/approvalDoc/searchAllGrids', {
 				method: 'POST',
 				headers:{
-					[csrfHeaderName]: csrfToken,
+					[csrfHeader]: csrfToken,
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify(params)
