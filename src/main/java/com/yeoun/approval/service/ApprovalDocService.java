@@ -182,6 +182,7 @@ public class ApprovalDocService {
 						 // approvalDoc의 status를 완료로 변경
 						 approvalDoc.setDocStatus("완료");
 						 
+						 // 인사 발령 등록 폼을 통한 신청 (승인 후처리)
 						 handleAfterFinalApproval(approvalDoc);
 						 
 						 // 결재 완료된 문서의 양식이 연차신청서인 경우 동작
@@ -216,8 +217,8 @@ public class ApprovalDocService {
 		 return list;
 	 }
 	 
-	// ------------------------------------------------------------------------------
-	// 전자결재 최종 승인(=완료) 후 도메인별 후처리
+	 // ------------------------------------------------------------------------------
+	 // 인사 발령 등록 폼을 통한 신청 (승인 후처리)
 	 private void handleAfterFinalApproval(ApprovalDoc approvalDoc) {
 		 
 		 // 1) 문서가 인사발령 문서인지 확인
