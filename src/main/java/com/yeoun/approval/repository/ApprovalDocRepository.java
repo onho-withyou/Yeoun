@@ -263,7 +263,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 				""", nativeQuery = true)
 	List<Object[]> findMyApprovalDocs(@Param("empId") String empId);
 	
-	// 그리드 - 4.결재대기 - 나와관련된 모든 결재대기문서
+	// 그리드 - 4.결재대기 - 나와관련된 모든 결재대기문서(내가결재권한자인것,내가올린문서)
 	@Query(value = """
 		 SELECT  rownum AS row_no
             	,adre.approval_id
@@ -328,7 +328,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
                     INNER JOIN approver ar
                     ON ad.doc_status NOT LIKE '%완료%'  -- 공통- 문서작성자이면서, 결재권한자 일때
                     WHERE (ar.viewing ='Y' and ad.emp_id = :empId)--문서작성자일떄--ar.viewing의 경우에는 Y나N을 안걸어주면 뻥튀기되서2배로나옴
-                    OR (ad.approval_id = ar.approval_id       -- 결재권한자일때  3개
+                    OR (ad.approval_id = ar.approval_id       -- 결재권한자일때
                     AND ar.viewing ='Y' AND ar.emp_id = :empId)) adr -- 박경찬 문서작성자이면서, 결재권한자일떄 
             WHERE adr.emp_id = e.emp_id
 			AND e.dept_id = d.dept_id
@@ -409,7 +409,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 	 """, nativeQuery = true)
 	 List<Object[]> findFinishedApprovalDocs(@Param("empId") String empId);
 	 
-	
+	//main에사용하는쿼리 현재결재권한자로서 결재해야할 것과 내가 올린 결재만
 	@Query("select a from ApprovalDoc a " 
 			+ "where (a.docStatus not in ('완료', '반려') and a.approver = :empId)" 
 			+ "or a.empId = :empId "

@@ -24,7 +24,7 @@
 		patchApproval("accept");
 	});
 	
-	// 반려버튼 눌렀을때 동작할 함수
+	// f- 반려버튼 눌렀을때 동작할 함수
 	approvalCompanionBtn.addEventListener('click', () => {
 		patchApproval("deny")		
 	});
@@ -121,8 +121,10 @@
 	}
 	
 	let approverDiv = document.querySelector('#approver');
-	let selectBox;
+	
 	let itemData;
+
+
 	// f- selectbox - 인사정보 불러오기
 	async function empData() {
 		try {
@@ -137,7 +139,7 @@
 				itemData.push(obj);
 				obj = {};
 			});
-			
+			let selectBox;
 			//셀렉트박스 - 토스트유아이
 			selectBox = new tui.SelectBox('#select-box', {
 			  data: itemData
@@ -170,7 +172,7 @@
 					
 					const rowData = grid1.getRow(ev.rowKey);
 					$('#approval-modal').modal('show');
-					//formReset();
+				
 					document.getElementById('saveBtn').style.display = "none";//approvalCompanionBtn//approvalCheckBtn
 					document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
 					document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
@@ -200,21 +202,23 @@
 					document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 					//document.getElementById('approver').value = rowData.approver;//결재권한자
 					//상세버튼 클릭시 디폴트 결재권한자 div 생기게하는 로직
+					//여러번 누르면 한번씩 이전값을가지고있음
 					const approverList = await getApproverList(approvalId);
-					
+					console.log("approverList ---------->",approverList);
 					let sortedList; 
 					
 					if(approverList.length > 0) {
 						sortedList = approverList.sort((a, b) => {
 							return Number (a.orderApprovers) - Number(b.orderApprovers);
 						});
+						console.log("approverList---------------->",approverList);
 
 						window.count = 0;
 						approverDiv.innerHTML = "";
-
+						console.log("sortedList---->",sortedList);
 						for (const approver of sortedList) {
 							selectBox.select(approver.empId);
-							print("default", selectBox.getSelectedItem().label);
+							print("default", selectBox.getSelectedItem()?.label);
 						}
 
 					}
@@ -263,7 +267,6 @@
 					const approverList = await getApproverList(approvalId);
 					
 					let sortedList; 
-					
 					if(approverList.length > 0) {
 						sortedList = approverList.sort((a, b) => {
 							return Number (a.orderApprovers) - Number(b.orderApprovers);
@@ -271,10 +274,9 @@
 
 						window.count = 0;
 						approverDiv.innerHTML = "";
-
 						for (const approver of sortedList) {
 							selectBox.select(approver.empId);
-							print("default", selectBox.getSelectedItem().label);
+							print("default", selectBox.getSelectedItem()?.label);
 						}
 
 					}
@@ -330,13 +332,14 @@
 						sortedList = approverList.sort((a, b) => {
 							return Number (a.orderApprovers) - Number(b.orderApprovers);
 						});
+                        console.log("approverList---------------->",approverList);
 
 						window.count = 0;
 						approverDiv.innerHTML = "";
 
 						for (const approver of sortedList) {
 							selectBox.select(approver.empId);
-							print("default", selectBox.getSelectedItem().label);
+							print("default", selectBox.getSelectedItem()?.label);
 						}
 
 					}
@@ -397,13 +400,13 @@
 
 						for (const approver of sortedList) {
 							selectBox.select(approver.empId);
-							print("default", selectBox.getSelectedItem().label);
+							print("default", selectBox.getSelectedItem()?.label);
 						}
 
 					}
 					//document.getElementById('approver').innerText = rowData.approver;//전결자
 					document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-					//electBox.disable();
+					//selectBox.disable();
 					formDisable();
 				}
 			});
@@ -456,7 +459,7 @@
 												
 							for (const approver of sortedList) {
 								selectBox.select(approver.empId);
-								print("default", selectBox.getSelectedItem().label);
+								print("default", selectBox.getSelectedItem()?.label);
 							}
 							
 						}
@@ -519,9 +522,7 @@
 		document.getElementById('to-dept-id').disabled = true;
 		document.getElementById('expnd-type').disabled = true;
 		document.getElementById('reason-write').disabled = true;
-		if (selectBox) { 
-			selectBox.disable();
-		}
+		
 	}
 	//f- 기안서작성 클릭시 활성화 시켜주는 함수
 	function formEnable(){
@@ -539,10 +540,6 @@
 		document.getElementById('to-dept-id').disabled = false;
 		document.getElementById('expnd-type').disabled = false;
 		document.getElementById('reason-write').disabled = false;
-		
-		if (selectBox) { // 인스턴스가 존재하는지 확인
-        	selectBox.enable(); 
-    	}
 	}
 
 	//f- 폼 결재권한자 데이터 말아서 보내는 함수
@@ -1203,21 +1200,23 @@
 	}
 	//f- 양식 모달 리셋함수
 	function formReset(ev){
-		console.log("formReset ev:",ev);
-		
-		approverDiv.innerHTML = "";
-		if(selectedForm){
-			
-			console.log("formReset 11111selectedForm:",selectedForm.formName);
-			document.getElementById('Drafting').innerText = selectedForm.formName;
-			document.getElementById("DraftingHidden").value = selectedForm.formName;//양식종류 숨은값
-			
-		}else{
-			//console.log("formReset222222 selectedForm:",selectedForm);
-			document.getElementById('Drafting').innerText = '기안서 작성';
-			document.getElementById("DraftingHidden").value = '기안서 작성';
+    
+    	// Null 체크 추가
+    	const draftingElement = document.getElementById('Drafting');
+    	if (draftingElement) { // draftingElement가 null인지 체크
+    	    draftingElement.innerText = selectedForm.formName;
+    	}
+	
+    	// Null 체크 추가
+    	const draftingHiddenElement = document.getElementById("DraftingHidden");
+    	if (draftingHiddenElement) { // draftingHiddenElement가 null인지 체크
+    	    draftingHiddenElement.value = selectedForm.formName; // 양식종류 숨은값
+    	}
 
-		}
+		//document.getElementById("DraftingHidden").value = selectedForm.formName;//양식종류 숨은값
+		//document.getElementById('Drafting').innerText = selectedForm.formName;
+		//document.getElementById("DraftingHidden").value = selectedForm.formName;//양식종류 숨은값
+
 		document.getElementById("approval-title").value = "";//문서제목
 		//document.getElementById("approver-name").value ="";//결재자명 - 로그인정보에서 불러옴
 		document.getElementById("create-date").value = null;//문서 생성일자
@@ -1252,8 +1251,22 @@
     this.count = 0; //결재권한자 label count
     let defalutapproverArr = ["d-이사랑","d-미미미누","d-김경란"];
     let approverArr = [];//결재권한자 배열 
+	let writeBtn = document.getElementById("writeBtn");
 	
+	//f- 기안서작성 모달이 열리기전에 이벤트를 감지
+	$('#approval-modal').on('show.bs.modal', function (e) {
+		// e.relatedTarget이 null/undefined이면 .dataset 접근을 멈추고 actionType에 undefined 할당
+    	let actionType = e.relatedTarget?.dataset?.action; 
 
+    	// actionType이 유효할 때만 로직을 실행합니다.
+    	if (!selectedForm && actionType === 'create') { 
+    	    e.preventDefault();
+    	    alert("양식을 선택해주세요.");  
+    	} else {
+    	    console.log(" 모달 열기 진행");
+    	}
+	 });
+			
 	//f- 작성 버튼 클릭 시 실행되는 함수
   	function defaultPrint(){
 		// 모달을 닫고 다시 작성 버튼을 클릭하면 이전 데이터가 남아있어서 초기화 진행
@@ -1264,19 +1277,11 @@
 		window.count = 0;
 		approverArr = [];
 		// selectedForm 값이 없을 경우 에러가 생길 수 있어서 에러 처리
-		// 모달이 작성 클릭 두번째부터 안열림
 		//<option selected>기안서</option> 해당구문 없앨시에 마지막인덱스로됨
 		if (!selectedForm) {
-			$('#approval-modal').on('shown.bs.modal', function (ev) {
-				
-			 		// 모달을 열지 않도록 강제로 닫기
-					alert("양식을 선택해주세요.");
-			 		ev.preventDefault();
-			 		console.log('모달을 열 수 없습니다.');
-			});
+			console.log('모달을 열 수 없습니다.');
 			return;
-		}else{
-			//$('#approval-modal').modal('show');
+
 			// document.getElementById('leavePeriodForm').style.display = 'flex';
 			// document.getElementById('leaveTypeForm').style.display = 'flex';
 			// document.getElementById('expndTypeForm').style.display = 'flex';
@@ -1370,9 +1375,7 @@
 		    divElement.remove(); //자신의 div 제거
 		
 		    if(divElement.innerText !== null){ //defalut 태그가 있을때
-				// console.log("defalutapproverArr",defalutapproverArr);
 				approverArr = approverArr.filter((ev) => ev.approverOrder !== count);
-				// console.log("approverArr defalut 닫기후:", approverArr);	
 		    }
 			approverArr = approverArr.filter((ev) => ev !== count);
 			this.count = count-1; //제거 라벨 카운트 원상복기
@@ -1380,9 +1383,7 @@
 		if(type === "close"){ //전결자 변경 닫기버튼시
 			divElement.remove(); //자신의 div 제거
 			//전결자 변경시 결재권한자 배열에서 해당 결재권한자 제거
-			console.log("count:",count-1);
 			approverArr = approverArr.filter((ev) => ev.approverOrder !== count);
-			console.log("approverArr 닫기후:", approverArr);
 		}
 		if(approverArr.length === 0){
 	    	this.count = 0;
@@ -1390,14 +1391,15 @@
 	}
 
 	//에디터-없앰
-//	const editor = new toastui.Editor({
-//		el: document.querySelector('#editor'),
-//	  	height: '500px',
-//	  	initialEditType: 'markdown',
-//	  	previewStyle: 'vertical'
-//	});
+	// const editor = new toastui.Editor({
+	// 	el: document.querySelector('#editor'),
+	//   	height: '500px',
+	//   	initialEditType: 'markdown',
+	//   	previewStyle: 'vertical'
+	// });
 	
-	//editor.getMarkdown();
+	// editor.getMarkdown();
+
 	
 	//모달 움직이게 하기
 	const modalHeader = document.querySelector(".modal-header");
