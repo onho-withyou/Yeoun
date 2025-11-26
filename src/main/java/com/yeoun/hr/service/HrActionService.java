@@ -50,8 +50,25 @@ public class HrActionService {
     private final ApprovalDocRepository approvalDocRepository;
     private final ApprovalFormRepository approvalFormRepository;
     private final ApproverRepository approverRepository;
-
+    
     // ----------------------------------------------------------------------------
+    // 발령 코드에 맞는 이름
+    private String getActionTypeName(String actionType) {
+
+        if (actionType == null || actionType.isBlank()) {
+            return "인사발령";
+        }
+
+        return switch (actionType) {
+            case "PROMOTION"  -> "승진";
+            case "TRANSFER"   -> "전보";
+            case "RETIRE_ACT" -> "퇴직";
+            case "LEAVE_ACT"  -> "휴직";
+            case "RETURN_ACT" -> "복직";
+            default           -> "인사발령";
+        };
+    }
+    
     /**
      *  1. 인사 발령 등록 및 전자결재 생성
      *   - 인사 발령 신청 폼에서 넘어온 데이터를 받아서 HR_ACTION 발령 레코드 생성
@@ -72,14 +89,16 @@ public class HrActionService {
         Emp creator = empRepository.findById(loginEmpId)
                 .orElseThrow(() -> new IllegalArgumentException("등록자 사원을 찾을 수 없습니다. empId=" + loginEmpId));
 
-        // 2) 발령 대상 사원 / 부서 / 직급 조회
-        // 2-1) 발령 타입 및 발령 대상
+        // ======================================
+        // 2. 발령 대상 사원 / 부서 / 직급 조회
+        // ======================================
+        // 1) 발령 타입 및 발령 대상
         String actionType = hrActionRequestDTO.getActionType();
         
         Emp emp = empRepository.findById(hrActionRequestDTO.getEmpId())
                 .orElseThrow(() -> new IllegalArgumentException("사원을 찾을 수 없습니다. empId=" + hrActionRequestDTO.getEmpId()));
 
-        // 2-2) 부서 및 직급
+        // 2) 부서 및 직급
         Dept toDept = null;
         Position toPos = null;
         
@@ -93,35 +112,39 @@ public class HrActionService {
         }
         
         // ==========================
-        // 2. HR_ACTION 엔티티 생성
+        // 3. HR_ACTION 엔티티 생성
         // ==========================
-        HrAction action = hrActionRequestDTO.toEntity();	// DTO -> 엔티티 (기본 필드 세팅)
+        // 1) 기본 필드 세팅 (DTO -> 엔티티)
+        HrAction action = hrActionRequestDTO.toEntity();	
 
-        // 관계 필드 세팅
-        action.setEmp(emp);	
+        // 2) 관계 필드 세팅
+        action.setEmp(emp);							// 발령 대상 사원
         action.setFromDept(emp.getDept());			// 이전 부서
         action.setFromPosition(emp.getPosition());	// 이전 직급
+        
         // 퇴직/휴직/복직 아닐 때만 toDept / toPos 세팅
         if (!"RETIRE_ACT".equals(actionType) && !"LEAVE_ACT".equals(actionType) && !"RETURN_ACT".equals(actionType)) {
             action.setToDept(toDept);
             action.setToPosition(toPos);
         }
 
-        action.setCreatedUser(creator);  // 등록자
+        action.setCreatedUser(creator);  // 발령을 신청한 사람 (로그인 사원)
         action.setStatus("대기");	  	 // 발령 상태 기본값 (요청 상태)
-        action.setAppliedYn("N");     	 // 발령은 처음 생성될 때 무조건 미적용
+        action.setAppliedYn("N");     	 // 발령은 처음 생성될 때 EMP에 미적용
         action.setAppliedDate(null);     // 적용일자 없음
 
-        // 발령(HR_ACTION) 저장
+        // 3) 발령(HR_ACTION) 저장
         HrAction saved = hrActionRepository.save(action);
         
         // ==========================
-        // 3. 전자결재 문서(approval_doc) 생성
+        // 4. 전자결재 문서(approval_doc) 생성
         // ==========================
-        // 3-1. 문서 제목 자동 생성
+        // 1) 문서 제목 자동 생성
         String actionTypeName = getActionTypeName(actionType);
         
         String title;
+        
+        // 퇴직/휴직/복직일 경우
         if ("RETIRE_ACT".equals(actionType) || "LEAVE_ACT".equals(actionType) || "RETURN_ACT".equals(actionType)) {
         	title = String.format("[인사발령/%s] %s (%s %s)",
         			actionTypeName,
@@ -129,13 +152,15 @@ public class HrActionService {
         			emp.getDept().getDeptName(),
         			emp.getPosition().getPosName());
         } else {
+        	// 그 외 경우
         	title = String.format(
-    			"[인사발령/%s] %s %s -> %s (%s)",
-    			actionTypeName,                      // 승진, 전보, 발령 등
-    			emp.getEmpName(),                    // 홍길동
+    			"[인사발령/%s] %s %s %s → %s %s",
+    			actionTypeName,                      // 승진, 전보 등
+    			emp.getDept().getDeptName(),		 // 인사부
     			emp.getPosition().getPosName(),      // 대리
-    			toPos.getPosName(),                  // 과장
-    			toDept.getDeptName()                 // 영업팀
+    			emp.getEmpName(),                    // 홍길동
+    			toDept.getDeptName(),                // 영업부
+    			toPos.getPosName()                   // 과장
 			);
         }
         
@@ -225,23 +250,6 @@ public class HrActionService {
         saved.setApprovalId(approvalId);      // 발령(HR_ACTION) ← 결재문서 ID 매핑
 
         return saved.getActionId();
-    }
-    
-    // 발령 코드에 맞는 이름
-    private String getActionTypeName(String actionType) {
-
-        if (actionType == null || actionType.isBlank()) {
-            return "인사발령";
-        }
-
-        return switch (actionType) {
-            case "PROMOTION"  -> "승진";
-            case "TRANSFER"   -> "전보";
-            case "RETIRE_ACT" -> "퇴직";
-            case "LEAVE_ACT"  -> "휴직";
-            case "RETURN_ACT" -> "복직";
-            default           -> "인사발령";
-        };
     }
     
 	// ==========================
