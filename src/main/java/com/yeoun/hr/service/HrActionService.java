@@ -1,16 +1,11 @@
 package com.yeoun.hr.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -36,7 +31,6 @@ import com.yeoun.hr.dto.HrActionRequestDTO;
 import com.yeoun.hr.entity.HrAction;
 import com.yeoun.hr.repository.HrActionRepository;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -57,31 +51,39 @@ public class HrActionService {
     private final ApprovalFormRepository approvalFormRepository;
     private final ApproverRepository approverRepository;
 
-    // 1. 발령 등록
+    // ----------------------------------------------------------------------------
+    /**
+     *  1. 인사 발령 등록 및 전자결재 생성
+     *   - 인사 발령 신청 폼에서 넘어온 데이터를 받아서 HR_ACTION 발령 레코드 생성
+     *   - APPROVAL_DOC 전자결재 문서 생성
+     *   - APPROVER 결재선 (1차, 2차, 3차) 생성
+     *   - 발령과 결재문서 연결 => approvalId 세팅 => 발령ID (actionId) 리턴 
+     */
     @Transactional
     public Long createAction(HrActionRequestDTO hrActionRequestDTO) {
 
-    	// 0. 로그인 사용자
+    	// ======================================
+        // 1. 로그인 사용자(신청자) 정보 가져오기
+        // ======================================
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         LoginDTO loginUser = (LoginDTO) auth.getPrincipal();
         String loginEmpId = loginUser.getEmpId();
         
-        // 0-1. 등록자 Emp 조회 (신청자)
         Emp creator = empRepository.findById(loginEmpId)
                 .orElseThrow(() -> new IllegalArgumentException("등록자 사원을 찾을 수 없습니다. empId=" + loginEmpId));
 
-        // ==========================
-        // 1. 발령 대상 및 부서/직급 조회
-        // ==========================
+        // 2) 발령 대상 사원 / 부서 / 직급 조회
+        // 2-1) 발령 타입 및 발령 대상
         String actionType = hrActionRequestDTO.getActionType();
         
         Emp emp = empRepository.findById(hrActionRequestDTO.getEmpId())
                 .orElseThrow(() -> new IllegalArgumentException("사원을 찾을 수 없습니다. empId=" + hrActionRequestDTO.getEmpId()));
 
-        // 1-1. 부서/직급은 퇴직/휴직/복직 아닐 때만 조회
+        // 2-2) 부서 및 직급
         Dept toDept = null;
         Position toPos = null;
         
+        // 퇴직/휴직/복직이 아닐 때만 발령 후 부서 및 직급을 조회
         if (!"RETIRE_ACT".equals(actionType) && !"LEAVE_ACT".equals(actionType) && !"RETURN_ACT".equals(actionType)) {
             toDept = deptRepository.findById(hrActionRequestDTO.getToDeptId())
                     .orElseThrow(() -> new IllegalArgumentException("부서를 찾을 수 없습니다. deptId=" + hrActionRequestDTO.getToDeptId()));
