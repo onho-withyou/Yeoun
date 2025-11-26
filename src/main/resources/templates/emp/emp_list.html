@@ -20,8 +20,8 @@
           
           	<!-- 부서 셀렉트 -->
             <div class="col-6 col-md-auto">
-              <select class="form-select" id="deptId" name="deptId">
-                <option value="">부서 전체</option>
+              <select class="form-select" id="deptId" name="deptId" th:disabled="${isDeptManager and !isAdmin}">
+                <option value="" th:if="${isAdmin}">부서 전체</option>
                 <option th:each="d : ${deptList}" th:value="${d.deptId}" th:text="${d.deptName}"
                         th:selected="${deptId != null and deptId == d.deptId}"
                         th:if="${d.parentDeptId != null}">
