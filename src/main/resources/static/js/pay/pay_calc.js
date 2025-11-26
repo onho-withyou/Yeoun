@@ -103,6 +103,10 @@ function bindTargetSwitcher(prefix) {
         if(type === "EMP"){
             inputEl.classList.remove("d-none");
             inputEl.setAttribute("name", "targetCode");
+
+            // ⭐ 자동완성 항상 바인딩 ⭐
+            bindEmpAutocomplete(inputEl);
+
             return;
         }
 
@@ -204,9 +208,17 @@ document.addEventListener("show.bs.modal", (evt)=>{
 
     console.log(`🔧 수정 모달 표시됨: ruleId=${ruleId}`);
 
+    // UI 스위치 먼저 실행
     bindTargetSwitcher(`edit-${ruleId}`);
 
     const form = modal.querySelector("form");
+
+    /* ⭐ 자동완성 바인딩 추가 ⭐ */  
+    const empInput = modal.querySelector("input[name='targetCode']");
+    if(empInput) {
+        console.log("✨ EMP 자동완성 활성화");
+        bindEmpAutocomplete(empInput);
+    }
 
     modal.addEventListener("input", (e)=>{
         if(e.target.matches(".amount-input")){
@@ -224,22 +236,21 @@ document.addEventListener("show.bs.modal", (evt)=>{
                     e.target.classList.remove("is-invalid");
                 }
             }
-			// ⭐ 실시간 금액 검증 (1000 미만 → invalid)
-			if(rt === "AMT"){
-			    const num = parseAmount(e.target.value);
-			    if(isNaN(num) || num < 1000){
-			        e.target.classList.add("is-invalid");
-			    } else {
-			        e.target.classList.remove("is-invalid");
-			    }
-			}
 
+            // ⭐ 실시간 금액 검증
+            if(rt === "AMT"){
+                const num = parseAmount(e.target.value);
+                if(isNaN(num) || num < 1000){
+                    e.target.classList.add("is-invalid");
+                } else {
+                    e.target.classList.remove("is-invalid");
+                }
+            }
         }
     });
 
     form.addEventListener("submit", (e)=>{
         const msg = validateCalcRule(form);
-
         const box = modal.querySelector(".modal-error-box");
 
         if(msg){
@@ -300,4 +311,75 @@ document.addEventListener("change", (e) => {
             endInput.value = startInput.value;
         }
     }
+});
+/* =====================================================
+   사원 자동완성 (등록 / 수정)
+===================================================== */
+function bindEmpAutocomplete(input) {
+    if (!input) return;
+
+    const box = input.closest(".autocomplete-box");
+    const listUI = box.querySelector(".autocomplete-list");
+
+    input.addEventListener("input", async (e) => {
+        const keyword = e.target.value.trim();
+        if (!keyword || keyword.length < 1) {
+            listUI.classList.add("d-none");
+            return;
+        }
+
+        try {
+            const res = await fetch(`/pay/rule_calc/searchEmployee?keyword=${encodeURIComponent(keyword)}`);
+            const arr = await res.json();
+
+            listUI.innerHTML = ""; // 초기화
+
+            if (arr.length === 0) {
+                listUI.classList.add("d-none");
+                return;
+            }
+
+            arr.forEach(emp => {
+                const li = document.createElement("li");
+                li.className = "list-group-item list-group-item-action";
+                li.style.cursor = "pointer";
+                li.innerHTML = `${emp.empName} <small class="text-muted">${emp.empId}</small>`;
+                li.addEventListener("click", () => {
+                    input.value = emp.empId; // 사번 입력
+                    listUI.classList.add("d-none");
+                });
+                listUI.appendChild(li);
+            });
+
+            listUI.classList.remove("d-none");
+
+        } catch (err) {
+            console.error("자동완성 오류", err);
+        }
+    });
+
+    // 외부 클릭 → 자동완성 닫기
+    document.addEventListener("click", (evt) => {
+        if (!box.contains(evt.target)) {
+            listUI.classList.add("d-none");
+        }
+    });
+}
+
+
+/* ⬇ 등록 모달에 활성화 */
+document.addEventListener("DOMContentLoaded", () => {
+    const createEmpInput = document.getElementById("create-target-code-input");
+    bindEmpAutocomplete(createEmpInput);
+});
+
+
+/* ⬇ 수정 모달에 활성화 */
+document.addEventListener("show.bs.modal", (evt) => {
+    const modal = evt.target;
+    const id = modal.getAttribute("id");
+    if (!id || !id.startsWith("calcEditModal-")) return;
+
+    const input = modal.querySelector("input[name='targetCode']");
+    bindEmpAutocomplete(input);
 });

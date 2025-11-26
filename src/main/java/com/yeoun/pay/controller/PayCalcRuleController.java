@@ -6,6 +6,7 @@ import com.yeoun.pay.entity.PayCalcRule;
 import com.yeoun.pay.enums.ActiveStatus;
 import com.yeoun.pay.enums.RuleType;
 import com.yeoun.pay.enums.TargetType;
+import com.yeoun.pay.repository.EmpNativeRepository;
 import com.yeoun.pay.repository.PayItemMstRepository;
 import com.yeoun.pay.service.PayCalcRuleService;
 
@@ -19,6 +20,8 @@ import com.yeoun.pay.entity.PayItemMst;
 
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/pay/rule_calc")
@@ -30,6 +33,7 @@ public class PayCalcRuleController {
     private final PayItemMstRepository itemRepo;
     private final DeptRepository deptRepo;
     private final PositionRepository positionRepo;
+    private final EmpNativeRepository empNativeRepository;
 
     /** 페이지 진입 */
     @GetMapping
@@ -135,5 +139,23 @@ public class PayCalcRuleController {
         model.addAttribute("depts", deptRepo.findActive());
         model.addAttribute("positions", positionRepo.findActive());
     }
+    
+    
+    /**사원 자동완성*/
+    @GetMapping("/searchEmployee")
+    @ResponseBody
+    public List<Map<String, String>> searchEmployee(@RequestParam("keyword") String keyword) {
+
+        List<EmpNativeRepository.EmpSimpleProjection> list =
+                empNativeRepository.searchActiveEmp(keyword);
+
+        return list.stream()
+                .map(e -> Map.of(
+                        "empId", e.getEmpId(),
+                        "empName", e.getEmpName()
+                ))
+                .toList();
+    }
+
 
 }
