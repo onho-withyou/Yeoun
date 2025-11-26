@@ -6,8 +6,8 @@
 // DOM 요소 참조 / 전역 상태
 // ==========================
 const tabFriends		= document.getElementById('tab-friends'); // 친구목록 탭
-const tabChats 			= document.getElementById('tab-chats'); // 대화목록 탭
-const friendsPanel 		= document.getElementById('friends-panel'); // 친구패널
+const tabChats 		= document.getElementById('tab-chats'); // 대화목록 탭
+const friendsPanel 	= document.getElementById('friends-panel'); // 친구패널
 const chatsPanel 		= document.getElementById('chats-panel'); // 대화패널
 const headerTitle 		= document.getElementById('header-title'); // 헤더(친구목록-대화목록 텍스트 전환)
 const groupButton		= document.getElementById('group-button'); // 그룹채팅 시작 버튼
@@ -107,13 +107,46 @@ function changeStatus(req){
 // 상태 실시간 변화 구독
 // ==========================
 function receiveNewMessage(req){
-	
-	console.log("일단 여기까지만 오면 성공인데!!");
-	
+
+    console.log("tabChats : ", tabChats);
+
 	if (currentMode == 'friend'){
-		
+        tabChats.classList.add('has-alert');
 	} else if (currentMode == 'chat'){
-		
+        tabChats.classList.remove('has-alert');
+
+        // 1) 기존에 있던 같은 roomId 방 제거
+        const existing = chatsPanel.querySelector(`.chat-item[data-id="${String(req.roomId)}"]`);
+        if (existing){
+            existing.remove();
+        }
+
+        // 2) 새 방 생성
+        const item = document.createElement('div');
+        item.classList.add('chat-item');
+        item.dataset.id = req.roomId;
+
+        item.innerHTML = `
+            <img class="rounded-circle"
+                 src="/img/msg_img_${req.profileImg}.png">
+            
+            <div class="chat-center">
+                <p class="chat-title">${req.groupName}</p>
+                <p class="chat-last">${req.preview}</p>
+            </div>
+            
+            <div class="chat-right">
+                <span class="chat-item">${req.sentTime}</span>
+                ${req.unreadCount > 0
+                    ? `<span class="badge-unread">${req.unreadCount}</span>`
+                    : ''
+                }
+            </div>
+        `;
+
+        // 3) 최상단 추가
+        chatsPanel.prepend(item);
+
 	}
 
 }
@@ -374,7 +407,7 @@ async function sendStatusToServer(presence, reason) {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                [csrfHeaderName]: csrfToken
+                [csrfHeader]: csrfToken
             },
             body: JSON.stringify({
                 avlbStat: presence,     // ONLINE / AWAY / BUSY / OFFLINE
@@ -603,7 +636,7 @@ document.addEventListener("click", (event) => {
   fetch(`/messenger/favorite/${id}`, {
     method: "PATCH",
     headers: {
-    	[csrfHeaderName] : csrfToken
+    	[csrfHeader] : csrfToken
     },
     credentials: "include"
   })
@@ -724,7 +757,7 @@ document.getElementById('create-group-btn')
     groupName: groupName,      // 입력값 또는 null
     firstMessage: null,        // 그룹은 firstMessage 없음
     msgType: null,             // 그룹은 msgType 없음
-    csrfHeaderName: csrfHeaderName,
+    csrfHeader: csrfHeader,
     csrfToken: csrfToken
   });
 

@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		fetch('/notices/' + selectedNoticeId, {
 			method: 'PATCH'
 			, headers: {
-				[csrfHeaderName]: csrfToken
+				[csrfHeader]: csrfToken
 			}
 			, body: new FormData(showNoticeForm)
 		})
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		fetch('/notices/' + selectedNoticeId, {
 			method: 'DELETE'
 			, headers: {
-				[csrfHeaderName]: csrfToken
+				[csrfHeader]: csrfToken
 			}		
 		})
 		.then(response => {
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		fetch('/notices', {
 			method: 'POST'
 			, headers: {
-				[csrfHeaderName]: csrfToken
+				[csrfHeader]: csrfToken
 			}
 			, body: new FormData(createNoticeForm)
 		})
@@ -267,7 +267,7 @@ function inputReadFileData(fileData) {
 }
 // 파일 삭제 함수
 async function deleteFile(elem) {
-	if(!confirm("상품을 삭제하시겠습니까?")) {
+	if(!confirm("파일을 삭제하시겠습니까?")) {
 		return;
 	}
 
@@ -282,7 +282,7 @@ async function deleteFile(elem) {
 		dataType: "json",
 		// AJAX 요청 전 먼저 CSRF 값을 서버측으로 전송
 		beforeSend: function(xhr) {
-			xhr.setRequestHeader(csrfHeaderName, csrfToken);
+			xhr.setRequestHeader(csrfHeader, csrfToken);
 		},
 		success: async function(response) {
 			if(response.result) {

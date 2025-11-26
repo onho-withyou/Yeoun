@@ -65,6 +65,9 @@
 
 <link rel="stylesheet" th:href="@{/css/common.css}"/>
 
+<!-- Socket -->
+<link rel="stylesheet" th:href="@{/css/messenger/header.css}">
+
 <!-- Page CSS -->
 
 <!-- Toast Grid CSS-->
@@ -80,7 +83,10 @@
 
 <!-- 개별 페이지 head 영역 -->
 <th:block layout:fragment="head"></th:block>
-
+<script>
+	const csrfToken  = document.querySelector('meta[name="_csrf_token"]').content;
+	const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]').content;
+</script>
 </head>
 
 <body th:attr="data-mode=${mode}">
@@ -131,10 +137,15 @@
 	<!-- Place this tag in your head or just before your close body tag. -->
 	<script async defer src="https://buttons.github.io/buttons.js"></script>
 	<script th:src="@{/custom_bg/custom_bg.js}"></script>
-	
+
+	<!-- Sock JS -->
+ 	<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 	<!-- 소켓 -->
 	<script th:src="@{/js/common/connectSocket.js}"></script>
-	
+	<script th:src="@{/js/common/headerAlarm.js}"></script>
+
+
 	<!-- 내 정보 모달 -->
 	<th:block th:replace="~{/emp/emp_detail_modal :: emp-detail-modal}"></th:block>
 	

@@ -7,8 +7,8 @@ const currentUserId = document.getElementById('currentUserId')?.value;
 const currentUserName = document.getElementById('currentUserName')?.value;
 
 // csrfTocken
-const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
-const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
+//const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content;
+//const csrfHeaderName = document.querySelector('meta[name="_csrf_headerName"]')?.content;
 
 // 연차 툴팁
 const tooltip = document.getElementById('leave_tooltip');
@@ -71,7 +71,7 @@ function patchApproval(btn) {
 		fetch(`/api/approvals/${approvalId}?btn=${btn}` , {
 			method: 'PATCH'
 			, headers: {
-				[csrfHeaderName]: csrfToken
+				[csrfHeader]: csrfToken
 			}
 		})
 		.then(response => {
@@ -854,6 +854,9 @@ async function initApprovalGrid(data) {
 	await approvalGrid.on("click", async (event) => {
 //		console.log(event);
 		const rowData = approvalGrid.getRow(event.rowKey);
+		if(!rowData) {
+			return;
+		}
 		selectedApprovalId = approvalId;
 		console.log("rowData : ", rowData);
 		

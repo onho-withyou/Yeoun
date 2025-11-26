@@ -61,6 +61,8 @@ public class NoticeService {
 	    } else { // 존재하지 않을 시 전체 공지사항 조회
 	    	noticePage = noticeRepository.findByDeleteYN("N", pageRequest);
 	    }
+	    
+//    	System.out.println(noticePage);
 
 	    return noticePage.map(NoticeDTO::fromEntity);
 	}

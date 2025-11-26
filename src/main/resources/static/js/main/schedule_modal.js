@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			fetch('/main/schedule', {
 				method: 'POST'
 				, headers: {
-					[csrfHeaderName]: csrfToken
+					[csrfHeader]: csrfToken
 				}
 				, body: formData
 			})
@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				fetch('/main/schedule', {
 					method: 'PATCH'
 					, headers: {
-						[csrfHeaderName]: csrfToken
+						[csrfHeader]: csrfToken
 					}
 					, body: formData
 				})
@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			fetch('/main/schedule', {
 				method: 'DELETE'
 				, headers: {
-					[csrfHeaderName]: csrfToken
+					[csrfHeader]: csrfToken
 				}
 				, body: new FormData(addScheduleForm)
 			})

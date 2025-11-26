@@ -1,13 +1,10 @@
-const csrf = document.querySelector('meta[name="_csrf_token"]').getAttribute('content');
-const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]').getAttribute('content');
-
 // 출/퇴근 버튼 클릭 시 사원번호를 전달해서 출/퇴근 기록 요청
 async function attendance(empId) {
 	const PROCESS_ATTENDANCE = `/attendance/toggle/${empId}`;
 	const response = await fetch(PROCESS_ATTENDANCE, { 
 		method: "POST",
 		headers: {
-			[csrfHeader]: csrf, 
+			[csrfHeader]: csrfToken, 
 			"Content-Type": "application/json"
 		}
 	});
@@ -203,7 +200,7 @@ const saveAttendance = async () => {
 		const response = await fetch(url, {
 			method,
 			headers: {
-				[csrfHeader]: csrf, 
+				[csrfHeader]: csrfToken, 
 				"Content-Type": "application/json"
 			},
 			body: JSON.stringify({empId, workIn, workOut, statusCode}),

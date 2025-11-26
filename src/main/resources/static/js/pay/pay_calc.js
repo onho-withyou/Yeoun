@@ -1,13 +1,11 @@
 console.log("🔥 pay_calc.js 로드됨");
 
-
 /* =====================================================
-   🔥 전역 에러 캡처
+    전역 에러 캡처
 ===================================================== */
 window.addEventListener("error", function(event) {
     console.error("[JS ERROR]", event.message, event.filename, event.lineno);
 });
-
 
 
 /* =====================================================
@@ -17,7 +15,6 @@ const onlyDigits    = (s)=> (s||'').replace(/[^\d]/g,'');
 const onlyDigitsDot = (s)=> (s||'').replace(/[^\d.]/g,'');
 const formatAmount  = (v)=> (v==''||v==null) ? '' : Number(v).toLocaleString('ko-KR');
 const parseAmount   = (v)=> Number(onlyDigits(v));
-
 
 
 /* =====================================================
@@ -44,21 +41,22 @@ function validateCalcRule(form) {
     else if(!startDate?.value) msg = "시작일은 필수입니다.";
     else if(!status?.value) msg = "상태는 필수입니다.";
     else if(!targetType?.value) msg = "대상구분은 필수입니다.";
-	// targetCode 는 뒤에서 처리됨
     else if(ruleType.value !== "FORMULA" && !valueNum.value)
-      msg = "금액/비율 규칙일 경우 숫자값은 필수입니다.";
+        msg = "금액/비율 규칙일 경우 숫자값은 필수입니다.";
     else if(!calcFormula?.value)
-      msg = "계산공식은 필수입니다.";
+        msg = "계산공식은 필수입니다.";
+    else if(/\s/.test(calcFormula.value))
+        msg = "계산공식에는 공백을 포함할 수 없습니다.";
 
-	    if(!msg && targetType.value === "EMP") {
-	        if(!targetCode?.value || targetCode.value.length !== 7) {
-	            msg = "사원코드는 7자리여야 합니다.";
-	        }
-	    }
+    // 사번 검증
+    if(!msg && targetType.value === "EMP") {
+        if(!targetCode?.value || targetCode.value.length !== 7) {
+            msg = "사원코드는 7자리여야 합니다.";
+        }
+    }
 
     return msg;
 }
-
 
 
 /* =====================================================
@@ -86,14 +84,12 @@ function bindTargetSwitcher(prefix) {
             }
         });
 
-        // 1) EMP 선택 → 입력칸만 보여주고 name 설정 (값 절대 건드리지 않음)
         if(type === "EMP"){
             inputEl.classList.remove("d-none");
             inputEl.setAttribute("name", "targetCode");
             return;
         }
 
-        // 2) DEPT 선택 → deptSelect 표시 + 사번칸 비우기
         if(type === "DEPT"){
             deptSel.classList.remove("d-none");
             deptSel.setAttribute("name", "targetCode");
@@ -101,7 +97,6 @@ function bindTargetSwitcher(prefix) {
             return;
         }
 
-        // 3) GRADE 선택 → gradeSelect 표시 + 사번칸 비우기
         if(type === "GRADE"){
             gradeSel.classList.remove("d-none");
             gradeSel.setAttribute("name", "targetCode");
@@ -109,14 +104,13 @@ function bindTargetSwitcher(prefix) {
             return;
         }
 
-        // 4) ALL 선택 → 사번칸 비우기 + 모두 숨김
+        // ALL 선택 시
         if(inputEl) inputEl.value = "";
     };
 
     updateUI();
     typeSel.addEventListener("change", updateUI);
 }
-
 
 
 /* =====================================================
@@ -128,36 +122,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if(createModal){
         const form = document.getElementById("createRuleForm");
-		
-		/* 🔥 모달 닫힐 때 초기화 */
-		        createModal.addEventListener("hidden.bs.modal", () => {
-		            form.reset();
 
-		            // 오류 메시지 초기화
-		            const box = document.getElementById("create-error-box");
-		            if (box) {
-		                box.classList.add("d-none");
-		                box.querySelector("span").innerText = "";
-		            }
+        /*  모달 닫힐 때 초기화 */
+        createModal.addEventListener("hidden.bs.modal", () => {
+            form.reset();
 
-		            // 대상 선택 UI 초기화
-		            const targetInput = document.getElementById("create-target-code-input");
-		            const targetDept  = document.getElementById("create-target-dept");
-		            const targetGrade = document.getElementById("create-target-grade");
+            const box = document.getElementById("create-error-box");
+            if (box) {
+                box.classList.add("d-none");
+                box.querySelector("span").innerText = "";
+            }
 
-		            if (targetInput) targetInput.classList.add("d-none");
-		            if (targetDept)  targetDept.classList.add("d-none");
-		            if (targetGrade) targetGrade.classList.add("d-none");
+            const targetInput = document.getElementById("create-target-code-input");
+            const targetDept  = document.getElementById("create-target-dept");
+            const targetGrade = document.getElementById("create-target-grade");
 
-		            if (targetInput) targetInput.removeAttribute("name");
-		            if (targetDept)  targetDept.removeAttribute("name");
-		            if (targetGrade) targetGrade.removeAttribute("name");
+            if (targetInput) targetInput.classList.add("d-none");
+            if (targetDept)  targetDept.classList.add("d-none");
+            if (targetGrade) targetGrade.classList.add("d-none");
 
-		            // 스위처 다시 초기화
-		            bindTargetSwitcher("create");
+            if (targetInput) targetInput.removeAttribute("name");
+            if (targetDept)  targetDept.removeAttribute("name");
+            if (targetGrade) targetGrade.removeAttribute("name");
 
-		            console.log("🔄 등록 모달 reset 완료");
-		        });
+            bindTargetSwitcher("create");
+
+            console.log("🔄 등록 모달 reset 완료");
+        });
 
         createModal.addEventListener("input", (e)=>{
             if(e.target.matches(".amount-input")){
@@ -186,7 +177,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-
 /* =====================================================
    수정 모달 
 ===================================================== */
@@ -200,10 +190,8 @@ document.addEventListener("show.bs.modal", (evt)=>{
     
     console.log(`🔧 수정 모달 표시됨: ruleId=${ruleId}`);
 
-    /* 대상 스위처 활성화 */
     bindTargetSwitcher(`edit-${ruleId}`);
 
-    /* 금액/비율 입력 처리 */
     const form = modal.querySelector("form");
 
     modal.addEventListener("input", (e)=>{
@@ -217,11 +205,9 @@ document.addEventListener("show.bs.modal", (evt)=>{
         }
     });
 
-    /* 저장 검증 */
     form.addEventListener("submit", (e)=>{
         const msg = validateCalcRule(form);
 
-        // targetType 이 ALL 아닌데 name="targetCode" 이 없으면 에러
         const targetType = form.querySelector('select[name="targetType"]').value;
         const targetCode = form.querySelector('[name="targetCode"]');
 
@@ -244,23 +230,58 @@ document.addEventListener("show.bs.modal", (evt)=>{
 
 });
 
+
 /* =====================================================
    저장 직전 콤마 제거 (등록 + 수정 공통)
 ===================================================== */
 document.addEventListener("submit", (e) => {
 
     const form = e.target;
-    if (!form.matches("form")) return; // 폼이 아니면 무시
+    if (!form.matches("form")) return;
 
     console.log("💾 submit 시 콤마 제거 실행");
 
     const valueInput = form.querySelector("input[name='valueNum']");
     if (valueInput && valueInput.value) {
-        // 콤마 제거
         valueInput.value = valueInput.value.replace(/,/g, "");
         console.log("➡ valueNum cleaned:", valueInput.value);
     }
 });
 
 
+/* =====================================================
+    계산공식 공백 자동 제거 (등록 + 수정 + 모든 모달)
+===================================================== */
+document.addEventListener("DOMContentLoaded", () => {
+    // textarea[name='calcFormula'] 전부 적용
+    document.querySelectorAll("textarea[name='calcFormula']").forEach(el => {
+        el.addEventListener("input", (e) => {
+            e.target.value = e.target.value.replace(/\s+/g, "");
+        });
+    });
+});
+
+/* =====================================================
+    시작일 종료일 설정하기
+===================================================== */
+
+
+document.addEventListener("change", (e) => {
+    if (e.target.matches('input[name="startDate"]')) {
+
+        const startInput = e.target;
+        const form = startInput.closest("form");
+        const endInput = form.querySelector('input[name="endDate"]');
+
+        if (!endInput) return;
+
+        // 종료일 최소 날짜 제한
+        endInput.min = startInput.value;
+
+        // 이미 선택된 종료일이 시작일보다 빠르면 자동 수정
+        if (endInput.value && endInput.value < startInput.value) {
+            endInput.value = startInput.value;
+        }
+    }
+});
 
