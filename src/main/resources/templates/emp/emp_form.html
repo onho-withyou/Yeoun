@@ -122,12 +122,12 @@
 			
 			          <!-- 우편번호 + 검색버튼 -->
 			          <div class="input-group mb-2">
-			          	<input type="text" class="form-control" id="zipcode" th:field="*{postCode}" placeholder="우편번호">
+			          	<input type="text" class="form-control" id="zipcode" th:field="*{postCode}" placeholder="우편번호" readonly>
 			            <input class="btn btn-outline-secondary" type="button" onclick="btnSearchZip()" value="우편번호 찾기"><br>
 			          </div>
 			
 			          <!-- 기본주소 -->
-			          <input type="text" class="form-control mb-2" id="address" th:field="*{address1}" placeholder="도로명 주소">
+			          <input type="text" class="form-control mb-2" id="address" th:field="*{address1}" placeholder="도로명 주소" readonly>
 			          <!-- 상세주소 -->
 			          <input type="text" class="form-control" id="addressDetail" th:field="*{address2}" placeholder="상세 주소">
 					  <div class="text-danger small" th:if="${#fields.hasErrors('postCode')}" th:errors="*{postCode}"></div>
