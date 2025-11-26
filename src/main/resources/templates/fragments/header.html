@@ -16,19 +16,8 @@
 			    </a>
               <ul class="navbar-nav flex-row align-items-center ms-auto dropdown">
               	<li class="nav-item lh-1 me-3">
-              		<span id="badge_payment" style="
-				            position: relative;
-						    top: -12px;
-						    left: 45px;
-						    background-color: red;
-						    color: rgb(255, 255, 255);
-						    border-radius: 15px;
-						    padding: 3px 8px;
-						    border-color: rgb(255, 255, 255);
-						    font-size: 12px;
-						    display: none;
-				  	"></span>
-                    <i class="icon-base bx bx-folder icon" data-bs-toggle="dropdown" id="payment"></i> 
+              		<i class="icon-base bx bx-folder icon" data-bs-toggle="dropdown" id="payment"></i> 
+              		<span id="badge_payment"></span>
 				    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
 					  <li><a class="dropdown-item" href="#">Action</a></li>
 					  <li><a class="dropdown-item" href="#">Another action</a></li>
@@ -38,20 +27,9 @@
 					</ul>
                 </li>
               	<li class="nav-item lh-1 me-3"> 
-              	<span id="badge_bell" style="
-				         position: relative;
-						 top: -12px;
-						 left: 45px;
-						 background-color: red;
-						 color: rgb(255, 255, 255);
-						 border-radius: 15px;
-						 padding: 3px 8px;
-						 border-color: rgb(255, 255, 255);
-						 font-size: 12px;
-						 display: none;
-				  "></span>
-                   <i class="icon-base bx bx-bell icon" data-bs-toggle="dropdown" id="bell"></i>
-                   <ul class="dropdown-menu">
+	              	<i class="icon-base bx bx-bell icon" data-bs-toggle="dropdown" id="bell"></i>
+	              	<span id="badge_bell"></span>
+	                <ul class="dropdown-menu">
 					  <li><a class="dropdown-item" href="#">bell</a></li>
 					  <li><a class="dropdown-item" href="#">알림</a></li>
 					  <li><a class="dropdown-item" href="#">공지사항</a></li>
@@ -60,9 +38,8 @@
 					</ul>
                 </li>
               	<li class="nav-item lh-1 me-3">
-					<span id="badge_chat" class="has-alert">
-                   		<i class="icon-base bx bx-chat icon" data-bs-toggle="dropdown" id="chat"></i>
-					</span>
+              		<i class="icon-base bx bx-chat icon" data-bs-toggle="dropdown" id="chat"></i>
+					<span id="badge_chat" class="has-alert"></span>
                    <!--<ul class="dropdown-menu">
 					  <li><a class="dropdown-item" href="#">점심시간입니다.</a></li>
 					  <li><a class="dropdown-item" href="#">퇴근 시간입니다.</a></li>
@@ -120,6 +97,9 @@
 		<script src="/js/auth/myInfo.js"></script>
 		
 		  <script>
+		  window.csrfToken      = /*[[${_csrf.token}]]*/ '';
+		  window.csrfHeaderName = /*[[${_csrf.headerName}]]*/ '';
+		  
 			//Resources
 		  
          	const payment = document.getElementById("payment");
