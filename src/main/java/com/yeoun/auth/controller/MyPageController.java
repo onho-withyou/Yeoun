@@ -59,6 +59,9 @@ public class MyPageController {
 		model.addAttribute("mode", "edit");
 		model.addAttribute("formAction", "/my/info/update");
 		
+		// 마이페이지에서 급여정보 수정 불가
+		model.addAttribute("canEditBankInfo", false);
+		
 		// --- 조직/직무 셀렉트 공통 세팅 (EmpController.setupEmpFormCommon 과 동일) ---
         List<Dept> topDeptList =
                 deptRepository.findByParentDeptIdAndUseYn("DEP999", "Y");
@@ -88,14 +91,17 @@ public class MyPageController {
 	    // 원본 DTO 한 번 조회 (기존 사진 / 통장 사본 유지용)
 	    EmpDTO original = empService.getEmpForEdit(loginUser.getEmpId());
 	    
+	    // 주민번호 마스킹, 파일 id 등 원본 기준으로 복원
+        empDTO.setRrnMasked(original.getRrnMasked());
+        empDTO.setPhotoFileId(original.getPhotoFileId());
+        empDTO.setFileId(original.getFileId()); 
+        
+        // 새 통장사본 업로드 들어와도 무시
+//        empDTO.setBankbookFile(null);
+	    
 	    // 1) Bean Validation 실패 폼 다시 보여주기
 	    if (bindingResult.hasErrors()) {
 	    	
-	    	// 주민번호 마스킹, 파일 id 등 원본 기준으로 복원
-	        empDTO.setRrnMasked(original.getRrnMasked());
-	        empDTO.setPhotoFileId(original.getPhotoFileId());
-	        empDTO.setFileId(original.getFileId()); 
-
 	        model.addAttribute("empDTO", empDTO);
 	        model.addAttribute("mode", "edit");
 	        model.addAttribute("formAction", "/my/info/update");
@@ -135,6 +141,7 @@ public class MyPageController {
 	        model.addAttribute("empDTO", empDTO);
 	        model.addAttribute("formAction", "/my/info/update");
 	        model.addAttribute("mode", "edit");
+	        model.addAttribute("canEditBankInfo", false);
 	        
 	        List<Dept> topDeptList =
 	                deptRepository.findByParentDeptIdAndUseYn("DEP999", "Y");
