@@ -29,7 +29,7 @@ public interface EmpNativeRepository extends JpaRepository<Emp, String> {
 		        """, nativeQuery = true)
 		    List<EmpForPayrollProjection> findActiveEmpForPayroll();
 	 
-	 /** 특정 사원 1명 급여계산용 조회 */
+	 /** 특정 사원 1명 급여계산용 조회   */
 	 @Query(value = """
 	         SELECT
 	             e.EMP_ID      AS empId,
