@@ -902,13 +902,13 @@ async function initApprovalGrid(data) {
 		  document.getElementById('toDeptForm').style.display = 'block';
 		  document.getElementById('to-dept-id').value = rowData.toDeptId;
 		}
-		
+		console.log(rowData.empId);
 		document.getElementById('Drafting').innerHTML = rowData.formType;
 //		console.log(rowData.approvaTitle);
 		document.getElementById('today-date').innerText = toDateStr(rowData.createdDate) ;//결재 작성날짜 = 결재시작일
 		document.getElementById('approval-title').value = rowData.approvalTitle;
 		//양식종류 form-menu
-		document.getElementById('approver-name').value  = rowData.empId;//결재자명
+//		document.getElementById('approver-name').value  = rowData.empId;//결재자명
 		
 		//const createdDate = rowData.created_date;
 		document.getElementById('create-date').value = toDateStr(rowData.createdDate);//결재시작일 =결재 작성날짜 
