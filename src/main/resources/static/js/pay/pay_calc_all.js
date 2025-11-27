@@ -15,11 +15,17 @@ document.addEventListener("DOMContentLoaded", () => {
             if (hiddenSim) hiddenSim.value = mm;
             if (hiddenConfirm) hiddenConfirm.value = mm;
 
-            // 페이지 다시 로드
-            location.href = `/pay/calc?yyyymm=${mm}`;
+            // 🔥 스피너 표시
+            showLoader();
+
+            // 🔥 렌더링 시간 확보 후 페이지 이동
+            setTimeout(() => {
+                location.href = `/pay/calc?yyyymm=${mm}`;
+            }, 50);
         });
     }
 });
+
 
 /* ================================
    AG GRID 초기 설정
@@ -263,3 +269,15 @@ function loadGridData(yyyymm) {
 
         });
 }
+
+/* 로딩스피너 */
+function showLoader() {
+    document.getElementById("loading-overlay").classList.remove("d-none");
+}
+function hideLoader() {
+    document.getElementById("loading-overlay").classList.add("d-none");
+}
+
+document.getElementById("calcBtn").addEventListener("click", () => {
+    showLoader();
+});

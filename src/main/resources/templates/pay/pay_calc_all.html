@@ -3,7 +3,7 @@
           layout:decorate="~{/layouts/layout.html}">
           
   <th:block layout:fragment="content">
-
+  
     <div class="container-xxl py-4">
       <div class="d-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-primary fw-bold">전체 급여 계산</h1>
@@ -46,7 +46,11 @@
 		</div>
 
 
+
+
           <div class="row g-3 mb-4">
+          
+        
 
   <!-- ================================
        ① 계산 상태 카드 (왼쪽: ALERT 효과)
@@ -114,6 +118,11 @@
 
 </div>
          
+<!--          로딩스피너 -->
+<!-- 			<div id="loading-overlay" class="loading-overlay d-none"> -->
+<!-- 			  <div class="spinner-border text-primary"></div> -->
+<!-- 			  <div class="mt-2 fw-bold">급여 계산 중입니다...</div> -->
+<!-- 			</div> -->
         
           <!-- AG Grid -->
           <h6 class="fw-semibold mt-3">계산 결과 검토</h6>
