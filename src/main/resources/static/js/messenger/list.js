@@ -75,7 +75,6 @@ async function loadChatList() {
         }
 
         const list = await res.json();
-        // 서버 응답 예상: [{ roomId, groupName, previewMessage, previewTime, unreadCount, profileImg }, ... ]
 
         const panel = document.querySelector("#chats-panel");
         panel.innerHTML = ""; // 기존꺼 지움
@@ -109,7 +108,7 @@ async function loadChatList() {
       `;
 
             // ==========================
-            // 더블클릭 → 기존 list.js 규칙 유지
+            // 더블클릭으로 창 열기
             // ==========================
             item.addEventListener("dblclick", () => {
                 window.open(
@@ -204,12 +203,12 @@ function receiveNewMessage(req){
                  src="/img/msg_img_${req.profileImg}.png">
             
             <div class="chat-center">
-                <p class="chat-title">${req.groupName}</p>
-                <p class="chat-last">${req.preview}</p>
+                <p class="mb-0 fw-bold">${req.groupName}</p>
+                <small class="text-muted">${req.preview}</p>
             </div>
             
             <div class="chat-right">
-                <span class="chat-item">${req.sentTime}</span>
+                <span class="chat-time">${req.sentTime}</span>
                 ${req.unreadCount > 0
                     ? `<span class="badge-unread">${req.unreadCount}</span>`
                     : ''
@@ -864,10 +863,10 @@ document.getElementById('create-group-btn')
 // ==========================
 // 채팅방 클릭 → 해당 unread 제거
 // ==========================
-chatsPanel.addEventListener("click", (e) => {
+chatsPanel.addEventListener("dblclick", (event) => {
 
     // 가장 가까운 chat-item 찾기
-    const item = e.target.closest(".chat-item");
+    const item = event.target.closest(".chat-item");
     if (!item) return;
 
     // 채팅방 안의 unread badge 찾기

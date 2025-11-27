@@ -1,6 +1,5 @@
 package com.yeoun.messenger.service;
 
-import java.security.Principal;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +9,6 @@ import com.yeoun.messenger.dto.*;
 import com.yeoun.messenger.entity.MsgStatus;
 import com.yeoun.messenger.repository.MsgStatusRepository;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.yeoun.emp.entity.Emp;
@@ -88,7 +86,8 @@ public class ChatService {
 					.roomId(event.getRoomId())
 					.preview(event.getMsgContent())
 					.senderId(event.getSenderId())
-					.senderName(event.getSenderName())
+					.senderName(empRepository.findById(event.getSenderId()).orElseThrow(() -> new RuntimeException("오류 발생"))
+							.getEmpName())
 					.sentTime(event.getSentTime())
 					.unreadCount(unread)
 					.build();
@@ -156,6 +155,8 @@ public class ChatService {
 		
 		log.info("************** STOMP! 방 퇴장" + roomLeaveRequest);
 	}
+	
+
 
 }
 

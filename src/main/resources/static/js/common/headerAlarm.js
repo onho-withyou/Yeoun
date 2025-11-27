@@ -32,8 +32,8 @@ function subscribeEvent() {
 //===============================
 //	메시지 수신 이벤트
 //===============================
+const chatBadge = document.querySelector("#badge_chat");
 function receiveNewMessage(req){
-	const chatBadge = document.querySelector("#badge_chat");
 	chatBadge.style.display = "flex";
 }
 
@@ -46,9 +46,7 @@ function hideElement(el) {
   el.style.display = "none";
 }
 
-chatsPanel.addEventListener("click", (e) => {
-  const item = document.querySelector("#badge_chat");
-  if (!item) return;
-
+chatBadge.addEventListener("click", () => {
+  console.log("클릭");
   hideElement(badge);
 });
