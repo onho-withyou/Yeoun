@@ -1,4 +1,3 @@
-
 /* ============================
    월 선택 시 페이지와 hidden input 업데이트
 ============================ */
@@ -24,6 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 50);
         });
     }
+
+    // ✅ 페이지 로드 완료 후 스피너 숨김
+    hideLoader();
 });
 
 
@@ -31,13 +33,13 @@ document.addEventListener("DOMContentLoaded", () => {
    AG GRID 초기 설정
 ================================ */
 
-const slips = window.slipsData ?? []; // Thymeleaf에서 JSON이 주입됨
+const slips = window.slipsData ?? [];
+let gridApi = null; // ✅ Grid API 전역 변수로 관리
 
 const columnDefs = [
      { headerName: "사번", field: "empId", sortable: true, filter: true, width: 120 },
      { headerName: "이름", field: "empName", sortable: true, filter: true, width: 140 },
      { headerName: "부서", field: "deptName", sortable: true, filter: true, width: 160 },
-
 
   { headerName: "기본급", field: "baseAmt", width: 120, 
     valueFormatter: p => numberWithCommas(p.value),
@@ -83,18 +85,23 @@ const columnDefs = [
 const gridOptions = {
   columnDefs,
   rowData: slipsData,
-  defaultColDef: { resizable:true, sortable:true,   filter: true, flex: 1, minWidth:100 },
+  defaultColDef: { resizable:true, sortable:true, filter: true, flex: 1, minWidth:100 },
   pagination: true,
   paginationPageSize: 10,
+  paginationPageSizeSelector: [10, 20, 50, 100],
   animateRows: true,
   rowHeight: 35,
+  onGridReady: (params) => {
+    gridApi = params.api; // ✅ API 저장
+    console.log("✅ AG Grid 초기화 완료");
+  }
 };
- 
-
 
 document.addEventListener("DOMContentLoaded", () => {
   const gridDiv = document.querySelector("#payslipGrid");
-  if (gridDiv) agGrid.createGrid(gridDiv, gridOptions);
+  if (gridDiv) {
+    agGrid.createGrid(gridDiv, gridOptions);
+  }
 });
 
 
@@ -114,8 +121,16 @@ function renderStatusBadge(v) {
     READY: 'bg-secondary'
   }[v] ?? 'bg-secondary';
 
-  return `<span class="badge ${cls}">${v}</span>`;
+  const label = {
+    CONFIRMED: "확정",
+    CALCULATED: "계산완료",
+    SIMULATED: "가계산",
+    READY: "미계산"
+  }[v] ?? v;
+
+  return `<span class="badge ${cls}">${label}</span>`;
 }
+
 
 /* ================================
    상세 조회 모달
@@ -167,7 +182,8 @@ async function refreshStatus(mm) {
   const s = await res.json();
   const fmt = n => (n ?? 0).toLocaleString();
 
-  document.getElementById("statMonth").textContent = mm;
+  const elMonth = document.getElementById("statMonth");
+  if (elMonth) elMonth.textContent = mm;
 
   const statusMap = {
     CONFIRMED: "확정 완료",
@@ -176,24 +192,29 @@ async function refreshStatus(mm) {
     READY: "미계산"
   };
 
-  document.getElementById("statCalc").textContent = statusMap[s.calcStatus];
-  document.getElementById("statCount").textContent = `건수 ${s.count}`;
-  document.getElementById("statTot").textContent = fmt(s.totAmt);
-  document.getElementById("statDed").textContent = fmt(s.dedAmt);
-  document.getElementById("statNet").textContent = fmt(s.netAmt);
+  const elCalc = document.getElementById("statCalc");
+  if (elCalc) elCalc.textContent = statusMap[s.calcStatus];
 
+  const elCount = document.getElementById("statCount");
+  if (elCount) elCount.textContent = `건수 ${s.totalCount}`;
+
+  const elTot = document.getElementById("statTot");
+  if (elTot) elTot.textContent = fmt(s.totAmt);
+
+  const elDed = document.getElementById("statDed");
+  if (elDed) elDed.textContent = fmt(s.dedAmt);
+
+  const elNet = document.getElementById("statNet");
+  if (elNet) elNet.textContent = fmt(s.netAmt);
 }
 
-document.addEventListener("DOMContentLoaded", ()=>{
-  const mm = document.getElementById("calc_month")?.value;
-  if (mm) refreshStatus(mm);
-});
 
 /*전체 가계산*/
 document.getElementById("btnSimulateAll")?.addEventListener("click", () => {
     const yyyymm = document.getElementById("calc_month").value;
-
     if (!yyyymm) return alert("월을 선택하세요.");
+
+    showLoader();
 
     fetch(`/pay/calc/simulateJson`, {
         method: "POST",
@@ -206,28 +227,30 @@ document.getElementById("btnSimulateAll")?.addEventListener("click", () => {
     .then(res => res.json())
     .then(r => {
         if (!r.success) {
+            hideLoader();
             alert("❌ 오류: " + r.message);
             return;
         }
-        alert("✅ " + r.message);
 
-        // 상태 리로드
         refreshStatus(yyyymm);
-
-        // 그리드 데이터 다시 로드
         loadGridData(yyyymm);
+    })
+    .catch(err => {
+        console.error("가계산 오류:", err);
+        hideLoader();
+        alert("❌ 서버 오류가 발생했습니다.");
     });
 });
+
 
 /*전체 확정*/
 document.getElementById("btnConfirmAll")?.addEventListener("click", () => {
     const yyyymm = document.getElementById("calc_month").value;
-
     if (!yyyymm) return alert("월을 선택하세요.");
 
-    if (!confirm("해당 월 급여를 전체 확정하시겠습니까?\n확정 후에는 수정할 수 없습니다.")) {
-        return;
-    }
+    if (!confirm("해당 월 급여를 전체 확정하시겠습니까?")) return;
+
+    showLoader();
 
     fetch(`/pay/calc/confirmJson`, {
         method: "POST",
@@ -240,44 +263,85 @@ document.getElementById("btnConfirmAll")?.addEventListener("click", () => {
     .then(res => res.json())
     .then(r => {
         if (!r.success) {
+            hideLoader();
             alert("❌ 오류: " + r.message);
             return;
         }
 
-        alert("✅ " + r.message);
-
-        // 상태 리로드
         refreshStatus(yyyymm);
-
-        // 그리드 리로드
         loadGridData(yyyymm);
+    })
+    .catch(err => {
+        console.error("확정 오류:", err);
+        hideLoader();
+        alert("❌ 서버 오류가 발생했습니다.");
     });
 });
 
+
+/* AG-Grid 데이터를 다시 로드 */
 /* AG-Grid 데이터를 다시 로드 */
 function loadGridData(yyyymm) {
     fetch(`/pay/calc/list?yyyymm=${yyyymm}`)
         .then(res => res.json())
         .then(list => {
-
-            const waitApi = setInterval(() => {
-                if (gridOptions.api) {
-                    gridOptions.api.setRowData(list);
-                    clearInterval(waitApi);
+            if (gridApi) {
+                // ✅ v31+ 호환 방식으로 데이터 업데이트
+                try {
+                    // v31 이상
+                    gridApi.setGridOption('rowData', list);
+                } catch (e) {
+                    // v30 이하 폴백
+                    gridApi.setRowData(list);
                 }
-            }, 50);
+                hideLoader();
+                console.log("✅ Grid 데이터 업데이트 완료");
+            } else {
+                // ✅ API 준비 대기 (최대 5초)
+                let attempts = 0;
+                const maxAttempts = 100; // 5초 (50ms * 100)
 
+                const waitApi = setInterval(() => {
+                    attempts++;
+
+                    if (gridApi) {
+                        try {
+                            gridApi.setGridOption('rowData', list);
+                        } catch (e) {
+                            gridApi.setRowData(list);
+                        }
+                        clearInterval(waitApi);
+                        hideLoader();
+                        console.log("✅ Grid 데이터 업데이트 완료");
+                    } else if (attempts >= maxAttempts) {
+                        // ✅ 타임아웃 처리
+                        clearInterval(waitApi);
+                        hideLoader();
+                        console.error("❌ Grid API 초기화 실패 - 타임아웃");
+                        alert("화면 로딩 중 문제가 발생했습니다. 페이지를 새로고침해주세요.");
+                    }
+                }, 50);
+            }
+        })
+        .catch(err => {
+            console.error("데이터 로드 오류:", err);
+            hideLoader();
+            alert("❌ 데이터를 불러오는데 실패했습니다.");
         });
 }
-
 /* 로딩스피너 */
 function showLoader() {
-    document.getElementById("loading-overlay").classList.remove("d-none");
-}
-function hideLoader() {
-    document.getElementById("loading-overlay").classList.add("d-none");
+    const loader = document.getElementById("loading-overlay");
+    if (loader) {
+        loader.classList.remove("d-none");
+        console.log("🔄 로딩 시작");
+    }
 }
 
-document.getElementById("calcBtn").addEventListener("click", () => {
-    showLoader();
-});
+function hideLoader() {
+    const loader = document.getElementById("loading-overlay");
+    if (loader) {
+        loader.classList.add("d-none");
+        console.log("✅ 로딩 완료");
+    }
+}
