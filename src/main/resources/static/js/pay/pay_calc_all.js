@@ -121,8 +121,16 @@ function renderStatusBadge(v) {
     READY: 'bg-secondary'
   }[v] ?? 'bg-secondary';
 
-  return `<span class="badge ${cls}">${v}</span>`;
+  const label = {
+    CONFIRMED: "확정",
+    CALCULATED: "계산완료",
+    SIMULATED: "가계산",
+    READY: "미계산"
+  }[v] ?? v;
+
+  return `<span class="badge ${cls}">${label}</span>`;
 }
+
 
 /* ================================
    상세 조회 모달
