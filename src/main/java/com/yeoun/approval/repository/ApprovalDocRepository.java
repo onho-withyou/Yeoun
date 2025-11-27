@@ -14,6 +14,7 @@ import com.yeoun.approval.entity.ApprovalDoc;
 import com.yeoun.approval.entity.ApprovalForm;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
+import com.yeoun.emp.entity.Position;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,11 +29,17 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 	@Query("SELECT m FROM Emp m WHERE status='ACTIVE'")
     List<Emp> findAllMember();
 
+	// 퇴사안한 사원목록 조회
 	@Query(value ="""
 			 SELECT emp_id,emp_name FROM emp WHERE status='ACTIVE'
 			""",nativeQuery = true)
     List<Object[]> findAllMember2();
-	
+
+	// 직급정보 불러오기
+	@Query(value ="""
+			SELECT * FROM position
+			""",nativeQuery = true)
+	List<Position> findPosition();
 	//기안서 양식종류 - 부서별 다름
     @Query(value ="""
     		SELECT afede.form_code
@@ -78,7 +85,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 	// 그리드 - 1.결재사항 - 진행해야할 결재만 - 결재권한자만 볼수있음
 	// 열람권한은 무조건 대문자 Y여야함
 	  @Query(value = """
-		         SELECT 
+		        SELECT 
 		               ROWNUM AS row_no
 		             , ade.approval_id
 		             , ade.approval_title
@@ -96,6 +103,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 		             , ade.start_date
 		             , ade.end_date
 		             , ade.leave_type
+                     , ade.to_pos_code -- 변경되는 기안자 직급
 		             , ade.to_dept_id
 		             , ade.expnd_type
 		             , ade.reason
@@ -118,6 +126,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 		                     , ad.start_date   -- 휴가 시작
 		                     , ad.end_date     -- 휴가 종료
 		                     , ad.leave_type   -- 휴가 유형
+                             , ad.to_pos_code  -- 변경되는 기안자 직급
 		                     , ad.to_dept_id   -- 발령 부서
 		                     , ad.expnd_type   -- 지출 종류
 		                     , ad.reason       -- 사유
@@ -132,80 +141,84 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 		                  AND ad.approver = :empId       -- 결재권자 = 로그인 사번
 		                  AND ad.doc_status NOT IN ('완료','반려') -- 진행중/대기만
 		             ) ade
-		        WHERE ade.approver = e.emp_id          -- 결재자 정보 조인
+		        WHERE ade.approver = e.emp_id         -- 결재자 정보 조인
 		        """, nativeQuery = true)
 	List<Object[]> findPendingApprovalDocs(@Param("empId") String empId);
 
 	// 그리드 - 2.전체결재- 나와관련된 모든 결재문서
 	@Query(value = """
+				
 				SELECT rownum AS row_no
-					,adre.approval_id
-					,adre.approval_title
-                    ,adre.form_type
-					,adre.emp_id
-					,adre.emp_name
-					,adre.dept_id
-					,adre.dept_name
-					,adre.approver
-					,e.emp_name as approver_name
-					,adre.pos_code
-					,adre.pos_name
-					,adre.created_date
-					,adre.finish_date
-					,adre.start_date
-					,adre.end_date
-					,adre.leave_type
-					,adre.to_dept_id
-					,adre.expnd_type
-					,adre.reason
-					,adre.doc_status
-				FROM
-				(SELECT 
-						adr.approval_id
-						,adr.approval_title
-                        ,adr.form_type
-						,adr.emp_id
-						,e.emp_name
-						,e.dept_id
-						,d.dept_name
-						,adr.approver
-						,p.pos_code
-						,p.pos_name
-						,adr.created_date
-						,adr.finish_date
-						,adr.start_date
-						,adr.end_date
-						,adr.leave_type
-						,adr.to_dept_id
-						,adr.expnd_type
-						,adr.reason
-						,adr.doc_status
-					FROM emp e, dept d,position p,
-					( SELECT distinct 
-							ad.approval_id
-							,ad.approval_title
-                            ,ad.form_type
-							,ad.emp_id
-							,ad.approver
-							,ad.created_date
-							,ad.finish_date
-							,ad.start_date -- 휴가시작날짜
-							,ad.end_date -- 휴가종료날짜
-							,ad.leave_type-- 연차유형,휴가종류
-							,ad.to_dept_id-- 발령부서
-							,ad.expnd_type-- 지출종류
-							,ad.reason-- 결재사유내용
-							,ad.doc_status
-						FROM approval_doc ad,approver ar
-						WHERE (ad.approver is not null
-							and ad.approver = ar.emp_id 
-							and ar.viewing = 'Y'
-							and ar.emp_id= :empId) 
-						OR ad.emp_id= :empId ) adr
-						WHERE e.emp_id = adr.emp_id 
-						and e.dept_id = d.dept_id
-						and e.pos_code = p.pos_code) adre,emp e
-					WHERE adre.approver = e.emp_id
+							,adre.approval_id
+							,adre.approval_title
+							,adre.form_type
+							,adre.emp_id
+							,adre.emp_name
+							,adre.dept_id
+							,adre.dept_name
+							,adre.approver
+							,e.emp_name as approver_name
+							,adre.pos_code
+							,adre.pos_name
+							,adre.created_date
+							,adre.finish_date
+							,adre.start_date
+							,adre.end_date
+							,adre.leave_type
+							,adre.to_pos_code
+							,adre.to_dept_id
+							,adre.expnd_type
+							,adre.reason
+							,adre.doc_status
+						FROM
+						(SELECT 
+								adr.approval_id
+								,adr.approval_title
+								,adr.form_type
+								,adr.emp_id
+								,e.emp_name
+								,e.dept_id
+								,d.dept_name
+								,adr.approver
+								,p.pos_code
+								,p.pos_name
+								,adr.created_date
+								,adr.finish_date
+								,adr.start_date
+								,adr.end_date
+								,adr.leave_type
+								,adr.to_pos_code
+								,adr.to_dept_id
+								,adr.expnd_type
+								,adr.reason
+								,adr.doc_status
+							FROM emp e, dept d,position p,
+							( SELECT distinct 
+									ad.approval_id
+									,ad.approval_title
+									,ad.form_type
+									,ad.emp_id
+									,ad.approver
+									,ad.created_date
+									,ad.finish_date
+									,ad.start_date -- 휴가시작날짜
+									,ad.end_date -- 휴가종료날짜
+									,ad.leave_type-- 연차유형,휴가종류
+									,ad.to_pos_code
+									,ad.to_dept_id-- 발령부서
+									,ad.expnd_type-- 지출종류
+									,ad.reason-- 결재사유내용
+									,ad.doc_status
+								FROM approval_doc ad,approver ar
+								WHERE (ad.approver is not null
+									and ad.approver = ar.emp_id 
+									and ar.viewing = 'Y'
+									and ar.emp_id= :empId) 
+								OR ad.emp_id = :empId ) adr
+								WHERE e.emp_id = adr.emp_id 
+								and e.dept_id = d.dept_id
+								and e.pos_code = p.pos_code) adre,emp e
+							WHERE adre.approver = e.emp_id
 				""", nativeQuery = true)	
 	List<Object[]> findAllApprovalDocs(@Param("empId") String empId);
 
@@ -229,6 +242,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
                     ,adre.start_date
                     ,adre.end_date
                     ,adre.leave_type
+					,adre.to_pos_code
                     ,adre.to_dept_id
                     ,adre.expnd_type
                     ,adre.reason
@@ -249,6 +263,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
                     ,ad.start_date -- 휴가시작날짜
                     ,ad.end_date -- 휴가종료날짜
                     ,ad.leave_type-- 연차유형,휴가종류
+					,ad.to_pos_code -- 변경직급
                     ,ad.to_dept_id-- 발령부서
                     ,ad.expnd_type-- 지출종류
                     ,ad.reason-- 결재사유내용
@@ -282,6 +297,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
             	,adre.start_date
             	,adre.end_date
             	,adre.leave_type
+				,adre.to_pos_code
             	,adre.to_dept_id
             	,adre.expnd_type
             	,adre.reason
@@ -302,6 +318,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
                     	,adr.start_date -- 휴가시작날짜
                     	,adr.end_date -- 휴가종료날짜
                     	,adr.leave_type-- 연차유형,휴가종류
+						,adr.to_pos_code -- 변경직급
                     	,adr.to_dept_id-- 발령부서
                     	,adr.expnd_type-- 지출종류
                     	,adr.reason-- 결재사유내용
@@ -319,6 +336,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
                             ,ad.start_date -- 휴가시작날짜
                             ,ad.end_date -- 휴가종료날짜
                             ,ad.leave_type-- 연차유형,휴가종류
+							,ad.to_pos_code -- 변경직급
                             ,ad.to_dept_id-- 발령부서
                             ,ad.expnd_type-- 지출종류
                             ,ad.reason-- 결재사유내용
@@ -356,6 +374,7 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
             			,adre.start_date
             			,adre.end_date
             			,adre.leave_type
+						,adre.to_pos_code 
             			,adre.to_dept_id
             			,adre.expnd_type
             			,adre.reason
@@ -375,7 +394,8 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 			        			,adr.finish_date
                     			,adr.start_date -- 휴가시작날짜
                     			,adr.end_date -- 휴가종료날짜
-                    			,adr.leave_type-- 연차유형,휴가종류
+                    			,adr.leave_type -- 연차유형,휴가종류
+								,adr.to_pos_code -- 변경직급
                     			,adr.to_dept_id-- 발령부서
                     			,adr.expnd_type-- 지출종류
                     			,adr.reason-- 결재사유내용
@@ -390,7 +410,8 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 						        	,ad.finish_date
                                 	,ad.start_date -- 휴가시작날짜
                                 	,ad.end_date -- 휴가종료날짜
-                                	,ad.leave_type-- 연차유형,휴가종류
+                                	,ad.leave_type-- 연차유형,휴가종류\
+									,ad.to_pos_code -- 변경직급
                                 	,ad.to_dept_id-- 발령부서
                                 	,ad.expnd_type-- 지출종류
                                 	,ad.reason-- 결재사유내용

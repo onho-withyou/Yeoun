@@ -48,11 +48,11 @@ public class ApprovalController {
 	//전자결재 연결페이지
   	@GetMapping("/approval_doc")
   	public String approvalDoc(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
-		model.addAttribute("empList", approvalDocService.getEmp());//결재- 기안자 목록 불러오기
+		model.addAttribute("empList", approvalDocService.getEmp());//기안자 목록 불러오기
 		model.addAttribute("formTypes",approvalDocService.getFormTypes(loginDTO.getDeptId())); //"DEP001"결재- 기안서 양식종류 불러오기
-		model.addAttribute("deptList", approvalDocService.getDept()); //결재- 부서목록 불러오기
-		model.addAttribute("approvalDocDTO", new ApprovalDocDTO());//결재문서DTO
-		
+		model.addAttribute("deptList", approvalDocService.getDept()); //부서목록 불러오기
+		model.addAttribute("approvalDocDTO", new ApprovalDocDTO());//문서DTO
+		model.addAttribute("positionList",approvalDocService.getPosition());//직급정보불러오기
 		// --------------------------------------------
 		model.addAttribute("currentUserId", loginDTO.getEmpId());
 		model.addAttribute("currentUserName", loginDTO.getEmpName());
