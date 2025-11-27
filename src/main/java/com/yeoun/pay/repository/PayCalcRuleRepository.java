@@ -12,20 +12,34 @@ import java.util.List;
 
 public interface PayCalcRuleRepository extends JpaRepository<PayCalcRule, Long> {
 
-    /** 항목별 목록 (우선순위 asc) */
+    /* =========================================================
+       🔹 리스트 조회
+    ========================================================= */
+
+    /** 항목별 목록 (우선순위 ASC) */
     List<PayCalcRule> findByItem_ItemCodeOrderByPriorityAsc(String itemCode);
 
-    /** 항목 + 대상 조건 목록 (우선순위 asc) */
+    /** 항목 + 대상 조건 목록 (우선순위 ASC) */
     List<PayCalcRule> findByItem_ItemCodeAndTargetTypeAndTargetCodeOrderByPriorityAsc(
-            String itemCode, TargetType targetType, String targetCode);
+            String itemCode,
+            TargetType targetType,
+            String targetCode
+    );
 
-    /** 기간 중복 체크 (JPQL) */
+    /** 전체 목록 정렬 */
+    List<PayCalcRule> findAllByOrderByPriorityAsc();
+
+
+    /* =========================================================
+       🔹 기간 중복 체크
+    ========================================================= */
+
     @Query("""
-        select r
-          from PayCalcRule r
-         where r.item.itemCode = :itemCode
-           and (:targetType is null or r.targetType = :targetType)
-           and coalesce(r.targetCode, '') = :targetCode
+        SELECT r
+          FROM PayCalcRule r
+         WHERE r.item.itemCode = :itemCode
+           AND r.targetType = :targetType
+           AND (:targetCode = '' OR r.targetCode = :targetCode)
         """)
     List<PayCalcRule> findForOverlapCheck(
             @Param("itemCode") String itemCode,
@@ -33,10 +47,12 @@ public interface PayCalcRuleRepository extends JpaRepository<PayCalcRule, Long> 
             @Param("targetCode") String targetCode
     );
 
-    /** 전체 정렬 (우선순위 asc) */
-    List<PayCalcRule> findAllByOrderByPriorityAsc();
 
-    /** 특정 항목 + 기준일에 유효한 규칙 조회 */
+
+    /* =========================================================
+       🔹 활성 규칙 조회 (Native)
+    ========================================================= */
+
     @Query(value = """
         SELECT *
           FROM PAY_CALC_RULE R
@@ -49,7 +65,7 @@ public interface PayCalcRuleRepository extends JpaRepository<PayCalcRule, Long> 
             @Param("asOf") LocalDate asOf
     );
 
-    /** 활성 규칙 전체 (기간 포함) */
+
     @Query(value = """
         SELECT *
           FROM PAY_CALC_RULE R
@@ -60,9 +76,27 @@ public interface PayCalcRuleRepository extends JpaRepository<PayCalcRule, Long> 
     List<PayCalcRule> findActiveRules(@Param("asOf") LocalDate asOf);
 
 
-    /** 우선순위 중복 체크 - 수정 시 자기 자신 제외 */
-    boolean existsByPriorityAndRuleIdNot(Integer priority, Long ruleId);
 
-    /** 우선순위 중복 체크 - 같은 항목 내 */
+    /* =========================================================
+       🔹 우선순위 중복 체크 (등록/수정)
+    ========================================================= */
+
+    /** 등록용: itemCode + priority 존재 여부 */
     boolean existsByItem_ItemCodeAndPriority(String itemCode, Integer priority);
+
+
+    /** 수정용: 자기 자신 제외하고 동일한 priority 존재 여부 */
+    @Query("""
+        SELECT COUNT(r) > 0
+          FROM PayCalcRule r
+         WHERE r.item.itemCode = :itemCode
+           AND r.priority = :priority
+           AND r.ruleId <> :ruleId
+        """)
+    boolean existsByItemCodeAndPriorityExceptSelf(
+            @Param("itemCode") String itemCode,
+            @Param("priority") Integer priority,
+            @Param("ruleId") Long ruleId
+    );
+
 }
