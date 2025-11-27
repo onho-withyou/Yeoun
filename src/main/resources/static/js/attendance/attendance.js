@@ -150,16 +150,16 @@ const saveAttendance = async () => {
 	const url = currentMode === "edit" ? `/attendance/${currentAttendanceId}` : "/attendance";
 	const method = currentMode === "edit" ? "PATCH" : "POST";
 	
+	// 근무정책의 출퇴근 데이터 가져오기
 	const data = await loadWorkPolicy();
 	
-	// 오전 9시부터 오후 6시까지만 시간 제한을 두기 위한 범위 체크 상수
+	// 근무정책에 따른 출퇴근 시간 저장하는 변수
 	const MIN_TIME = data.startTime;
 	const MAX_TIME = data.endTime;
 	
 	// 범위 체크 상수를 사용하여 Date 객체로 변환
 	const min = new Date(`2000-01-01T${MIN_TIME}`);
 	const max = new Date(`2000-01-01T${MAX_TIME}`);
-	
 	
 	// 출근 시간을 입력하지 않았을 때
 	if (!workIn) {
