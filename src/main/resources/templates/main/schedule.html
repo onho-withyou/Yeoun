@@ -91,6 +91,16 @@
 	.spinner-border.text-primary {
 	  color: #0d6efd !important;
 	}
+	
+    .tui-grid-body .combined-text {
+        font-size: 14px;
+        color: black;
+    }
+    .tui-grid-body .combined-text span {
+        font-size: 8px;
+        color: #666;
+        margin-left: 6px;
+    }
 	</style>
 	
 </head>
@@ -110,10 +120,10 @@
 	                    <div class="calendar-header d-flex align-items-center pb-2">
 	                        <!-- 달력 타입변환 -->
 	                        <div class="btn-group" role="group">
-	                            <button type="button" class="btn btn-outline-secondary btn-sm " data-view="list" id="type-list">List</button>
-	                            <button type="button" class="btn btn-outline-secondary btn-sm active" data-view="month" id="type-month">Month</button>
-	                            <button type="button" class="btn btn-outline-secondary btn-sm " data-view="week" id="type-week">Week</button>
-	                            <button type="button" class="btn btn-outline-secondary btn-sm " data-view="day" id="type-day">Day</button>
+	                            <button type="button" class="btn btn-outline-secondary btn-sm " data-view="list" id="type-list">목록</button>
+	                            <button type="button" class="btn btn-outline-secondary btn-sm active" data-view="month" id="type-month">월</button>
+	                            <button type="button" class="btn btn-outline-secondary btn-sm " data-view="week" id="type-week">주</button>
+	                            <button type="button" class="btn btn-outline-secondary btn-sm " data-view="day" id="type-day">일</button>
 	                        </div>
 	                        <!-- 달력날짜 -->
 		                    <div class="calendar-date text-center item-center flex-grow-1">
