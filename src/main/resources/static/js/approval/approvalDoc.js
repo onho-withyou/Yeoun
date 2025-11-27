@@ -1270,7 +1270,7 @@
 	//f- 작성 버튼 클릭 시 실행되는 함수
   	function defaultPrint(){
 		// 모달을 닫고 다시 작성 버튼을 클릭하면 이전 데이터가 남아있어서 초기화 진행
-		//approverDiv.innerHTML = "";
+		approverDiv.innerHTML = "";
 		formReset();
 		formEnable();
 		//selectBox.enable();
