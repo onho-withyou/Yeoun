@@ -106,6 +106,7 @@ public class ChatService {
 	
 	// 2) 메시지 읽음 처리
 	public void readMessage(MsgReadRequest msgReadRequest) {
+		if (msgReadRequest.getGroupYn().equals("Y")) return;
 
 		simpMessagingTemplate.convertAndSend(
 				"/topic/chat/room/" + msgReadRequest.getRoomId() + "/read",
