@@ -418,3 +418,26 @@ document.addEventListener("show.bs.modal", (evt) => {
     const input = modal.querySelector("input[name='targetCode']");
     bindEmpAutocomplete(input);
 });
+
+
+/*클릭시 복사됨!*/
+document.addEventListener("click", function (e) {
+  if (e.target.classList.contains("copy-code")) {
+
+    const copyText = e.target.dataset.copy;
+    const originalText = e.target.dataset.original; // ← 원래 텍스트
+
+    navigator.clipboard.writeText(copyText).then(() => {
+
+      // 클릭한 요소를 “복사됨!” 으로 변경
+      e.target.innerText = "복사됨!";
+      e.target.style.color = "#198754";
+
+      // 1초 뒤 원래 텍스트로 복구
+      setTimeout(() => {
+        e.target.innerText = originalText;
+        e.target.style.color = "#6c757d";
+      }, 800);
+    });
+  }
+});

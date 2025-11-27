@@ -52,6 +52,33 @@
 .autocomplete-list .list-group-item:hover {
     background-color: #eef5ff;
 }
+/* ===========================
+   계산식 도움말 테이블 스타일
+=========================== */
+
+/* 헤더 행 음영 */
+#formulaHelper table thead tr {
+  background-color: #f8f9fa;  /* 밝은 회색 */
+}
+
+/* 셀 텍스트 가운데 정렬 */
+#formulaHelper table td,
+#formulaHelper table th {
+  text-align: center;
+  vertical-align: middle;
+  padding: 10px 12px;
+  font-size: 1rem;
+  color: #495057;  /* 기본 회색 텍스트 */
+}
+
+/* code 변수 스타일 (회색, 강조 X) */
+#formulaHelper code {
+  font-size: 1rem;
+  color: #6c757d;   /* 은은한 회색 */
+  font-weight: 600;
+}
+
+
 
 </style>
 
@@ -333,6 +360,78 @@
 				    영문오타확인필수! 공백은 불가능합니다.
 				  </div>
             </div>
+            
+            <!-- 변수 목록 안내 -->
+				 <div class="mt-2">
+				  <a data-bs-toggle="collapse" href="#formulaHelper" role="button">
+				    사용 가능한 변수 목록 보기
+				  </a>
+				
+			<div class="collapse mt-2" id="formulaHelper">
+			  <table class="table table-bordered w-auto mx-auto text-center">
+			    <thead>
+			      <tr>
+			        <th>항목</th>
+			        <th>변수명</th>
+			      </tr>
+			    </thead>
+			
+			    <tbody>
+			      <tr>
+  <td>기본급</td>
+  <td><code class="copy-code" data-copy="BASE_AMT" data-original="BASE_AMT">BASE_AMT</code></td>
+</tr>
+
+<tr>
+  <td>수당합계</td>
+  <td><code class="copy-code" data-copy="ALW_AMT" data-original="ALW_AMT">ALW_AMT</code></td>
+</tr>
+
+<tr>
+  <td>인센티브합계</td>
+  <td><code class="copy-code" data-copy="INC_AMT" data-original="INC_AMT">INC_AMT</code></td>
+</tr>
+
+<tr>
+  <td>총공제액</td>
+  <td><code class="copy-code" data-copy="DED_AMT" data-original="DED_AMT">DED_AMT</code></td>
+</tr>
+
+<tr>
+  <td>총지급액</td>
+  <td><code class="copy-code" data-copy="TOT_AMT" data-original="TOT_AMT">TOT_AMT</code></td>
+</tr>
+
+<tr>
+  <td>실수령액</td>
+  <td><code class="copy-code" data-copy="NET_AMT" data-original="NET_AMT">NET_AMT</code></td>
+</tr>
+
+<tr>
+  <td>비율</td>
+  <td><code class="copy-code" data-copy="rate" data-original="rate">rate</code></td>
+</tr>
+
+<tr>
+  <td>값</td>
+  <td><code class="copy-code" data-copy="value" data-original="value">value</code></td>
+</tr>
+
+<tr>
+  <td>연차일수</td>
+  <td><code class="copy-code" data-copy="remain_days" data-original="remain_days">remain_days</code></td>
+</tr>
+
+<tr>
+  <td>근속년수</td>
+  <td><code class="copy-code" data-copy="YEAR_DIFF" data-original="YEAR_DIFF">YEAR_DIFF</code></td>
+</tr>
+
+			    </tbody>
+			  </table>
+			</div>
+			
+				</div>
 
             <!-- 상세 -->
             <div class="col-12">
@@ -505,6 +604,79 @@
 				    영문오타확인필수! 공백은 불가능합니다.
 				  </div>
               </div>
+              <!-- 변수 목록 안내 -->
+				 <div class="mt-2">
+				  <a data-bs-toggle="collapse" href="#formulaHelper" role="button">
+				    사용 가능한 변수 목록 보기
+				  </a>
+				
+								 <div class="collapse mt-2" id="formulaHelper">
+				  <table class="table table-bordered w-auto mx-auto text-center">
+				    <thead>
+				      <tr>
+				        <th>항목</th>
+				        <th>변수명</th>
+				      </tr>
+				    </thead>
+				
+				    <tbody>
+				      <tr>
+  <td>기본급</td>
+  <td><code class="copy-code" data-copy="BASE_AMT" data-original="BASE_AMT">BASE_AMT</code></td>
+</tr>
+
+<tr>
+  <td>수당합계</td>
+  <td><code class="copy-code" data-copy="ALW_AMT" data-original="ALW_AMT">ALW_AMT</code></td>
+</tr>
+
+<tr>
+  <td>인센티브합계</td>
+  <td><code class="copy-code" data-copy="INC_AMT" data-original="INC_AMT">INC_AMT</code></td>
+</tr>
+
+<tr>
+  <td>총공제액</td>
+  <td><code class="copy-code" data-copy="DED_AMT" data-original="DED_AMT">DED_AMT</code></td>
+</tr>
+
+<tr>
+  <td>총지급액</td>
+  <td><code class="copy-code" data-copy="TOT_AMT" data-original="TOT_AMT">TOT_AMT</code></td>
+</tr>
+
+<tr>
+  <td>실수령액</td>
+  <td><code class="copy-code" data-copy="NET_AMT" data-original="NET_AMT">NET_AMT</code></td>
+</tr>
+
+<tr>
+  <td>비율</td>
+  <td><code class="copy-code" data-copy="rate" data-original="rate">rate</code></td>
+</tr>
+
+<tr>
+  <td>값</td>
+  <td><code class="copy-code" data-copy="value" data-original="value">value</code></td>
+</tr>
+
+<tr>
+  <td>연차일수</td>
+  <td><code class="copy-code" data-copy="remain_days" data-original="remain_days">remain_days</code></td>
+</tr>
+
+<tr>
+  <td>근속년수</td>
+  <td><code class="copy-code" data-copy="YEAR_DIFF" data-original="YEAR_DIFF">YEAR_DIFF</code></td>
+</tr>
+
+				    </tbody>
+				  </table>
+				</div>
+
+
+				</div>
+
 
               <!-- 상세설명 -->
               <div class="col-12">
