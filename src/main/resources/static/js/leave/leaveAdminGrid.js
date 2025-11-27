@@ -40,7 +40,7 @@ const grid = new tui.Grid({
 			header: "수정",
 			name : "btn",
 			formatter: (rowInfo) => {
-				return  `<button class="btn btn-primary" data-id="${rowInfo.row.id}">수정</button>`
+				return  `<button class="btn btn-primary btn-sm" data-id="${rowInfo.row.id}">수정</button>`
 			}
 		},
 	],
