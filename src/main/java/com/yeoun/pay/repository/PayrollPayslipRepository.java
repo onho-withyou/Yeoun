@@ -152,7 +152,7 @@ public interface PayrollPayslipRepository extends JpaRepository<PayrollPayslip, 
     		    WHERE p.payYymm = :yyyymm
     		    ORDER BY p.confirmDate DESC
     		    """)
-    		Object[] findLastConfirmInfo(@Param("yyyymm") String yyyymm);
+    		List<Object[]> findLastConfirmInfo(@Param("yyyymm") String yyyymm);
 
     
     	/*확정된 사람만 명세서 보여주기*/
