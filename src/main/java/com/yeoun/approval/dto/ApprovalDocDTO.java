@@ -51,6 +51,8 @@ public class ApprovalDocDTO {
 	
 	private String leaveType; //연차 유형
 	
+	private String toPosCode;   //직급코드
+	
 	private String expndType; //지출종류 - 지출결의서
 	
 	private String reason; //사유 - 자유양식결재서

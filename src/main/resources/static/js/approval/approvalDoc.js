@@ -198,6 +198,7 @@
 					//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
 					document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
 					console.log("rowData.to_dept_id",rowData.to_dept_id);
+					document.getElementById('position').value = rowData.to_pos_code;
 					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서
 					document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 					//document.getElementById('approver').value = rowData.approver;//결재권한자
@@ -260,6 +261,7 @@
 					document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
 					//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
 					document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
+					document.getElementById('position').value = rowData.to_pos_code;//변경직급
 					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서
 					document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 					//document.getElementById('approver').value = rowData.approver;//결재권한자
@@ -320,7 +322,7 @@
 					document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
 					//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
 					document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
-					
+					document.getElementById('position').value = rowData.to_pos_code; //변경직급
 					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서
 					document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 					//document.getElementById('approver').value = rowData.approver;//결재권한자
@@ -382,7 +384,7 @@
 				document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
 				//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
 				document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
-				
+				document.getElementById('position').value = rowData.to_pos_code; //변경직급
 				document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서
 				document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 				//document.getElementById('approver').value = rowData.approver;//결재권한자
@@ -441,7 +443,7 @@
 					document.getElementById('end-date').value = toDateStr(rowData.end_date); //휴가종료날짜
 					//document.getElementById('leave-radio').value = rowData.leave_type;// 연차유형 라디오- 없앳음 -휴가종류로 들어감
 					document.getElementById('leave-type').value = rowData.leave_type;//휴가종류
-					
+					document.getElementById('position').value = rowData.to_pos_code;//변경직급
 					document.getElementById('to-dept-id').value = rowData.to_dept_id;//발령부서
 					document.getElementById('expnd-type').value = rowData.expnd_type;//지출종류EXPND_TYPE
 					//document.getElementById('approver').value = rowData.approver;//결재권한자
@@ -483,26 +485,31 @@
 			document.getElementById('expndTypeForm').style.display = 'flex';//지출종류
 			document.getElementById('leavePeriodForm').style.display = 'none';// 휴가기간
 			document.getElementById('leaveTypeForm').style.display = 'none';//휴가종류	
+			document.getElementById('positionForm').style.display = 'none';//직급
 			document.getElementById('toDeptForm').style.display = 'none'; //발령부서
 		}else if(formType == '연차신청서'){
 			document.getElementById('expndTypeForm').style.display = 'none';//지출종류
 			document.getElementById('leavePeriodForm').style.display = 'flex';// 휴가기간
 			document.getElementById('leaveTypeForm').style.display = 'flex';//휴가종류	
+			document.getElementById('positionForm').style.display = 'none';//직급
 			document.getElementById('toDeptForm').style.display = 'none'; //발령부서
 		}else if(formType == '반차신청서'){
 			document.getElementById('expndTypeForm').style.display = 'none';//지출종류
 			document.getElementById('leavePeriodForm').style.display = 'flex';// 휴가기간
 			document.getElementById('leaveTypeForm').style.display = 'flex';//휴가종류	
+			document.getElementById('positionForm').style.display = 'none';//직급
 			document.getElementById('toDeptForm').style.display = 'none'; //발령부서
 		}else if(formType == '인사발령신청서'){
 			document.getElementById('expndTypeForm').style.display = 'none';//지출종류
 			document.getElementById('leavePeriodForm').style.display = 'none';// 휴가기간
 			document.getElementById('leaveTypeForm').style.display = 'none';//휴가종류	
+			document.getElementById('positionForm').style.display = 'flex';//직급
 			document.getElementById('toDeptForm').style.display = 'flex'; //발령부
 		}else if(formType == '자유양식결재서'){
 			document.getElementById('expndTypeForm').style.display = 'none';//지출종류
 			document.getElementById('leavePeriodForm').style.display = 'none';// 휴가기간
 			document.getElementById('leaveTypeForm').style.display = 'none';//휴가종류	
+			document.getElementById('positionForm').style.display = 'none';//직급
 			document.getElementById('toDeptForm').style.display = 'none'; //발령부서
 		}
 	}
@@ -519,6 +526,7 @@
 		document.getElementById('start-date').disabled = true;
 		document.getElementById('end-date').disabled = true;
 		document.getElementById('leave-type').disabled = true;
+		document.getElementById('position').disabled = true;
 		document.getElementById('to-dept-id').disabled = true;
 		document.getElementById('expnd-type').disabled = true;
 		document.getElementById('reason-write').disabled = true;
@@ -591,11 +599,11 @@
 			.then(response => response.text()) // 서버 응답을 JSON으로 파싱
 			.then(data => {
 				console.log('성공:', data);
-				alert('데이터 전송 성공!');
+				alert('기안서 작성이 완료되었습니다.');
 			})
 			.catch((error) => {
 				console.error('오류:', error);
-				alert('데이터 전송 중 오류 발생');
+				alert('기안서 작성을 실패했습니다.');
 			});
 	});
 
@@ -725,11 +733,12 @@
 				obj["finish_date"]  = toDateStr(item[13]); //결재완료일자
 				obj["start_date"]   = toDateStr(item[14]); //휴가시작일자
 				obj["end_date"]     = toDateStr(item[15]); //휴가종료일자
-				obj["leave_type"] = item[16]; //	
-				obj["to_dept_id"] = item[17]; //	
-				obj["expnd_type"] = item[18]; //
-				obj["reason"] = item[19]; //	
-				obj["doc_status"] = item[20]; //상태
+				obj["leave_type"] = item[16]; //연차유형
+				obj["to_pos_code"] = item[17] //변경직급
+				obj["to_dept_id"] = item[18]; //발령부서
+				obj["expnd_type"] = item[19]; //지출타입
+				obj["reason"] = item[20]; //사유
+				obj["doc_status"] = item[21]; //상태
 				colData.push(obj);
 				obj = {};
 			});
@@ -763,11 +772,12 @@
 				obj["finish_date"]  = toDateStr(item[13]); //결재완료일자
 				obj["start_date"]   = toDateStr(item[14]); //휴가시작일자
 				obj["end_date"]     = toDateStr(item[15]); //휴가종료일자
-				obj["leave_type"] = item[16]; //	
-				obj["to_dept_id"] = item[17]; //	
-				obj["expnd_type"] = item[18]; //
-				obj["reason"] = item[19]; //	
-				obj["doc_status"] = item[20]; //상태
+				obj["leave_type"] = item[16]; //
+				obj["to_pos_code"] = item[17] //변경직급
+				obj["to_dept_id"] = item[18]; //발령부서
+				obj["expnd_type"] = item[19]; //지출타입
+				obj["reason"] = item[20]; //사유
+				obj["doc_status"] = item[21]; //상태
 				colData.push(obj);
 				obj = {};
 			});
@@ -803,10 +813,11 @@
 				obj["start_date"]   = toDateStr(item[14]); //휴가시작일자
 				obj["end_date"]     = toDateStr(item[15]); //휴가종료일자
 				obj["leave_type"] = item[16]; //	
-				obj["to_dept_id"] = item[17]; //	
-				obj["expnd_type"] = item[18]; //
-				obj["reason"] = item[19]; //	
-				obj["doc_status"] = item[20]; //상태
+				obj["to_pos_code"] = item[17] //변경직급
+				obj["to_dept_id"] = item[18]; //발령부서
+				obj["expnd_type"] = item[19]; //지출타입
+				obj["reason"] = item[20]; //사유
+				obj["doc_status"] = item[21]; //상태
 				colData.push(obj);
 				obj = {};
 			});
@@ -842,10 +853,11 @@
 				obj["start_date"]   = toDateStr(item[14]); //휴가시작일자
 				obj["end_date"]     = toDateStr(item[15]); //휴가종료일자
 				obj["leave_type"] = item[16]; //	
-				obj["to_dept_id"] = item[17]; //	
-				obj["expnd_type"] = item[18]; //
-				obj["reason"] = item[19]; //	
-				obj["doc_status"] = item[20]; //상태
+				obj["to_pos_code"] = item[17] //변경직급
+				obj["to_dept_id"] = item[18]; //발령부서
+				obj["expnd_type"] = item[19]; //지출타입
+				obj["reason"] = item[20]; //사유
+				obj["doc_status"] = item[21]; //상태
 				colData.push(obj);
 				obj = {};
 			});
@@ -883,10 +895,11 @@
 				obj["start_date"]   = toDateStr(item[14]); //휴가시작일자
 				obj["end_date"]     = toDateStr(item[15]); //휴가종료일자
 				obj["leave_type"] = item[16]; //	
-				obj["to_dept_id"] = item[17]; //	
-				obj["expnd_type"] = item[18]; //
-				obj["reason"] = item[19]; //	
-				obj["doc_status"] = item[20]; //상태
+				obj["to_pos_code"] = item[17] //변경직급
+				obj["to_dept_id"] = item[18]; //발령부서
+				obj["expnd_type"] = item[19]; //지출타입
+				obj["reason"] = item[20]; //사유
+				obj["doc_status"] = item[21]; //상태
 				colData.push(obj);
 				obj = {};
 			});
@@ -910,25 +923,26 @@
 			,{header: '양식' ,name: 'form_type' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자id' ,name: 'approver' ,align: 'center',hidden: true}
 			,{header: '결재권한자' ,name: 'approver_name' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
-			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
 			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
 			,{header: '휴가시작일자' ,name: 'start_date' ,align: 'center',hidden: true}
 			,{header: '휴가종료일자' ,name: 'end_date' ,align: 'center',hidden: true}
 			,{header: '연차유형' ,name: 'leave_type' ,align: 'center',hidden: true}
+			,{header: '변경직급' ,name: 'to_pos_code' ,align: 'center',hidden: true}
 			,{header: '발령부서' ,name: 'to_dept_id' ,align: 'center',hidden: true}
 			,{header: '지출종류' ,name: 'expnd_type' ,align: 'center',hidden: true}
 			,{header: '결재사유내용' ,name: 'reason' ,align: 'center',hidden: true}
 			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
 			,{header: '상세보기' ,name: 'view_details' ,align: 'center', width: 100
 				,formatter: (rowInfo) => {
- 					return `<button type='button' class='btn btn-primary me-2' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
-			}}
+ 					return `<button type='button' class='btn btn-primary btn-sm' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
+			}}              
 		  ],
 		  data: []
 		  ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
@@ -954,24 +968,25 @@
 			,{header: '양식' ,name: 'form_type' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자id' ,name: 'approver' ,align: 'center',hidden: true}
 			,{header: '결재권한자' ,name: 'approver_name' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
-			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
 			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
 			,{header: '휴가시작일자' ,name: 'start_date' ,align: 'center',hidden: true}
 			,{header: '휴가종료일자' ,name: 'end_date' ,align: 'center',hidden: true}
 			,{header: '연차유형' ,name: 'leave_type' ,align: 'center',hidden: true}
+			,{header: '변경직급' ,name: 'to_pos_code' ,align: 'center',hidden: true}
 			,{header: '발령부서' ,name: 'to_dept_id' ,align: 'center',hidden: true}
 			,{header: '지출종류' ,name: 'expnd_type' ,align: 'center',hidden: true}
 			,{header: '결재사유내용' ,name: 'reason' ,align: 'center',hidden: true}
 			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
 			,{header: '상세보기' ,name: 'view_details' ,align: 'center'
 				,formatter: (rowInfo) => {
- 					return `<button type='button' class='btn btn-primary me-2' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
+ 					return `<button type='button' class='btn btn-primary btn-sm' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
 			}}
 		  ],
 		  data: []
@@ -995,24 +1010,25 @@
 			,{header: '양식' ,name: 'form_type' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자id' ,name: 'approver' ,align: 'center',hidden: true}
 			,{header: '결재권한자' ,name: 'approver_name' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
-			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
-			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center',hidden: true}
+			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
 			,{header: '휴가시작일자' ,name: 'start_date' ,align: 'center',hidden: true}
 			,{header: '휴가종료일자' ,name: 'end_date' ,align: 'center',hidden: true}
 			,{header: '연차유형' ,name: 'leave_type' ,align: 'center',hidden: true}
+			,{header: '변경직급' ,name: 'to_pos_code' ,align: 'center',hidden: true}
 			,{header: '발령부서' ,name: 'to_dept_id' ,align: 'center',hidden: true}
 			,{header: '지출종류' ,name: 'expnd_type' ,align: 'center',hidden: true}
 			,{header: '결재사유내용' ,name: 'reason' ,align: 'center',hidden: true}
 			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
 			,{header: '상세보기' ,name: 'view_details' ,align: 'center'
 				,formatter: function(rowInfo) {
- 					return `<button type='button' class='btn btn-primary me-2' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
+ 					return `<button type='button' class='btn btn-primary btn-sm' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
 			}}
 		  ],
 		  data: []
@@ -1036,24 +1052,25 @@
 			,{header: '양식' ,name: 'form_type' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자id' ,name: 'approver' ,align: 'center',hidden: true}
 			,{header: '결재권한자' ,name: 'approver_name' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
-			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
-			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center',hidden: true}
+			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
 			,{header: '휴가시작일자' ,name: 'start_date' ,align: 'center',hidden: true}
 			,{header: '휴가종료일자' ,name: 'end_date' ,align: 'center',hidden: true}
 			,{header: '연차유형' ,name: 'leave_type' ,align: 'center',hidden: true}
+			,{header: '변경직급' ,name: 'to_pos_code' ,align: 'center',hidden: true}
 			,{header: '발령부서' ,name: 'to_dept_id' ,align: 'center',hidden: true}
 			,{header: '지출종류' ,name: 'expnd_type' ,align: 'center',hidden: true}
 			,{header: '결재사유내용' ,name: 'reason' ,align: 'center',hidden: true}
 			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
 			,{header: '상세보기' ,name: 'view_details' ,align: 'center'
 				,formatter: function(rowInfo) {
- 					return `<button type='button' class='btn btn-primary me-2' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
+ 					return `<button type='button' class='btn btn-primary btn-sm' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
 			}}
 		  ],
 		  data: []
@@ -1077,24 +1094,25 @@
 			,{header: '양식' ,name: 'form_type' ,align: 'center'}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
+			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자id' ,name: 'approver' ,align: 'center',hidden: true}
 			,{header: '결재권한자' ,name: 'approver_name' ,align: 'center'}
-			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
-			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
 			,{header: '생성일' ,name: 'created_date' ,align: 'center'}
 			,{header: '결재완료일자' ,name: 'finish_date' ,align: 'center'}
 			,{header: '휴가시작일자' ,name: 'start_date' ,align: 'center',hidden: true}
 			,{header: '휴가종료일자' ,name: 'end_date' ,align: 'center',hidden: true}
 			,{header: '연차유형' ,name: 'leave_type' ,align: 'center',hidden: true}
+			,{header: '변경직급' ,name: 'to_pos_code' ,align: 'center',hidden: true}
 			,{header: '발령부서' ,name: 'to_dept_id' ,align: 'center',hidden: true}
 			,{header: '지출종류' ,name: 'expnd_type' ,align: 'center',hidden: true}
 			,{header: '결재사유내용' ,name: 'reason' ,align: 'center',hidden: true}
 			,{header: '상태' ,name: 'doc_status' ,align: 'center'}
 			,{header: '상세보기' ,name: 'view_details' ,align: 'center'
 				,formatter: function(rowInfo) {
- 					return `<button type='button' class='btn btn-primary me-2' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
+ 					return `<button type='button' class='btn btn-primary btn-sm' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
 			}}
 		  ],
 		  data: []

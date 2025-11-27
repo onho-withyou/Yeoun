@@ -72,6 +72,9 @@ public class ApprovalDocGridDTO {
     @JsonProperty("leave_type")  
     private String leaveType; 
 
+    @JsonProperty("to_pos_code")
+    private String toPosCode; 
+
     @JsonProperty("to_dept_id")
     private String toDeptId; 
     

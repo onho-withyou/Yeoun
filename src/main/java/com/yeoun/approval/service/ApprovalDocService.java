@@ -27,6 +27,7 @@ import com.yeoun.approval.repository.ApprovalDocRepository;
 import com.yeoun.approval.repository.ApproverRepository;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
+import com.yeoun.emp.entity.Position;
 import com.yeoun.hr.entity.HrAction;
 import com.yeoun.hr.repository.HrActionRepository;
 import com.yeoun.leave.service.LeaveService;
@@ -58,6 +59,11 @@ public class ApprovalDocService {
 	@Transactional(readOnly = true)
 	public List<Object[]> getEmp2() {
 		return approvalDocRepository.findAllMember2();
+	}
+	//직급정보 불러오기
+	@Transactional(readOnly = true)
+	public List<Position> getPosition(){
+		return approvalDocRepository.findPosition();
 	}
 	//검색 조회
 	@Transactional(readOnly = true)
@@ -125,15 +131,18 @@ public class ApprovalDocService {
 		approvalDoc.setDocStatus(doc.get("docStatus"));//1차대기 -결재권한자가있을때
         approvalDoc.setFormType(doc.get("drafting"));//양식종류
         approvalDoc.setApprover(doc.get("docApprover"));//결재권한자
-        approvalDoc.setStartDate(startDate);// 휴가시작일
+        //연차,반차 신청서
+		approvalDoc.setStartDate(startDate);// 휴가시작일
         approvalDoc.setEndDate(endDate);//휴가종료일
         approvalDoc.setLeaveType(doc.get("leaveType"));//휴가유형
+		//인사발령신청서
+		approvalDoc.setToPosCode(doc.get("position"));//직급 - 
         approvalDoc.setToDeptId(doc.get("toDeptId"));//발령부서
+		// 지출결의서
         approvalDoc.setExpndType(doc.get("expndType"));//지출타입
         approvalDoc.setReason(doc.get("reason"));//사유
 		
         //결재문서
-            
 		approvalDocDTO.setApprovalId(approvalDoc.getApprovalId());//결재문서id
         approvalDocDTO.setApprovalTitle(approvalDoc.getApprovalTitle());//문서제목
         approvalDocDTO.setEmpId(approvalDoc.getEmpId());//로그인한 사람 사원번호
@@ -145,6 +154,7 @@ public class ApprovalDocService {
         approvalDocDTO.setApprover(approvalDoc.getApprover());//결재권한자
         approvalDocDTO.setDocStatus(approvalDoc.getDocStatus());//문서상태
         approvalDocDTO.setLeaveType(approvalDoc.getLeaveType());//연차유형
+		approvalDocDTO.setToPosCode(approvalDoc.getToPosCode()); //직급코드
         approvalDocDTO.setExpndType(approvalDoc.getExpndType());//지출종류
         approvalDocDTO.setReason(approvalDoc.getReason());//사유
 
@@ -256,30 +266,31 @@ public class ApprovalDocService {
 	 
 	 // ------------------------------------------------------------------------------
 	 // 인사 발령 등록 폼을 통한 신청 (승인 후처리)
-	 private void handleAfterFinalApproval(ApprovalDoc approvalDoc) {
+	private void handleAfterFinalApproval(ApprovalDoc approvalDoc) {
 		 
-		 // 1) 문서가 인사발령 문서인지 확인
-		 if (!"인사발령신청서".equals(approvalDoc.getFormType())) {
-			 return; // 다른 양식이면 종료
-		 }
-		 
-		 // 2) 인사발령 서비스에 해당 결재문서의 발령을 적용
-		 Long approvalId = approvalDoc.getApprovalId();
-		 
-		 HrAction hrAction = hrActionRepository.findByApprovalId(approvalId)
-		            .orElseThrow(() -> new EntityNotFoundException(
-		                    "결재문서와 연결된 인사발령을 찾을 수 없습니다. approvalId=" + approvalId));
-		 
-		 // 3) 발령 상태만 '승인완료'로 변경 (EMP 적용 금지)
-		 hrAction.setStatus("승인완료");
-		 
-		 // 4) 적용여부는 그대로 'N'
-		 hrAction.setAppliedYn("N");
-		 
-		 // 5) appliedDate NULL
-		 hrAction.setAppliedDate(null);
-	 
-	 }	 
+		// 1) 문서가 인사발령 문서인지 확인
+		if (!"인사발령신청서".equals(approvalDoc.getFormType())) {
+		 return; // 다른 양식이면 종료
+		}
+		
+		// 2) 인사발령 서비스에 해당 결재문서의 발령을 적용
+		Long approvalId = approvalDoc.getApprovalId();
+		log.info("approvalId 인사발령신청서 id -----> {}",approvalId);
+		HrAction hrAction = hrActionRepository.findByApprovalId(approvalId)
+                   .orElseThrow(() -> new EntityNotFoundException(
+                       // 💡 예외 메시지 구체화
+                       "HR 데이터 누락: 결재 최종 승인 후처리용 인사발령(HrAction)을 찾을 수 없습니다. approvalId=" + approvalId));
+		
+		// 3) 발령 상태만 '승인완료'로 변경 (EMP 적용 금지)
+		hrAction.setStatus("승인완료");
+		
+		// 4) 적용여부는 그대로 'N'
+		hrAction.setAppliedYn("N");
+		
+		// 5) appliedDate NULL
+		hrAction.setAppliedDate(null);
+	
+	}	 
 	 
 	 // 결제문서 조회시 결제권한자 목록 불러오기
 	 public List<ApproverDTO> getApproverDTOList(Long approvalId) {
