@@ -150,9 +150,11 @@ const saveAttendance = async () => {
 	const url = currentMode === "edit" ? `/attendance/${currentAttendanceId}` : "/attendance";
 	const method = currentMode === "edit" ? "PATCH" : "POST";
 	
+	const data = await loadWorkPolicy();
+	
 	// 오전 9시부터 오후 6시까지만 시간 제한을 두기 위한 범위 체크 상수
-	const MIN_TIME = "09:00";
-	const MAX_TIME = "18:00";
+	const MIN_TIME = data.startTime;
+	const MAX_TIME = data.endTime;
 	
 	// 범위 체크 상수를 사용하여 Date 객체로 변환
 	const min = new Date(`2000-01-01T${MIN_TIME}`);
@@ -176,7 +178,7 @@ const saveAttendance = async () => {
 	if (originalInTime !== null && workIn !== originalInTime) {
 		
 		if (inDate < min || inDate > max) {
-			alert("출근시간은 09:00 ~ 18:00 사이여야 합니다.");
+			alert(`출근시간은 ${MIN_TIME} ~ ${MAX_TIME} 사이여야 합니다.`);
 			return;
 		}
 	}
@@ -191,7 +193,7 @@ const saveAttendance = async () => {
 		}
 		
 		if (outDate < min || outDate > max) {
-			alert("퇴근시간은 09:00 ~ 18:00 사이여야 합니다.");
+			alert(`퇴근시간은 ${MIN_TIME} ~ ${MAX_TIME} 사이여야 합니다.`);
 			return;
 		}
 	}
@@ -232,4 +234,12 @@ function resetModal() {
 	document.querySelector("#inTime").value = "";
 	document.querySelector("#endTime").value = "";
 	document.querySelector("select[name='statusCode']").value = "";
+}
+
+// 근무정책에서 출근시간과 퇴근시간 정보 가져오기
+async function loadWorkPolicy() {
+	const res = await fetch("/attendance/policy/data");
+	const data = await res.json();
+	
+	return data;
 }
