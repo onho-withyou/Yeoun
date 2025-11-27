@@ -736,6 +736,7 @@ async function getLastNoticeList() {
 	});
 }
 
+
 // 공지그리드 생성변수
 let noticeGrid = null;
 
@@ -748,13 +749,31 @@ async function initNoticeGrid(data) {
 		editable: true,
 		columns: [
 			{
-				header: '제목'
-				, name: 'noticeTitle'
-				, align: "right"
-			},
-		]
+	            header: '제목',
+	            name: 'noticeTitle',
+	            align: "left",
+	            formatter: function({ row }) {
+	                const title = row.noticeTitle || "";
+	                let dateStr = "";
+	                if (row.updatedDate) {
+	                    const date = new Date(row.updatedDate);
+	                    if (!isNaN(date)) {
+	                        const yy = String(date.getFullYear()).slice(-2);
+	                        const mm = String(date.getMonth() + 1).padStart(2, '0');
+	                        const dd = String(date.getDate()).padStart(2, '0');
+	                        const hh = String(date.getHours()).padStart(2, '0');
+	                        const min = String(date.getMinutes()).padStart(2, '0');
+	                        dateStr = ` <span>(${mm}-${dd} ${hh}:${min})</span>`;
+	                    }
+	                }
+	                return title + dateStr;
+	            },
+	            className: 'combined-text'
+	        }
+	    ]
 	});
 	// 그리드 데이터 추가
+	console.log(data);
 	noticeGrid.resetData(data);
 //	console.log(noticeGrid.gridEl, "노티스그리드");
 	const rows = noticeGrid.getData();
