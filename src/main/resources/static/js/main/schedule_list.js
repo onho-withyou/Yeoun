@@ -14,12 +14,14 @@ document.addEventListener('DOMContentLoaded', function() {
 	
 	//일정목록 데이트피커 객체 생성
 	picker_list = tui.DatePicker.createRangePicker({
+		language: 'ko',
 	    startpicker: {
 	        date: today,
 	        input: '#startpicker-input-list',
 	        container: '#startpicker-container-list'
 	    },
 	    endpicker: {
+			language: 'ko',
 	        date: nextYear,
 	        input: '#endpicker-input-list',
 	        container: '#endpicker-container-list'
@@ -88,6 +90,45 @@ function initGrid(data) {
 		createGrid();
 	}
 	
+	// 1. 그리드 한글 언어셋 설정 (필터 및 각종 텍스트 한글화)
+	tui.Grid.setLanguage('ko', {
+	    display: {
+	        noData: '데이터가 없습니다.',
+	        loadingData: '데이터를 불러오는 중입니다.',
+	        resizeHandleGuide: '마우스 드래그를 통해 너비를 조정할 수 있습니다.',
+	    },
+	    net: {
+	        confirmCreate: '생성하시겠습니까?',
+	        confirmUpdate: '수정하시겠습니까?',
+	        confirmDelete: '삭제하시겠습니까?',
+	        confirmModify: '저장하시겠습니까?',
+	        noDataToCreate: '생성할 데이터가 없습니다.',
+	        noDataToUpdate: '수정할 데이터가 없습니다.',
+	        noDataToDelete: '삭제할 데이터가 없습니다.',
+	        noDataToModify: '수정할 데이터가 없습니다.',
+	        failResponse: '데이터 요청 중에 에러가 발생하였습니다.'
+	    },
+	    filter: {
+	        // 문자열 필터 옵션
+	        contains: '포함',
+	        eq: '일치',
+	        ne: '불일치',
+	        start: '시작 문자',
+	        end: '끝 문자',
+	        
+	        // 날짜/숫자 필터 옵션
+	        after: '이후',
+	        afterEq: '이후 (포함)',
+	        before: '이전',
+	        beforeEq: '이전 (포함)',
+
+	        // 버튼 및 기타
+	        apply: '적용',
+	        clear: '초기화',
+	        selectAll: '전체 선택'
+	    }
+	});
+	
 	function createGrid() {
 		grid = new tui.Grid({
 			el: document.getElementById("grid"),
@@ -98,7 +139,7 @@ function initGrid(data) {
 					name: 'scheduleTitle',
 					sortable: true,
 					width: 150,
-					filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
+					filter: 'text'
 				},
 				{
 					header: '종류',
@@ -106,6 +147,15 @@ function initGrid(data) {
 					sortable: true,
 					width: 70,
 					filter: 'select'
+					, formatter: (row) => {
+						const typeMap = {
+							'share': '공유'
+							, 'company': '회사'
+							, 'private': '개인'
+						}
+						
+						return typeMap[row.value] || row.value;
+					}
 				},
 				{
 					header: '일정시작',
@@ -126,28 +176,23 @@ function initGrid(data) {
 					}
 				},
 				{
-					header: '작성자',
-					name: 'empName',
-					sortable: true,
-					width: 70,
-					filter: {
-						type: 'text',
-						operator: 'OR'
-					}
+					header: '작성자'
+					, name: 'empName'
+					, sortable: true
+					, filter: 'text'
+					, width: 80
 				},
 				{
 					header: '내용',
 					name: 'scheduleContent',
 					sortable: true,
-					filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
+					filter: 'text'
 				},
 				{
 					header: '상세'
 					, name: "btn"
 					, width: 100 // 너비 설정
 					, align: "center"
-					// formatter 속성에 화살표 함수를 활용하여 원하는 태그를 해당 셀에 삽입 가능(각 셀에 반복 삽입됨)
-	//				, formatter: () => "<button type='button' class='btn-detail' >상세정보</button>"
 					, formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary btn-sm' data-row='${cellInfo.rowKey}' >상세</button>"
 				}
 			],

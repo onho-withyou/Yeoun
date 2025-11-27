@@ -187,4 +187,53 @@
             </li>
         </ul>
     </aside>
+    <script>
+		document.addEventListener("DOMContentLoaded", function() {
+		    // 현재 브라우저의 경로
+		    const currentPath = window.location.pathname;
+		
+		    // 사이드바의 링크
+		    const menuLinks = document.querySelectorAll('.layout-menu .menu-link');
+		
+		    menuLinks.forEach(link => {
+		        const href = link.getAttribute('href');
+		
+		        // 현재 경로와 일치하거나 포함되어 있는지 확인
+		        if (href && href !== '#' && href !== 'javascript:void(0);') {
+		            
+		            let isMatch = false;
+		
+		            // 메인 화면인 경우 정확히 일치할 때만
+		            if (href === '/' || href === '/main') {
+		                if (currentPath === '/' || currentPath === '/main') {
+		                    isMatch = true;
+		                }
+		            } 
+		            // 그 외 메뉴는 현재 경로가 href로 시작하면 활성
+		            else if (currentPath.startsWith(href)) {
+		                isMatch = true;
+		            }
+		
+		            // 일치하는 메뉴를 찾았다면 스타일 적용
+		            if (isMatch) {
+		                // 해당 메뉴에 'active' 클래스 추가
+		                const parentLi = link.closest('.menu-item');
+		                if (parentLi) {
+		                    parentLi.classList.add('active');
+		
+		                    // 서브메뉴(Dropdown) 안에 있는 메뉴라면?
+		                    // 부모 메뉴를 찾아서 펼쳐주고(open) 활성화(active) 표시
+		                    const parentSub = parentLi.closest('.menu-sub');
+		                    if (parentSub) {
+		                        const grandParentLi = parentSub.closest('.menu-item');
+		                        if (grandParentLi) {
+		                            grandParentLi.classList.add('active', 'open');
+		                        }
+		                    }
+		                }
+		            }
+		        }
+		    });
+		});
+	</script>
 </th:block>
