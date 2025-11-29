@@ -534,7 +534,91 @@
 		document.getElementById('reason-write').disabled = false;
 	}
 
-	//f- 폼 결재권한자 데이터 말아서 보내는 함수
+	//f- 모달 첨부파일
+	document.addEventListener('DOMContentLoaded', function() {
+    	const attachBtn = document.getElementById('attachmentBtn');
+    	const fileInput = document.getElementById('realFileInput');
+    	const listContainer = document.getElementById('fileListContainer');
+    	const fileNameDisp = document.getElementById('fileNameDisplay');
+
+    	attachBtn.addEventListener('click', () => fileInput.click());
+		fileInput.addEventListener('change', updateFileListDisplay);
+
+		// function resetAttachments() {
+    	//     fileInput.value = ''; // input[type=file]의 파일 목록을 초기화
+    	//     updateFileListDisplay(); // 화면 목록 갱신 (목록을 비우고 "선택된 파일 없음" 표시)
+    	// }
+		// 파일 목록을 화면에 갱신하는 함수
+		function updateFileListDisplay() {
+		    listContainer.innerHTML = '';
+		    const files = fileInput.files;
+		    // '선택된 파일 없음' 문구 표시/숨김
+		    fileNameDisp.style.display = files.length > 0 ? 'none' : 'block';
+	
+		    Array.from(files).forEach((file, index) => {
+		        const item = document.createElement('div');
+				item.style.cssText = 'border-radius: 15px; display: flex; align-items: center; margin: 5px;';
+		
+		        // 미리보기/아이콘 영역 생성
+		        const preview = createPreviewElement(file);
+		        item.appendChild(preview);
+		        // 파일 정보 영역 생성
+		        const info = document.createElement('div');
+		
+		        // 파일 이름 (innerText 사용)
+		        const nameSpan = document.createElement('span');
+		        nameSpan.innerText = file.name;
+		        info.appendChild(nameSpan);
+		        // 삭제 버튼 생성 (innerText 사용 및 이벤트 연결)
+		        const deleteBtn = document.createElement('button');
+				deleteBtn.innerText = '×'; 
+				deleteBtn.type = 'button';
+
+				deleteBtn.style.cssText = 'border: none; background: transparent; padding: 0; font-size: 18px; cursor: pointer;';
+		        deleteBtn.onclick = () => removeFile(index); 
+		        info.appendChild(deleteBtn);
+		        item.appendChild(info);
+		        listContainer.appendChild(item);
+		    });
+		}
+		// 파일 유형에 따른 미리보기/아이콘 요소 생성
+		function createPreviewElement(file) {
+		    const previewArea = document.createElement('div');
+		    previewArea.style.cssText = 'width: 50px; height: 50px; border: none; overflow: hidden; display: flex; justify-content: center; align-items: center;';
+		    if (file.type.startsWith('image/')) {
+		        const reader = new FileReader();
+		        reader.onload = (e) => {
+		            const img = document.createElement('img');
+		            img.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
+		            previewArea.appendChild(img);
+		        };
+		        reader.readAsDataURL(file);
+		    } else if (file.type === 'application/pdf') {
+		        previewArea.innerHTML = '<span style="font-size: 30px;">📄</span>';
+		    } else {
+		        previewArea.innerHTML = '<span style="font-size: 30px;">📎</span>';
+		    }
+		    return previewArea;
+		}
+		// 파일 삭제 로직 (DataTransfer 사용)
+		function removeFile(indexToRemove) {
+		    const dt = new DataTransfer();
+		    const files = fileInput.files;
+		    for (let i = 0; i < files.length; i++) {
+		        if (i !== indexToRemove) {
+		            dt.items.add(files[i]);
+		        }
+		    }
+		
+		    fileInput.files = dt.files;
+		    updateFileListDisplay(); 
+		}
+
+		//window.resetAttachments = resetAttachments;
+	});
+
+    	
+	//f- 등록버튼,폼 결재권한자 데이터 말아서 보내는 함수
 	document.getElementById('modal-doc').addEventListener('submit', async function(event) {
     	// 폼의 기본 제출 동작 방지
     	event.preventDefault();
@@ -570,15 +654,15 @@
 
 
     	// FormData를 일반 JavaScript 객체로 변환
-    	const dataObject = Object.fromEntries(formData.entries());
+    	//const dataObject = Object.fromEntries(formData.entries());
 
     	await fetch("/approval/approval_doc", {
 				method: 'POST', 
 				headers: {
 					[csrfHeader]: csrfToken
-					,'Content-Type': 'application/json' // Content-Type 헤더를 application/json으로 설정
+					//,'Content-Type': 'application/json' // Content-Type 헤더를 application/json으로 설정
 				},
-				body:  JSON.stringify(dataObject) // 요청 본문에 JSON 데이터 포함
+				body:  formData // 요청 본문에 JSON 데이터 포함
 			})
 			.then(response => response.text()) // 서버 응답을 JSON으로 파싱
 			.then(data => {
@@ -1056,6 +1140,12 @@
     let approverArr = [];//결재권한자 배열 
 	let writeBtn = document.getElementById("writeBtn");
 	
+	//모달이 닫힐떄 첨부파일 리셋
+	// const approvalModal = document.getElementById('approval-modal');
+	// approvalModal.addEventListener('hidden.bs.modal', function (event) {
+	// 	resetAttachments(); 
+	// });
+
 	//f- 기안서작성 모달이 열리기전에 이벤트를 감지
 	$('#approval-modal').on('show.bs.modal', function (e) {
 		// e.relatedTarget이 null/undefined이면 .dataset 접근을 멈추고 actionType에 undefined 할당

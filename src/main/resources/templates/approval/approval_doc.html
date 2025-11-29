@@ -113,7 +113,7 @@
 		<!-- 모달 -->
 		<div class="modal fade" id="approval-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
-		    <form class="modal-content" id="modal-doc" th:action="@{/approval/approval_doc}" th:object="${approvalDocGridDTO}" method="POST" enctype="multipart/form-data">
+		    <form class="modal-content" id="modal-doc" action="/approval/approval_doc"  method="POST" enctype="multipart/form-data">
 		      <div class="modal-header" data-draggable="true">
 				<h3 class="modal-title" id="Drafting" value="">기안서 작성</h3>
 				<input type="hidden" id="DraftingHidden" name="drafting" value="">
@@ -279,9 +279,14 @@
 	     				<!--에디터-->
 		        <!--  <div id="editor" style="border: 1px solid black;;"></div> -->
 		      </div>
+			  <div class="modal-footer">
+				<div id="fileListContainer" class="d-flex"></div>
+					<span id="fileNameDisplay">선택된 파일 없음</span>
+					<button type="button" id="attachmentBtn" class="btn btn-primary">첨부파일</button>		
+					<input type="file" id="realFileInput" name="itemImgFiles" accept="image/*,application/pdf" style="display: none;" multiple>
+			  </div>
 		      <div class="modal-footer">
 		      	<div>
-			     	<button type="button" id="attachmentBtn" class="btn btn-primary">첨부파일</button>
 			     	<button type="button" id="approvalCompanionBtn" class="btn btn-primary" style="display:none;">반려</button>
 			      	<button type="button" id="approvalCheckBtn" class="btn btn-primary" style="display:none;">결재확인</button>
 			    </div>

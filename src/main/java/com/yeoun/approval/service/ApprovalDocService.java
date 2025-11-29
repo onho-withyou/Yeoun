@@ -1,7 +1,9 @@
 package com.yeoun.approval.service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.yeoun.approval.dto.ApprovalDocDTO;
 import com.yeoun.approval.dto.ApprovalDocGridDTO;
@@ -25,6 +28,11 @@ import com.yeoun.approval.mapper.ApprovalFormMapper;
 import com.yeoun.approval.entity.ApprovalDoc;
 import com.yeoun.approval.repository.ApprovalDocRepository;
 import com.yeoun.approval.repository.ApproverRepository;
+import com.yeoun.common.dto.FileAttachDTO;
+import com.yeoun.common.entity.FileAttach;
+import com.yeoun.common.repository.FileAttachRepository;
+import com.yeoun.common.util.FileUtil;
+import com.yeoun.common.wrapper.FileAttachWrapper;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.entity.Position;
@@ -36,6 +44,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+ 
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -44,10 +53,12 @@ public class ApprovalDocService {
 
 	private final ApprovalDocRepository approvalDocRepository;
 	private final ApproverRepository approverRepository;
+	private final FileAttachRepository fileAttachRepository;
 	private final HrActionRepository hrActionRepository;
 	private final ApprovalFormMapper approvalFormMapper;
 	private final ApprovalDocMapper approvalDocMapper;
 	private final LeaveService leaveService;
+	private final FileUtil fileUtil;
 	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 	//기안자 명 불러오기
@@ -106,69 +117,80 @@ public class ApprovalDocService {
 		return results;
 	}
 	
-    //결재 문서 등록
-    public void saveApprovalDoc(String empId, Map<String,String> doc) {
-        log.info(">>>>>>>>>>>>>>>>>> approvalDoc : " + doc);
-        ApprovalDoc approvalDoc = new ApprovalDoc();
-        ApprovalDocDTO approvalDocDTO = new ApprovalDocDTO();
-        doc.forEach((key, value) -> {
-            System.out.println(key + " : " + value);
-        });
-
+	//결재 문서 등록
+	public void saveApprovalDoc(String empId, Map<String,String> doc, MultipartFile[] files) {
 		
-      	// 날짜 파싱 
-      	LocalDate createdDate = parseDateSafely(doc.get("createdDate"));
-		LocalDate finishDate = parseDateSafely(doc.get("finishDate"));
-		LocalDate startDate = parseDateSafely(doc.get("startDate"));
-		LocalDate endDate = parseDateSafely(doc.get("endDate"));
+	    // ⭐ 1. Map -> Entity 변환 및 엔티티 설정 (기존 로직 유지) ⭐
+	    log.info(">>>>>>>>>>>>>>>>>> approvalDoc : {}", doc);
+	    ApprovalDoc approvalDoc = new ApprovalDoc(); 
 
-		log.info(">>>>>>>>>>>>>>>>>> doc.get(\"docStatus\") : " + doc.get("docStatus"));
-		approvalDoc.setApprovalId(null);//문서id -자동생성됨
-        approvalDoc.setApprovalTitle(doc.get("approvalTitle")); //문서제목
-        approvalDoc.setEmpId(empId); //기안자 사번번호
-        approvalDoc.setCreatedDate(createdDate);//문서생성일= 결재시작일 =오늘날짜
-        approvalDoc.setFinishDate(finishDate);//결재마감일
-		approvalDoc.setDocStatus(doc.get("docStatus"));//1차대기 -결재권한자가있을때
-        approvalDoc.setFormType(doc.get("drafting"));//양식종류
-        approvalDoc.setApprover(doc.get("docApprover"));//결재권한자
-        //연차,반차 신청서
-		approvalDoc.setStartDate(startDate);// 휴가시작일
-        approvalDoc.setEndDate(endDate);//휴가종료일
-        approvalDoc.setLeaveType(doc.get("leaveType"));//휴가유형
-		//인사발령신청서
-		approvalDoc.setToPosCode(doc.get("position"));//직급 - 
-        approvalDoc.setToDeptId(doc.get("toDeptId"));//발령부서
-		// 지출결의서
-        approvalDoc.setExpndType(doc.get("expndType"));//지출타입
-        approvalDoc.setReason(doc.get("reason"));//사유
+	    // 날짜 파싱 (기존 로직 유지)
+	    LocalDate createdDate = parseDateSafely(doc.get("createdDate"));
+	    LocalDate finishDate = parseDateSafely(doc.get("finishDate"));
+	    LocalDate startDate = parseDateSafely(doc.get("startDate"));
+	    LocalDate endDate = parseDateSafely(doc.get("endDate"));
 		
-        //결재문서
-		approvalDocDTO.setApprovalId(approvalDoc.getApprovalId());//결재문서id
-        approvalDocDTO.setApprovalTitle(approvalDoc.getApprovalTitle());//문서제목
-        approvalDocDTO.setEmpId(approvalDoc.getEmpId());//로그인한 사람 사원번호
-        approvalDocDTO.setCreatedDate(approvalDoc.getCreatedDate());//생성일자
-        approvalDocDTO.setFinishDate(approvalDoc.getFinishDate());//완료예정일자
-        approvalDocDTO.setStartDate(approvalDoc.getStartDate());//시작휴가일자
-        approvalDocDTO.setEndDate(approvalDoc.getEndDate());//종료휴가날짜
-        approvalDocDTO.setFormType(approvalDoc.getFormType());//양식종류
-        approvalDocDTO.setApprover(approvalDoc.getApprover());//결재권한자
-        approvalDocDTO.setDocStatus(approvalDoc.getDocStatus());//문서상태
-        approvalDocDTO.setLeaveType(approvalDoc.getLeaveType());//연차유형
-		approvalDocDTO.setToPosCode(approvalDoc.getToPosCode()); //직급코드
-        approvalDocDTO.setExpndType(approvalDoc.getExpndType());//지출종류
-        approvalDocDTO.setReason(approvalDoc.getReason());//사유
-
-		approvalDocRepository.save(approvalDoc);
-
-		Long generatedApprovalId = approvalDoc.getApprovalId();
+	    // ApprovalDoc 엔티티에 값 설정 (기존 로직 유지)
+	    approvalDoc.setApprovalId(null);
+	    approvalDoc.setApprovalTitle(doc.get("approvalTitle")); 
+	    approvalDoc.setEmpId(empId); 
+	    approvalDoc.setCreatedDate(createdDate);
+	    approvalDoc.setFinishDate(finishDate);
+	    approvalDoc.setDocStatus(doc.get("docStatus"));
+	    approvalDoc.setFormType(doc.get("drafting"));
+	    approvalDoc.setApprover(doc.get("docApprover"));
+	    approvalDoc.setStartDate(startDate);
+	    approvalDoc.setEndDate(endDate);
+	    approvalDoc.setLeaveType(doc.get("leaveType"));
+	    approvalDoc.setToPosCode(doc.get("position"));
+	    approvalDoc.setToDeptId(doc.get("toDeptId"));
+	    approvalDoc.setExpndType(doc.get("expndType"));
+	    approvalDoc.setReason(doc.get("reason"));
 		
-        String[] approverKeys = {"approverEmpIdOVD1", "approverEmpIdOVD2", "approverEmpIdOVD3"};
-        for (String key : approverKeys) {
-            processApprover(generatedApprovalId, doc, key);
-        }		
+	    // ⭐ 2. 문서 저장 및 생성된 ID 획득 ⭐
+	    approvalDocRepository.save(approvalDoc); 
+	    Long generatedApprovalId = approvalDoc.getApprovalId();
+		
+	    // 3. 결재선 처리 (기존 로직 유지)
+	    String[] approverKeys = {"approverEmpIdOVD1", "approverEmpIdOVD2", "approverEmpIdOVD3"};
+	    for (String key : approverKeys) {
+	        processApprover(generatedApprovalId, doc, key);
+	    } 
+	
+	    // 4. ⭐ 파일 업로드 및 DB 저장 로직 완성 ⭐
+	    if (files != null && files.length > 0) {
+		
+	        // 4-1. Array -> List 변환
+	        List<MultipartFile> fileList = Arrays.asList(files);
+		
+	        // 4-2. FileAttachWrapper 객체 생성 (FileUploadHelpper 계약 이행)
+	        FileAttachWrapper wrapper = new FileAttachWrapper(
+	            generatedApprovalId, 
+	            "APPROVAL_DOC"
+	        );
+		
+	        try {
+	            // 4-3. FileUtil 호출 (물리적 저장 및 DTO 목록 획득)
+	            List<FileAttachDTO> fileDtos = fileUtil.uploadFile(wrapper, fileList);
 
-    }
-
+	            // 4-4. DTO -> Entity 변환 및 추가 정보 설정
+	            List<FileAttach> finalFileList = fileDtos.stream()
+	                .map(dto -> dto.toEntity()) // DTO를 Entity로 변환
+	                .peek(fileAttach -> {
+	                    // 추가 분류 정보 설정 (선택 사항)
+	                    fileAttach.setCategory("APPROVAL");
+	                })
+	                .toList();
+				
+	            fileAttachRepository.saveAll(finalFileList);
+				
+	        } catch (IOException e) {
+	            log.error("파일 업로드 중 오류 발생", e);
+	            // 파일 저장 실패 시 트랜잭션 롤백 유도
+	            throw new RuntimeException("공통 파일 처리 중 오류가 발생했습니다.", e);
+	        }
+	    }
+	}
 	//기안서 양식종류
 	@Transactional(readOnly = true)
 	public List<ApprovalForm> getFormTypes(String deptId) {

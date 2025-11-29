@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.yeoun.approval.dto.ApprovalDocDTO;
@@ -78,15 +80,35 @@ public class ApprovalController {
 
 	//기안서 등록(저장)
     @PostMapping("/approval_doc")
-    public ResponseEntity<Map<String, Object>> approvalDocSave(@AuthenticationPrincipal LoginDTO loginDTO, @RequestBody Map<String, String> doc) {
+    public ResponseEntity<Map<String, Object>> approvalDocSave(
+									@AuthenticationPrincipal LoginDTO loginDTO, 
+									@RequestParam Map<String, String> doc,
+    								@RequestParam(value = "itemImgFiles", required = false) MultipartFile[] files) {
         
-        log.info("받은 JSON: {}", doc);
-		approvalDocService.saveApprovalDoc(loginDTO.getEmpId(),doc); 
-		Map<String, Object> response = new HashMap<>();
-    	response.put("status", "success");
-    	response.put("message", "결재 문서가 성공적으로 등록되었습니다.");
-    
-    	return ResponseEntity.ok(response); 
+		log.info("로그인 사용자 ID: {}", loginDTO.getEmpId());
+    	log.info("받은 폼 데이터 (Map): {}", doc); 
+    	int fileCount = (files != null) ? files.length : 0;
+    	log.info("첨부된 파일 수: {}", fileCount);
+										
+    	try {
+    	    approvalDocService.saveApprovalDoc(loginDTO.getEmpId(), doc, files); 
+			
+    	    Map<String, Object> response = new HashMap<>();
+    	    response.put("status", "success");
+    	    response.put("message", "결재 문서가 성공적으로 등록되었습니다.");
+			
+    	    return ResponseEntity.ok(response); 
+			
+    	} catch (Exception e) {
+    	    // 예외 처리 로직 추가 (필수)
+    	    log.error("결재 문서 등록 실패: {}", e.getMessage(), e); // e를 추가하여 스택 트레이스 출력
+		
+    	    Map<String, Object> errorResponse = new HashMap<>();
+    	    errorResponse.put("status", "error");
+    	    errorResponse.put("message", "결재 문서 등록 중 오류가 발생했습니다: " + e.getMessage());
+		
+    	    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    	}
     }
 
 }
