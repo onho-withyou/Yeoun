@@ -52,7 +52,7 @@
 	                </div>
 	                 <input id="searchEmpIdAndformType" class="form-control" type="text" placeholder="기안자및문서제목" style="width: 200px;height: 38.94px;">
 	                <div class="mb-6 col-lg-6 col-xl-3 col-12 mb-0">
-		             	<button id="searchBtn" class="btn btn-primary">조회</button>
+		             	<button id="searchBtn" onclick="AllGridSearch()" class="btn btn-primary">조회</button>
 	                </div>
 				</div>
 			</div>
@@ -110,11 +110,10 @@
               </div>
             </div>
           </div>
-		</div>
 		<!-- 모달 -->
 		<div class="modal fade" id="approval-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
-		    <form class="modal-content" id="modal-doc" th:action="@{/approval/approval_doc}" method="POST" enctype="multipart/form-data">
+		    <form class="modal-content" id="modal-doc" th:action="@{/approval/approval_doc}" th:object="${approvalDocGridDTO}" method="POST" enctype="multipart/form-data">
 		      <div class="modal-header" data-draggable="true">
 				<h3 class="modal-title" id="Drafting" value="">기안서 작성</h3>
 				<input type="hidden" id="DraftingHidden" name="drafting" value="">
@@ -282,7 +281,7 @@
 		      </div>
 		      <div class="modal-footer">
 		      	<div>
-			     	<button type="button" id="attachmentBtn" class="btn btn-primary" style="display: none;">첨부파일</button>
+			     	<button type="button" id="attachmentBtn" class="btn btn-primary">첨부파일</button>
 			     	<button type="button" id="approvalCompanionBtn" class="btn btn-primary" style="display:none;">반려</button>
 			      	<button type="button" id="approvalCheckBtn" class="btn btn-primary" style="display:none;">결재확인</button>
 			    </div>
