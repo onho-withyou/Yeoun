@@ -1,0 +1,38 @@
+/* Inventory Module Specific Styles */
+
+/* Expiry Alert Animation */
+#expiryAlert {
+    border-left: 5px solid #ff3e1d;
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 62, 29, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 62, 29, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 62, 29, 0);
+    }
+}
+
+/* Dashboard Chart Containers */
+#warehouseUsageChart,
+#trendChart {
+    min-height: 300px;
+}
+
+/* Modal Styles */
+.modal-header {
+    background-color: #f5f5f9;
+    border-bottom: 1px solid #d9dee3;
+}
+
+/* Grid Customization (if needed beyond common.css) */
+.tui-grid-cell-content {
+    vertical-align: middle;
+}
