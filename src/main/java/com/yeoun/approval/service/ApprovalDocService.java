@@ -281,7 +281,7 @@ public class ApprovalDocService {
 		log.info("approvalId 인사발령신청서 id -----> {}",approvalId);
 		HrAction hrAction = hrActionRepository.findByApprovalId(approvalId)
                    .orElseThrow(() -> new EntityNotFoundException(
-                       // 💡 예외 메시지 구체화
+                       //예외 메시지 구체화
                        "HR 데이터 누락: 결재 최종 승인 후처리용 인사발령(HrAction)을 찾을 수 없습니다. approvalId=" + approvalId));
 		
 		// 3) 발령 상태만 '승인완료'로 변경 (EMP 적용 금지)
