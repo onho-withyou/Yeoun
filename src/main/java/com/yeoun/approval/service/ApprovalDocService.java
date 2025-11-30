@@ -76,6 +76,16 @@ public class ApprovalDocService {
 	public List<Position> getPosition(){
 		return approvalDocRepository.findPosition();
 	}
+
+	// 결재문서 파일 가져오기
+	public List<FileAttachDTO> getApprovalDocFiles(Long approvalId) {
+		List<FileAttach> fileList = fileAttachRepository.findByRefTableAndRefId("APPROVAL_DOC", approvalId);
+		
+		return fileList.stream().map(FileAttachDTO::fromEntity).toList(); 
+	}
+	
+
+
 	//검색 조회
 	@Transactional(readOnly = true)
 	public  Map<String, List<ApprovalDocGridDTO>> getAllGridsData(String empId,Map<String,Object> searchParams){
@@ -120,17 +130,16 @@ public class ApprovalDocService {
 	//결재 문서 등록
 	public void saveApprovalDoc(String empId, Map<String,String> doc, MultipartFile[] files) {
 		
-	    // ⭐ 1. Map -> Entity 변환 및 엔티티 설정 (기존 로직 유지) ⭐
 	    log.info(">>>>>>>>>>>>>>>>>> approvalDoc : {}", doc);
 	    ApprovalDoc approvalDoc = new ApprovalDoc(); 
 
-	    // 날짜 파싱 (기존 로직 유지)
+	    // 날짜 파싱 
 	    LocalDate createdDate = parseDateSafely(doc.get("createdDate"));
 	    LocalDate finishDate = parseDateSafely(doc.get("finishDate"));
 	    LocalDate startDate = parseDateSafely(doc.get("startDate"));
 	    LocalDate endDate = parseDateSafely(doc.get("endDate"));
 		
-	    // ApprovalDoc 엔티티에 값 설정 (기존 로직 유지)
+	    // ApprovalDoc 엔티티에 값 설정 
 	    approvalDoc.setApprovalId(null);
 	    approvalDoc.setApprovalTitle(doc.get("approvalTitle")); 
 	    approvalDoc.setEmpId(empId); 
@@ -147,7 +156,7 @@ public class ApprovalDocService {
 	    approvalDoc.setExpndType(doc.get("expndType"));
 	    approvalDoc.setReason(doc.get("reason"));
 		
-	    // ⭐ 2. 문서 저장 및 생성된 ID 획득 ⭐
+	    // 2. 문서 저장 및 생성된 ID 획득
 	    approvalDocRepository.save(approvalDoc); 
 	    Long generatedApprovalId = approvalDoc.getApprovalId();
 		
@@ -157,7 +166,7 @@ public class ApprovalDocService {
 	        processApprover(generatedApprovalId, doc, key);
 	    } 
 	
-	    // 4. ⭐ 파일 업로드 및 DB 저장 로직 완성 ⭐
+	    // 4. 파일 업로드 및 DB 저장 로직 완성
 	    if (files != null && files.length > 0) {
 		
 	        // 4-1. Array -> List 변환
@@ -176,10 +185,7 @@ public class ApprovalDocService {
 	            // 4-4. DTO -> Entity 변환 및 추가 정보 설정
 	            List<FileAttach> finalFileList = fileDtos.stream()
 	                .map(dto -> dto.toEntity()) // DTO를 Entity로 변환
-	                .peek(fileAttach -> {
-	                    // 추가 분류 정보 설정 (선택 사항)
-	                    fileAttach.setCategory("APPROVAL");
-	                })
+	                .peek(fileAttach -> {})
 	                .toList();
 				
 	            fileAttachRepository.saveAll(finalFileList);

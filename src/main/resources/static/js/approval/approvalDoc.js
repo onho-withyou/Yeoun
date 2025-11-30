@@ -158,10 +158,13 @@
 					$('#approval-modal').modal('show');
 				
 					document.getElementById('saveBtn').style.display = "none";//approvalCompanionBtn//approvalCheckBtn
+					document.getElementById('attachmentBtn').style.display = "none";//첨부파일
+					document.getElementById('downloadArea').style.display = "block";//다운로드
 					document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
 					document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
 					// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 					approvalId = rowData.approval_id;
+					getApprovalDocFileData(approvalId);
 					// 문서 열릴때 현재 결재권자(approval) 저장
 					currentApprover = rowData.approver;
 					console.log("rowData",rowData);//DraftingHidden
@@ -224,11 +227,14 @@
 					$('#approval-modal').modal('show');
 					
 					document.getElementById('saveBtn').style.display = "none";
+					document.getElementById('attachmentBtn').style.display = "none";//첨부파일
+					document.getElementById('downloadArea').style.display = "block";//다운로드
 					document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
 					document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
 					
 					// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 					approvalId = rowData.approval_id;
+					getApprovalDocFileData(approvalId);
 					// 문서 열릴때 현재 결재권자(approval) 저장
 					currentApprover = rowData.approver;
 					
@@ -283,11 +289,14 @@
 					$('#approval-modal').modal('show');
 					
 					document.getElementById('saveBtn').style.display = "none";
+					document.getElementById('attachmentBtn').style.display = "none";//첨부파일
+					document.getElementById('downloadArea').style.display = "block";//다운로드
 					document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
 					document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
 					
 					// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 					approvalId = rowData.approval_id;
+					getApprovalDocFileData(approvalId);
 					// 문서 열릴때 현재 결재권자(approval) 저장
 					currentApprover = rowData.approver;
 					
@@ -345,11 +354,14 @@
 				$('#approval-modal').modal('show');
 				
 				document.getElementById('saveBtn').style.display = "none";//등록버튼
+				document.getElementById('attachmentBtn').style.display = "none";//첨부파일
+				document.getElementById('downloadArea').style.display = "block";//다운로드
 				document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려버튼
 				document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인버튼
 				
 				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 				approvalId = rowData.approval_id;
+				getApprovalDocFileData(approvalId);
 				// 문서 열릴때 현재 결재권자(approval) 저장
 				currentApprover = rowData.approver;
 				
@@ -405,10 +417,13 @@
 					$('#approval-modal').modal('show');
 					
 					document.getElementById('saveBtn').style.display = "none";
+					document.getElementById('attachmentBtn').style.display = "none";//첨부파일
+					document.getElementById('downloadArea').style.display = "block";//다운로드
 					document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
 					document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
 					// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 					approvalId = rowData.approval_id;
+					getApprovalDocFileData(approvalId);
 					// 문서 열릴때 현재 결재권자(approval) 저장
 					currentApprover = rowData.approver;
 					
@@ -465,7 +480,7 @@
 
 	// f- 결재양식에따른 form 활성화/비활성화 함수
 	function formChange(formType){
-		if(formType == '지출결의서'){
+		if(formType == '지출결의서'){//attachmentBtn
 			document.getElementById('expndTypeForm').style.display = 'flex';//지출종류
 			document.getElementById('leavePeriodForm').style.display = 'none';// 휴가기간
 			document.getElementById('leaveTypeForm').style.display = 'none';//휴가종류	
@@ -539,21 +554,20 @@
     	const attachBtn = document.getElementById('attachmentBtn');
     	const fileInput = document.getElementById('realFileInput');
     	const listContainer = document.getElementById('fileListContainer');
-    	const fileNameDisp = document.getElementById('fileNameDisplay');
 
     	attachBtn.addEventListener('click', () => fileInput.click());
 		fileInput.addEventListener('change', updateFileListDisplay);
 
-		// function resetAttachments() {
-    	//     fileInput.value = ''; // input[type=file]의 파일 목록을 초기화
-    	//     updateFileListDisplay(); // 화면 목록 갱신 (목록을 비우고 "선택된 파일 없음" 표시)
-    	// }
+		function resetAttachments() {
+    	    fileInput.value = ''; // input[type=file]의 파일 목록을 초기화
+    	    updateFileListDisplay(); // 화면 목록 갱신 (목록을 비우고 "선택된 파일 없음" 표시)
+    	}
 		// 파일 목록을 화면에 갱신하는 함수
 		function updateFileListDisplay() {
 		    listContainer.innerHTML = '';
 		    const files = fileInput.files;
 		    // '선택된 파일 없음' 문구 표시/숨김
-		    fileNameDisp.style.display = files.length > 0 ? 'none' : 'block';
+		   //fileNameDisp.style.display = files.length > 0 ? 'none' : 'block';
 	
 		    Array.from(files).forEach((file, index) => {
 		        const item = document.createElement('div');
@@ -589,8 +603,10 @@
 		        const reader = new FileReader();
 		        reader.onload = (e) => {
 		            const img = document.createElement('img');
+					img.src = e.target.result;
 		            img.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
 		            previewArea.appendChild(img);
+					
 		        };
 		        reader.readAsDataURL(file);
 		    } else if (file.type === 'application/pdf') {
@@ -614,8 +630,58 @@
 		    updateFileListDisplay(); 
 		}
 
-		//window.resetAttachments = resetAttachments;
+		window.resetAttachments = resetAttachments;
 	});
+
+	// 파일 링크 생성 헬퍼 함수 downloadArea영역에생성되는 a태그
+	const createFileLink = (fileId, fileName) => {
+		const link = document.createElement('a');
+		link.href = `/files/download/${fileId}`;
+		link.download = fileName;
+		link.textContent = `📎 ${fileName}`;
+		Object.assign(link.style, {
+			display: 'block',
+			margin: '5px 0',
+			color: '#007bff',
+			textDecoration: 'none',
+			cursor: 'pointer'
+		});
+		return link;
+	};
+
+	// 결재 문서 첨부파일 로드 및 렌더링
+	async function loadAndRenderFiles(docId) {
+		const container = document.getElementById('downloadArea');
+		if (!container) return console.error('다운로드 영역을 찾을 수 없습니다.');
+
+		container.innerHTML = '파일 목록을 불러오는 중...';
+
+		try {
+			const response = await fetch(`/approval/file/${docId}`);
+			if (!response.ok) throw new Error(`상태: ${response.status}`);
+
+			const files = await response.json();
+			container.innerHTML = '';
+
+			if (!files.length) {
+				container.textContent = '첨부된 파일이 없습니다.';
+				return;
+			}
+
+			files.forEach(file => {
+				const fileId = file.fileId;
+				const fileName = file.originFileName || file.fileName;
+				if (fileId && fileName) container.appendChild(createFileLink(fileId, fileName));
+			});
+
+		} catch (error) {
+			console.error('첨부파일 로드 실패:', error);
+			container.innerHTML = `⚠️ 파일을 불러올 수 없습니다. (${error.message})`;
+		}
+	}
+
+	// 결재 문서 파일 데이터 로드
+	const getApprovalDocFileData = (approvalId) => loadAndRenderFiles(approvalId);
 
     	
 	//f- 등록버튼,폼 결재권한자 데이터 말아서 보내는 함수
@@ -660,7 +726,6 @@
 				method: 'POST', 
 				headers: {
 					[csrfHeader]: csrfToken
-					//,'Content-Type': 'application/json' // Content-Type 헤더를 application/json으로 설정
 				},
 				body:  formData // 요청 본문에 JSON 데이터 포함
 			})
@@ -1065,7 +1130,9 @@
 	function draftValFn(ev){
 		let draft_doc = ev.value;
 
-		document.getElementById('saveBtn').style.display = "block";
+		document.getElementById('saveBtn').style.display = "block";//등록
+		document.getElementById('attachmentBtn').style.display = 'block';//첨부파일
+		document.getElementById('downloadArea').style.display = "none";//다운로드
 		//document.getElementById('DraftingHidden').value = draft_doc;
 
 		// html에서 th:data-formname="${item.formName}" 값을 가져와서 이름으로 사용
@@ -1141,10 +1208,10 @@
 	let writeBtn = document.getElementById("writeBtn");
 	
 	//모달이 닫힐떄 첨부파일 리셋
-	// const approvalModal = document.getElementById('approval-modal');
-	// approvalModal.addEventListener('hidden.bs.modal', function (event) {
-	// 	resetAttachments(); 
-	// });
+	const approvalModal = document.getElementById('approval-modal');
+	approvalModal.addEventListener('hidden.bs.modal', function (event) {
+		resetAttachments(); 
+	});
 
 	//f- 기안서작성 모달이 열리기전에 이벤트를 감지
 	$('#approval-modal').on('show.bs.modal', function (e) {
@@ -1230,7 +1297,7 @@
     		approverDiv.innerHTML +='<div class="btn btn-success"'
     		                      +'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
     		                      +'<p onclick="approverDivclose(this,' + "'"+ type + "'"+ ','+ count +')" style="float:right;margin-right: 8px;">&times;</p>'
-    		                      +'<p id="approver_'+count+'" onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 :' + text + ' 변경</p>'
+    		                      +'<p id="approver_'+count+'" onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 ' + text + ' 변경</p>'
     		                    	+'</div>';
 		}
     }

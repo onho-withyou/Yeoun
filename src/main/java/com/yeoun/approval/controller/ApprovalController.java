@@ -29,6 +29,7 @@ import com.yeoun.approval.dto.ApprovalFormDTO;
 import com.yeoun.approval.repository.ApprovalDocRepository;
 import com.yeoun.approval.service.ApprovalDocService;
 import com.yeoun.auth.dto.LoginDTO;
+import com.yeoun.common.dto.FileAttachDTO;
 import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.entity.Dept;
@@ -77,6 +78,14 @@ public class ApprovalController {
 		return allGridsData;
 		
 	}
+
+	// 결재문서 파일데이터 조회
+    @GetMapping("/file/{approvalId}")
+    public ResponseEntity<List<FileAttachDTO>> getApprovalDocFile(@PathVariable("approvalId")Long approvalId){
+    	List<FileAttachDTO> fileDTOList = approvalDocService.getApprovalDocFiles(approvalId);
+        
+        return ResponseEntity.ok(fileDTOList);
+    }
 
 	//기안서 등록(저장)
     @PostMapping("/approval_doc")
