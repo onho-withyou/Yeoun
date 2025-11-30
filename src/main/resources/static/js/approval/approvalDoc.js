@@ -119,7 +119,7 @@
 			//console.log(data);
 			data.map((item,index)=>{
 				obj["value"] = item[0]; //사번
-				obj["label"] = (index+1) +" : "+item[1]+"("+item[0]+")"; //이름(사번)
+				obj["label"] = item[1]+"("+item[0]+")"; //이름(사번)
 				itemData.push(obj);
 				obj = {};
 			});
@@ -823,7 +823,7 @@
 			// 새로운 전결자 표시
 			if(selectedValue != 'N') {
 				targetDiv.querySelectorAll('span').forEach(span => span.remove());
-				targetDiv.innerHTML += `<span style="color:red;"> ${selectedValue} : ${selectedEmpName} </span>`;
+				targetDiv.innerHTML += `<span style="color:blue;"> ${selectedValue} <br> ${selectedEmpName} </span>`;
 			}
 		}
 		approverArr.forEach((value,key) => {
@@ -1295,9 +1295,9 @@
     	if(this.count < 3){
     		this.count++;
     		approverDiv.innerHTML +='<div class="btn btn-success"'
-    		                      +'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
+    		                      +'style="width:250px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
     		                      +'<p onclick="approverDivclose(this,' + "'"+ type + "'"+ ','+ count +')" style="float:right;margin-right: 8px;">&times;</p>'
-    		                      +'<p id="approver_'+count+'" onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 ' + text + ' 변경</p>'
+    		                      +'<p id="approver_'+count+'" onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:30px;height: 129px;font-size:22px;">'+(this.count) + '차 결재권한자 '+'<br>'+ text + '<br>' + '</p>'
     		                    	+'</div>';
 		}
     }

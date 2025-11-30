@@ -240,7 +240,9 @@
 					<label>결재권한자 </label> 
 		          	<div id="select-box" style="width: 200px"></div>
 		        </h5>
+					<label>* 해당하는 결재권한자버튼을 누르면,결재권한자를 변경할수있습니다.</label>
      				<div id="approver" th:value="${empList}"  style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
+					
 					<!-- 결재권한자 버튼 생성 영역 -->
      				</div>	
      				
@@ -270,7 +272,7 @@
 							  <option selected></option>
 							  <option th:each="item, iterStat : ${empList}" 
 							 			th:value="${item.empId}" 
-							 			th:text="${iterStat.index+1} + ' : ' + ${item.empName} + '(' + ${item.empId} + ')'">
+							 			th:text="${item.empName} + '(' + ${item.empId} + ')'">
 							 </option> 
 							</select>
 						  </div>
