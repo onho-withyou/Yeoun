@@ -19,10 +19,10 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "INVENTROY")
+@Table(name = "INVENTORY")
 @SequenceGenerator(
-		name = "INVENTROY_SEQ_GENERATOR", // JPA 에서 사용하는 시퀀스 이름(DB의 시퀀스 이름이 아님!)
-		sequenceName = "INVENTROY_SEQ", // 오라클에서 사용하는 시퀀스 이름
+		name = "INVENTORY_SEQ_GENERATOR", // JPA 에서 사용하는 시퀀스 이름(DB의 시퀀스 이름이 아님!)
+		sequenceName = "INVENTORY_SEQ", // 오라클에서 사용하는 시퀀스 이름
 		initialValue = 1, 			// 초기값(오라클 시퀀스의 start with 1과 동일)
 		allocationSize = 1          // 증가값(오라클 시퀀스의 increment by 값과 동일)
 		)
@@ -31,7 +31,7 @@ import lombok.ToString;
 @ToString
 @EntityListeners(AuditingEntityListener.class)
 public class Inventory {
-	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "INVENTROY_SEQ_GENERATOR")
+	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "INVENTORY_SEQ_GENERATOR")
 	@Column(name = "IV_ID", updatable = false)
 	private Long ivId; 
 	

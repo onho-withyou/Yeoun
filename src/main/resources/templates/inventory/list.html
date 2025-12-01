@@ -9,6 +9,7 @@
 </head>
 
 <th:block layout:fragment="content">
+
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">재고 관리 /</span> 재고 리스트</h4>
 
@@ -37,11 +38,11 @@
                         </div>
                     </div>
 
-                    <!-- Advanced Search Fields (Hidden by default) -->
+                    <!-- 검색 상세조건 리스트 -->
                     <div id="advancedSearch" class="mt-3" style="display: none;">
                         <hr class="my-3">
                         <div class="row gx-3 gy-2">
-                            <div class="col-md-2">
+                            <div class="col-md-3">
                                 <label class="form-label" for="searchCategory">카테고리</label>
                                 <select class="form-select" id="searchCategory">
                                     <option value="">전체</option>
@@ -49,7 +50,7 @@
                                     <option value="PRODUCT">완제품</option>
                                 </select>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-3">
                                 <label class="form-label" for="searchZone">Zone</label>
                                 <select class="form-select" id="searchZone">
                                     <option value="">전체</option>
@@ -58,10 +59,13 @@
                                     <option value="C">C존 (완제품)</option>
                                 </select>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-3">
                                 <label class="form-label" for="searchRack">Rack</label>
                                 <input type="text" class="form-control" id="searchRack" placeholder="예: 01">
                             </div>
+                        </div>
+                        
+                        <div class="row gx-3 gy-2">
                             <div class="col-md-3">
                                 <label class="form-label" for="searchStatus">상태</label>
                                 <select class="form-select" id="searchStatus">
@@ -80,6 +84,7 @@
                             </div>
                         </div>
                     </div>
+                    
                 </form>
             </div>
         </div>
@@ -90,7 +95,7 @@
                 <h5 class="mb-0">재고 목록</h5>
                 <div>
                     <button type="button" class="btn btn-primary btn-sm"
-                        onclick="location.href='/inventory/stock-take'">
+                        onclick="location.href='/inventory/stock_take'">
                         <i class='bx bx-clipboard me-1'></i> 재고 실사
                     </button>
                 </div>
@@ -101,207 +106,16 @@
         </div>
     </div>
 
-    <!-- Detail Modal -->
-    <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel1">재고 상세 정보</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row g-2">
-                        <div class="col mb-3">
-                            <label for="detailProdName" class="form-label">상품명</label>
-                            <input type="text" id="detailProdName" class="form-control" readonly>
-                        </div>
-                        <div class="col mb-3">
-                            <label for="detailLotNo" class="form-label">LOT 번호</label>
-                            <input type="text" id="detailLotNo" class="form-control" readonly>
-                        </div>
-                    </div>
-                    <div class="row g-2">
-                        <div class="col mb-3">
-                            <label for="detailCategory" class="form-label">카테고리</label>
-                            <input type="text" id="detailCategory" class="form-control" readonly>
-                        </div>
-                        <div class="col mb-3">
-                            <label for="detailQty" class="form-label">현재 수량</label>
-                            <input type="text" id="detailQty" class="form-control" readonly>
-                        </div>
-                    </div>
-                    <div class="row g-2">
-                        <div class="col mb-3">
-                            <label for="detailLocation" class="form-label">위치 (Zone-Rack-Row-Col)</label>
-                            <input type="text" id="detailLocation" class="form-control" readonly>
-                        </div>
-                        <div class="col mb-3">
-                            <label for="detailExpiry" class="form-label">유통기한</label>
-                            <input type="text" id="detailExpiry" class="form-control" readonly>
-                        </div>
-                    </div>
-
-                    <!-- Same LOT Locations Table -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">동일 LOT 다른 위치 정보</label>
-                        <div class="table-responsive text-nowrap border rounded">
-                            <table class="table table-sm table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Zone</th>
-                                        <th>Rack</th>
-                                        <th>Row</th>
-                                        <th>Col</th>
-                                        <th>수량</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="sameLotTableBody">
-                                    <!-- JS will populate this -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <hr>
-                    <h6>작업</h6>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-warning" data-bs-toggle="modal"
-                            data-bs-target="#adjustModal">수량 조절</button>
-                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#moveModal">재고
-                            이동</button>
-                        <button type="button" class="btn btn-danger" data-bs-toggle="modal"
-                            data-bs-target="#disposalModal">폐기</button>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">닫기</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Adjust Quantity Modal -->
-    <div class="modal fade" id="adjustModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">수량 조절</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">조절 유형</label>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="adjustType" id="adjustInc" value="INC"
-                                checked>
-                            <label class="form-check-label" for="adjustInc">증가</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="adjustType" id="adjustDec" value="DEC">
-                            <label class="form-check-label" for="adjustDec">감소</label>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="adjustQty" class="form-label">수량</label>
-                        <input type="number" id="adjustQty" class="form-control" placeholder="0">
-                    </div>
-                    <div class="mb-3">
-                        <label for="adjustReason" class="form-label">사유</label>
-                        <textarea id="adjustReason" class="form-control" rows="3"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary">저장</button>
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">취소</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Move Stock Modal -->
-    <div class="modal fade" id="moveModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">재고 이동</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row g-2">
-                        <div class="col mb-3">
-                            <label for="moveZone" class="form-label">Zone</label>
-                            <select id="moveZone" class="form-select">
-                                <option value="A">A</option>
-                                <option value="B">B</option>
-                                <option value="C">C</option>
-                            </select>
-                        </div>
-                        <div class="col mb-3">
-                            <label for="moveRack" class="form-label">Rack</label>
-                            <input type="text" id="moveRack" class="form-control" placeholder="01">
-                        </div>
-                    </div>
-                    <div class="row g-2">
-                        <div class="col mb-3">
-                            <label for="moveRow" class="form-label">Row</label>
-                            <input type="text" id="moveRow" class="form-control" placeholder="1">
-                        </div>
-                        <div class="col mb-3">
-                            <label for="moveColumn" class="form-label">Column</label>
-                            <input type="text" id="moveColumn" class="form-control" placeholder="1">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="moveQty" class="form-label">이동 수량</label>
-                        <input type="number" id="moveQty" class="form-control" placeholder="0">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary">이동</button>
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">취소</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Disposal Modal -->
-    <div class="modal fade" id="disposalModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">재고 폐기</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="disposalQty" class="form-label">폐기 수량</label>
-                        <input type="number" id="disposalQty" class="form-control" placeholder="0">
-                    </div>
-                    <div class="mb-3">
-                        <label for="disposalReason" class="form-label">폐기 사유</label>
-                        <select id="disposalReason" class="form-select">
-                            <option value="EXPIRY">유통기한 경과</option>
-                            <option value="DAMAGED">파손</option>
-                            <option value="OTHER">기타</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="disposalFile" class="form-label">사진 첨부 (선택)</label>
-                        <input class="form-control" type="file" id="disposalFile">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger">폐기 처리</button>
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">취소</button>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- 모달창 삽입 -->
+<th:block th:insert="~{inventory/modal/inventoryDetailModal}"></th:block>
+<th:block th:insert="~{inventory/modal/moveStockModal}"></th:block>
+<th:block th:insert="~{inventory/modal/adjustQuantityModal}"></th:block>
+<th:block th:insert="~{inventory/modal/disposalModal}"></th:block>
 
 </th:block>
 
 <th:block layout:fragment="myScript">
-    <script th:src="@{/js/inventory/inventory_list.js(v=2)}"></script>
+    <script th:src="@{/js/inventory/inventory_list.js}"></script>
 </th:block>
 
 </html>
