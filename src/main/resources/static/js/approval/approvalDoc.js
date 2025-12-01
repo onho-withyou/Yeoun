@@ -100,24 +100,8 @@
 	//grid - 4.결재대기 - 나와관련된 모든 결재대기
 	//grid - 5.결재완료 - 나와 관련된 결재완료한 문서
 	window.onload = function() {
-		fetchPendingApprovalDocs().then(data => {
-			grid1.resetData(data);
-		});
-		fetchApprovalDocs().then(data => {
-			grid2.resetData(data);
-		});
-		fetchMyApprovalDocs().then(data => {
-			grid3.resetData(data);
-		});
-		fetchWaitingApprovalDocs().then(data => {
-			grid4.resetData(data);
-		});
-		fetchDoneApprovalDocs().then(data =>{
-			grid5.resetData(data);
-		});		
+		AllGridSearch();//조회버튼
 		empData();
-
-		
 	}
 	
 	let approverDiv = document.querySelector('#approver');
@@ -708,209 +692,6 @@
 		console.log("Updated approverArr:", approverArr);
 	}
 
-	//f- 1. 결재사항 불러오기
-	async function fetchPendingApprovalDocs() {
-		try {
-			const response = await fetch('/approval/pendingApprovalDocGrid');
-			const data = await response.json();
-			let colData = [];
-			let obj = {};
-			// console.log("grid1 fetch-data----->:",data);
-			data.map((item, index) => {
-				obj["row_no"] = item[0]; //결재순번
-				obj["approval_id"] = item[1]; //문서id
-				obj["approval_title"] = item[2]; //문서제목
-				obj["form_type"] = item[3];	//폼양식
-				obj["emp_id"] = item[4]; //사원번호
-				obj["emp_name"] = item[5]; //기안자
-				obj["dept_id"] = item[6]; //부서코드
-				obj["dept_name"] = item[7]; //부서명
-				obj["approver"] = item[8]; //결재권한자id
-				obj["approver_name"] = item[9]; //결재권한자 이름
-				obj["pos_code"] = item[10]; //직급코드
-				obj["pos_name"] = item[11]; //직급
-				obj["created_date"] = toDateStr(item[12]); //생성일
-				obj["finish_date"]  = toDateStr(item[13]); //결재완료일자
-				obj["start_date"]   = toDateStr(item[14]); //휴가시작일자
-				obj["end_date"]     = toDateStr(item[15]); //휴가종료일자
-				obj["leave_type"] = item[16]; //연차유형
-				obj["to_pos_code"] = item[17] //변경직급
-				obj["to_dept_id"] = item[18]; //발령부서
-				obj["expnd_type"] = item[19]; //지출타입
-				obj["reason"] = item[20]; //사유
-				obj["doc_status"] = item[21]; //상태
-				colData.push(obj);
-				obj = {};
-			});
-			return colData;
-		} catch (error) {
-			console.error('Error fetching approval documents:', error);
-		}
-	}
-	//f- 2. 전체결재 목록 불러오기
-	async function fetchApprovalDocs() {
-		try {
-			const response = await fetch('/approval/approvalDocGrid');
-			const data = await response.json();
-			let colData = [];
-			let obj = {};
-
-			data.map((item, index) => {
-				obj["row_no"] = item[0]; //결재순번
-				obj["approval_id"] = item[1]; //문서id
-				obj["approval_title"] = item[2]; //문서제목
-				obj["form_type"] = item[3];	
-				obj["emp_id"] = item[4]; //사원번호
-				obj["emp_name"] = item[5]; //기안자
-				obj["dept_id"] = item[6]; //부서코드
-				obj["dept_name"] = item[7]; //부서명
-				obj["approver"] = item[8]; //결재권한자
-				obj["approver_name"] = item[9]; //결재권한자 이름
-				obj["pos_code"] = item[10]; //직급코드
-				obj["pos_name"] = item[11]; //직급
-				obj["created_date"] = toDateStr(item[12]); //생성일
-				obj["finish_date"]  = toDateStr(item[13]); //결재완료일자
-				obj["start_date"]   = toDateStr(item[14]); //휴가시작일자
-				obj["end_date"]     = toDateStr(item[15]); //휴가종료일자
-				obj["leave_type"] = item[16]; //
-				obj["to_pos_code"] = item[17] //변경직급
-				obj["to_dept_id"] = item[18]; //발령부서
-				obj["expnd_type"] = item[19]; //지출타입
-				obj["reason"] = item[20]; //사유
-				obj["doc_status"] = item[21]; //상태
-				colData.push(obj);
-				obj = {};
-			});
-			return colData;
-		} catch (error) {
-			console.error('Error fetching approval documents:', error);
-		}
-	}
-	//f- 3.내 결재목록 불러오기
-	async function fetchMyApprovalDocs() {
-		try {
-			const response = await fetch('/approval/myApprovalDocGrid');
-			const data = await response.json();
-			// console.log("grid3 fetch-data----->:",data);
-			let colData = [];
-			let obj = {};
-
-			data.map((item, index) => {
-				obj["row_no"] = item[0]; //결재순번
-				obj["approval_id"] = item[1]; //문서id
-				obj["approval_title"] = item[2]; //문서제목
-				obj["form_type"] = item[3];//폼양식	
-				obj["emp_id"] = item[4]; //사원번호
-				obj["emp_name"] = item[5]; //기안자
-				obj["dept_id"] = item[6]; //부서코드
-				obj["dept_name"] = item[7]; //부서명
-				obj["approver"] = item[8]; //결재권한자
-				obj["approver_name"] = item[9]; //결재권한자 이름
-				obj["pos_code"] = item[10]; //직급코드
-				obj["pos_name"] = item[11]; //직급
-				obj["created_date"] = toDateStr(item[12]); //생성일
-				obj["finish_date"]  = toDateStr(item[13]); //결재완료일자
-				obj["start_date"]   = toDateStr(item[14]); //휴가시작일자
-				obj["end_date"]     = toDateStr(item[15]); //휴가종료일자
-				obj["leave_type"] = item[16]; //	
-				obj["to_pos_code"] = item[17] //변경직급
-				obj["to_dept_id"] = item[18]; //발령부서
-				obj["expnd_type"] = item[19]; //지출타입
-				obj["reason"] = item[20]; //사유
-				obj["doc_status"] = item[21]; //상태
-				colData.push(obj);
-				obj = {};
-			});
-			return colData;
-		} catch (error) {
-			console.error('Error fetching approval documents:', error);
-		}
-	}
-	//f- 4.결재대기 불러오기 -- 1차반려,2차반려,3차반려,1차완료,2차완료,3차완료, 종료
-	async function fetchWaitingApprovalDocs() {
-		try {
-			const response = await fetch('/approval/waitingApprovalDocGrid');
-			const data = await response.json();
-			//console.log("grid4 fetch-data----->:", data);
-			let colData = [];
-			let obj = {};
-
-			data.map((item, index) => {
-				obj["row_no"] = item[0]; //결재순번
-				obj["approval_id"] = item[1]; //문서id
-				obj["approval_title"] = item[2]; //문서제목	
-				obj["form_type"] = item[3];
-				obj["emp_id"] = item[4]; //사원번호
-				obj["emp_name"] = item[5]; //기안자
-				obj["dept_id"] = item[6]; //부서코드
-				obj["dept_name"] = item[7]; //부서명
-				obj["approver"] = item[8]; //결재권한자
-				obj["approver_name"] = item[9]; //결재권한자 이름
-				obj["pos_code"] = item[10]; //직급코드
-				obj["pos_name"] = item[11]; //직급
-				obj["created_date"] = toDateStr(item[12]); //생성일
-				obj["finish_date"]  = toDateStr(item[13]); //결재완료일자
-				obj["start_date"]   = toDateStr(item[14]); //휴가시작일자
-				obj["end_date"]     = toDateStr(item[15]); //휴가종료일자
-				obj["leave_type"] = item[16]; //	
-				obj["to_pos_code"] = item[17] //변경직급
-				obj["to_dept_id"] = item[18]; //발령부서
-				obj["expnd_type"] = item[19]; //지출타입
-				obj["reason"] = item[20]; //사유
-				obj["doc_status"] = item[21]; //상태
-				colData.push(obj);
-				obj = {};
-			});
-
-			//console.log("grid4 map------>:", colData);
-			return colData;
-		} catch (error) {
-			console.error('Error fetching approval documents:', error);
-		}
-	}
-	//f- 5.결재완료 불러오기
-	async function fetchDoneApprovalDocs() {
-		try {
-			const response = await fetch('/approval/finishedApprovalDocGrid');
-			const data = await response.json();
-			//console.log("grid5 fetch-data----->:", data);
-			let colData = [];
-			let obj = {};
-
-			data.map((item, index) => {
-				obj["row_no"] = item[0]; //결재순번
-				obj["approval_id"] = item[1]; //문서id
-				obj["approval_title"] = item[2]; //문서제목	
-				obj["form_type"] = item[3];
-				obj["emp_id"] = item[4]; //사원번호
-				obj["emp_name"] = item[5]; //기안자
-				obj["dept_id"] = item[6]; //부서코드
-				obj["dept_name"] = item[7]; //부서명
-				obj["approver"] = item[8]; //결재권한자
-				obj["approver_name"] = item[9]; //결재권한자 이름
-				obj["pos_code"] = item[10]; //직급코드
-				obj["pos_name"] = item[11]; //직급
-				obj["created_date"] = toDateStr(item[12]); //생성일
-				obj["finish_date"]  = toDateStr(item[13]); //결재완료일자
-				obj["start_date"]   = toDateStr(item[14]); //휴가시작일자
-				obj["end_date"]     = toDateStr(item[15]); //휴가종료일자
-				obj["leave_type"] = item[16]; //	
-				obj["to_pos_code"] = item[17] //변경직급
-				obj["to_dept_id"] = item[18]; //발령부서
-				obj["expnd_type"] = item[19]; //지출타입
-				obj["reason"] = item[20]; //사유
-				obj["doc_status"] = item[21]; //상태
-				colData.push(obj);
-				obj = {};
-			});
-
-			//console.log("grid5 map------>:", colData);
-			return colData;
-		} catch (error) {
-			console.error('Error fetching approval documents:', error);
-		}
-	}
-
 	const Grid = tui.Grid;
 	// g- 결재사항
 	const grid1 = new Grid({
@@ -1128,10 +909,8 @@
 	
 	Grid.applyTheme('clean'); // Call API of static method
 	//f- 날짜,기안자,문서양식 조회 불러오는 함수
-	const searchBtn = document.getElementById("searchBtn");
-    if (searchBtn) {
-        searchBtn.addEventListener("click", (ev) => {
-			console.log(ev);
+	function AllGridSearch() {
+		console.log("AllGridSearch()-----> 해당함수 로딩시실행잘되나??");
 			const params = {
 				
 			 	createDate: document.getElementById("searchStartDate").value ?? "",
@@ -1140,7 +919,7 @@
 				approvalTitle: document.getElementById("searchEmpIdAndformType").value ?? ""
 			};
 
-			fetch('/api/approvals/approvalDoc/searchAllGrids', {
+			fetch('/approval/searchAllGrids', {
 				method: 'POST',
 				headers:{
 					[csrfHeader]: csrfToken,
@@ -1171,6 +950,12 @@
 				grid5.resetData([]);
         	});
 			console.log("params:",params);
+
+	}
+	const searchBtn = document.getElementById("searchBtn");
+    if (searchBtn) {
+        searchBtn.addEventListener("click", (ev) => {
+		
 		});
 
     }

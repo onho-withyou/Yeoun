@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
 	// 결재자 셀렉트박스 옵션 로드
 	initApproverView();
 	
+	// 결재선 박스 기본 숨김
+	setApprovalLineVisible(false);
+	
 	// 검색 이벤트
 	const btnSearch = document.getElementById('btnSearchEmp');
 	if (btnSearch) {
@@ -254,6 +257,7 @@ function loadApproverOptions(empId) {
   // 아직 사원 선택 안 했으면 비우기만
   if (!empId) {
     initApproverView();
+	setApprovalLineVisible(false);
     return;
   }
 
@@ -275,25 +279,20 @@ function loadApproverOptions(empId) {
       if (list[0] && a1) a1.textContent = `${list[0].empName} (${list[0].deptName})`;
       if (list[1] && a2) a2.textContent = `${list[1].empName} (${list[1].deptName})`;
       if (list[2] && a3) a3.textContent = `${list[2].empName} (${list[2].deptName})`;
+	  
+	  setApprovalLineVisible(true);
     })
     .catch(err => {
       console.error("결재자 로드 실패:", err);
       // 에러 난 경우도 깔끔하게 표시
       const a1 = document.getElementById("appr1");
       if (a1) a1.textContent = "결재선 로드 실패";
+	  
+	  setApprovalLineVisible(false);
     });
 }
 
-// 결재선 초기화 (처음 로딩 시)
-function initApproverView() {
-  const a1 = document.getElementById("appr1");
-  const a2 = document.getElementById("appr2");
-  const a3 = document.getElementById("appr3");
-  if (a1) a1.textContent = "-";
-  if (a2) a2.textContent = "-";
-  if (a3) a3.textContent = "-";
-}
-
+// 5. 발령타입
 function handleActionTypeChange() {
     const actionType = document.querySelector("select[name='actionType']").value;
     const deptSelect = document.querySelector("select[name='toDeptId']");
@@ -322,5 +321,13 @@ function handleActionTypeChange() {
 		leaveEndInput.value = "";
 	}
 	
+}
+
+// 6. 결재선 박스 show/hide
+function setApprovalLineVisible(show) {
+	const box = document.getElementById('approvalLineBox');
+	if (!box) return;
+	
+	box.style.display = show ? 'block' : 'none';
 }
 

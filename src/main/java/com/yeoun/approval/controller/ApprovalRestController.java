@@ -100,13 +100,7 @@ public class ApprovalRestController {
 		return ResponseEntity.ok(approverDTOList);
 
 	}
-	//날짜,제목 기안자 조회
-	@PostMapping("/approvalDoc/searchAllGrids")
-	public Map<String, List<ApprovalDocGridDTO>> searchApprovalDocGrid1(@AuthenticationPrincipal LoginDTO loginDTO ,@RequestBody Map<String,Object> searchParams){
-		Map<String, List<ApprovalDocGridDTO>> allGridsData = approvalDocService.getAllGridsData(loginDTO.getEmpId(), searchParams);
-		return allGridsData;
-		
-	}
+
 }
 
 
