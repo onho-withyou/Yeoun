@@ -631,6 +631,116 @@
 		}
 
 		window.resetAttachments = resetAttachments;
+
+		const printButton = document.getElementById('printBtn');
+    
+    	if (printButton) {
+    	    printButton.addEventListener('click', () => {
+    	        const modalDoc = document.getElementById('modal-doc');
+    	        if (!modalDoc) return;
+
+    	        // 1. 인쇄를 위해 모달 내용을 복사합니다. (원본 폼 보호)
+    	        const printElement = modalDoc.cloneNode(true);
+			
+    	        // 2. 불필요한 UI 요소 및 입력 필드를 정리합니다.
+			
+    	        // // 2.1. 입력 필드 (input, select, textarea)를 값으로 대체
+    	        // printElement.querySelectorAll('input, select, textarea').forEach(input => {
+    	        //     let displayValue = '';
+
+    	        //     if (input.type === 'hidden') {
+    	        //         // 숨겨진 필드는 제거
+    	        //         input.remove();
+    	        //         return;
+    	        //     }
+				
+    	        //     if (input.tagName === 'SELECT') {
+    	        //         // select 태그의 선택된 option의 텍스트를 가져옴
+    	        //         if (input.options.length > 0 && input.selectedIndex !== -1) {
+    	        //              displayValue = input.options[input.selectedIndex].text.trim() || ' - ';
+    	        //         }
+    	        //     } else if (input.tagName === 'TEXTAREA') {
+    	        //         // textarea의 값
+    	        //         displayValue = input.value || ' - ';
+    	        //     } else if (input.type === 'radio') {
+    	        //         // 라디오 버튼 처리 (체크된 경우만 표시)
+    	        //         if (input.checked) {
+    	        //             const label = input.closest('div').querySelector(`label[for="${input.id}"]`) || input.previousElementSibling;
+    	        //             displayValue = label ? label.textContent.trim() : input.value;
+    	        //             // 라디오 버튼은 복잡하므로, 체크된 요소만 값으로 변환 후 나머지 제거
+    	        //             input.parentNode.innerHTML = `<p style="display:inline; margin-right: 15px;">**${displayValue}**</p>`;
+    	        //             return; // 추가적인 대체 처리 방지
+    	        //         } else {
+    	        //             input.remove();
+    	        //             return;
+    	        //         }
+    	        //     } else {
+    	        //         // 일반 input (text, date 등)의 값
+    	        //         displayValue = input.value || ' - ';
+    	        //     }
+				
+    	        //     // 값만 표시하는 <span>/<div> 태그 생성 및 대체
+    	        //     const displayNode = document.createElement('span');
+    	        //     displayNode.textContent = displayValue;
+    	        //     displayNode.style.display = 'inline-block';
+    	        //     displayNode.style.minWidth = '200px';
+    	        //     displayNode.style.paddingLeft = '5px';
+    	        //     displayNode.style.borderBottom = '1px solid #333';
+
+    	        //     input.parentNode.replaceChild(displayNode, input);
+    	        // });
+
+    	        // // 2.2. 인쇄 시 불필요한 UI/버튼 영역 제거
+    	        // printElement.querySelector('.btn-close')?.remove();
+    	        // printElement.querySelector('.modal-footer')?.remove();
+    	        // printElement.querySelector('#select-box')?.remove();
+    	        // printElement.querySelector('#approver')?.remove();
+    	        // printElement.querySelector('#jeongyeolja')?.remove();
+			
+
+    	        // 3. 새 창을 열고 인쇄 내용을 삽입합니다.
+    	        const printWindow = window.open('', '_blank', 'height=800,width=1000');
+			
+    	        let printHTML = `
+    	            <html>
+    	            <head>
+    	                <title>기안서 인쇄</title>
+    	                <style>
+    	                    /* 인쇄 전용 스타일 */
+    	                    @page { margin: 2cm; }
+    	                    body { font-family: 'Malgun Gothic', sans-serif; }
+    	                    .modal-content { width: 800px; margin: 20px auto; padding: 30px; border: 1px solid #333; }
+    	                    .modal-header { border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+    	                    .modal-header h3 { font-size: 24px; text-align: center; }
+    	                    h5 { display: flex; align-items: baseline; margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;}
+    	                    h5 label { font-weight: bold; width: 150px; flex-shrink: 0; }
+    	                    .d-flex p { margin-left: 10px; }
+			
+    	                    /* Thymeleaf로 채워지는 기안자 정보 스타일링 */
+    	                    #approver-name { font-weight: bold; }
+
+    	                    /* 대체된 입력 필드 스타일 */
+    	                    h5 span { border: none !important; }
+
+    	                </style>
+    	            </head>
+    	            <body>
+    	                <div id="print-area">
+    	                    ${printElement.innerHTML}
+    	                </div>
+    	            </body>
+    	            </html>
+    	        `;
+
+    	        printWindow.document.write(printHTML);
+    	        printWindow.document.close();
+			
+    	        // 4. 인쇄 실행
+    	        printWindow.focus();
+    	        printWindow.print();
+    	        printWindow.close();
+    	    });
+    	}
 	});
 
 	// 파일 링크 생성 헬퍼 함수 downloadArea영역에생성되는 a태그
