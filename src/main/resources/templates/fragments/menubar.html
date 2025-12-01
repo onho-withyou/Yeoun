@@ -188,6 +188,37 @@
                 </ul>
             </li>
 
+<li class="menu-item">
+    <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <div data-i18n="Sales management">영업관리</div>
+    </a>
+
+    <ul class="menu-sub">
+
+	        <!-- 관리자(HR_ADMIN, SYS_ADMIN)만 보임 -->
+	        <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN')">
+	             <a th:href="@{sales/client}" class="menu-link">
+	                <div data-i18n="Menu1" class="menu-link-sub">거래처목록</div>
+	             </a>
+	        </li>
+	
+	        <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN')">
+	             <a th:href="@{sales/orders}" class="menu-link">
+	                <div data-i18n="Menu2" class="menu-link-sub">수주관리</div>
+	             </a>
+	        </li>
+	
+	        <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN')">
+	            <a th:href="@{sales/shipments}" class="menu-link">
+	                <div data-i18n="Menu3" class="menu-link-sub">출하관리</div>
+	            </a>
+	        </li>
+	
+	       
+	
+	    </ul>
+</li>
+
             <li class="menu-item">
                 <a href="/setting/setting_doc" class="menu-link">
                     <div data-i18n="Setting" class="menu-link-sub">Setting</div>

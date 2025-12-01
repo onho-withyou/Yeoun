@@ -1,5 +1,6 @@
 package com.yeoun.masterData.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -40,8 +41,8 @@ public class productMst {
 		@Column(name="EFFECTIVE_DATE")
 		private String effectiveDate; //유효일자
 		
-		@Column(name="UNIT_PRICE")
-		private NUMBER unitRrice; //단가
+		@Column(name = "UNIT_PRICE", precision = 18, scale = 2)
+		private BigDecimal unitPrice;
 		
 		@Column(name="PRD_SPEC")
 		private String prdSpec; //제품상세설명

@@ -1,0 +1,81 @@
+<th:block th:fragment="client-detail-modal">
+
+<div class="modal fade" id="clientDetailModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">거래처 / 협력사 상세조회</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <table class="table table-bordered">
+          <tbody>
+            <tr>
+              <th style="width:150px">거래처명</th>
+              <td id="d-clientName"></td>
+            </tr>
+
+            <tr>
+              <th>구분</th>
+              <td id="d-clientType"></td>
+            </tr>
+
+            <tr>
+              <th>사업자번호</th>
+              <td id="d-businessNo"></td>
+            </tr>
+
+            <tr>
+              <th>대표자명</th>
+              <td id="d-ceoName"></td>
+            </tr>
+
+            <tr>
+              <th>주소</th>
+              <td>
+                  <span id="d-postCode"></span><br>
+                  <span id="d-addr"></span><br>
+                  <span id="d-addrDetail"></span>
+              </td>
+            </tr>
+
+            <tr>
+              <th>담당자</th>
+              <td>
+                <b id="d-managerName"></b><br>
+                <span id="d-managerDept"></span><br>
+                <span id="d-managerTitle"></span><br>
+                <span id="d-managerEmail"></span>
+              </td>
+            </tr>
+
+            <tr>
+              <th>계좌 정보</th>
+              <td>
+                <span id="d-bankName"></span><br>
+                <span id="d-accountNumber"></span><br>
+                <span id="d-accountName"></span>
+              </td>
+            </tr>
+
+            <tr>
+              <th>상태</th>
+              <td id="d-status"></td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</th:block>
