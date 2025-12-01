@@ -48,15 +48,15 @@ public class QcItem {
 	private Number sortOrder; //정렬순서
 	
 	@Column(name="CREATED_ID", length = 7)
-	private String createId; //생성자 id
+	private String createdId; //생성자 id
 	
 	@Column(name="CREATED_DATE")
-	private LocalDate createDate; //생성일시
+	private LocalDate createdDate; //생성일시
 	
 	@Column(name="UPDATED_ID", length = 7)
-	private String updateId; //수정자 id
+	private String updatedId; //수정자 id
 	
 	@Column(name="UPDATED_DATE")
-	private LocalDate updateDate; //수정일시
+	private LocalDate updatedDate; //수정일시
 	
 }
