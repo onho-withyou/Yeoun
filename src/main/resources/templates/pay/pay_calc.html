@@ -29,6 +29,57 @@
   overflow-y: auto;
   max-height: calc(90vh - 150px);  /* 헤더 + 푸터 제외한 영역 */
 }
+
+.autocomplete-list {
+    top: 100%;
+    margin-top: 4px;
+    background: white;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 3000 !important;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+
+.autocomplete-list .list-group-item {
+    cursor: pointer;
+    display: flex;   
+    align-items: center;
+    padding: 8px 10px;
+}
+
+.autocomplete-list .list-group-item:hover {
+    background-color: #eef5ff;
+}
+/* ===========================
+   계산식 도움말 테이블 스타일
+=========================== */
+
+/* 헤더 행 음영 */
+#formulaHelper table thead tr {
+  background-color: #f8f9fa;  /* 밝은 회색 */
+}
+
+/* 셀 텍스트 가운데 정렬 */
+#formulaHelper table td,
+#formulaHelper table th {
+  text-align: center;
+  vertical-align: middle;
+  padding: 10px 12px;
+  font-size: 1rem;
+  color: #495057;  /* 기본 회색 텍스트 */
+}
+
+/* code 변수 스타일 (회색, 강조 X) */
+#formulaHelper code {
+  font-size: 1rem;
+  color: #6c757d;   /* 은은한 회색 */
+  font-weight: 600;
+}
+
+
+
 </style>
 
 
@@ -194,15 +245,16 @@
 
             <!-- 항목 -->
             <div class="col-md-6">
-              <label class="form-label">항목 코드</label>
-              <select class="form-select" name="item.itemCode" required
-                      th:value="${createForm.item != null ? createForm.item.itemCode : ''}">
-                <option value="">-- 선택 --</option>
-                <option th:each="i : ${items}" th:value="${i.itemCode}"
-                        th:text="${i.itemCode + ' · ' + i.itemName}">
-                </option>
-              </select>
-            </div>
+			    <label class="form-label">항목 코드</label>
+			    <select class="form-select" name="item.itemCode" required
+			            th:value="${createForm?.item?.itemCode}">
+			        <option value="">-- 선택 --</option>
+			        <option th:each="i : ${items}" th:value="${i.itemCode}"
+			                th:text="${i.itemCode + ' · ' + i.itemName}">
+			        </option>
+			    </select>
+			</div>
+
 
             <!-- 유형 -->
             <div class="col-md-3">
@@ -257,12 +309,15 @@
 			<div class="col-md-8">
 			  <label class="form-label">대상코드</label>
 
-			  <!-- 사원 입력 -->
-			  <input type="text" id="create-target-code-input"
-			         name="targetCode"
-			         class="form-control target-input d-none"
-			         placeholder="사원번호 7자리를 입력하세요"
-			         th:value="*{targetCode}">
+			         <div class="autocomplete-box position-relative">
+				  <input type="text" id="create-target-code-input"
+				         class="form-control target-input d-none"
+				         name="targetCode"
+				         placeholder="사원명/사번 검색하세요">
+				  <ul class="autocomplete-list list-group position-absolute w-100 d-none"
+				      style="z-index: 2000;"></ul>
+				</div>
+			         
 
 			  <!-- 부서 선택 -->
 			  <select id="create-target-dept"  name="targetCode"
@@ -291,7 +346,7 @@
               <input type="text" name="valueNum" class="form-control amount-input"
                      th:value="*{valueNum}">
                      <div class="form-text text-muted">
-				    비율은 0~1사이의 숫자만 입력하세요
+				    비율은 0~1사이의 숫자만! 금액은 1,000원 이상 입력가능!
 				  </div>
             </div>
 
@@ -302,9 +357,81 @@
                         th:text="*{calcFormula}"
                         placeholder="value 또는 계산규칙을 입력하세요"></textarea>
                         <div class="form-text text-muted">
-				    오타필수확인! 공백은 불가능합니다.
+				    영문오타확인필수! 공백은 불가능합니다.
 				  </div>
             </div>
+            
+            <!-- 변수 목록 안내 -->
+				 <div class="mt-2">
+				  <a data-bs-toggle="collapse" href="#formulaHelper" role="button">
+				    사용 가능한 변수 목록 보기
+				  </a>
+				
+			<div class="collapse mt-2" id="formulaHelper">
+			  <table class="table table-bordered w-auto mx-auto text-center">
+			    <thead>
+			      <tr>
+			        <th>항목</th>
+			        <th>변수명</th>
+			      </tr>
+			    </thead>
+			
+			    <tbody>
+			      <tr>
+  <td>기본급</td>
+  <td><code class="copy-code" data-copy="BASE_AMT" data-original="BASE_AMT">BASE_AMT</code></td>
+</tr>
+
+<tr>
+  <td>수당합계</td>
+  <td><code class="copy-code" data-copy="ALW_AMT" data-original="ALW_AMT">ALW_AMT</code></td>
+</tr>
+
+<tr>
+  <td>인센티브합계</td>
+  <td><code class="copy-code" data-copy="INC_AMT" data-original="INC_AMT">INC_AMT</code></td>
+</tr>
+
+<tr>
+  <td>총공제액</td>
+  <td><code class="copy-code" data-copy="DED_AMT" data-original="DED_AMT">DED_AMT</code></td>
+</tr>
+
+<tr>
+  <td>총지급액</td>
+  <td><code class="copy-code" data-copy="TOT_AMT" data-original="TOT_AMT">TOT_AMT</code></td>
+</tr>
+
+<tr>
+  <td>실수령액</td>
+  <td><code class="copy-code" data-copy="NET_AMT" data-original="NET_AMT">NET_AMT</code></td>
+</tr>
+
+<tr>
+  <td>비율</td>
+  <td><code class="copy-code" data-copy="rate" data-original="rate">rate</code></td>
+</tr>
+
+<tr>
+  <td>값</td>
+  <td><code class="copy-code" data-copy="value" data-original="value">value</code></td>
+</tr>
+
+<tr>
+  <td>연차일수</td>
+  <td><code class="copy-code" data-copy="remain_days" data-original="remain_days">remain_days</code></td>
+</tr>
+
+<tr>
+  <td>근속년수</td>
+  <td><code class="copy-code" data-copy="YEAR_DIFF" data-original="YEAR_DIFF">YEAR_DIFF</code></td>
+</tr>
+
+			    </tbody>
+			  </table>
+			</div>
+			
+				</div>
 
             <!-- 상세 -->
             <div class="col-12">
@@ -327,7 +454,6 @@
   </div>
 </div>
 
-
 <!-- =========================
      수정 모달
 =========================== -->
@@ -335,7 +461,7 @@
   <div class="modal fade" th:id="${'calcEditModal-' + c.ruleId}" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
-          
+        
         <form th:object="${editForm}" th:action="@{/pay/rule_calc/{id}/update(id=${c.ruleId})}" method="post">
 
           <div class="modal-header">
@@ -344,14 +470,14 @@
           </div>
 
           <div class="modal-body">
-          
-         <div id="edit-error-[[${c.ruleId}]]"
-		     class="alert alert-danger d-none modal-error-box"
-		     th:classappend="${editErrorMsg} ? '' : 'd-none'">
-		    <span th:text="${editErrorMsg}"></span>
-		</div>
 
-          
+            <!-- 에러 메시지 -->
+            <div class="alert alert-danger modal-error-box"
+                 th:id="'edit-error-' + ${c.ruleId}"
+                 th:classappend="${openEditModalId == c.ruleId} ? '' : 'd-none'">
+              <span th:text="${editErrorMsg}"></span>
+            </div>
+
             <div class="row g-3">
 
               <!-- 항목 -->
@@ -383,104 +509,178 @@
 
               <!-- 날짜 -->
               <div class="col-md-4">
-                <label class="form-label" required>시작일</label>
-                <input type="date" name="startDate" th:value="${#temporals.format(c.startDate,'yyyy-MM-dd')}" class="form-control">
+                <label class="form-label">시작일</label>
+                <input type="date" name="startDate"
+                       th:value="${#temporals.format(c.startDate,'yyyy-MM-dd')}"
+                       class="form-control">
               </div>
 
               <div class="col-md-4">
                 <label class="form-label">종료일</label>
-                <input type="date" name="endDate" class="form-control"
-                       th:value="${c.endDate!=null ? #temporals.format(c.endDate,'yyyy-MM-dd'):''}">
+                <input type="date" name="endDate"
+                       th:value="${c.endDate!=null ? #temporals.format(c.endDate,'yyyy-MM-dd') : ''}"
+                       class="form-control">
               </div>
 
               <!-- 상태 -->
               <div class="col-md-4">
-                <label class="form-label" required>상태</label>
+                <label class="form-label">상태</label>
                 <select name="status" class="form-select">
                   <option value="ACTIVE" th:selected="${c.status?.name()=='ACTIVE'}">ACTIVE</option>
                   <option value="INACTIVE" th:selected="${c.status?.name()=='INACTIVE'}">INACTIVE</option>
                 </select>
               </div>
 
+              <!-- 대상구분 -->
               <div class="col-md-4">
-			  <label class="form-label">대상구분</label>
-			  <select th:id="'edit-' + ${c.ruleId} + '-target-type'"
-			          name="targetType"
-			          class="form-select">
-			      <option value="ALL"   th:selected="${c.targetType?.name()=='ALL'}">전체</option>
-			      <option value="EMP"   th:selected="${c.targetType?.name()=='EMP'}">사원</option>
-			      <option value="DEPT"  th:selected="${c.targetType?.name()=='DEPT'}">부서</option>
-			      <option value="GRADE" th:selected="${c.targetType?.name()=='GRADE'}">직책</option>
-			  </select>
-			</div>
+                <label class="form-label">대상구분</label>
+                <select th:id="'edit-' + ${c.ruleId} + '-target-type'"
+                        name="targetType"
+                        class="form-select">
+                  <option value="ALL"   th:selected="${c.targetType?.name()=='ALL'}">전체</option>
+                  <option value="EMP"   th:selected="${c.targetType?.name()=='EMP'}">사원</option>
+                  <option value="DEPT"  th:selected="${c.targetType?.name()=='DEPT'}">부서</option>
+                  <option value="GRADE" th:selected="${c.targetType?.name()=='GRADE'}">직책</option>
+                </select>
+              </div>
 
-		<div class="col-md-8">
-		  <label class="form-label">대상코드</label>
-		  
-		 <input type="text"
-		       th:id="'edit-' + ${c.ruleId} + '-target-code-input'"
-		       class="form-control target-input"
-		       th:classappend="${c.targetType?.name()=='EMP'} ? '' : 'd-none'"
-		       name="targetCode"
-		       th:placeholder="'사원번호를 입력하세요'">    
-		  				
-		  <!-- EMP: 사원 입력 -->
-		  <input type="text"
-		         th:id="'edit-' + ${c.ruleId} + '-target-code-input'"
-		         class="form-control target-input"
-		         th:classappend="${c.targetType?.name()=='EMP'} ? '' : 'd-none'"
-		         th:name="${c.targetType?.name()=='EMP'} ? 'targetCode' : null"
-		         th:value="${c.targetType?.name()=='EMP' ? c.targetCode : ''}">
-		
-		  <!-- DEPT: 부서 선택 -->
-		  <select th:id="'edit-' + ${c.ruleId} + '-target-dept'"
-		          class="form-select target-dept"
-		          th:classappend="${c.targetType?.name()=='DEPT'} ? '' : 'd-none'"
-		          th:name="${c.targetType?.name()=='DEPT'} ? 'targetCode' : null">
-		      <option value="">-- 부서 선택 --</option>
-		      <option th:each="d : ${depts}"
-		              th:value="${d.deptId}"
-		              th:selected="${c.targetType?.name()=='DEPT' and c.targetCode == d.deptId}"
-		              th:text="${d.deptName + ' (' + d.deptId + ')'}"></option>
-		  </select>
-		
-		  <!-- GRADE: 직책 선택 -->
-		  <select th:id="'edit-' + ${c.ruleId} + '-target-grade'"
-		          class="form-select target-grade"
-		          th:classappend="${c.targetType?.name()=='GRADE'} ? '' : 'd-none'"
-		          th:name="${c.targetType?.name()=='GRADE'} ? 'targetCode' : null">
-		      <option value="">-- 직책 선택 --</option>
-		      <option th:each="g : ${positions}"
-		              th:value="${g.posCode}"
-		              th:selected="${c.targetType?.name()=='GRADE' and c.targetCode == g.posCode}"
-		              th:text="${g.posName + ' (' + g.posCode + ')'}"></option>
-		  </select>
-		</div>
-              
-              
+              <!-- 대상코드 -->
+              <div class="col-md-8">
+                <label class="form-label">대상코드</label>
+
+                <!-- EMP: 사원 자동완성 입력 -->
+                <div class="autocomplete-box position-relative">
+                  <input type="text"
+                         th:id="'edit-' + ${c.ruleId} + '-target-code-input'"
+                         class="form-control target-input"
+                         th:classappend="${c.targetType?.name()=='EMP'} ? '' : 'd-none'"
+                         th:name="${c.targetType?.name()=='EMP'} ? 'targetCode' : null"
+                         th:value="${c.targetType?.name()=='EMP' ? c.targetCode : ''}"
+                         placeholder="사원명/사번 검색하세요">
+
+                  <ul class="autocomplete-list list-group position-absolute w-100 d-none"
+                      style="z-index:2000;"></ul>
+                </div>
+
+                <!-- DEPT: 부서 선택 -->
+                <select th:id="'edit-' + ${c.ruleId} + '-target-dept'"
+                        class="form-select target-dept d-none"
+                        th:name="${c.targetType?.name()=='DEPT'} ? 'targetCode' : null">
+                  <option value="">-- 부서 선택 --</option>
+                  <option th:each="d : ${depts}"
+                          th:value="${d.deptId}"
+                          th:selected="${c.targetType?.name()=='DEPT' and c.targetCode == d.deptId}"
+                          th:text="${d.deptName + ' (' + d.deptId + ')'}"></option>
+                </select>
+
+                <!-- GRADE: 직책 선택 -->
+                <select th:id="'edit-' + ${c.ruleId} + '-target-grade'"
+                        class="form-select target-grade d-none"
+                        th:name="${c.targetType?.name()=='GRADE'} ? 'targetCode' : null">
+                  <option value="">-- 직책 선택 --</option>
+                  <option th:each="g : ${positions}"
+                          th:value="${g.posCode}"
+                          th:selected="${c.targetType?.name()=='GRADE' and c.targetCode == g.posCode}"
+                          th:text="${g.posName + ' (' + g.posCode + ')'}"></option>
+                </select>
+
+              </div>
 
               <!-- 숫자 -->
               <div class="col-md-6">
                 <label class="form-label">숫자값</label>
                 <input type="text" name="valueNum" th:value="${c.valueNum}" class="form-control amount-input">
-                <div class="form-text text-muted">
-				    비율은 0~1사이의 숫자만 입력하세요
+                 <div class="form-text text-muted">
+				    비율은 0~1사이의 숫자만! 금액은 1,000원 이상 입력가능!
 				  </div>
               </div>
 
               <!-- 계산공식 -->
               <div class="col-md-6">
                 <label class="form-label">계산공식</label>
-                <textarea name="calcFormula" class="form-control" rows="3"                 
-                          th:text="${c.calcFormula}" required placeholder="vaule 또는 계산규칙을 입력하세요"></textarea>
-              <div class="form-text text-muted">
-				    오타필수확인! 공백은 불가능합니다.
+                <textarea name="calcFormula" class="form-control" rows="3"
+                          th:text="${c.calcFormula}" required></textarea>
+                          <div class="form-text text-muted">
+				    영문오타확인필수! 공백은 불가능합니다.
 				  </div>
               </div>
+              <!-- 변수 목록 안내 -->
+				 <div class="mt-2">
+				  <a data-bs-toggle="collapse" href="#formulaHelper" role="button">
+				    사용 가능한 변수 목록 보기
+				  </a>
+				
+								 <div class="collapse mt-2" id="formulaHelper">
+				  <table class="table table-bordered w-auto mx-auto text-center">
+				    <thead>
+				      <tr>
+				        <th>항목</th>
+				        <th>변수명</th>
+				      </tr>
+				    </thead>
+				
+				    <tbody>
+				      <tr>
+  <td>기본급</td>
+  <td><code class="copy-code" data-copy="BASE_AMT" data-original="BASE_AMT">BASE_AMT</code></td>
+</tr>
 
-              <!-- 상세 -->
+<tr>
+  <td>수당합계</td>
+  <td><code class="copy-code" data-copy="ALW_AMT" data-original="ALW_AMT">ALW_AMT</code></td>
+</tr>
+
+<tr>
+  <td>인센티브합계</td>
+  <td><code class="copy-code" data-copy="INC_AMT" data-original="INC_AMT">INC_AMT</code></td>
+</tr>
+
+<tr>
+  <td>총공제액</td>
+  <td><code class="copy-code" data-copy="DED_AMT" data-original="DED_AMT">DED_AMT</code></td>
+</tr>
+
+<tr>
+  <td>총지급액</td>
+  <td><code class="copy-code" data-copy="TOT_AMT" data-original="TOT_AMT">TOT_AMT</code></td>
+</tr>
+
+<tr>
+  <td>실수령액</td>
+  <td><code class="copy-code" data-copy="NET_AMT" data-original="NET_AMT">NET_AMT</code></td>
+</tr>
+
+<tr>
+  <td>비율</td>
+  <td><code class="copy-code" data-copy="rate" data-original="rate">rate</code></td>
+</tr>
+
+<tr>
+  <td>값</td>
+  <td><code class="copy-code" data-copy="value" data-original="value">value</code></td>
+</tr>
+
+<tr>
+  <td>연차일수</td>
+  <td><code class="copy-code" data-copy="remain_days" data-original="remain_days">remain_days</code></td>
+</tr>
+
+<tr>
+  <td>근속년수</td>
+  <td><code class="copy-code" data-copy="YEAR_DIFF" data-original="YEAR_DIFF">YEAR_DIFF</code></td>
+</tr>
+
+				    </tbody>
+				  </table>
+				</div>
+
+
+				</div>
+
+
+              <!-- 상세설명 -->
               <div class="col-12">
-                <label class="form-label">상세</label>
+                <label class="form-label">상세설명</label>
                 <textarea class="form-control" name="remark" rows="3"
                           th:text="${c.remark}"></textarea>
               </div>
@@ -499,6 +699,7 @@
     </div>
   </div>
 </div>
+
 
 
 

@@ -5,12 +5,30 @@
 <th:block layout:fragment="content">
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
 	
-	<h2 th:text="${mode == 'edit'} ? '인사 정보 수정' : '인사 신규 등록'">
-	  인사 신규 등록
-	</h2>
+	<div class="d-flex justify-content-between align-items-center mb-3">
+		<h2 th:text="${mode == 'edit'} ? '인사 정보 수정' : '인사 신규 등록'">
+		  인사 신규 등록
+		</h2>
+		
+		<!-- 수정 모드 + 관리자일 때만 보이게 -->
+	    <form th:if="${mode == 'edit'} 
+	               and ${#authorization.expr('hasRole(''ROLE_SYS_ADMIN'') or hasRole(''ROLE_HR_ADMIN'')')}"
+	          th:action="@{|/auth/manage/emp/${empDTO.empId}/pwdResetDefault|}"
+	          method="post"
+	          onsubmit="return confirm('비밀번호를 1234로 초기화할까요?');">
+	      <button type="submit" class="btn btn-outline-danger btn-sm">
+	        비밀번호 초기화
+	      </button>
+	    </form>
+	</div>
+	
+	<div th:if="${msg}" class="alert alert-warning mt-3">
+	  <div class="fw-semibold" th:text="${msg}"></div>
+	  <div class="small" th:text="${infoMsg}"></div>
+	</div>
 
-	  <form th:action="@{${formAction}}" th:object="${empDTO}" method="post"
-      		enctype="multipart/form-data" novalidate>
+	  <form th:action="@{${formAction}}" th:object="${empDTO}" method="post" enctype="multipart/form-data" novalidate>
+      	
       		
 	    <!-- 상단 2컬럼 카드 -->
 	    <div class="row g-4 mb-5">
@@ -24,7 +42,7 @@
 			      <div class="row g-3">
 			        <div class="col-12 col-md-6">
 			          <label class="form-label required" for="empName">이름</label>
-			          <input type="text" class="form-control" id="empName" th:field="*{empName}" placeholder="김여운">
+			          <input type="text" class="form-control" id="empName" th:field="*{empName}" placeholder="김여운" th:readonly="${mode == 'edit'}">
 			          <div class="text-danger small" th:if="${#fields.hasErrors('empName')}" th:errors="*{empName}"></div>
 			        </div>
 			        <!-- 사번은 서비스에서 생성됨: 입력받지 않기 -->
@@ -194,6 +212,8 @@
 	      <div class="card-body">
 	        <h5 class="card-title mb-3">급여통장 정보</h5>
 	
+			<!-- HR / SYS 관리자 : 수정 가능 -->
+			<div th:if="${canEditBankInfo}">
 	        <div class="row g-3">
 	          <div class="col-12 col-md-6">
 	            <label class="form-label required" for="bankCode">은행</label>
@@ -246,8 +266,63 @@
 	          </div>
 	        </div>
 	      </div>
-	    </div>
+	      
+	      <!-- 일반 사원: 읽기만 가능 -->
+	      <div th:unless="${canEditBankInfo}">
+	          <div class="row g-3">
+	            <div class="col-12 col-md-6">
+	              <label class="form-label" for="bankCodeView">은행</label>
+	              <!-- 화면에는 읽기전용 텍스트 -->
+	              <select class="form-select" id="bankCodeView" th:field="*{bankCode}" disabled>
+			        <option value="">선택</option>
+			        <option th:each="b : ${bankList}" th:value="${b.codeId}" th:text="${b.codeName}"></option>
+			      </select>
+	              <!-- 실제 전송용 hidden -->
+	              <input type="hidden" th:field="*{bankCode}">
+	            </div>
+	            
+	            <div class="col-12 col-md-6">
+	              <label class="form-label" for="accountNoView">계좌번호</label>
+	              <input type="text" class="form-control" id="accountNoView" th:value="*{accountNo}" readonly>
+	              <input type="hidden" th:field="*{accountNo}">
+	            </div>
+	          </div>
 	
+	          <div class="row g-3 mt-0">
+	            <div class="col-12 col-md-6">
+	              <label class="form-label" for="holderView">예금주</label>
+	              <input type="text" class="form-control" id="holderView" th:value="${empDTO.empName}" readonly>
+	              <div class="form-text text-muted">
+	                본인 명의 계좌만 등록 가능합니다.
+	              </div>
+	            </div>
+	            
+	            <div class="col-12 col-md-6">
+	              <label class="form-label">통장사본</label>
+	              
+	              <div th:if="${empDTO.fileId != null}">
+	                <a th:href="@{'/files/download/' + ${empDTO.fileId}}" target="_blank" class="small">
+	                  통장 사본 보기
+	                </a>
+	              </div>
+	              <div th:if="${empDTO.fileId == null}" class="text-muted small">
+	                등록된 통장 사본이 없습니다.
+	              </div>
+	
+	              <!-- fileId만 hidden으로 유지 -->
+	              <input type="hidden" th:field="*{fileId}">
+	            </div>
+	          </div>
+	        </div>
+	        
+	        <br>
+	        
+	        <div class="alert alert-light border small mb-3" sec:authorize="!hasAnyRole('SYS_ADMIN','HR_ADMIN')">
+	          급여통장 정보 변경은 인사부에 문의바랍니다.
+         	</div>
+	        
+	      </div>
+		</div>	
 	    <!-- 버튼 -->
 	    <div class="d-flex justify-content-end gap-2">
 	    

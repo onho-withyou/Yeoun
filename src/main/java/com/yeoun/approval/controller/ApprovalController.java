@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.yeoun.approval.dto.ApprovalDocDTO;
+import com.yeoun.approval.dto.ApprovalDocGridDTO;
 import com.yeoun.approval.dto.ApprovalFormDTO;
 import com.yeoun.approval.repository.ApprovalDocRepository;
 import com.yeoun.approval.service.ApprovalDocService;
@@ -48,11 +49,11 @@ public class ApprovalController {
 	//전자결재 연결페이지
   	@GetMapping("/approval_doc")
   	public String approvalDoc(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
-		model.addAttribute("empList", approvalDocService.getEmp());//결재- 기안자 목록 불러오기
+		model.addAttribute("empList", approvalDocService.getEmp());//기안자 목록 불러오기
 		model.addAttribute("formTypes",approvalDocService.getFormTypes(loginDTO.getDeptId())); //"DEP001"결재- 기안서 양식종류 불러오기
-		model.addAttribute("deptList", approvalDocService.getDept()); //결재- 부서목록 불러오기
-		model.addAttribute("approvalDocDTO", new ApprovalDocDTO());//결재문서DTO
-		
+		model.addAttribute("deptList", approvalDocService.getDept()); //부서목록 불러오기
+		model.addAttribute("approvalDocGridDTO", new ApprovalDocGridDTO());//문서DTO
+		model.addAttribute("positionList",approvalDocService.getPosition());//직급정보불러오기
 		// --------------------------------------------
 		model.addAttribute("currentUserId", loginDTO.getEmpId());
 		model.addAttribute("currentUserName", loginDTO.getEmpName());
@@ -66,40 +67,18 @@ public class ApprovalController {
 		 return (List<Object[]>) approvalDocService.getEmp2();
 	}
 
-	//grid - 1.결재사항 - 진행해야할 결재만 - 결재권한자만 볼수있음
-	@ResponseBody
-	@GetMapping("/pendingApprovalDocGrid")
-	public List<Object[]> getPendingApprovalDocs(@AuthenticationPrincipal LoginDTO loginDTO) {
-		return approvalDocService.getPendingApprovalDocs(loginDTO.getEmpId());//"2401300"
+	//날짜,제목 기안자 조회
+	@PostMapping("/searchAllGrids")
+	@ResponseBody 
+	public Map<String, List<ApprovalDocGridDTO>> searchApprovalDocGrid1(@AuthenticationPrincipal LoginDTO loginDTO ,@RequestBody Map<String,Object> searchParams){
+		Map<String, List<ApprovalDocGridDTO>> allGridsData = approvalDocService.getAllGridsData(loginDTO.getEmpId(), searchParams);
+		return allGridsData;
+		
 	}
-	//그리드  - 2.전체결재
-	@ResponseBody
-	@GetMapping("/approvalDocGrid")
-	public List<Object[]> getItemList(@AuthenticationPrincipal LoginDTO loginDTO) {
-		return approvalDocService.getAllApprovalDocs(loginDTO.getEmpId());//"2104502"
-	}
-	//그리드 - 3.내 결재목록
-	@ResponseBody
-	@GetMapping("/myApprovalDocGrid")
-	public List<Object[]> getMyApprovalDocs(@AuthenticationPrincipal LoginDTO loginDTO) {
-		return approvalDocService.getMyApprovalDocs(loginDTO.getEmpId());
-	}
-	//그리드 - 4.결재대기
-	@ResponseBody	
-	@GetMapping("/waitingApprovalDocGrid")
-	public List<Object[]> getWaitingApprovalDocs(@AuthenticationPrincipal LoginDTO loginDTO) {
-		return approvalDocService.getWaitingApprovalDocs(loginDTO.getEmpId());//"2104502"
-	}
-	//그리드 - 5.결재완료
-	 @ResponseBody
-	 @GetMapping("/finishedApprovalDocGrid")
-	 public List<Object[]> getFinishedApprovalDocs(@AuthenticationPrincipal LoginDTO loginDTO) {
-	 	return approvalDocService.getFinishedApprovalDocs(loginDTO.getEmpId());//"2505823"
-	 }
 
-	
+	//기안서 등록(저장)
     @PostMapping("/approval_doc")
-    public ResponseEntity<Map<String, Object>> postMethodName(@AuthenticationPrincipal LoginDTO loginDTO, @RequestBody Map<String, String> doc) {
+    public ResponseEntity<Map<String, Object>> approvalDocSave(@AuthenticationPrincipal LoginDTO loginDTO, @RequestBody Map<String, String> doc) {
         
         log.info("받은 JSON: {}", doc);
 		approvalDocService.saveApprovalDoc(loginDTO.getEmpId(),doc); 

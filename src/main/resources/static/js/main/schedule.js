@@ -736,6 +736,7 @@ async function getLastNoticeList() {
 	});
 }
 
+
 // 공지그리드 생성변수
 let noticeGrid = null;
 
@@ -744,17 +745,47 @@ async function initNoticeGrid(data) {
 	const Pagination = tui.Pagination;
 	
 	noticeGrid = new tui.Grid({
-		el: document.getElementById("noticeGrid"),
-		editable: true,
-		columns: [
-			{
-				header: '제목'
-				, name: 'noticeTitle'
-				, align: "right"
-			},
-		]
+	    el: document.getElementById("noticeGrid"),
+	    editable: true,
+	    columns: [
+	        {
+	            header: '제목',
+	            name: 'noticeTitle',
+	            align: "left",
+	            formatter: function({ row }) {
+	                const title = row.noticeTitle || "";
+	                let dateHtml = "";
+
+	                if (row.updatedDate) {
+	                    const date = new Date(row.updatedDate);
+	                    if (!isNaN(date)) {
+	                        const mm = String(date.getMonth() + 1).padStart(2, '0');
+	                        const dd = String(date.getDate()).padStart(2, '0');
+	                        const hh = String(date.getHours()).padStart(2, '0');
+	                        const min = String(date.getMinutes()).padStart(2, '0');
+	                        
+	                        // 날짜 텍스트 생성
+	                        const dateText = `(${mm}-${dd} ${hh}:${min})`;
+	                        
+	                        // 날짜 부분에만 적용할 스타일 (글자 작게, 줄바꿈 방지 등)
+	                        dateHtml = `<span style="font-size: 11px; color: #888; margin-left: 10px; flex-shrink: 0;">${dateText}</span>`;
+	                    }
+	                }
+
+	                // Flexbox를 사용하여 제목(왼쪽)과 날짜(오른쪽) 배치
+	                return `
+	                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+	                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${title}</span>
+	                        ${dateHtml}
+	                    </div>
+	                `;
+	            },
+	            className: 'combined-text'
+	        }
+	    ]
 	});
 	// 그리드 데이터 추가
+	console.log(data);
 	noticeGrid.resetData(data);
 //	console.log(noticeGrid.gridEl, "노티스그리드");
 	const rows = noticeGrid.getData();
@@ -902,13 +933,13 @@ async function initApprovalGrid(data) {
 		  document.getElementById('toDeptForm').style.display = 'block';
 		  document.getElementById('to-dept-id').value = rowData.toDeptId;
 		}
-		
-		document.getElementById('Drafting').value = rowData.formType;
+		console.log(rowData.empId);
+		document.getElementById('Drafting').innerHTML = rowData.formType;
 //		console.log(rowData.approvaTitle);
 		document.getElementById('today-date').innerText = toDateStr(rowData.createdDate) ;//결재 작성날짜 = 결재시작일
 		document.getElementById('approval-title').value = rowData.approvalTitle;
 		//양식종류 form-menu
-		document.getElementById('approver-name').value  = rowData.empId;//결재자명
+//		document.getElementById('approver-name').value  = rowData.empId;//결재자명
 		
 		//const createdDate = rowData.created_date;
 		document.getElementById('create-date').value = toDateStr(rowData.createdDate);//결재시작일 =결재 작성날짜 
@@ -966,6 +997,7 @@ async function initApprovalGrid(data) {
 
 // 달력, 데이트피커에 현재 날짜 업데이트 함수
 async function updateCurrentDate() {
+	showCalendarLoading();
 	// 현재날짜 표시 할 위치 지정
 	const currentDateEl = document.getElementById('calendar-date');
     // 현재날짜 저장
@@ -998,6 +1030,7 @@ async function updateCurrentDate() {
 	// 바뀐 년월 정보 저장
 	calendarYear = year;
 	calendarMonth = month;
+	hideCalendarLoading(); 
 }
 	
 // 스피너 보이기 끄기

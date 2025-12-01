@@ -337,6 +337,16 @@ public class PayCalcPageController {
             );
         }
     }
+    
+
+    
+    @GetMapping("/list")
+    @ResponseBody
+    public List<PayslipViewDTO> getList(@RequestParam("yyyymm") String yyyymm) {
+        return querySvc.findForView(yyyymm);
+    }
+
+
 
     
 }

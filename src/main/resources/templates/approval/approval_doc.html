@@ -38,7 +38,7 @@
 	            	</select>
 	            </div>
 	            <div class="d-flex justify-content-end" style="margin-left: 5px;">
-					<button onclick="defaultPrint()" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#approval-modal" style="width: 71px;">
+					<button id="writeBtn" data-action="create" onclick="defaultPrint()" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#approval-modal" style="width: 71px;">
 					작성
 					</button>
 		        </div>
@@ -50,59 +50,14 @@
 	                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
 		                <input id="searchEndDate" type="date" name="endDate" class="form-control">
 	                </div>
-	                 <input id="searchEmpIdAndformType" class="form-control" type="text" placeholder="기안자및문서양식" style="width: 200px;height: 38.94px;">
+	                 <input id="searchEmpIdAndformType" class="form-control" type="text" placeholder="기안자및문서제목" style="width: 200px;height: 38.94px;">
 	                <div class="mb-6 col-lg-6 col-xl-3 col-12 mb-0">
-		             	<button id="searchBtn" class="btn btn-primary">조회</button>
+		             	<button id="searchBtn" onclick="AllGridSearch()" class="btn btn-primary">조회</button>
 	                </div>
 				</div>
 			</div>
 		</div>
 		<hr>
-		<!--
-		<div>
-			<nav>
-			  <div class="nav nav-tabs" id="nav-tab" role="tablist">
-			    <button class="nav-link active" id="nav-approval-tab" data-bs-toggle="tab" data-bs-target="#nav-approval" type="button" role="tab" aria-controls="nav-home" aria-selected="true">
-			    	결재사항
-			    </button>
-			    <button class="nav-link" id="nav-all-tab" data-bs-toggle="tab" data-bs-target="#nav-all" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">
-			    	전체결재
-			    </button>
-			    <button class="nav-link" id="nav-my-tab" data-bs-toggle="tab" data-bs-target="#nav-my" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
-			    	내 결재목록
-			    </button>
-			    <button class="nav-link" id="nav-waiting-tab" data-bs-toggle="tab" data-bs-target="#nav-waiting" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
-			    	결재대기
-			    </button>
-			    <button class="nav-link" id="nav-done-tab" data-bs-toggle="tab" data-bs-target="#nav-done" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
-			    	결재완료
-			    </button>
-			  </div>
-			</nav>
-			<div class="tab-content" id="nav-tabContent">
-			  <div class="tab-pane fade show active" id="nav-approval" role="tabpanel" aria-labelledby="nav-approval-tab">
-			  	<h2>결재사항</h2>
-			  	<div id="approvalGrid"></div>
-			  </div>
-			  <div class="tab-pane fade" id="nav-all" role="tabpanel" aria-labelledby="nav-all-tab">
-			  		<h2>전체결재</h2>
-			  		<div id="allApprovalGrid"></div>
-			  </div>
-			  <div class="tab-pane fade" id="nav-my" role="tabpanel" aria-labelledby="nav-my-tab">
-			  		<h2>내 결재목록</h2>
-			  		<div id="myApprovalGrid"></div>
-			  </div>
-			  <div class="tab-pane fade" id="nav-waiting" role="tabpanel" aria-labelledby="nav-waiting-tab">
-			  		<h2>결재대기</h2>
-					<div id="waitingApprovalGrid"></div>
-			  </div>
-			  <div class="tab-pane fade" id="nav-done" role="tabpanel" aria-labelledby="nav-done-tab">
-			  		<h2>결재완료</h2>
-					<div id="doneApprovalGrid"></div>
-			  </div>
-			</div>
-		</div> 
-	-->
 		<div class="col-xl-15">
           <div class="nav-align-top mb-4">
             <ul class="nav nav-tabs" role="tablist">
@@ -155,11 +110,10 @@
               </div>
             </div>
           </div>
-		</div>
 		<!-- 모달 -->
 		<div class="modal fade" id="approval-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
-		    <form class="modal-content" id="modal-doc" th:action="@{/approval/approval_doc}" method="POST" enctype="multipart/form-data">
+		    <form class="modal-content" id="modal-doc" th:action="@{/approval/approval_doc}" th:object="${approvalDocGridDTO}" method="POST" enctype="multipart/form-data">
 		      <div class="modal-header" data-draggable="true">
 				<h3 class="modal-title" id="Drafting" value="">기안서 작성</h3>
 				<input type="hidden" id="DraftingHidden" name="drafting" value="">
@@ -168,7 +122,7 @@
 		      </div>
 		      <div class="modal-body">
 		        <h5 class="d-flex">
-					<label>문서 날짜 : </label>
+					<label>문서 날짜 </label>
 					<p id="today-date"></p>
 				</h5>
 		        <h5 class="d-flex">
@@ -243,6 +197,18 @@
 		            	</select>
 	            	</div>
 		        </h5>
+				<h5 id="positionForm" style="display: none;"> <!--인사발령신청서-->
+					<label class="p-1" style="width: 200px;">직급</label><!--- 인사발령신청서-->
+		        	<div class="mb-6 mb-0" style="width: 344px;">
+		            	<select id="position" name="position" class="form-select" >
+		            		<option value="" selected>직급</option>
+							<option th:each="item, iterStat : ${positionList}" 
+							 		th:value="${item.posCode}" 
+							 		th:text="${iterStat.index+1} + ' : ' + ${item.posName}">
+							 </option>
+		            	</select>
+	            	</div>
+				</h5>
 		        <h5 id="toDeptForm" style="display: none;">
 					<label class="p-1" style="width: 200px;">발령부서</label><!--- 인사발령신청서-->
 		        	<div class="mb-6 mb-0" style="width: 344px;">
@@ -270,12 +236,8 @@
 					<label class="p-1" style="width: 200px;">사유내용</label>
 		        	<textarea id="reason-write" class="form-control" name="reason" rows="10" placeholder="결재사유내용 작성"></textarea>
 		        </h5>
-		        <!--<h5 class="d-flex">결재권한자 변경:
-		        	<input class="form-check-input" type="checkbox" id="opt-in">
-		        
-		        </h5>-->
 		        <h5 class="d-flex">
-					<label>결재권한자 : </label> 
+					<label>결재권한자 </label> 
 		          	<div id="select-box" style="width: 200px"></div>
 		        </h5>
      				<div id="approver" th:value="${empList}"  style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
@@ -319,7 +281,7 @@
 		      </div>
 		      <div class="modal-footer">
 		      	<div>
-			     	<button type="button" id="attachmentBtn" class="btn btn-primary" style="display: none;">첨부파일</button>
+			     	<button type="button" id="attachmentBtn" class="btn btn-primary">첨부파일</button>
 			     	<button type="button" id="approvalCompanionBtn" class="btn btn-primary" style="display:none;">반려</button>
 			      	<button type="button" id="approvalCheckBtn" class="btn btn-primary" style="display:none;">결재확인</button>
 			    </div>

@@ -22,6 +22,7 @@ import com.yeoun.common.service.CommonCodeService;
 import com.yeoun.emp.dto.EmpDTO;
 import com.yeoun.emp.dto.EmpDetailDTO;
 import com.yeoun.emp.entity.Dept;
+import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.DeptRepository;
 import com.yeoun.emp.repository.PositionRepository;
 import com.yeoun.emp.service.EmpService;
@@ -59,6 +60,9 @@ public class MyPageController {
 		model.addAttribute("mode", "edit");
 		model.addAttribute("formAction", "/my/info/update");
 		
+		// 마이페이지에서 급여정보 수정 불가
+		model.addAttribute("canEditBankInfo", false);
+		
 		// --- 조직/직무 셀렉트 공통 세팅 (EmpController.setupEmpFormCommon 과 동일) ---
         List<Dept> topDeptList =
                 deptRepository.findByParentDeptIdAndUseYn("DEP999", "Y");
@@ -88,14 +92,17 @@ public class MyPageController {
 	    // 원본 DTO 한 번 조회 (기존 사진 / 통장 사본 유지용)
 	    EmpDTO original = empService.getEmpForEdit(loginUser.getEmpId());
 	    
+	    // 주민번호 마스킹, 파일 id 등 원본 기준으로 복원
+        empDTO.setRrnMasked(original.getRrnMasked());
+        empDTO.setPhotoFileId(original.getPhotoFileId());
+        empDTO.setFileId(original.getFileId()); 
+        
+        // 새 통장사본 업로드 들어와도 무시
+//        empDTO.setBankbookFile(null);
+	    
 	    // 1) Bean Validation 실패 폼 다시 보여주기
 	    if (bindingResult.hasErrors()) {
 	    	
-	    	// 주민번호 마스킹, 파일 id 등 원본 기준으로 복원
-	        empDTO.setRrnMasked(original.getRrnMasked());
-	        empDTO.setPhotoFileId(original.getPhotoFileId());
-	        empDTO.setFileId(original.getFileId()); 
-
 	        model.addAttribute("empDTO", empDTO);
 	        model.addAttribute("mode", "edit");
 	        model.addAttribute("formAction", "/my/info/update");
@@ -135,6 +142,7 @@ public class MyPageController {
 	        model.addAttribute("empDTO", empDTO);
 	        model.addAttribute("formAction", "/my/info/update");
 	        model.addAttribute("mode", "edit");
+	        model.addAttribute("canEditBankInfo", false);
 	        
 	        List<Dept> topDeptList =
 	                deptRepository.findByParentDeptIdAndUseYn("DEP999", "Y");
@@ -156,9 +164,20 @@ public class MyPageController {
 
     // 2. 비밀번호 변경 폼 
     @GetMapping("/password")
-    public String changePasswordForm(Model model) {
-        model.addAttribute("passwordChangeDTO", new PasswordChangeDTO());
-        return "auth/password_change";   // templates/auth/password_change.html
+    public String changePasswordForm(@AuthenticationPrincipal LoginDTO login, Model model) {
+    	if (!model.containsAttribute("passwordChangeDTO")) {
+            model.addAttribute("passwordChangeDTO", new PasswordChangeDTO());
+        }
+    	
+    	// 초기 비밀번호인지(Y) 여부 확인
+    	String empId = login.getEmpId();
+    	 
+    	Emp emp = empService.getEmpEntity(empId);
+    	boolean forceChange = "Y".equals(emp.getPwdChangeReq());
+    	 
+    	model.addAttribute("forceChange", forceChange);
+    	 
+        return "auth/password_change";   
     }
 
     // 3. 비밀번호 변경 처리 

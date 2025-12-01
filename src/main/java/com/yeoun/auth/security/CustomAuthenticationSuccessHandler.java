@@ -70,9 +70,19 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 		// 2-4) 응답 객체에 쿠키 추가
 		response.addCookie(cookie);
 		
+		// ======================= 이동할 URL ======================= 
+		// 기본값: 메인 화면
+		String targetUrl = "/main";
+		
+		// 비밀번호 변경 강제 대상이면 비밀번호 변경 화면으로 이동
+		if ("Y".equals(emp.getPwdChangeReq())) {
+			log.info("[비밀번호 변경 필요] empId={} → /my/password로 리다이렉트", empId);
+			targetUrl = "/my/password";
+		}
+		
 		// =====================================================================================
 		// 로그인 성공 시 이동할 페이지로 리다이렉트 처리
-		response.sendRedirect("/main");
+		response.sendRedirect(targetUrl);
 	}
 	
 	

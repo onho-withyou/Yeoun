@@ -58,19 +58,35 @@ public class PayCalcRuleService {
         // 비즈니스 검증 (기간, 대상 등)
         validateBusiness(entity, entity.getRuleId());
 
-        // 🔥 우선순위 중복 검사
-        if (payCalcRuleRepository.existsByPriorityAndRuleIdNot(entity.getPriority(), entity.getRuleId())) {
-            throw new IllegalArgumentException("이미 사용 중인 우선순위입니다. 다른 번호를 입력하세요.");
+        String itemCode = entity.getItem().getItemCode();
+        Integer priority = entity.getPriority();
+
+        if (entity.getRuleId() == null) {
+
+            // 신규 생성
+            if (payCalcRuleRepository.existsByItem_ItemCodeAndPriority(itemCode, priority)) {
+                throw new IllegalArgumentException("이미 사용 중인 우선순위입니다.");
+            }
+
+        } else {
+
+            // 수정 - 자기 자신 제외
+            if (payCalcRuleRepository.existsByItemCodeAndPriorityExceptSelf(
+                    itemCode, priority, entity.getRuleId())) {
+                throw new IllegalArgumentException("이미 사용 중인 우선순위입니다.");
+            }
         }
 
         return payCalcRuleRepository.save(entity);
+
     }
 
-
-    // =============================== 아래 기존 메서드 동일 ===============================
+    // =============================== 기존 메서드 동일 ===============================
 
     @Transactional(readOnly = true)
-    public PayCalcRule find(Long ruleId) { return payCalcRuleRepository.findById(ruleId).orElse(null); }
+    public PayCalcRule find(Long ruleId) {
+        return payCalcRuleRepository.findById(ruleId).orElse(null);
+    }
 
     @Transactional(readOnly = true)
     public List<PayCalcRule> findByItem(String itemCode) {
@@ -88,8 +104,11 @@ public class PayCalcRuleService {
         return payCalcRuleRepository.findAllByOrderByPriorityAsc();
     }
 
-    public void delete(Long ruleId) { payCalcRuleRepository.deleteById(ruleId); }
+    public void delete(Long ruleId) {
+        payCalcRuleRepository.deleteById(ruleId);
+    }
 
+    /** 연관관계 보호 */
     private void normalizeItemReference(PayCalcRule r) {
         if (r.getItem() == null || r.getItem().getItemCode() == null || r.getItem().getItemCode().isBlank())
             throw new IllegalArgumentException("급여항목을 선택하세요.");
@@ -101,13 +120,26 @@ public class PayCalcRuleService {
         r.setItem(item);
     }
 
+    /** 비즈니스 검증 */
     private void validateBusiness(PayCalcRule r, Long excludeId) {
+
         if (r.getEndDate() != null && r.getEndDate().isBefore(r.getStartDate()))
             throw new IllegalArgumentException("종료일은 시작일보다 빠를 수 없습니다.");
 
+        // RATE → valueNum 0~1 유지
+        if (r.getRuleType() == RuleType.RATE) {
+            if (r.getValueNum() == null)
+                throw new IllegalArgumentException("비율(RATE)은 0~1 사이 숫자를 입력해야 합니다.");
+
+            if (r.getValueNum().doubleValue() < 0 || r.getValueNum().doubleValue() > 1)
+                throw new IllegalArgumentException("비율(RATE)은 반드시 0~1 사이여야 합니다.");
+        }
+
+        // FORMULA 외 타입은 valueNum 필수
         if (r.getRuleType() != RuleType.FORMULA && r.getValueNum() == null)
             throw new IllegalArgumentException("숫자값을 입력하세요.");
 
+        // 기간 중복 체크
         String targetCodeSafe =
                 (r.getTargetType() == TargetType.ALL) ? "" : nullToEmpty(r.getTargetCode());
 
@@ -124,6 +156,7 @@ public class PayCalcRuleService {
             throw new IllegalArgumentException("동일 항목/대상 조합에 기간이 겹치는 규칙이 이미 존재합니다.");
     }
 
+    /** 기간 중복 체크 */
     @Transactional(readOnly = true)
     public boolean hasOverlap(String itemCode,
                               TargetType targetType,
@@ -151,4 +184,17 @@ public class PayCalcRuleService {
     }
 
     private String nullToEmpty(String s) { return (s == null ? "" : s); }
+
+
+    /** JS에서 호출하는 우선순위 체크 API */
+    public boolean isPriorityDuplicate(String itemCode, Integer priority, Long ruleId) {
+
+        if (ruleId != null) {
+            return payCalcRuleRepository.existsByItemCodeAndPriorityExceptSelf(
+                    itemCode, priority, ruleId);
+        }
+
+        return payCalcRuleRepository.existsByItem_ItemCodeAndPriority(itemCode, priority);
+    }
+
 }

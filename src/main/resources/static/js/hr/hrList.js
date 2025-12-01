@@ -31,8 +31,41 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+  
+  // 5) 날짜 범위 제약
+  const startDateInput = document.getElementById('startDate');
+  const endDateInput   = document.getElementById('endDate');
+  
+  if (startDateInput && endDateInput) {
+	
+	// 시작일 변경 시, 종료일 최소값 설정 및 잘못된 값 보정
+	startDateInput.addEventListener('change', () => {
+		if (!startDateInput.value) {
+			endDateInput.min = '';
+			return;
+		}
+		endDateInput.min = startDateInput.value;
+		
+		if (endDateInput.value && endDateInput.value < startDateInput.value) {
+			endDateInput.value = startDateInput.value;
+		}
+	});
+	
+	// 종료일 변경 시, 시작일 최대값 설정 + 잘못된 값 보정
+	endDateInput .addEventListener('change', () => {
+		if (!endDateInput.value) {
+			startDateInput.max = '';
+			return;
+		}
+		startDateInput.max = endDateInput.value;
+		
+		if (startDateInput.value && startDateInput.value > endDateInput.value) {
+			startDateInput.value = endDateInput.value;
+		}
+	});
+  }
 
-  // 5) 초기 로딩
+  // 6) 초기 로딩
   loadHrActionList();
 });
 
@@ -44,6 +77,11 @@ function loadHrActionList() {
   const actionType = document.getElementById('actionType')?.value || '';
   const startDate  = document.getElementById('startDate')?.value || '';
   const endDate    = document.getElementById('endDate')?.value || '';
+  
+  if (startDate && endDate && endDate < startDate) {
+      alert('종료일은 시작일보다 빠를 수 없습니다.');
+      return;
+  }
 
   const params = new URLSearchParams({
     keyword,

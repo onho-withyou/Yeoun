@@ -549,12 +549,12 @@ document.getElementById("message")?.addEventListener("keydown", function (e) {
 //===============================
 
 function sendRead() {
-	if (groupYn === "Y") return;
 	if (!stompClient || !connected || !roomId || !senderId) return;
 
 	const payload = {
 		roomId: roomId,
-		readerId: senderId
+		readerId: senderId,
+		groupYn: groupYn
 	};
 
 	stompClient.send("/app/chat/read", {}, JSON.stringify(payload));

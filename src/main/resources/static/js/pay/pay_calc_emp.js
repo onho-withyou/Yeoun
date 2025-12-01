@@ -1,5 +1,3 @@
-const csrfToken = document.querySelector('meta[name="_csrf_token"]').content;
-const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]').content;
 
 /* ===============================
     사원 기본 정보 로드
@@ -227,3 +225,4 @@ document.getElementById("btnResetEmp").addEventListener("click", () => {
     const statusBox = document.getElementById("empStatusBox");
     if (statusBox) statusBox.style.display = "none";
 });
+

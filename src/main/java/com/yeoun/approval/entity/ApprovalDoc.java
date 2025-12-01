@@ -58,6 +58,9 @@ public class ApprovalDoc {
 	
 	@Column(name="END_DATE")
 	private LocalDate endDate; //종료휴가날짜
+
+	@Column(name="TO_POS_CODE")
+	private String toPosCode;   //직급코드
 	
 	@Column(name="TO_DEPT_ID")
 	private String toDeptId; //발령부서

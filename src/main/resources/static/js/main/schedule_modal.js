@@ -8,6 +8,7 @@ let checkedUpEmpList;
 // 일정등록 데이트피커 객체 생성
 function createRangePicker() {
 	picker = tui.DatePicker.createRangePicker({
+		language: 'ko',
 	    startpicker: {
 	        date: today,
 	        input: '#startpicker-input',
@@ -276,7 +277,7 @@ async function openScheduleModal(mode, data = null) {
 	const alldayCheckbox = document.getElementById('all-day-checkbox');
 	const organizeInput = document.getElementById('schedule-sharer');
 	const organizeBtn = document.getElementById('select-sharer-btn');
-	
+	const shareEl = document.getElementById('shareField');
 //	const createdUser = document.getElementById('schedule-writer')
 //	const startpickerInput = document.getElementById('startpicker-input');
 //	const endpickerInput = document.getElementById('endpicker-input');
@@ -326,6 +327,8 @@ async function openScheduleModal(mode, data = null) {
 		
 		// 등록모달은 개인으로 기본값설정
 		select.value = 'share';
+		shareEl.style.display = "block";
+		
 		// 종일 체크 해제
 		alldayCheckbox.checked = true
 		form.alldayYN.value = "Y";
@@ -490,7 +493,6 @@ async function getOrganizationChart() {
 		return response.json();  //JSON 파싱
 	}).then(async data => {
 		toastTreeData = await buildDeptTree(data.data);
-		console.log("toastTreeData : " , toastTreeData)
 		await renderOrgGrid();
 	}).catch(error => {
 		console.error('에러', error)
@@ -554,6 +556,44 @@ let treeGrid = null;
 
 // 조직도그리드 그리기
 async function renderOrgGrid() {
+	// 그리드 언어 설정
+	tui.Grid.setLanguage('ko', {
+	    display: {
+	        noData: '데이터가 없습니다.',
+	        loadingData: '데이터를 불러오는 중입니다.',
+	        resizeHandleGuide: '마우스 드래그를 통해 너비를 조정할 수 있습니다.',
+	    },
+	    net: {
+	        confirmCreate: '생성하시겠습니까?',
+	        confirmUpdate: '수정하시겠습니까?',
+	        confirmDelete: '삭제하시겠습니까?',
+	        confirmModify: '저장하시겠습니까?',
+	        noDataToCreate: '생성할 데이터가 없습니다.',
+	        noDataToUpdate: '수정할 데이터가 없습니다.',
+	        noDataToDelete: '삭제할 데이터가 없습니다.',
+	        noDataToModify: '수정할 데이터가 없습니다.',
+	        failResponse: '데이터 요청 중에 에러가 발생하였습니다.'
+	    },
+	    filter: {
+	        // 문자열 필터 옵션
+	        contains: '포함',
+	        eq: '일치',
+	        ne: '불일치',
+	        start: '시작 문자',
+	        end: '끝 문자',
+	        
+	        // 날짜/숫자 필터 옵션
+	        after: '이후',
+	        afterEq: '이후 (포함)',
+	        before: '이전',
+	        beforeEq: '이전 (포함)',
+
+	        // 버튼 및 기타
+	        apply: '적용',
+	        clear: '초기화',
+	        selectAll: '전체 선택'
+	    }
+	});
 	// 조직도 열때마다 초기화
     if (treeGrid) {
 		treeGrid.destroy();
@@ -575,9 +615,8 @@ async function renderOrgGrid() {
 			, name: 'name'
 			, treeColumn: true
 			, align: 'left'
-			, filter: { type: 'text', showApplyBtn: true, showClearBtn: true }	
+			, filter: 'text'	
 			, formatter: function({row}) {
-				console.log(row, "@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 				if(row.empId != null){
 					return `${row.name}(${row.empId})`
 				} else {
