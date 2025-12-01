@@ -22,7 +22,7 @@ import oracle.sql.NUMBER;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class) 
-public class productMst {
+public class ProductMst {
 		@Id
 		@Column(name="PRD_ID")
 		private String prdId; //제품id

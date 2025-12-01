@@ -9,45 +9,44 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
-@Entity
-@Table(name = "MATERIAL_MST")
 @Getter
 @Setter
-@EntityListeners(AuditingEntityListener.class) 
-public class MaterialMst {
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+public class MaterialMstDTO {
 
-	@Id
-	@Column(name="MAT_ID")
+	@NotBlank(message = "원재료 ID는 필수 입력값입니다.")
 	private String matId; //원재료id
 	
-	@Column(name="MAT_NAME")
+	@NotBlank(message = "원재료 품목명은 필수 입력값입니다.")
 	private String matName; //원재료품목명
-			
-	@Column(name="MAT_TYPE")
+	
+	@NotBlank(message = "원재료 유형은 필수 입력값입니다.")
 	private String matType; //원재료 유형
 	
-	@Column(name="MAT_UNIT")
+	@NotBlank(message = "단위는 필수 입력값입니다.")
 	private String matUnit; //단위(용량)
 	
-	@Column(name="EFFECTIVE_DATE")
+	@NotBlank(message = "유효일자는 필수 입력값입니다.")
 	private String effectiveDate; //유효일자
 	
-	@Column(name="MAT_DESC")
+	@NotBlank(message = "상세설명은 필수 입력값입니다.")
 	private String matDesc; //상세설명
 	
-	@Column(name="CREATE_ID")
 	private String createId; //생성자 id
 	
-	@Column(name="CREATE_DATE")
 	private LocalDate createDate; //생성일시
 	
-	@Column(name="UPDATE_ID")
 	private String updateId; //수정자 id
 	
-	@Column(name="UPDATE_DATE")
 	private LocalDate updateDate; //수정일시
 
 }

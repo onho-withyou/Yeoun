@@ -17,7 +17,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class) 
-public class qcItem {
+public class QcItem {
 
 	@Id
 	@Column(name="QC_ITEM_ID")
