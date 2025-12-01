@@ -20,43 +20,43 @@ import lombok.Setter;
 public class QcItem {
 
 	@Id
-	@Column(name="QC_ITEM_ID")
+	@Column(name="QC_ITEM_ID", length = 20)
 	private String qcItemId; // QC 항목 id
 	
-	@Column(name="ITEM_NAME")
+	@Column(name="ITEM_NAME", length = 100)
 	private String itemName; //항목명
 	
-	@Column(name="TARGET_TYPE")
+	@Column(name="TARGET_TYPE", length = 20)
 	private String targetType; //대상구분
 	
-	@Column(name="UNIT")
+	@Column(name="UNIT", length = 20)
 	private String unit; //단위
 	
-	@Column(name="STD_TEXT")
+	@Column(name="STD_TEXT", length = 200)
 	private String stdText; //기준값텍스트
 	
-	@Column(name="MIN_VALUE")
-	private String minValue; //허용하한값
+	@Column(name="MIN_VALUE", length = 10)
+	private Number minValue; //허용하한값
 	
-	@Column(name="MAX_VALUE")
-	private String maxValue; //허용상한값
+	@Column(name="MAX_VALUE", length = 10)
+	private Number maxValue; //허용상한값
 	
-	@Column(name="USE_YN")
+	@Column(name="USE_YN", length = 1)
 	private String useYn; //사용여부
 	
-	@Column(name="SORT_ORDER")
-	private String sortOrder; //정렬순서
+	@Column(name="SORT_ORDER", length = 3)
+	private Number sortOrder; //정렬순서
 	
-	@Column(name="CREATE_ID")
+	@Column(name="CREATED_ID", length = 7)
 	private String createId; //생성자 id
 	
-	@Column(name="CREATE_DATE")
+	@Column(name="CREATED_DATE")
 	private LocalDate createDate; //생성일시
 	
-	@Column(name="UPDATE_ID")
+	@Column(name="UPDATED_ID", length = 7)
 	private String updateId; //수정자 id
 	
-	@Column(name="UPDATE_DATE")
+	@Column(name="UPDATED_DATE")
 	private LocalDate updateDate; //수정일시
 	
 }

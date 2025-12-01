@@ -20,34 +20,34 @@ import oracle.sql.NUMBER;
 @EntityListeners(AuditingEntityListener.class)
 public class BomMst {
 	@Id
-	@Column(name="BOM_ID")
+	@Column(name="BOM_ID", length = 20)
 	private NUMBER bomId; //BOMid
 	
-	@Column(name="PRD_ID")
+	@Column(name="PRD_ID", length = 50)
 	private String prdId; //제품id
 	
-	@Column(name="MAT_ID")
+	@Column(name="MAT_ID", length = 50)
 	private String matId; //원재료id
 	
 	@Column(name="MAT_QTY")
 	private String matQty; //원재료사용량
 
-	@Column(name="MAT_UNIT")
-	private String matUnit; //사용단위
+	@Column(name="MAT_UNIT", length = 20)
+	private NUMBER matUnit; //사용단위
 	
-	@Column(name="BOM_SEQ_NO")
+	@Column(name="BOM_SEQ_NO", length = 10)
 	private String bomSeqNo; //순서
 	
-	@Column(name="CREATE_ID")
-	private String createId; //생성자 id
+	@Column(name="CREATED_ID", length = 7)
+	private String createdId; //생성자 id
 	
-	@Column(name="CREATE_DATE")
-	private LocalDate createDate; //생성일시
+	@Column(name="CREATED_DATE")
+	private LocalDate createdDate; //생성일시
 	
-	@Column(name="UPDATE_ID")
-	private String updateId; //수정자 id
+	@Column(name="UPDATED_ID", length = 7)
+	private String updatedId; //수정자 id
 	
-	@Column(name="UPDATE_DATE")
-	private LocalDate updateDate; //수정일시
+	@Column(name="UPDATED_DATE")
+	private LocalDate updatedDate; //수정일시
 
 }

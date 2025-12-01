@@ -2,6 +2,7 @@ package com.yeoun.masterData.entity;
 
 import java.time.LocalDate;
 
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
@@ -20,34 +21,35 @@ import lombok.Setter;
 public class MaterialMst {
 
 	@Id
-	@Column(name="MAT_ID")
+	@Column(name="MAT_ID", length = 50)
 	private String matId; //원재료id
 	
-	@Column(name="MAT_NAME")
+	@Column(name="MAT_NAME", length = 100)
 	private String matName; //원재료품목명
 			
-	@Column(name="MAT_TYPE")
+	@Column(name="MAT_TYPE", length = 50)
 	private String matType; //원재료 유형
 	
-	@Column(name="MAT_UNIT")
+	@Column(name="MAT_UNIT", length = 20)
 	private String matUnit; //단위(용량)
 	
 	@Column(name="EFFECTIVE_DATE")
 	private String effectiveDate; //유효일자
 	
-	@Column(name="MAT_DESC")
+	@Column(name="MAT_DESC", length = 255)
 	private String matDesc; //상세설명
 	
-	@Column(name="CREATE_ID")
-	private String createId; //생성자 id
+	@Column(name="CREATED_ID", length = 7)
+	private String createdId; //생성자 id
 	
-	@Column(name="CREATE_DATE")
-	private LocalDate createDate; //생성일시
+	@CreatedDate
+	@Column(name="CREATED_DATE")
+	private LocalDate createdDate; //생성일시
 	
-	@Column(name="UPDATE_ID")
-	private String updateId; //수정자 id
+	@Column(name="UPDATED_ID", length = 7)
+	private String updatedId; //수정자 id
 	
-	@Column(name="UPDATE_DATE")
-	private LocalDate updateDate; //수정일시
+	@Column(name="UPDATED_DATE")
+	private LocalDate updatedDate; //수정일시
 
 }

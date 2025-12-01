@@ -3,19 +3,16 @@ package com.yeoun.masterData.entity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import oracle.sql.NUMBER;
 
 @Entity
 @Table(name = "PRODUCT_MST")
@@ -24,41 +21,43 @@ import oracle.sql.NUMBER;
 @EntityListeners(AuditingEntityListener.class) 
 public class ProductMst {
 		@Id
-		@Column(name="PRD_ID")
+		@Column(name="PRD_ID", length = 50)
 		private String prdId; //제품id
 		
-		@Column(name="PRD_NAME")
+		@Column(name="PRD_NAME", length = 100)
 		private String prdName; //제품명
 		
-		@Column(name="PRD_CAT")
+		@Column(name="PRD_CAT", length = 50)
 		private String prdCat; //제품유형
 		
-		@Column(name="PRD_UNIT")
+		@Column(name="PRD_UNIT", length = 20)
 		private String prdUnit; //단위
 		
-		@Column(name="PRD_STATUS")
+		@Column(name="PRD_STATUS", length = 20)
 		private String prdStatus; //상태
 
 		@Column(name="EFFECTIVE_DATE")
-		private String effectiveDate; //유효일자
+		private LocalDate effectiveDate; //유효일자
 		
 		@Column(name = "UNIT_PRICE", precision = 18, scale = 2)
 		private BigDecimal unitPrice;
 		
-		@Column(name="PRD_SPEC")
+		@Column(name="PRD_SPEC", length = 225)
 		private String prdSpec; //제품상세설명
 		
-		@Column(name="CREATE_ID")
-		private String createId; //생성자 id
 		
-		@Column(name="CREATE_DATE")
-		private LocalDate createDate; //생성일시
+		@Column(name="CREATED_ID")
+		private String createdId; //생성자 id
 		
-		@Column(name="UPDATE_ID")
-		private String updateId; //수정자 id
+		@CreatedDate
+		@Column(name="CREATED_DATE")
+		private LocalDate createdDate; //생성일시
 		
-		@Column(name="UPDATE_DATE")
-		private LocalDate updateDate; //수정일시
+		@Column(name="UPDATED_ID")
+		private String updatedId; //수정자 id
+		
+		@Column(name="UPDATED_DATE")
+		private LocalDate updatedDate; //수정일시
 		
 		
 
