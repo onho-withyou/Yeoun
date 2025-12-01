@@ -33,13 +33,14 @@ public class WarehouseLocation {
 	
 	@Column(nullable = false)
 	private String zone; // 존
+	
 	@Column(nullable = false)
 	private String rack; // 랙
+	
 	@Column(nullable = false)
-	private String row; // 로우
+	private String rackRow; // 로우
+	
 	@Column(nullable = false)
-	private String column; // 컬럼
+	private String rackCol; // 컬럼
 
-	
-	
 }
