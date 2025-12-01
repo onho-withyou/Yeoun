@@ -17,7 +17,8 @@ import lombok.Getter;
 import lombok.Setter;
 import oracle.sql.NUMBER;
 
-
+@Entity
+@Table(name = "PRODUCT_MST")
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class) 

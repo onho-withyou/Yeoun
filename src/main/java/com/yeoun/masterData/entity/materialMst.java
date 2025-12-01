@@ -5,12 +5,15 @@ import java.time.LocalDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import oracle.sql.NUMBER;
 
+@Entity
+@Table(name = "MATERIAL_MST")
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class) 
