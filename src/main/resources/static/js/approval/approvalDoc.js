@@ -119,7 +119,7 @@
 			//console.log(data);
 			data.map((item,index)=>{
 				obj["value"] = item[0]; //사번
-				obj["label"] = (index+1) +" : "+item[1]+"("+item[0]+")"; //이름(사번)
+				obj["label"] = item[1]+"("+item[0]+")"; //이름(사번)
 				itemData.push(obj);
 				obj = {};
 			});
@@ -158,10 +158,13 @@
 					$('#approval-modal').modal('show');
 				
 					document.getElementById('saveBtn').style.display = "none";//approvalCompanionBtn//approvalCheckBtn
+					document.getElementById('attachmentBtn').style.display = "none";//첨부파일
+					document.getElementById('downloadArea').style.display = "block";//다운로드
 					document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
 					document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
 					// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 					approvalId = rowData.approval_id;
+					getApprovalDocFileData(approvalId);
 					// 문서 열릴때 현재 결재권자(approval) 저장
 					currentApprover = rowData.approver;
 					console.log("rowData",rowData);//DraftingHidden
@@ -224,11 +227,14 @@
 					$('#approval-modal').modal('show');
 					
 					document.getElementById('saveBtn').style.display = "none";
+					document.getElementById('attachmentBtn').style.display = "none";//첨부파일
+					document.getElementById('downloadArea').style.display = "block";//다운로드
 					document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
 					document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
 					
 					// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 					approvalId = rowData.approval_id;
+					getApprovalDocFileData(approvalId);
 					// 문서 열릴때 현재 결재권자(approval) 저장
 					currentApprover = rowData.approver;
 					
@@ -283,11 +289,14 @@
 					$('#approval-modal').modal('show');
 					
 					document.getElementById('saveBtn').style.display = "none";
+					document.getElementById('attachmentBtn').style.display = "none";//첨부파일
+					document.getElementById('downloadArea').style.display = "block";//다운로드
 					document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
 					document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
 					
 					// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 					approvalId = rowData.approval_id;
+					getApprovalDocFileData(approvalId);
 					// 문서 열릴때 현재 결재권자(approval) 저장
 					currentApprover = rowData.approver;
 					
@@ -345,11 +354,14 @@
 				$('#approval-modal').modal('show');
 				
 				document.getElementById('saveBtn').style.display = "none";//등록버튼
+				document.getElementById('attachmentBtn').style.display = "none";//첨부파일
+				document.getElementById('downloadArea').style.display = "block";//다운로드
 				document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려버튼
 				document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인버튼
 				
 				// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 				approvalId = rowData.approval_id;
+				getApprovalDocFileData(approvalId);
 				// 문서 열릴때 현재 결재권자(approval) 저장
 				currentApprover = rowData.approver;
 				
@@ -405,10 +417,13 @@
 					$('#approval-modal').modal('show');
 					
 					document.getElementById('saveBtn').style.display = "none";
+					document.getElementById('attachmentBtn').style.display = "none";//첨부파일
+					document.getElementById('downloadArea').style.display = "block";//다운로드
 					document.getElementById('approvalCompanionBtn').style.display = "inline-block";//반려
 					document.getElementById('approvalCheckBtn').style.display = "inline-block";//결재확인
 					// 문서 열릴때 approvalId에 현재 열린 문서id 저장
 					approvalId = rowData.approval_id;
+					getApprovalDocFileData(approvalId);
 					// 문서 열릴때 현재 결재권자(approval) 저장
 					currentApprover = rowData.approver;
 					
@@ -465,7 +480,7 @@
 
 	// f- 결재양식에따른 form 활성화/비활성화 함수
 	function formChange(formType){
-		if(formType == '지출결의서'){
+		if(formType == '지출결의서'){//attachmentBtn
 			document.getElementById('expndTypeForm').style.display = 'flex';//지출종류
 			document.getElementById('leavePeriodForm').style.display = 'none';// 휴가기간
 			document.getElementById('leaveTypeForm').style.display = 'none';//휴가종류	
@@ -534,7 +549,252 @@
 		document.getElementById('reason-write').disabled = false;
 	}
 
-	//f- 폼 결재권한자 데이터 말아서 보내는 함수
+	//f- 모달 첨부파일
+	document.addEventListener('DOMContentLoaded', function() {
+    	const attachBtn = document.getElementById('attachmentBtn');
+    	const fileInput = document.getElementById('realFileInput');
+    	const listContainer = document.getElementById('fileListContainer');
+
+    	attachBtn.addEventListener('click', () => fileInput.click());
+		fileInput.addEventListener('change', updateFileListDisplay);
+
+		function resetAttachments() {
+    	    fileInput.value = ''; // input[type=file]의 파일 목록을 초기화
+    	    updateFileListDisplay(); // 화면 목록 갱신 (목록을 비우고 "선택된 파일 없음" 표시)
+    	}
+		// 파일 목록을 화면에 갱신하는 함수
+		function updateFileListDisplay() {
+		    listContainer.innerHTML = '';
+		    const files = fileInput.files;
+		    // '선택된 파일 없음' 문구 표시/숨김
+		   //fileNameDisp.style.display = files.length > 0 ? 'none' : 'block';
+	
+		    Array.from(files).forEach((file, index) => {
+		        const item = document.createElement('div');
+				item.style.cssText = 'border-radius: 15px; display: flex; align-items: center; margin: 5px;';
+		
+		        // 미리보기/아이콘 영역 생성
+		        const preview = createPreviewElement(file);
+		        item.appendChild(preview);
+		        // 파일 정보 영역 생성
+		        const info = document.createElement('div');
+		
+		        // 파일 이름 (innerText 사용)
+		        const nameSpan = document.createElement('span');
+		        nameSpan.innerText = file.name;
+		        info.appendChild(nameSpan);
+		        // 삭제 버튼 생성 (innerText 사용 및 이벤트 연결)
+		        const deleteBtn = document.createElement('button');
+				deleteBtn.innerText = '×'; 
+				deleteBtn.type = 'button';
+
+				deleteBtn.style.cssText = 'border: none; background: transparent; padding: 0; font-size: 18px; cursor: pointer;';
+		        deleteBtn.onclick = () => removeFile(index); 
+		        info.appendChild(deleteBtn);
+		        item.appendChild(info);
+		        listContainer.appendChild(item);
+		    });
+		}
+		// 파일 유형에 따른 미리보기/아이콘 요소 생성
+		function createPreviewElement(file) {
+		    const previewArea = document.createElement('div');
+		    previewArea.style.cssText = 'width: 50px; height: 50px; border: none; overflow: hidden; display: flex; justify-content: center; align-items: center;';
+		    if (file.type.startsWith('image/')) {
+		        const reader = new FileReader();
+		        reader.onload = (e) => {
+		            const img = document.createElement('img');
+					img.src = e.target.result;
+		            img.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
+		            previewArea.appendChild(img);
+					
+		        };
+		        reader.readAsDataURL(file);
+		    } else if (file.type === 'application/pdf') {
+		        previewArea.innerHTML = '<span style="font-size: 30px;">📄</span>';
+		    } else {
+		        previewArea.innerHTML = '<span style="font-size: 30px;">📎</span>';
+		    }
+		    return previewArea;
+		}
+		// 파일 삭제 로직 (DataTransfer 사용)
+		function removeFile(indexToRemove) {
+		    const dt = new DataTransfer();
+		    const files = fileInput.files;
+		    for (let i = 0; i < files.length; i++) {
+		        if (i !== indexToRemove) {
+		            dt.items.add(files[i]);
+		        }
+		    }
+		
+		    fileInput.files = dt.files;
+		    updateFileListDisplay(); 
+		}
+
+		window.resetAttachments = resetAttachments;
+
+		const printButton = document.getElementById('printBtn');
+    
+    	if (printButton) {
+    	    printButton.addEventListener('click', () => {
+    	        const modalDoc = document.getElementById('modal-doc');
+    	        if (!modalDoc) return;
+
+    	        // 1. 인쇄를 위해 모달 내용을 복사합니다. (원본 폼 보호)
+    	        const printElement = modalDoc.cloneNode(true);
+			
+    	        // 2. 불필요한 UI 요소 및 입력 필드를 정리합니다.
+			
+    	        // // 2.1. 입력 필드 (input, select, textarea)를 값으로 대체
+    	        // printElement.querySelectorAll('input, select, textarea').forEach(input => {
+    	        //     let displayValue = '';
+
+    	        //     if (input.type === 'hidden') {
+    	        //         // 숨겨진 필드는 제거
+    	        //         input.remove();
+    	        //         return;
+    	        //     }
+				
+    	        //     if (input.tagName === 'SELECT') {
+    	        //         // select 태그의 선택된 option의 텍스트를 가져옴
+    	        //         if (input.options.length > 0 && input.selectedIndex !== -1) {
+    	        //              displayValue = input.options[input.selectedIndex].text.trim() || ' - ';
+    	        //         }
+    	        //     } else if (input.tagName === 'TEXTAREA') {
+    	        //         // textarea의 값
+    	        //         displayValue = input.value || ' - ';
+    	        //     } else if (input.type === 'radio') {
+    	        //         // 라디오 버튼 처리 (체크된 경우만 표시)
+    	        //         if (input.checked) {
+    	        //             const label = input.closest('div').querySelector(`label[for="${input.id}"]`) || input.previousElementSibling;
+    	        //             displayValue = label ? label.textContent.trim() : input.value;
+    	        //             // 라디오 버튼은 복잡하므로, 체크된 요소만 값으로 변환 후 나머지 제거
+    	        //             input.parentNode.innerHTML = `<p style="display:inline; margin-right: 15px;">**${displayValue}**</p>`;
+    	        //             return; // 추가적인 대체 처리 방지
+    	        //         } else {
+    	        //             input.remove();
+    	        //             return;
+    	        //         }
+    	        //     } else {
+    	        //         // 일반 input (text, date 등)의 값
+    	        //         displayValue = input.value || ' - ';
+    	        //     }
+				
+    	        //     // 값만 표시하는 <span>/<div> 태그 생성 및 대체
+    	        //     const displayNode = document.createElement('span');
+    	        //     displayNode.textContent = displayValue;
+    	        //     displayNode.style.display = 'inline-block';
+    	        //     displayNode.style.minWidth = '200px';
+    	        //     displayNode.style.paddingLeft = '5px';
+    	        //     displayNode.style.borderBottom = '1px solid #333';
+
+    	        //     input.parentNode.replaceChild(displayNode, input);
+    	        // });
+
+    	        // // 2.2. 인쇄 시 불필요한 UI/버튼 영역 제거
+    	        // printElement.querySelector('.btn-close')?.remove();
+    	        // printElement.querySelector('.modal-footer')?.remove();
+    	        // printElement.querySelector('#select-box')?.remove();
+    	        // printElement.querySelector('#approver')?.remove();
+    	        // printElement.querySelector('#jeongyeolja')?.remove();
+			
+
+    	        // 3. 새 창을 열고 인쇄 내용을 삽입합니다.
+    	        const printWindow = window.open('', '_blank', 'height=800,width=1000');
+			
+    	        let printHTML = `
+    	            <html>
+    	            <head>
+    	                <title>기안서 인쇄</title>
+    	                <style>
+    	                    /* 인쇄 전용 스타일 */
+    	                    @page { margin: 2cm; }
+    	                    body { font-family: 'Malgun Gothic', sans-serif; }
+    	                    .modal-content { width: 800px; margin: 20px auto; padding: 30px; border: 1px solid #333; }
+    	                    .modal-header { border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+    	                    .modal-header h3 { font-size: 24px; text-align: center; }
+    	                    h5 { display: flex; align-items: baseline; margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;}
+    	                    h5 label { font-weight: bold; width: 150px; flex-shrink: 0; }
+    	                    .d-flex p { margin-left: 10px; }
+			
+    	                    /* Thymeleaf로 채워지는 기안자 정보 스타일링 */
+    	                    #approver-name { font-weight: bold; }
+
+    	                    /* 대체된 입력 필드 스타일 */
+    	                    h5 span { border: none !important; }
+
+    	                </style>
+    	            </head>
+    	            <body>
+    	                <div id="print-area">
+    	                    ${printElement.innerHTML}
+    	                </div>
+    	            </body>
+    	            </html>
+    	        `;
+
+    	        printWindow.document.write(printHTML);
+    	        printWindow.document.close();
+			
+    	        // 4. 인쇄 실행
+    	        printWindow.focus();
+    	        printWindow.print();
+    	        printWindow.close();
+    	    });
+    	}
+	});
+
+	// 파일 링크 생성 헬퍼 함수 downloadArea영역에생성되는 a태그
+	const createFileLink = (fileId, fileName) => {
+		const link = document.createElement('a');
+		link.href = `/files/download/${fileId}`;
+		link.download = fileName;
+		link.textContent = `📎 ${fileName}`;
+		Object.assign(link.style, {
+			display: 'block',
+			margin: '5px 0',
+			color: '#007bff',
+			textDecoration: 'none',
+			cursor: 'pointer'
+		});
+		return link;
+	};
+
+	// 결재 문서 첨부파일 로드 및 렌더링
+	async function loadAndRenderFiles(docId) {
+		const container = document.getElementById('downloadArea');
+		if (!container) return console.error('다운로드 영역을 찾을 수 없습니다.');
+
+		container.innerHTML = '파일 목록을 불러오는 중...';
+
+		try {
+			const response = await fetch(`/approval/file/${docId}`);
+			if (!response.ok) throw new Error(`상태: ${response.status}`);
+
+			const files = await response.json();
+			container.innerHTML = '';
+
+			if (!files.length) {
+				container.textContent = '첨부된 파일이 없습니다.';
+				return;
+			}
+
+			files.forEach(file => {
+				const fileId = file.fileId;
+				const fileName = file.originFileName || file.fileName;
+				if (fileId && fileName) container.appendChild(createFileLink(fileId, fileName));
+			});
+
+		} catch (error) {
+			console.error('첨부파일 로드 실패:', error);
+			container.innerHTML = `⚠️ 파일을 불러올 수 없습니다. (${error.message})`;
+		}
+	}
+
+	// 결재 문서 파일 데이터 로드
+	const getApprovalDocFileData = (approvalId) => loadAndRenderFiles(approvalId);
+
+    	
+	//f- 등록버튼,폼 결재권한자 데이터 말아서 보내는 함수
 	document.getElementById('modal-doc').addEventListener('submit', async function(event) {
     	// 폼의 기본 제출 동작 방지
     	event.preventDefault();
@@ -570,15 +830,14 @@
 
 
     	// FormData를 일반 JavaScript 객체로 변환
-    	const dataObject = Object.fromEntries(formData.entries());
+    	//const dataObject = Object.fromEntries(formData.entries());
 
     	await fetch("/approval/approval_doc", {
 				method: 'POST', 
 				headers: {
 					[csrfHeader]: csrfToken
-					,'Content-Type': 'application/json' // Content-Type 헤더를 application/json으로 설정
 				},
-				body:  JSON.stringify(dataObject) // 요청 본문에 JSON 데이터 포함
+				body:  formData // 요청 본문에 JSON 데이터 포함
 			})
 			.then(response => response.text()) // 서버 응답을 JSON으로 파싱
 			.then(data => {
@@ -674,7 +933,7 @@
 			// 새로운 전결자 표시
 			if(selectedValue != 'N') {
 				targetDiv.querySelectorAll('span').forEach(span => span.remove());
-				targetDiv.innerHTML += `<span style="color:red;"> ${selectedValue} : ${selectedEmpName} </span>`;
+				targetDiv.innerHTML += `<span style="color:blue;"> ${selectedValue} <br> ${selectedEmpName} </span>`;
 			}
 		}
 		approverArr.forEach((value,key) => {
@@ -981,7 +1240,9 @@
 	function draftValFn(ev){
 		let draft_doc = ev.value;
 
-		document.getElementById('saveBtn').style.display = "block";
+		document.getElementById('saveBtn').style.display = "block";//등록
+		document.getElementById('attachmentBtn').style.display = 'block';//첨부파일
+		document.getElementById('downloadArea').style.display = "none";//다운로드
 		//document.getElementById('DraftingHidden').value = draft_doc;
 
 		// html에서 th:data-formname="${item.formName}" 값을 가져와서 이름으로 사용
@@ -1056,6 +1317,12 @@
     let approverArr = [];//결재권한자 배열 
 	let writeBtn = document.getElementById("writeBtn");
 	
+	//모달이 닫힐떄 첨부파일 리셋
+	const approvalModal = document.getElementById('approval-modal');
+	approvalModal.addEventListener('hidden.bs.modal', function (event) {
+		resetAttachments(); 
+	});
+
 	//f- 기안서작성 모달이 열리기전에 이벤트를 감지
 	$('#approval-modal').on('show.bs.modal', function (e) {
 		// e.relatedTarget이 null/undefined이면 .dataset 접근을 멈추고 actionType에 undefined 할당
@@ -1138,9 +1405,9 @@
     	if(this.count < 3){
     		this.count++;
     		approverDiv.innerHTML +='<div class="btn btn-success"'
-    		                      +'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
+    		                      +'style="width:250px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
     		                      +'<p onclick="approverDivclose(this,' + "'"+ type + "'"+ ','+ count +')" style="float:right;margin-right: 8px;">&times;</p>'
-    		                      +'<p id="approver_'+count+'" onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 :' + text + ' 변경</p>'
+    		                      +'<p id="approver_'+count+'" onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:30px;height: 129px;font-size:22px;">'+(this.count) + '차 결재권한자 '+'<br>'+ text + '<br>' + '</p>'
     		                    	+'</div>';
 		}
     }
