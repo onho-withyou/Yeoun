@@ -33,7 +33,6 @@ public class ClientService {
     }
 
     /** 신규 등록 */
-    /** 신규 등록 */
     public Client create(Client client) {
 
         // 1) 거래처 ID 생성
@@ -90,15 +89,32 @@ public class ClientService {
         return clientRepository.save(origin);
     }
 
-    /** 거래처ID 생성 규칙 */
     private String generateClientId(String type) {
 
-        String prefix = type.equals("SUPPLIER") ? "SUP" : "CUS";
+        // 1. prefix
+        String prefix = type.equals("SUPPLIER") ? "VEN" : "CUS";
 
+        // 2. 날짜 (YYYYMMDD)
         String date = java.time.LocalDate.now().toString().replace("-", "");
 
-        int seq = (int) (Math.random() * 9000) + 1000;
+        // 3. 오늘 해당 prefix+date 로 시작하는 client_id 중 가장 큰 번호 조회
+        String pattern = prefix + date + "-%";
+        String maxId = clientRepository.findMaxClientId(pattern);
 
-        return prefix + date + seq;
+        // 4. 다음 seq 계산
+        int nextSeq = 1; // 기본값
+
+        if (maxId != null) {
+            // ID 끝 4자리 추출 → int 변환 → +1
+            String seqStr = maxId.substring(maxId.lastIndexOf("-") + 1);
+            nextSeq = Integer.parseInt(seqStr) + 1;
+        }
+
+        // 5. 4자리 포맷
+        String seqStr = String.format("%04d", nextSeq);
+
+        // 6. 최종 ID
+        return prefix + date + "-" + seqStr;
     }
+
 }

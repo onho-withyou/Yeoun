@@ -2,7 +2,7 @@ package com.yeoun.sales.repository;
 
 import com.yeoun.sales.entity.Client;
 
-import org.apache.ibatis.annotations.Param;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -32,5 +32,12 @@ public interface ClientRepository extends JpaRepository<Client, String> {
     	        @Param("keyword") String keyword,
     	        @Param("type") String type
     	);
+
+    @Query(value = """
+    	    SELECT MAX(c.clientId)
+    	    FROM Client c
+    	    WHERE c.clientId LIKE :pattern
+    	""")
+    	String findMaxClientId(@Param("pattern") String pattern);
 
 }
