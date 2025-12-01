@@ -6,6 +6,10 @@ import com.yeoun.pay.service.PayRuleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
+import java.util.Comparator;
+import java.util.List;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,6 +29,13 @@ public class PayRuleController {
     public String rulePage(Model model) {
 
         model.addAttribute("activeTab", "rule");
+        
+        List<PayRule> sortedRules = payRuleService.findAll()
+                .stream()
+                .sorted(Comparator.comparing(PayRule::getRuleId))
+                .toList();
+        
+        
         model.addAttribute("rules", payRuleService.findAll());
 
         // 등록 모달 바인딩 객체 준비

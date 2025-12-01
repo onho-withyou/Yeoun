@@ -144,7 +144,7 @@
 					});
 					console.log("@@@@@@@@@@@@@@@@@@@@@@",approverArr);
 				}
-				formReset();
+				
 			});
 			//const modal = document.getElementById('approval-modal');
 			//그리드 1클릭시 상세버튼

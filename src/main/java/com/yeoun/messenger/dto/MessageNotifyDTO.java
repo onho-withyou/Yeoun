@@ -1,7 +1,5 @@
 package com.yeoun.messenger.dto;
 
-import java.time.LocalDateTime;
-
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,6 +11,7 @@ import lombok.ToString;
 @ToString
 public class MessageNotifyDTO {
 	private Long roomId;				// 메시지 ID
+	private String groupName;			// 그룹채팅방일 시 이름
 	private String preview;				// 미리보기 메시지 (밖에서 보일 메시지)
 	private String senderId;			// 보낸사람 ID (혹시 몰라서)
 	private String senderName;			// 보낸사람 이름 (토스트 알림에 사용 예정)

@@ -104,9 +104,11 @@
 
         <div class="d-flex justify-content-between align-items-center pb-2 border-bottom">
           <div class="d-flex align-items-center">
-            <h6 class="mb-0 me-3 fw-bold text-dark">
-              기준 ID: <span class="text-primary" th:text="${r.ruleId}"></span>
-            </h6>
+            <h6 class="mb-0 me-3 fw-bold text-dark"
+				    style="display:inline-block; white-space:nowrap;">
+				  No. <span class="text-primary" th:text="${r.ruleId}"></span>
+				</h6>
+
             <span class="text-muted small">
               (<span th:text="${#temporals.format(r.startDate, 'yyyy.MM.dd')}"></span> ~
                <span th:text="${r.endDate != null ? #temporals.format(r.endDate, 'yyyy.MM.dd') : '무기한'}"></span>)
@@ -124,10 +126,6 @@
               수정
             </button>
 
-<!--             <button class="btn btn-sm btn-outline-danger btn-delete-rule" -->
-<!--                     th:attr="data-href=@{'/pay/rule/delete/' + ${r.ruleId}}, data-rule-id=${r.ruleId}"> -->
-<!--               삭제 -->
-<!--             </button> -->
             
             <form th:action="@{'/pay/rule/delete/' + ${r.ruleId}}" method="post"
 		      onsubmit="return confirm('해당 기준을 삭제하시겠습니까?');">

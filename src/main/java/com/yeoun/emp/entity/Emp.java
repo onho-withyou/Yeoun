@@ -42,6 +42,10 @@ public class Emp implements FileUploadHelpper {
 	@Column(name = "EMP_PWD", nullable = false, length = 200)
 	private String empPwd;		
 	
+	// 비밀번호 변경 필요 여부
+	@Column(name = "PWD_CHANGE_REQ", length = 1)
+	private String pwdChangeReq = "N";
+	
 	// 이름
 	@Column(name = "EMP_NAME", nullable = false, length = 50)
 	private String empName;		

@@ -598,15 +598,40 @@ public class EmpService {
 	
 	
 	// ========== 비밀번호 변경 ==========
+	// 일반 사원
 	public void changePassword(String empId, String newPassword) {
         Emp emp = empRepository.findById(empId)
                 .orElseThrow(() -> new EntityNotFoundException("사원 없음: " + empId));
 
         String encoded = encoder.encode(newPassword);
         emp.setEmpPwd(encoded);
+        
+        emp.setPwdChangeReq("N");
     }
 	
+	// 관리자 전용 - 비밀번호를 초기값(1234)로 재설정하는 기능
+	public void resetPwdToDefaultByAdmin(String empId) {
+		Emp emp = empRepository.findById(empId)
+                .orElseThrow(() -> new EntityNotFoundException("사원 없음: " + empId));
+		
+		// 초기 비밀번호 (평문)
+		String defaultPwd = "1234";
+		
+		// 암호화 저장
+		String encoded = encoder.encode(defaultPwd);
+		emp.setEmpPwd(encoded);
+		
+		// 다음 로그인 때 비밀번호 변경 강제
+		emp.setPwdChangeReq("Y");
+		
+		log.info("[관리자 비밀번호 초기화] empId={}, 초기값=1234, pwdChangeReq=Y", empId);
+	}
 	
+	@Transactional(readOnly = true)
+	public Emp getEmpEntity(String empId) {
+	    return empRepository.findById(empId)
+	            .orElseThrow(() -> new EntityNotFoundException("사원 없음: " + empId));
+	}
 	
 	
 

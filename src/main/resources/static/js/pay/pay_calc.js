@@ -20,11 +20,11 @@ const parseAmount   = (v)=> Number(onlyDigits(v));
 /* =====================================================
    공통 검증 함수 (등록/수정)
 ===================================================== */
-function validateCalcRule(form) {
+async function validateCalcRule(form) {
 
-    const itemCode   = form.querySelector('select[name="item.itemCode"]');
+    const itemSel    = form.querySelector('select[name="item.itemCode"]');
     const ruleType   = form.querySelector('select[name="ruleType"]');
-    const priority   = form.querySelector('input[name="priority"]');
+    const priorityEl = form.querySelector('input[name="priority"]');
     const startDate  = form.querySelector('input[name="startDate"]');
     const status     = form.querySelector('select[name="status"]');
     const targetType = form.querySelector('select[name="targetType"]');
@@ -35,9 +35,10 @@ function validateCalcRule(form) {
 
     let msg = null;
 
-    if(!itemCode?.value) msg = "항목 코드는 필수입니다.";
+    // 기본 검증들 유지
+    if(!itemSel?.value) msg = "항목 코드는 필수입니다.";
     else if(!ruleType?.value) msg = "규칙 유형은 필수입니다.";
-    else if(!priority?.value) msg = "우선순위는 필수입니다.";
+    else if(!priorityEl?.value) msg = "우선순위는 필수입니다.";
     else if(!startDate?.value) msg = "시작일은 필수입니다.";
     else if(!status?.value) msg = "상태는 필수입니다.";
     else if(!targetType?.value) msg = "대상구분은 필수입니다.";
@@ -48,31 +49,55 @@ function validateCalcRule(form) {
     else if(/\s/.test(calcFormula.value))
         msg = "계산공식에는 공백을 포함할 수 없습니다.";
 
-    // 사번 검증
-    if(!msg && targetType.value === "EMP") {
-        if(!targetCode?.value || targetCode.value.length !== 7) {
-            msg = "사원코드는 7자리여야 합니다.";
-        }
-    }
+    if (msg) return msg;
 
-    // ⭐ 비율 검증 추가!
-    if(!msg && ruleType.value === "RATE"){
+    // 금액/비율 검증
+    if(ruleType.value === "RATE"){
         const num = parseFloat(valueNum.value);
         if(isNaN(num) || num < 0 || num > 1){
-            msg = "비율은 0~1 사이 값만 입력 가능합니다. (예: 0.1 = 10%)";
+            return "비율은 0~1 사이 값만 입력 가능합니다. (예: 0.1 = 10%)";
         }
     }
-	
-	// ⭐ 금액 검증 추가! (1000원 이상)
-	if(!msg && ruleType.value === "AMT"){
-	    const num = parseAmount(valueNum.value);
-	    if(isNaN(num) || num < 1000){
-	        msg = "금액은 1,000원 이상 입력해야 합니다.";
-	    }
-	}
 
+    if(ruleType.value === "AMT"){
+        const num = parseAmount(valueNum.value);
+        if(isNaN(num) || num < 1000){
+            return "금액은 1,000원 이상 입력해야 합니다.";
+        }
+    }
 
-    return msg;
+    // 사번 검증
+    if(targetType.value === "EMP"){
+        if(!targetCode?.value || targetCode.value.length !== 7){
+            return "사원코드는 7자리여야 합니다.";
+        }
+    }
+
+    /* =====================================================
+       ⭐ 우선순위 중복 검증 AJAX
+    ====================================================== */
+    const itemCode = itemSel.value;
+    const priority = priorityEl.value;
+
+    // 수정모달이면 ruleId 있음
+    const ruleId = form.dataset.ruleId || null;
+
+    const url = `/pay/rule_calc/checkPriority?itemCode=${itemCode}&priority=${priority}`
+              + (ruleId ? `&ruleId=${ruleId}` : "");
+
+    try {
+        const res = await fetch(url);
+        const isDup = await res.json();
+
+        if (isDup) {
+            return "해당 항목에서 이미 사용 중인 우선순위입니다. 다른 번호를 입력하세요.";
+        }
+    } catch (e) {
+        console.error("우선순위 중복 체크 실패", e);
+        return "우선순위 중복 검증 중 오류가 발생했습니다.";
+    }
+
+    return null; // 성공
 }
 
 
@@ -179,16 +204,20 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        form.addEventListener("submit", (e)=>{
-            const msg = validateCalcRule(form);
-            if(msg){
-                e.preventDefault();
-                const box = document.getElementById("create-error-box");
-                box.classList.remove("d-none");
-                box.querySelector("span").innerText = msg;
-                return;
-            }
-        });
+		form.addEventListener("submit", async (e)=>{
+		    e.preventDefault();
+		    const msg = await validateCalcRule(form);
+
+		    if(msg){
+		        const box = document.getElementById("create-error-box");
+		        box.classList.remove("d-none");
+		        box.querySelector("span").innerText = msg;
+		        return;
+		    }
+
+		    form.submit();   // ⭐ 이게 있어야 최종 제출됨
+		});
+
     }
 
     bindTargetSwitcher("create");
@@ -207,6 +236,9 @@ document.addEventListener("show.bs.modal", (evt)=>{
     const ruleId = id.replace("calcEditModal-", "");
 
     console.log(`🔧 수정 모달 표시됨: ruleId=${ruleId}`);
+	
+	// ⭐⭐⭐ 가장 중요한 부분 — dataset에 ruleId 주입 ⭐⭐⭐
+	    form.dataset.ruleId = ruleId;
 
     // UI 스위치 먼저 실행
     bindTargetSwitcher(`edit-${ruleId}`);
@@ -249,17 +281,20 @@ document.addEventListener("show.bs.modal", (evt)=>{
         }
     });
 
-    form.addEventListener("submit", (e)=>{
-        const msg = validateCalcRule(form);
-        const box = modal.querySelector(".modal-error-box");
+	form.addEventListener("submit", async (e)=>{
+	    e.preventDefault();
+	    const msg = await validateCalcRule(form);
+	    const box = modal.querySelector(".modal-error-box");
 
-        if(msg){
-            e.preventDefault();
-            box.classList.remove("d-none");
-            box.querySelector("span").innerText = msg;
-            return;
-        }
-    });
+	    if(msg){
+	        box.classList.remove("d-none");
+	        box.querySelector("span").innerText = msg;
+	        return;
+	    }
+
+	    form.submit();  
+		});
+
 
 });
 
@@ -382,4 +417,27 @@ document.addEventListener("show.bs.modal", (evt) => {
 
     const input = modal.querySelector("input[name='targetCode']");
     bindEmpAutocomplete(input);
+});
+
+
+/*클릭시 복사됨!*/
+document.addEventListener("click", function (e) {
+  if (e.target.classList.contains("copy-code")) {
+
+    const copyText = e.target.dataset.copy;
+    const originalText = e.target.dataset.original; // ← 원래 텍스트
+
+    navigator.clipboard.writeText(copyText).then(() => {
+
+      // 클릭한 요소를 “복사됨!” 으로 변경
+      e.target.innerText = "복사됨!";
+      e.target.style.color = "#198754";
+
+      // 1초 뒤 원래 텍스트로 복구
+      setTimeout(() => {
+        e.target.innerText = originalText;
+        e.target.style.color = "#6c757d";
+      }, 800);
+    });
+  }
 });

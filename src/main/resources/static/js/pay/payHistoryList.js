@@ -191,25 +191,33 @@ function numberFormat(x) {
 function statusBadge(s) {
     if (!s) return "";
 
-    let color = "bg-secondary"; // 기본값 (SIMULATED 등)
+    let color = "bg-secondary";
+    let label = "미확인";   // 기본값
 
     switch (s) {
         case "SIMULATED":
-            color = "bg-secondary";    // 회색
+            color = "bg-secondary";
+            label = "가계산";
             break;
         case "CALCULATED":
-            color = "bg-primary";      // 파란색
+            color = "bg-primary";
+            label = "계산완료";
             break;
         case "CONFIRMED":
-            color = "bg-success";      // 초록색
+            color = "bg-success";
+            label = "확정";
             break;
         case "ERROR":
-            color = "bg-danger";       // 빨간색
+            color = "bg-danger";
+            label = "오류";
             break;
+        default:
+            label = s;
     }
 
-    return `<span class="badge ${color}">${s}</span>`;
+    return `<span class="badge ${color}">${label}</span>`;
 }
+
 
 
 // ===============================

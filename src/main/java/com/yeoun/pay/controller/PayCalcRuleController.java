@@ -156,6 +156,17 @@ public class PayCalcRuleController {
                 ))
                 .toList();
     }
+    
+    @GetMapping("/checkPriority")
+    @ResponseBody
+    public boolean checkPriority(
+            @RequestParam("itemCode") String itemCode,
+            @RequestParam("priority") int priority,
+            @RequestParam(value = "ruleId", required = false) Long ruleId
+    ) {
+        return service.isPriorityDuplicate(itemCode, priority, ruleId);
+    }
+
 
 
 }

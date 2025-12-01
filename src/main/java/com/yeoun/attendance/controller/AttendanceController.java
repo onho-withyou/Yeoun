@@ -27,6 +27,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.yeoun.attendance.dto.AccessLogDTO;
 import com.yeoun.attendance.dto.AttendanceDTO;
 import com.yeoun.attendance.dto.WorkPolicyDTO;
+import com.yeoun.attendance.entity.WorkPolicy;
 import com.yeoun.attendance.service.AttendanceService;
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.common.dto.CommonCodeDTO;
@@ -247,4 +248,16 @@ public class AttendanceController {
 		
 		return ResponseEntity.ok(AccessLogDTOList);
 	}
+	
+	// 출퇴근 등록 및 수정하는 모달창에서 사용할 정책 데이터 API
+	@GetMapping("/policy/data")
+	public ResponseEntity<Map<String, String>> getMethodName() {
+		WorkPolicyDTO workPolicyDTO = attendanceService.getWorkPolicy();
+		
+		return ResponseEntity.ok(Map.of(
+				"startTime", workPolicyDTO.getInTime(),
+				"endTime", workPolicyDTO.getOutTime()
+		));
+	}
+	
 }
