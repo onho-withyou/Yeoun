@@ -18,24 +18,31 @@ public class ClientController {
 
     /** 목록페이지 */
     @GetMapping
-    public String list(
-    		  @RequestParam(name = "keyword", required = false) String keyword,
-    	      @RequestParam(name = "type", required = false) String type,
-            Model model
-    ) {
-        List<Client> list = clientService.search(keyword, type);
+    public String list(@RequestParam(value="keyword",required = false) String keyword,
+                       @RequestParam(value="keyword",required = false) String type,
+                       Model model) {
+    	
 
+        List<Client> list = clientService.search(keyword, type);
         model.addAttribute("list", list);
         model.addAttribute("keyword", keyword);
         model.addAttribute("type", type);
 
-        return "sales/client_list";  
+        return "sales/client_list";
     }
 
-    /** 상세조회 */
-    @GetMapping("/{clientId}")
+    /** 목록 JSON API */
+    @GetMapping("/data")
     @ResponseBody
-    public Client detail(@PathVariable String clientId) {
+    public List<Client> listData(@RequestParam(value="keyword",required = false) String keyword,
+                                 @RequestParam(value="type",required = false) String type) {
+        return clientService.search(keyword, type);
+    }
+
+    /** 상세조회 (PathVariable → RequestParam 방식으로 변경) */
+    @GetMapping("/detail")
+    @ResponseBody
+    public Client detail(@RequestParam("clientId") String clientId) {
         return clientService.get(clientId);
     }
 
@@ -44,14 +51,15 @@ public class ClientController {
     @ResponseBody
     public String create(@ModelAttribute Client form) {
         clientService.create(form);
-        return "OK";
+        return "OK";   // 반드시 OK
     }
 
     /** 수정 */
-    @PostMapping("/{clientId}/update")
+    @PostMapping("/update")
     @ResponseBody
-    public String update(@PathVariable String clientId, @ModelAttribute Client form) {
+    public String update(@RequestParam("clientId") String clientId,
+                         @ModelAttribute Client form) {
         clientService.update(clientId, form);
-        return "OK";
+        return "OK";   // 반드시 OK
     }
 }
