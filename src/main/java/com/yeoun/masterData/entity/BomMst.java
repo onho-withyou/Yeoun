@@ -5,16 +5,20 @@ import java.time.LocalDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import oracle.sql.NUMBER;
 
+@Entity
+@Table(name = "BOM_MST")
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
-public class bomMst {
+public class BomMst {
 	@Id
 	@Column(name="BOM_ID")
 	private NUMBER bomId; //BOMid
@@ -32,7 +36,7 @@ public class bomMst {
 	private String matUnit; //사용단위
 	
 	@Column(name="BOM_SEQ_NO")
-	private String bomSeqn; //순서
+	private String bomSeqNo; //순서
 	
 	@Column(name="CREATE_ID")
 	private String createId; //생성자 id
