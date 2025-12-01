@@ -1,0 +1,124 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
+
+<body>
+<th:block layout:fragment="content">
+
+<div class="custom-body container-xxl flex-grow-1 container-p-y">
+
+    <!-- 메시지 출력 -->
+    <div id="clientMsgHolder" th:if="${msg}" th:data-msg="${msg}"></div>
+
+    <h2>거래처 / 협력사 관리</h2>
+
+    <!-- ===========================================================
+         탭 (거래처 / 협력사)
+    ============================================================ -->
+    <ul class="nav nav-tabs mb-3" id="clientTabs">
+        <li class="nav-item">
+            <a class="nav-link"
+               th:classappend="${type == null or type == 'CUSTOMER'} ? 'active' : ''"
+               th:href="@{/sales/client(type='CUSTOMER')}">
+                거래처 목록
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link"
+               th:classappend="${type == 'SUPPLIER'} ? 'active' : ''"
+               th:href="@{/sales/client(type='SUPPLIER')}">
+                협력사 목록
+            </a>
+        </li>
+    </ul>
+
+
+    <!-- ===========================================================
+         검색 영역
+    ============================================================ -->
+    <div class="row align-items-center g-2 mb-3">
+        <div class="col-12 col-lg-9">
+
+            <form class="row g-2 align-items-center"
+                  th:action="@{/sales/client}"
+                  method="get"
+                  role="search">
+
+                <!-- hidden: 현재 선택된 탭 -->
+                <input type="hidden" name="type" th:value="${type}"/>
+
+                <!-- 거래처명 검색 -->
+                <div class="col-12 col-md-auto">
+                    <input class="form-control"
+                           id="keyword"
+                           name="keyword"
+                           type="search"
+                           placeholder="거래처명 / 사업자번호 / 담당자명 검색"
+                           style="width:280px;"
+                           th:value="${keyword}">
+                </div>
+
+                <div class="col-6 col-md-auto d-grid">
+                    <button class="btn btn-outline-primary"
+                            id="btnSearch"
+                            type="button">
+                        검색
+                    </button>
+                </div>
+            </form>
+
+        </div>
+
+        <!-- 등록 버튼 -->
+        <div class="col-12 col-lg-3 d-grid d-lg-flex justify-content-lg-end">
+            <button class="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#clientRegModal">
+                거래처/협력사 등록
+            </button>
+        </div>
+    </div>
+
+
+    <!-- ===========================================================
+         등록 모달 include
+    ============================================================ -->
+   <th:block th:replace="sales/client_reg_modal :: client-reg-modal"></th:block>
+
+<!--    ===========================================================
+          상세 보기 모달 include 
+       ============================================================ --> 
+    <th:block th:replace="sales/client_detail_modal :: client-detail-modal"></th:block> 
+
+
+    <!-- ===========================================================
+         AG GRID 영역
+    ============================================================ -->
+    <div class="card-body p-0">
+        <div id="clientGrid"></div>
+    </div>
+
+    <br>
+
+    <!-- Pagination -->
+    <nav aria-label="거래처 목록 페이지네이션">
+        <ul class="pagination justify-content-center" id="clientPagination"></ul>
+    </nav>
+
+</div>
+
+
+<!-- ===========================================================
+     초기 데이터 전달
+============================================================ -->
+<script th:inline="javascript">
+    const initialClientList = /*[[${list}]]*/ [];
+    const currentType = /*[[${type}]]*/ 'CUSTOMER';
+</script>
+
+<script src="/js/sales/clientList.js"></script>
+
+</th:block>
+</body>
+</th:block>
