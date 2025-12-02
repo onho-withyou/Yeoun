@@ -9,7 +9,7 @@
     <!-- 메시지 출력 -->
     <div id="clientMsgHolder" th:if="${msg}" th:data-msg="${msg}"></div>
 
-    <h2>거래처 / 협력사 관리중입니다</h2>
+    <h2>거래처 / 협력사 관리</h2>
 
     <!-- ===========================================================
          탭 (거래처 / 협력사)
@@ -19,7 +19,7 @@
             <a class="nav-link"
                th:classappend="${type == null or type == 'CUSTOMER'} ? 'active' : ''"
                th:href="@{/sales/client(type='CUSTOMER')}">
-                거래처 목록입니다
+                거래처
             </a>
         </li>
 
@@ -27,7 +27,7 @@
             <a class="nav-link"
                th:classappend="${type == 'SUPPLIER'} ? 'active' : ''"
                th:href="@{/sales/client(type='SUPPLIER')}">
-                협력사 목록입니다
+                협력사
             </a>
         </li>
     </ul>
@@ -64,12 +64,20 @@
                             type="submit">
                         검색
                     </button>
-                </div>
+                </div>               
+               
             </form>
 
-        </div>
-    </div>
+  		</div>
+      </div>
+ <div class="text-end mb-3">
+			    <a class="btn btn-primary" th:href="@{/sales/client/create}">
+			        + 신규 거래처 등록
+			    </a>
+			</div>
 
+
+    
 
     <!-- ===========================================================
          AG GRID 영역
@@ -85,19 +93,29 @@
 </div>
 
 <!-- ===========================================================
-     초기 데이터 전달
+     🔥 초기 데이터 전달 (window 객체에 할당)
 ============================================================ -->
 <script th:inline="javascript">
-    const initialClientList = /*[[${list}]]*/ [];
-    const currentType = /*[[${type}]]*/ "CUSTOMER";
+    // window 객체에 명시적으로 할당
+    window.initialClientList = /*[[${list}]]*/ [];
+    window.currentType = /*[[${type}]]*/ 'CUSTOMER';
+    
+    // 디버깅용 로그
+    console.log('📌 초기 데이터 설정:', {
+        type: window.currentType,
+        count: window.initialClientList?.length ?? 0,
+        data: window.initialClientList
+    });
 </script>
 
+
 <!-- AG Grid v31+ 최신버전 -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-grid.css"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-quartz.css"/>
 
+<!-- 1. AG Grid (반드시 clientList.js 보다 먼저 로드) -->
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
 
-<!-- JS -->
+<!-- 2. 커스텀 JS (AG Grid 로드 후) -->
 <script src="/js/sales/clientList.js"></script>
 
 

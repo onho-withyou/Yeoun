@@ -33,11 +33,19 @@ public interface ClientRepository extends JpaRepository<Client, String> {
     	        @Param("type") String type
     	);
 
+    /*코드 생성*/
     @Query(value = """
     	    SELECT MAX(c.clientId)
     	    FROM Client c
     	    WHERE c.clientId LIKE :pattern
     	""")
     	String findMaxClientId(@Param("pattern") String pattern);
+    
+    /*사업자번호 중복체크*/
+    boolean existsByBusinessNo(String businessNo);
+    
+    @Query("SELECT COUNT(c) > 0 FROM Client c WHERE REPLACE(c.businessNo, '-', '') = :bizNo")
+    boolean existsBizNoClean(@Param("bizNo") String bizNo);
+
 
 }
