@@ -18,10 +18,10 @@ import lombok.extern.log4j.Log4j2;
 public class ProcessMstController {
 
     //공정(라우트/코드)관리 연결페이지
-  	@GetMapping("/processMst")
+  	@GetMapping("/process_mst")
   	public String processMst(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
 		//model.addAttribute("empList", approvalDocService.getEmp());//기안자 목록 불러오기
-		return "masterData/processMst";
+		return "masterData/process_mst";
  	}
     
 }

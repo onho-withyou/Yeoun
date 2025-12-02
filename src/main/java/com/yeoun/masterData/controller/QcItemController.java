@@ -18,10 +18,10 @@ import lombok.extern.log4j.Log4j2;
 public class QcItemController {
 
     //품질항목관리 연결페이지(검사 X)
-  	@GetMapping("/qcItem")
+  	@GetMapping("/qc_item")
   	public String qcItem(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
 		//model.addAttribute("empList", approvalDocService.getEmp());//기안자 목록 불러오기
-		return "masterData/qcItem";
+		return "masterData/qc_item";
  	}
     
 }
