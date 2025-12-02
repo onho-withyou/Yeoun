@@ -1166,6 +1166,37 @@
       	  }
 	});
 	
+	
+	// -----------------------------------------
+	// 탭클릭시 그리드를 다시 그려주는 로직
+	// -----------------------------------------
+	document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
+	    tab.addEventListener('shown.bs.tab', function (e) {
+	        const targetId = e.target.getAttribute('data-bs-target');
+
+	        if (targetId === '#nav-approval-tab') {
+				console.log("결재사항 탭 클릭!");
+	            grid1.refreshLayout();
+	        } else if (targetId === '#navs-all-tab') {
+				console.log("전체결재 탭 클릭!");
+	            grid2.refreshLayout();
+	        } else if (targetId === '#navs-my-tab') {
+				console.log("내결재목록 탭 클릭!");
+	            grid3.refreshLayout();
+	        } else if (targetId === '#navs-waiting-tab') {
+				console.log("결재대기 탭 클릭!");
+	            grid4.refreshLayout();
+	        } else if (targetId === '#navs-done-tab') {
+				console.log("결재완료 탭 클릭!");
+	            grid5.refreshLayout();
+	        }
+	    });
+	});
+	// -----------------------------------------
+	// -----------------------------------------
+	// -----------------------------------------
+	
+	
 	Grid.applyTheme('clean'); // Call API of static method
 	//f- 날짜,기안자,문서양식 조회 불러오는 함수
 	function AllGridSearch() {
