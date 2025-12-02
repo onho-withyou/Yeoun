@@ -957,10 +957,10 @@
 		  el: document.getElementById('approvalGrid'), 
 		  columns: [
 	
-		    {header: '순번' ,name: 'row_no' ,align: 'center'}
+		    {header: '순번' ,name: 'row_no' ,align: 'center',sortable: true}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 200}
-			,{header: '양식' ,name: 'form_type' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 230}
+			,{header: '양식' ,name: 'form_type' ,align: 'center',filter: "select"}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
@@ -1002,10 +1002,10 @@
 	    el: document.getElementById('allApprovalGrid'), // 전체결재
 	    columns: [
 	
-		   {header: '결재순번' ,name: 'row_no' ,align: 'center'}
+		   {header: '순번' ,name: 'row_no' ,align: 'center'}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 200}
-			,{header: '양식' ,name: 'form_type' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 230}
+			,{header: '양식' ,name: 'form_type' ,align: 'center',filter: "select"}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
@@ -1044,10 +1044,10 @@
 	    el: document.getElementById('myApprovalGrid'), // 내 결재목록
 	    columns: [
 	
-		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
+		    {header: '순번' ,name: 'row_no' ,align: 'center'}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 200}
-			,{header: '양식' ,name: 'form_type' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 230}
+			,{header: '양식' ,name: 'form_type' ,align: 'center',filter: "select"}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
@@ -1088,8 +1088,8 @@
 	
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 200}
-			,{header: '양식' ,name: 'form_type' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 230}
+			,{header: '양식' ,name: 'form_type' ,align: 'center',filter: "select"}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
@@ -1130,8 +1130,8 @@
 	
 		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 200}
-			,{header: '양식' ,name: 'form_type' ,align: 'center'}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 230}
+			,{header: '양식' ,name: 'form_type' ,align: 'center',filter: "select"}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
