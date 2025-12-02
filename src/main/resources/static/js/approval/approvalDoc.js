@@ -548,7 +548,7 @@
 		document.getElementById('expnd-type').disabled = false;
 		document.getElementById('reason-write').disabled = false;
 	}
-
+	let attachedFiles = [];
 	//f- 모달 첨부파일
 	document.addEventListener('DOMContentLoaded', function() {
     	const attachBtn = document.getElementById('attachmentBtn');
@@ -634,129 +634,327 @@
 
 		const printButton = document.getElementById('printBtn');
     
-    	if (printButton) {
-    	    printButton.addEventListener('click', () => {
-    	        const modalDoc = document.getElementById('modal-doc');
-    	        if (!modalDoc) return;
+    if (printButton) {
+        printButton.addEventListener('click', async () => {
+            const modalDoc = document.getElementById('modal-doc');
+            if (!modalDoc) return;
 
-    	        // 1. 인쇄를 위해 모달 내용을 복사합니다. (원본 폼 보호)
-    	        const printElement = modalDoc.cloneNode(true);
+            // 1. 인쇄를 위해 모달 내용을 복사합니다. (원본 폼 보호)
+            const printElement = modalDoc.cloneNode(true);
+            
+            // A. 결재완료기간 (createdDate ~ finishDate) 처리
+            const createdDate = document.getElementById('create-date')?.value || ' - ';
+            const finishDate = document.getElementById('finish-date')?.value || ' - ';
+            const completeDateDiv = printElement.querySelector('#create-date')?.closest('.row'); 
+            
+            if (completeDateDiv) {
+                // 인쇄 시 두 칸을 대체할 통합 텍스트 노드 생성
+                const combinedDateSpan = document.createElement('span');
+                combinedDateSpan.textContent = `${createdDate} ~ ${finishDate}`;
+                combinedDateSpan.style.padding = '3px 5px';
+                combinedDateSpan.style.display = 'inline-block';
+                combinedDateSpan.style.minWidth = '350px'; // 충분한 너비 확보
+
+                // 기존의 <div class="row">를 통합된 <span>으로 대체
+                completeDateDiv.parentNode.replaceChild(combinedDateSpan, completeDateDiv);
+            }
+
+            // B. 휴가기간 (startDate ~ endDate) 처리
+            const startDate = document.getElementById('start-date')?.value || ' - ';
+            const endDate = document.getElementById('end-date')?.value || ' - ';
+            const leavePeriodDiv = printElement.querySelector('#start-date')?.closest('.row'); 
+
+            if (leavePeriodDiv) {
+                const combinedLeaveSpan = document.createElement('span');
+                combinedLeaveSpan.textContent = `${startDate} ~ ${endDate}`;
+                combinedLeaveSpan.style.padding = '3px 5px';
+                combinedLeaveSpan.style.display = 'inline-block';
+                combinedLeaveSpan.style.minWidth = '350px';
+
+                leavePeriodDiv.parentNode.replaceChild(combinedLeaveSpan, leavePeriodDiv);
+            }
+            
+            // ===================================================
+            // 2. 불필요한 UI 요소 및 입력 필드를 정리하고 값으로 대체합니다.
+            // ===================================================
+            
+            // 2.1. 입력 필드 (select, textarea, input[type=text] 등)를 값으로 대체
+            // 참고: type="date" input은 위에서 이미 처리했으므로 이 루프에서는 대체되지 않습니다.
+            printElement.querySelectorAll('input, select, textarea').forEach(input => {
+                let displayValue = '';
+                
+                // 숨겨진 필드 및 날짜 필드 건너뛰기
+                if (input.type === 'hidden' || input.type === 'date') {
+                    input.remove();
+                    return;
+                }
+                
+                if (input.tagName === 'SELECT') {
+                    const originalSelect = document.getElementById(input.id);
+                    
+                    if (originalSelect && originalSelect.selectedIndex >= 0) {
+                        displayValue = originalSelect.options[originalSelect.selectedIndex].text;
+                    } else {
+                        displayValue = ' - '; 
+                    }
+                    
+                } else if (input.tagName === 'TEXTAREA' || input.tagName === 'INPUT') {
+                    displayValue = input.value || ' - ';
+                }
+                
+                // 값만 표시하는 <span> 태그 생성 및 대체
+                const displayNode = document.createElement('span');
+                displayNode.textContent = displayValue;
+                displayNode.style.display = 'inline-block';
+                displayNode.style.minWidth = '200px'; 
+                displayNode.style.paddingLeft = '5px';
+                
+                // 원본 입력 필드를 displayNode로 대체
+                input.parentNode.replaceChild(displayNode, input);
+            });
+
+            // 2.2. 인쇄 시 불필요한 UI/버튼 영역 제거 (기존 로직 유지)
+            printElement.querySelector('.btn-close')?.remove();
+            //printElement.querySelector('.modal-footer')?.remove();
+			printElement.querySelector('#attachmentBtn')?.remove();
+			printElement.querySelector('#realFileInput')?.remove();
+            printElement.querySelector('#select-box')?.remove();
+            printElement.querySelector('#jeongyeolja')?.remove();
+            printElement.querySelector('#approverInfo')?.remove();
+            printElement.querySelector('#approvalCompanionBtn')?.remove();
+            printElement.querySelector('#approvalCheckBtn')?.remove();
+            printElement.querySelector('#printBtn')?.remove();
+            printElement.querySelector('#saveBtn')?.remove();
+            printElement.querySelector('#modalCloseBtn')?.remove();
+            printElement.querySelector('#attachmentBtn')?.remove();
+            printElement.querySelector('#realFileInput')?.remove();
+			printElement.querySelector('#approver_close_1')?.remove();
+			printElement.querySelector('#approver_close_2')?.remove();
+			printElement.querySelector('#approver_close_3')?.remove();
 			
-    	        // 2. 불필요한 UI 요소 및 입력 필드를 정리합니다.
-			
-    	        // // 2.1. 입력 필드 (input, select, textarea)를 값으로 대체
-    	        // printElement.querySelectorAll('input, select, textarea').forEach(input => {
-    	        //     let displayValue = '';
+			// 3. 인쇄용 첨부파일을 printElement 내에 이미지 포함으로 채웁니다.
+			const printDownloadArea = printElement.querySelector('#downloadArea');
+			if (printDownloadArea) {
+				printDownloadArea.innerHTML = '파일 목록을 불러오는 중...';
+				try {
+					const resp = await fetch(`/approval/file/${approvalId}`);
+					if (resp.ok) {
+						const files = await resp.json();
+						printDownloadArea.innerHTML = '';
+						// 동기적으로 처리하여 Base64 변환을 순차적으로 수행
+						for (const file of files) {
+							const fileId = file.fileId;
+							const fileName = file.originFileName || file.fileName;
+							if (!fileId || !fileName) continue;
+							if (isImageFile(fileName)) {
+								// 인증이 필요할 수 있으므로 fetch 후 Blob -> DataURL 변환
+								const dataUrl = await fetchImageAsDataURL(fileId);
+								if (dataUrl) {
+									printDownloadArea.appendChild(createFileLink(fileId, fileName, true, dataUrl));
+									continue;
+								}
+								// 실패하면 일반 링크로 대체
+							}
+							printDownloadArea.appendChild(createFileLink(fileId, fileName, true));
+						}
+					} else {
+						printDownloadArea.textContent = '첨부파일을 불러올 수 없습니다.';
+					}
+				} catch (e) {
+					console.error('인쇄용 첨부파일 로드 실패:', e);
+					printDownloadArea.textContent = '첨부파일을 불러올 수 없습니다.';
+				}
+			}
 
-    	        //     if (input.type === 'hidden') {
-    	        //         // 숨겨진 필드는 제거
-    	        //         input.remove();
-    	        //         return;
-    	        //     }
-				
-    	        //     if (input.tagName === 'SELECT') {
-    	        //         // select 태그의 선택된 option의 텍스트를 가져옴
-    	        //         if (input.options.length > 0 && input.selectedIndex !== -1) {
-    	        //              displayValue = input.options[input.selectedIndex].text.trim() || ' - ';
-    	        //         }
-    	        //     } else if (input.tagName === 'TEXTAREA') {
-    	        //         // textarea의 값
-    	        //         displayValue = input.value || ' - ';
-    	        //     } else if (input.type === 'radio') {
-    	        //         // 라디오 버튼 처리 (체크된 경우만 표시)
-    	        //         if (input.checked) {
-    	        //             const label = input.closest('div').querySelector(`label[for="${input.id}"]`) || input.previousElementSibling;
-    	        //             displayValue = label ? label.textContent.trim() : input.value;
-    	        //             // 라디오 버튼은 복잡하므로, 체크된 요소만 값으로 변환 후 나머지 제거
-    	        //             input.parentNode.innerHTML = `<p style="display:inline; margin-right: 15px;">**${displayValue}**</p>`;
-    	        //             return; // 추가적인 대체 처리 방지
-    	        //         } else {
-    	        //             input.remove();
-    	        //             return;
-    	        //         }
-    	        //     } else {
-    	        //         // 일반 input (text, date 등)의 값
-    	        //         displayValue = input.value || ' - ';
-    	        //     }
-				
-    	        //     // 값만 표시하는 <span>/<div> 태그 생성 및 대체
-    	        //     const displayNode = document.createElement('span');
-    	        //     displayNode.textContent = displayValue;
-    	        //     displayNode.style.display = 'inline-block';
-    	        //     displayNode.style.minWidth = '200px';
-    	        //     displayNode.style.paddingLeft = '5px';
-    	        //     displayNode.style.borderBottom = '1px solid #333';
+			// 4. 새 창을 열고 인쇄 내용을 삽입합니다.
+			const printWindow = window.open('', '_blank', 'height=800,width=1000');
 
-    	        //     input.parentNode.replaceChild(displayNode, input);
-    	        // });
+			// ... printHTML 정의 및 실행 ...
+		   let printHTML = `
+			    <html>
+			    <head>
+			        <title>기안서 인쇄</title>
+			        <style>
+			            /* --- 기존 기안서 필드 스타일 --- */
+			            @page { margin: 2cm; }
+			            body { font-family: 'Malgun Gothic', sans-serif; }
+			            .modal-content { width: 800px; margin: 20px auto; padding: 30px;}
+			            .modal-header { padding-bottom: 10px; margin-bottom: 20px; }
+			            .modal-header h3 { font-size: 24px; text-align: center; }
+			            h5 { 
+			                display: flex; 
+			                align-items: baseline; 
+			                margin-bottom: 15px; 
+			                border-bottom: 1px dashed #ccc; 
+			                padding-bottom: 5px;
+			            }
+			            h5 label { font-weight: bold; width: 200px; flex-shrink: 0; }
+			            .d-flex p { margin-left: 10px; }
+			            /* 입력 필드 대체 <span>의 테두리 제거 */
+			            h5 span { border: none; padding: 3px 5px; border-radius: 3px; }
+					
+			            /* =================================================== */
+			            /* ⭐️ 첨부파일 목록 인쇄 CSS 추가 ⭐️ */
+			            /* =================================================== */
+					
+			            /* 1. 컨테이너 스타일 */
+			            #fileListContainer {
+			                display: flex !important; /* Flex 레이아웃 유지 */
+			                flex-wrap: wrap; /* 여러 줄로 표시 */
+			                margin-top: 20px;
+			                padding: 10px 0;
+			                border-top: 1px solid #999; /* 기안서 본문과의 구분선 */
+			            }
+					
+			            /* 2. 개별 파일 아이템 스타일 */
+			            .file-preview-item {
+			                display: flex;
+			                flex-direction: column;
+			                align-items: center;
+			                margin-right: 15px;
+			                padding: 5px;
+			                border: 1px solid #eee; /* 파일 구분을 위한 연한 테두리 */
+					
+			                /* 중요: 내용이 페이지를 넘어갈 때 잘리지 않도록 함 */
+			                page-break-inside: avoid; 
+			                box-sizing: border-box;
+			                max-width: 100px; /* JS에서 설정한 너비를 존중 */
+			            }
+					
+			            /* 3. 이미지 자체 스타일 */
+			            .file-preview-item img {
+			                display: block !important; /* 이미지가 확실히 보이도록 강제 */
+			                /* JS에서 설정된 width: 80px, height: 80px은 유지됩니다. */
+			            }
+					
+			            /* 4. PDF 등 이미지가 아닌 파일 아이콘 스타일 */
+			            .file-preview-item div:not(.file-preview-item) {
+			                /* JS에서 확장자 텍스트를 담는 div */
+			                background-color: #f8f8f8 !important; /* 흰색 배경 유지 */
+			            }
+					
+			        </style>
+			    </head>
+			    <body>
+			        <div id="print-area">
+			            ${printElement.innerHTML}
+			        </div>
+			    </body>
+			    </html>
+			`;
 
-    	        // // 2.2. 인쇄 시 불필요한 UI/버튼 영역 제거
-    	        // printElement.querySelector('.btn-close')?.remove();
-    	        // printElement.querySelector('.modal-footer')?.remove();
-    	        // printElement.querySelector('#select-box')?.remove();
-    	        // printElement.querySelector('#approver')?.remove();
-    	        // printElement.querySelector('#jeongyeolja')?.remove();
-			
-
-    	        // 3. 새 창을 열고 인쇄 내용을 삽입합니다.
-    	        const printWindow = window.open('', '_blank', 'height=800,width=1000');
-			
-    	        let printHTML = `
-    	            <html>
-    	            <head>
-    	                <title>기안서 인쇄</title>
-    	                <style>
-    	                    /* 인쇄 전용 스타일 */
-    	                    @page { margin: 2cm; }
-    	                    body { font-family: 'Malgun Gothic', sans-serif; }
-    	                    .modal-content { width: 800px; margin: 20px auto; padding: 30px; border: 1px solid #333; }
-    	                    .modal-header { border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-    	                    .modal-header h3 { font-size: 24px; text-align: center; }
-    	                    h5 { display: flex; align-items: baseline; margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;}
-    	                    h5 label { font-weight: bold; width: 150px; flex-shrink: 0; }
-    	                    .d-flex p { margin-left: 10px; }
-			
-    	                    /* Thymeleaf로 채워지는 기안자 정보 스타일링 */
-    	                    #approver-name { font-weight: bold; }
-
-    	                    /* 대체된 입력 필드 스타일 */
-    	                    h5 span { border: none !important; }
-
-    	                </style>
-    	            </head>
-    	            <body>
-    	                <div id="print-area">
-    	                    ${printElement.innerHTML}
-    	                </div>
-    	            </body>
-    	            </html>
-    	        `;
-
-    	        printWindow.document.write(printHTML);
-    	        printWindow.document.close();
-			
-    	        // 4. 인쇄 실행
-    	        printWindow.focus();
-    	        printWindow.print();
-    	        printWindow.close();
-    	    });
-    	}
+            printWindow.document.write(printHTML);
+            printWindow.document.close();
+            
+            printWindow.focus();
+            printWindow.print();
+        });
+    }
 	});
 
+	function getBase64Image(imgEl) {
+	    return new Promise((resolve) => {
+	        // 이미 blob: URL이 아니면 그대로 반환 (불필요한 변환 방지)
+	        if (!imgEl.src.startsWith('blob:')) {
+	             resolve(imgEl.src);
+	             return;
+	        }
+
+        
+		
+	        const canvas = document.createElement('canvas');
+	        const ctx = canvas.getContext('2d');
+		
+	        const img = new Image();
+	        img.onload = function () {
+	            canvas.width = img.naturalWidth;
+	            canvas.height = img.naturalHeight;
+	            ctx.drawImage(img, 0, 0);
+			
+	            // toDataURL로 Base64 문자열 생성 (이미지 형식 지정)
+	            const dataURL = canvas.toDataURL('image/png'); 
+	            resolve(dataURL);
+	        };
+	        img.onerror = function() {
+	            console.error("Image loading failed for Base64 conversion.");
+	            resolve(''); // 로드 실패 시 빈 문자열 반환
+	        };
+	        // 중요: 로컬 파일이라도 crossOrigin 설정 권장
+	        img.crossOrigin = 'Anonymous'; 
+	        img.src = imgEl.src;
+	    });
+	}
+
+	// 서버에서 이미지 파일을 가져와 DataURL로 변환 (인증 포함 가능)
+	async function fetchImageAsDataURL(fileId) {
+		try {
+			const resp = await fetch(`/files/download/${fileId}`, { credentials: 'include' });
+			if (!resp.ok) throw new Error(`이미지 응답 상태: ${resp.status}`);
+			const blob = await resp.blob();
+			return await new Promise((resolve, reject) => {
+				const reader = new FileReader();
+				reader.onloadend = () => resolve(reader.result);
+				reader.onerror = reject;
+				reader.readAsDataURL(blob);
+			});
+		} catch (e) {
+			console.error('fetchImageAsDataURL error', e);
+			return null;
+		}
+	}
+
 	// 파일 링크 생성 헬퍼 함수 downloadArea영역에생성되는 a태그
-	const createFileLink = (fileId, fileName) => {
-		const link = document.createElement('a');
-		link.href = `/files/download/${fileId}`;
-		link.download = fileName;
-		link.textContent = `📎 ${fileName}`;
-		Object.assign(link.style, {
-			display: 'block',
-			margin: '5px 0',
-			color: '#007bff',
-			textDecoration: 'none',
-			cursor: 'pointer'
-		});
-		return link;
+	// 이미지 파일 확인
+	const isImageFile = (fileName) => /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(fileName);
+
+	// 파일 항목 생성 (인쇄 모드에서만 이미지 표시)
+	const createFileLink = (fileId, fileName, isPrintMode = false, srcOverride = null) => {
+		const container = document.createElement('div');
+		container.style.margin = '10px 0';
+		container.style.padding = '8px';
+		container.style.border = '1px solid #ddd';
+		container.style.borderRadius = '4px';
+		container.style.backgroundColor = '#f9f9f9';
+
+		if (isPrintMode && isImageFile(fileName)) {
+			// 인쇄 모드: 이미지 미리보기
+			const img = document.createElement('img');
+			img.src = srcOverride || `/files/download/${fileId}`;
+			img.alt = fileName;
+			Object.assign(img.style, {
+				maxWidth: '100%',
+				maxHeight: '300px',
+				display: 'block',
+				marginBottom: '8px',
+				borderRadius: '4px'
+			});
+			
+			const fileName_span = document.createElement('span');
+			fileName_span.textContent = `📄 ${fileName}`;
+			Object.assign(fileName_span.style, {
+				display: 'block',
+				fontSize: '12px',
+				color: '#666'
+			});
+			
+			container.appendChild(img);
+			container.appendChild(fileName_span);
+		} else {
+			// 일반 모드: 다운로드 링크만
+			const link = document.createElement('a');
+			link.href = `/files/download/${fileId}`;
+			link.download = fileName;
+			link.textContent = `📎 ${fileName}`;
+			Object.assign(link.style, {
+				display: 'block',
+				color: '#007bff',
+				textDecoration: 'none',
+				cursor: 'pointer'
+			});
+			container.appendChild(link);
+		}
+
+		return container;
 	};
 
 	// 결재 문서 첨부파일 로드 및 렌더링
@@ -1442,8 +1640,8 @@
     		this.count++;
     		approverDiv.innerHTML +='<div class="btn btn-success"'
     		                      +'style="width:250px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
-    		                      +'<p onclick="approverDivclose(this,' + "'"+ type + "'"+ ','+ count +')" style="float:right;margin-right: 8px;">&times;</p>'
-    		                      +'<p id="approver_'+count+'" onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:30px;height: 129px;font-size:22px;">'+(this.count) + '차 결재권한자 '+'<br>'+ text + '<br>' + '</p>'
+    		                      +'<a id="approver_close_' + count + '" onclick="approverDivclose(this,' + "'"+ type + "'"+ ','+ count +')" style="float:right;margin-right: 8px;">&times;</a>'
+    		                      +'<p id="approver_'+ count +'" onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:30px;height: 129px;font-size:22px;">'+(this.count) + '차 결재권한자 '+'<br>'+ text + '<br>' + '</p>'
     		                      +'</div>';
 			if(count < 3)
 			approverDiv.innerHTML +='<i class="bi bi-caret-right-fill" style="margin-top:95px;"></i>';
