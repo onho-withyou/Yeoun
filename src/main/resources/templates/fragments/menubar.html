@@ -190,6 +190,12 @@
                             <div data-i18n="Menu4" class="menu-link-sub">재고 실사</div>
                         </a>
                     </li>
+                    
+                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                        <a th:href="@{/purchase/purchaseOrder}" class="menu-link">
+                            <div data-i18n="Menu4" class="menu-link-sub">발주관리</div>
+                        </a>
+                    </li>
 
                 </ul>
             </li>
