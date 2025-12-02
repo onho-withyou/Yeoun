@@ -18,13 +18,13 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "MATERAIAL_ORDER")
+@Table(name = "MATERIAL_ORDER")
 @Getter
 @Setter
 @ToString
 @EntityListeners(AuditingEntityListener.class)
 public class MaterialOrder {
-	@Id @Column(name = "LOCATION_ID", updatable = false)
+	@Id @Column(name = "ORDER_ID", updatable = false)
 	private String orderId; // 로케이션 고유ID
 	
 	@Column(nullable = false)

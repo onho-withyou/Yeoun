@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -18,12 +19,14 @@ public class ClientController {
 
     /** 목록페이지 */
     @GetMapping
-    public String list(@RequestParam(value="keyword",required = false) String keyword,
-                       @RequestParam(value="keyword",required = false) String type,
-                       Model model) {
-    	
+    public String list(
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "type", required = false, defaultValue = "CUSTOMER") String type,
+            Model model
+    ) {
 
         List<Client> list = clientService.search(keyword, type);
+
         model.addAttribute("list", list);
         model.addAttribute("keyword", keyword);
         model.addAttribute("type", type);
@@ -31,35 +34,53 @@ public class ClientController {
         return "sales/client_list";
     }
 
+
     /** 목록 JSON API */
     @GetMapping("/data")
     @ResponseBody
-    public List<Client> listData(@RequestParam(value="keyword",required = false) String keyword,
-                                 @RequestParam(value="type",required = false) String type) {
+    public List<Client> listData(
+            @RequestParam(value="keyword",required = false) String keyword,
+            @RequestParam(value="type",required = false, defaultValue = "CUSTOMER") String type
+    ) {
         return clientService.search(keyword, type);
     }
 
-    /** 상세조회 (PathVariable → RequestParam 방식으로 변경) */
-    @GetMapping("/detail")
+    /**상세조회*/    
+    @GetMapping("/{clientId}")
     @ResponseBody
-    public Client detail(@RequestParam("clientId") String clientId) {
+    public Client detail(@PathVariable String clientId) {
         return clientService.get(clientId);
     }
+    @GetMapping("/create")
+    public String createPage(Model model) {
+        model.addAttribute("client", new Client());
+        return "sales/client_create";
+    }
 
-    /** 등록 */
+    /**거래처 등록*/
     @PostMapping("/create")
-    @ResponseBody
-    public String create(@ModelAttribute Client form) {
-        clientService.create(form);
-        return "OK";   // 반드시 OK
+    public String createProcess(@ModelAttribute Client client, RedirectAttributes rttr) {
+
+        try {
+            clientService.create(client);
+            rttr.addFlashAttribute("msg", "거래처가 등록되었습니다.");
+        } catch (Exception e) {
+            rttr.addFlashAttribute("msg", "오류: " + e.getMessage());
+            return "redirect:/sales/client/create";
+        }
+
+        return "redirect:/sales/client";
     }
 
-    /** 수정 */
-    @PostMapping("/update")
+    /** 사업자번호 중복 확인 */
+    @GetMapping("/check-business")
     @ResponseBody
-    public String update(@RequestParam("clientId") String clientId,
-                         @ModelAttribute Client form) {
-        clientService.update(clientId, form);
-        return "OK";   // 반드시 OK
+    public boolean checkBusiness(@RequestParam("businessNo") String businessNo) {
+        String cleanBiz = businessNo.replaceAll("[^0-9]", "");
+        return !clientService.existsByBusinessNoClean(cleanBiz);
     }
+
+
+
 }
+

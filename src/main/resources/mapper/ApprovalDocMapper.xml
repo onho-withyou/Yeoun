@@ -76,6 +76,7 @@
 				        OR ade.approval_title LIKE '%' || #{empNameTitleFilter} || '%'
 				    )
 				</if>
+				ORDER BY ade.finish_date DESC
 	</select>
 	<select id="searchAllApproval" 
 		parameterType="java.util.Map" 
@@ -164,6 +165,7 @@
 				        OR adre.approval_title LIKE '%' || #{empNameTitleFilter} || '%'
 				    )
 				</if>
+				ORDER BY adre.finish_date DESC
 	</select>
 	<select id="searchMyApprovalList" 
 		parameterType="java.util.Map" 
@@ -231,6 +233,7 @@
 			        OR adre.approval_title LIKE '%' || #{empNameTitleFilter} || '%'
 			    )
 			</if>
+			ORDER BY adre.finish_date DESC
 	</select>
 	<select id="searchPendingApproval" 
 		parameterType="java.util.Map" 
@@ -320,6 +323,7 @@
 		        OR adre.approval_title LIKE '%' || #{empNameTitleFilter} || '%'
 		    )
 		</if>
+		ORDER BY adre.finish_date DESC
 	</select>
 	<select id="searchCompletedApproval" 
 		parameterType="java.util.Map" 
@@ -407,6 +411,7 @@
 			        OR adre.approval_title LIKE '%' || #{empNameTitleFilter} || '%'
 			    )
 			</if>
+			ORDER BY adre.finish_date DESC
 	</select>
 
 </mapper>

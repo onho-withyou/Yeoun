@@ -4,6 +4,8 @@ import java.time.LocalDate;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.yeoun.common.util.FileUtil;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -25,7 +27,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class) 
-public class ApprovalDoc {
+public class ApprovalDoc implements FileUtil.FileUploadHelpper {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "APPROVAL_DOC_SEQ_GENERATOR")
@@ -73,5 +75,15 @@ public class ApprovalDoc {
 	
 	@Column(name="REASON")
 	private String reason; //사유
+
+	@Override
+	public String getTargetTable() {
+		return "APPROVAL_DOC";
+	}
+
+	@Override
+	public Long getTargetTableId() {
+		return this.approvalId;
+	}
 
 }

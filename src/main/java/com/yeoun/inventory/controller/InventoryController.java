@@ -27,7 +27,7 @@ public class InventoryController {
     }
 
     // 재고 실사 페이지
-    @GetMapping("/stock_take")
+    @GetMapping("/stock-take")
     public String stockTake() {
         return "inventory/stock_take";
     }
