@@ -955,16 +955,17 @@
 	// g- 결재사항
 	const grid1 = new Grid({
 		  el: document.getElementById('approvalGrid'), 
+		  rowHeaders: ['rowNum'],
 		  columns: [
 	
-		    {header: '순번' ,name: 'row_no' ,align: 'center',sortable: true}
+		    {header: '순번' ,name: 'row_no' ,align: 'center',hidden: true}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 230}
-			,{header: '양식' ,name: 'form_type' ,align: 'center',filter: "select"}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 370}
+			,{header: '양식' ,name: 'form_type' ,align: 'center',width: 136,filter: "select"}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
-			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center',width: 51}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자id' ,name: 'approver' ,align: 'center',hidden: true}
@@ -1000,16 +1001,17 @@
 	// g- 전체결재
 	const grid2 = new Grid({
 	    el: document.getElementById('allApprovalGrid'), // 전체결재
+		rowHeaders: ['rowNum'],
 	    columns: [
 	
-		   {header: '순번' ,name: 'row_no' ,align: 'center'}
+		   {header: '순번' ,name: 'row_no' ,align: 'center',hidden: true}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 230}
-			,{header: '양식' ,name: 'form_type' ,align: 'center',filter: "select"}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 370}
+			,{header: '양식' ,name: 'form_type' ,align: 'center',width: 136,filter: "select"}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
-			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center',width: 51}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자id' ,name: 'approver' ,align: 'center',hidden: true}
@@ -1042,16 +1044,17 @@
 	//g- 내결재목록
 	const grid3 = new Grid({
 	    el: document.getElementById('myApprovalGrid'), // 내 결재목록
+		rowHeaders: ['rowNum'],
 	    columns: [
 	
-		    {header: '순번' ,name: 'row_no' ,align: 'center'}
+		    {header: '순번' ,name: 'row_no' ,align: 'center',hidden: true}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 230}
-			,{header: '양식' ,name: 'form_type' ,align: 'center',filter: "select"}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 370}
+			,{header: '양식' ,name: 'form_type' ,align: 'center',width: 136,filter: "select"}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
-			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center',width: 51}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자id' ,name: 'approver' ,align: 'center',hidden: true}
@@ -1084,16 +1087,17 @@
 	//g- 결재대기
 	const grid4 = new Grid({
 	    el: document.getElementById('waitingApprovalGrid'), //결재대기
+		rowHeaders: ['rowNum'],
 	    columns: [
 	
-		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
+		    {header: '순번' ,name: 'row_no' ,align: 'center',hidden: true}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 230}
-			,{header: '양식' ,name: 'form_type' ,align: 'center',filter: "select"}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 370}
+			,{header: '양식' ,name: 'form_type' ,align: 'center',width: 136,filter: "select"}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
-			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center',width: 51}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자id' ,name: 'approver' ,align: 'center',hidden: true}
@@ -1126,16 +1130,17 @@
 	//g- 결재완료
 	const grid5 = new Grid({
 	    el: document.getElementById('doneApprovalGrid'), //결재완료
+		rowHeaders: ['rowNum'],
 	    columns: [
 	
-		    {header: '결재순번' ,name: 'row_no' ,align: 'center'}
+		    {header: '순번' ,name: 'row_no' ,align: 'center',hidden: true}
 			,{header: '문서id' ,name: 'approval_id' ,align: 'center',hidden: true}
-			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 230}
-			,{header: '양식' ,name: 'form_type' ,align: 'center',filter: "select"}
+			,{header: '문서제목' ,name: 'approval_title' ,align: 'center',width: 370}
+			,{header: '양식' ,name: 'form_type' ,align: 'center',width: 136,filter: "select"}
 			,{header: '사원번호' ,name: 'emp_id' ,align: 'center'}
 			,{header: '기안자' ,name: 'emp_name' ,align: 'center'}
 			,{header: '직급코드' ,name: 'pos_code' ,align: 'center',hidden: true}
-			,{header: '직급' ,name: 'pos_name' ,align: 'center'}
+			,{header: '직급' ,name: 'pos_name' ,align: 'center',width: 51}
 			,{header: '부서코드' ,name: 'dept_id' ,align: 'center',hidden: true}
 			,{header: '부서명' ,name: 'dept_name' ,align: 'center'}
 			,{header: '결재권한자id' ,name: 'approver' ,align: 'center',hidden: true}
@@ -1439,7 +1444,9 @@
     		                      +'style="width:250px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
     		                      +'<p onclick="approverDivclose(this,' + "'"+ type + "'"+ ','+ count +')" style="float:right;margin-right: 8px;">&times;</p>'
     		                      +'<p id="approver_'+count+'" onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:30px;height: 129px;font-size:22px;">'+(this.count) + '차 결재권한자 '+'<br>'+ text + '<br>' + '</p>'
-    		                    	+'</div>';
+    		                      +'</div>';
+			if(count < 3)
+			approverDiv.innerHTML +='<i class="bi bi-caret-right-fill" style="margin-top:95px;"></i>';
 		}
     }
 
@@ -1469,6 +1476,27 @@
 	function approverDivclose(buttonDiv,type,count){
 		const divElement = buttonDiv.parentNode; // 버튼의 부모인 div를 찾음
 		console.log("type",type);
+
+		const approverCard = buttonDiv.closest('.btn-success'); 
+    
+    	if (approverCard) {
+    		// 화살표 아이콘 (다음 형제 요소) 찾기
+    		// 삭제할 카드의 바로 다음에 있는 요소(화살표 <i> 태그)를 찾습니다.
+    		const arrowIcon = approverCard.nextElementSibling;
+		
+    		// 부모 요소 (approverDiv)를 찾습니다.
+    		const parentDiv = approverCard.parentElement;
+    		// 카드 삭제
+    		parentDiv.removeChild(approverCard);
+		
+    		// 화살표 아이콘 삭제 (안전하게 확인 후 삭제)
+    		// 다음 형제 요소가 null이 아니며, 실제로 화살표 아이콘 클래스를 가지고 있을 때만 삭제합니다.
+    		if (arrowIcon && arrowIcon.classList.contains('bi-caret-right-fill')) {
+    		     parentDiv.removeChild(arrowIcon);
+    		}
+			
+    	}
+	
 		
 		jeongyeoljaDiv.style.display = 'none';
 		//defalut 태그 닫기 버튼시 
