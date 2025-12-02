@@ -1,3 +1,6 @@
+//전역변수
+let detailRowData;
+
 // 1) 모달 필드 초기화
 function resetDetailModal() {
 	document.getElementById('detailIvId').value = '';
@@ -15,8 +18,9 @@ function resetDetailModal() {
 // 2) rowData를 받아서 모달에 바인딩 + 모달 오픈
 function openDetailModal(rowData, sameLotList = []) {
 	resetDetailModal();
-
+	detailRowData = rowData;
 	// 기본 정보 세팅
+	document.getElementById('detailIvId').value = rowData.ivId || '';
 	document.getElementById('detailLotNo').value = rowData.lotNo || '';
 	// 카테고리: itemType → 한글 매핑
 	document.getElementById('detailCategory').value = (function(type) {
@@ -80,3 +84,9 @@ function openDetailModal(rowData, sameLotList = []) {
 	const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
 	bsModal.show();
 }
+
+//수량조절 버튼 클릭 이벤트
+const btnAdjustQty = document.getElementById('adjustBtn');
+btnAdjustQty.addEventListener('click', () => {
+	openAdjustQtyModal(detailRowData);
+});

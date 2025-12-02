@@ -60,7 +60,7 @@ async function fetchInventoryData(searchData) {
 			body: JSON.stringify(searchData)
 			
 		});
-	console.log(response);
+//	console.log(response);
 	if (!response.ok) {
 		throw new Error('재고데이터를 가져올 수 없습니다.')
 	}
@@ -128,7 +128,6 @@ function initGrid() {
 			if (target && target.tagName === "BUTTON") {
 				
 				const rowData = inventoryGrid.getRow(event.rowKey);
-				console.log(rowData);
 				
 				// 같은 LOT, 같은 상품(itemId)만 필터
 				const sameLotList = inventoryData.filter(item =>
