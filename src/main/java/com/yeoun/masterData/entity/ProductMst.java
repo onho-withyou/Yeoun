@@ -37,7 +37,7 @@ public class ProductMst {
 		private String prdStatus; //상태
 
 		@Column(name="EFFECTIVE_DATE")
-		private LocalDate effectiveDate; //유효일자
+		private Number effectiveDate; //유효일자
 		
 		@Column(name = "UNIT_PRICE", precision = 18, scale = 2)
 		private BigDecimal unitPrice;

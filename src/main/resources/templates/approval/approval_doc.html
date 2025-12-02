@@ -92,19 +92,19 @@
                 <h2>결재사항</h2>
 			  	<div id="approvalGrid" ></div>
               </div>
-              <div class="tab-pane fade active" id="navs-all-tab" role="tabpanel">
+              <div class="tab-pane fade" id="navs-all-tab" role="tabpanel">
                 <h2>전체결재</h2>
 			  	<div id="allApprovalGrid"></div>
               </div>
-              <div class="tab-pane fade active" id="navs-my-tab" role="tabpanel">
+              <div class="tab-pane fade" id="navs-my-tab" role="tabpanel">
                 <h2>내 결재목록</h2>
 			  	<div id="myApprovalGrid"></div>
               </div>
-			  <div class="tab-pane fade active" id="navs-waiting-tab" role="tabpanel">
+			  <div class="tab-pane fade" id="navs-waiting-tab" role="tabpanel">
                 <h2>결재대기</h2>
 				<div id="waitingApprovalGrid" ></div>
               </div>
-			  <div class="tab-pane fade active" id="navs-done-tab" role="tabpanel">
+			  <div class="tab-pane fade" id="navs-done-tab" role="tabpanel">
                 <h2>결재완료</h2>
 				<div id="doneApprovalGrid"></div>
               </div>
@@ -113,7 +113,7 @@
 		<!-- 모달 -->
 		<div class="modal fade" id="approval-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
-		    <form class="modal-content" id="modal-doc" th:action="@{/approval/approval_doc}" th:object="${approvalDocGridDTO}" method="POST" enctype="multipart/form-data">
+		    <form class="modal-content" id="modal-doc" action="/approval/approval_doc"  method="POST" enctype="multipart/form-data">
 		      <div class="modal-header" data-draggable="true">
 				<h3 class="modal-title" id="Drafting" value="">기안서 작성</h3>
 				<input type="hidden" id="DraftingHidden" name="drafting" value="">
@@ -240,7 +240,9 @@
 					<label>결재권한자 </label> 
 		          	<div id="select-box" style="width: 200px"></div>
 		        </h5>
+					<label>* 해당하는 결재권한자버튼을 누르면,결재권한자를 변경할수있습니다.</label>
      				<div id="approver" th:value="${empList}"  style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
+					
 					<!-- 결재권한자 버튼 생성 영역 -->
      				</div>	
      				
@@ -270,7 +272,7 @@
 							  <option selected></option>
 							  <option th:each="item, iterStat : ${empList}" 
 							 			th:value="${item.empId}" 
-							 			th:text="${iterStat.index+1} + ' : ' + ${item.empName} + '(' + ${item.empId} + ')'">
+							 			th:text="${item.empName} + '(' + ${item.empId} + ')'">
 							 </option> 
 							</select>
 						  </div>
@@ -279,21 +281,26 @@
 	     				<!--에디터-->
 		        <!--  <div id="editor" style="border: 1px solid black;;"></div> -->
 		      </div>
+			  <div class="modal-footer">
+				<div id="fileListContainer" class="d-flex"></div>
+					<button type="button" id="attachmentBtn" class="btn btn-primary">첨부파일</button>		
+					<input type="file" id="realFileInput" name="itemImgFiles" accept="image/*,application/pdf" style="display: none;" multiple>
+					<div id="downloadArea"></div>
+			  </div>
 		      <div class="modal-footer">
 		      	<div>
-			     	<button type="button" id="attachmentBtn" class="btn btn-primary">첨부파일</button>
 			     	<button type="button" id="approvalCompanionBtn" class="btn btn-primary" style="display:none;">반려</button>
 			      	<button type="button" id="approvalCheckBtn" class="btn btn-primary" style="display:none;">결재확인</button>
 			    </div>
 		      	<hr>
-		      	<button type="button" id="printBtn" class="btn btn-primary" style="display: none;">인쇄</button>
+		      	<button type="button" id="printBtn" class="btn btn-primary">인쇄</button>
 		        <button type="submit" id="saveBtn" class="btn btn-primary" >등록</button>
 		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
 		      </div>
 		</form>
 	    </div>
 	</div>
-	</div>
+</div>
 
 </th:block>
 </body>
