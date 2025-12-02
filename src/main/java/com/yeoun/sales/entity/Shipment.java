@@ -50,9 +50,9 @@ public class Shipment {
     private String shipmentStatus;
 
     // 7) 담당자ID (EMP FK)
-    @Column(name = "ADMIN_ID", length = 20, nullable = false)
+    @Column(name = "EMP_ID", length = 20, nullable = false)
     @Comment("출하 처리 담당자 (EMP_ID)")
-    private String adminId;
+    private String empId;
 
     // 8) 고객사명
     @Column(name = "CLIENT_NAME", length = 200)
