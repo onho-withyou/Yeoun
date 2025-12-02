@@ -69,16 +69,5 @@ public class Inventory {
 	
 	
 	
-	@Column(nullable = false)
-	private String inboundStatus; // 입고상태
-	
-	@Column(nullable = true)
-	private String materialId; // 발주 고유번호
-	
-	@Column(nullable = true)
-	private String prodId; // 작업지시서 고유번호
-	
-	@CreatedDate
-	private LocalDateTime createdDate; // 등록 일시
 	
 }
