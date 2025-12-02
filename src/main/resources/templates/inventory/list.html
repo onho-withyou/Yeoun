@@ -26,15 +26,15 @@
                             <label class="form-label" for="searchProdName">상품명</label>
                             <input type="text" class="form-control" id="searchProdName" placeholder="상품명 입력">
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <label class="form-label d-block">&nbsp;</label>
-                            <button type="button" class="btn btn-primary w-100" id="btnSearch">검색</button>
+                            <button type="button" class="btn btn-outline-primary" id="btnToggleAdvanced">
+                                상세 조건 <i class='bx bx-chevron-down'></i>
+                            </button>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label d-block">&nbsp;</label>
-                            <button type="button" class="btn btn-outline-primary w-100" id="btnToggleAdvanced">
-                                상세 조건 <i class='bx bx-chevron-down'></i>
-                            </button>
+                            <button type="button" class="btn btn-primary w-100" id="btnSearch">검색</button>
                         </div>
                     </div>
 
@@ -54,14 +54,19 @@
                                 <label class="form-label" for="searchZone">Zone</label>
                                 <select class="form-select" id="searchZone">
                                     <option value="">전체</option>
-                                    <option value="A">A존 (원자재)</option>
-                                    <option value="B">B존 (부자재)</option>
-                                    <option value="C">C존 (완제품)</option>
+                                    <option value="A">A존</option>
+                                    <option value="B">B존</option>
+                                    <option value="C">C존</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label" for="searchRack">Rack</label>
-                                <input type="text" class="form-control" id="searchRack" placeholder="예: 01">
+                                <select class="form-select" id="searchRack">
+                                    <option value="">전체</option>
+                                    <option value="01">01</option>
+                                    <option value="02">02</option>
+                                    <option value="03">03</option>
+                                </select>
                             </div>
                         </div>
                         

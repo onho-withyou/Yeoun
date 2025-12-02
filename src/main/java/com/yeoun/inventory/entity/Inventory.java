@@ -45,6 +45,9 @@ public class Inventory {
 	private String itemId; // 원자재/부자재, 완제품의 기준정보 고유값
 	
 	@Column(nullable = false)
+	private String itemType; // 상품의타입 (RAW, SUB, FG)
+	
+	@Column(nullable = false)
 	private Long ivAmount; // 재고량
 	
 	@Column(nullable = true)
