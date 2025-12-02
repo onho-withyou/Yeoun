@@ -44,14 +44,33 @@ document.addEventListener("DOMContentLoaded", () => {
 function initClientGrid() {
 
     const columnDefs = [
-        { headerName: "유형", field: "clientType", width: 110 },
+		{
+		    headerName: "유형",
+		    field: "clientType",
+		    width: 110,
+		    valueFormatter: p => {
+		        if (!p.value) return "";
+		        return p.value === "CUSTOMER" ? "거래처" : 
+		               p.value === "SUPPLIER" ? "협력사" : p.value;
+		    }
+        },
+
         { headerName: "코드", field: "clientId", width: 130 },
         { headerName: "거래처명", field: "clientName", flex: 1 },
         { headerName: "사업자번호", field: "businessNo", width: 150 },
         { headerName: "대표자명", field: "ceoName", width: 140 },
         { headerName: "담당자", field: "managerName", width: 140 },
         { headerName: "연락처", field: "managerTel", width: 150 },
-        { headerName: "상태", field: "statusCode", width: 120 },
+		{
+		    headerName: "상태",
+		    field: "statusCode",
+		    width: 120,
+		    valueFormatter: p => {
+		        if (!p.value) return "";
+		        return p.value === "ACTIVE" ? "활성" :
+		               p.value === "INACTIVE" ? "비활성" : p.value;
+		    }
+		},
 
         {
             headerName: "상세",
