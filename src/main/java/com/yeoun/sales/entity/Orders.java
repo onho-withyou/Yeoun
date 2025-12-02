@@ -28,9 +28,9 @@ public class Orders {
     private String clientId;
 
     // 3) 담당자 ID (내부 직원, FK)
-    @Column(name = "ADMIN_ID", length = 20, nullable = false)
+    @Column(name = "EMP_ID", length = 20, nullable = false)
     @Comment("수주를 등록/요청받은 내부 담당자 ID")
-    private String adminId;
+    private String empId;
 
     // 4) 주문번호 (외부 주문번호)
     @Column(name = "ORDER_NUM", length = 30)
