@@ -18,10 +18,10 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "MATERAIAL_ORDER_ITEM")
+@Table(name = "MATERIAL_ORDER_ITEM")
 @SequenceGenerator(
-		name = "MATERAIAL_ORDER_ITEM_SEQ_GENERATOR", // JPA 에서 사용하는 시퀀스 이름(DB의 시퀀스 이름이 아님!)
-		sequenceName = "MATERAIAL_ORDER_ITEM_SEQ", // 오라클에서 사용하는 시퀀스 이름
+		name = "MATERIAL_ORDER_ITEM_SEQ_GENERATOR", // JPA 에서 사용하는 시퀀스 이름(DB의 시퀀스 이름이 아님!)
+		sequenceName = "MATERIAL_ORDER_ITEM_SEQ", // 오라클에서 사용하는 시퀀스 이름
 		initialValue = 1, 			// 초기값(오라클 시퀀스의 start with 1과 동일)
 		allocationSize = 1          // 증가값(오라클 시퀀스의 increment by 값과 동일)
 		)
@@ -30,7 +30,7 @@ import lombok.ToString;
 @ToString
 @EntityListeners(AuditingEntityListener.class)
 public class MaterialOrderItem {
-	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "MATERAIAL_ORDER_ITEM_SEQ_GENERATOR") 
+	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "MATERIAL_ORDER_ITEM_SEQ_GENERATOR") 
 	@Column(name = "ORDER_ITEM_ID", updatable = false)
 	private String orderItemId; // 발주품목
 	

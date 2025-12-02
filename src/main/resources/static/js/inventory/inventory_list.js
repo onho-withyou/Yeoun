@@ -1,6 +1,3 @@
-/**
- * Inventory List Page Script
- */
 
 document.addEventListener('DOMContentLoaded', function () {
 
