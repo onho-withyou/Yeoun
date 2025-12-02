@@ -14,19 +14,25 @@
  -->
 <!-- beautify ignore:start -->
 <html lang="en" class="light-style layout-menu-fixed" dir="ltr"
-	data-theme="theme-default" data-assets-path="../assets/"
+	data-theme="theme-default" th:attr="data-assets-path=@{/assets/}"
 	data-template="vertical-menu-template-free"
 	xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 <meta charset="utf-8" />
+
+<!-- CSRF 토큰값과 CSRF 헤더명 저장 -->
+<meta name="_csrf_token" th:content="${_csrf.token}">
+<meta name="_csrf_headerName" th:content="${_csrf.headerName}">
+
 <meta name="viewport"
 	content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
 <title>여운</title>
 <meta name="description" content="" />
 <!-- FontAweosome -->
-<script src="https://kit.fontawesome.com/6ceaa42ac0.js" crossorigin="anonymous"></script>
+<!-- <script src="https://kit.fontawesome.com/6ceaa42ac0.js" crossorigin="anonymous"></script> -->
 
 <!-- Favicon -->
 <link rel="icon" type="image/x-icon" th:href="@{/icon/favicon.png}" />
@@ -39,33 +45,51 @@
 	rel="stylesheet" />
 
 <!-- Icons. Uncomment required icon fonts -->
-<link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+<link rel="stylesheet" th:href="@{/assets/vendor/fonts/boxicons.css}" />
 
 <!-- Core CSS -->
-<link rel="stylesheet" href="../assets/vendor/css/core.css"
-	class="template-customizer-core-css" />
-<link rel="stylesheet" href="../assets/vendor/css/theme-default.css"
-	class="template-customizer-theme-css" />
-<link rel="stylesheet" href="../assets/css/demo.css" />
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+<link rel="stylesheet"
+      th:href="@{/assets/vendor/css/core.css}"
+      class="template-customizer-core-css" />
+<link rel="stylesheet"
+      th:href="@{/assets/vendor/css/theme-default.css}"
+      class="template-customizer-theme-css" />
+<link rel="stylesheet" th:href="@{/assets/css/demo.css}" />
 
 <!-- Vendors CSS -->
-<link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+<link rel="stylesheet"
+      th:href="@{/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css}" />
+<link rel="stylesheet"
+      th:href="@{/assets/vendor/libs/apex-charts/apex-charts.css}" />
 
-<link rel="stylesheet" href="../assets/vendor/libs/apex-charts/apex-charts.css" />
 <link rel="stylesheet" th:href="@{/css/common.css}"/>
+
+<!-- Socket -->
+<link rel="stylesheet" th:href="@{/css/messenger/header.css}">
 
 <!-- Page CSS -->
 
+<!-- Toast Grid CSS-->
+<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css">
+<link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css">
+
 <!-- Helpers -->
-<script src="../assets/vendor/js/helpers.js"></script>
+<script th:src="@{/assets/vendor/js/helpers.js}"></script>
 
 <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
 <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
-<script src="../assets/js/config.js"></script>
+<script th:src="@{/assets/js/config.js}"></script>
 
+<!-- 개별 페이지 head 영역 -->
+<th:block layout:fragment="head"></th:block>
+<script>
+	const csrfToken  = document.querySelector('meta[name="_csrf_token"]').content;
+	const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]').content;
+</script>
 </head>
 
-<body>
+<body th:attr="data-mode=${mode}">
 	<!-- Layout wrapper -->
 	<div class="layout-wrapper layout-content-navbar">
 		<div class="layout-container">
@@ -74,6 +98,7 @@
 			<div class="layout-page">
 				<!-- header 추가 되고 --> 
 				<th:block th:insert="~{fragments/header}"></th:block>
+<!-- 				<th:block layout:fragment="nav"></th:block> -->
 				<!-- Content 추가 -->
 				<th:block layout:fragment="content"></th:block>
 				<!-- header 추가 되고 --> 
@@ -83,30 +108,56 @@
 		<!-- Overlay -->
 		<div class="layout-overlay layout-menu-toggle"></div>
     </div>
+
 	<!-- / Layout wrapper -->
-	
 
 	<!-- Core JS -->
 	<!-- build:js assets/vendor/js/core.js -->
-	<script src="../assets/vendor/libs/jquery/jquery.js"></script>
-	<script src="../assets/vendor/libs/popper/popper.js"></script>
-	<script src="../assets/vendor/js/bootstrap.js"></script>
-	<script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-
-	<script src="../assets/vendor/js/menu.js"></script>
+	<script th:src="@{/assets/vendor/libs/jquery/jquery.js}"></script>
+	<script th:src="@{/assets/vendor/libs/popper/popper.js}"></script>
+	<script th:src="@{/assets/vendor/js/bootstrap.js}"></script>
+	<script th:src="@{/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js}"></script>
+	
+	<script th:src="@{/assets/vendor/js/menu.js}"></script>
 	<!-- endbuild -->
 
 	<!-- Vendors JS -->
-	<script src="../assets/vendor/libs/apex-charts/apexcharts.js"></script>
+	<script th:src="@{/assets/vendor/libs/apex-charts/apexcharts.js}"></script>
 
 	<!-- Main JS -->
-	<script src="../assets/js/main.js"></script>
+	<script th:src="@{/assets/js/main.js}"></script>
 
 	<!-- Page JS -->
-	<script src="../assets/js/dashboards-analytics.js"></script>
+	<script th:src="@{/assets/js/dashboards-analytics.js}"></script>
+	
+	<!-- Toast Grid JS -->
+	<script src="https://uicdn.toast.com/grid/latest/tui-grid.js" defer></script>
+	<script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
 
 	<!-- Place this tag in your head or just before your close body tag. -->
 	<script async defer src="https://buttons.github.io/buttons.js"></script>
-	<script src="../custom_bg/custom_bg.js"></script>
+	<script th:src="@{/custom_bg/custom_bg.js}"></script>
+
+	<!-- Sock JS -->
+ 	<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+	<!-- 소켓 -->
+	<script th:src="@{/js/common/connectSocket.js}"></script>
+	<script th:src="@{/js/common/headerAlarm.js}"></script>
+		
+
+
+
+	<!-- 내 정보 모달 -->
+	<th:block th:replace="~{/emp/emp_detail_modal :: emp-detail-modal}"></th:block>
+	
+    <!-- 개별 페이지의 자바스크립트 영역 -->
+	<th:block layout:fragment="myScript"></th:block>
+	
+	<!-- 공통 사원 상세 모달 (내 정보/사원 상세 모두 여기 사용) -->
+	<th:block th:replace="~{/emp/emp_detail_modal :: emp-detail-modal}"></th:block>
+	
+	
+	
 </body>
 </html>

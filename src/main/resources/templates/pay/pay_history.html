@@ -1,0 +1,222 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
+
+<th:block layout:fragment="content">
+
+<div class="custom-body container-xxl flex-grow-1 container-p-y">
+
+    <h2>급여 이력 조회</h2>
+
+    <!-- ========================== -->
+    <!-- 🔍 검색 영역 -->
+    <!-- ========================== -->
+    <div class="row g-2 align-items-center">
+
+        <!-- 검색 조건 (왼쪽) -->
+        <div class="col-12 col-lg-auto d-flex flex-wrap align-items-center gap-2">
+
+            <!-- 조회 모드 -->
+            <select id="mode" class="form-select" style="width:150px;">
+                <option value="emp">사원 기준</option>
+                <option value="dept">부서 기준</option>
+                <option value="month">월별 기준</option>
+            </select>
+
+            <!-- 사번/이름 -->
+            <input type="text" id="keyword" class="form-control"
+                   placeholder="사번 또는 사원명" style="width:160px;">
+
+            <!-- 부서명 -->
+            <input type="text" id="deptName" class="form-control"
+                   placeholder="부서명" style="width:160px; display:none;">
+
+            <!-- 연도 -->
+            <select id="year" class="form-select" style="width:100px;"></select>
+
+            <!-- 월 -->
+            <select id="month" class="form-select" style="width:100px;"></select>
+
+            <!-- 조회 버튼 -->
+            <button class="btn btn-primary" id="btnSearch">검색</button>
+        </div>
+
+        <!-- 오른쪽 버튼 -->
+        <div class="col-12 col-lg d-flex justify-content-lg-end">
+            <button class="btn btn-secondary" id="btnReset">초기화</button>
+        </div>
+
+    </div>
+
+    <br>
+
+    <!-- ========================== -->
+    <!-- 📊 AG Grid -->
+    <!-- ========================== -->
+    <div class="card-body p-0">
+        <div id="payslipGrid" class="ag-theme-alpine"
+             style="height:420px; width:100%;"></div>
+    </div>
+
+    <br>
+
+    <!-- ========================== -->
+    <!-- 📄 페이지네이션 -->
+    <!-- ========================== -->
+    <nav aria-label="급여 이력 페이지네이션">
+        <ul class="pagination justify-content-center" id="payPagination"></ul>
+    </nav>
+
+</div>
+
+<!-- ============================
+     급여 상세 모달
+============================ -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content rounded-4 shadow">
+
+      <div class="modal-header border-0">
+        <h4 class="modal-title fw-bold text-primary">급여 상세 내역</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- 상단 기본 정보 -->
+        <div class="p-4 rounded-4 mb-4" style="background:#f8f9fa;">
+  <div class="row g-3 align-items-center">
+
+    <div class="col-md-2">
+      <div class="small text-secondary">지급월</div>
+      <div class="fw-bold fs-5" id="d-payYymm"></div>
+    </div>
+
+    <div class="col-md-2">
+      <div class="small text-secondary">사번</div>
+      <div class="fw-bold fs-5" id="d-empId"></div>
+    </div>
+
+    <div class="col-md-2">
+      <div class="small text-secondary">이름</div>
+      <div class="fw-bold fs-5" id="d-empName"></div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="small text-secondary">부서</div>
+      <div class="fw-bold fs-5" id="d-deptName"></div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="small text-secondary">직책</div>
+      <div class="fw-bold fs-5" id="d-posName"></div>
+    </div>
+    
+   
+
+  </div>
+
+  <hr>
+
+  <div class="row text-center">
+    <div class="col">
+      <div class="small text-secondary">기본급</div>
+      <div class="fw-bold fs-5" id="d-baseAmt"></div>
+    </div>
+    <div class="col">
+      <div class="small text-secondary">수당 합계</div>
+      <div class="fw-bold fs-5" id="d-alwAmt"></div>
+    </div>
+    <div class="col">
+      <div class="small text-secondary">공제 합계</div>
+      <div class="fw-bold fs-5" id="d-dedAmt"></div>
+    </div>
+    <div class="col">
+      <div class="small text-secondary">총지급액</div>
+      <div class="fw-bold fs-5" id="d-totAmt"></div>
+    </div>
+    <div class="col">
+      <div class="small text-secondary">실수령액</div>
+      <div class="fw-bold fs-5 text-primary" id="d-netAmt"></div>
+    </div>
+  </div>
+</div>
+
+
+        <!-- 지급 / 공제 영역 -->
+        <div class="row g-4">
+
+          <!-- 🔵 지급 항목 -->
+          <div class="col-md-6">
+            <div class="rounded-4 border shadow-sm p-3">
+              <div class="d-flex justify-content-between mb-3">
+                <h5 class="fw-bold text-primary mb-0">지급 항목</h5>
+                <span class="small text-secondary" id="payCount"></span>
+              </div>
+
+              <table class="table align-middle" style="background:#fdfdfd;">
+                <thead class="table-light">
+                  <tr>
+                    <th>항목명</th>
+                    <th class="text-end">금액</th>
+                  </tr>
+                </thead>
+                <tbody id="payItemsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 🔴 공제 항목 -->
+          <div class="col-md-6">
+            <div class="rounded-4 border shadow-sm p-3">
+              <div class="d-flex justify-content-between mb-3">
+                <h5 class="fw-bold text-primary mb-0">공제 항목</h5>
+                <span class="small text-secondary" id="dedCount"></span>
+              </div>
+
+              <table class="table align-middle" style="background:#fdfdfd;">
+                <thead class="table-light">
+                  <tr>
+                    <th>항목명</th>
+                    <th class="text-end">금액</th>
+                  </tr>
+                </thead>
+                <tbody id="dedItemsBody"></tbody>
+              </table>
+            </div>
+             
+		    <div class="row mt-3" >
+		    <div class="col text-end">
+		        <strong>확정자:</strong>
+		        <span id="confirmUser">-</span>
+		
+		        <strong class="ms-3">확정일시:</strong>
+		        <span id="confirmDate">-</span>
+		    </div>
+		</div>
+
+          </div>         
+    
+
+        </div>
+      </div>
+
+      <div class="modal-footer border-0">
+        <button class="btn btn-secondary px-4" data-bs-dismiss="modal">닫기</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ========================== -->
+<!-- JS 포함 -->
+<!-- ========================== -->
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
+<script src="/js/pay/payHistoryList.js"></script>
+
+
+
+</th:block>
+</th:block>

@@ -7,45 +7,18 @@
 	<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
 		<h3>사원 연차 현황</h3>
 		<div class="my-0">
-			<form class="d-flex justify-content-end">
+			<div class="d-flex justify-content-end">
 	            <div class="dt-search mb-md-6 mb-2 w-25">
-					<input type="text" placeholder="사원번호" class="form-control"/>
+					<input type="text" placeholder="사원번호" class="form-control" id="searchId"/>
 	            </div>
 	            <div class="mb-6 ms-3 mb-0">
-					<button type="submit" class="btn btn-info">검색</button>
+					<button type="button" class="btn btn-outline-primary" id="searchBtn">검색</button>
 	            </div>
-			</form>
+			</div>
 		</div>
 		<div class="card mt-4">
 			<div class="table-responsive text-nowrap">
-				<table class="table">
-					<thead class="table-light">
-						<tr>
-							<th>부서</th>
-							<th>직급</th>
-							<th>사원번호</th>
-							<th>이름</th>
-							<th>총연차</th>
-							<th>사용연차</th>
-							<th>잔여연차</th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody class="table-border-bottom-0">
-						<tr>
-							<td>관리부</td>
-							<td>사장</td>
-							<td>251106123</td>
-							<td>이재용</td>
-							<td>15</td>
-							<td>10</td>
-							<td>5</td>
-							<td>
-								<button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modalCenter">수정</button>
-							</td>
-						</tr>
-					</tbody>
-				</table>
+			<div id="grid"></div>
 			</div>
 		</div>
 		<div class="modal fade" id="modalCenter" tabindex="-1" style="display: none;" aria-hidden="true">
@@ -56,10 +29,10 @@
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
-						<form>
+						<div>
 							<div class="col mb-6">
 								<label for="currentLeave" class="form-label">현재 보유 연차</label>
-								<input type="text" id="currentLeave" class="form-control mb-2" value="15" readonly/>
+								<input type="text" id="currentLeave" class="form-control mb-2" readonly/>
 							</div>
 							<div class="col mb-6">
 								<label class="form-label">증감유형</label>
@@ -83,13 +56,26 @@
 								<input type="text" id="reason" class="form-control" required/>
 							</div>
 							<div class="modal-footer mt-3 p-0">
-								<button class="btn btn-warning">수정</button>
+								<button class="btn btn-warning" id="modifyBtn">수정</button>
 							</div>
-						</form>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
+	<th:block layout:fragment="myScript">
+		<script>
+			const message = "[[${message}]]";
+			
+			if (message) {
+				alert(message);
+			}
+		</script>
+		<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.js"></script>
+		<script type="text/javascript" src="https://uicdn.toast.com/tui.pagination/v3.4.0/tui-pagination.js"></script>
+		<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+		<script src="/js/leave/leaveAdminGrid.js"></script>
+	</th:block>
 </body>
 </th:block>

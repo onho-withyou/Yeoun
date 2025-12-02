@@ -164,7 +164,7 @@
   --bs-body-font-family: var(--bs-font-sans-serif);/*폰트 테마 설정*/
   --bs-body-font-weight: 9900;
   --bs-body-line-height: 1.53;/*메뉴바, 본문 아래위 글자간격 조정*/
-  --bs-body-color: #FFF;/*헤더,메뉴바,본문 폰트 색상*/
+  --bs-body-color: #000;/*헤더,메뉴바,본문 폰트 색상*/
   --bs-body-bg: rgb(101, 140, 88);/*헤더,메뉴바,본문 배경색*/
   --bs-body-bg-out: rgb(187, 200, 99);/*본문밖 밖 배경색*/
   --bs-big-menu-btn: rgb(113, 90, 90);/*데쉬보드 색상*/
@@ -3382,7 +3382,7 @@ textarea.form-control-lg {
 
 .nav {
   display: flex;
-  flex-wrap: wrap;
+  /* flex-wrap: wrap; */
   padding-left: 0;
   margin-bottom: 0;
   list-style: none;
@@ -3430,7 +3430,7 @@ textarea.form-control-lg {
 .nav-tabs .nav-link.active,
 .nav-tabs .nav-item.show .nav-link {
   color: #697a8d;
-  background-color: #fff;
+  background-color: aliceblue;/*탭 색상변경*/
   border-color: #fff;
 }
 .nav-tabs .dropdown-menu {

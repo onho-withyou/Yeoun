@@ -2,29 +2,21 @@
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:fragment="nav">
 	<head>
-	<style>
-	</style>
+		
 	</head>
 		<nav
             class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
             id="layout-navbar"
           >
             <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+            <!-- 모바일 메뉴 토글 버튼 -->
+			    <a href="javascript:void(0);" class="nav-link layout-menu-toggle d-xl-none">
+			        <i class="bx bx-menu bx-sm"></i>
+			    </a>
               <ul class="navbar-nav flex-row align-items-center ms-auto dropdown">
               	<li class="nav-item lh-1 me-3">
-              		<span id="badge_payment" style="
-				            position: relative;
-						    top: -12px;
-						    left: 45px;
-						    background-color: red;
-						    color: rgb(255, 255, 255);
-						    border-radius: 15px;
-						    padding: 3px 8px;
-						    border-color: rgb(255, 255, 255);
-						    font-size: 12px;
-						    display: none;
-				  	"></span>
-                    <i class="icon-base bx bx-folder icon" data-bs-toggle="dropdown" id="payment"></i> 
+              		<i class="icon-base bx bx-folder icon" data-bs-toggle="dropdown" id="payment"></i> 
+              		<span id="badge_payment"></span>
 				    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
 					  <li><a class="dropdown-item" href="#">Action</a></li>
 					  <li><a class="dropdown-item" href="#">Another action</a></li>
@@ -34,20 +26,9 @@
 					</ul>
                 </li>
               	<li class="nav-item lh-1 me-3"> 
-              	<span id="badge_bell" style="
-				         position: relative;
-						 top: -12px;
-						 left: 45px;
-						 background-color: red;
-						 color: rgb(255, 255, 255);
-						 border-radius: 15px;
-						 padding: 3px 8px;
-						 border-color: rgb(255, 255, 255);
-						 font-size: 12px;
-						 display: none;
-				  "></span>
-                   <i class="icon-base bx bx-bell icon" data-bs-toggle="dropdown" id="bell"></i>  
-                   <ul class="dropdown-menu">
+	              	<i class="icon-base bx bx-bell icon" data-bs-toggle="dropdown" id="bell"></i>
+	              	<span id="badge_bell"></span>
+	                <ul class="dropdown-menu">
 					  <li><a class="dropdown-item" href="#">bell</a></li>
 					  <li><a class="dropdown-item" href="#">알림</a></li>
 					  <li><a class="dropdown-item" href="#">공지사항</a></li>
@@ -56,45 +37,71 @@
 					</ul>
                 </li>
               	<li class="nav-item lh-1 me-3">
-              		<span id="badge_chat" style="
-				        position: relative;
-						top: -12px;
-						left: 45px;
-						background-color: blue;
-						color: rgb(255, 255, 255);
-						border-radius: 15px;
-						padding: 3px 8px;
-						border-color: rgb(255, 255, 255);
-						font-size: 12px;
-						display: none;
-				  	"></span>
-                   <i class="icon-base bx bx-chat icon" data-bs-toggle="dropdown" id="chat"></i>
-                   <ul class="dropdown-menu">
+              		<i class="icon-base bx bx-chat icon" data-bs-toggle="dropdown" id="chat"></i>
+					<span id="badge_chat" class="has-alert"></span>
+                   <!--<ul class="dropdown-menu">
 					  <li><a class="dropdown-item" href="#">점심시간입니다.</a></li>
 					  <li><a class="dropdown-item" href="#">퇴근 시간입니다.</a></li>
 					  <li><a class="dropdown-item" href="#">무슨 커피드실래요</a></li>
 					  <li><hr class="dropdown-divider"></li>
 					  <li><a class="dropdown-item" href="#">헤이즐럿라떼요</a></li>
+					</ul>-->
+                </li>
+                
+				<!-- 로그인한 경우에만 프로필 드롭다운 보이게 -->
+				<li class="nav-item dropdown lh-1 me-3" sec:authorize="isAuthenticated()">
+					<a class="nav-link dropdown-toggle nav-font-size d-flex align-items-center" href="#"
+				       id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+				    	<span class="me-1" sec:authentication="principal.empName"></span>
+				    	(<span sec:authentication="principal.empId"></span>)
+				  	</a>
+				  	
+				  	<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+				  		<!-- 내 정보 모달 -->
+				  		<li>
+				  			<a class="dropdown-item" href="#" id="btnMyInfo">내 정보</a>
+		  				</li>
+				  		<!-- 내 정보 수정: 여기서 바로 페이지로 이동 -->
+					 	<li>
+					 		<a class="dropdown-item" th:href="@{/my/info/edit}">개인정보 수정</a>
+			 			</li>
+				  		<!-- 비밀번호 변경 -->
+				  		<li>
+				  			<a class="dropdown-item" th:href="@{/my/password}">비밀번호 변경</a>
+		  				</li>
+				  		<li>
+				  			<hr class="dropdown-divider">
+			  			</li>
+				  		<!-- 로그아웃 -->
+				  		<li>
+				    		<a class="dropdown-item logout-link" href="#">로그아웃</a>
+				  		</li>
 					</ul>
-                </li>
-                <li class="nav-item lh-1 me-3">
-                    <a class="nav-font-size" id="name">이름 (사번)</a>
-                </li>
-                <li class="nav-item lh-1 me-3">
-                    <a class="nav-font-size" id="login">login</a>
-                </li>
+				</li>
+				<!-- 로그인 안 한 경우에는 그냥 login 링크만 -->
+				<li class="nav-item lh-1 me-3" sec:authorize="!isAuthenticated()">
+				  <a class="nav-font-size" id="login-link" th:href="@{/login}">login</a>
+				</li>
+				<!-- 프로필 드롭다운 끝 -->
+
               </ul>
             </div>
           </nav>
+		
+		<form th:action="@{/logout}" method="post" id="hiddenLogoutForm" style="display:none">
+		  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+		</form>
+		
+		<!-- 상단바 (내 정보, 개인정보 수정, 로그아웃) -->
+		<script src="/js/auth/myInfo.js"></script>
+		
 		  <script>
 			//Resources
 		  
          	const payment = document.getElementById("payment");
       		const bell = document.getElementById("bell");
       		const chat = document.getElementById("chat");
-          	const nameTag = document.getElementById("name");
-        	const loginTag = document.getElementById("login");
-        	   
+
         	const badgePayment = document.getElementById("badge_payment");
         	const badgeBell = document.getElementById("badge_bell");
         	const badgeChat = document.getElementById("badge_chat");
@@ -125,24 +132,44 @@
       		});
     		
     		chat.addEventListener("click",()=>{
-    			if(badgeChat.style.display === 'none')  {
+    	    	 window.open(
+    			    "/messenger/list",
+    			    "messenger",
+    			    "noopener,noreferrer,width=500,height=700,left=200,top=100,resizable=no"
+    			 );
+            	/*const iframe = document.createElement("iframe");
+    			iframe.src = "/messenger/popup";
+    			iframe.style.position = "fixed";
+    			iframe.style.right = "20px";
+    			iframe.style.bottom = "20px";
+    			iframe.style.width = "400px";
+    			iframe.style.height = "600px";
+    			iframe.style.border = "1px solid #ccc";
+    			iframe.style.boxShadow = "0 0 12px rgba(0,0,0,0.2)";
+    			iframe.style.borderRadius = "12px";
+    			iframe.style.zIndex = "9999";
+    			document.body.appendChild(iframe);*/
+    			
+    			/*if(badgeChat.style.display === 'none')  {
           		   	this.chatCount += 1;
           		   	badgeChat.textContent = this.chatCount;
           		   	badgeChat.style.display = 'block';
           		}else {
           			badgeChat.style.display = 'none';
-          		}
+          		}*/
       		});
-   
-           	nameTag.addEventListener("click",function() {
-        		if(nameTag.innerText === '이름 (사번)') nameTag.innerText = '사용자 정보';
-        	    else nameTag.innerText = '이름 (사번)';
-        	});
-   
-           	loginTag.addEventListener("click",function() {
-        		if(loginTag.innerText === 'login') loginTag.innerText = 'logout';
-        	    else loginTag.innerText = 'login';
-        	});
-        	    	 
+    		
+    		window.addEventListener("message", (event) => {
+   			  if (event.data === "closeMessengerFrame") {
+   			    document.querySelector("iframe[src='/messenger/popup']")?.remove();
+   			  }
+   			});
           </script>
+          
+		<script>
+		 
+		</script>
+
+
+          
 </th:block>
