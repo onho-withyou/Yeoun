@@ -32,7 +32,7 @@ import lombok.ToString;
 public class MaterialOrderItem {
 	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "MATERIAL_ORDER_ITEM_SEQ_GENERATOR") 
 	@Column(name = "ORDER_ITEM_ID", updatable = false)
-	private String orderItemId; // 발주품목
+	private Long orderItemId; // 발주품목
 	
 	@Column(nullable = false)
 	private String orderId; // 발주ID
