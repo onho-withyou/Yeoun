@@ -23,7 +23,7 @@
                 </a>
             </li>
             <li class="menu-header small text-uppercase">
-                <!-- <span class="menu-header-text">ERP</span> -->
+                <span class="menu-header-text">ERP</span>
             </li>
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -134,14 +134,36 @@
 
                 </ul>
             </li>
-
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">MES</span>
+            </li>
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <div data-i18n="Master Data Management" class="menu-link-sub">기준정보관리</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item">
+                        <a th:href="@{/masterData/product_bom}" class="menu-link" target="_blank">
+                            <div data-i18n="Product/BOM Information Management" class="menu-link-sub">제품/BOM 정보관리</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a th:href="@{/masterData/qc_item}" class="menu-link" target="_blank">
+                            <div data-i18n="Quality Item Management" class="menu-link-sub">품질항목관리</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a th:href="@{/masterData/process_mst}" class="menu-link" target="_blank">
+                            <div data-i18n="Process Route/Process Code Management" class="menu-link-sub">공정라우트/공정코드관리</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <div data-i18n="Salary management">재고관리</div>
                 </a>
-
                 <ul class="menu-sub">
-
                     <!-- 관리자(HR_ADMIN, SYS_ADMIN)만 보임 -->
                     <li class="menu-item" sec:authorize="isAuthenticated()">
                         <a th:href="@{/inventory/dashboard}" class="menu-link">
@@ -163,44 +185,44 @@
 
                     <!-- 사원 누구나: 본인 급여명세서 조회 -->
                     <li class="menu-item" sec:authorize="isAuthenticated()">
-                        <a th:href="@{/inventory/stock_take}" class="menu-link">
+                        <a th:href="@{/inventory/stock-take}" class="menu-link">
                             <div data-i18n="Menu4" class="menu-link-sub">재고 실사</div>
+                        </a>
+                    </li>
+                    
+                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                        <a th:href="@{/purchase/purchaseOrder}" class="menu-link">
+                            <div data-i18n="Menu4" class="menu-link-sub">발주관리</div>
                         </a>
                     </li>
 
                 </ul>
             </li>
-
-<li class="menu-item">
-    <a href="javascript:void(0);" class="menu-link menu-toggle">
-        <div data-i18n="Sales management">영업관리</div>
-    </a>
-
-    <ul class="menu-sub">
-
-	        <!-- 관리자(HR_ADMIN, SYS_ADMIN)만 보임 -->
-	        <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN')">
-	             <a th:href="@{sales/client}" class="menu-link">
-	                <div data-i18n="Menu1" class="menu-link-sub">거래처목록</div>
-	             </a>
-	        </li>
-	
-	        <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN')">
-	             <a th:href="@{sales/orders}" class="menu-link">
-	                <div data-i18n="Menu2" class="menu-link-sub">수주관리</div>
-	             </a>
-	        </li>
-	
-	        <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN')">
-	            <a th:href="@{sales/shipments}" class="menu-link">
-	                <div data-i18n="Menu3" class="menu-link-sub">출하관리</div>
-	            </a>
-	        </li>
-	
-	       
-	
-	    </ul>
-</li>
+              
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <div data-i18n="Sales management">영업관리</div>
+                </a>
+                <ul class="menu-sub">
+	                <li class="menu-item" sec:authorize="isAuthenticated()">
+	                     <a th:href="@{/sales/client}" class="menu-link">
+	                        <div data-i18n="Menu1" class="menu-link-sub">거래처목록</div>
+	                     </a>
+	                </li>
+                
+	                <li class="menu-item" sec:authorize="isAuthenticated()">
+	                     <a th:href="@{/sales/orders}" class="menu-link">
+	                        <div data-i18n="Menu2" class="menu-link-sub">수주관리</div>
+	                     </a>
+	                </li>
+                
+	                <li class="menu-item" sec:authorize="isAuthenticated()">
+	                    <a th:href="@{/sales/shipments}" class="menu-link">
+	                        <div data-i18n="Menu3" class="menu-link-sub">출하관리</div>
+	                    </a>
+	                </li>
+	            </ul>
+            </li>
 
             <li class="menu-item">
                 <a href="/setting/setting_doc" class="menu-link">

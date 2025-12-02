@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeoun.inventory.mapper.PurchaseMapper">
+
+	<!-- 공급업체 조회 -->	
+	<resultMap type="com.yeoun.inventory.dto.SupplierDTO" id="SupplierResultMap">
+		<id property="clientId" column="CLIENT_ID"/>
+		<result property="clientName"  column="CLIENT_NAME"/>
+		<result property="managerName"  column="MANAGER_NAME"/>
+		<result property="statusCode"  column="STATUS_CODE"/>
+		
+		<collection property="supplierItemList" ofType="com.yeoun.inventory.dto.SupplierItemDTO">
+			<id property="itemId" column="ITEM_ID"/>
+	        <result property="clientId" column="CLIENT_ID"/>
+	        <result property="materialId" column="MATERIAL_ID"/>
+	        <result property="matName"    column="MAT_NAME"/>
+	        <result property="unitPrice"  column="UNIT_PRICE"/>
+	        <result property="leadDays"   column="LEAD_DAYS"/>
+	        <result property="unit"       column="UNIT"/>
+	        <result property="supplyAvaliable" column="SUPPLY_AVAILABLE"/>
+	        <result property="minOrderQty" column="MIN_ORDER_QTY"/>
+	        <result property="orderUnit" column="ORDER_UNIT"/>
+		</collection>
+	</resultMap>
+	
+	<select id="findAllSuppliers" resultMap="SupplierResultMap">
+		SELECT
+			c.CLIENT_ID
+			, c.CLIENT_NAME
+			, c.MANAGER_NAME
+			, c.STATUS_CODE
+			, i.ITEM_ID
+			, i.CLIENT_ID
+			, i.MATERIAL_ID
+			, m.MAT_NAME
+			, i.UNIT_PRICE
+			, i.LEAD_DAYS
+			, i.UNIT
+			, i.SUPPLY_AVAILABLE
+			, i.MIN_ORDER_QTY
+			, i.ORDER_UNIT
+		FROM
+			CLIENT c
+		LEFT JOIN 
+			CLIENT_ITEM  i
+		ON
+			c.CLIENT_ID = i.CLIENT_ID
+		LEFT JOIN 
+			MATERIAL_MST m
+		ON
+			i.MATERIAL_ID = m.MAT_ID
+		WHERE
+			c.CLIENT_TYPE = 'SUPPLIER'
+		ORDER BY
+			C.CLIENT_ID ASC, I.ITEM_ID ASC
+	</select>
+
+</mapper>
+
+
+
+
+

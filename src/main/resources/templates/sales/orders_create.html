@@ -1,0 +1,103 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{layouts/layout}">
+
+<th:block layout:fragment="content">
+
+<style>
+    #clientAutoList {
+        background: white !important;  /* 흰 배경 */
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    #clientAutoList .auto-item {
+        padding: 8px 12px;
+        cursor: pointer;
+    }
+
+    #clientAutoList .auto-item:hover {
+        background: #f0f0f0;
+    }
+</style>
+
+<div class="custom-body container-xxl flex-grow-1 container-p-y">
+
+<h3 class="mb-4">신규 수주 등록</h3>
+
+<form th:action="@{/sales/orders/create}" method="post" id="orderForm">
+
+<!-- ===================== 거래처 선택 ===================== -->
+<div class="col-md-6 position-relative">
+    <label class="form-label">거래처</label>
+
+    <!-- 선택된 거래처 ID 저장용 -->
+    <input type="hidden" id="clientId" name="clientId"/>
+
+    <!-- 검색 입력창 (JS가 찾는 ID와 동일) -->
+    <input type="text"
+           id="clientSearch"
+           class="form-control"
+           autocomplete="off"
+           placeholder="거래처명 또는 코드로 검색"/>
+
+    <!-- 자동완성 목록 (JS가 찾는 ID와 동일) -->
+    <div id="clientAutoList"
+         class="list-group position-absolute w-100 d-none"
+         style="z-index:2000; max-height:200px; overflow-y:auto;"></div>
+</div>
+
+
+
+
+    <!-- ===================== 날짜 ===================== -->
+    <div class="row mb-3">
+        <div class="col">
+            <label class="form-label fw-bold">수주일자</label>
+            <input type="date" class="form-control" name="orderDate" required>
+        </div>
+        <div class="col">
+            <label class="form-label fw-bold">납기일자</label>
+            <input type="date" class="form-control" name="deliveryDate" required>
+        </div>
+    </div>
+
+    <!-- ===================== 담당자 ===================== -->
+    <div class="mb-3">
+        <label class="form-label fw-bold">담당자</label>
+        <input type="text" class="form-control"
+               name="adminId" th:value="${login.empId}" readonly>
+    </div>
+
+    <!-- ===================== 제품 목록 추가 ===================== -->
+    <h5 class="mt-4 mb-2">제품 추가</h5>
+
+			<select id="prdId" name="prdId" class="form-select">
+			    <option value="">제품 선택</option>
+			    <th:block th:each="p : ${products}">
+			        <option th:value="${p.prdId}"
+			                th:text="${p.prdName}"></option>
+			    </th:block>
+			</select>
+
+
+    <button type="button" class="btn btn-outline-primary btn-sm" id="addItemBtn">+ 제품 추가</button>
+
+    <!-- ===================== 메모 ===================== -->
+    <div class="mb-3 mt-4">
+        <label class="form-label fw-bold">메모</label>
+        <textarea class="form-control" name="orderMemo" rows="3"></textarea>
+    </div>
+
+    <button class="btn btn-primary mt-3">저장</button>
+
+</form>
+</div>
+
+
+<script src="/js/sales/orders_create.js"></script>
+
+
+
+</th:block>
+</th:block>

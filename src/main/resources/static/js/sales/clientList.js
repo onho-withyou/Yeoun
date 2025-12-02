@@ -1,156 +1,229 @@
 /**
- * clientList.js
- * 거래처/협력사 목록 + 등록 + 상세조회
+ * clientList.js (AG Grid v31+ 버전 안정화 - 수정본)
  */
 
-let clientGrid = null;
-let clientDetailModal = null;
+let gridApi = null;
 
 document.addEventListener("DOMContentLoaded", () => {
 
     /* 메시지 출력 */
     const holder = document.getElementById("clientMsgHolder");
-    if (holder) {
-        const msg = holder.dataset.msg;
-        if (msg) alert(msg);
+    if (holder?.dataset.msg) {
+        alert(holder.dataset.msg);
     }
 
-    /* 상세 모달 */
-    clientDetailModal = new bootstrap.Modal(document.getElementById("clientDetailModal"));
-
-    /* 검색 버튼 */
-    const searchBtn = document.getElementById("btnSearch");
-    if (searchBtn) {
-        searchBtn.addEventListener("click", loadClientList);
+    /* 검색 버튼 (기존 submit 방지) */
+    const btnSearch = document.getElementById("btnSearch");
+    if (btnSearch) {
+        btnSearch.addEventListener("click", e => {
+            e.preventDefault();
+            loadClientList();
+        });
     }
 
     /* 엔터 검색 */
-    const keyword = document.getElementById("keyword");
-    if (keyword) {
-        keyword.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                loadClientList();
-            }
-        });
-    }
-
-    /* 그리드 생성 */
-    initClientGrid();
-
-    /* 초기 데이터 로딩 */
-    clientGrid.resetData(initialClientList);
-
-    /* 등록 이벤트 설정 */
-    initRegisterEvent();
-});
-
-
-/* =======================================================
-    1. AG GRID 생성
-======================================================= */
-function initClientGrid() {
-    clientGrid = new tui.Grid({
-        el: document.getElementById("clientGrid"),
-        scrollX: true,
-        scrollY: true,
-        rowHeaders: [],
-        columns: [
-            { header: "구분", name: "clientType", width: 90, align: "center" },
-            { header: "거래처명", name: "clientName", width: 180 },
-            { header: "사업자번호", name: "businessNo", width: 140, align: "center" },
-            { header: "대표자명", name: "ceoName", width: 120, align: "center" },
-            { header: "담당자명", name: "managerName", width: 120, align: "center" },
-            { header: "연락처", name: "managerTel", width: 150 },
-            {
-                header: " ",
-                name: "btn",
-                width: 80,
-                align: "center",
-                formatter: () => `<button class="btn btn-sm btn-info">상세</button>`
-            }
-        ],
-        pagination: true,
-        pageOptions: {
-            perPage: 10,
-            useClient: true
+    document.getElementById("keyword")?.addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            loadClientList();
         }
     });
 
-    /* 상세 버튼 클릭 */
-    clientGrid.on("click", (ev) => {
-        if (ev.columnName !== "btn") return;
-        const row = clientGrid.getRow(ev.rowKey);
-        if (!row || !row.clientId) return;
+    /* 그리드 생성 */
+    initClientGrid();
+    
+    /* 초기 데이터 로드 */
+    loadClientList();
+});
 
-        showClientDetail(row.clientId);
-    });
+
+/* ==========================================================
+   1. AG Grid v31 그리드 초기화
+========================================================== */
+
+function initClientGrid() {
+
+    const columnDefs = [
+		{
+		    headerName: "유형",
+		    field: "clientType",
+		    width: 110,
+		    valueFormatter: p => {
+		        if (!p.value) return "";
+		        return p.value === "CUSTOMER" ? "거래처" : 
+		               p.value === "SUPPLIER" ? "협력사" : p.value;
+		    }
+        },
+
+        { headerName: "코드", field: "clientId", width: 130 },
+        { headerName: "거래처명", field: "clientName", flex: 1 },
+        { headerName: "사업자번호", field: "businessNo", width: 150 },
+        { headerName: "대표자명", field: "ceoName", width: 140 },
+        { headerName: "담당자", field: "managerName", width: 140 },
+        { headerName: "연락처", field: "managerTel", width: 150 },
+		{
+		    headerName: "상태",
+		    field: "statusCode",
+		    width: 120,
+		    valueFormatter: p => {
+		        if (!p.value) return "";
+		        return p.value === "ACTIVE" ? "활성" :
+		               p.value === "INACTIVE" ? "비활성" : p.value;
+		    }
+		},
+
+        {
+            headerName: "상세",
+            width: 120,
+            cellRenderer: p => {
+                if (!p.data) return "";
+                return `
+                    <button class="btn btn-sm btn-outline-primary"
+                        onclick="showClientDetail('${p.data.clientId}')">
+                        상세
+                    </button>
+                `;
+            },
+            cellStyle: { textAlign: "center" }
+        }
+    ];
+
+    const gridOptions = {
+        columnDefs,
+        defaultColDef: { 
+            resizable: true, 
+            sortable: true, 
+            filter: true 
+        },
+        pagination: true,
+        paginationPageSize: 20,
+        rowHeight: 38,
+        animateRows: true,
+        
+        /* 로딩 오버레이 설정 (v32+) */
+        loading: true,
+        overlayLoadingTemplate: '<span class="ag-overlay-loading-center">데이터를 불러오는 중...</span>',
+        overlayNoRowsTemplate: '<span class="ag-overlay-no-rows-center">조회된 데이터가 없습니다.</span>',
+
+        /* Grid Ready 이벤트 */
+        onGridReady: params => {
+            gridApi = params.api;
+            console.log("✅ Grid Ready");
+            
+            /* 초기 데이터가 있으면 로드 */
+            if (window.initialClientList && Array.isArray(window.initialClientList)) {
+                console.log("📊 초기 데이터 로드:", window.initialClientList.length);
+                params.api.setGridOption("rowData", window.initialClientList);
+                params.api.setGridOption("loading", false);
+            }
+            /* 초기 데이터 없으면 자동으로 로딩 상태 유지 */
+        }
+    };
+
+    const gridDiv = document.getElementById("clientGrid");
+    if (gridDiv) {
+        agGrid.createGrid(gridDiv, gridOptions);
+    } else {
+        console.error("❌ clientGrid 요소를 찾을 수 없습니다.");
+    }
 }
 
 
-/* =======================================================
-    2. 목록 AJAX 조회
-======================================================= */
+
+/* ==========================================================
+   2. 검색 및 목록 조회
+========================================================== */
+
 function loadClientList() {
+    
+    if (!gridApi) {
+        console.error("❌ Grid API가 초기화되지 않았습니다.");
+        return;
+    }
 
-    const keyword = document.getElementById("keyword").value;
-    const type = currentType; // CUSTOMER / SUPPLIER
+    const keyword = document.getElementById("keyword")?.value ?? "";
+    const type = window.currentType ?? "CUSTOMER";
 
-    const params = new URLSearchParams({
-        keyword: keyword,
-        type: type
-    });
+    console.log("🔍 검색 조건:", { keyword, type });
+    
+    /* 로딩 표시 (v32+) */
+    gridApi.setGridOption("loading", true);
+
+    const params = new URLSearchParams({ keyword, type });
 
     fetch(`/sales/client/data?${params.toString()}`)
-        .then(res => res.json())
-        .then(data => {
-            clientGrid.resetData(data);
+        .then(res => {
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            return res.json();
+        })
+        .then(list => {
+            console.log("✅ 데이터 수신:", list?.length ?? 0);
+            
+            if (!gridApi) return;
+            
+            gridApi.setGridOption("loading", false);
+            
+            if (list && list.length > 0) {
+                gridApi.setGridOption("rowData", list);
+            } else {
+                gridApi.setGridOption("rowData", []);
+            }
         })
         .catch(err => {
-            console.error(err);
-            alert("거래처 목록을 불러오는데 실패했습니다.");
+            console.error("❌ 데이터 로드 실패:", err);
+            alert("거래처 목록을 불러오는데 실패했습니다.\n" + err.message);
+            if (gridApi) {
+                gridApi.setGridOption("loading", false);
+                gridApi.setGridOption("rowData", []);
+            }
         });
 }
 
+/* ==========================================================
+   3. 상세조회
+========================================================== */
 
-/* =======================================================
-    3. 상세 모달 조회
-======================================================= */
 function showClientDetail(clientId) {
 
-    fetch(`/sales/client/detail?clientId=${clientId}`)
-        .then(res => res.json())
+    fetch(`/sales/client/${clientId}`)
+        .then(res => {
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            return res.json();
+        })
         .then(d => {
-            // 기본 정보
-            document.getElementById("d-clientName").textContent = d.clientName;
-            document.getElementById("d-clientType").textContent = d.clientType;
-            document.getElementById("d-businessNo").textContent = d.businessNo;
-            document.getElementById("d-ceoName").textContent = d.ceoName;
 
-            // 주소
-            document.getElementById("d-postCode").textContent = d.postCode;
-            document.getElementById("d-addr").textContent = d.addr;
-            document.getElementById("d-addrDetail").textContent = d.addrDetail;
+            // 상세 모달 값 세팅
+            const set = (id, v) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = v ?? "";
+            };
 
-            // 담당자
-            document.getElementById("d-managerName").textContent = d.managerName;
-            document.getElementById("d-managerDept").textContent = d.managerDept;
-            document.getElementById("d-managerTel").textContent = d.managerTel;
-            document.getElementById("d-managerEmail").textContent = d.managerEmail;
+            set("d-clientName", d.clientName);
+            set("d-clientType", d.clientType);
+            set("d-businessNo", d.businessNo);
+            set("d-ceoName", d.ceoName);
 
-            // 계좌
-            document.getElementById("d-bankName").textContent = d.bankName;
-            document.getElementById("d-accountNumber").textContent = d.accountNumber;
-            document.getElementById("d-accountName").textContent = d.accountName;
+            set("d-postCode", d.postCode);
+            set("d-addr", d.addr);
+            set("d-addrDetail", d.addrDetail);
 
-            // 상태
-            document.getElementById("d-status").textContent = d.statusCode ?? "Y";
+            set("d-managerName", d.managerName);
+            set("d-managerDept", d.managerDept);
+            set("d-managerTel", d.managerTel);
+            set("d-managerEmail", d.managerEmail);
 
-            clientDetailModal.show();
+            set("d-bankName", d.bankName);
+            set("d-accountNumber", d.accountNumber);
+            set("d-accountName", d.accountName);
+
+            new bootstrap.Modal(document.getElementById("clientDetailModal")).show();
         })
         .catch(err => {
-            console.error(err);
-            alert("상세 조회 오류가 발생했습니다.");
+            console.error("❌ 상세 조회 실패:", err);
+            alert("상세 조회 오류가 발생했습니다.\n" + err.message);
         });
 }
-
