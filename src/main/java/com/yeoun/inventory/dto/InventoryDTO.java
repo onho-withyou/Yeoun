@@ -2,16 +2,14 @@ package com.yeoun.inventory.dto;
 
 import java.time.LocalDateTime;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
+import com.yeoun.inventory.entity.Inventory;
+import com.yeoun.inventory.entity.WarehouseLocation;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -53,8 +51,9 @@ public class InventoryDTO {
 	private Long expectObAmount = 0l; // 출고예정수량
 	
 //	@NotBlank(message = "재고상태는 필수 입력값입니다.")
-	private String ivStatus = "ok"; // 재고상태 : 정상/임박
+	private String ivStatus = "NORMAL"; // 재고상태 : 정상NORMAL/임박DISPOSAL_WAIT/폐기DISPOSAL
 	
+	// --------------------------------------------------------------------------------
 	private String prodName; // 재고 상품이름
 	
 	private String itemType; // 재고타입(원자재 : RAW, 부자재 : SUB, 완제품: FG)
@@ -63,7 +62,51 @@ public class InventoryDTO {
 	
 	private String rack; // 랙
 	
+	private String rackRow;
+	private String rackCol;
+	
 	private String status; // 상태
 	
+	// --------------------------------------------------------------------------------
+	private static ModelMapper modelMapper = new ModelMapper();
 	
+	public Inventory toEntity() {
+	    // 공통 단순 필드는 ModelMapper로 복사
+	    Inventory inventory = modelMapper.map(this, Inventory.class);
+	    
+	    // 상품이름 설정
+	    this.setProdName(inventory.getItemName());
+	    
+	    // 연관관계는 직접 세팅
+	    WarehouseLocation location = new WarehouseLocation();
+	    if(this.getLocationId() != null) {
+	    	location.setLocationId(this.getLocationId());
+	    	inventory.setWarehouseLocation(location);
+	    }
+
+	    // 기본값 보정
+	    if (inventory.getExpectObAmount() == null) {
+	        inventory.setExpectObAmount(0L);
+	    }
+	    if (inventory.getIvStatus() == null) {
+	        inventory.setIvStatus("ok");
+	    }
+	    // 조회용 연관 필드(materialMst, productMst)는 굳이 여기서 세팅 안 함
+	    return inventory;
+	}
+	
+	public static InventoryDTO fromEntity(Inventory inventory) {
+		InventoryDTO inventoryDTO = modelMapper.map(inventory, InventoryDTO.class);
+		
+		inventoryDTO.setProdName(inventory.getItemName());
+		
+		if(inventory.getWarehouseLocation() != null) {
+			inventoryDTO.setZone(inventory.getWarehouseLocation().getZone());
+			inventoryDTO.setRack(inventory.getWarehouseLocation().getRack());
+			inventoryDTO.setRackRow(inventory.getWarehouseLocation().getRackRow());
+			inventoryDTO.setRackCol(inventory.getWarehouseLocation().getRackCol());
+		}
+		
+		return inventoryDTO;
+	}
 }

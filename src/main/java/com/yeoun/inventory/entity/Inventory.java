@@ -3,15 +3,23 @@ package com.yeoun.inventory.entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.yeoun.masterData.entity.MaterialMst;
+import com.yeoun.masterData.entity.ProductMst;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -38,14 +46,43 @@ public class Inventory {
 	@Column(nullable = false)
 	private String lotNo;
 	
-	@Column(nullable = false)
-	private String locationId;
+//	@Column(nullable = false)
+//	private String locationId;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "LOCATION_ID") 
+	private WarehouseLocation warehouseLocation;
 	
 	@Column(nullable = false)
 	private String itemId; // 원자재/부자재, 완제품의 기준정보 고유값
 	
 	@Column(nullable = false)
 	private String itemType; // 상품의타입 (RAW, SUB, FG)
+	
+	// -------------------------------------------------------------
+	// 조회용 객체 ItemId가 materialMst, productMst에 있는지 검색
+	@ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "itemId", insertable = false, updatable = false)
+    @NotFound(action = NotFoundAction.IGNORE) 
+    @ToString.Exclude
+    private MaterialMst materialMst;
+	
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "itemId", insertable = false, updatable = false)
+    @NotFound(action = NotFoundAction.IGNORE) 
+    @ToString.Exclude
+    private ProductMst productMst;
+    
+    // getItemName베서드를 통해 해당 재고의 이름 얻기
+    public String getItemName() {
+        if ("FG".equals(this.itemType)) {
+            return (productMst != null) ? productMst.getPrdName() : "Unknown Product";
+        } else {
+            // RAW, SUB 인 경우
+            return (materialMst != null) ? materialMst.getMatName() : "Unknown Material";
+        }
+    }
+    // -------------------------------------------------------------
 	
 	@Column(nullable = false)
 	private Long ivAmount; // 재고량
@@ -63,7 +100,7 @@ public class Inventory {
 	private Long expectObAmount = 0l; // 출고예정수량
 	
 	@Column(nullable = false)
-	private String ivStatus; // 재고상태 : 정상/임박
+	private String ivStatus; // 재고상태 : 정상NORMAL/임박DISPOSAL_WAIT/폐기DISPOSAL
 	
 	
 	
