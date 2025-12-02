@@ -44,6 +44,10 @@ public class WorkOrderProcess {
 	@Column(name = "STEP_SEQ", nullable = false)
     private Integer stepSeq;
 	
+	// LOT 번호
+	@Column(name = "LOT_NO", length = 50)
+	private String lotNo;
+	
 	// 상태
 	@Column(name = "STATUS", length = 20, nullable = false)
     private String status;

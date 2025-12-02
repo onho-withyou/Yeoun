@@ -33,6 +33,10 @@ public class QcResult {
 	@Column(name = "ORDER_ID", length = 16, nullable = false)
 	private String orderId;
 	
+	// LOT 번호
+	@Column(name = "LOT_NO", length = 50)
+	private String lotNo;
+	
 	// 검사일자
 	@Column(name = "INSPECTION_DATE", nullable = false)
 	private LocalDate inspectionDate;
