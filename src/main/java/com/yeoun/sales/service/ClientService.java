@@ -36,7 +36,7 @@ public class ClientService {
      * =============================== */
     public Client create(Client client) {
 
-        /* ✅ 1. 필수값 검증 */
+        /* 1. 필수값 검증 */
         if (client.getClientType() == null || client.getClientType().isBlank())
             throw new IllegalArgumentException("유형은 필수입니다.");
 
@@ -46,19 +46,23 @@ public class ClientService {
         if (client.getBusinessNo() == null || client.getBusinessNo().isBlank())
             throw new IllegalArgumentException("사업자번호는 필수입니다.");
 
-        /* ✅ 2. 사업자번호 중복 확인 */
-        if (clientRepository.existsByBusinessNo(client.getBusinessNo()))
-            throw new IllegalArgumentException("이미 등록된 사업자번호입니다.");
 
-        /* ✅ 3. 거래처 ID 자동 생성 */
+        /* ⭐⭐ 2. 사업자번호 숫자만 남기기 */
+        String cleanBizNo = client.getBusinessNo().replaceAll("[^0-9]", "");
+
+        if (clientRepository.existsBizNoClean(cleanBizNo)) {
+            throw new IllegalArgumentException("이미 등록된 사업자번호입니다.");
+        }
+
+        /* 4. 거래처 ID 자동 생성 */
         client.setClientId(generateClientId(client.getClientType()));
 
-        /* ✅ 4. 기본 상태값 설정 */
+        /* 5. 기본 상태 */
         client.setStatusCode("ACTIVE");
 
-        /* ✅ 5. 생성자/일시 */
+        /* 6. 생성일시 */
         client.setCreatedAt(LocalDateTime.now());
-        client.setCreatedBy("SYSTEM");  // 로그인 사용자로 변경 가능
+        client.setCreatedBy("SYSTEM");
 
         /* 기본값 보정 */
         if (client.getFaxNumber() == null) client.setFaxNumber("");
@@ -130,7 +134,20 @@ public class ClientService {
     }
 
     /* 사업자번호 중복 체크 API용 */
-    public boolean existsBusinessNo(String businessNo) {
-        return clientRepository.existsByBusinessNo(businessNo);
+
+//    public boolean existsByBusinessNo(String businessNo) {
+//        return clientRepository.existsByBusinessNo(cleanBizNo(businessNo));
+//    }
+    
+    private String cleanBizNo(String no) {
+        if (no == null) return null;
+        return no.replaceAll("[^0-9]", "");  // 숫자만 남기기
     }
+    
+    public boolean existsByBusinessNoClean(String businessNo) {
+        return clientRepository.existsBizNoClean(businessNo);
+    }
+
+
+
 }

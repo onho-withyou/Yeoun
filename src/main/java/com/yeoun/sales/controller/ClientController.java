@@ -57,6 +57,7 @@ public class ClientController {
         return "sales/client_create";
     }
 
+    /**거래처 등록*/
     @PostMapping("/create")
     public String createProcess(@ModelAttribute Client client, RedirectAttributes rttr) {
 
@@ -74,8 +75,12 @@ public class ClientController {
     /** 사업자번호 중복 확인 */
     @GetMapping("/check-business")
     @ResponseBody
-    public boolean checkBusiness(@RequestParam String businessNo) {
-        return !clientService.existsBusinessNo(businessNo);
+    public boolean checkBusiness(@RequestParam("businessNo") String businessNo) {
+        String cleanBiz = businessNo.replaceAll("[^0-9]", "");
+        return !clientService.existsByBusinessNoClean(cleanBiz);
     }
+
+
+
 }
 

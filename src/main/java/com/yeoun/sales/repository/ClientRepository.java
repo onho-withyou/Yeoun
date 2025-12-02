@@ -43,5 +43,9 @@ public interface ClientRepository extends JpaRepository<Client, String> {
     
     /*사업자번호 중복체크*/
     boolean existsByBusinessNo(String businessNo);
+    
+    @Query("SELECT COUNT(c) > 0 FROM Client c WHERE REPLACE(c.businessNo, '-', '') = :bizNo")
+    boolean existsBizNoClean(@Param("bizNo") String bizNo);
+
 
 }

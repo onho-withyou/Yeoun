@@ -14,7 +14,7 @@
         <!--   기본 정보                    -->
         <!-- ============================== -->
         <div class="col-md-3">
-            <label class="form-label required">유형 *</label>
+            <label class="form-label required">유형</label>
             <select class="form-select" th:field="*{clientType}" required>
                 <option value="">선택</option>
                 <option value="CUSTOMER">거래처</option>
@@ -23,12 +23,12 @@
         </div>
 
         <div class="col-md-6">
-            <label class="form-label required">거래처명 *</label>
+            <label class="form-label required">거래처명</label>
             <input type="text" class="form-control" th:field="*{clientName}" required>
         </div>
 
         <div class="col-md-6">
-            <label class="form-label required">사업자번호 *</label>
+            <label class="form-label required">사업자번호</label>
             <div class="input-group">
                 <input type="text" class="form-control" th:field="*{businessNo}" id="businessNo" required>
                 <button class="btn btn-outline-secondary" type="button" onclick="checkBusinessNo()">중복확인</button>
@@ -37,8 +37,8 @@
         </div>
 
         <div class="col-md-4">
-            <label class="form-label">대표자명</label>
-            <input type="text" class="form-control" th:field="*{ceoName}">
+            <label class="form-label required">대표자명</label>
+            <input type="text" class="form-control" th:field="*{ceoName}" required>
         </div>
 
 
@@ -49,21 +49,21 @@
         <h5 class="mt-4 fw-bold">주소 정보</h5>
 
         <div class="col-md-3">
-            <label class="form-label">우편번호</label>
+            <label class="form-label required">우편번호</label>
             <div class="input-group">
-                <input type="text" class="form-control" th:field="*{postCode}" id="postcode">
+                <input type="text" class="form-control" th:field="*{postCode}" id="postcode" readonly required>
                 <button type="button" class="btn btn-outline-secondary" onclick="findAddress()">주소검색</button>
             </div>
         </div>
 
         <div class="col-md-7">
-            <label class="form-label">주소</label>
-            <input type="text" class="form-control" th:field="*{addr}" id="address">
+            <label class="form-label required">주소</label>
+            <input type="text" class="form-control" th:field="*{addr}" id="address" readonly required>
         </div>
 
         <div class="col-md-7">
-            <label class="form-label">상세주소</label>
-            <input type="text" class="form-control" th:field="*{addrDetail}">
+            <label class="form-label required">상세주소</label>
+            <input type="text" class="form-control" th:field="*{addrDetail}" id="detailAddress" required>
         </div>
 
 
@@ -74,8 +74,8 @@
         <h5 class="mt-4 fw-bold">담당자 정보</h5>
 
         <div class="col-md-4">
-            <label class="form-label">담당자명</label>
-            <input type="text" class="form-control" th:field="*{managerName}">
+            <label class="form-label required">담당자명</label>
+            <input type="text" class="form-control" th:field="*{managerName}" required>
         </div>
 
         <div class="col-md-4">
@@ -84,13 +84,13 @@
         </div>
 
         <div class="col-md-4">
-            <label class="form-label">연락처</label>
-            <input type="text" class="form-control" th:field="*{managerTel}">
+            <label class="form-label required">연락처</label>
+            <input type="text" class="form-control" th:field="*{managerTel}" required>
         </div>
 
         <div class="col-md-5">
-            <label class="form-label">이메일</label>
-            <input type="email" class="form-control" th:field="*{managerEmail}">
+            <label class="form-label required">이메일</label>
+            <input type="email" class="form-control" th:field="*{managerEmail}" required>
         </div>
 
 
@@ -101,19 +101,27 @@
         <h5 class="mt-4 fw-bold">정산 계좌 정보</h5>
 
         <div class="col-md-4">
-            <label class="form-label">은행명</label>
-            <input type="text" class="form-control" th:field="*{bankName}">
+            <label class="form-label required">은행명</label>
+            <input type="text" class="form-control" th:field="*{bankName}" required>
         </div>
 
         <div class="col-md-4">
-            <label class="form-label">계좌번호</label>
-            <input type="text" class="form-control" th:field="*{accountNumber}">
+            <label class="form-label required">계좌번호</label>
+            <input type="text" class="form-control" th:field="*{accountNumber}" required>
         </div>
 
         <div class="col-md-4">
-            <label class="form-label">예금주</label>
-            <input type="text" class="form-control" th:field="*{accountHolder}">
+            <label class="form-label required">예금주</label>
+            <input type="text" class="form-control" th:field="*{accountName}" required>
         </div>
+        
+        <div class="col-md-3">
+    <label class="form-label required">상태</label>
+    <select class="form-select" th:field="*{statusCode}" required>
+        <option value="ACTIVE">활성</option>
+        <option value="INACTIVE">비활성</option>
+    </select>
+</div>
 
 
         <!-- ============================== -->
@@ -128,35 +136,11 @@
     </form>
 </div>
 
-</th:block>
-
-<!-- 카카오 주소 API -->
+<!-- 🔥 카카오 주소 API - content fragment 안으로 이동 -->
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
-<script>
-function findAddress() {
-    new daum.Postcode({
-        oncomplete: function(data) {
-            document.getElementById("postcode").value = data.zonecode;
-            document.getElementById("address").value = data.address;
-        }
-    }).open();
-}
+<script src="/js/sales/clientCreate.js"></script>
 
-function checkBusinessNo() {
-    const num = document.getElementById("businessNo").value;
-    fetch(`/sales/client/check-business?businessNo=` + num)
-        .then(res => res.json())
-        .then(valid => {
-            if (valid) {
-                bizMsg.innerHTML = "사용 가능한 사업자번호입니다.";
-                bizMsg.className = "text-primary";
-            } else {
-                bizMsg.innerHTML = "이미 등록된 사업자번호입니다.";
-                bizMsg.className = "text-danger";
-            }
-        });
-}
-</script>
+</th:block>
 
 </th:block>

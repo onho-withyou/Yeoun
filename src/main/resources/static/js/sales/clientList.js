@@ -61,7 +61,7 @@ function initClientGrid() {
                 return `
                     <button class="btn btn-sm btn-outline-primary"
                         onclick="showClientDetail('${p.data.clientId}')">
-                        열기
+                        상세
                     </button>
                 `;
             },

@@ -61,34 +61,24 @@ public class ClientItem {
     // 9) 발주단위수량
     @Column(name = "ORDER_UNIT", precision = 18, scale = 4)
     @Comment("발주단위 수량 (최소수량 배수 적용)")
-    private BigDecimal orderUnit;
+    private BigDecimal orderUnit;    
 
-    // 10) 포장수량(PACK)
-    @Column(name = "PACK_QTY", precision = 18, scale = 4)
-    @Comment("1 주문단위(PACK) 당 실제 공급 수량")
-    private BigDecimal packQty;
-
-    // 11) 단위변환 환산값
-    @Column(name = "CONV_TO_BASE", precision = 18, scale = 6)
-    @Comment("구매단위를 기본단위로 변환하는 계산값 (예: 1pack → 1000g 등)")
-    private BigDecimal convToBase;
-
-    // 12) 등록일시
+    // 11) 등록일시
     @Column(name = "CREATED_AT")
     @Comment("공급품목 최초 등록 일시")
     private LocalDateTime createdAt;
 
-    // 13) 등록자 ID (EMP FK)
+    // 12) 등록자 ID (EMP FK)
     @Column(name = "CREATED_BY", length = 20)
     @Comment("공급품목 최초 등록자 ID")
     private String createdBy;
 
-    // 14) 수정일시
+    // 13) 수정일시
     @Column(name = "UPDATED_AT")
     @Comment("공급품목 최종 수정 일시")
     private LocalDateTime updatedAt;
 
-    // 15) 수정자 ID (EMP FK)
+    // 14) 수정자 ID (EMP FK)
     @Column(name = "UPDATED_BY", length = 20)
     @Comment("공급품목 최종 수정자 ID")
     private String updatedBy;
