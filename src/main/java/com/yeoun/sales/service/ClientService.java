@@ -14,16 +14,15 @@ public class ClientService {
 
     private final ClientRepository clientRepository;
 
-    /** 전체 목록 조회 */
+    /** 전체 목록 */
     public List<Client> findAll() {
         return clientRepository.findAll();
     }
 
-    /** 검색 조건 조회 */
+    /** 검색 */
     public List<Client> search(String name, String type) {
-        if ((name == null || name.isBlank()) && (type == null || type.isBlank())) {
+        if ((name == null || name.isBlank()) && (type == null || type.isBlank()))
             return clientRepository.findAll();
-        }
         return clientRepository.search(name, type);
     }
 
@@ -32,50 +31,60 @@ public class ClientService {
         return clientRepository.findById(clientId).orElse(null);
     }
 
-    /** 신규 등록 */
+    /** ===============================
+     *   신규 등록 (필수값+중복검증 포함)
+     * =============================== */
     public Client create(Client client) {
 
-        // 1) 거래처 ID 생성
-        if (client.getClientId() == null || client.getClientId().isBlank()) {
-            client.setClientId(generateClientId(client.getClientType()));
-        }
+        /* ✅ 1. 필수값 검증 */
+        if (client.getClientType() == null || client.getClientType().isBlank())
+            throw new IllegalArgumentException("유형은 필수입니다.");
 
-        // 2) 기본 상태값 설정
-        if (client.getStatusCode() == null || client.getStatusCode().isBlank()) {
-            client.setStatusCode("ACTIVE");   // 기본 활성 상태
-        }
+        if (client.getClientName() == null || client.getClientName().isBlank())
+            throw new IllegalArgumentException("거래처명은 필수입니다.");
 
-        // 3) 생성일시
+        if (client.getBusinessNo() == null || client.getBusinessNo().isBlank())
+            throw new IllegalArgumentException("사업자번호는 필수입니다.");
+
+        /* ✅ 2. 사업자번호 중복 확인 */
+        if (clientRepository.existsByBusinessNo(client.getBusinessNo()))
+            throw new IllegalArgumentException("이미 등록된 사업자번호입니다.");
+
+        /* ✅ 3. 거래처 ID 자동 생성 */
+        client.setClientId(generateClientId(client.getClientType()));
+
+        /* ✅ 4. 기본 상태값 설정 */
+        client.setStatusCode("ACTIVE");
+
+        /* ✅ 5. 생성자/일시 */
         client.setCreatedAt(LocalDateTime.now());
+        client.setCreatedBy("SYSTEM");  // 로그인 사용자로 변경 가능
 
-        // 4) 기본값 보정
-        if (client.getAccountName() == null) {
-            client.setAccountName(client.getCeoName()); // 또는 빈값 허용
-        }
+        /* 기본값 보정 */
+        if (client.getFaxNumber() == null) client.setFaxNumber("");
+        if (client.getManagerTel() == null) client.setManagerTel("");
+        if (client.getAccountName() == null) client.setAccountName("");
 
-        if (client.getFaxNumber() == null) {
-            client.setFaxNumber("");
-        }
-
-        if (client.getManagerTel() == null) {
-            client.setManagerTel("");
-        }
-
-        // 5) 저장
         return clientRepository.save(client);
     }
 
-    /** 수정 */
+
+    /** ===========================
+     *   수정
+     * =========================== */
     public Client update(String clientId, Client updateForm) {
+
         Client origin = clientRepository.findById(clientId)
                 .orElseThrow(() -> new IllegalArgumentException("거래처 없음"));
 
+        // 필드 갱신
         origin.setClientName(updateForm.getClientName());
         origin.setClientType(updateForm.getClientType());
         origin.setBusinessNo(updateForm.getBusinessNo());
         origin.setCeoName(updateForm.getCeoName());
         origin.setManagerName(updateForm.getManagerName());
-        origin.setManagerDept(updateForm.getManagerDept());      
+        origin.setManagerDept(updateForm.getManagerDept());
+        origin.setManagerTel(updateForm.getManagerTel());
         origin.setManagerEmail(updateForm.getManagerEmail());
         origin.setPostCode(updateForm.getPostCode());
         origin.setAddr(updateForm.getAddr());
@@ -86,35 +95,42 @@ public class ClientService {
         origin.setAccountNumber(updateForm.getAccountNumber());
         origin.setStatusCode(updateForm.getStatusCode());
 
+        // 수정일/수정자
+        origin.setUpdatedAt(LocalDateTime.now());
+        origin.setUpdatedBy("SYSTEM");
+
         return clientRepository.save(origin);
     }
 
-    private String generateClientId(String type) {
 
-        // 1. prefix
-        String prefix = type.equals("SUPPLIER") ? "VEN" : "CUS";
+    /* ===========================
+        ID 생성 규칙
+        CUS20251202-0001
+        VEN20251202-0001
+       ===========================*/
+    public String generateClientId(String type) {
 
-        // 2. 날짜 (YYYYMMDD)
+        String prefix = type.equals("SUPPLIER") ? "VEN" : "CUS";  
         String date = java.time.LocalDate.now().toString().replace("-", "");
-
-        // 3. 오늘 해당 prefix+date 로 시작하는 client_id 중 가장 큰 번호 조회
         String pattern = prefix + date + "-%";
+
+        /* 오늘 날짜의 최대 seq 조회 */
         String maxId = clientRepository.findMaxClientId(pattern);
 
-        // 4. 다음 seq 계산
-        int nextSeq = 1; // 기본값
+        int nextSeq = 1;
 
         if (maxId != null) {
-            // ID 끝 4자리 추출 → int 변환 → +1
-            String seqStr = maxId.substring(maxId.lastIndexOf("-") + 1);
+            String seqStr = maxId.substring(maxId.lastIndexOf("-") + 1); // 0001
             nextSeq = Integer.parseInt(seqStr) + 1;
         }
 
-        // 5. 4자리 포맷
         String seqStr = String.format("%04d", nextSeq);
 
-        // 6. 최종 ID
         return prefix + date + "-" + seqStr;
     }
 
+    /* 사업자번호 중복 체크 API용 */
+    public boolean existsBusinessNo(String businessNo) {
+        return clientRepository.existsByBusinessNo(businessNo);
+    }
 }
