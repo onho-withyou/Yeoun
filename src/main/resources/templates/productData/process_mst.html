@@ -1,0 +1,13 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/layouts/layout.html}">
+<body>
+<th:block layout:fragment="content">
+	<div class="custom-body container-xxl flex-grow-1 container-p-y">
+	<h2>공정관리</h2>
+	</div>
+</th:block>
+</body>
+<th:block layout:fragment="myScript"> 
+		<script th:inline="javascript" th:src="@{/js/productData/processMst.js}"></script>
+</th:block>
