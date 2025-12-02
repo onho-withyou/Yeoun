@@ -1,8 +1,5 @@
 package com.yeoun.inventory.entity;
 
-import java.time.LocalDateTime;
-
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
@@ -11,9 +8,13 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -29,13 +30,15 @@ import lombok.ToString;
 @Setter
 @ToString
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor
 public class MaterialOrderItem {
 	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "MATERIAL_ORDER_ITEM_SEQ_GENERATOR") 
 	@Column(name = "ORDER_ITEM_ID", updatable = false)
 	private Long orderItemId; // 발주품목
 	
-	@Column(nullable = false)
-	private String orderId; // 발주ID
+	@ManyToOne
+	@JoinColumn(name = "ORDER_ID")
+	private MaterialOrder materialOrder; // 발주 ID
 	
 	@Column(nullable = false)
 	private Long itemId; // 발주상품ID
@@ -54,5 +57,16 @@ public class MaterialOrderItem {
 	
 	@Column(nullable = false)
 	private Long totalPrice; // 총금액 
+	
+	@Builder
+	public MaterialOrderItem(Long itemId, Long orderAmount, Long unitPrice,
+							Long supplyAmount, Long vat, Long totalPrice) {
+		this.itemId = itemId;
+		this.orderAmount = orderAmount;
+		this.unitPrice = unitPrice;
+		this.supplyAmount = supplyAmount;
+		this.VAT = vat;
+		this.totalPrice = totalPrice;
+	}
 	
 }

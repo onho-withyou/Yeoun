@@ -53,7 +53,7 @@
 							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 						</div>
 						<div class="modal-body">
-							<form id="outworkForm" th:action="@{/attendance/outwork}" method="post">
+							<div id="purchaseForm">
 								<div class="row mb-6">
 									<div class="col mb-0">
 										<label class="form-label">거래처</label>
@@ -66,7 +66,7 @@
 									</div>
 									<div class="col mb-0">
 										<label class="form-label">담당자</label>
-										<input class="form-control" type="text" id="managerName" name="managerName"/>
+										<input class="form-control" type="text" id="managerName" name="managerName" readonly/>
 									</div>
 								</div>
 								<div class="row mb-6">
@@ -80,7 +80,7 @@
 									</div>
 								</div>
 								<hr>
-								<table class="table">
+								<table class="table" id="orderTable">
 									<thead>
 										<tr>
 											<th>품목명</th>
@@ -96,9 +96,9 @@
 									<tbody></tbody>
 								</table>
 								<div class="modal-footer mt-3 p-0">
-									<button type="submit" class="btn btn-primary">등록</button>
+									<button type="button" class="btn btn-primary" onclick="submitOrder()">등록</button>
 								</div>
-							</form>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -110,7 +110,7 @@
 		<th:block layout:fragment="myScript">
 			<script type="text/javascript" src="https://uicdn.toast.com/tui.pagination/v3.4.0/tui-pagination.js"></script>
 			<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-			<script src="/js/purchase/purchaseGrid.js"></script>
+			<script src="/js/purchase/purchase_regist.js"></script>
 		</th:block>
 	</body>
 </th:block>
