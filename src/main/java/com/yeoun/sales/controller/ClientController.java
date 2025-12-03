@@ -46,11 +46,13 @@ public class ClientController {
     }
 
     /**상세조회*/    
-    @GetMapping("/{clientId}")
+    @GetMapping("/detail/{clientId}")
     @ResponseBody
-    public Client detail(@PathVariable String clientId) {
+    public Client detail(@PathVariable("clientId") String clientId) {
         return clientService.get(clientId);
     }
+
+
     @GetMapping("/create")
     public String createPage(Model model) {
         model.addAttribute("client", new Client());
@@ -80,7 +82,8 @@ public class ClientController {
         return !clientService.existsByBusinessNoClean(cleanBiz);
     }
 
-
+    
+    
 
 }
 
