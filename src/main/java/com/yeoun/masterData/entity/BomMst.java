@@ -11,7 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import oracle.sql.NUMBER;
 
 @Entity
 @Table(name = "BOM_MST")
@@ -21,7 +20,7 @@ import oracle.sql.NUMBER;
 public class BomMst {
 	@Id
 	@Column(name="BOM_ID", length = 20)
-	private NUMBER bomId; //BOMid
+	private String bomId; //BOMid
 	
 	@Column(name="PRD_ID", length = 50)
 	private String prdId; //제품id
@@ -33,7 +32,7 @@ public class BomMst {
 	private String matQty; //원재료사용량
 
 	@Column(name="MAT_UNIT", length = 20)
-	private NUMBER matUnit; //사용단위
+	private String matUnit; //사용단위
 	
 	@Column(name="BOM_SEQ_NO", length = 10)
 	private String bomSeqNo; //순서
