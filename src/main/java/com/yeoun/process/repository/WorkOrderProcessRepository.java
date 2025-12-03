@@ -24,7 +24,7 @@ public interface WorkOrderProcessRepository extends JpaRepository<WorkOrderProce
             "from WorkOrder w " +
             "join w.product p " +                 
             "where w.status in :statuses " +
-            "order by w.startDate asc")
+            "order by w.planStartDate asc")
 	List<WorkOrderProcessDTO> findWorkOrdersForProcessStatus(@Param("statues") List<String> statuses);
 
 }
