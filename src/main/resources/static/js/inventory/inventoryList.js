@@ -9,9 +9,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 	locationInfo = await getLocationInfo();
 	console.log("@@@@@@@@@@@@@@@@@@", locationInfo);
 	const zones = getUniqueValues(locationInfo, 'zone');
-	const racks  = getUniqueValues(locations, 'rack'); 
-	const rows   = getUniqueValues(locations, 'rackRow');
-	const cols   = getUniqueValues(locations, 'rackCol');
+	const racks  = getUniqueValues(locationInfo, 'rack'); 
+	const rows   = getUniqueValues(locationInfo, 'rackRow');
+	const cols   = getUniqueValues(locationInfo, 'rackCol');
 	console.log(zones); 
 	initGrid();
 	//최초로딩
