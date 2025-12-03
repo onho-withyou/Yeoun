@@ -63,22 +63,22 @@ public class ClientItem {
     @Comment("발주단위 수량 (최소수량 배수 적용)")
     private BigDecimal orderUnit;    
 
-    // 11) 등록일시
+    // 10) 등록일시
     @Column(name = "CREATED_AT")
     @Comment("공급품목 최초 등록 일시")
     private LocalDateTime createdAt;
 
-    // 12) 등록자 ID (EMP FK)
+    // 11) 등록자 ID (EMP FK)
     @Column(name = "CREATED_BY", length = 20)
     @Comment("공급품목 최초 등록자 ID")
     private String createdBy;
 
-    // 13) 수정일시
+    // 12) 수정일시
     @Column(name = "UPDATED_AT")
     @Comment("공급품목 최종 수정 일시")
     private LocalDateTime updatedAt;
 
-    // 14) 수정자 ID (EMP FK)
+    // 13) 수정자 ID (EMP FK)
     @Column(name = "UPDATED_BY", length = 20)
     @Comment("공급품목 최종 수정자 ID")
     private String updatedBy;

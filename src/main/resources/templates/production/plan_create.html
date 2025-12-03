@@ -1,0 +1,59 @@
+<!-- templates/prod/plan_create.html -->
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>생산계획 작성</title>
+
+    <link rel="stylesheet" th:href="@{/css/pretendard.css}" />
+    <link rel="stylesheet" th:href="@{/plugins/aggrid/ag-grid.css}" />
+    <link rel="stylesheet" th:href="@{/plugins/aggrid/ag-theme-alpine.css}" />
+</head>
+
+<body>
+
+<div class="container mt-4">
+
+    <h3 class="mb-3">📦 생산계획서 작성</h3>
+
+    <!-- ============================
+         1) 제품군 선택
+    ============================= -->
+    <div class="card p-3 mb-4">
+        <label class="form-label fw-bold">제품군 선택</label>
+
+        <select id="productGroup" class="form-select w-25">
+            <option value="">전체</option>
+            <option value="SOLID">고체향수</option>
+            <option value="LIQUID">액체향수</option>
+            <option value="OTHERS">기타제품</option>
+        </select>
+    </div>
+
+    <!-- ============================
+         2) 수주 목록 AG Grid
+    ============================= -->
+    <div class="card p-3 mb-4">
+        <div class="d-flex justify-content-between mb-2">
+            <h5 class="fw-bold">수주 목록 (접수된 건)</h5>
+            <button id="btnLoadOrders" class="btn btn-primary btn-sm">조회</button>
+        </div>
+
+        <div id="orderGrid" class="ag-theme-alpine" style="height: 350px;"></div>
+    </div>
+
+    <!-- ============================
+         3) 생산계획 생성 버튼
+    ============================= -->
+    <div class="card p-3">
+        <button id="btnCreatePlan" class="btn btn-success btn-lg w-100">
+            생산계획서 생성하기
+        </button>
+    </div>
+
+</div>
+
+<script th:src="@{/plugins/aggrid/ag-grid-community.min.js}"></script>
+<script th:src="@{/js/prod/plan_create.js}"></script>
+</body>
+</html>
