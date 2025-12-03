@@ -10,7 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import oracle.sql.NUMBER;
 
 @Getter
 @Setter
@@ -20,7 +19,7 @@ import oracle.sql.NUMBER;
 public class BomMstDTO {
 	
 	@NotBlank(message = "BOM ID는 필수 입력값입니다.")
-	private NUMBER bomId; //BOMid
+	private String bomId; //BOMid
 	
 	@NotBlank(message = "제품 ID는 필수 입력값입니다.")
 	private String prdId; //제품id
