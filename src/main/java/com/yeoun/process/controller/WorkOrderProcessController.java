@@ -107,7 +107,7 @@ public class WorkOrderProcessController {
         }
     }
 
-    // 요청 JSON 바디용 DTO (내부 static 클래스로 둬도 되고, 별도 파일로 빼도 됨)
+    // 요청 JSON 바디용 DTO
     @Getter @Setter
     public static class StepRequest {
         private String orderId;
@@ -120,5 +120,5 @@ public class WorkOrderProcessController {
         private Integer stepSeq;
         private String memo;
     }
-
+    
 }

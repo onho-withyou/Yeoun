@@ -30,12 +30,12 @@ document.addEventListener("DOMContentLoaded", () => {
     columnOptions: {
       resizable: true
     },
-    columns: [  
+    columns: [
       {
         header: "작업지시번호",
         name: "orderId",
         align: "center",
-		width: 150
+        width: 150
       },
       {
         header: "제품코드",
@@ -229,28 +229,13 @@ function openDetailModal(orderId) {
               </button>
             `;
           }
-		  if (!step.canStart && !step.canFinish) {
-		    workBtnHtml = (step.status === 'DONE')
-		      ? '<span class="text-muted">완료</span>'      
-		      : '-';            // 나머지는 -
-		  }
-		  // 양품 input
-		  const goodInputHtml = `
-		    <input type="number"
-		           class="form-control form-control-sm step-good-input"
-		           data-order-id="${summary.orderId}"
-		           data-step-seq="${step.stepSeq}"
-		           value="${step.goodQty ?? ""}">
-		  `;
-		  // 불량 input
-		  const defectInputHtml = `
-		    <input type="number"
-		           class="form-control form-control-sm step-defect-input"
-		           data-order-id="${summary.orderId}"
-		           data-step-seq="${step.stepSeq}"
-		           value="${step.defectQty ?? ""}">
-		  `;
-          // 메모 input
+          if (!step.canStart && !step.canFinish) {
+            workBtnHtml = (step.status === 'DONE')
+              ? '<span class="text-muted">완료</span>'
+              : '-';
+          }
+
+          // 메모 input (현장 비고용)
           const memoInputHtml = `
             <input type="text"
                    class="form-control form-control-sm step-memo-input"
@@ -268,10 +253,8 @@ function openDetailModal(orderId) {
               </span>
             </td>
             <td>${statusBadge}</td>
-			<td>${formatDateTime(step.startTime)}</td>
-			<td>${formatDateTime(step.endTime)}</td>
-            <td>${goodInputHtml}</td>
-            <td>${defectInputHtml}</td>
+            <td>${formatDateTime(step.startTime)}</td>
+            <td>${formatDateTime(step.endTime)}</td>
             <td>${workBtnHtml}</td>
             <td>${memoInputHtml}</td>
           `;
@@ -294,71 +277,44 @@ function openDetailModal(orderId) {
 // -------------------------------
 // 공정 단계 시작/종료/메모 이벤트
 // -------------------------------
-// 시작/종료 버튼 공통 이벤트
+
+// 시작/종료 버튼 공통 이벤트 (이벤트 위임)
 document.addEventListener("click", (e) => {
   if (e.target.classList.contains("btn-step-start")) {
     const btn     = e.target;
     const orderId = btn.dataset.orderId;
     const stepSeq = btn.dataset.stepSeq;
-	
-	console.log("[CLICK-START]", { orderId, stepSeq });
-	
-    handleStartStep(orderId, stepSeq, btn);
+
+    handleStartStep(orderId, stepSeq);
   }
 
   if (e.target.classList.contains("btn-step-finish")) {
     const btn     = e.target;
     const orderId = btn.dataset.orderId;
     const stepSeq = btn.dataset.stepSeq;
-	
-	console.log("[CLICK-FINISH]", { orderId, stepSeq });
-	
-    handleFinishStep(orderId, stepSeq, btn);
+
+    handleFinishStep(orderId, stepSeq);
   }
 });
 
-// 양품, 불량, 메모 change 시 저장
+// 메모 change 시 저장
 document.addEventListener("change", (e) => {
-  
-  // 1) 메모 저장
   if (e.target.classList.contains("step-memo-input")) {
     const input   = e.target;
     const orderId = input.dataset.orderId;
     const stepSeq = input.dataset.stepSeq;
     const memo    = input.value;
-
     handleSaveStepMemo(orderId, stepSeq, memo, input);
-    return;
-  }
-
-  // 2) 양품/불량 입력 저장 (같이 저장)
-  if (e.target.classList.contains("step-good-input") ||
-      e.target.classList.contains("step-defect-input")) {
-
-    const input   = e.target;
-    const orderId = input.dataset.orderId;
-    const stepSeq = input.dataset.stepSeq;
-
-    const row = input.closest("tr");
-
-    const goodQty   = row.querySelector(".step-good-input")?.value || 0;
-    const defectQty = row.querySelector(".step-defect-input")?.value || 0;
-
-    handleSaveStepQty(orderId, stepSeq, goodQty, defectQty, input);
-    return;
   }
 });
-
 
 // -------------------------------
 // 공정 시작
 // -------------------------------
-function handleStartStep(orderId, stepSeq, btnEl) {
+function handleStartStep(orderId, stepSeq) {
   if (!confirm('해당 공정을 시작 처리하시겠습니까?')) {
     return;
   }
-  
-  console.log("[HANDLE-START]", { orderId, stepSeq, type: typeof stepSeq });
 
   const headers = {
     'Content-Type': 'application/json'
@@ -374,7 +330,6 @@ function handleStartStep(orderId, stepSeq, btnEl) {
   })
     .then(res => res.json())
     .then(result => {
-		console.log("[START-RESULT]", result);
       if (!result.success) {
         alert(result.message || '공정 시작 처리 중 오류가 발생했습니다.');
         return;
@@ -393,11 +348,10 @@ function handleStartStep(orderId, stepSeq, btnEl) {
     });
 }
 
-
 // -------------------------------
-// 공정 종료
+// 공정 종료 (수량 X, 상태/시간만)
 // -------------------------------
-function handleFinishStep(orderId, stepSeq, btnEl) {
+function handleFinishStep(orderId, stepSeq) {
   if (!confirm('해당 공정을 종료 처리하시겠습니까?')) {
     return;
   }
@@ -434,7 +388,6 @@ function handleFinishStep(orderId, stepSeq, btnEl) {
     });
 }
 
-
 // -------------------------------
 // 메모 저장
 // -------------------------------
@@ -464,31 +417,6 @@ function handleSaveStepMemo(orderId, stepSeq, memo, inputEl) {
       alert('메모 저장 중 오류가 발생했습니다.');
     });
 }
-
-function handleSaveStepQty(orderId, stepSeq, goodQty, defectQty, inputEl) {
-  const headers = { 'Content-Type': 'application/json' };
-  if (csrfHeader && csrfToken) headers[csrfHeader] = csrfToken;
-
-  fetch('/process/status/step/qty', {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ orderId, stepSeq, goodQty, defectQty })
-  })
-    .then(res => res.json())
-    .then(result => {
-      if (!result.success) {
-        alert(result.message || '수량 저장 중 오류가 발생했습니다.');
-        return;
-      }
-      console.log('양품/불량 저장 완료');
-    })
-    .catch(err => {
-      console.error('수량 저장 오류', err);
-      alert('수량 저장 중 오류가 발생했습니다.');
-    });
-}
-
-
 
 // -------------------------------
 // 모달 안에서 해당 row 갱신
@@ -538,7 +466,9 @@ function updateStepRowInModal(updatedStep) {
     `;
   }
   if (!updatedStep.canStart && !updatedStep.canFinish) {
-    workBtnHtml = "-";
+    workBtnHtml = (updatedStep.status === 'DONE')
+      ? '<span class="text-muted">완료</span>'
+      : '-';
   }
 
   const memoInputHtml = `
@@ -558,17 +488,17 @@ function updateStepRowInModal(updatedStep) {
       </span>
     </td>
     <td>${statusBadge}</td>
-	<td>${formatDateTime(updatedStep.startTime)}</td>
-	<td>${formatDateTime(updatedStep.endTime)}</td>
-    <td>${updatedStep.goodQty ?? "-"}</td>
-    <td>${updatedStep.defectQty ?? "-"}</td>
+    <td>${formatDateTime(updatedStep.startTime)}</td>
+    <td>${formatDateTime(updatedStep.endTime)}</td>
     <td>${workBtnHtml}</td>
     <td>${memoInputHtml}</td>
   `;
 }
 
+// -------------------------------
 // 날짜 포맷
+// -------------------------------
 function formatDateTime(dt) {
-	if (!dt) return "-";
-	return dt.replace('T', ' ').split('.')[0];
+  if (!dt) return "-";
+  return dt.replace("T", " ").split(".")[0];
 }

@@ -51,13 +51,8 @@ public class WorkOrderProcessService {
                     List<WorkOrderProcess> processes =
                             workOrderProcessRepository.findByWorkOrderOrderIdOrderByStepSeqAsc(w.getOrderId());
 
-                    // ---- 1) 양품수량: DONE 공정의 GOOD_QTY 합계 ----
-                    int goodQty = processes.stream()
-                            .filter(p -> "DONE".equals(p.getStatus()))
-                            .map(WorkOrderProcess::getGoodQty)
-                            .filter(Objects::nonNull)
-                            .mapToInt(Integer::intValue)
-                            .sum();
+                    // ---- 1) 양품수량: 추후 QC에서 가져올 예정 ----
+                    int goodQty = 0;
 
                     // ---- 2) 진행률: 공정 단계 기준 (DONE 개수 / 전체 단계수 * 100) ----
                     int progressRate = 0;
@@ -132,12 +127,7 @@ public class WorkOrderProcessService {
                 .toList();
     }
 
-	
-	/**
-     * 공정 현황 상세
-     * - 상단: 작업지시 기본정보 (WorkOrder)
-     * - 하단: 라우트 단계(RouteStep) + 공정진행(WorkOrderProcess) 병합
-     */
+	// 공정 현황 상세
     @Transactional(readOnly = true)
     public WorkOrderProcessDetailDTO getWorkOrderProcessDetail(String orderId) {
 
@@ -159,7 +149,6 @@ public class WorkOrderProcessService {
                 workOrderProcessRepository.findByWorkOrderOrderIdOrderByStepSeqAsc(orderId);
 
         // RouteStep 기준으로 WorkOrderProcess를 빠르게 찾기 위한 Map 구성
-        // (RouteStep의 PK 타입/이름에 맞게 getRouteStepId() 부분만 네 엔티티에 맞게 수정하면 됨)
         Map<String, WorkOrderProcess> processMap = processes.stream()
                 .filter(p -> p.getRouteStep() != null && p.getRouteStep().getRouteStepId() != null)
                 .collect(Collectors.toMap(
@@ -224,9 +213,7 @@ public class WorkOrderProcessService {
         return new WorkOrderProcessDetailDTO(wopDTO, stepDTOs);
     }
     
-    /**
-     * 공정 단계 시작 처리
-     */
+    // 공정 단계 시작 처리
     @Transactional
     public WorkOrderProcessStepDTO startStep(String orderId, Integer stepSeq) {
 
@@ -246,9 +233,7 @@ public class WorkOrderProcessService {
         return toStepDTO(saved);
     }
 
-    /**
-     * 공정 단계 종료 처리
-     */
+    // 공정 단계 종료 처리
     @Transactional
     public WorkOrderProcessStepDTO finishStep(String orderId, Integer stepSeq) {
 
@@ -268,9 +253,7 @@ public class WorkOrderProcessService {
         return toStepDTO(saved);
     }
 
-    /**
-     * 공정 단계 메모 저장
-     */
+    // 공정 메모
     @Transactional
     public WorkOrderProcessStepDTO updateStepMemo(String orderId, Integer stepSeq, String memo) {
 
@@ -284,9 +267,7 @@ public class WorkOrderProcessService {
         return toStepDTO(saved);
     }
 
-    /**
-     * 엔티티 → 단계 DTO 변환 공통 메소드
-     */
+    // 엔티티 -> 단계 DTO 변환 공통 메서드
     private WorkOrderProcessStepDTO toStepDTO(WorkOrderProcess proc) {
         WorkOrderProcessStepDTO dto = new WorkOrderProcessStepDTO();
         dto.setOrderId(proc.getWorkOrder().getOrderId());
