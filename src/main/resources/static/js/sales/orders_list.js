@@ -1,3 +1,25 @@
+// ================================
+// 상태값 → 뱃지 변환 함수 (추가)
+// ================================
+const statusBadge = (value) => {
+    const map = {
+        "REQUEST":  { text: "수주요청", color: "primary" },
+        "RECEIVED": { text: "접수완료", color: "success" },
+        "CONFIRMED": { text: "확정", color: "purple" },
+        "SHIPPING": { text: "출하중", color: "warning" },
+        "CANCEL":   { text: "취소", color: "secondary" }
+    };
+
+    const v = map[value] ?? { text: value ?? "-", color: "secondary" };
+
+    return `
+        <span class="badge bg-${v.color}" style="font-size:12px;">
+            ${v.text}
+        </span>
+    `;
+}
+
+
 // URL 파라미터에서 status 자동 인식
 const urlParams = new URLSearchParams(location.search);
 let currentStatus = urlParams.get("status") ?? "";
@@ -6,13 +28,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const gridOptions = {
         columnDefs: [
-            { headerName: "수주번호", field: "orderId", width: 150 },
-            { headerName: "거래처명", field: "clientName", width: 140 },
-            { headerName: "수주일자", field: "orderDate", width: 120 },
-            { headerName: "납기일", field: "deliveryDate", width: 120 },
-            { headerName: "상태", field: "orderStatus", width: 110 },
-            { headerName: "담당자", field: "managerName", width: 120 },
-            { headerName: "메모", field: "memo", flex: 1 },
+            { headerName: "수주번호", field: "orderId", width: 200 },
+            { headerName: "거래처명", field: "clientName", width: 200 },
+            { headerName: "수주일자", field: "orderDate", width: 200 },
+            { headerName: "납기일자", field: "deliveryDate", width: 200 },         
+            
+			{
+						        headerName: "상태",
+						        field: "orderStatus",
+						        width: 120,
+						        cellRenderer: (params) => statusBadge(params.value)
+						    },
+			{ headerName: "담당자", field: "managerName", width: 150 },
+			{ headerName: "메모", field: "memo", flex: 1 },
+						    
             {
                 headerName: "",
                 width: 100,
@@ -24,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
         rowHeight: 42
     };
 
-    // v31부터 createGrid 사용
+    
     const gridApi = agGrid.createGrid(
         document.getElementById("orderGrid"),
         gridOptions
