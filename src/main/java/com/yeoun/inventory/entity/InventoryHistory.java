@@ -53,6 +53,9 @@ public class InventoryHistory {
 	@Column(nullable = true)
 	private String currentLocationId; // 현재위치
 	
+	@Column(nullable = true) // 이동수량
+	private Long moveAmount = 0l;
+	
 	@Column(nullable = false)
 	private String empId; // 작업자
 	
@@ -60,10 +63,10 @@ public class InventoryHistory {
 	private String workType; // 작업종류 ( 입고, 이동, 출고, 폐기, 증가, 감소 )
 	
 	@Column(nullable = true)
-	private Long prevAmount; // 이전수량
+	private Long prevAmount = 0l; // 이전수량
 	
 	@Column(nullable = true)
-	private Long currentAmount; // 현재수량
+	private Long currentAmount  = 0l; // 현재수량
 	
 	@Column(nullable = true)
 	private String reason; // 이유
@@ -71,6 +74,22 @@ public class InventoryHistory {
 	@CreatedDate
 	private LocalDateTime createdDate; // 등록 일시
 	
-	
+	public static InventoryHistory createFromMove(Inventory beforeInventory, 
+	            Inventory afterInventory, 
+	            Long moveQty, 
+	            String empId) {
+	return InventoryHistory.builder()
+		.lotNo(beforeInventory.getLotNo())
+		.itemId(beforeInventory.getItemId())
+		.prevLocationId(beforeInventory.getWarehouseLocation().getLocationId())
+		.currentLocationId(afterInventory.getWarehouseLocation().getLocationId())
+		.moveAmount(moveQty)
+		.empId(empId)
+		.workType("MOVE")
+		.prevAmount(0l)
+		.currentAmount(0l)
+		.reason("")
+		.build();
+	}
 	
 }
