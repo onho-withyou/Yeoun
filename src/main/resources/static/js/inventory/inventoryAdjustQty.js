@@ -11,7 +11,7 @@ function resetAdjustQtyModal() {
     document.getElementById('adjustReason').value = '';
 }
 
-// 수량 조절 모달 열기 (재고id, 출고예정수량 저장)
+// 수량 조절 모달 열기
 function openAdjustQtyModal(rowData) {
 	resetAdjustQtyModal();
 	

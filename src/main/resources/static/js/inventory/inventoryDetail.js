@@ -38,7 +38,7 @@ function openDetailModal(rowData, sameLotList = []) {
 	currentIvQty = rowData.ivAmount;
 	expectOutboundQty = rowData.expectObAmount;
 	currentLoc = rowData.locationId; 
-	canMoveQty = rowData.ivAmount - rowData.expectObAmount;
+	canUseQty = rowData.ivAmount - rowData.expectObAmount;
 	
 	// 기본 정보 세팅
 	document.getElementById('detailIvId').value = rowData.ivId || '';
@@ -107,8 +107,8 @@ function openDetailModal(rowData, sameLotList = []) {
 }
 
 //수량조절 버튼 클릭 이벤트
-const btnAdjustQty = document.getElementById('adjustBtn');
-btnAdjustQty.addEventListener('click', () => {
+const detailBtnAdjustQty = document.getElementById('adjustBtn');
+detailBtnAdjustQty.addEventListener('click', () => {
 	openAdjustQtyModal(detailRowData);
 });
 
@@ -118,7 +118,11 @@ detailBtnMove.addEventListener('click', () => {
 	openMoveModal(detailRowData);	
 });
 
-
+//폐기 버튼 클릭 이벤트
+const detailBtnDisposal = document.getElementById('detailBtnDisposal');
+detailBtnDisposal.addEventListener('click', () => {
+	openDisposalModal(detailRowData);
+});
 
 
 

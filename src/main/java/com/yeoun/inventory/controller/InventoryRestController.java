@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yeoun.auth.dto.LoginDTO;
-import com.yeoun.inventory.dto.InventoryAdjustRequestDTO;
+import com.yeoun.inventory.dto.InventoryModalRequestDTO;
 import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.WarehouseLocationDTO;
 import com.yeoun.inventory.entity.WarehouseLocation;
@@ -54,7 +54,7 @@ public class InventoryRestController {
 	//수량조절
 	@PostMapping("/{ivId}/adjustQty")
 	public ResponseEntity<Map<String, String>> adjustQty(
-			@PathVariable("ivId") Long ivId, @RequestBody InventoryAdjustRequestDTO requestDTO,
+			@PathVariable("ivId") Long ivId, @RequestBody InventoryModalRequestDTO requestDTO,
 			@AuthenticationPrincipal LoginDTO loginUser) {
 		Map result = new HashMap<String, String>();
 		String empId = loginUser.getEmpId();
@@ -68,13 +68,29 @@ public class InventoryRestController {
 	//재고이동
 	@PostMapping("/{ivId}/move")
 	public ResponseEntity<Map<String, String>> moveInventory(
-			@PathVariable("ivId") Long ivId, @RequestBody InventoryAdjustRequestDTO requestDTO,
+			@PathVariable("ivId") Long ivId, @RequestBody InventoryModalRequestDTO requestDTO,
 			@AuthenticationPrincipal LoginDTO loginUser) {
 		Map result = new HashMap<String, String>();
 		String empId = loginUser.getEmpId();
 		requestDTO.setIvId(ivId);
 		
-		inventoryService.adjustQty(requestDTO, empId);
+		log.info(requestDTO);
+		inventoryService.moveInventory(requestDTO, empId);
+		
+		return ResponseEntity.ok(result);
+	}
+	
+	//재고폐기
+	@PostMapping("/{ivId}/dispose")
+	public ResponseEntity<Map<String, String>> disposeInventory(
+			@PathVariable("ivId") Long ivId, @RequestBody InventoryModalRequestDTO requestDTO,
+			@AuthenticationPrincipal LoginDTO loginUser) {
+		Map result = new HashMap<String, String>();
+		String empId = loginUser.getEmpId();
+		requestDTO.setIvId(ivId);
+		
+		log.info(requestDTO);
+		inventoryService.disposeInventory(requestDTO, empId);
 		
 		return ResponseEntity.ok(result);
 	}

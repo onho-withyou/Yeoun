@@ -34,11 +34,13 @@ function resetMoveModal() {
 // 재고이동 모달 열기
 function openMoveModal(rowData) {
 	resetMoveModal();
-	console.log(rowData);
+//	console.log(rowData);
 	document.getElementById('ivQtyMove').value = rowData.ivAmount;
 	document.getElementById('exPectObQtyMove').value = rowData.expectObAmount;
 	// 이동가능 수량 전역변수 지정
 	document.getElementById('canMoveAmount').value = canUseQty; 
+	
+	console.log(canUseQty);
 
 	
 	// 이동물량 제한 (1~이동가능수량)
@@ -204,15 +206,15 @@ btnMove.addEventListener('click', async () => {
 	// 로케이션id 가져오기
 	const moveLocationId = getLocationIdByPosition();
 	// 유효성검사 
-	if(locationId == null) return;
+	if(moveLocationId == null) return;
 	
 	//이동수량
 	const moveQty = document.getElementById('moveQty').value;
 	if(moveQty < 1) {
 		alert('이동 수량은 1보다 작을 수 없습니다.')
 	}
-	if(moveQty > expectOutboundQty){
-		alert('이동 수량은 출고예정 수량보다 클수없습니다.')
+	if(moveQty > canUseQty){
+		alert('이동 수량은 이동가능 수량보다 클수없습니다.')
 	}
 	
 	// 재고이동 요청
@@ -223,16 +225,17 @@ btnMove.addEventListener('click', async () => {
 				[csrfHeader]: csrfToken,
 				'Content-Type': 'application/json'
 			},
-			body: {
+			body: JSON.stringify({
 				moveLocationId,
 				moveAmount: moveQty
-			}
+			})
 		});
 	//	console.log(response);
 	if (!response.ok) {
 		throw new Error('재고이동에 실패하였습니다.')
 	}
-	return await response.json();
+	alert("재고 이동 완료");
+	window.location.reload();
 	
 });
 
