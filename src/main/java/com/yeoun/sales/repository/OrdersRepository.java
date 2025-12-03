@@ -42,6 +42,12 @@ public interface OrdersRepository extends JpaRepository<Orders, String> {
 		        @Param("keyword") String keyword
 		);
 
+	
+	//주문번호 생성
+	@Query("SELECT o.orderId FROM Orders o WHERE o.orderId LIKE concat('ORD', :date, '%') ORDER BY o.orderId DESC LIMIT 1")
+	String findLastOrderId(@Param("date") String date);
+
+
 
 
 }

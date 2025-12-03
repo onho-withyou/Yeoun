@@ -70,7 +70,8 @@ public class OrdersController {
       
 
         // 모델에 추가
-        model.addAttribute("products", products);       
+        model.addAttribute("products", products); 
+        model.addAttribute("productList", products);
         model.addAttribute("login", login);   
 
         return "sales/orders_create";
@@ -92,11 +93,11 @@ public class OrdersController {
             @RequestParam(value="orderDate", required = false) String orderDate,
             @RequestParam(value="deliveryDate", required = false) String deliveryDate,
             @RequestParam(value="empId", required = false) String empId,
-            @RequestParam(value="orderMemo",required = false) String orderMemo
+            @RequestParam(value="orderMemo",required = false) String orderMemo,
+            @RequestParam Map<String, String> params
     ) {
 
-        // TODO: DB 저장 로직 추가 (OrdersService 이용)
-
+    	  ordersService.createOrder(clientId, orderDate, deliveryDate, empId, orderMemo, params);
         // 저장 후 목록 페이지로 이동
         return "redirect:/sales/orders";
     }
