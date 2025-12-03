@@ -1,6 +1,7 @@
 package com.yeoun.inbound.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -9,8 +10,10 @@ import org.springframework.stereotype.Service;
 
 import com.yeoun.inbound.dto.InboundDTO;
 import com.yeoun.inbound.dto.InboundItemDTO;
+import com.yeoun.inbound.dto.ReceiptDTO;
 import com.yeoun.inbound.entity.Inbound;
 import com.yeoun.inbound.entity.InboundItem;
+import com.yeoun.inbound.mapper.InboundMapper;
 import com.yeoun.inbound.repository.InboundRepository;
 import com.yeoun.inventory.entity.MaterialOrder;
 import com.yeoun.inventory.entity.MaterialOrderItem;
@@ -31,6 +34,7 @@ public class InboundService {
 	private final InboundRepository inboundRepository;
 	private final ClientItemRepository clientItemRepository;
 	private final MaterialMstRepository materialMstRepository;
+	private final InboundMapper inboundMapper;
 	
 	// 입고대기 등록
 	@Transactional
@@ -100,8 +104,7 @@ public class InboundService {
 	}
 
 	// 원재료 목록 데이터(날짜 지정과 검색 기능 포함)
-	public List<InboundDTO> getMaterialInboundList(String startDate, String endDate, String keyword) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<ReceiptDTO> getMaterialInboundList(LocalDateTime startDate, LocalDateTime endDate, String keyword) {
+		return inboundMapper.findAllMaterialInbound(startDate, endDate);
 	}
 }

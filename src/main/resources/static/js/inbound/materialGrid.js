@@ -3,38 +3,40 @@ const grid = new tui.Grid({
 	columns: [
 		{
 			header: "입고번호",
-			name: "",
+			name: "inboundId",
 		},
 		{
 			header: "회사명",
-			name: "",
+			name: "clientName",
 		},
 		{
 			header: "담당자",
-			name: "",
+			name: "clientName",
 		},
 		{
 			header: "입고예정일",
-			name: "",
+			name: "expectArrivalDate",
 		},
 		{
 			header: "상태",
-			name: "",
+			name: "inboundStatus",
 		},
 		{
-			header: "상세버튼",
+			header: "",
 			name: "",
+			formatter: (rowInfo) => {
+				return `<button class="btn btn-primary btn-sm" data-id="${rowInfo.row.id}">상세</button>`
+			}
 		}
 	]
 });
 
-let keyword;
+let keyword = null;
 
 // 원재료 정보 불러오기
 async function loadMaterialInbound(startDate, endDate, keyword) {
+	const MATERIAL_INBOUND_LIST = `/inventory/inbound/materialList/data?startDate=${startDate}&endDate=${endDate}&keyword=${keyword}`
 	try {
-		const MATERIAL_INBOUND_LIST = `/inventory/inbound/materialList/data?startDate=${startDate}&endDate=${endDate}&keyword=${keyword}`
-		
 		const res = await fetch(MATERIAL_INBOUND_LIST, {method: "GET"});
 		
 		if (!res.ok) {
@@ -48,7 +50,7 @@ async function loadMaterialInbound(startDate, endDate, keyword) {
 			grid.resetData([]);
 		}
 		
-		console.log(data);
+		grid.resetData(data);
 		
 	} catch (error) {
 		console.error(error);
@@ -70,7 +72,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	document.querySelector("#startDate").value = startDate;
 	document.querySelector("#endDate").value = endDate;
 	
-	await loadMaterialInbound(startDate, endDate);
+	await loadMaterialInbound(startDate, endDate, null);
 });
 
 // 날짜 조회 후 데이터 가져오기
@@ -83,5 +85,5 @@ document.querySelector("#searchbtn").addEventListener("click", async () => {
 		return;
 	}
 	
-	await loadMaterialInbound(startDate, endDate);
+	await loadMaterialInbound(startDate, endDate, null);
 });

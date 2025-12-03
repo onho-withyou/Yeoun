@@ -3,7 +3,9 @@ package com.yeoun.inbound.controller;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,13 +15,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.inbound.dto.InboundDTO;
+import com.yeoun.inbound.dto.ReceiptDTO;
 import com.yeoun.inbound.service.InboundService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Controller
 @RequestMapping("/inventory/inbound")
 @RequiredArgsConstructor
+@Log4j2
 public class InboundController {
 	private final InboundService inboundService;
 
@@ -48,9 +53,9 @@ public class InboundController {
 	}
 	
 	// 원재료 목록 데이터(날짜 지정과 검색 기능 포함)
-	@GetMapping("/inventory/inbound/materialList/data")
+	@GetMapping("/materialList/data")
 	@ResponseBody
-	public ResponseEntity<List<InboundDTO>> materialList(
+	public ResponseEntity<List<ReceiptDTO>> materialList(
 			@RequestParam(required = false, name = "startDate") String startDate, 
 			@RequestParam(required = false, name = "endDate") String endDate,
 			@RequestParam(required = false, name = "keyword") String keyword) {
@@ -59,7 +64,7 @@ public class InboundController {
 		LocalDateTime start = (startDate != null) ? LocalDate.parse(startDate).atStartOfDay() : LocalDate.now().withDayOfMonth(1).atStartOfDay();
 		LocalDateTime end = (endDate != null) ? LocalDate.parse(endDate).atTime(23, 59, 59) : LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()).atTime(23, 59, 59);
 		
-		List<InboundDTO> inboundList = inboundService.getMaterialInboundList(startDate, endDate, keyword);
+		List<ReceiptDTO> inboundList = inboundService.getMaterialInboundList(start, end, keyword);
 		
 		return ResponseEntity.ok(inboundList);
 	}
