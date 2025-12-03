@@ -21,11 +21,12 @@ public interface OrdersRepository extends JpaRepository<Orders, String> {
 		        o.orderDate,
 		        o.deliveryDate,
 		        o.orderStatus,
-		        o.empId,
+		        e.empName,      
 		        o.orderMemo
 		    )
 		    FROM Orders o
 		    LEFT JOIN Client c ON c.clientId = o.clientId
+		    LEFT JOIN Emp e ON e.empId = o.empId   
 		    WHERE (:status IS NULL OR o.orderStatus = :status)
 		      AND (:startDate IS NULL OR o.orderDate >= :startDate)
 		      AND (:endDate IS NULL OR o.deliveryDate <= :endDate)
@@ -36,11 +37,25 @@ public interface OrdersRepository extends JpaRepository<Orders, String> {
 		    ORDER BY o.orderDate DESC
 		""")
 		List<OrderListDTO> searchOrders(
-		        @Param("status") String status,
-		        @Param("startDate") LocalDate startDate,
-		        @Param("endDate") LocalDate endDate,
-		        @Param("keyword") String keyword
+		    @Param("status") String status,
+		    @Param("startDate") LocalDate startDate,
+		    @Param("endDate") LocalDate endDate,
+		    @Param("keyword") String keyword
 		);
+
+
+	
+	//주문번호 생성
+	@Query(value = """
+		    SELECT ORDER_ID
+		    FROM ORDERS
+		    WHERE ORDER_ID LIKE 'ORD' || :today || '%'
+		    ORDER BY ORDER_ID DESC
+		    FETCH FIRST 1 ROWS ONLY
+		""", nativeQuery = true)
+		String findLastOrderId(@Param("today") String today);
+
+
 
 
 
