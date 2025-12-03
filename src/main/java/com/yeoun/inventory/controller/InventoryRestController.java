@@ -65,4 +65,22 @@ public class InventoryRestController {
 		return ResponseEntity.ok(result);
 	}
 	
+	//재고이동
+	@PostMapping("/{ivId}/move")
+	public ResponseEntity<Map<String, String>> moveInventory(
+			@PathVariable("ivId") Long ivId, @RequestBody InventoryAdjustRequestDTO requestDTO,
+			@AuthenticationPrincipal LoginDTO loginUser) {
+		Map result = new HashMap<String, String>();
+		String empId = loginUser.getEmpId();
+		requestDTO.setIvId(ivId);
+		
+		inventoryService.adjustQty(requestDTO, empId);
+		
+		return ResponseEntity.ok(result);
+	}
+	
+	
 }
+
+
+
