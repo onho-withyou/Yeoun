@@ -98,4 +98,10 @@ public class InboundService {
 		
 		inboundRepository.save(inbound);
 	}
+
+	// 원재료 목록 데이터(날짜 지정과 검색 기능 포함)
+	public List<InboundDTO> getMaterialInboundList(String startDate, String endDate, String keyword) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
