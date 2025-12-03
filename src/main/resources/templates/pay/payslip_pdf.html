@@ -1,0 +1,169 @@
+<html lang="ko">
+<head>
+
+    <style>
+        body {
+            font-family: "NotoSansKR", sans-serif;
+            font-size: 13px;
+            color: #222;
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 150px;
+            margin-bottom: 8px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 9px;
+        }
+
+        th, td {
+            border: 1px solid #c9c9c9;
+            padding: 6px 8px;
+        }
+
+        th {
+            background: #f4f6f8;
+            font-weight: 600;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-top: 28px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .right { text-align: right; }
+
+        .total-row {
+            background: #f9fafb;
+            font-weight: 700;
+        }
+
+        .pay-box {
+            margin-top: 25px;
+            border: 2px solid #444;
+            padding: 12px;
+        }
+
+        .pay-box-title {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .pay-amount {
+            text-align: right;
+            font-size: 22px;
+            font-weight: 800;
+            color: #0a5faf;
+        }
+    </style>
+
+</head>
+<body>
+
+<!-- 상단 로고 -->
+<div class="header">
+    <img src="classpath:/static/icon/yeoun-logo.png" class="logo" alt="Company Logo" />
+    <div class="title">급여 명세서</div>
+</div>
+
+<!-- 기본 정보 -->
+<div class="section-title">기본 정보</div>
+
+<table>
+    <tr>
+        <th>사원명</th>
+        <td th:text="${slip.empName}">홍길동</td>
+
+        <th>사번</th>
+        <td th:text="${slip.empId}">00001</td>
+    </tr>
+
+    <tr>
+        <th>부서</th>
+        <td th:text="${slip.deptName}">부서명</td>
+
+        <th>지급월</th>
+        <td th:text="${payYymmFormatted}">2025년 11월</td>        
+    </tr>
+</table>
+
+
+<!-- ① 지급내역 -->
+<div class="section-title">① 지급내역</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>항목</th>
+            <th class="right">금액</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr th:each="i : ${items}">
+            <td th:if="${i.type == 'ALW'}" th:text="${i.itemName}"></td>
+            <td th:if="${i.type == 'ALW'}" class="right"
+                th:text="${#numbers.formatInteger(i.amount, 3, 'COMMA')}"></td>
+        </tr>
+
+        <tr class="total-row">
+            <td>지급총액</td>
+            <td class="right" th:text="${#numbers.formatInteger(slip.totAmt, 3, 'COMMA')}"></td>
+        </tr>
+    </tbody>
+</table>
+
+
+<!-- ② 공제내역 -->
+<div class="section-title">② 공제내역</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>항목</th>
+            <th class="right">금액</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr th:each="i : ${items}">
+            <td th:if="${i.type == 'DED'}" th:text="${i.itemName}"></td>
+            <td th:if="${i.type == 'DED'}" class="right"
+                th:text="${#numbers.formatInteger(i.amount, 3, 'COMMA')}"></td>
+        </tr>
+
+        <tr class="total-row">
+            <td>공제총액</td>
+            <td class="right" th:text="${#numbers.formatInteger(slip.dedAmt, 3, 'COMMA')}"></td>
+        </tr>
+    </tbody>
+</table>
+
+
+<!-- ③ 실지급액 -->
+<div class="pay-box">
+    <div class="pay-box-title">③ 실지급액</div>
+    <div class="pay-amount" th:text="${#numbers.formatInteger(slip.netAmt, 3, 'COMMA')} + ' 원'"></div>
+</div>
+
+</body>
+</html>

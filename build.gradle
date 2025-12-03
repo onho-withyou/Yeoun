@@ -4,9 +4,11 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
+
 group = 'com.yeoun'
 version = '0.0.1-SNAPSHOT'
 description = 'Yeoun Team Project'
+apply plugin: 'war'
 
 java {
 	toolchain {
@@ -18,6 +20,11 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+	
+	// Log4j2 라이브러리 사용을 위해 기본 스프링부트 로깅 라이브러리(Logback => spring-boot-starter-logging) 제외시키기
+	all {
+		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+	}
 }
 
 repositories {
@@ -26,23 +33,55 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-//	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5'
-//	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	runtimeOnly 'com.h2database:h2'
+	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'		// war 배포
+//	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	runtimeOnly 'com.oracle.database.jdbc:ojdbc11'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.5'
-//	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	
+	// --------------------------------------------
+	// 타임리프 레이아웃 사용 시 간결한 문법으로 바꾸기 위한 의존성 추가	
+	// https://mvnrepository.com/artifact/nz.net.ultraq.thymeleaf/thymeleaf-layout-dialect
+	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.4.0'
+	
+	// --------------------------------------------
+	// 스프링시큐리티 의존성 추가
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+	testImplementation 'org.springframework.security:spring-security-test'
+	
+	// --------------------------------------------------------------------------------------------------
+	// 서로 다른 클래스(객체)간의 변환을 지원해주는 의존성 추가
+	// https://mvnrepository.com/artifact/org.modelmapper/modelmapper
+	implementation 'org.modelmapper:modelmapper:3.2.5'
+	
+	// --------------------------------------------------------------------------------------------------
+	//스프링 부트 로그 라이브러리 - Log4j2
+	// => 주의! 스프링부트 스타터 패키지내에 기본 로깅 라이브러리가 포함되어있으므로 해당 라이브러리 수동으로 제외시켜야함
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-log4j2
+	implementation 'org.springframework.boot:spring-boot-starter-log4j2:3.5.7'
+	
+	
+	//문자열 수식을 실제 연산식으로 처리하는 라이브러리
+	// https://mvnrepository.com/artifact/org.apache.commons/commons-jexl3
+    implementation 'org.apache.commons:commons-jexl3:3.6.0'
+     
+     //PDF 파일 의존성 추가
+	implementation 'org.xhtmlrenderer:flying-saucer-pdf-openpdf:9.1.22'
+    implementation 'com.openhtmltopdf:openhtmltopdf-core:1.0.10'
+    implementation 'com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10'
+	implementation 'com.openhtmltopdf:openhtmltopdf-slf4j:1.0.10'
+    
 }
 
 tasks.named('test') {

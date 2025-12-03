@@ -1,0 +1,100 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:fragment="schedule_modal">
+<!-- 일정등록 모달 -->
+<div class="modal" id="add-schedule-modal" tabindex="-1" style="display: none; width:100%" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered h-100" role="document" style="max-width:600px; width:100%;">
+		<div class="modal-content h-75">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modalCenterTitle">일정등록</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form id="add-schedule-form">
+					<div class="col mb-6">
+						<input type="hidden" id="schedule-id" name="scheduleId" value="">
+						<label for="scheduleTitle" class="form-label">제목</label>
+						<input type="text" id="scheduleTitle" class="form-control" name="scheduleTitle"/>
+					</div>
+					<div class="col mb-6">
+						<label for="scheduleTitle" class="form-label">작성자</label>
+						<input type="text" class="form-control" readonly
+							th:value="${currentUserName}" id="createdUserName">
+						
+						<input type="hidden" id="schedule-writer" class="form-control" 
+							th:value="${currentUserId}" name="createdUser" readonly/>
+					</div>
+					<div class="mb-3 mt-3" style="display:flex; gap:8px;">
+						<div>
+							<select id="schedule-type" class="form-select" name="scheduleType">
+								<option value="share" selected>공유</option>
+								<option value="company">회사</option>
+								<option th:value="private" >개인</option>
+							</select>
+						</div>
+						<div>
+							<div class="d-flex">
+								<div class="tui-datepicker-input tui-datetime-input" style="width:135px">
+									<input id="startpicker-input" name="scheduleStart" type="text" />
+									<span class="tui-ico-date"></span>
+									<div id="startpicker-container"></div>
+								</div>
+								<span class="mx-1">~</span>
+								<div class="tui-datepicker-input tui-datetime-input" style="width:135px">
+									<input id="endpicker-input" name="scheduleFinish" type="text" />
+									<span class="tui-ico-date"></span>
+									<div id="endpicker-container"></div>
+								</div>
+							</div>
+						</div>
+						<div class="d-flex">
+							<input type="checkbox" id="all-day-checkbox" checked style="margin-bottom: 10px;"/>
+							<input type="hidden" id="all-day-checkbox-value" style="margin-bottom: 10px;" name="alldayYN" value="Y"/>
+							<label for="all-day-checkbox" style="margin-top: 3px;">종일</label>
+						</div>
+					</div>
+
+					<div class="col mb-6" id="shareField">
+					    <label for="schedule-sharer" class="form-label">공유자</label>
+					    <div style="display:flex; gap:8px;">
+					        <input id="schedule-sharer" class="form-control" readonly style="flex:1;" />
+					        <button type="button" id="select-sharer-btn" class="btn btn-secondary" >+ 조직도 선택</button>
+					    </div>
+					</div>
+					<div class="col mb-6">
+						<label for="schedule-content" class="form-label">내용</label>
+						<textarea id="schedule-content" class="form-control" rows="5" name="scheduleContent"></textarea>
+					</div>
+					
+					<div class="modal-footer mt-3 p-0 pb-3" >
+						<button type="button" id="delete-schedule-btn" class="btn btn-outline-danger d-none">삭제</button>
+						<button type="submit" id="add-schedule-btn" class="btn btn-primary">등록</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- 조직도 선택 모달 -->
+<div class="modal" id="organization-modal" tabindex="-1" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">조직도에서 공유자 선택</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        onclick="closeOrgModal()"></button>
+            </div>
+            <div class="modal-body">
+<!--             	<input type="text" oninput="searchInGrid(this.value)" placeholder="전체 검색"> -->
+				<div id="organizationChartGrid" style="width:100%; height:400px;"></div>
+			</div>
+            <div class="modal-footer">
+                <button type="button" id="select-org-btn" class="btn btn-primary">적용</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closeOrgModal()">닫기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/main/schedule_modal.js"></script>

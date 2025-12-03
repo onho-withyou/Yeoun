@@ -1,0 +1,28 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
+
+  <!-- 1. head: OrgChart CSS -->
+  <th:block layout:fragment="head">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/treant-js/1.0/Treant.css">
+	<link rel="stylesheet" th:href="@{/css/orgchart-custom.css}">
+  </th:block>
+
+  <!-- 2. content -->
+  <th:block layout:fragment="content">
+    <div class="custom-body container-xxl flex-grow-1 container-p-y">
+      <h2>조직도</h2>
+     	 <div class="org-wrapper">
+      		<div id="orgCard" class="chart"></div>
+      	 </div>
+    </div>
+  </th:block>
+
+  <!-- 3. myScript -->
+  <th:block layout:fragment="myScript">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/treant-js/1.0/Treant.min.js"></script>
+    <script src="/js/orgchart/orgchart.js"></script>
+  </th:block>
+
+</th:block>

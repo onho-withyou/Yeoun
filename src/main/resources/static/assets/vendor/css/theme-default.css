@@ -1,4 +1,20 @@
 @charset "UTF-8";
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Thin.woff2') format('woff2');
+    font-weight: 100;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Paperozi';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-1Thin.woff2') format('woff2');
+    font-weight: 100;
+    font-display: swap;
+}
+
+
 .layout-navbar-fixed .layout-wrapper:not(.layout-horizontal) .layout-page:before {
   content: "";
   width: 100%;
@@ -301,7 +317,7 @@ button.list-group-item-primary.active {
 
 .nav-pills .nav-link.active, .nav-pills .nav-link.active:hover, .nav-pills .nav-link.active:focus {
   background-color: #696cff;
-  color: #fff;
+  color: #45ADFE;
   box-shadow: 0 2px 4px 0 rgba(105, 108, 255, 0.4);
 }
 
@@ -633,10 +649,12 @@ a:hover {
 }
 
 .layout-navbar {
-  background-color: rgba(255, 255, 255, 0.95) !important;
+  background-color: var(--bs-body-bg) !important;  /*원래색*/
+/*   background-color: rgb(68, 68, 78) !important;헤더 배경색 */
   -webkit-backdrop-filter: saturate(200%) blur(6px);
           backdrop-filter: saturate(200%) blur(6px);
 }
+
 
 .navbar-detached {
   box-shadow: 0 0 0.375rem 0.25rem rgba(161, 172, 184, 0.15);
@@ -649,7 +667,8 @@ a:hover {
 }
 
 .bg-menu-theme {
-  background-color: #fff !important;
+/*   background-color: #fff !important; 원래색 */
+  background-color: var(--bs-body-bg) !important;/*메뉴바 배경색*/
   color: #697a8d;
 }
 .bg-menu-theme .menu-link,
@@ -748,11 +767,11 @@ html:not(.layout-menu-collapsed) .bg-menu-theme .menu-inner .menu-item .menu-lin
   color: #696cff;
 }
 .bg-menu-theme .menu-inner > .menu-item.active > .menu-link {
-  color: #696cff;
-  background-color: rgba(105, 108, 255, 0.16) !important;
+  color: var(--bs-big-menu-color);/*데쉬보드 글자색*/
+  background-color: var(--bs-big-menu-btn) !important; /*데쉬보드 배경색*/
 }
 .bg-menu-theme .menu-inner > .menu-item.active:before {
-  background: #696cff;
+   background: var(--bs-big-menu-btn);
 }
 .bg-menu-theme .menu-sub > .menu-item > .menu-link:before {
   background-color: #b4bdc6 !important;
@@ -774,7 +793,7 @@ html:not(.layout-menu-collapsed) .bg-menu-theme .menu-inner .menu-item .menu-lin
 }
 
 .bg-footer-theme {
-  background-color: #f5f5f9 !important;
+  background-color: var(--bs-body-bg-out) !important;/* 푸터 배경색 */
   color: #697a8d;
 }
 .bg-footer-theme .footer-link {

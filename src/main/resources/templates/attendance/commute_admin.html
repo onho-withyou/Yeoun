@@ -1,0 +1,84 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/layouts/layout.html}">
+<body>
+	<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
+		<h3>출퇴근 현황</h3>
+		<div class="d-flex justify-content-between">
+			<div class="row flex-nowrap">
+				<div class="mb-6 col-lg-6 col-xl-6 col-12 mb-0">
+					<input type="date" name="srhStrDate" class="form-control" id="startDate">
+				</div>
+                ~
+                <div class="mb-6 col-lg-6 col-xl-6 col-12 mb-0">
+	                <input type="date" name="srhEndDate" class="form-control" id="endDate">
+                </div>
+                <div class="mb-6 col-lg-6 col-xl-4 col-12 mb-0">
+	             	<button type="button" class="btn btn-primary" id="searchbtn">조회</button>
+                </div>
+			</div>
+			<div class="d-flex">
+	            <div class="mb-6 mb-0">
+					<button type="button" class="btn btn-primary" onclick="openModalAttendance('regist')">+출퇴근입력</button>
+	            </div>
+			</div>
+		</div>
+		<div class="card mt-4">
+			<div class="table-responsive text-nowrap">
+				<div id="grid"></div>
+			</div>
+		</div>
+		<div class="modal fade" id="modalCenter" tabindex="-1" style="display: none;" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="modalCenterTitle"></h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<form>
+							<div class="col mb-6">
+								<label for="nameWithTitle" class="form-label">사원번호</label>
+								<div class="input-group">
+									<input type="text" id="nameWithTitle" class="form-control" name="empId" />
+									<button type="button" class="btn btn-primary" th:onclick="searchEmp()" id="searchBtn">검색</button>
+								</div>
+							</div>
+							<div class="col mb-6">
+								<label for="inTime" class="form-label">사원이름</label>
+								<input type="text" id="empName" class="form-control" disabled/>
+							</div>
+							<div class="col mb-6">
+								<label for="inTime" class="form-label">출근시간</label>
+								<input type="time" id="inTime" class="form-control" name="workIn" required/>
+							</div>
+							<div class="col mb-6">
+								<label for="endTime" class="form-label">퇴근시간</label>
+								<input type="time" id="endTime" class="form-control" name="workOut"/>
+							</div>
+							<div class="col mb-6">
+								<label class="form-label">상태</label>
+								<select class="form-select" name="statusCode">
+									<option value="">상태</option>
+									<option value="WORKIN">출근</option>
+									<option value="LATE">지각</option>
+									<option value="OUTWORK">외근</option>
+								</select>
+							</div>
+							<div class="modal-footer mt-3 p-0">
+								<button type="button" class="btn btn-primary" id="saveBtn" th:onclick="saveAttendance()"></button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<th:block layout:fragment="myScript">
+		<script type="text/javascript" src="https://uicdn.toast.com/tui.pagination/v3.4.0/tui-pagination.js"></script>
+		<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+		<script src="/js/attendance/attendance.js"></script>
+		<script src="/js/attendance/attendanceAdminGrid.js"></script>
+	</th:block>
+</body>
+</th:block>

@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequestMapping("")
 public class HomeController {
-	@GetMapping("home")
+	@GetMapping("/home")
 	public String home(Model model) {
-		return "/home";
+		return "main/main.html";
 	}
 	
 }

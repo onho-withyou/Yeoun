@@ -37,16 +37,138 @@
   --bs-black-rgb: 67, 89, 113;
   --bs-body-color-rgb: 105, 122, 141;
   --bs-body-bg-rgb: 245, 245, 249;
-  --bs-font-sans-serif: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  /*폰트 테마 설정*/
+  --bs-font-sans-serif: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   --bs-font-monospace: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
-  --bs-root-font-size: 16px;
-  --bs-body-font-family: var(--bs-font-sans-serif);
-  --bs-body-font-size: 0.9375rem;
+  --bs-header-font-size: 18px;/*헤더 폰트크기*/
+  --bs-menubar-font-size: 0.9375rem;/*메뉴바 폰트크기*/
+  --bs-menubar-menu-font-size: 1rem;/*메뉴바 서브 폰트크기*/
+  --bs-root-font-size: 16px;/*메뉴바 넓이 변경*/
+  --bs-body-font-size: 0.9375rem;/*본문,푸터 글자크기 변경*/
+  --bs-body-font-family: var(--bs-font-sans-serif); /*폰트 테마 설정 매핑*/
   --bs-body-font-weight: 400;
-  --bs-body-line-height: 1.53;
-  --bs-body-color: #697a8d;
-  --bs-body-bg: #f5f5f9;
+  --bs-body-line-height: 1.53;/*메뉴바, 본문 아래위 글자간격 조정*/
+  --bs-body-color: #697a8d;/*헤더,메뉴바,본문 폰트 색상*/
+  --bs-body-bg: white;/*헤더,메뉴바,본문 배경색*/
+  --bs-body-bg-out: #F5f5f9;/*본문밖 밖 배경색*/
+  --bs-big-menu-btn: rgba(105, 108, 255, 0.16);/*데쉬보드 색상*/
+  --bs-big-menu-color: #696cff;/*데쉬보드 글자색*/
+}
+/*custom_bg.js 파일에서 color-theme를 원하는 색으로 설정후 복붙으로 사용가능 
+ * 폰트 @import는 theme-default.css파일에 있음 */
+:root[color-theme='dark'] {
+  --bs-blue: #007bff;
+  --bs-indigo: #6610f2;
+  --bs-purple: #696cff;
+  --bs-pink: #e83e8c;
+  --bs-red: #ff3e1d;
+  --bs-orange: #fd7e14;
+  --bs-yellow: #ffab00;
+  --bs-green: #71dd37;
+  --bs-teal: #20c997;
+  --bs-cyan: #03c3ec;
+  --bs-white: #fff;
+  --bs-gray: rgba(67, 89, 113, 0.6);
+  --bs-gray-dark: rgba(67, 89, 113, 0.8);
+  --bs-gray-25: rgba(67, 89, 113, 0.025);
+  --bs-gray-50: rgba(67, 89, 113, 0.05);
+  --bs-primary: #696cff;
+  --bs-secondary: #8592a3;
+  --bs-success: #71dd37;
+  --bs-info: #03c3ec;
+  --bs-warning: #ffab00;
+  --bs-danger: #ff3e1d;
+  --bs-light: #fcfdfd;
+  --bs-dark: #233446;
+  --bs-gray: rgba(67, 89, 113, 0.1);
+  --bs-primary-rgb: 105, 108, 255;
+  --bs-secondary-rgb: 133, 146, 163;
+  --bs-success-rgb: 113, 221, 55;
+  --bs-info-rgb: 3, 195, 236;
+  --bs-warning-rgb: 255, 171, 0;
+  --bs-danger-rgb: 255, 62, 29;
+  --bs-light-rgb: 252, 253, 253;
+  --bs-dark-rgb: 35, 52, 70;
+  --bs-gray-rgb: 67, 89, 113;
+  --bs-white-rgb: 255, 255, 255;
+  --bs-black-rgb: 67, 89, 113;
+  --bs-body-color-rgb: 105, 122, 141;
+  --bs-body-bg-rgb: 245, 245, 249;
+  /*폰트 테마 설정*/
+  --bs-font-sans-serif: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;/*원하는 글꼴로 변경*/
+  --bs-font-monospace: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
+  --bs-header-font-size: 25px;/*헤더 폰트크기*/
+  --bs-menubar-font-size: 25px;/*메뉴바 폰트크기*/
+  --bs-menubar-sub-font-size: 22px;/*메뉴바 서브 폰트크기*/
+  --bs-root-font-size: 16px;/*메뉴바 넓이 변경*/
+  --bs-body-font-size: 16px;/*본문,푸터 글자크기 변경*/
+  --bs-body-font-family: var(--bs-font-sans-serif);/*폰트 테마 설정*/
+  --bs-body-font-weight: 9900;/**/
+  --bs-body-line-height: 1.53;/*메뉴바, 본문 아래위 글자간격 조정*/
+  --bs-body-color: #45ADFE;/*헤더,메뉴바,본문 폰트 색상*/
+  --bs-body-bg: rgb(68, 68, 78);/*헤더,메뉴바,본문 배경색*/
+  --bs-body-bg-out: #666;/*본문밖 밖 배경색*/
+  --bs-big-menu-btn: rgb(113, 90, 90);/*데쉬보드 색상*/
+  --bs-big-menu-color: #FFF;/*데쉬보드 글자색*/
+}
+
+:root[color-theme='green'] {
+  --bs-blue: #007bff;
+  --bs-indigo: #6610f2;
+  --bs-purple: #696cff;
+  --bs-pink: #e83e8c;
+  --bs-red: #ff3e1d;
+  --bs-orange: #fd7e14;
+  --bs-yellow: #ffab00;
+  --bs-green: #71dd37;
+  --bs-teal: #20c997;
+  --bs-cyan: #03c3ec;
+  --bs-white: #fff;
+  --bs-gray: rgba(67, 89, 113, 0.6);
+  --bs-gray-dark: rgba(67, 89, 113, 0.8);
+  --bs-gray-25: rgba(67, 89, 113, 0.025);
+  --bs-gray-50: rgba(67, 89, 113, 0.05);
+  --bs-primary: #696cff;
+  --bs-secondary: #8592a3;
+  --bs-success: #71dd37;
+  --bs-info: #03c3ec;
+  --bs-warning: #ffab00;
+  --bs-danger: #ff3e1d;
+  --bs-light: #fcfdfd;
+  --bs-dark: #233446;
+  --bs-gray: rgba(67, 89, 113, 0.1);
+  --bs-primary-rgb: 105, 108, 255;
+  --bs-secondary-rgb: 133, 146, 163;
+  --bs-success-rgb: 113, 221, 55;
+  --bs-info-rgb: 3, 195, 236;
+  --bs-warning-rgb: 255, 171, 0;
+  --bs-danger-rgb: 255, 62, 29;
+  --bs-light-rgb: 252, 253, 253;
+  --bs-dark-rgb: 35, 52, 70;
+  --bs-gray-rgb: 67, 89, 113;
+  --bs-white-rgb: 255, 255, 255;
+  --bs-black-rgb: 67, 89, 113;
+  --bs-body-color-rgb: 105, 122, 141;
+  --bs-body-bg-rgb: 245, 245, 249;
+  /*폰트 테마 설정*/
+  --bs-font-sans-serif: "Paperozi", -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;/*원하는 글꼴로 변경*/
+  --bs-font-monospace: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
+  --bs-header-font-size: 25px;/*헤더 폰트크기*/
+  --bs-menubar-font-size: 25px;/*메뉴바 폰트 크기*/
+  --bs-menubar-sub-font-size: 22px;/*메뉴바 서브 폰트크기*/
+  --bs-root-font-size: 16px;/*메뉴바 넓이 변경*/
+  --bs-body-font-size: 16px;/*본문,푸터 글자크기 변경*/
+  --bs-body-font-family: var(--bs-font-sans-serif);/*폰트 테마 설정*/
+  --bs-body-font-weight: 9900;
+  --bs-body-line-height: 1.53;/*메뉴바, 본문 아래위 글자간격 조정*/
+  --bs-body-color: #000;/*헤더,메뉴바,본문 폰트 색상*/
+  --bs-body-bg: rgb(101, 140, 88);/*헤더,메뉴바,본문 배경색*/
+  --bs-body-bg-out: rgb(187, 200, 99);/*본문밖 밖 배경색*/
+  --bs-big-menu-btn: rgb(113, 90, 90);/*데쉬보드 색상*/
+  --bs-big-menu-color: #FFF;/*데쉬보드 글자색*/
 }
 
 *,
@@ -72,7 +194,7 @@ body {
   line-height: var(--bs-body-line-height);
   color: var(--bs-body-color);
   text-align: var(--bs-body-text-align);
-  background-color: var(--bs-body-bg);
+  background-color: var(--bs-body-bg-out) !important;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(67, 89, 113, 0);
 }
@@ -2897,7 +3019,7 @@ textarea.form-control-lg {
 .dropdown-menu[data-bs-popper] {
   top: 100%;
   left: 0;
-  margin-top: 0.125rem;
+  margin-top: 1.125rem;
 }
 
 .dropdown-menu-start {
@@ -3092,7 +3214,7 @@ textarea.form-control-lg {
   width: 100%;
   padding: 0.532rem 1.25rem;
   clear: both;
-  font-weight: 400;
+  font-weight: 500;
   color: #697a8d;
   text-align: inherit;
   white-space: nowrap;
@@ -3260,7 +3382,7 @@ textarea.form-control-lg {
 
 .nav {
   display: flex;
-  flex-wrap: wrap;
+  /* flex-wrap: wrap; */
   padding-left: 0;
   margin-bottom: 0;
   list-style: none;
@@ -3308,7 +3430,7 @@ textarea.form-control-lg {
 .nav-tabs .nav-link.active,
 .nav-tabs .nav-item.show .nav-link {
   color: #697a8d;
-  background-color: #fff;
+  background-color: aliceblue;/*탭 색상변경*/
   border-color: #fff;
 }
 .nav-tabs .dropdown-menu {
@@ -3393,7 +3515,7 @@ textarea.form-control-lg {
   padding-left: 0;
 }
 .navbar-nav .dropdown-menu {
-  position: static;
+
 }
 
 .navbar-text {
@@ -9348,6 +9470,8 @@ button.list-group-item-gray.active {
 
 .align-items-center {
   align-items: center !important;
+  color: var(--bs-body-color);/* header 글자색 */
+  font-size: var(--bs-header-font-size);/* 헤더 글자크기*/
 }
 
 .align-items-baseline {
@@ -11215,6 +11339,7 @@ button.list-group-item-gray.active {
 
   .mb-md-0 {
     margin-bottom: 0 !important;
+    color: var(--bs-body-color);/* 푸터 글자색 추가*/
   }
 
   .mb-md-1 {
@@ -14971,6 +15096,7 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
 .menu-item {
   align-items: flex-start;
   justify-content: flex-start;
+  color: var(--bs-body-color);/*메뉴 글자색*/
 }
 .menu-item.menu-item-animating {
   transition: height 0.3s ease-in-out;
@@ -15094,7 +15220,12 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
   padding: 0.625rem 2rem 0.625rem 2rem;
 }
 .menu-vertical .menu-item .menu-link {
-  font-size: 0.9375rem;
+  color: var(--bs-body-color);/*메뉴바 글자색*/
+  font-size: var(--bs-menubar-font-size);
+}
+.menu-vertical .menu-item .menu-link .menu-link-sub {
+  color: var(--bs-body-color);/*메뉴바-sub 글자색*/
+  font-size: var(--bs-menubar-sub-font-size);/*메뉴-sub 글자 크기*/
 }
 .menu-vertical .menu-item.active:not(.open) > .menu-link {
   font-weight: 600;
@@ -15297,7 +15428,7 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
   padding: 0 1.5rem;
 }
 .layout-navbar.navbar-detached.container-xxl {
-  max-width: calc(1440px - calc(1.625rem * 2));
+  max-width: calc(1493px - calc(1.625rem * 2));
 }
 .layout-navbar-fixed .layout-navbar.navbar-detached {
   width: calc(100% - calc(1.625rem * 2) - 16.25rem);
@@ -15389,6 +15520,8 @@ html:not(.layout-menu-fixed) .menu-inner-shadow {
   min-width: 0;
   max-width: 100%;
 }
+
+
 .layout-content-navbar .content-wrapper {
   width: 100%;
 }
