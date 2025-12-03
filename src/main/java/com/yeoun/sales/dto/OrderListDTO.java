@@ -19,5 +19,6 @@ public class OrderListDTO {
     private String orderStatus;
     private String managerName;
     private String memo;
+
 }
 

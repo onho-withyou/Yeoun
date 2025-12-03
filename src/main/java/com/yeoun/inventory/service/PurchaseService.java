@@ -46,7 +46,6 @@ public class PurchaseService {
 		
 		for (SupplierItemDTO item : supplierDTO.getSupplierItemList()) {
 			int supply = item.getOrderAmount() * item.getUnitPrice(); // 공급가액
-			log.info(">>>>>>>>>>>> supply : " + supply);
 			int vat = (int) Math.round(supply * 0.1); // 부가세
 			int total = supply + vat; // 품목별 총 금액
 			
@@ -54,7 +53,7 @@ public class PurchaseService {
 			
 			MaterialOrderItemDTO materialOrderItemDTO = MaterialOrderItemDTO.builder()
 					.orderId(orderId)
-					.itemId(item.getItemId())
+					.itemId(item.getMaterialId())
 					.orderAmount((long) item.getOrderAmount())
 					.unitPrice((long) item.getUnitPrice())
 					.VAT((long) vat)
@@ -81,8 +80,6 @@ public class PurchaseService {
 			
 			materialOrder.addItem(orderItem);
 		}
-		
-		log.info(">>>>>>>>>>>>>> materialOrder  : " + materialOrder);
 		
 		materialOrderRepository.save(materialOrder);
 	}

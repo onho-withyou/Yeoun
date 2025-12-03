@@ -14,7 +14,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -30,6 +33,9 @@ import lombok.ToString;
 @Setter
 @ToString
 @EntityListeners(AuditingEntityListener.class)
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class InventoryHistory {
 	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "INVENTORY_HISTORY_SEQ_GENERATOR")
 	@Column(name = "IV_HISTORY_ID", updatable = false)
@@ -51,15 +57,20 @@ public class InventoryHistory {
 	private String empId; // 작업자
 	
 	@Column(nullable = false)
-	private String workType; // 작업종류 ( 입고, 이동, 출고, 폐기 )
+	private String workType; // 작업종류 ( 입고, 이동, 출고, 폐기, 증가, 감소 )
 	
-	@Column(nullable = false)
-	private Long amount; // 수량
+	@Column(nullable = true)
+	private Long prevAmount; // 이전수량
+	
+	@Column(nullable = true)
+	private Long currentAmount; // 현재수량
 	
 	@Column(nullable = true)
 	private String reason; // 이유
 	
 	@CreatedDate
 	private LocalDateTime createdDate; // 등록 일시
+	
+	
 	
 }

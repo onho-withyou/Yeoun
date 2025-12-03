@@ -5,6 +5,56 @@
 <th:block layout:fragment="content">
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
 	<h2>공정관리</h2>
+	   <!-- SEARCH / FILTER -->
+		<div class="d-flex justify-content-between">
+			<div class="d-flex justify-content-start">
+        	     <div class="d-flex">
+             			<label style="width:200px;">제품군</label>
+             			<select class="form-select" id="searchFamily">
+               			<option value="">전체</option>
+               			<option value="PF-FRUIT">PF-FRUIT (과일/꽃 액체향수)</option>
+               			<option value="PF-NATUR">PF-NATUR (자연/풀 액체향수)</option>
+               			<option value="PF-SOLID">PF-SOLID (고체향수)</option>
+             			</select>
+           		</div>
+			</div>
+	        <div class="d-flex justify-content-start">
+	         	<div class="d-flex col-md-4">
+             			<label>라우트명</label>
+             			<input type="text" class="form-control" id="searchRouteName" placeholder="예: 과일/꽃향 액체향수 공정">
+           		</div>
+			</div>
+			<div class="col-md-4 text-md-end">
+             		<button type="button" class="btn btn-primary" onclick="searchRoute()">조회</button>
+             		<button type="button" class="btn btn-success ms-1" onclick="openRouteModalForCreate()">+ 신규 라우트</button>
+           	</div>
+		</div>
+	
+
+	 <div class="nav-align-top mb-4">
+         <ul class="nav nav-tabs" role="tablist">
+           <li class="nav-item">
+             <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab" data-bs-target="#nav-process-tab" aria-controls="navs-process-tab" aria-selected="true">
+               제품별 공정 라우트
+             </button>
+           </li>
+           <li class="nav-item">
+             <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-processCode-tab" aria-controls="navs-processCode-tab" aria-selected="false">
+               공정코드관리
+             </button>
+           </li>
+         </ul>
+         <div class="tab-content" style="height: 700px;">
+           <div class="tab-pane fade show active"  id="navs-process-tab" role="tabpanel">
+             <h2>제품별 공정 라우트</h2>
+             <div id="processGrid" style="display: grid;margin-right:20px;"></div>
+           </div>
+           <div class="tab-pane fade" id="navs-processCode-tab" role="tabpanel">
+             <h2>공정 코드 관리</h2>
+  				<div id="processCodeGrid"></div>
+           </div>
+         </div>
+       </div>
 	</div>
 </th:block>
 </body>
