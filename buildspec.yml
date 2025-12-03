@@ -1,0 +1,52 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: ap-northeast-2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto21
+    commands:
+      # Gradle Wrapper를 사용하므로 별도의 설치 불필요
+      - echo "No additional software installation required due to Gradle Wrapper."
+  pre_build:
+    commands:
+      - echo Build started on `date`
+      - chmod +x gradlew
+      - echo "Parameter Store에서 비밀값 가져오기"
+      - DB_USER=$(aws ssm get-parameter --name "/yeoun/local/DB_USERNAME" --with-decryption --query "Parameter.Value" --output text)
+      - DB_PASS=$(aws ssm get-parameter --name "/yeoun/local/DB_PASSWORD" --with-decryption --query "Parameter.Value" --output text)
+      - |
+        cat > src/main/resources/application.properties << EOF
+        spring.application.name=Yeoun
+        spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
+        spring.datasource.url=jdbc:oracle:thin:@itwillbs.com:1601:ORCL2412
+        spring.datasource.username=${DB_USER}
+        spring.datasource.password=${DB_PASS}
+        spring.jpa.hibernate.ddl-auto=update
+        mybatis.mapper-locations=classpath:mapper/*.xml
+        mybatis.configuration.map-underscore-to-camel-case= true
+        logging.level.com.yeoun.approval.mapper=DEBUG
+        # =========================================================================
+        # [ 파일 업로드 설정 ]
+        # 파일 한 개 당 최대 사이즈
+        spring.servlet.multipart.max-file-size=10MB
+        # 업로드 요청 한 건 당 전체 파일 최대 사이즈
+        spring.servlet.multipart.max-request-size=50MB
+        # 파일 업로드 경로
+        # 1) 업로드 기본 경로
+        file.uploadBaseLocation=/usr/local/tomcat/upload
+        EOF
+  build:
+    commands:
+      - echo Building the Spring Boot application
+      - ./gradlew clean bootWar  # 빌드 명령
+      - ls -l build/libs/
+      - mv build/libs/myapp.war myapp.war
+artifacts:
+  files:
+    - myapp.war
+    - appspec.yml
+    - scripts/*

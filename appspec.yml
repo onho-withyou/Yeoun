@@ -1,0 +1,14 @@
+version: 0.0
+os: linux
+files:
+  - source: myapp.war
+    destination: /usr/local/tomcat/webapps/
+hooks:
+  BeforeInstall:
+    - location: scripts/stop_tomcat.sh
+      timeout: 300
+      runas: root
+  AfterInstall:
+    - location: scripts/start_tomcat.sh
+      timeout: 300
+      runas: root
