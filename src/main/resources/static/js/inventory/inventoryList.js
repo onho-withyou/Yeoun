@@ -7,12 +7,8 @@ let locationInfo = [];
 document.addEventListener('DOMContentLoaded', async function () {
 	// 창고정보 저장
 	locationInfo = await getLocationInfo();
-	console.log("@@@@@@@@@@@@@@@@@@", locationInfo);
-	const zones = getUniqueValues(locationInfo, 'zone');
-	const racks  = getUniqueValues(locationInfo, 'rack'); 
-	const rows   = getUniqueValues(locationInfo, 'rackRow');
-	const cols   = getUniqueValues(locationInfo, 'rackCol');
-	console.log(zones); 
+	inputLocationInfo(locationInfo);
+
 	initGrid();
 	//최초로딩
 	const firstSearchData = getSearchData();
@@ -173,7 +169,28 @@ async function getLocationInfo() {
 function getUniqueValues(list, key) {
     return [...new Set(list.map(item => item[key]))]; 
 }
+// 셀렉트박스 채우기 함수
+function fillSelect(selectEl, values) {
+	selectEl.length = 1; // 첫번째 option만 남김
+	
+	values.forEach(v => {
+		const opt = document.createElement('option');
+		opt.value = v;
+		opt.textContent = v;
+		selectEl.appendChild(opt);
+	})
+}
 
+//창고 정보 셀렉트박스에 집어넣기
+function inputLocationInfo(locationInfo) {
+	const zones = getUniqueValues(locationInfo, 'zone');
+	const racks  = getUniqueValues(locationInfo, 'rack');
+	const zoneSelect = document.getElementById('searchZone')
+	const rackSelect = document.getElementById('searchRack')
+	
+	fillSelect(zoneSelect, zones);
+	fillSelect(rackSelect, racks);
+}
 
 
 

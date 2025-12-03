@@ -1,4 +1,4 @@
-package com.yeoun.inventory.entity;
+package com.yeoun.common.entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,7 +14,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -29,6 +32,9 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @EntityListeners(AuditingEntityListener.class)
 public class Dispose {
 	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "DISPOSE_SEQ_GENERATOR")

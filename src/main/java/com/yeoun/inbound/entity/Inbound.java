@@ -43,6 +43,9 @@ public class Inbound {
 	@Column(nullable = true)
 	private String prodId; // 작업지시서 고유번호
 	
+	@Column(nullable = true)
+	private String empId; // 담당자
+	
 	@CreatedDate
 	private LocalDateTime createdDate; // 등록 일시
 	
@@ -58,14 +61,13 @@ public class Inbound {
 
 	@Builder
 	public Inbound(String inboundId, LocalDateTime expectArrivalDate, String inboundStatus, String materialId,
-			String prodId, LocalDateTime createdDate, List<InboundItem> items) {
+			String prodId, LocalDateTime createdDate) {
 		this.inboundId = inboundId;
 		this.expectArrivalDate = expectArrivalDate;
 		this.inboundStatus = inboundStatus;
 		this.materialId = materialId;
 		this.prodId = prodId;
 		this.createdDate = createdDate;
-		this.items = items;
 	}
 	
 	
