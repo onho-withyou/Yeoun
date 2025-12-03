@@ -6,16 +6,14 @@
 
 <style>
     #clientAutoList {
-        background: white !important;  /* 흰 배경 */
+        background: white !important;
         border: 1px solid #ccc;
         border-radius: 4px;
     }
-
     #clientAutoList .auto-item {
         padding: 8px 12px;
         cursor: pointer;
     }
-
     #clientAutoList .auto-item:hover {
         background: #f0f0f0;
     }
@@ -27,142 +25,172 @@
 
 <form th:action="@{/sales/orders/create}" method="post" id="orderForm">
 
-<!-- ===================== 거래처 선택 ===================== -->
+<!-- =====================================================
+     1) 거래처 검색
+===================================================== -->
 <div class="col-md-6 position-relative">
     <label class="form-label">거래처</label>
 
-    <!-- 선택된 거래처 ID 저장용 -->
-    <input type="hidden" id="clientId" name="clientId"/>
+    <!-- 실제로 서버로 전달되는 값 -->
+    <input type="hidden" name="clientId" id="clientId" />
 
-    <!-- 검색 입력창 (JS가 찾는 ID와 동일) -->
+    <!-- 검색창 -->
     <input type="text"
            id="clientSearch"
            class="form-control"
            autocomplete="off"
-           placeholder="거래처명 또는 코드로 검색"/>
+           placeholder="거래처명 또는 코드로 검색">
 
-    <!-- 자동완성 목록 (JS가 찾는 ID와 동일) -->
+    <!-- 자동완성 목록 -->
     <div id="clientAutoList"
          class="list-group position-absolute w-100 d-none"
          style="z-index:2000; max-height:200px; overflow-y:auto;"></div>
 </div>
 
 
-<!-- ===================== 거래처 정보 박스 ===================== -->
+<!-- =====================================================
+     2) 거래처 상세 정보 박스
+===================================================== -->
 <div id="clientInfoBox"
      class="border rounded p-3 mt-2 d-none"
      style="background:#fafafa;">
 
     <h6 class="fw-bold">거래처 정보</h6>
 
+    <!-- 🔥 우편번호(hidden) -->
+    <input type="hidden" id="clientPostcode" name="dPostcode">
+
     <div class="row mt-2">
-     <div class="col-md-6">
+
+        <!-- 사업자등록번호 -->
+        <div class="col-md-6">
             <label class="form-label">사업자등록번호</label>
-            <input type="text" class="form-control" id="clientBizNo" readonly>
+            <input type="text" id="clientBizNo"
+                   class="form-control" readonly>
         </div>
-    
+
+        <!-- 대표자 -->
         <div class="col-md-6">
             <label class="form-label">대표자</label>
-            <input type="text" class="form-control" id="clientCeo" readonly>
+            <input type="text" id="clientCeo"
+                   class="form-control" readonly>
         </div>
 
-        <div class="col-md-6">
+        <!-- 고객사 담당자 -->
+        <div class="col-md-6 mt-2">
             <label class="form-label">담당자</label>
-            <input type="text" class="form-control" id="clientManager">
+            <input type="text" id="clientManager"
+                   name="managerName" class="form-control">
         </div>
     </div>
 
     <div class="row mt-2">
+        <!-- 담당자 연락처 -->
         <div class="col-md-6">
             <label class="form-label">담당자 연락처</label>
-            <input type="text" class="form-control" id="clientManagerTel">
+            <input type="text" id="clientManagerTel"
+                   name="managerTel" class="form-control">
         </div>
-       
+
+        <!-- 담당자 이메일 -->
+        <div class="col-md-6">
+            <label class="form-label">담당자 이메일</label>
+            <input type="text" id="clientManagerEmail"
+                   name="managerEmail" class="form-control">
+        </div>
     </div>
 
-    <div class="mt-2">
-    <label class="form-label">주소</label>
+    <!-- 주소 -->
+    <div class="mt-3">
+        <label class="form-label">주소</label>
+        <div class="input-group mb-1">
+            <input type="text" class="form-control"
+                   id="clientAddr" name="dAddress1"
+                   placeholder="주소 입력 또는 검색 버튼 클릭">
 
-    <!-- 주소 검색 버튼 포함 -->
-    <div class="input-group mb-1">
-        <input type="text"
-               class="form-control"
-               id="clientAddr"
-               placeholder="주소를 입력하거나 검색 버튼을 클릭하세요">
-        <button type="button"
-                class="btn btn-outline-secondary"
-                id="addrSearchBtn">
-            주소 검색
-        </button>
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    id="addrSearchBtn">
+                주소 검색
+            </button>
+        </div>
+
+        <input type="text" class="form-control"
+               id="clientAddrDetail" name="dAddress2"
+               placeholder="상세 주소 입력">
     </div>
 
-    <input type="text"
-           class="form-control"
-           id="clientAddrDetail"
-           placeholder="상세 주소 입력">
 </div>
 
 
+
+<!-- =====================================================
+     3) 날짜 입력
+===================================================== -->
+<div class="row mb-3 mt-3">
+    <div class="col-md-6">
+        <label class="form-label fw-bold">수주일자</label>
+        <input type="date" class="form-control"
+               name="orderDate" required>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label fw-bold">납기일자</label>
+        <input type="date" class="form-control"
+               name="deliveryDate" required>
+    </div>
 </div>
 
 
-    <!-- ===================== 날짜 ===================== -->
-    <div class="row mb-3">
-        <div class="col">
-            <label class="form-label fw-bold">수주일자</label>
-            <input type="date" class="form-control" name="orderDate" required>
-        </div>
-        <div class="col">
-            <label class="form-label fw-bold">납기일자</label>
-            <input type="date" class="form-control" name="deliveryDate" required>
-        </div>
-    </div>
-
-    <!-- ===================== 담당자 ===================== -->
- <div class="mb-3">
+<!-- =====================================================
+     4) 내부 담당자
+===================================================== -->
+<div class="mb-3">
     <label class="form-label fw-bold">담당자</label>
 
-    <!-- 화면에 보여주는 직원 정보 -->
+    <!-- 화면 출력 -->
     <input type="text" class="form-control"
            th:value="|${login.empName} (${login.empId}) / ${login.deptName}|"
            readonly>
 
-    <!-- 🔥 서버로 실제 전달되는 empId -->
+    <!-- 서버 전달 -->
     <input type="hidden" name="empId" th:value="${login.empId}">
 </div>
 
 
 
+<!-- =====================================================
+     5) 제품목록
+===================================================== -->
+<button type="button" class="btn btn-outline-primary btn-sm" id="addItemBtn">
+    + 제품 추가
+</button>
 
-    <!-- ===================== 제품 목록 추가 ===================== -->
-
-    <button type="button" class="btn btn-outline-primary btn-sm" id="addItemBtn">+ 제품 추가</button>
-    
-		    <!-- ===================== 제품 목록 테이블 ===================== -->
-		<table class="table table-bordered mt-3">
+<table class="table table-bordered mt-3">
     <thead>
         <tr>
-            <th style="width: 25%">제품</th>
-            <th style="width: 15%">단가</th>
-            <th style="width: 10%">최소수량</th>
-            <th style="width: 10%">단위</th>
-            <th style="width: 15%">수량</th>
-            <th style="width: 15%">금액</th>
-            <th style="width: 10%">삭제</th>
+            <th style="width:25%">제품</th>
+            <th style="width:15%">단가</th>
+            <th style="width:10%">최소수량</th>
+            <th style="width:10%">단위</th>
+            <th style="width:15%">수량</th>
+            <th style="width:15%">금액</th>
+            <th style="width:10%">삭제</th>
         </tr>
     </thead>
     <tbody id="itemBody"></tbody>
 </table>
 
-    
 
-    <!-- ===================== 메모 ===================== -->
-    <div class="mb-3 mt-4">
-        <label class="form-label fw-bold">메모</label>
-        <textarea class="form-control" name="orderMemo" rows="3"></textarea>
-    </div>
 
-    <button class="btn btn-primary mt-3">저장</button>
+<!-- =====================================================
+     6) 메모
+===================================================== -->
+<div class="mb-3 mt-4">
+    <label class="form-label fw-bold">메모</label>
+    <textarea class="form-control" name="orderMemo" rows="3"></textarea>
+</div>
+
+<button class="btn btn-primary mt-3">저장</button>
 
 </form>
 </div>
@@ -174,9 +202,6 @@
 <script th:inline="javascript">
     window.productList = /*[[${products}]]*/ [];
 </script>
-
-
-
 
 </th:block>
 </th:block>
