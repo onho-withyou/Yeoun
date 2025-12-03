@@ -58,14 +58,13 @@ public class Inbound {
 
 	@Builder
 	public Inbound(String inboundId, LocalDateTime expectArrivalDate, String inboundStatus, String materialId,
-			String prodId, LocalDateTime createdDate, List<InboundItem> items) {
+			String prodId, LocalDateTime createdDate) {
 		this.inboundId = inboundId;
 		this.expectArrivalDate = expectArrivalDate;
 		this.inboundStatus = inboundStatus;
 		this.materialId = materialId;
 		this.prodId = prodId;
 		this.createdDate = createdDate;
-		this.items = items;
 	}
 	
 	
