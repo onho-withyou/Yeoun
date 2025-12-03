@@ -223,5 +223,88 @@ public class WorkOrderProcessService {
         // 8) 상세 DTO 리턴
         return new WorkOrderProcessDetailDTO(wopDTO, stepDTOs);
     }
+    
+    /**
+     * 공정 단계 시작 처리
+     */
+    @Transactional
+    public WorkOrderProcessStepDTO startStep(String orderId, Integer stepSeq) {
+
+        WorkOrderProcess proc = workOrderProcessRepository
+                .findByWorkOrderOrderIdAndStepSeq(orderId, stepSeq)
+                .orElseThrow(() -> new IllegalArgumentException("해당 공정 단계가 존재하지 않습니다."));
+
+        // READY 상태만 시작 가능
+        if (!"READY".equals(proc.getStatus())) {
+            throw new IllegalStateException("대기 상태(READY)인 공정만 시작할 수 있습니다.");
+        }
+
+        proc.setStatus("IN_PROGRESS");
+        proc.setStartTime(LocalDateTime.now());
+
+        WorkOrderProcess saved = workOrderProcessRepository.save(proc);
+        return toStepDTO(saved);
+    }
+
+    /**
+     * 공정 단계 종료 처리
+     */
+    @Transactional
+    public WorkOrderProcessStepDTO finishStep(String orderId, Integer stepSeq) {
+
+        WorkOrderProcess proc = workOrderProcessRepository
+                .findByWorkOrderOrderIdAndStepSeq(orderId, stepSeq)
+                .orElseThrow(() -> new IllegalArgumentException("해당 공정 단계가 존재하지 않습니다."));
+
+        // 진행중인 것만 종료 가능
+        if (!"IN_PROGRESS".equals(proc.getStatus())) {
+            throw new IllegalStateException("진행중(IN_PROGRESS) 상태인 공정만 종료할 수 있습니다.");
+        }
+
+        proc.setStatus("DONE");
+        proc.setEndTime(LocalDateTime.now());
+
+        WorkOrderProcess saved = workOrderProcessRepository.save(proc);
+        return toStepDTO(saved);
+    }
+
+    /**
+     * 공정 단계 메모 저장
+     */
+    @Transactional
+    public WorkOrderProcessStepDTO updateStepMemo(String orderId, Integer stepSeq, String memo) {
+
+        WorkOrderProcess proc = workOrderProcessRepository
+                .findByWorkOrderOrderIdAndStepSeq(orderId, stepSeq)
+                .orElseThrow(() -> new IllegalArgumentException("해당 공정 단계가 존재하지 않습니다."));
+
+        proc.setMemo(memo);
+
+        WorkOrderProcess saved = workOrderProcessRepository.save(proc);
+        return toStepDTO(saved);
+    }
+
+    /**
+     * 엔티티 → 단계 DTO 변환 공통 메소드
+     */
+    private WorkOrderProcessStepDTO toStepDTO(WorkOrderProcess proc) {
+        WorkOrderProcessStepDTO dto = new WorkOrderProcessStepDTO();
+        dto.setOrderId(proc.getWorkOrder().getOrderId());
+        dto.setStepSeq(proc.getStepSeq());
+        dto.setProcessId(proc.getProcess().getProcessId());
+        dto.setProcessName(proc.getProcess().getProcessName());
+        dto.setStatus(proc.getStatus());
+        dto.setStartTime(proc.getStartTime());
+        dto.setEndTime(proc.getEndTime());
+        dto.setGoodQty(proc.getGoodQty());
+        dto.setDefectQty(proc.getDefectQty());
+        dto.setMemo(proc.getMemo());
+
+        dto.setCanStart("READY".equals(proc.getStatus()));
+        dto.setCanFinish("IN_PROGRESS".equals(proc.getStatus()));
+
+        return dto;
+    }
+
 
 } // WorkOrderProcessService 끝

@@ -13,6 +13,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class WorkOrderProcessStepDTO {
 	
+	private String orderId;
+	
 	// 단계순서
 	private Integer stepSeq;
 	

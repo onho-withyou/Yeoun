@@ -32,7 +32,7 @@ public class WorkOrderProcess {
 	
 	// 작업공정ID
 	@Id
-	@Column(name = "WOP_ID", length = 20)
+	@Column(name = "WOP_ID")
 	private String wopId;
 	
 	// 작업지시번호
