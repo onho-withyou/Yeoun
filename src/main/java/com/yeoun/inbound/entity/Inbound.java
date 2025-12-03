@@ -43,6 +43,9 @@ public class Inbound {
 	@Column(nullable = true)
 	private String prodId; // 작업지시서 고유번호
 	
+	@Column(nullable = true)
+	private String empId; // 담당자
+	
 	@CreatedDate
 	private LocalDateTime createdDate; // 등록 일시
 	

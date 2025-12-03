@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeoun.inbound.mapper.InboundMapper">
+
+	<!-- 원재료 리스트 조회 -->
+	<resultMap type="com.yeoun.inbound.dto.ReceiptDTO" id="ReceiptMap">
+		<id property="inboundId" column="INBOUND_ID"/>
+		<result property="clientName"  column="CLIENT_NAME"/>
+		<result property="expectArrivalDate"  column="EXPECT_ARRIVAL_DATE"/>
+		<result property="inboundStatus"  column="INBOUND_STATUS"/>
+		<result property="materialId"  column="MATERIAL_ID"/>
+		<result property="prodId"  column="PROD_ID"/>
+		<result property="orderEmpName"  column="ORDEREMPNAME"/>
+		<result property="materialEmpName"  column="MATERIALEMPNAME"/>
+	</resultMap>
+	
+	<select id="findAllMaterialInbound" resultMap="ReceiptMap">
+		SELECT
+			i.INBOUND_ID
+			, i.EXPECT_ARRIVAL_DATE
+			, i.INBOUND_STATUS
+			, i.MATERIAL_ID
+			, i.PROD_ID
+			, c.CLIENT_NAME
+			, e1.EMP_NAME AS orderEmpName
+			, e2.EMP_NAME AS materialEmpName 
+		FROM
+			INBOUND i
+		LEFT JOIN
+			MATERIAL_ORDER m
+		ON
+			i.MATERIAL_ID = m.ORDER_ID
+		LEFT JOIN
+			CLIENT c
+		ON
+			m.CLIENT_ID = c.CLIENT_ID
+		LEFT JOIN
+			EMP e1
+		ON
+			m.EMP_ID = e1.EMP_ID
+		LEFT JOIN
+			EMP e2
+		ON
+			i.EMP_ID = e2.EMP_ID
+		WHERE 
+			i.EXPECT_ARRIVAL_DATE &gt;= #{startDate}
+		AND 
+			i.EXPECT_ARRIVAL_DATE &lt;= #{endDate}
+		ORDER BY
+			i.EXPECT_ARRIVAL_DATE DESC
+	</select>
+
+</mapper>
+
+
+
+
+
