@@ -2,11 +2,18 @@
 // 전역변수
 let inventoryGrid; // 그리드 객체 변수
 let inventoryData = []; // 그리드로 그려지는 데이터 저장
-
+let locationInfo = [];
 // 문서 로딩 후 시작
 document.addEventListener('DOMContentLoaded', async function () {
+	// 창고정보 저장
+	locationInfo = await getLocationInfo();
+	console.log("@@@@@@@@@@@@@@@@@@", locationInfo);
+	const zones = getUniqueValues(locationInfo, 'zone');
+	const racks  = getUniqueValues(locations, 'rack'); 
+	const rows   = getUniqueValues(locations, 'rackRow');
+	const cols   = getUniqueValues(locations, 'rackCol');
+	console.log(zones); 
 	initGrid();
-	
 	//최초로딩
 	const firstSearchData = getSearchData();
 	const firstData = await fetchInventoryData(firstSearchData);
@@ -144,7 +151,28 @@ function initGrid() {
 }
 
 
+// 창고 ZONE, RACK, ROW, COL 가져오기
+async function getLocationInfo() {
+	const response = 
+		await fetch('/api/inventorys/locations', {
+			method: 'GET',
+			headers: {
+				[csrfHeader]: csrfToken,
+				'Content-Type': 'application/json'
+			}
+		});
+		
+		console.log(response);
+		if (!response.ok) {
+			throw new Error('창고정보를 가져올 수 없습니다.')
+		}
+		return await response.json();
+}
 
+// 창고 정보의 유니크값 뽑아내기
+function getUniqueValues(list, key) {
+    return [...new Set(list.map(item => item[key]))]; 
+}
 
 
 

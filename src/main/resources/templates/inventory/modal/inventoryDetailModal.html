@@ -19,13 +19,13 @@
                     </div>
                 </div>
                 <div class="row g-2">
-                   	<div class="col mb-3">
-                        <label for="detailCategory" class="form-label">카테고리</label>
-                        <input type="text" id="detailCategory" class="form-control" readonly>
-                    </div>
                     <div class="col mb-3">
                         <label for="detailProdName" class="form-label">상품명</label>
                         <input type="text" id="detailProdName" class="form-control" readonly>
+                    </div>
+                   	<div class="col mb-3">
+                        <label for="detailCategory" class="form-label">타입</label>
+                        <input type="text" id="detailCategory" class="form-control" readonly>
                     </div>
                 </div>
                 <div class="row g-2">
@@ -87,7 +87,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">닫기</button>
-                <button type="button" class="btn btn-primary">재고 이동</button>
+                <button type="button" class="btn btn-primary" id="detailBtnMove">재고 이동</button>
                 <button type="button" class="btn btn-danger">폐기</button>
             </div>
         </div>

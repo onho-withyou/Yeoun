@@ -12,6 +12,20 @@
             </div>
             <div class="modal-body">
                 <div class="row g-2">
+                	<div class="col mb-3">
+	                	<label for="ivQtyMove" class="form-label">현재수량</label>
+	                	<input type="text" id="ivQtyMove" class="form-control" readonly>
+                	</div>
+                	<div class="col mb-3">
+	                	<label for="exPectObQtyMove" class="form-label">출고예정수량</label>
+	                	<input type="text" id="exPectObQtyMove" class="form-control" readonly>
+                	</div>
+                	<div class="col mb-3">
+	                	<label for="canMoveAmount" class="form-label">이동가능수량</label>
+	                	<input type="text" id="canMoveAmount" class="form-control" readonly>
+                	</div>
+                </div>
+				<div class="row g-2">
                     <div class="col mb-3">
                         <label for="moveZone" class="form-label">Zone</label>
                         <select id="moveZone" class="form-select">
@@ -22,17 +36,15 @@
                     </div>
                     <div class="col mb-3">
                         <label for="moveRack" class="form-label">Rack</label>
-                        <input type="text" id="moveRack" class="form-control" placeholder="01">
+                        <select id="moveRack" class="form-select"></select>
                     </div>
-                </div>
-                <div class="row g-2">
                     <div class="col mb-3">
                         <label for="moveRow" class="form-label">Row</label>
-                        <input type="text" id="moveRow" class="form-control" placeholder="1">
+                        <select id="moveRow" class="form-select"></select>
                     </div>
                     <div class="col mb-3">
                         <label for="moveColumn" class="form-label">Column</label>
-                        <input type="text" id="moveColumn" class="form-control" placeholder="1">
+                        <select id="moveColumn" class="form-select"></select>
                     </div>
                 </div>
                 <div class="mb-3">
@@ -40,6 +52,7 @@
                     <input type="number" id="moveQty" class="form-control" placeholder="0">
                 </div>
             </div>
+            
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary">이동</button>
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">취소</button>
@@ -48,4 +61,4 @@
     </div>
 </div>
 
-<!--     <script th:src="@{/js/inventory/inventory_list.js(v=2)}"></script> -->
+    <script th:src="@{/js/inventory/inventoryMove.js}"></script>

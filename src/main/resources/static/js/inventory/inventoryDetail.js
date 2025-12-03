@@ -90,3 +90,38 @@ const btnAdjustQty = document.getElementById('adjustBtn');
 btnAdjustQty.addEventListener('click', () => {
 	openAdjustQtyModal(detailRowData);
 });
+
+//재고이동 버튼 클릭 이벤트
+const detailBtnMove = document.getElementById('detailBtnMove');
+detailBtnMove.addEventListener('click', () => {
+	openMoveModal(detailRowData);	
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
