@@ -102,7 +102,21 @@ public class Inventory {
 	@Column(nullable = false)
 	private String ivStatus; // 재고상태 : 정상NORMAL/임박DISPOSAL_WAIT/폐기DISPOSAL
 	
-	
+	public Inventory createMovedInventory(WarehouseLocation newLocation, Long moveQty) {
+	    Inventory movedInventory = new Inventory();
+	    movedInventory.setLotNo(this.lotNo);
+	    movedInventory.setWarehouseLocation(newLocation);
+	    movedInventory.setItemId(this.itemId);
+	    movedInventory.setItemType(this.itemType);
+	    movedInventory.setIvAmount(moveQty);
+	    movedInventory.setExpirationDate(this.expirationDate);
+	    movedInventory.setManufactureDate(this.manufactureDate);
+	    movedInventory.setIbDate(this.ibDate);
+	    movedInventory.setExpectObAmount(0L); // 이동 시 출고예정수량 0으로 초기화할 수도 있음
+	    movedInventory.setIvStatus(this.ivStatus);
+	    
+	    return movedInventory;
+	}
 	
 	
 	
