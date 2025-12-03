@@ -5,78 +5,68 @@ import java.time.LocalDateTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.yeoun.emp.entity.Emp;
+import com.yeoun.masterData.entity.Equipment;
 import com.yeoun.masterData.entity.ProdLine;
-import com.yeoun.masterData.entity.ProductMst;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "WORK_ORDER")
+@Table(name = "PROD_EQUIP")
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
-public class WorkOrder {
+public class ProdEquip {
 
-	// 작업 지시번호 ID
-	// WO-YYYYMMDD-0000 (시퀀스)
-	@Id @Column(nullable = false, length = 16)
-	private String orderId;
-	
-	// 제품 ID
+	// 설비 고유 시퀀스
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "EQUIP_SEQ")
+    @SequenceGenerator(
+      name = "EQUIP_SEQ",
+      sequenceName = "EQUIP_SEQ",
+      allocationSize = 1
+    )
+	private Integer equipId;
+    
+    // 설비 코드 (기준정보 타입)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "PRD_ID", nullable = false)
-	private ProductMst product;
+    @JoinColumn(name = "EQUIP_CODE", nullable = false)
+    private Equipment equipment;
     
-    // 계획수량
+    // 부를 수 있는 설비명
     @Column(nullable = false)
-    private Integer planQty;
+    private String equipName;
     
-    // Lot번호
-//    @Column(nullable = false)
-//    private String lotNo;				=================> 컬럼 삭제
-    
-    // 시작예정일시
-    @Column(nullable = false)
-    private LocalDateTime startDate;
-    
-    // 완료예정일시
-    @Column(nullable = false)
-    private LocalDateTime endDate;
-    
-    // 수행 라인
+    // 설비 소속 라인 (기준정보)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "LINE_ID", nullable = false)
     private ProdLine line;
     
-    // 수행 상태
+    // 설비 상태	=> RUN/STOP/BREAKDOWN/MAINTENANCE
     @Column(nullable = false)
     private String status;
     
-    // 작성자 ID
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "CREATED_ID", nullable = false)
-    private Emp createdEmp;
-    
-    // 작성일자
+    // 등록 일시
     @CreatedDate
     @Column(nullable = false)
     private LocalDateTime createdDate;
     
-    // 수정일자
+    // 수정 일시
     @Column
     private LocalDateTime updatedDate;
     
-    // 비고(특이사항 및 메모)
+    // 비고
     @Column
     private String remark;
 	
