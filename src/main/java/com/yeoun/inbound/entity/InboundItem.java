@@ -1,9 +1,7 @@
 package com.yeoun.inbound.entity;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
@@ -12,9 +10,13 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -30,6 +32,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor
 public class InboundItem {
 	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "INBOUND_ITEM_GENERATOR")
 	@Column(name = "INBOUND_ITEM_ID", updatable = false)
@@ -38,8 +41,9 @@ public class InboundItem {
 	@Column(nullable = false)
 	private String lotNo; // 로트넘버
 	
-	@Column(nullable = false)
-	private String inboundId; 
+	@ManyToOne
+	@JoinColumn(name = "INBOUND_ID")
+	private Inbound inbound;
 	
 	@Column(nullable = false)
 	private String itemId; // 원자재/부자재, 완제품의 기준정보 고유값
@@ -64,6 +68,22 @@ public class InboundItem {
 
 	@Column(nullable = true)
 	private String locationId; //창고위치
+
+	@Builder
+	public InboundItem(Long inboundItemId, String lotNo, Inbound inbound, String itemId, Long requestAmount,
+			Long inboundAmount, Long disposeAmount, LocalDateTime manufactureDate, LocalDateTime expirationDate,
+			String itemType, String locationId) {
+		this.lotNo = lotNo;
+		this.inbound = inbound;
+		this.itemId = itemId;
+		this.requestAmount = requestAmount;
+		this.inboundAmount = inboundAmount;
+		this.disposeAmount = disposeAmount;
+		this.manufactureDate = manufactureDate;
+		this.expirationDate = expirationDate;
+		this.itemType = itemType;
+		this.locationId = locationId;
+	}
 	
 	
 }
