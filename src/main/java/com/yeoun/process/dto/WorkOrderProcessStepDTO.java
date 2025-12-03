@@ -1,7 +1,5 @@
 package com.yeoun.process.dto;
 
-import java.time.LocalDateTime;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,10 +24,10 @@ public class WorkOrderProcessStepDTO {
 	private String status;
 	
 	// 시작시간
-	private LocalDateTime startTime;
+	private String startTime;
 	
 	// 종료시간
-	private LocalDateTime endTime;
+	private String endTime;
 	
 	// 양품
 	private Integer goodQty;
