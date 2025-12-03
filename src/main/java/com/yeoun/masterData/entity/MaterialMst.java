@@ -31,7 +31,7 @@ public class MaterialMst {
 	private String matType; //원재료 유형
 	
 	@Column(name="MAT_UNIT", length = 20)
-	private String matUnit; //단위(용량)
+	private String matUnit; //단위
 	
 	@Column(name="EFFECTIVE_DATE")
 	private String effectiveDate; //유효일자
