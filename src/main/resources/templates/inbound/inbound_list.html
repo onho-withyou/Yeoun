@@ -80,10 +80,7 @@
 		  		<li class="nav-item"><a class="nav-link" th:href="@{/inventory/inbound/materialList}" th:classappend="${activeTab}=='mat' ? 'active'">원재료 입고</a></li>
 		    	<li class="nav-item"><a class="nav-link" th:href="@{/inventory/inbound/productList}" th:classappend="${activeTab}=='pro' ? 'active'">완제품 입고</a></li>
 		  	</ul>
-		  	<th:block th:if="${activeTab} =='mat'"
-		  		th:replace="inbound/material_list :: material"></th:block>
-<!-- 		  	<th:block th:unless="${activeTab} =='mat'" -->
-<!-- 		  		th:replace="inbound/product_list :: product"></th:block> -->
+			<div th:replace="${activeTab == 'mat'} ? ~{inbound/material_list :: material} : ~{inbound/product_list :: product}"></div>
 			<br>
 			<div class="modal fade" id="modalCenter" tabindex="-1" style="display: none;" aria-hidden="true">
 				<div class="modal-dialog modal-xl modal-dialog-centered" role="document">

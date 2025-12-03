@@ -232,7 +232,6 @@ function initGrid(data) {
 				});
 			}
 		}
-		
 	});
 }
 

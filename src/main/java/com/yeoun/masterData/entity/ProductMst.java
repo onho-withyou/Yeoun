@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import oracle.sql.NUMBER;
 
 @Entity
 @Table(name = "PRODUCT_MST")
@@ -30,6 +31,9 @@ public class ProductMst {
 		@Column(name="PRD_CAT", length = 50)
 		private String prdCat; //제품유형
 		
+		@Column(name="MIN_QTY")
+		private NUMBER minQty; //최소수량
+		
 		@Column(name="PRD_UNIT", length = 20)
 		private String prdUnit; //단위
 		
@@ -44,7 +48,6 @@ public class ProductMst {
 		
 		@Column(name="PRD_SPEC", length = 225)
 		private String prdSpec; //제품상세설명
-		
 		
 		@Column(name="CREATED_ID")
 		private String createdId; //생성자 id
