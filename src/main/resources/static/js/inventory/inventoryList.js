@@ -91,13 +91,18 @@ function initGrid() {
 	inventoryGrid = new Grid({
 		el: inventoryGridEl,
 		bodyHeight: 'auto',
-		rowHeaders:['rowNum'],	
+		rowHeaders:['rowNum'],
+		pageOptions: {
+		    useClient: true,  // 클라이언트 사이드 페이징
+		    perPage: 20       // 페이지당 20개 행
+		},	
 		columns: [
-		  { header: 'LOT 번호',  name: 'lotNo',    width: 180 },
-		  { header: '상품명',    name: 'prodName', width: 180 },
+		  { header: 'LOT 번호',  name: 'lotNo',    minWidth: 180 },
+		  { header: '상품명',    name: 'prodName', minWidth: 180 },
 		  { header: '재고량',    name: 'ivAmount', width: 80, align: 'right' },
+		  { header: '출고예정',    name: 'expectObAmount', width: 80, align: 'right' },
 		  {
-		    header: '위치', name: 'location', width: 140,
+		    header: '위치', name: 'location', minwidth: 140,
 		    formatter: ({ row }) => {
 		      const z  = row.zone  || '';
 		      const r  = row.rack  || '';
@@ -107,14 +112,14 @@ function initGrid() {
 		      return [z, r, rr, rc].filter(v => v).join('-'); // 예: "A-01-B-01"
 		    }
 		  },
-		  { header: 'Zone',      name: 'zone',     width: 60, hidden: true },
-		  { header: 'Rack',      name: 'rack',     width: 60, hidden: true },
-		  { header: 'Row',       name: 'rackRow',  width: 60, hidden: true },
-		  { header: 'Col',       name: 'rackCol',  width: 60, hidden: true },
-		  { header: '입고일',    name: 'ibDate',   width: 120, 
+		  { header: 'Zone',      name: 'zone',     minWidth: 60, hidden: true },
+		  { header: 'Rack',      name: 'rack',     minWidth: 60, hidden: true },
+		  { header: 'Row',       name: 'rackRow',  minWidth: 60, hidden: true },
+		  { header: 'Col',       name: 'rackCol',  minWidth: 60, hidden: true },
+		  { header: '입고일',    name: 'ibDate',   minWidth: 120, 
 			formatter: ({ value }) => value ? value.substring(0, 16) : ''
 		  },
-		  { header: '유통기한',  name: 'expirationDate', width: 120, 
+		  { header: '유통기한',  name: 'expirationDate', minWidth: 120, 
 			formatter: ({ value }) => value ? value.substring(0, 16) : '없음'
 		  },
 		  { header: '상태',      name: 'ivStatus', width: 80 },

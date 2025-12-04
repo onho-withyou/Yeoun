@@ -10,6 +10,7 @@ import com.yeoun.inventory.dto.InventoryModalRequestDTO;
 import com.yeoun.common.entity.Dispose;
 import com.yeoun.common.repository.DisposeRepository;
 import com.yeoun.inventory.dto.InventoryDTO;
+import com.yeoun.inventory.dto.InventoryHistoryDTO;
 import com.yeoun.inventory.dto.WarehouseLocationDTO;
 import com.yeoun.inventory.entity.Inventory;
 import com.yeoun.inventory.entity.InventoryHistory;
@@ -97,9 +98,9 @@ public class InventoryService {
 		// 재고내역 엔티티 작성
 		InventoryHistory history = InventoryHistory.builder()
 			.lotNo(inventory.getLotNo()) //재고의 lot번호
-			.itemId(inventory.getItemId()) // 원자재 및 상품의 itemId(mat/prod)
-			.prevLocationId(inventory.getWarehouseLocation().getLocationId())// 이전위치
-			.currentLocationId(inventory.getWarehouseLocation().getLocationId()) // 현재위치
+			.itemName(inventory.getItemName()) // 원자재 및 상품의 itemId(mat/prod)
+			.prevWarehouseLocation(inventory.getWarehouseLocation())// 이전위치
+			.currentWarehouseLocation(inventory.getWarehouseLocation()) // 현재위치
 			.empId(empId) //작성자
 			.workType(requestDTO.getAdjustType()) // 작업타입
 			.prevAmount(prevInventoryQty) // 이전수량
@@ -139,7 +140,7 @@ public class InventoryService {
 		// 이동위치에 이동하는 재고 lotNo 재고조회
 		Optional<Inventory> existingInventoryOpt = inventoryRepository.findByWarehouseLocationAndLotNo(location, inventory.getLotNo());
 		
-		if(inventory.getIvAmount() == moveQty) {
+		if(inventory.getIvAmount().equals(moveQty)) {
 			// 전체 재고 이동시 기존 재고 정보 삭제
 			inventoryRepository.delete(inventory);
 		} else { 
@@ -202,9 +203,9 @@ public class InventoryService {
 		// 재고내역 엔티티 작성
 		InventoryHistory history = InventoryHistory.builder()
 			.lotNo(inventory.getLotNo()) //재고의 lot번호
-			.itemId(inventory.getItemId()) // 원자재 및 상품의 itemId(mat/prod)
-			.prevLocationId(inventory.getWarehouseLocation().getLocationId())// 이전위치
-			.currentLocationId(inventory.getWarehouseLocation().getLocationId()) // 현재위치
+			.itemName(inventory.getItemName()) // 원자재 및 상품의 itemId(mat/prod)
+			.prevWarehouseLocation(inventory.getWarehouseLocation())// 이전위치
+			.currentWarehouseLocation(inventory.getWarehouseLocation()) // 현재위치
 			.empId(empId) //작성자
 			.workType("DISPOSE") // 작업타입
 			.prevAmount(prevIvQty) // 이전수량
@@ -227,6 +228,15 @@ public class InventoryService {
 				.build();
 		
 		disposeRepository.save(dispose);
+	}
+	
+	
+	// ------------------------------------------------------------------------
+	// 재고내역 불러오기
+	public List<InventoryHistoryDTO> getInventoryHistorys() {
+		List<InventoryHistory> historyList = inventoryHistoryRepository.findAll();
+		
+		return historyList.stream().map(InventoryHistoryDTO::fromEntity).toList(); 
 	}
 	
 	
