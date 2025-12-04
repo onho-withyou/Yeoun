@@ -28,10 +28,10 @@ public class OrderItem {
     @Comment("수주 마스터 정보의 수주 식별자 (FK)")
     private String orderId;
 
-    // 3) 제품 ID (FK → PRODUCT_MST.PRODUCT_ID)
-    @Column(name = "PRODUCT_ID", length = 30, nullable = false)
+    // 3) 제품 ID (FK → PRODUCT_MST.PRD_ID)
+    @Column(name = "PRD_ID", length = 30, nullable = false)
     @Comment("주문한 상품의 ID (PRODUCT 테이블 참조)")
-    private String productId;
+    private String prdId;
 
     // 4) 주문수량
     @Column(name = "ORDER_QTY", precision = 18, scale = 2, nullable = false)

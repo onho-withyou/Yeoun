@@ -5,7 +5,7 @@ const statusBadge = (value) => {
     const map = {
         "REQUEST":  { text: "수주요청", color: "primary" },
         "RECEIVED": { text: "접수완료", color: "success" },
-        "CONFIRMED": { text: "확정", color: "purple" },
+        "CONFIRMED": { text: "확정", color: "warning" },
         "SHIPPING": { text: "출하중", color: "warning" },
         "CANCEL":   { text: "취소", color: "secondary" }
     };

@@ -7,6 +7,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.yeoun.production.enums.BomStatus;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -20,45 +22,50 @@ import java.time.LocalDateTime;
 public class ProductionPlanItem {
 
     @Id
-    @Column(name = "PLAN_ITEM_ID", length = 20)
-    @Comment("생산계획 상세ID (PLAN_ITEM + 시퀀스)")
+    @Column(name = "PLAN_ITEM_ID", length = 20, nullable=false)
     private String planItemId;
 
     @Column(name = "PLAN_ID", length = 20, nullable = false)
-    @Comment("생산계획 마스터ID")
     private String planId;
 
+    @Column(name = "ORDER_ID", length = 20, nullable = false)
+    @Comment("어떤 수주에서 온 항목인지")
+    private String orderId;
+
+    @Column(name = "ORDER_ITEM_ID", length = 30, nullable = false)
+    @Comment("어떤 수주 상세에서 온 항목인지")
+    private String orderItemId;
+
     @Column(name = "PRD_ID", length = 20, nullable = false)
-    @Comment("제품 ID")
     private String prdId;
 
     @Column(name = "ORDER_QTY", precision = 10, scale = 2, nullable = false)
-    @Comment("수주된 수량")
+    @Comment("해당 수주 항목의 주문 수량")
     private BigDecimal orderQty;
 
     @Column(name = "PLAN_QTY", precision = 10, scale = 2, nullable = false)
-    @Comment("계획 생산수량")
+    @Comment("실제 생산 계획 수량 (기본은 ORDER_QTY와 동일)")
     private BigDecimal planQty;
 
-    @Column(name = "BOM_READY_YN", length = 1, nullable = false)
-    @Comment("BOM 작성 여부")
-    private String bomReadyYn;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "BOM_STATUS", nullable = false, length = 10)
+    private BomStatus bomStatus = BomStatus.WAIT;
+
+    @Column(name = "PARTIAL_QTY")
+    @Comment("부분 생산 가능 수량(BOM_STATUS가 PARTIAL일 때만 값)")
+    private Double partialQty;
 
     @Column(name = "ITEM_MEMO", length = 300)
-    @Comment("상세 메모")
     private String itemMemo;
 
     @CreatedDate
     @Column(name = "CREATED_AT")
-    @Comment("생성 시각")
     private LocalDateTime createdAt;
 
     @Column(name = "CREATED_BY", length = 30)
-    @Comment("생성자 ID")
     private String createdBy;
 
     @LastModifiedDate
     @Column(name = "UPDATED_AT")
-    @Comment("수정 시각")
     private LocalDateTime updatedAt;
 }

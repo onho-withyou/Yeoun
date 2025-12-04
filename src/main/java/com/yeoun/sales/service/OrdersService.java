@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.yeoun.sales.dto.OrderItemDTO;
 import com.yeoun.sales.dto.OrderListDTO;
 import com.yeoun.sales.entity.Client;
 import com.yeoun.sales.entity.OrderItem;
@@ -151,7 +152,7 @@ public class OrdersService {
 
             OrderItem item = OrderItem.builder()
                     .orderId(orderId)
-                    .productId(prdId)
+                    .prdId(prdId)
                     .orderQty(new BigDecimal(qtyStr))
                     .unitPrice(new BigDecimal(priceStr))
                     .totalPrice(new BigDecimal(amountStr))
@@ -194,5 +195,19 @@ public class OrdersService {
     private String nvl(String v) {
         return (v == null ? "" : v);
     }
+    
+    
+    /* ============================================================
+    6) 생산계획 수주항목조회
+  ============================================================ */
+    
+    public List<Map<String, Object>> getOrderItemsForPlan(String group) {
+        return ordersRepository.findOrderItemsForPlan(group);
+    }
+
+    public List<OrderItemDTO> getConfirmedOrderItems() {
+        return orderItemRepository.findConfirmedOrderItems();
+    }
+
 
 }
