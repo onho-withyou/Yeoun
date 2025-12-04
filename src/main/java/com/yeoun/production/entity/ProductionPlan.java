@@ -24,9 +24,13 @@ public class ProductionPlan {
     @Comment("생산계획 고유식별자 (PLAN + YYYYMMDD + 시퀀스)")
     private String planId;
 
-    @Column(name = "ORDER_ID", length = 20, nullable = false)
-    @Comment("수주(ORDER) ID")
-    private String orderId;
+    @Column(name = "PRD_ID", length = 20, nullable = false)
+    @Comment("제품 ID (PLAN은 제품 기준)")
+    private String prdId;
+
+    @Column(name = "PLAN_QTY", nullable = false)
+    @Comment("총 생산 계획수량")
+    private Integer planQty;
 
     @Column(name = "PLAN_DATE", nullable = false)
     @Comment("계획일자")
