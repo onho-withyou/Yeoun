@@ -1,9 +1,15 @@
 // qc_regist.js
 
 let qcRegistGrid = null;
+let qcRegModal = null;
 
 document.addEventListener("DOMContentLoaded", () => {
 	
+	// 모달 초기화
+    const modalEl = document.getElementById("qcRegModal");
+    qcRegModal = new bootstrap.Modal(modalEl);
+	
+	// 그리드 초기화
 	const gridEl = document.getElementById("qcRegistGrid");
 	
 	qcRegistGrid = new tui.Grid({
@@ -54,26 +60,38 @@ document.addEventListener("DOMContentLoaded", () => {
 		]
 	});
 	loadQcRegistGrid();
+	
+	qcRegistGrid.on('click', (ev) => {
+        if (ev.columnName !== "btn") return;
+
+		const row = qcRegistGrid.getRow(ev.rowKey);
+	    if (!row || !row.orderId) return;
+		
+        openQcRegModal(row);
+    });
 });
 
 // 목록 조회
 function loadQcRegistGrid() {
+    fetch("/qc/regist/data")
+        .then(res => res.json())
+        .then(data => {
+            qcRegistGrid.resetData(data);
+        });
+}
 
-  fetch("/qc/regist/data")
-    .then((res) => {
-      if (!res.ok) {
-        throw new Error("HTTP " + res.status);
-      }
-      return res.json();
-    })
-    .then((data) => {
-      console.log("QC등록 목록:", data);
-      if (qcRegistGrid) {
-        qcRegistGrid.resetData(data);
-      }
-    })
-    .catch((err) => {
-      console.error("QC등록 데이터 로딩 중 오류", err);
-      alert("QC등록 데이터를 불러오는 중 오류가 발생했습니다.");
-    });
+// 모달을 열면서 데이터 넣는 함수
+function openQcRegModal(rowData) {
+
+    document.getElementById("qcModalTitleOrder").innerText = rowData.orderId;
+    document.getElementById("qcModalTitleProduct").innerText = rowData.prdId + " / " + rowData.prdName;
+
+    document.getElementById("qcOrderIdText").innerText = rowData.orderId;
+    document.getElementById("qcProductText").innerText = rowData.prdId + " / " + rowData.prdName;
+    document.getElementById("qcPlanQtyText").innerText = rowData.planQty + " EA";
+
+    // hidden
+    document.getElementById("orderId").value = rowData.orderId;
+
+    qcRegModal.show();
 }
