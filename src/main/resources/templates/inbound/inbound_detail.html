@@ -1,0 +1,38 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{/layouts/layout.html}">
+	
+	<body>
+		<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
+			<button>← 목록으로</button>
+			<div class="d-flex justify-content-between align-items-center mb-4">
+				<h2>입고 상세 정보</h2>
+				<button>입고 완료</button>
+			</div>
+			<div class="row row-cols-3 gap-3 p-4 bg-light rounded-3 mb-5">
+				<div class="text-center">
+				    <span class="text-secondary small me-2">거래처명</span>
+				    <span class="fw-semibold">거래처명</span>
+				</div>
+			    <div class="text-center">
+			        <div class="text-secondary small mb-1">담당자</div>
+			        <div>익명의 담당자</div>
+			    </div>
+			    <div class="text-center">
+			        <div class="text-secondary small mb-1">납기일자</div>
+			        <div>2025-12-04</div>
+			    </div>
+			    <div class="text-center">
+			        <div class="text-secondary small mb-1">발주번호</div>
+			        <div>INB202512012-0001</div>
+			    </div>		
+			</div>
+		</div>
+		<th:block layout:fragment="myScript">
+			<script type="text/javascript" src="https://uicdn.toast.com/tui.pagination/v3.4.0/tui-pagination.js"></script>
+			<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+			<script src="/js/purchase/purchase_regist.js"></script>
+			<script src="/js/inbound/materialGrid.js"></script>
+		</th:block>
+	</body>
+</th:block>

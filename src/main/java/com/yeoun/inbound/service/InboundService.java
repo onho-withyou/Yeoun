@@ -104,7 +104,13 @@ public class InboundService {
 	}
 
 	// 원재료 목록 데이터(날짜 지정과 검색 기능 포함)
-	public List<ReceiptDTO> getMaterialInboundList(LocalDateTime startDate, LocalDateTime endDate, String keyword) {
-		return inboundMapper.findAllMaterialInbound(startDate, endDate);
+	public List<ReceiptDTO> getMaterialInboundList(LocalDateTime startDate, LocalDateTime endDate, String searchType, String keyword) {
+		return inboundMapper.findAllMaterialInbound(startDate, endDate, searchType, keyword);
+	}
+
+	// 입고 상세 조회
+	public ReceiptDTO getMaterialInbound(String inboundId) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -1,6 +1,7 @@
 package com.yeoun.inbound.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -18,4 +19,5 @@ public class ReceiptDTO {
 	private String prodId; // 작업지서서Id
 	private String orderEmpName; // 발주 담당자(원재료)
 	private String materialEmpName; // 입고 담당자(완제품)
+	private List<ReceiptItemDTO> items; // 입고 품목들
 }
