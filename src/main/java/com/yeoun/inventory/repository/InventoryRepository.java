@@ -30,4 +30,6 @@ public interface InventoryRepository
 		
 
 
+	List<Inventory> findByWarehouseLocation(WarehouseLocation location);
+
 }

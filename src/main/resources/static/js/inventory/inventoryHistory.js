@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 // 재고내역 데이터 정보 가져오기
 async function fetchInventoryHistoryData() {
 	const response = 
-		await fetch('/api/inventorys/historys', {
+		await fetch('/api/inventories/historys', {
 			method: 'GET',
 			headers: {
 				[csrfHeader]: csrfToken,
