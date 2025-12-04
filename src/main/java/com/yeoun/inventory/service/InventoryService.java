@@ -239,6 +239,14 @@ public class InventoryService {
 		return historyList.stream().map(InventoryHistoryDTO::fromEntity).toList(); 
 	}
 	
+	// 특정위치의 재고목록 불러오기
+	public List<InventoryDTO> getlocationInventories(String locationId) {
+		WarehouseLocation location = warehouseLocationRepository.findById(locationId).orElseThrow(() -> new EntityNotFoundException("존재하지않는 로케이션입니다.") ); 
+		List<Inventory> inventoryList = inventoryRepository.findByWarehouseLocation(location);
+		
+		return inventoryList.stream().map(InventoryDTO::fromEntity).toList();
+	}
+	
 	
 
 }
