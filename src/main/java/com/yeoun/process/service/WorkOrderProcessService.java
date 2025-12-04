@@ -23,6 +23,7 @@ import com.yeoun.process.entity.WorkOrderProcess;
 import com.yeoun.process.repository.WorkOrderProcessRepository;
 import com.yeoun.qc.entity.QcResult;
 import com.yeoun.qc.repository.QcResultRepository;
+import com.yeoun.qc.service.QcResultService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,6 +39,7 @@ public class WorkOrderProcessService {
     private final RouteHeaderRepository routeHeaderRepository;
     private final RouteStepRepository routeStepRepository;
     private final QcResultRepository qcResultRepository;
+    private final QcResultService qcResultService;
 
     // =========================================================================
     // 1. 공정현황 메인 목록
@@ -364,9 +366,14 @@ public class WorkOrderProcessService {
         String processId = proc.getProcess().getProcessId();
 
         if ("PRC-CAP".equals(processId)) {
+        	// 1) 공정 상태: QC 대기
             proc.setStatus("QC_PENDING");
-            // TODO: QC_RESULT 생성/연결 로직 추가
+            
+            // 2) QC 결과 헤더 자동 생성
+            qcResultService.createPendingQcResultForOrder(orderId);
+            
         } else {
+        	// 일반 공정은 바로 완료
             proc.setStatus("DONE");
         }
 
