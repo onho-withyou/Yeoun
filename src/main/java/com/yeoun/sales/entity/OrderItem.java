@@ -67,7 +67,8 @@ public class OrderItem {
     @Column(name = "UPDATED_AT")
     @Comment("데이터 수정 일시")
     private LocalDateTime updatedAt;
-
+    
+ 
     // =============================
     // 기본값 자동 처리
     // =============================
