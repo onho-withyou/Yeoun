@@ -4,35 +4,89 @@
 	
 	<body>
 		<div class="custom-body container-xxl flex-grow-1 container-p-y" layout:fragment="content">
-			<button>← 목록으로</button>
+			<button class="btn btn-outline-primary mb-3" onclick="history.back()">← 목록으로</button>
 			<div class="d-flex justify-content-between align-items-center mb-4">
 				<h2>입고 상세 정보</h2>
-				<button>입고 완료</button>
+				<button class="btn btn-primary" id="completeInboundBtn">입고 완료</button>
 			</div>
-			<div class="row row-cols-3 gap-3 p-4 bg-light rounded-3 mb-5">
-				<div class="text-center">
-				    <span class="text-secondary small me-2">거래처명</span>
-				    <span class="fw-semibold">거래처명</span>
+			<div class="card p-4 mb-5">
+				<div class="card-body">
+					 <div class="row row-cols-3 g-4">
+						<div class="col">
+						    <div class="text-secondary mb-1">거래처명</div>
+						    <div class="fw-semibold" th:text="${receiptDTO.clientName}"></div>
+						</div>
+						<div class="col">
+						    <div class="text-secondary mb-1">담당자</div>
+						    <div class="fw-semibold" th:text="${receiptDTO.clientName}"></div>
+						</div>
+						<div class="col">
+						    <div class="text-secondary mb-1">납기일자</div>
+						    <div class="fw-semibold" th:text="${receiptDTO.expectArrivalDate}"></div>
+						</div>
+						<div class="col">
+						    <div class="text-secondary mb-1">발주번호</div>
+						    <div class="fw-semibold" th:text="${receiptDTO.materialId}"></div>
+						</div>
+						<div class="col">
+							<div class="text-secondary mb-1">상태</div>
+							<div>대기</div>
+						</div>
+					 </div>
 				</div>
-			    <div class="text-center">
-			        <div class="text-secondary small mb-1">담당자</div>
-			        <div>익명의 담당자</div>
-			    </div>
-			    <div class="text-center">
-			        <div class="text-secondary small mb-1">납기일자</div>
-			        <div>2025-12-04</div>
-			    </div>
-			    <div class="text-center">
-			        <div class="text-secondary small mb-1">발주번호</div>
-			        <div>INB202512012-0001</div>
-			    </div>		
+			</div>
+			<div>
+			<div class="card mb-5">
+				<div class="card-header">
+					<h5 class="mb-0">입고 품목 목록</h5>
+				</div>
+				<div class="card-body p-0">
+					<div class="table-responsive">
+						<input type="hidden" id="inboundStatus" th:value="${receiptDTO.inboundStatus}">
+						<input type="hidden" id="inboundId" th:value="${receiptDTO.inboundId}">
+						<table class="table table-bordered table-hover mb-0">
+							<thead class="table-light">
+								<tr class="text-center">
+									<th>원재료명</th>
+									<th>발주 수량</th>
+									<th style="width: 9em;">입고 수량</th>
+									<th style="width: 9em;">불량 수량</th>
+									<th>ZONE</th>
+									<th>RACK</th>
+									<th>ROW</th>
+									<th>COLUMN</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="item, iterStat  : ${receiptDTO.items}">
+									<td th:text="${item.itemName}" th:attr="data-id=${item.inboundItemId}"></td>
+									<td>
+										<span class="requestAmount" th:text="${item.requestAmount}" th:attr="data-index=${iterStat.index}"></span>
+									</td>
+									<td>
+										<input type="number" min="0" step="1" class="form-control inboundAmount" th:attr="data-index=${iterStat.index}"/>
+									</td>
+									<td>
+										<span class="disposeAmount" th:attr="data-index=${iterStat.index}" th:text="${item.disposeAmount}"></span>
+									</td>
+									<td><select class="moveZone form-select" th:attr="data-index=${iterStat.index}"></select></td>
+									<td><select class="moveRack form-select" th:attr="data-index=${iterStat.index}"></select></td>
+									<td><select class="moveRow form-select" th:attr="data-index=${iterStat.index}"></select></td>
+									<td><select class="moveColumn form-select" th:attr="data-index=${iterStat.index}"></select></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				
+				</div>
+			</div>
 			</div>
 		</div>
 		<th:block layout:fragment="myScript">
 			<script type="text/javascript" src="https://uicdn.toast.com/tui.pagination/v3.4.0/tui-pagination.js"></script>
 			<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-			<script src="/js/purchase/purchase_regist.js"></script>
 			<script src="/js/inbound/materialGrid.js"></script>
+			<script src="/js/inbound/materialItem.js"></script>
 		</th:block>
 	</body>
 </th:block>

@@ -30,7 +30,6 @@ import lombok.ToString;
 		)
 @Getter
 @Setter
-@ToString
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
 public class InboundItem {
@@ -85,5 +84,11 @@ public class InboundItem {
 		this.locationId = locationId;
 	}
 	
-	
+	// 입고대기에서 완료로 변경시 변경될 내용들
+	public void updateInfo(String lotNo, Long inboundAmount, Long disposeAmount, String locationId) {
+		this.lotNo = lotNo;
+		this.inboundAmount = inboundAmount;
+		this.disposeAmount = disposeAmount;
+		this.locationId = locationId;
+	}
 }

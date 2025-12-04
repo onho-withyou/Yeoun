@@ -4,20 +4,28 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import com.yeoun.inbound.dto.InboundDTO;
 import com.yeoun.inbound.dto.InboundItemDTO;
 import com.yeoun.inbound.dto.ReceiptDTO;
+import com.yeoun.inbound.dto.ReceiptItemDTO;
 import com.yeoun.inbound.entity.Inbound;
 import com.yeoun.inbound.entity.InboundItem;
 import com.yeoun.inbound.mapper.InboundMapper;
+import com.yeoun.inbound.repository.InboundItemRepository;
 import com.yeoun.inbound.repository.InboundRepository;
 import com.yeoun.inventory.entity.MaterialOrder;
 import com.yeoun.inventory.entity.MaterialOrderItem;
+import com.yeoun.inventory.repository.MaterialOrderRepository;
 import com.yeoun.inventory.util.InventoryIdUtil;
+import com.yeoun.lot.dto.LotHistoryDTO;
+import com.yeoun.lot.dto.LotMasterDTO;
+import com.yeoun.lot.service.LotTraceService;
 import com.yeoun.masterData.entity.MaterialMst;
 import com.yeoun.masterData.repository.MaterialMstRepository;
 import com.yeoun.sales.entity.ClientItem;
@@ -32,8 +40,11 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class InboundService {
 	private final InboundRepository inboundRepository;
+	private final InboundItemRepository inboundItemRepository;
 	private final ClientItemRepository clientItemRepository;
 	private final MaterialMstRepository materialMstRepository;
+	private final MaterialOrderRepository materialOrderRepository;
+	private final LotTraceService lotTraceService;
 	private final InboundMapper inboundMapper;
 	
 	// 입고대기 등록
@@ -61,7 +72,7 @@ public class InboundService {
 			ClientItem clientItem = clientItemRepository.findByItemId(item.getItemId())
 					.orElseThrow(() -> new NoSuchElementException("해당 품목 정보를 찾을 수 없습니다."));
 			// 원자재 조회
-			MaterialMst materialMst = materialMstRepository.findByMatId(item.getMaterialOrder())
+			MaterialMst materialMst = materialMstRepository.findByMatId(clientItem.getMaterialId())
 					.orElseThrow(() -> new NoSuchElementException("해당 원재료 정보를 찾을 수 없습니다."));
 			
 			// 입고대기 품목 생성
@@ -87,6 +98,7 @@ public class InboundService {
 				.expectArrivalDate(LocalDate.parse(materialOrder.getDueDate()).atStartOfDay())
 				.inboundStatus("PENDING_ARRIVAL")
 				.materialId(materialOrder.getOrderId())
+				.prodId(null)
 				.items(items)
 				.build();
 		
@@ -110,7 +122,75 @@ public class InboundService {
 
 	// 입고 상세 조회
 	public ReceiptDTO getMaterialInbound(String inboundId) {
-		// TODO Auto-generated method stub
-		return null;
+		return inboundMapper.findInbound(inboundId);
+	}
+
+	// 입고완료 처리
+	@Transactional
+	public void updateInbound(ReceiptDTO receiptDTO, String empId) {
+		// 입고 조회
+		Inbound inbound = inboundRepository.findByinboundId(receiptDTO.getInboundId())
+				.orElseThrow(() -> new NoSuchElementException("입고 내역을 찾을 수 없습니다."));
+		
+		// 발주 조회
+		MaterialOrder materialOrder = materialOrderRepository.findByOrderId(inbound.getMaterialId())
+				.orElseThrow(() -> new NoSuchElementException("발주 내역을 찾을 수 없습니다."));
+		
+		// 입고담당자 등록
+		inbound.registEmpId(empId);
+		
+		// 입고 상태를 완료로 변경
+		inbound.changeStatus("COMPLETED");
+		// 발주 상태를 완료로 변경
+		materialOrder.changeStatus("COMPLETED");
+		
+		Map<Long, InboundItem> inboundItemMap = inboundItemRepository
+				.findAllByInbound_InboundId(receiptDTO.getInboundId())
+				.stream()
+				.collect(Collectors.toMap(InboundItem::getInboundItemId, item -> item));
+		
+		for (ReceiptItemDTO itemDTO : receiptDTO.getItems()) {
+			
+			InboundItem inboundItem = inboundItemMap.get(itemDTO.getInboundItemId());
+			
+			if (inboundItem == null) {
+				throw new NoSuchElementException("입고 품목을 찾을 수 없습니다.");
+			}
+			
+			Integer qty = itemDTO.getInboundAmount().intValue();
+			
+			// LotMasterDTO 생성
+			LotMasterDTO lotMasterDTO = LotMasterDTO.builder()
+					.lotType(itemDTO.getItemType())
+					.prdId(itemDTO.getItemId())
+					.quantity(qty)
+					.currentStatus("NEW")
+					.currentLocType("WH")
+					.currentLocId("WH" + itemDTO.getLocationId())
+					.statusChangeDate(LocalDateTime.now())
+					.build();
+			
+			// LOT 생성 및 LOT번호 반환
+			String lotNo = lotTraceService.registLotMaster(lotMasterDTO, itemDTO.getItemId(), "00");
+			
+			// InboundItem 업데이트
+			inboundItem.updateInfo(lotNo, itemDTO.getInboundAmount(), itemDTO.getDisposeAmount(), itemDTO.getLocationId());
+			
+			// lotHistory 생성
+			LotHistoryDTO lotHistoryDTO = LotHistoryDTO.builder()
+					.lotNo(lotNo)
+					.orderId("")
+					.processId("")
+					.eventType("CREATE")
+					.status("NEW")
+					.locationType("WH")
+					.locationId("WH" + itemDTO.getLocationId())
+					.quantity(qty)
+					.workedId(empId)
+					.build();
+			
+			lotTraceService.registLotHistory(lotHistoryDTO);
+		}
+		
 	}
 }

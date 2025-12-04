@@ -15,4 +15,7 @@ public interface InboundMapper {
 	List<ReceiptDTO> findAllMaterialInbound(@Param("startDate") LocalDateTime startDate, 
 			@Param("endDate") LocalDateTime endDate, @Param("searchType") String searchType, 
 			@Param("keyword") String keyword);
+
+	// 입고 상세 조회
+	ReceiptDTO findInbound(String inboundId);
 }

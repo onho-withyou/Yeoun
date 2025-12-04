@@ -14,8 +14,9 @@
 		<result property="materialEmpName"  column="MATERIALEMPNAME"/>
 		
 		<collection property="items" ofType="com.yeoun.inbound.dto.ReceiptItemDTO">
-			<id property="InboundItemId" column="INBOUND_ITEM_ID"/>
+			<id property="inboundItemId" column="INBOUND_ITEM_ID"/>
 			<result property="itemName" column="ITEMNAME"/>
+			<result property="itemId" column="ITEMId"/>
 			<result property="itemType" column="ITEM_TYPE"/>
 			<result property="lotNo" column="LOT_NO"/>
 			<result property="inboundAmount" column="INBOUND_AMOUNT"/>
@@ -28,7 +29,6 @@
 			<result property="supplyAmount" column="SUPPLY_AMOUNT"/>
 			<result property="totalPrice" column="TOTAL_PRICE"/>
 		</collection>
-		
 	</resultMap>
 	
 	<select id="findAllMaterialInbound" resultMap="ReceiptMap">
@@ -103,13 +103,92 @@
 			AND c.CLIENT_NAME LIKE '%' || #{keyword} || '%'
 		</if>
 		<if test="searchType == 'mat'">
-    		AND mat.MAT_NAME LIKE '%' || #{keyword} || '%'
+    		AND (
+    		 mat.MAT_NAME LIKE '%' || #{keyword} || '%'
+    		 OR prd.PRD_NAME LIKE '%' || #{keyword} || '%'
+    		)
 		</if>
 		<if test="searchType == 'lot'">
-    		AND it.LOT_NO '%' || #{keyword} || '%'
+    		AND it.LOT_NO LIKE '%' || #{keyword} || '%'
 		</if>
 		ORDER BY
 			i.EXPECT_ARRIVAL_DATE DESC
+	</select>
+	
+	<select id="findInbound" resultMap="ReceiptMap">
+		SELECT
+			i.INBOUND_ID
+			, i.EXPECT_ARRIVAL_DATE
+			, i.INBOUND_STATUS
+			, i.MATERIAL_ID
+			, i.PROD_ID
+			, c.CLIENT_NAME
+			, e1.EMP_NAME AS orderEmpName
+			, e2.EMP_NAME AS materialEmpName
+			, it.INBOUND_ITEM_ID
+			, it.LOT_NO
+			, it.ITEM_TYPE
+			, it.INBOUND_AMOUNT
+			, it.REQUEST_AMOUNT
+			, it.DISPOSE_AMOUNT
+			, it.MANUFACTURE_DATE
+			, it.EXPIRATION_DATE
+			, it.LOCATION_ID
+			, mi.UNIT_PRICE
+			, mi.SUPPLY_AMOUNT
+			, mi.TOTAL_PRICE
+			, CASE
+				WHEN
+					mat.MAT_NAME IS NOT NULL THEN mat.MAT_NAME
+				ELSE 
+					prd.PRD_NAME
+			  END AS itemName
+			, CASE
+				WHEN
+					mat.MAT_ID IS NOT NULL THEN mat.MAT_ID
+				ELSE
+					prd.PRD_ID
+			  END AS itemId
+		FROM
+			INBOUND i
+		LEFT JOIN
+			MATERIAL_ORDER m
+		ON
+			i.MATERIAL_ID = m.ORDER_ID
+		LEFT JOIN
+			CLIENT c
+		ON
+			m.CLIENT_ID = c.CLIENT_ID
+		LEFT JOIN
+			EMP e1
+		ON
+			m.EMP_ID = e1.EMP_ID
+		LEFT JOIN
+			EMP e2
+		ON
+			i.EMP_ID = e2.EMP_ID
+		LEFT JOIN
+			INBOUND_ITEM it
+		ON
+			i.INBOUND_ID = it.INBOUND_ID
+		LEFT JOIN
+			MATERIAL_ORDER_ITEM mi
+		ON
+			mi.ORDER_ID = m.ORDER_ID
+		LEFT JOIN
+			MATERIAL_MST mat
+		ON
+			it.ITEM_ID = mat.MAT_ID
+			AND it.ITEM_TYPE IN ('RAW', 'SUB')
+		LEFT JOIN
+			PRODUCT_MST prd
+		ON
+			it.ITEM_ID = prd.PRD_ID
+			AND it.ITEM_TYPE = 'FG'
+		WHERE 
+			i.INBOUND_ID = #{inboundId}
+		ORDER BY
+			it.INBOUND_ITEM_ID
 	</select>
 
 </mapper>

@@ -70,5 +70,12 @@ public class Inbound {
 		this.createdDate = createdDate;
 	}
 	
+	// 상태 변경
+	public void changeStatus(String status) {
+		this.inboundStatus = status;
+	}
 	
+	public void registEmpId(String empId) {
+		this.empId = empId;
+	}
 }
