@@ -9,7 +9,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 	// 창고정보 저장
 	locationInfo = await getLocationInfo();
 //	console.log(locationInfo);
+
+	// 로케이션에서 존정보만 추출하여 오름차순정렬
 	const zones = sortNumericStrings(getUniqueValues(locationInfo, 'zone'));
+	// 존 셀렉트박스 채우기
 	fillSelect(zone, zones);
 	
 	// zones가 있으면 0번째로 기본 세팅 + 하위 셀렉트 자동 세팅
@@ -17,16 +20,17 @@ document.addEventListener('DOMContentLoaded', async function () {
 	    zone.value = zones[0];
 	    applyZoneSelection(zones[0]);
 	}
+	
 	// 그리드 초기화
 	initStockTakeGrid();
 	
-	// 버튼 바인딩
+	// 입력완료 버튼 이벤트
 	const btnComplete = document.getElementById('btnCompleteInput');
-	const btnApplySel = document.getElementById('btnApplySelected');
-
 	if (btnComplete) {
 	    btnComplete.addEventListener('click', onCompleteInput);
 	}
+	// 일괄반영 버튼 이벤트
+	const btnApplySel = document.getElementById('btnApplySelected');
 	if (btnApplySel) {
 	    btnApplySel.addEventListener('click', () => {
 			const rowKeys = stockTakeGrid.getCheckedRowKeys();
@@ -84,21 +88,27 @@ function applyZoneSelection(selectedZone) {
     const rack   = document.getElementById('rack');
     const row    = document.getElementById('row');
     const column = document.getElementById('column');
-
+	
+	// 선택된 zone이 없으면 빈배열추가
     if (!selectedZone) {
         fillSelect(rack, []);
         fillSelect(row, []);
         fillSelect(column, []);
         return;
     }
-
+	
+	// 로케이션 정보에서 선택된 존으로 데이터 필터
     const byZone = locationInfo.filter(loc => loc.zone === selectedZone);
+	// 선택된 존으로 필터된 데이터에서 중복제거한 랙 값 추출후 오름차순 정렬
     const racks  = sortNumericStrings(getUniqueValues(byZone, 'rack'));
-
+	
+	// 랙 셀렉트박스 채우기
     fillSelect(rack, racks);
+	
     fillSelect(row, []);
     fillSelect(column, []);
-
+	
+	// 랙이 존재하면 첫번째 선택후 로우,컬럼 채우기함수 실행
     if (racks.length > 0) {
         const firstRack = racks[0];
         document.getElementById('rack').value = firstRack;
@@ -110,21 +120,24 @@ function applyZoneSelection(selectedZone) {
 function applyRackSelection(selectedZone, selectedRack) {
     const row    = document.getElementById('row');
     const column = document.getElementById('column');
-
+	
+	// 선택된 zone이나 rack이 없으면 row, column 비우기
     if (!selectedZone || !selectedRack) {
         fillSelect(row, []);
         fillSelect(column, []);
         return;
     }
-
+	
+	// locationh정보에서 선택한 존, 랙의 정보 필터
     const byZoneRack = locationInfo.filter(
         loc => loc.zone === selectedZone && loc.rack === selectedRack
     );
 	
-	// 숫자 문자열 오름차순 정렬 (01,02,03)
+	// 선택된 존,랙으로 필터된 데이터에서 유니크한 rows, cols 추출후 오름차순정렬
 	const rows = sortNumericStrings(getUniqueValues(byZoneRack, 'rackRow'));
 	const cols = sortNumericStrings(getUniqueValues(byZoneRack, 'rackCol'));
 	
+	// 로우 컬럼 셀렉트박스 채우기
     fillSelect(row, rows);
     fillSelect(column, cols);
 }
@@ -182,24 +195,32 @@ function getLocationIdByPosition() {
 const btnSelect = document.getElementById('btnSelect');
 
 btnSelect.addEventListener('click', async () => {
+	// locationId
 	const locationId = getLocationIdByPosition();
+	// 존,랙,로우,컬럼값저장
 	const zone = document.getElementById('zone').value;
 	const rack = document.getElementById('rack').value;
 	const row = document.getElementById('row').value;
 	const column = document.getElementById('column').value;
+	// 선택한 로케이션 이름설정
 	const selectLocation = `${zone}-${rack}-${row}-${column}`
-	
+	// 로케이션이름을 보여줄 위치
 	const head = document.getElementById('stockTakeHead');
-
+	
+	// 선택한 로케이션의 재고목록 저장
 	const rawList  = await getLocationInventory(locationId);
-
+	
+	// 재고가 존재하지 않을때
 	if(rawList.length < 1) {
 		alert("해당위치에 재고가 없습니다!");
 		return;
 	}
 	
+	// 재고가 존재할 때
+	// 어느 위치의 실사를 하는지 실사위치 표시
 	head.innerHTML= `실사 위치 : ${selectLocation}`;
 	
+	// 실사도중 조회를 눌렀을 경우 한번더 확인 
 	if(!isReviewMode) {
 		const ok = confirm('이전에 실사 확인을 완료한 데이터가 있습니다. 새로 조회하시겠습니까?');
        if (!ok) return;
@@ -217,6 +238,7 @@ btnSelect.addEventListener('click', async () => {
 	    countQty: '',
 	    diffQty: null
 	}));
+	
 	loadStockTakeData(locationIvInfo);
 });
 
@@ -225,7 +247,7 @@ function loadStockTakeData(locationIvInfo) {
     isReviewMode = false;   // 조회하면 항상 입력모드로 리셋
     stockTakeGrid.resetData(locationIvInfo);
 	
-	// 장부수량/차이 컬럼 숨기고, 실사수량은 다시 editable
+	// 재고수량, 출고예정수량, 차이 컬럼 숨기고, 실사수량은 다시 editable
 	const cols = stockTakeGrid.getColumns().map(col => {
 	    if (['ivAmount', 'expectObAmount', 'diffQty'].includes(col.name)) {
 	        return { ...col, hidden: true };
@@ -235,7 +257,7 @@ function loadStockTakeData(locationIvInfo) {
 	    }
 	    return col;
 	});
-	
+	// 컬럼 설정 적용
 	stockTakeGrid.setColumns(cols);
 }
 
@@ -312,7 +334,7 @@ function initStockTakeGrid() {
             { header: '로케이션ID', name: 'locationId', hidden: true }
         ]
     });
-	// 단건 반영
+	// 단건 반영버튼 함수
 	stockTakeGrid.on('click', (ev) => {
 	    if (ev.columnName === 'btn') {
 	        const target = ev.nativeEvent.target;
@@ -323,12 +345,19 @@ function initStockTakeGrid() {
 	});
 }
 
-// 실사 입력완료
+// 실사 입력완료동작함수
 function onCompleteInput() {
     const data = stockTakeGrid.getData();
-
+	
     if (data.length === 0) {
         alert('실사 대상 데이터가 없습니다.');
+        return;
+    }
+	
+    // 실사수량 미입력 체크
+    const hasInput = data.some(row => row.countQty !== '' && row.countQty != null);
+    if (!hasInput) {
+        alert('최소 한 개 이상의 실사 수량을 입력해주세요.');
         return;
     }
 	
@@ -338,34 +367,31 @@ function onCompleteInput() {
 	    alert('실사 수량에 숫자만 입력 가능하며, 0 이상이어야 합니다.');
 	    return;
 	}
-	
-    // 실사수량 미입력 체크
-    const hasInput = data.some(row => row.countQty !== '' && row.countQty != null);
-    if (!hasInput) {
-        alert('최소 한 개 이상의 실사 수량을 입력해주세요.');
-        return;
-    }
 
-    // 차이 계산
+    // 실재고 - 전산재고 계산
     data.forEach(row => {
         const book  = Number(row.ivAmount || 0);
         const count = Number(row.countQty || 0);
         row.diffQty = count - book;
     });
-
-    // 컬럼 토글: 장부/출고예정/차이 보이기, 실사수량 수정 막기
+	
+	// 컬럼 설정세팅
     const cols = stockTakeGrid.getColumns().map(col => {
+		// 재고량/출고예정량/차이 보이기
         if (['ivAmount', 'expectObAmount', 'diffQty'].includes(col.name)) {
             return { ...col, hidden: false };
         }
+		// 실사수량 수정 막기
         if (col.name === 'countQty') {
             const { editor, ...rest } = col; // editor 제거
             return rest;
         }
         return col;
     });
-
+	
+	// 설정한 컬럼값 세팅
     stockTakeGrid.setColumns(cols);
+	// 입력한 실제고값, 계산한 차이 데이터 그리드 입력
     stockTakeGrid.resetData(data);
 
     isReviewMode = true;
@@ -382,11 +408,6 @@ async function applyStockTakeRow(rowKey) {
 
     if (!row) return false;
 
-    if (row._applied) {
-        alert('이미 반영된 행입니다.');
-        return false;
-    }
-	
 	// 실사 수량이 출고예정 수량보다 작은지 검사
 	if((row.countQty || 0) < (row.expectObAmount || 0)) {
 		alert("실사 수량이 출고예정 수량보다 적어 변경할 수 없습니다.")
@@ -398,7 +419,7 @@ async function applyStockTakeRow(rowKey) {
         alert('차이가 0인 행은 반영할 필요가 없습니다.');
         return false;
     }
-
+	// 단건 수량 조정 실행
     const response = await fetch(`/api/inventories/${req.ivId}/adjustQty`, {
         method: 'POST',
         headers: { [csrfHeader]: csrfToken, 'Content-Type': 'application/json' },
