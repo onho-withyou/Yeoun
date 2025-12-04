@@ -241,7 +241,7 @@
 					document.getElementById('Drafting').innerText = rowData.approval_title;
 					document.getElementById('DraftingHidden').value = rowData.approval_title;
 					document.getElementById('today-date').innerText = toDateStr(rowData.created_date);//결재 작성날짜 = 결재시작일
-					//document.getElementById('approval-title').value = rowData.approval_title;
+					document.getElementById('approval-title').value = rowData.approval_title;
 					document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
 					document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
 					document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
@@ -303,7 +303,7 @@
 					document.getElementById('Drafting').innerText = rowData.approval_title;
 					document.getElementById('DraftingHidden').value = rowData.approval_title;
 					document.getElementById('today-date').innerText = toDateStr(rowData.created_date);//결재 작성날짜 = 결재시작일
-					//document.getElementById('approval-title').value = rowData.approval_title;
+					document.getElementById('approval-title').value = rowData.approval_title;
 					document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
 					document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
 					console.log("rowData.created_date",toDateStr(rowData.created_date) );
@@ -368,7 +368,7 @@
 				document.getElementById('Drafting').innerText = rowData.approval_title;
 				document.getElementById('DraftingHidden').value = rowData.approval_title;
 				document.getElementById('today-date').innerText = toDateStr(rowData.created_date);//결재 작성날짜 = 결재시작일
-				//document.getElementById('approval-title').value = rowData.approval_title;
+				document.getElementById('approval-title').value = rowData.approval_title;
 				document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
 				document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
 				
@@ -430,7 +430,7 @@
 					document.getElementById('Drafting').innerText = rowData.approval_title;
 					document.getElementById('DraftingHidden').value = rowData.approval_title;
 					document.getElementById('today-date').innerText = rowData.created_date.split('T')[0] ;//결재 작성날짜 = 결재시작일
-					//document.getElementById('approval-title').value = rowData.approval_title;
+					document.getElementById('approval-title').value = rowData.approval_title;
 					document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
 					document.getElementById('approver-name').value  = rowData.emp_id;//결재자명
 					
@@ -766,11 +766,8 @@
 				}
 			}
 
-			// 4. 새 창을 열고 인쇄 내용을 삽입합니다.
-			const printWindow = window.open('', '_blank', 'height=800,width=1000');
-
-			// ... printHTML 정의 및 실행 ...
-		   let printHTML = `
+		// 4. 숨긴 iframe을 만들어 인쇄 내용을 삽입합니다. (새창 차단/팝업 이슈 회피)
+	   let printHTML = `
 			    <html>
 			    <head>
 			        <title>기안서 인쇄</title>
@@ -843,11 +840,32 @@
 			    </html>
 			`;
 
-            printWindow.document.write(printHTML);
-            printWindow.document.close();
-            
-            printWindow.focus();
-            printWindow.print();
+			// 숨긴 iframe 생성 및 쓰기
+			const iframe = document.createElement('iframe');
+			iframe.style.position = 'fixed';
+			iframe.style.right = '0';
+			iframe.style.bottom = '0';
+			iframe.style.width = '0';
+			iframe.style.height = '0';
+			iframe.style.border = '0';
+			iframe.style.visibility = 'hidden';
+			iframe.id = 'print-iframe-' + Date.now();
+			document.body.appendChild(iframe);
+
+			const iframeWindow = iframe.contentWindow;
+			const iframeDoc = iframeWindow.document;
+			iframeDoc.open();
+			iframeDoc.write(printHTML);
+			iframeDoc.close();
+
+			const cleanup = () => { try { document.body.removeChild(iframe); } catch (e) { } };
+			try { iframeWindow.addEventListener('afterprint', cleanup, { once: true }); } catch (e) { }
+			// 안전용: afterprint 미지원 브라우저 대비 타임아웃
+			setTimeout(cleanup, 1000);
+
+			// 포커스 및 인쇄 호출
+			iframeWindow.focus();
+			iframeWindow.print();
         });
     }
 	});
@@ -859,9 +877,6 @@
 	             resolve(imgEl.src);
 	             return;
 	        }
-
-        
-		
 	        const canvas = document.createElement('canvas');
 	        const ctx = canvas.getContext('2d');
 		
@@ -1496,6 +1511,7 @@
 		formReset();
 		defaultPrint();
 	}
+	
 	//f- 양식 모달 리셋함수
 	function formReset(ev){
     
