@@ -9,9 +9,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -45,13 +48,22 @@ public class InventoryHistory {
 	private String lotNo;
 	
 	@Column(nullable = false)
-	private String itemId; // 원자재/부자재, 완제품의 기준정보 고유값
+	private String itemName; // 재고상품이름
 	
-	@Column(nullable = true)
-	private String prevLocationId; //이전위치
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "PREV_LOCATION_ID") 
+	private WarehouseLocation prevWarehouseLocation;
 	
-	@Column(nullable = true)
-	private String currentLocationId; // 현재위치
+//	@Column(nullable = true)
+//	private String prevLocationId; //이전위치
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "CURRENT_LOCATION_ID") 
+	private WarehouseLocation currentWarehouseLocation;
+	
+//	@Column(nullable = true)
+//	private String currentLocationId; // 현재위치
+	
 	
 	@Column(nullable = true) // 이동수량
 	private Long moveAmount = 0l;
@@ -80,9 +92,9 @@ public class InventoryHistory {
 	            String empId) {
 	return InventoryHistory.builder()
 		.lotNo(beforeInventory.getLotNo())
-		.itemId(beforeInventory.getItemId())
-		.prevLocationId(beforeInventory.getWarehouseLocation().getLocationId())
-		.currentLocationId(afterInventory.getWarehouseLocation().getLocationId())
+		.itemName(beforeInventory.getItemName())
+		.prevWarehouseLocation(beforeInventory.getWarehouseLocation())
+		.currentWarehouseLocation(afterInventory.getWarehouseLocation())
 		.moveAmount(moveQty)
 		.empId(empId)
 		.workType("MOVE")
