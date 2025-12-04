@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.inventory.dto.InventoryModalRequestDTO;
 import com.yeoun.inventory.dto.InventoryDTO;
+import com.yeoun.inventory.dto.InventoryHistoryDTO;
 import com.yeoun.inventory.dto.WarehouseLocationDTO;
 import com.yeoun.inventory.entity.WarehouseLocation;
 import com.yeoun.inventory.service.InventoryService;
@@ -74,7 +75,7 @@ public class InventoryRestController {
 		String empId = loginUser.getEmpId();
 		requestDTO.setIvId(ivId);
 		
-		log.info(requestDTO);
+//		log.info(requestDTO);
 		inventoryService.moveInventory(requestDTO, empId);
 		
 		return ResponseEntity.ok(result);
@@ -94,6 +95,20 @@ public class InventoryRestController {
 		
 		return ResponseEntity.ok(result);
 	}
+	
+	//-----------------------------------------------------------------------------
+	// 재고이력 정보
+	//창고 정보 조회
+	@GetMapping("/historys")
+	public ResponseEntity<List<InventoryHistoryDTO>> historys() {
+		
+		List<InventoryHistoryDTO> historyDTOList = inventoryService.getInventoryHistorys();
+		
+		log.info("@@@@@@@@@@@@@@@@historyDTOList" + historyDTOList);
+		
+		return ResponseEntity.ok(historyDTOList);
+	}
+	
 	
 	
 }
