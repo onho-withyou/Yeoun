@@ -7,11 +7,12 @@
 			w.order_id,
 			pp.plan_id,
 			ppi.prd_id,
-			m.item_name,
+			m.prd_name,
 			w.plan_qty,
 			w.plan_start_date as start_date,
 			w.plan_end_date as end_date,
 			w.status,
+			w.outbound_yn,
 			w.created_date,
 			w.remark
 		from work_order w
