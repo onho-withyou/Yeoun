@@ -111,16 +111,18 @@ public class WebSecurityConfig {
 				)
 				// ---------- 접근 권한 오류 --------------
 				.exceptionHandling(ex -> ex
-						// 인증은 됐는데(로그인 O) 권한이 없을 때 → 403
-						.accessDeniedHandler((request, response, e) -> {
-							response.sendRedirect("/error/403");
-						})
+					// 인증은 됐는데(로그인 O) 권한이 없을 때 → 403
+					.accessDeniedHandler((request, response, e) -> {
+						response.sendRedirect("/error/403");
+					})
 				)
 				// ---------- 자동 로그인 처리 설정 ----------
 				.rememberMe(rememberMeCustormizer -> rememberMeCustormizer
-						.rememberMeParameter("remember-me") 		// 자동 로그인 수행을 위한 체크박스 파라미터명 지정(체크 여부 자동으로 판별)
-						.key("my-fixed-secret-key") 				// 서버 재시작해도 이전 로그인에서 사용했던 키 동일하게 사용
-						.tokenValiditySeconds(60 * 60 * 24 * 30) 	// 자동 로그인 토큰 유효기간 설정(30일)
+					.rememberMeParameter("remember-me") 		// 자동 로그인 수행을 위한 체크박스 파라미터명 지정(체크 여부 자동으로 판별)
+					.key("my-fixed-secret-key") 				// 서버 재시작해도 이전 로그인에서 사용했던 키 동일하게 사용
+					.tokenValiditySeconds(60 * 60 * 24 * 30) 	// 자동 로그인 토큰 유효기간 설정(30일)
+					.userDetailsService(customuserDetailsService) 
+					.authenticationSuccessHandler(customAuthenticationSuccessHandler)
 				)
 				.build();
     }
