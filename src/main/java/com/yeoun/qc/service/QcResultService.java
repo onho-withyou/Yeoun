@@ -1,10 +1,14 @@
 package com.yeoun.qc.service;
 
+import java.util.List;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
 import com.yeoun.order.entity.WorkOrder;
 import com.yeoun.order.repository.WorkOrderRepository;
+import com.yeoun.qc.dto.QcRegistDTO;
 import com.yeoun.qc.entity.QcResult;
 import com.yeoun.qc.repository.QcResultRepository;
 
@@ -76,6 +80,11 @@ public class QcResultService {
         QcResult savedHeader = qcResultRepository.save(qc);
 
     	return savedHeader;
+    }
+
+    // QC 등록 목록
+    public List<QcRegistDTO> getQcResultListForRegist() {
+        return qcResultRepository.findRegistListByStatus("PENDING");
     }
     
     

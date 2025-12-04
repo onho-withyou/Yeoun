@@ -4,8 +4,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.yeoun.qc.dto.QcRegistDTO;
 import com.yeoun.qc.entity.QcResult;
 
 @Repository
@@ -19,5 +22,22 @@ public interface QcResultRepository extends JpaRepository<QcResult, Long> {
 
     // 여러 작업지시에 대한 QC 결과를 한 번에 조회
     List<QcResult> findByOrderIdIn(List<String> orderIds);
+    
+    // QC 등록 목록용 DTO 조회 (PENDING 상태만)
+    @Query("""
+        SELECT new com.yeoun.qc.dto.QcRegistDTO(
+            q.orderId,
+            w.product.prdId,
+            w.product.prdName,
+            w.planQty,
+            q.overallResult,
+            q.inspectionDate
+        )
+        FROM QcResult q
+        JOIN WorkOrder w ON w.orderId = q.orderId
+        WHERE q.overallResult = :status
+        ORDER BY w.createdDate DESC
+        """)
+    List<QcRegistDTO> findRegistListByStatus(@Param("status") String status);
     
 }
