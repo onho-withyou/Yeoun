@@ -385,6 +385,8 @@ window.onload = function () {
 let approverDiv = document.querySelector('#approver');
 
 let itemData;
+	let selectBox = null;
+	let modalOpenedFromGrid = false;
 
 
 // f- selectbox - 인사정보 불러오기
@@ -401,7 +403,7 @@ async function empData() {
 			itemData.push(obj);
 			obj = {};
 		});
-		let selectBox;
+			selectBox;
 		//셀렉트박스 - 토스트유아이
 		selectBox = new tui.SelectBox('#select-box', {
 			data: itemData
@@ -433,6 +435,8 @@ async function empData() {
 			if (ev.targetType === 'cell' && target.tagName === 'BUTTON') {
 
 				const rowData = grid1.getRow(ev.rowKey);
+				// mark modal opened from grid so approvalNo clicks are ignored
+				modalOpenedFromGrid = true;
 				$('#approval-modal').modal('show');
 
 				document.getElementById('saveBtn').style.display = "none";//approvalCompanionBtn//approvalCheckBtn
@@ -495,7 +499,7 @@ async function empData() {
 				}
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-				//selectBox.disable();
+				selectBox.disable();
 				// 상세버튼 양식종류에 따른 form 보이기/숨기기
 				formChange(rowData.form_type);
 				formDisable();
@@ -507,6 +511,7 @@ async function empData() {
 			const target = ev.nativeEvent.target;
 			if (ev.targetType === 'cell' && target.tagName === 'BUTTON') {
 				const rowData = grid2.getRow(ev.rowKey);
+				modalOpenedFromGrid = true;
 				$('#approval-modal').modal('show');
 
 				document.getElementById('saveBtn').style.display = "none";
@@ -562,7 +567,7 @@ async function empData() {
 				}
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-				//selectBox.disable();
+				selectBox.disable();
 				formChange(rowData.form_type);
 				formDisable();
 			}
@@ -574,7 +579,8 @@ async function empData() {
 			const target = ev.nativeEvent.target;
 			if (ev.targetType === 'cell' && target.tagName === 'BUTTON') {
 				const rowData = grid3.getRow(ev.rowKey);
-				$('#approval-modal').modal('show');
+					modalOpenedFromGrid = true;
+					$('#approval-modal').modal('show');
 
 				document.getElementById('saveBtn').style.display = "none";
 				document.getElementById('attachmentBtn').style.display = "none";//첨부파일
@@ -633,7 +639,7 @@ async function empData() {
 				}
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-				//selectBox.disable();
+				selectBox.disable();
 				formChange(rowData.form_type);
 				formDisable();
 			}
@@ -644,6 +650,7 @@ async function empData() {
 			const target = ev.nativeEvent.target;
 			if (ev.targetType === 'cell' && target.tagName === 'BUTTON') {
 				const rowData = grid4.getRow(ev.rowKey);
+				modalOpenedFromGrid = true;
 				$('#approval-modal').modal('show');
 
 				document.getElementById('saveBtn').style.display = "none";//등록버튼
@@ -702,7 +709,7 @@ async function empData() {
 				}
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-				//selectBox.disable();
+				selectBox.disable();
 				formDisable();
 			}
 		});
@@ -769,7 +776,7 @@ async function empData() {
 				}
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
-				//selectBox.disable();
+				selectBox.disable();
 				formChange(rowData.form_type);
 				formDisable();
 			}
@@ -2074,6 +2081,8 @@ let writeBtn = document.getElementById("writeBtn");
 const approvalModal = document.getElementById('approval-modal');
 approvalModal.addEventListener('hidden.bs.modal', function (event) {
 	resetAttachments();
+	// modal이 닫힐 때 grid에서 연 플래그 초기화
+	modalOpenedFromGrid = false;
 });
 
 //f- 기안서작성 모달이 열리기전에 이벤트를 감지
@@ -2094,9 +2103,9 @@ $('#approval-modal').on('show.bs.modal', function (e) {
 function defaultPrint() {
 	// 모달을 닫고 다시 작성 버튼을 클릭하면 이전 데이터가 남아있어서 초기화 진행
 	approverDiv.innerHTML = "";
-	formReset();
-	formEnable();
-	//selectBox.enable();
+		formReset();
+		formEnable();
+		if (selectBox && typeof selectBox.enable === 'function') selectBox.enable();
 	window.count = 0;
 	approverArr = [];
 	// selectedForm 값이 없을 경우 에러가 생길 수 있어서 에러 처리
@@ -2156,20 +2165,28 @@ defalutapprover();
 function print(type, text) {
 
 	if (this.count < 3) {
-		this.count++;
-		approverDiv.innerHTML += '<div class="btn btn-success"'
+		const idx = this.count + 1;
+		const cardHtml = '<div class="btn btn-success"'
 			+ 'style="width:250px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
-			+ '<a id="approver_close_' + count + '" onclick="approverDivclose(this,' + "'" + type + "'" + ',' + count + ')" style="float:right;margin-right: 8px;">&times;</a>'
-			+ '<p id="approver_' + count + '" onclick="approvalNo(' + (this.count) + ',' + "'" + text + "'" + ')" style="margin-top:30px;height: 129px;font-size:22px;">' + (this.count) + '차 결재권한자 ' + '<br>' + text + '<br>' + '</p>'
+			+ '<a id="approver_close_' + idx + '" onclick="approverDivclose(this,' + "'" + type + "'" + ',' + idx + ')" style="float:right;margin-right: 8px;">&times;</a>'
+			+ '<p id="approver_' + idx + '" onclick="approvalNo(' + idx + ',' + "'" + text + "'" + ')" style="margin-top:30px;height: 129px;font-size:22px;">' + idx + '차 결재권한자 ' + '<br>' + text + '<br>' + '</p>'
 			+ '</div>';
-		if (count < 3)
+
+		// 화살표 아이콘은 두번째 카드가 추가될 때(=idx===2)와 세번째 카드가 추가될 때(=idx===3)에만 삽입
+		if (idx > 1) {
 			approverDiv.innerHTML += '<i class="bi bi-caret-right-fill" style="margin-top:95px;"></i>';
+		}
+
+		approverDiv.innerHTML += cardHtml;
+		this.count = idx;
 	}
 }
 
 
 //f- 결재권한자 버튼 클릭시 결재권한자변경 div 태그 생성//전결자
 function approvalNo(count, text) {
+	// 그리드에서 모달을 열었을 때는 approvalNo 동작을 무시합니다.
+	if (modalOpenedFromGrid) return;
 	elemApproverIdNum = count;
 	let type = "change";
 	if (jeongyeoljaDiv) {
