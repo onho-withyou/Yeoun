@@ -11,7 +11,4 @@ import com.yeoun.masterData.entity.RouteHeader;
 @Repository
 public interface RouteHeaderRepository extends JpaRepository<RouteHeader, String> {
 	
-	// 제품 + 사용여부로 라우트 찾기
-	Optional<RouteHeader> findFirstByProductAndUseYn(ProductMst product, String useYn);
-
 }
