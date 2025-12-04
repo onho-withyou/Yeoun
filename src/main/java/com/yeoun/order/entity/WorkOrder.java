@@ -32,6 +32,10 @@ public class WorkOrder {
 	@Id @Column(nullable = false, length = 16)
 	private String orderId;
 	
+	// 생산계획 ID
+	@Column			// ================================> 생산계획 엔티티랑 연결
+	private String planId;
+	
 	// 제품 ID
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "PRD_ID", nullable = false)
@@ -41,17 +45,27 @@ public class WorkOrder {
     @Column(nullable = false)
     private Integer planQty;
     
-    // Lot번호
-//    @Column(nullable = false)
-//    private String lotNo;				=================> 컬럼 삭제
-    
-    // 시작예정일시
+    // 예정시작일시
     @Column(nullable = false)
-    private LocalDateTime startDate;
+    private LocalDateTime planStartDate;
     
-    // 완료예정일시
+    // 실제시작일시
+    @Column
+    private LocalDateTime actStartDate;
+    
+    // 예정완료일시
     @Column(nullable = false)
-    private LocalDateTime endDate;
+    private LocalDateTime planEndDate;
+    
+    // 실제완료일시
+    @Column
+    private LocalDateTime actEndDate;
+    
+	// 공정 ID
+	@Column				// ================================> 라우트 엔티티랑 연결
+	private String routeId;
+	
+	//private String processId;
     
     // 수행 라인
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -75,6 +89,10 @@ public class WorkOrder {
     // 수정일자
     @Column
     private LocalDateTime updatedDate;
+    
+    // 출고여부
+    @Column(nullable = false, columnDefinition = "CHAR(1) DEFAULT 'N'")
+    private String outboundYn;
     
     // 비고(특이사항 및 메모)
     @Column

@@ -53,6 +53,18 @@
 		  overflow-y: auto;
 		  max-height: calc(90vh - 150px);  /* 헤더 + 푸터 제외한 영역 */
 		}
+		
+		#clientResult {
+		    max-height: 180px;
+		    overflow-y: auto;
+		    background-color: white;
+		    z-index: 9999;
+		}
+			
+		#clientSearch:focus {
+		    border-color: #6ea8fe;
+		    box-shadow: 0 0 6px rgba(110, 168, 254, 0.5);
+		}
 		</style>
 	</head>
 	<body>
@@ -100,7 +112,7 @@
 										<select class="form-select" name="materialOrderItem" id="itemSelect" disabled></select>
 									</div>
 									<div class="col mb-0">
-										<label class="form-label">납기일자</label>
+										<label class="form-label">예상도착일</label>
 										<input class="form-control" type="date" id="dueDate" name="dueDate"/>
 									</div>
 								</div>

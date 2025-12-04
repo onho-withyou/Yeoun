@@ -1,0 +1,58 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout}">
+
+<th:block layout:fragment="content">
+
+<div class="custom-body container-xxl flex-grow-1 container-p-y">
+
+    <h3 class="fw-bold mb-4">📄 생산계획 목록</h3>
+
+    <div class="card mb-4">
+        <div class="card-body">
+
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <input id="keyword" class="form-control" placeholder="계획ID / 수주번호 검색">
+                </div>
+
+                <div class="col-md-2">
+                    <button id="btnSearch" class="btn btn-primary w-100">검색</button> <hr>
+                    <button class="btn btn-primary" onclick="location.href='/production/create'">  생산계획 생성</button>
+
+                </div>
+            </div>
+
+        </div>
+    
+    
+    
+</div>
+    
+
+    <div class="card">
+        <div class="card-body">
+            <div id="planGrid" class="ag-theme-alpine" style="height: 550px;"></div>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+    
+<!-- AG Grid CSS -->
+<link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-quartz.css" />
+
+<!-- AG Grid JS (createGrid 지원되는 빌드) -->
+<script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
+
+<th:block layout:fragment="myScript">
+    <script th:src="@{/js/production/plan_list.js}"></script>
+</th:block>
+    
+
+</th:block>
+</th:block>

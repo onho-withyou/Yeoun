@@ -85,9 +85,9 @@ public class Shipment {
     private String clientId;
 
     // 14) 제품ID (PRODUCT FK)
-    @Column(name = "PRODUCT_ID", length = 30, nullable = false)
+    @Column(name = "PRD_ID", length = 30, nullable = false)
     @Comment("해당 출하에 포함된 제품 ID")
-    private String productId;
+    private String prdId;
 
 
     // =============================
