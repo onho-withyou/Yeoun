@@ -371,7 +371,6 @@ public class WorkOrderProcessService {
             
             // 2) QC 결과 헤더 자동 생성
             qcResultService.createPendingQcResultForOrder(orderId);
-            
         } else {
         	// 일반 공정은 바로 완료
             proc.setStatus("DONE");

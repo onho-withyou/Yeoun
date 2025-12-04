@@ -6,10 +6,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.yeoun.masterData.entity.QcItem;
+import com.yeoun.masterData.repository.QcItemRepository;
 import com.yeoun.order.entity.WorkOrder;
 import com.yeoun.order.repository.WorkOrderRepository;
 import com.yeoun.qc.dto.QcRegistDTO;
 import com.yeoun.qc.entity.QcResult;
+import com.yeoun.qc.entity.QcResultDetail;
+import com.yeoun.qc.repository.QcResultDetailRepository;
 import com.yeoun.qc.repository.QcResultRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -20,6 +24,8 @@ public class QcResultService {
 	
 	private final QcResultRepository qcResultRepository;
     private final WorkOrderRepository workOrderRepository;
+    private final QcItemRepository qcItemRepository;
+    private final QcResultDetailRepository qcResultDetailRepository;
     
     // --------------------------------------------------------------
     // 캡/펌프 공정 종료 시 호출되는 QC 결과 생성 메서드
@@ -35,12 +41,12 @@ public class QcResultService {
     // 새로운 QC_RESULT(+DETAIL)을 생성하는 메서드
     private QcResult createNewPendingQcResult(String orderId) {
     	
+    	// 로그인한 직원 ID 가져오기
     	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String loginEmpId = null;
         
         if (authentication != null && authentication.isAuthenticated()
                 && !"anonymousUser".equals(authentication.getPrincipal())) {
-            // username 이 사번(EMP_ID)이면 이렇게
             loginEmpId = authentication.getName();
         }
     	
@@ -78,9 +84,61 @@ public class QcResultService {
         
         // 3) 헤더 저장
         QcResult savedHeader = qcResultRepository.save(qc);
+        
+        // 4) QC_RESULT_DETAIL 자동 생성
+        createEmptyQcDetails(savedHeader, workOrder);
 
     	return savedHeader;
     }
+    
+    // QC_RESULT_DETAIL 자동 생성
+    private void createEmptyQcDetails(QcResult qcHeader, WorkOrder workOrder) {
+
+        // 0) 로그인한 직원 ID
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String loginEmpId = null;
+
+        if (authentication != null && authentication.isAuthenticated()
+                && !"anonymousUser".equals(authentication.getPrincipal())) {
+            loginEmpId = authentication.getName();
+        }
+
+        // 1) QC 항목 마스터 조회
+        List<QcItem> qcItems =
+                qcItemRepository.findByTargetTypeAndUseYnOrderBySortOrderAsc("FINISHED_QC", "Y");
+
+        int seq = 1;
+
+        for (QcItem item : qcItems) {
+
+            QcResultDetail detail = new QcResultDetail();
+
+            // (1) 상세 PK 생성 방식 (예시)
+            // QCD-<QC_RESULT_ID>-001 형식
+            String dtlId = String.format("QCD-%04d-%03d",
+                    qcHeader.getQcResultId(),  // Long
+                    seq++);
+
+            detail.setQcResultDtlId(dtlId);
+
+            // (2) 헤더 ID (Detail은 String이라 변환)
+            detail.setQcResultId(String.valueOf(qcHeader.getQcResultId()));
+
+            // (3) QC 항목ID
+            detail.setQcItemId(item.getQcItemId());
+
+            // (4) 측정값/판정/비고 초기화
+            detail.setMeasureValue(null);   // 아직 미측정
+            detail.setResult(null);         // PASS/FAIL은 나중에
+            detail.setRemark(null);
+
+            // (5) 등록자
+            detail.setCreatedUser(loginEmpId);
+
+            qcResultDetailRepository.save(detail);
+        }
+    }
+
 
     // QC 등록 목록
     public List<QcRegistDTO> getQcResultListForRegist() {
