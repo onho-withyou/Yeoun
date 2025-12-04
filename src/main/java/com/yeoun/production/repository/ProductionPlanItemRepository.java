@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ProductionPlanItemRepository extends JpaRepository<ProductionPlanItem, String> {
 
@@ -16,7 +17,7 @@ public interface ProductionPlanItemRepository extends JpaRepository<ProductionPl
         ORDER BY PLAN_ITEM_ID DESC
         FETCH FIRST 1 ROWS ONLY
         """, nativeQuery = true)
-    String findLastPlanItemId(String prefix);
+    String findLastPlanItemId(@Param("prefix") String prefix);
     
     
     

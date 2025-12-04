@@ -35,7 +35,7 @@ public class ProductionPlanController {
     /* ============================
        2) 생산계획 목록 데이터(JSON)
        ============================ */
-    @GetMapping("list")
+    @GetMapping("/list")
     @ResponseBody
     public List<ProductionPlanListDTO> getPlanList() {
         return planService.getPlanList();
@@ -45,7 +45,7 @@ public class ProductionPlanController {
     /* ============================
        3) 생산계획 작성 페이지
        ============================ */
-    @GetMapping("create")
+    @GetMapping("/create")
     public String planCreatePage() {
         return "production/plan_create";
     }
@@ -54,7 +54,7 @@ public class ProductionPlanController {
     /* ============================
        4) 수동 생산계획 생성
        ============================ */
-    @PostMapping("create")
+    @PostMapping("/create/submit")
     @ResponseBody
     public Map<String, Object> createPlan(
             @RequestBody PlanCreateRequestDTO request,
@@ -78,7 +78,7 @@ public class ProductionPlanController {
     /* ============================
        5) 생산 추천 목록 조회(JSON)
        ============================ */
-    @GetMapping("suggest")
+    @GetMapping("/suggest")
     @ResponseBody
     public List<OrderPlanSuggestDTO> getPlanSuggestions(
             @RequestParam(value = "group", required = false) String group

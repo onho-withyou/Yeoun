@@ -7,6 +7,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.yeoun.production.enums.ProductionStatus;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -38,11 +40,7 @@ public class ProductionPlan {
 
     @Column(name = "DUE_DATE", nullable = false)
     @Comment("납기일자")
-    private LocalDate dueDate;
-
-    @Column(name = "STATUS", length = 20, nullable = false)
-    @Comment("계획 상태 (PLANNING / CONFIRMED)")
-    private String status;
+    private LocalDate dueDate;    
 
     @Column(name = "PLAN_MEMO", length = 1000)
     @Comment("계획 메모")
@@ -61,4 +59,10 @@ public class ProductionPlan {
     @Column(name = "UPDATED_AT")
     @Comment("수정 시각")
     private LocalDateTime updatedAt;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "STATUS", length = 20, nullable = false)
+    private ProductionStatus status; 
+    //PLANNING- 계획 단계 (생산 전)  IN_PROGRESS-  생산 진행중  DONE -생산완료
+
 }

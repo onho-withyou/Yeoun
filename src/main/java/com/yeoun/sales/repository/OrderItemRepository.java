@@ -3,11 +3,14 @@ package com.yeoun.sales.repository;
 import com.yeoun.sales.dto.OrderItemDTO;
 import com.yeoun.sales.entity.OrderItem;
 
+import jakarta.transaction.Transactional;
+
 import java.util.List;
 import java.util.Map;
 
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -41,11 +44,11 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 		    JOIN PRODUCT_MST p ON p.PRD_ID = oi.PRD_ID
 		    JOIN ORDERS o ON o.ORDER_ID = oi.ORDER_ID
 		    WHERE o.ORDER_STATUS = 'CONFIRMED'
+		      AND oi.ITEM_STATUS != 'PLANNED' 
 		      AND (:group = '' OR :group IS NULL OR p.ITEM_NAME = :group)
 		    GROUP BY oi.PRD_ID, p.PRD_NAME
 		""", nativeQuery = true)
 		List<Map<String,Object>> findConfirmedGrouped(@Param("group") String group);
-
 
 
     // 2) 특정 제품에 대한 확정된 수주 상세 조회
@@ -60,7 +63,20 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
         JOIN ORDERS o ON o.ORDER_ID = oi.ORDER_ID
         WHERE o.ORDER_STATUS = 'CONFIRMED'
           AND oi.PRD_ID = :prdId
+          AND oi.ITEM_STATUS != 'PLANNED'
     """, nativeQuery = true)
     List<Map<String,Object>> findItemsByProduct(@Param("prdId") String prdId);
+
+    /*상태값 변경*/      
+    @Modifying
+    @Transactional
+    @Query("""
+        UPDATE OrderItem oi
+        SET oi.itemStatus = 'PLANNED'
+        WHERE oi.orderItemId = :orderItemId
+    """)
+    void updateStatusToPlanned(@Param("orderItemId") Long orderItemId);
+
+
 
 }

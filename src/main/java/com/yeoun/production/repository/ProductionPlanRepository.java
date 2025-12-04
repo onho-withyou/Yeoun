@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ProductionPlanRepository extends JpaRepository<ProductionPlan, String> {
 
@@ -18,7 +19,7 @@ public interface ProductionPlanRepository extends JpaRepository<ProductionPlan, 
         ORDER BY PLAN_ID DESC
         FETCH FIRST 1 ROWS ONLY
         """, nativeQuery = true)
-    String findLastPlanId(String prefix);
+    String findLastPlanId(@Param("prefix") String prefix);
     
     List<ProductionPlan> findAllByOrderByCreatedAtDesc();
     

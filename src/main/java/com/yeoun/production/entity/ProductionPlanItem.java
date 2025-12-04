@@ -8,6 +8,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.yeoun.production.enums.BomStatus;
+import com.yeoun.production.enums.ProductionStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -27,10 +28,6 @@ public class ProductionPlanItem {
 
     @Column(name = "PLAN_ID", length = 20, nullable = false)
     private String planId;
-
-    @Column(name = "ORDER_ID", length = 20, nullable = false)
-    @Comment("어떤 수주에서 온 항목인지")
-    private String orderId;
 
     @Column(name = "ORDER_ITEM_ID", length = 30, nullable = false)
     @Comment("어떤 수주 상세에서 온 항목인지")
@@ -68,4 +65,9 @@ public class ProductionPlanItem {
     @LastModifiedDate
     @Column(name = "UPDATED_AT")
     private LocalDateTime updatedAt;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "STATUS", length = 20, nullable = false)
+    private ProductionStatus status;
+
 }
