@@ -72,7 +72,7 @@ public interface OrdersRepository extends JpaRepository<Orders, String> {
 		        ON pr.PRD_ID = oi.PRD_ID
 		    JOIN ORDERS o
 		        ON o.ORDER_ID = oi.ORDER_ID
-		    WHERE (:group IS NULL OR pr.ITEM_NAME = :group)
+		    WHERE (:group = '' OR :group IS NULL OR pr.ITEM_NAME = :group)
 		      AND o.STATUS = 'RECEIVED'
 		    ORDER BY oi.ORDER_ITEM_ID DESC
 		    """,

@@ -121,7 +121,7 @@ function loadProcessGrid() {
 
   const query = new URLSearchParams({
     workDate,
-    productId: searchProduct,
+    prdId: searchProduct,
     status: searchHStatus,
     keyword: searchKeyword
   });

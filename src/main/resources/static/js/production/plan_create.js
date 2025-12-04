@@ -17,7 +17,7 @@ function initSuggestGrid() {
 
     const columnDefs = [
         { headerName: "선택", checkboxSelection: true, headerCheckboxSelection: true, width: 60 },
-        { headerName: "제품명", field: "productName", width: 180 },
+        { headerName: "제품명", field: "prdName", width: 180 },
         { headerName: "총 주문수량", field: "totalOrderQty", width: 120 },
         { headerName: "현재 재고", field: "currentStock", width: 120 },
         { headerName: "부족수량", field: "shortageQty", width: 120 },

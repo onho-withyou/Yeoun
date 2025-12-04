@@ -152,7 +152,7 @@ public class OrdersService {
 
             OrderItem item = OrderItem.builder()
                     .orderId(orderId)
-                    .productId(prdId)
+                    .prdId(prdId)
                     .orderQty(new BigDecimal(qtyStr))
                     .unitPrice(new BigDecimal(priceStr))
                     .totalPrice(new BigDecimal(amountStr))

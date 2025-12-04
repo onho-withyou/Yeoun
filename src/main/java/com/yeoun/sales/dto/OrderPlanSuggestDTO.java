@@ -16,7 +16,7 @@ import lombok.Setter;
 public class OrderPlanSuggestDTO {
 
     private String prdId;          // 제품 ID
-    private String productName;    // 제품명
+    private String prdName;    // 제품명
     private int totalOrderQty;     // 총 주문 수량
     private int currentStock;      // 현재 재고
     private int shortageQty;       // 부족 수량 (생산해야 하는 양)

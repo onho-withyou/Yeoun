@@ -85,8 +85,8 @@ public class ProductionPlanService {
             OrderItem oi = orderItemRepository.findById(dto.getOrderItemId())
                     .orElseThrow(() -> new IllegalArgumentException("OrderItem 없음: " + dto.getOrderItemId()));
 
-            if (prdId == null) prdId = oi.getProductId();
-            else if (!prdId.equals(oi.getProductId())) {
+            if (prdId == null) prdId = oi.getPrdId();
+            else if (!prdId.equals(oi.getPrdId())) {
                 throw new IllegalArgumentException("생산계획은 동일 제품만 묶어서 생성할 수 있습니다.");
             }
         }
@@ -177,7 +177,7 @@ public class ProductionPlanService {
         for (Map<String, Object> g : groups) {
 
             String prdId = (String) g.get("prdId");
-            String productName = (String) g.get("productName");
+            String prdName = (String) g.get("prdName");
             int totalOrderQty = ((BigDecimal) g.get("totalOrderQty")).intValue();
 
             // ★ 재고 기능 없으므로 0으로 설정
@@ -200,7 +200,7 @@ public class ProductionPlanService {
             results.add(
                     OrderPlanSuggestDTO.builder()
                             .prdId(prdId)
-                            .productName(productName)
+                            .prdName(prdName)
                             .totalOrderQty(totalOrderQty)
                             .currentStock(currentStock)
                             .shortageQty(shortageQty)

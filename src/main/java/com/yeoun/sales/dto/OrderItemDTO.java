@@ -14,7 +14,7 @@ public class OrderItemDTO {
     private String orderItemId;
     private String orderId;
     private String prdId;
-    private String productName;
+    private String prdName;
     private Integer orderQty;
     private LocalDate dueDate;
 }
