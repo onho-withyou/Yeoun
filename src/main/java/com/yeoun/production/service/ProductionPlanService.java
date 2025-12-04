@@ -7,6 +7,7 @@ import com.yeoun.production.entity.ProductionPlanItem;
 import com.yeoun.production.enums.BomStatus;
 import com.yeoun.production.repository.ProductionPlanItemRepository;
 import com.yeoun.production.repository.ProductionPlanRepository;
+import com.yeoun.sales.dto.OrderPlanSuggestDTO;
 import com.yeoun.sales.entity.OrderItem;
 import com.yeoun.sales.repository.OrderItemRepository;
 
@@ -18,7 +19,9 @@ import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -160,5 +163,130 @@ public class ProductionPlanService {
     }
 
     
+    //자동 그룹화 + 부족수량 계산 + 생산계획 추천 기능
+    
+ // 생산계획 추천 기능
+    public List<OrderPlanSuggestDTO> getPlanSuggestions(String group) {
+
+        // group이 있으면 해당 제품군만 조회하는 쿼리 실행
+        List<Map<String, Object>> groups =
+                orderItemRepository.findConfirmedGrouped(group);
+
+        List<OrderPlanSuggestDTO> results = new ArrayList<>();
+
+        for (Map<String, Object> g : groups) {
+
+            String prdId = (String) g.get("prdId");
+            String productName = (String) g.get("productName");
+            int totalOrderQty = ((BigDecimal) g.get("totalOrderQty")).intValue();
+
+            // ★ 재고 기능 없으므로 0으로 설정
+            int currentStock = 0;
+            int shortageQty = totalOrderQty;
+
+            // 개별 수주 목록 조회 (제품별)
+            List<Map<String, Object>> items =
+                    orderItemRepository.findItemsByProduct(prdId);
+
+            List<OrderPlanSuggestDTO.OrderItemInfo> orderItems = items.stream()
+                    .map(i -> new OrderPlanSuggestDTO.OrderItemInfo(
+                            ((Number) i.get("ORDER_ITEM_ID")).longValue(),
+                            (String) i.get("ORDER_ID"),
+                            ((Number) i.get("ORDER_QTY")).intValue(),
+                            (String) i.get("dueDate")
+                    ))
+                    .toList();
+
+            results.add(
+                    OrderPlanSuggestDTO.builder()
+                            .prdId(prdId)
+                            .productName(productName)
+                            .totalOrderQty(totalOrderQty)
+                            .currentStock(currentStock)
+                            .shortageQty(shortageQty)
+                            .needProduction("YES")
+                            .orderItems(orderItems)
+                            .build()
+            );
+        }
+
+        return results;
+    }
+
+
+    /* ============================================================
+    자동 추천 기반 생산계획 생성
+ ============================================================ */
+ @Transactional
+ public String createAutoPlan(List<Map<String, Object>> requestList, String createdBy) {
+
+     if (requestList == null || requestList.isEmpty()) {
+         throw new IllegalArgumentException("자동 생산계획 생성 실패: 요청 데이터 없음");
+     }
+
+     StringBuilder resultMsg = new StringBuilder();
+
+     for (Map<String, Object> req : requestList) {
+
+         String prdId = (String) req.get("prdId");
+         Integer planQty = (Integer) req.get("planQty");
+
+         if (prdId == null || planQty == null) {
+             throw new IllegalArgumentException("잘못된 요청 데이터입니다.");
+         }
+
+         /* ---------------------------------------------
+             1) 마스터 생산계획 생성
+         --------------------------------------------- */
+         String planId = generatePlanId();
+
+         ProductionPlan plan = ProductionPlan.builder()
+                 .planId(planId)
+                 .prdId(prdId)
+                 .planQty(planQty)
+                 .planDate(LocalDate.now())
+                 .dueDate(LocalDate.now().plusDays(7))
+                 .status("PLANNING")
+                 .planMemo("추천 기반 자동 생성 계획")
+                 .createdBy(createdBy)
+                 .build();
+
+         planRepo.save(plan);
+
+
+         /* ---------------------------------------------
+             2) 상세 항목 생성
+         --------------------------------------------- */
+         List<Map<String, Object>> orderItems =
+                 (List<Map<String, Object>>) req.get("orderItems");
+
+         if (orderItems != null) {
+
+             for (Map<String, Object> item : orderItems) {
+
+                 Long orderItemId = Long.valueOf(item.get("orderItemId").toString());
+
+                 OrderItem oi = orderItemRepository.findById(orderItemId)
+                         .orElseThrow(() -> new IllegalArgumentException("OrderItem 찾을 수 없음: " + orderItemId));
+
+                 ProductionPlanItem detail = ProductionPlanItem.builder()
+                         .planItemId(generatePlanItemId())
+                         .planId(planId)
+                         .prdId(prdId)
+                         .orderQty(oi.getOrderQty())
+                         .planQty(oi.getOrderQty())   // 상세는 주문수량 기준
+                         .bomStatus(BomStatus.WAIT)
+                         .createdBy(createdBy)
+                         .build();
+
+                 itemRepo.save(detail);
+             }
+         }
+
+         resultMsg.append(planId).append(" 생성완료, ");
+     }
+
+     return resultMsg.toString();
+ }
 
 }

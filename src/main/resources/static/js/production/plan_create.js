@@ -1,88 +1,129 @@
-let orderGridApi = null;
+let suggestGridApi = null;
 
 document.addEventListener("DOMContentLoaded", () => {
-    initOrderGrid();
+    initSuggestGrid();
 
-    document.getElementById("btnLoadOrders").addEventListener("click", loadOrders);
-    document.getElementById("btnCreatePlan").addEventListener("click", createPlan);
+    document.getElementById("btnLoadSuggested")
+        .addEventListener("click", loadSuggestList);
+
+    document.getElementById("btnCreatePlan")
+        .addEventListener("click", createProductionPlan);
 });
 
 /* =========================================
-   AG Grid 초기화
+   1) 추천 생산 목록 GRID 초기화
 ========================================= */
-function initOrderGrid() {
+function initSuggestGrid() {
 
     const columnDefs = [
         { headerName: "선택", checkboxSelection: true, headerCheckboxSelection: true, width: 60 },
-        { headerName: "수주번호", field: "orderId", width: 140 },
-        { headerName: "상세ID", field: "orderItemId", width: 120 },
-        { headerName: "제품명", field: "productName", width: 200 },
-        { headerName: "제품ID", field: "prdId", width: 130 },
-        { headerName: "주문수량", field: "orderQty", width: 100 },
-        { headerName: "납기일", field: "dueDate", width: 120 }
+        { headerName: "제품명", field: "productName", width: 180 },
+        { headerName: "총 주문수량", field: "totalOrderQty", width: 120 },
+        { headerName: "현재 재고", field: "currentStock", width: 120 },
+        { headerName: "부족수량", field: "shortageQty", width: 120 },
+
+        {
+            headerName: "생산 필요",
+            field: "needProduction",
+            width: 120,
+            cellRenderer: params => {
+                return params.value === "YES"
+                    ? `<span style="color:#d9534f; font-weight:bold;">YES</span>`
+                    : `<span style="color:#5cb85c;">NO</span>`;
+            }
+        },
+
+        {
+            headerName: "상세",
+            width: 100,
+            cellRenderer: params => {
+                const json = encodeURIComponent(JSON.stringify(params.data.orderItems));
+                return `<button class="btn btn-sm btn-secondary" onclick='showOrderItems("${json}")'>
+                            보기
+                        </button>`;
+            }
+        }
     ];
 
     const gridOptions = {
         columnDefs,
         rowSelection: "multiple",
+        suppressRowClickSelection: true,
     };
 
-    orderGridApi = agGrid.createGrid(document.getElementById("orderGrid"), gridOptions);
+    suggestGridApi = agGrid.createGrid(
+        document.getElementById("suggestGrid"),
+        gridOptions
+    );
 }
 
 /* =========================================
-   1) 수주 목록 조회
+   2) 추천 생산 목록 조회 (API 호출)
 ========================================= */
-function loadOrders() {
+function loadSuggestList() {
     const group = document.getElementById("productGroup").value;
 
-    fetch(`/sales/order-items?group=${group}`)
-        .then(res => res.json())
-        .then(data => {
-            orderGridApi.setGridOption("rowData", data);
+    fetch(`/production/plan/suggest?group=${group}`)
+        .then(res => {
+            if (!res.ok) throw new Error("API 오류");
+            return res.json();
         })
-        .catch(err => console.error("수주 조회 실패:", err));
+        .then(data => {
+            suggestGridApi.setGridOption("rowData", data);
+        })
+        .catch(err => {
+            console.error("추천 생산 목록 조회 오류:", err);
+            alert("추천 목록 조회 중 오류 발생");
+        });
 }
 
 /* =========================================
-   2) 생산계획 생성 요청
+   3) 상세 보기 (orderItems)
 ========================================= */
-function createPlan() {
-    const selected = orderGridApi.getSelectedRows();
+function showOrderItems(json) {
+
+    const orderItems = JSON.parse(decodeURIComponent(json));
+
+    let text = `📌 포함된 수주 내역\n\n`;
+
+    orderItems.forEach(o => {
+        text += `• 수주번호: ${o.orderId}\n`;
+        text += `  수량: ${o.orderQty}\n`;
+        text += `  납기일: ${o.dueDate}\n\n`;
+    });
+
+    alert(text);
+}
+
+/* =========================================
+   4) 생산계획 자동 생성
+========================================= */
+function createProductionPlan() {
+    const selected = suggestGridApi.getSelectedRows();
 
     if (selected.length === 0) {
-        alert("📌 생산계획에 포함할 수주 항목을 선택하세요.");
+        alert("📌 생산계획을 생성할 제품을 선택하세요.");
         return;
     }
 
-    const prdSet = new Set(selected.map(r => r.prdId));
-    if (prdSet.size > 1) {
-        alert("⚠️ 서로 다른 제품은 함께 생산계획을 만들 수 없습니다.");
-        return;
-    }
-
-    const items = selected.map(row => ({
-        orderItemId: row.orderItemId,
-        qty: row.orderQty,
-        orderId: row.orderId
+    const payload = selected.map(item => ({
+        prdId: item.prdId,
+        planQty: item.shortageQty > 0 ? item.shortageQty : item.totalOrderQty,
+        orderItems: item.orderItems
     }));
 
-    const payload = {
-        memo: "자동 생성된 생산계획",
-        items: items
-    };
-
-    fetch("/production/create", {
+    fetch("/production/auto-create-plan", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
     })
         .then(res => res.text())
-        .then(planId => {
-            alert(`📌 생산계획 생성 완료\n계획 ID: ${planId}`);
+        .then(msg => {
+            alert("📌 생산계획 생성 완료!\n" + msg);
             location.href = "/production/plan";
         })
-        .catch(err => console.error("생산계획 생성 오류:", err));
+        .catch(err => {
+            console.error("생산계획 생성 오류:", err);
+            alert("생산계획 생성 중 오류 발생");
+        });
 }

@@ -7,6 +7,7 @@ import com.yeoun.production.dto.ProductionPlanListDTO;
 import com.yeoun.production.entity.ProductionPlan;
 import com.yeoun.production.entity.ProductionPlanItem;
 import com.yeoun.production.service.ProductionPlanService;
+import com.yeoun.sales.dto.OrderPlanSuggestDTO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -68,6 +70,37 @@ public class ProductionPlanController {
         return "production/plan_create";
     }
 
+    
+    /*생산 추천*/
+    @GetMapping("/plan/suggest")
+    @ResponseBody
+    public List<OrderPlanSuggestDTO> getPlanSuggestions(
+            @RequestParam(value="group",required = false) String group
+    ) {
+        return planService.getPlanSuggestions(group);
+        
+        
+    }
+        /* =========================================
+         * 추천 기반 자동 생산계획 생성
+         * ========================================= */
+        @PostMapping("/auto-create-plan")
+        @ResponseBody
+        public String autoCreatePlan(
+                @RequestBody List<Map<String, Object>> requestList,
+                @AuthenticationPrincipal LoginDTO login
+        ) {
+            String empId = login.getEmpId();
+
+            return planService.createAutoPlan(requestList, empId);
+        }
+
+    }
+    
+    
+
+
+    
 
 //    /** =============================
 //     * 생산계획 상세 조회
@@ -86,4 +119,4 @@ public class ProductionPlanController {
 //    public List<ProductionPlanItem> getPlanItems(@PathVariable String planId) {
 //        return planService.getPlanItems(planId);
 //    }
-}
+

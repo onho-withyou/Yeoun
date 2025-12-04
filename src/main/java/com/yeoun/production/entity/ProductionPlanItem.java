@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 public class ProductionPlanItem {
 
     @Id
-    @Column(name = "PLAN_ITEM_ID", length = 20)
+    @Column(name = "PLAN_ITEM_ID", length = 20, nullable=false)
     private String planItemId;
 
     @Column(name = "PLAN_ID", length = 20, nullable = false)
