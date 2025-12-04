@@ -1,20 +1,17 @@
 package com.yeoun.production.controller;
 
-
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.production.dto.PlanCreateRequestDTO;
 import com.yeoun.production.dto.ProductionPlanListDTO;
-import com.yeoun.production.entity.ProductionPlan;
-import com.yeoun.production.entity.ProductionPlanItem;
 import com.yeoun.production.service.ProductionPlanService;
 import com.yeoun.sales.dto.OrderPlanSuggestDTO;
 
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,99 +21,94 @@ import java.util.Map;
 public class ProductionPlanController {
 
     private final ProductionPlanService planService;
-    
-    /** 생산계획 목록 화면 */
+
+
+    /* ============================
+       1) 생산계획 목록 페이지
+       ============================ */
     @GetMapping("/plan")
     public String planPage() {
         return "production/plan_list";
     }
-    
 
-    /** =============================
-     * 생산계획 목록 조회(JSON) - DTO 기반
-     * ============================= */
-    @GetMapping("/list")
+
+    /* ============================
+       2) 생산계획 목록 데이터(JSON)
+       ============================ */
+    @GetMapping("list")
     @ResponseBody
     public List<ProductionPlanListDTO> getPlanList() {
-        System.out.println("📌 [CONTROLLER] /production/plan/list 호출됨");
-
-        List<ProductionPlanListDTO> list = planService.getPlanList();  // DTO 사용하는 메서드
-        System.out.println("📌 [CONTROLLER] 조회건수 = " + list.size());
-
-        return list;
+        return planService.getPlanList();
     }
 
 
-
-
-    /** =============================
-     * 생산계획 생성
-     * ============================= */
-    @PostMapping("/create")
-    @ResponseBody
-    public String createPlan(
-            @RequestBody PlanCreateRequestDTO request,
-            @AuthenticationPrincipal LoginDTO login
-    ) {
-        String empId = login.getEmpId();
-        String memo = request.getMemo();
-
-        return planService.createPlan(request.getItems(), empId, memo);
-    }
-    
-    /*생산계획 작성 페이지 열기*/
-    @GetMapping("/create")
+    /* ============================
+       3) 생산계획 작성 페이지
+       ============================ */
+    @GetMapping("create")
     public String planCreatePage() {
         return "production/plan_create";
     }
 
-    
-    /*생산 추천*/
-    @GetMapping("/plan/suggest")
+
+    /* ============================
+       4) 수동 생산계획 생성
+       ============================ */
+    @PostMapping("create")
+    @ResponseBody
+    public Map<String, Object> createPlan(
+            @RequestBody PlanCreateRequestDTO request,
+            @AuthenticationPrincipal LoginDTO login
+    ) {
+
+        String planId = planService.createPlan(
+                request.getItems(),
+                login.getEmpId(),
+                request.getMemo()
+        );
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("planId", planId);
+
+        return response;
+    }
+
+
+    /* ============================
+       5) 생산 추천 목록 조회(JSON)
+       ============================ */
+    @GetMapping("suggest")
     @ResponseBody
     public List<OrderPlanSuggestDTO> getPlanSuggestions(
-            @RequestParam(value="group",required = false) String group
+            @RequestParam(value = "group", required = false) String group
     ) {
         return planService.getPlanSuggestions(group);
-        
-        
     }
-        /* =========================================
-         * 추천 기반 자동 생산계획 생성
-         * ========================================= */
-        @PostMapping("/auto-create-plan")
-        @ResponseBody
-        public String autoCreatePlan(
-                @RequestBody List<Map<String, Object>> requestList,
-                @AuthenticationPrincipal LoginDTO login
-        ) {
-            String empId = login.getEmpId();
 
-            return planService.createAutoPlan(requestList, empId);
+
+    /* ============================
+       6) 자동 생산계획 생성
+       ============================ */
+    @PostMapping("/plan/auto-create")
+    @ResponseBody
+    public Map<String, Object> autoCreatePlan(
+            @RequestBody List<Map<String, Object>> req,
+            @AuthenticationPrincipal LoginDTO login
+    ) {
+
+        Map<String, Object> result = new HashMap<>();
+
+        try {
+            String planIds = planService.createAutoPlan(req, login.getEmpId());
+            result.put("success", true);
+            result.put("planIds", planIds);
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", e.getMessage());
         }
 
+        return result;
     }
-    
-    
 
-
-    
-
-//    /** =============================
-//     * 생산계획 상세 조회
-//     * ============================= */
-//    @GetMapping("/{planId}")
-//    @ResponseBody
-//    public ProductionPlan getPlanDetail(@PathVariable String planId) {
-//        return planService.getPlanDetail(planId);
-//    }
-//
-//    /** =============================
-//     * 생산계획 상세 item 리스트 조회
-//     * ============================= */
-//    @GetMapping("/{planId}/items")
-//    @ResponseBody
-//    public List<ProductionPlanItem> getPlanItems(@PathVariable String planId) {
-//        return planService.getPlanItems(planId);
-//    }
-
+}

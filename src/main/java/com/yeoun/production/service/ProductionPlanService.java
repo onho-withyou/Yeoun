@@ -1,5 +1,6 @@
 package com.yeoun.production.service;
 
+import com.yeoun.inventory.repository.InventoryRepository;
 import com.yeoun.production.dto.PlanCreateItemDTO;
 import com.yeoun.production.dto.ProductionPlanListDTO;
 import com.yeoun.production.entity.ProductionPlan;
@@ -20,6 +21,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +32,7 @@ public class ProductionPlanService {
     private final ProductionPlanRepository planRepo;
     private final ProductionPlanItemRepository itemRepo;
     private final OrderItemRepository orderItemRepository;
+    private final InventoryRepository inventoryRepository;
 
     /* ================================
         생산계획 ID 생성
@@ -164,27 +167,38 @@ public class ProductionPlanService {
 
     
     //자동 그룹화 + 부족수량 계산 + 생산계획 추천 기능
-    
- // 생산계획 추천 기능
     public List<OrderPlanSuggestDTO> getPlanSuggestions(String group) {
 
-        // group이 있으면 해당 제품군만 조회하는 쿼리 실행
-        List<Map<String, Object>> groups =
-                orderItemRepository.findConfirmedGrouped(group);
+        // 1) 확정된 수주 그룹 조회
+        List<Map<String, Object>> groups = orderItemRepository.findConfirmedGrouped(group);
+
+        // 2) 전체 재고를 한 번만 조회
+        List<Map<String, Object>> stockList = inventoryRepository.findCurrentStockGrouped();
+
+        // 3) 재고를 Map<String, Integer> 형태로 변환
+        Map<String, Integer> stockMap = new HashMap<>();
+        for (Map<String, Object> s : stockList) {
+            String itemId = (String) s.get("prdId");
+            int currentStock = ((BigDecimal) s.get("currentStock")).intValue();
+            stockMap.put(itemId, currentStock);
+        }
 
         List<OrderPlanSuggestDTO> results = new ArrayList<>();
 
+        // 4) 제품별 수주량 + 재고 비교
         for (Map<String, Object> g : groups) {
 
             String prdId = (String) g.get("prdId");
             String prdName = (String) g.get("prdName");
             int totalOrderQty = ((BigDecimal) g.get("totalOrderQty")).intValue();
 
-            // ★ 재고 기능 없으므로 0으로 설정
-            int currentStock = 0;
-            int shortageQty = totalOrderQty;
+            // ★ 재고가 있으면 가져오고, 없으면 0으로 처리
+            int currentStock = stockMap.getOrDefault(prdId, 0);
 
-            // 개별 수주 목록 조회 (제품별)
+            int shortageQty = totalOrderQty - currentStock;
+            if (shortageQty < 0) shortageQty = 0;
+
+            // 상세 수주 목록 조회
             List<Map<String, Object>> items =
                     orderItemRepository.findItemsByProduct(prdId);
 
@@ -204,7 +218,7 @@ public class ProductionPlanService {
                             .totalOrderQty(totalOrderQty)
                             .currentStock(currentStock)
                             .shortageQty(shortageQty)
-                            .needProduction("YES")
+                            .needProduction(shortageQty > 0 ? "YES" : "NO")
                             .orderItems(orderItems)
                             .build()
             );
