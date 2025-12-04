@@ -1,4 +1,4 @@
-// static/js/prod/plan_list.js
+
 let planGridApi = null;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -9,11 +9,11 @@ document.addEventListener("DOMContentLoaded", () => {
 function initPlanGrid() {
 
     const columnDefs = [
-        { headerName: "계획ID", field: "planId", width: 120 },
-        { headerName: "작성일", field: "createdAt", width: 140 },
+        { headerName: "계획ID", field: "planId", width: 200 },
+        { headerName: "작성일", field: "createdAt", width: 200 },
         { headerName: "제품명", field: "itemName", width: 180 },
-        { headerName: "총수량", field: "totalQty", width: 100 },
-        { headerName: "상태", field: "status", width: 120 },
+        { headerName: "총수량", field: "totalQty", width: 200 },
+        { headerName: "상태", field: "status", width: 200 },
         {
             headerName: "상세",
             width: 100,
@@ -30,10 +30,12 @@ function initPlanGrid() {
 }
 
 function loadPlanList() {
-    fetch("/prod/plan/list")
+    fetch("/production/list")
         .then(res => res.json())
         .then(data => {
+            console.log("📌 서버에서 받아온 데이터:", data);
             planGridApi.setGridOption("rowData", data);
         })
-        .catch(err => console.error(err));
+        .catch(err => console.error("📌 에러 발생:", err));
 }
+

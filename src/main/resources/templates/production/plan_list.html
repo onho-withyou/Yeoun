@@ -17,12 +17,18 @@
                 </div>
 
                 <div class="col-md-2">
-                    <button id="btnSearch" class="btn btn-primary w-100">검색</button>
+                    <button id="btnSearch" class="btn btn-primary w-100">검색</button> <hr>
+                    <button class="btn btn-primary" onclick="location.href='/production/create'">  생산계획 생성</button>
+
                 </div>
             </div>
 
         </div>
-    </div>
+    
+    
+    
+</div>
+    
 
     <div class="card">
         <div class="card-body">
@@ -32,13 +38,21 @@
 
 </div>
 
-</th:block>
 
 
-<!-- 스크립트 영역 -->
-<th:block layout:fragment="pageScript">
-    <script th:src="@{/plugins/aggrid/ag-grid-community.min.js}"></script>
+
+
+    
+<!-- AG Grid CSS -->
+<link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-quartz.css" />
+
+<!-- AG Grid JS (createGrid 지원되는 빌드) -->
+<script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
+
+<th:block layout:fragment="myScript">
     <script th:src="@{/js/production/plan_list.js}"></script>
 </th:block>
+    
 
+</th:block>
 </th:block>
