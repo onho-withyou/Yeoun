@@ -30,6 +30,10 @@ document.addEventListener("DOMContentLoaded", () => {
     columnOptions: {
       resizable: true
     },
+	pageOptions: {
+		useClient: true,         
+		perPage: 10            
+	},
     columns: [
       {
         header: "작업지시번호",
