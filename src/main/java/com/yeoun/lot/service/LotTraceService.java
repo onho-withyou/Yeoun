@@ -32,21 +32,10 @@ public class LotTraceService {
 	
 	// LOT 생성
 	@Transactional
-	public String registLotMaster(LotMasterDTO lotMasterDTO, String matId, String line) {
-		
-		log.info(">>>>>> lotMasterDTO " + lotMasterDTO);
-		
-		String prdId = null;
-		
-		if ("RAW".equals(lotMasterDTO.getLotType()) || "SUB".equals(lotMasterDTO.getLotType()) ||
-				"PKG".equals(lotMasterDTO.getLotType())) {
-			prdId = matId;
-		} else {
-			prdId = lotMasterDTO.getPrdId();
-		}
+	public String registLotMaster(LotMasterDTO lotMasterDTO, String line) {
 		
 		// Lot번호 생성
-		String LotNo = generateLotId(lotMasterDTO.getLotType(), prdId, line, LocalDate.now());
+		String LotNo = generateLotId(lotMasterDTO.getLotType(), lotMasterDTO.getPrdId(), line, LocalDate.now());
 		
 		lotMasterDTO.setLotNo(LotNo);
 		

@@ -60,21 +60,20 @@ public class LotMasterDTO {
 	
 	// 엔티티 타입으로 변환
 	public LotMaster toEntity() {
-		LotMaster lotMaster = modelMapper.map(this, LotMaster.class);
-		
-		if (this.getPrdId() != null) {
-			ProductMst productMst = new ProductMst();
-			productMst.setPrdId(this.getPrdId());
-			lotMaster.setProduct(productMst);
-		}
-		
-		return lotMaster;
+//		LotMaster lotMaster = modelMapper.map(this, LotMaster.class);
+//		
+//		if (this.getPrdId() != null) {
+//			ProductMst productMst = new ProductMst();
+//			productMst.setPrdId(this.getPrdId());
+//		}
+//		
+//		return lotMaster;
+		return modelMapper.map(this, LotMaster.class);
 	}
 	
 	// DTO 타입으로 변환
 	public static LotMasterDTO fromEntity(LotMaster lotMaster) {
-		LotMasterDTO masterDTO = modelMapper.map(lotMaster, LotMasterDTO.class);
-		masterDTO.setPrdId(lotMaster.getProduct().getPrdId());
-		return masterDTO;
+//		LotMasterDTO masterDTO = modelMapper.map(lotMaster, LotMasterDTO.class);
+		return modelMapper.map(lotMaster, LotMasterDTO.class);
 	}
 }

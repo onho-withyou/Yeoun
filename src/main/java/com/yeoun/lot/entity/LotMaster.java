@@ -2,9 +2,12 @@ package com.yeoun.lot.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.yeoun.masterData.entity.MaterialMst;
 import com.yeoun.masterData.entity.ProductMst;
 
 import jakarta.persistence.Column;
@@ -18,6 +21,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * LOT 마스터
@@ -45,9 +49,8 @@ public class LotMaster {
 	private String orderId;
 	
 	// 제품 ID
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "PRD_ID", nullable = false)
-	private ProductMst product;
+	@Column(nullable = false)
+	private String prdId;
 	
 	// 현재수량
 	@Column(name = "QUANTITY", nullable = true)

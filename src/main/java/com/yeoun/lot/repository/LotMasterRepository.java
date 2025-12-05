@@ -13,18 +13,18 @@ import com.yeoun.lot.entity.LotMaster;
 public interface LotMasterRepository extends JpaRepository<LotMaster, String> {
 
 	// 최근 시퀀스 조회
-    @Query(value = """
-            SELECT 
-                SUBSTR(lot_no, LENGTH(lot_no) - 2, 3) AS seq
-            FROM LOT_MASTER
-            WHERE 
-                LOT_TYPE = :lotType
-            AND PRD_ID = :prdId
-            AND SUBSTR(lot_no, INSTR(lot_no, '-', 1, 3) + 1, 8) = :dateStr
-            AND SUBSTR(lot_no, INSTR(lot_no, '-', 1, 4) + 1, INSTR(lot_no, '-', 1, 5) - INSTR(lot_no, '-', 1, 4) - 1) = :line
-            ORDER BY seq DESC
-            FETCH FIRST 1 ROWS ONLY
-        """, nativeQuery = true)
+	@Query(value = """
+		    SELECT 
+		        REGEXP_SUBSTR(lot_no, '[0-9]{3}$') AS seq
+		    FROM LOT_MASTER
+		    WHERE 
+		        LOT_TYPE = :lotType
+		    AND PRD_ID = :prdId
+		    AND SUBSTR(lot_no, INSTR(lot_no, '-', 1, 3) + 1, 8) = :dateStr
+		    AND REGEXP_SUBSTR(lot_no, '-([0-9]{2})-', 1, 1, NULL, 1) = :line
+		    ORDER BY seq DESC
+		    FETCH FIRST 1 ROWS ONLY
+		""", nativeQuery = true)
 	String findLastSeq(@Param("lotType") String lotType, 
 			@Param("prdId") String prdId, 
 			@Param("dateStr")String dateStr, 

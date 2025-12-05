@@ -216,12 +216,18 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 		const locationId = makeLocationId(zone, rack, rackRow, rackCol);
 		
 		const inboundItemId = row.querySelector("td").getAttribute("data-id");
+		const itemId = row.querySelector(".itemId").value;
+		const itemType = row.querySelector(".itemType").value;
+		
+		console.log(itemId);
 		
 		items.push({
 			inboundAmount,
 			disposeAmount,
 			locationId,
-			inboundItemId
+			inboundItemId,
+			itemId,
+			itemType
 		});
 	});
 	

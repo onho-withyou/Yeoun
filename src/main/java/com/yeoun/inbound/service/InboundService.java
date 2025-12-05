@@ -171,7 +171,7 @@ public class InboundService {
 					.build();
 			
 			// LOT 생성 및 LOT번호 반환
-			String lotNo = lotTraceService.registLotMaster(lotMasterDTO, itemDTO.getItemId(), "00");
+			String lotNo = lotTraceService.registLotMaster(lotMasterDTO, "00");
 			
 			// InboundItem 업데이트
 			inboundItem.updateInfo(lotNo, itemDTO.getInboundAmount(), itemDTO.getDisposeAmount(), itemDTO.getLocationId());

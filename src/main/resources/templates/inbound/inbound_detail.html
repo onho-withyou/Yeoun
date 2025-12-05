@@ -68,6 +68,8 @@
 									</td>
 									<td>
 										<span class="disposeAmount" th:attr="data-index=${iterStat.index}" th:text="${item.disposeAmount}"></span>
+										<input type="hidden" th:value="${item.itemType}" class="itemType" />
+										<input type="hidden" th:value="${item.itemId}" class="itemId" />
 									</td>
 									<td><select class="moveZone form-select" th:attr="data-index=${iterStat.index}"></select></td>
 									<td><select class="moveRack form-select" th:attr="data-index=${iterStat.index}"></select></td>
