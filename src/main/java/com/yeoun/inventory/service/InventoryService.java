@@ -1,6 +1,7 @@
 package com.yeoun.inventory.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.jpa.domain.Specification;
@@ -245,6 +246,11 @@ public class InventoryService {
 		List<Inventory> inventoryList = inventoryRepository.findByWarehouseLocation(location);
 		
 		return inventoryList.stream().map(InventoryDTO::fromEntity).toList();
+	}
+
+	public List<Map<String, String>> getIvSummary() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	
