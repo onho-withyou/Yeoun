@@ -1,0 +1,43 @@
+
+<div class="modal fade" id="planDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">생산계획 상세조회</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <!-- 📌 생산계획 기본 정보 -->
+                <div class="mb-3 p-3 bg-light rounded">
+                    <div class="row mb-2">
+                        <div class="col-3"><b>계획번호</b> <span id="d_planId"></span></div>
+                        <div class="col-3"><b>작성일자</b> <span id="d_createdAt"></span></b></div>
+                        <div class="col-3"><b>완료예정일</b> <span id="d_dueDate"></span></div>
+                        <div class="col-3"><b>상태</b> <span id="d_status"></span></div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12"><b>메모</b> <span id="d_memo"></span></div>
+                    </div>
+                </div>
+
+                <!-- 📌 PLAN_ITEM Grid -->
+                <h6 class="mb-2">제품별 생산계획 목록</h6>
+                <div id="modalPlanItemGrid" class="ag-theme-quartz" style="height:260px;"></div>
+
+                <!-- 📌 ORDER_ITEM Grid -->
+                <h6 class="mt-4 mb-2">해당 제품 수주 목록</h6>
+                <div id="modalOrderItemGrid" class="ag-theme-quartz" style="height:260px;"></div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+            </div>
+
+        </div>
+    </div>
+</div>

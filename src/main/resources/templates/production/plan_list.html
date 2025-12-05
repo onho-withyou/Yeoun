@@ -40,14 +40,16 @@
 
 
 
-
-
     
 <!-- AG Grid CSS -->
 <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-quartz.css" />
 
 <!-- AG Grid JS (createGrid 지원되는 빌드) -->
 <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
+
+<div th:replace="production/plan_detail_modal :: *"></div>
+<script src="/js/production/plan_detail_modal.js"></script>
+
 
 <th:block layout:fragment="myScript">
     <script th:src="@{/js/production/plan_list.js}"></script>

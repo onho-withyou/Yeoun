@@ -22,8 +22,7 @@ public interface InventoryRepository
 		    SELECT 
 		        ITEM_ID AS prdId,
 		        SUM(IV_AMOUNT) AS currentStock
-		    FROM INVENTORY
-		    WHERE IV_STATUS = 'NORMAL'
+		    FROM INVENTORY		   
 		    GROUP BY ITEM_ID
 		""", nativeQuery = true)
 		List<Map<String, Object>> findCurrentStockGrouped();
