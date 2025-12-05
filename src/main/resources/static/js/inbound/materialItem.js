@@ -103,6 +103,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 		hideCompleteButton();
 	}
 	
+	document.querySelectorAll(".locationId").forEach(td => {
+		const rawId = td.textContent.trim();
+		const loc = locationInfo.find(l => String(l.locationId) === rawId);
+		
+		if (loc) {
+			td.textContent = `${loc.zone}-${loc.rack}-${loc.rackRow}-${loc.rackCol}`;
+		}
+	})
+	
 	// 모든 row의 zone select 채우기
 	const zones = [... new Set(locationInfo.map(location => location.zone))];
 	const sortedZones = sortNumericStrings(zones);
@@ -123,7 +132,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 	document.querySelectorAll(".moveRack").forEach(select => {
 		const index = select.dataset.index;
 		
-		console.log(index);
 		select.addEventListener("change", () => {
 			applyRackSelection(index);
 		});
@@ -132,7 +140,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // ------------------------------------------------------
 // 입고완료 처리 
-
 // 상태가 입고완료면 input과 select 비활성화
 function disableAllInputs() {
 	// 입고수량 input 비활성화
@@ -208,18 +215,12 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 		const inboundAmount = Number(row.querySelector(`.inboundAmount[data-index="${index}"]`).value);
 		const disposeAmount = Number(row.querySelector(`.disposeAmount[data-index="${index}"]`).textContent);
 		
-		const zone = row.querySelector(`.moveZone[data-index="${index}"]`).value;
-		const rack = row.querySelector(`.moveRack[data-index="${index}"]`).value;
-		const rackRow = row.querySelector(`.moveRow[data-index="${index}"]`).value;
-		const rackCol = row.querySelector(`.moveColumn[data-index="${index}"]`).value;
+		const locationId = getLocationIdByPosition(index);
 		
-		const locationId = makeLocationId(zone, rack, rackRow, rackCol);
-		
-		const inboundItemId = row.querySelector("td").getAttribute("data-id");
+		const itemName = row.querySelector("td").getAttribute("data-name");
 		const itemId = row.querySelector(".itemId").value;
 		const itemType = row.querySelector(".itemType").value;
-		
-		console.log(itemId);
+		const inboundItemId = row.querySelector(".inboundItemId").value;
 		
 		items.push({
 			inboundAmount,
@@ -227,7 +228,8 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 			locationId,
 			inboundItemId,
 			itemId,
-			itemType
+			itemType,
+			itemName
 		});
 	});
 	
@@ -251,10 +253,50 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 		return;
 	}
 	
-	alert("입고가 완료되었습니다.");
+	const data = res.json();
+	
+	if (data.success) {
+		alert("입고가 완료되었습니다.");
+		setTimeout(() => {
+			window.location.href = "/inventory/inbound/list";
+		}, 10); 
+	}
+	
 });
 
-// location 저장될 형식 만드는 함수
-function makeLocationId(zone, rack, row, col) {
-	return `${zone}-${rack}-${row}-${col}`;
+// 현재 location값 기준으로 locationId를 찾아 반환하는함수
+function getLocationIdByPosition(index) {
+	const { zone, rack, row, col } = getRowSelects(index);
+	
+	const selectedZone = zone.value;
+	const selectedRack = rack.value;
+	const selectedRow = row.value;
+	const selectedCol = col.value;
+	
+	if (!selectedZone || !selectedRack || !selectedRow || !selectedCol) {
+		return null;
+	}
+	
+	const target = locationInfo.find(loc => 
+		loc.zone === selectedZone &&
+		loc.rack === selectedRack &&
+		loc.rackRow  === selectedRow &&
+		loc.rackCol === selectedCol
+	);
+	
+	if (!target) {
+		console.error("해당 위치의 LOCATION_ID를 찾을 수 없음");
+		return null;
+	}
+	
+	return target.locationId;
+}
+
+// ---------------------------------------
+// 발주 상세 모달 열기
+function openDetailWindow(id) {
+	console.log(id);
+	const url = `/purchase/detail/${id}`;
+	
+	window.open(url, '_blank', 'width=1200,height=900,scrollbars=yes');
 }

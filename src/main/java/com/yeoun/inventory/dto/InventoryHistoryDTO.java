@@ -5,18 +5,23 @@ import java.time.LocalDateTime;
 import org.modelmapper.ModelMapper;
 
 import com.yeoun.inventory.entity.InventoryHistory;
+import com.yeoun.inventory.entity.WarehouseLocation;
 
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
 public class InventoryHistoryDTO {
     private Long ivHistoryId;        // 이력 ID
     private String lotNo;            // LOT 번호
     private String itemName;           // 재고이름
+    private String itemId;
 
     private String prevLocationId;   // 이전 위치
     private String prevLocationName;
@@ -35,6 +40,30 @@ public class InventoryHistoryDTO {
     private LocalDateTime createdDate; // 등록 일시
     
     // ---------------------------------------------------------------------------
+    @Builder
+	public InventoryHistoryDTO(Long ivHistoryId, String lotNo, String prevLocationId, String itemId, String itemName,
+			String prevLocationName, String currentLocationId, String currentLocationName, String empId,
+			String workType, Long moveAmount, Long prevAmount, Long currentAmount, String reason,
+			LocalDateTime createdDate) {
+		this.ivHistoryId = ivHistoryId;
+		this.lotNo = lotNo;
+		this.itemId = itemId;
+		this.itemName = itemName;
+		this.prevLocationId = prevLocationId;
+		this.prevLocationName = prevLocationName;
+		this.currentLocationId = currentLocationId;
+		this.currentLocationName = currentLocationName;
+		this.empId = empId;
+		this.workType = workType;
+		this.moveAmount = moveAmount;
+		this.prevAmount = prevAmount;
+		this.currentAmount = currentAmount;
+		this.reason = reason;
+		this.createdDate = createdDate;
+	}
+    
+    
+    // ---------------------------------------------------------------------------
     private static ModelMapper modelMapper = new ModelMapper();
     // Entity -> DTO 변환
     public static InventoryHistoryDTO fromEntity(InventoryHistory history) {
@@ -50,4 +79,24 @@ public class InventoryHistoryDTO {
         
         return dto;
     }
+    
+    // DTO -> Entity 변환
+    public InventoryHistory toEntity() {
+    	InventoryHistory inventoryHistory = modelMapper.map(this, InventoryHistory.class);
+    	
+    	if (this.getPrevLocationId() != null) {
+    		WarehouseLocation warehouseLocation= new WarehouseLocation();
+    		warehouseLocation.setLocationId(this.getPrevLocationId());
+    		inventoryHistory.setPrevWarehouseLocation(warehouseLocation);
+    	}
+    	
+    	if (this.getCurrentLocationId() != null) {
+    		WarehouseLocation warehouseLocation= new WarehouseLocation();
+    		warehouseLocation.setLocationId(this.getCurrentLocationId());
+    		inventoryHistory.setCurrentWarehouseLocation(warehouseLocation);
+    	}
+    	
+    	return inventoryHistory;
+    }    
+    
 }
