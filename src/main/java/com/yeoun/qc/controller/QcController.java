@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.qc.dto.QcDetailRowDTO;
 import com.yeoun.qc.dto.QcRegistDTO;
+import com.yeoun.qc.dto.QcResultListDTO;
 import com.yeoun.qc.service.QcResultService;
 
 import lombok.RequiredArgsConstructor;
@@ -41,13 +42,19 @@ public class QcController {
 		return qcResultService.getDetailRows(qcResultId);
 	}
 	
-
-	
 	// QC 결과 조회 페이지
 	@GetMapping("/result")
 	public String qcResultList() {
 		return "/qc/result_list";
 	}
+	
+	// QC 결과 목록 데이터
+	@GetMapping("/result/data")
+	@ResponseBody
+	public List<QcResultListDTO> qcResultListForGrid() {
+		return qcResultService.getQcResultListForView();
+	}
+	
 	
 
 }

@@ -12,6 +12,7 @@ import com.yeoun.order.entity.WorkOrder;
 import com.yeoun.order.repository.WorkOrderRepository;
 import com.yeoun.qc.dto.QcDetailRowDTO;
 import com.yeoun.qc.dto.QcRegistDTO;
+import com.yeoun.qc.dto.QcResultListDTO;
 import com.yeoun.qc.entity.QcResult;
 import com.yeoun.qc.entity.QcResultDetail;
 import com.yeoun.qc.repository.QcResultDetailRepository;
@@ -182,6 +183,13 @@ public class QcResultService {
 		
 		return qcDetailRowDTO;
 	}
+
+	// ----------------------------------------------------------
+	// QC 결과 목록 조회
+	public List<QcResultListDTO> getQcResultListForView() {
+		return qcResultRepository.findResultListForView();
+	}
+
 
     
     

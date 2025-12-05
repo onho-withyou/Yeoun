@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.yeoun.qc.dto.QcRegistDTO;
+import com.yeoun.qc.dto.QcResultListDTO;
 import com.yeoun.qc.entity.QcResult;
 
 @Repository
@@ -39,5 +40,23 @@ public interface QcResultRepository extends JpaRepository<QcResult, Long> {
         ORDER BY w.createdDate DESC
         """)
     List<QcRegistDTO> findRegistListByStatus(@Param("status") String status);
+    
+    //
+    @Query("""
+            select new com.yeoun.qc.dto.QcResultListDTO(
+                r.qcResultId,
+                r.orderId,
+                p.prdId,
+                p.prdName,
+                r.inspectionDate,
+                r.overallResult
+            )
+            from QcResult r
+              join WorkOrder w on r.orderId = w.orderId
+              join w.product p
+            where r.overallResult <> 'PENDING'
+            order by r.inspectionDate desc nulls last
+            """)
+	List<QcResultListDTO> findResultListForView();
     
 }
