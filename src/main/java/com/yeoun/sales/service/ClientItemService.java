@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class ClientItemService {
 
     private final ClientItemRepository repo;
+    
 
     @Transactional
     public void addItems(String clientId, List<ClientItemDTO> items, String empId) {
@@ -24,7 +25,7 @@ public class ClientItemService {
         for (ClientItemDTO dto : items) {
             ClientItem item = ClientItem.builder()
                     .clientId(clientId)
-                    .materialId(dto.getMaterialId())
+                    .materialId(dto.getMaterialId())                   
                     .unitPrice(dto.getUnitPrice())
                     .minOrderQty(dto.getMoq())
                     .unit(dto.getUnit())
@@ -37,7 +38,12 @@ public class ClientItemService {
         }
     }
 
-    public List<ClientItem> getItems(String clientId) {
-        return repo.findByClientId(clientId);
+    /** 🔥 품명 + 단위까지 포함된 DTO 목록 반환 */
+    public List<ClientItemDTO> getItems(String clientId) {
+        return repo.findItemsWithMaterialInfo(clientId);
     }
+   
+    
+    
+    
 }

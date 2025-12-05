@@ -85,6 +85,8 @@ public class ClientController {
 
         // ▶ SUPPLIER → 협력사 상세 페이지
         model.addAttribute("items", itemService.getItems(clientId));
+        model.addAttribute("materials", materialRepository.findAll());
+        
         return "sales/supplier_detail";
     }
 

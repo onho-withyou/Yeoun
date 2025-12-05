@@ -36,46 +36,39 @@
     ============================================================ -->
     <div class="tab-content">
 
-        <!-- =====================================================
-             ① 기본 정보
-        ====================================================== -->
+
+        <!-- =============== ① 기본 정보 =============== -->
         <div id="basicTab" class="tab-pane fade show active">
 
             <div class="card">
                 <div class="card-body">
-
                     <h5 class="card-title mb-3">기본 정보</h5>
 
                     <div class="row g-3">
 
                         <div class="col-md-4">
                             <label class="form-label">협력사명</label>
-                            <input class="form-control"
-                                   th:value="${client.clientName}" readonly>
+                            <input class="form-control" th:value="${client.clientName}" readonly>
                         </div>
 
                         <div class="col-md-4">
                             <label class="form-label">사업자등록번호</label>
-                            <input class="form-control"
-                                   th:value="${client.businessNo}" readonly>
+                            <input class="form-control" th:value="${client.businessNo}" readonly>
                         </div>
 
                         <div class="col-md-4">
                             <label class="form-label">대표자명</label>
-                            <input class="form-control"
-                                   th:value="${client.ceoName}" readonly>
+                            <input class="form-control" th:value="${client.ceoName}" readonly>
                         </div>
 
                         <div class="col-md-4">
                             <label class="form-label">전화번호</label>
-                            <input class="form-control"
-                                   th:value="${client.managerTel}" readonly>
+                            <input class="form-control" th:value="${client.managerTel}" readonly>
                         </div>
 
                         <div class="col-md-4">
                             <label class="form-label">이메일</label>
-                            <input class="form-control"
-                                   th:value="${client.managerEmail}" readonly>
+                            <input class="form-control" th:value="${client.managerEmail}" readonly>
                         </div>
 
                         <div class="col-md-8">
@@ -91,18 +84,15 @@
 
         </div>
 
-        <!-- =====================================================
-             ② 정산 정보
-        ====================================================== -->
-        <div id="settleTab" class="tab-pane fade">
 
+        <!-- =============== ② 정산 정보 =============== -->
+        <div id="settleTab" class="tab-pane fade">
             <div class="card">
                 <div class="card-body">
 
                     <h5 class="card-title mb-3">정산 정보</h5>
 
                     <div class="row g-3">
-
                         <div class="col-md-4">
                             <label class="form-label">은행명</label>
                             <input class="form-control" th:value="${client.bankName}" readonly>
@@ -117,89 +107,38 @@
                             <label class="form-label">예금주</label>
                             <input class="form-control" th:value="${client.accountName}" readonly>
                         </div>
-
                     </div>
 
                 </div>
             </div>
-
         </div>
 
-     <!-- =====================================================
-     ③ 취급 품목 (AG-GRID)
-====================================================== -->
+
+<!-- =====================================================
+     ③ 취급 품목 (AG-GRID + 내부 추가 폼)
+===================================================== -->
 <div id="itemTab" class="tab-pane fade">
 
     <div class="d-flex justify-content-between mb-3">
         <h5>취급 품목 정보</h5>
         <button class="btn btn-primary" id="btnAddItem">+ 품목 추가</button>
+
     </div>
 
+    <!-- ▶ 기존 AG GRID -->
     <div class="card">
         <div class="card-body">
-
-            <!-- AG Grid 영역 -->
-            <div id="supplierItemGrid"
-                 class="ag-theme-quartz"
-                 style="height: 500px; width: 100%;">
-            </div>
-
+            <div id="supplierItemGrid" class="ag-theme-quartz" style="height: 500px;"></div>
         </div>
     </div>
 
 </div>
 
+        
+   </div>
+   </div>
+        
 
-
-<!-- ===========================================================
-     원자재 선택 모달
-=========================================================== -->
-<!-- STEP A : 원자재 선택 -->
-<div class="modal-bg" id="modalItemSelect" style="display:none;">
-  <div class="modal item-modal">
-
-    <div class="modal-header">
-      <h3>취급 품목 선택</h3>
-      <span class="close" onclick="closeItemSelect()">×</span>
-    </div>
-
-    <input type="text" id="searchProductInput" class="input-search"
-           placeholder="품명 검색..." oninput="filterMaterialList()"/>
-
-    <table class="item-table">
-      <thead>
-        <tr><th></th><th>품명</th><th>카테고리</th><th>단위</th></tr>
-      </thead>
-      <tbody id="materialListArea"></tbody>
-    </table>
-
-    <button class="btn-next" onclick="goToStepB()">다음</button>
-  </div>
-</div>
-
-<!-- STEP B: 공급 조건 입력 -->
-<div class="modal-bg" id="modalItemInput" style="display:none;">
-  <div class="modal item-modal">
-
-    <div class="modal-header">
-      <h3>공급 조건 입력</h3>
-      <span class="close" onclick="closeItemInput()">×</span>
-    </div>
-
-    <table class="item-table">
-      <thead>
-        <tr>
-          <th>품명</th><th>단위</th><th>단가</th><th>MOQ</th><th>공급</th>
-        </tr>
-      </thead>
-      <tbody id="selectedInputTable"></tbody>
-    </table>
-
-    <button class="btn-save" onclick="saveVendorItems()">저장</button>
-  </div>
-</div>
-
-</div>
 <!-- ===========================================================
      JS 데이터 전달
 =========================================================== -->
@@ -208,13 +147,12 @@
     window.initialItemList = /*[[${items}]]*/ [];
 </script>
 
-
 <!-- AG Grid -->
 <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-quartz.css"/>
 <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
 
-<!-- 상세 JS -->
+<!-- 상세 JS  -->
 <script src="/js/sales/supplierDetail.js"></script>
 
 </th:block>
