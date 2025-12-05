@@ -21,7 +21,6 @@ public class InventoryHistoryDTO {
     private Long ivHistoryId;        // 이력 ID
     private String lotNo;            // LOT 번호
     private String itemName;           // 재고이름
-    private String itemId;
 
     private String prevLocationId;   // 이전 위치
     private String prevLocationName;
@@ -41,13 +40,12 @@ public class InventoryHistoryDTO {
     
     // ---------------------------------------------------------------------------
     @Builder
-	public InventoryHistoryDTO(Long ivHistoryId, String lotNo, String prevLocationId, String itemId, String itemName,
+	public InventoryHistoryDTO(Long ivHistoryId, String lotNo, String prevLocationId, String itemName,
 			String prevLocationName, String currentLocationId, String currentLocationName, String empId,
 			String workType, Long moveAmount, Long prevAmount, Long currentAmount, String reason,
 			LocalDateTime createdDate) {
 		this.ivHistoryId = ivHistoryId;
 		this.lotNo = lotNo;
-		this.itemId = itemId;
 		this.itemName = itemName;
 		this.prevLocationId = prevLocationId;
 		this.prevLocationName = prevLocationName;

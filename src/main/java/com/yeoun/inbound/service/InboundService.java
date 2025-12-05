@@ -161,8 +161,6 @@ public class InboundService {
 			
 			InboundItem inboundItem = inboundItemMap.get(itemDTO.getInboundItemId());
 			
-			log.info(">>>>>>>>>>>>>>>>>>>> itemID: " + itemDTO.getItemId());
-			
 			if (inboundItem == null) {
 				throw new NoSuchElementException("입고 품목을 찾을 수 없습니다.");
 			}
@@ -219,12 +217,9 @@ public class InboundService {
 			
 			inventoryService.registInventory(inventoryDTO);
 			
-			log.info(">>>>>>>>>>>>>>>>>>>> itemID1 " + itemDTO.getItemId());
-			
 			// 재고이력 등록
 			InventoryHistoryDTO inventoryHistoryDTO = InventoryHistoryDTO.builder()
 					.lotNo(lotNo)
-					.itemId(itemDTO.getItemId())
 					.itemName(itemDTO.getItemName())
 					.empId(empId)
 					.workType("INBOUND")
