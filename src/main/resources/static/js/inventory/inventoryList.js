@@ -53,8 +53,9 @@ async function getSearchData() {
 
 // 검색데이터에 기반하여 재고 데이터 정보 가져오기
 async function fetchInventoryData(searchData) {
+	console.log(await searchData,"DDD");
 	const response = 
-		await fetch('/api/inventorys', {
+		await fetch('/api/inventories', {
 			method: 'POST',
 			headers: {
 				[csrfHeader]: csrfToken,
@@ -88,10 +89,51 @@ btnSearch.addEventListener('click', async () => {
 function initGrid() {
 	const inventoryGridEl = document.getElementById('inventoryGrid');
 	const Grid = tui.Grid;
+	
+	// 1. 그리드 한글 언어셋 설정 (필터 및 각종 텍스트 한글화)
+	Grid.setLanguage('ko', {
+	    display: {
+	        noData: '데이터가 없습니다.',
+	        loadingData: '데이터를 불러오는 중입니다.',
+	        resizeHandleGuide: '마우스 드래그를 통해 너비를 조정할 수 있습니다.',
+	    },
+	    net: {
+	        confirmCreate: '생성하시겠습니까?',
+	        confirmUpdate: '수정하시겠습니까?',
+	        confirmDelete: '삭제하시겠습니까?',
+	        confirmModify: '저장하시겠습니까?',
+	        noDataToCreate: '생성할 데이터가 없습니다.',
+	        noDataToUpdate: '수정할 데이터가 없습니다.',
+	        noDataToDelete: '삭제할 데이터가 없습니다.',
+	        noDataToModify: '수정할 데이터가 없습니다.',
+	        failResponse: '데이터 요청 중에 에러가 발생하였습니다.'
+	    },
+	    filter: {
+	        // 문자열 필터 옵션
+	        contains: '포함',
+	        eq: '일치',
+	        ne: '불일치',
+	        start: '시작 문자',
+	        end: '끝 문자',
+	        
+	        // 날짜/숫자 필터 옵션
+	        after: '이후',
+	        afterEq: '이후 (포함)',
+	        before: '이전',
+	        beforeEq: '이전 (포함)',
+
+	        // 버튼 및 기타
+	        apply: '적용',
+	        clear: '초기화',
+	        selectAll: '전체 선택'
+	    }
+	});
+	
+	
 	inventoryGrid = new Grid({
 		el: inventoryGridEl,
 		bodyHeight: 'auto',
-		rowHeaders:['rowNum'],
+//		rowHeaders:['rowNum'],
 		pageOptions: {
 		    useClient: true,  // 클라이언트 사이드 페이징
 		    perPage: 20       // 페이지당 20개 행
@@ -102,7 +144,7 @@ function initGrid() {
 		  { header: '재고량',    name: 'ivAmount', width: 80, align: 'right' },
 		  { header: '출고예정',    name: 'expectObAmount', width: 80, align: 'right' },
 		  {
-		    header: '위치', name: 'location', minwidth: 140,
+		    header: '위치', name: 'location', minWidth: 80,
 		    formatter: ({ row }) => {
 		      const z  = row.zone  || '';
 		      const r  = row.rack  || '';
@@ -120,7 +162,7 @@ function initGrid() {
 			formatter: ({ value }) => value ? value.substring(0, 16) : ''
 		  },
 		  { header: '유통기한',  name: 'expirationDate', minWidth: 120, 
-			formatter: ({ value }) => value ? value.substring(0, 16) : '없음'
+			formatter: ({ value }) => value ? value.substring(0, 10) : '없음'
 		  },
 		  { header: '상태',      name: 'ivStatus', width: 80 },
 		  {
@@ -155,7 +197,7 @@ function initGrid() {
 // 창고 ZONE, RACK, ROW, COL 가져오기
 async function getLocationInfo() {
 	const response = 
-		await fetch('/api/inventorys/locations', {
+		await fetch('/api/inventories/locations', {
 			method: 'GET',
 			headers: {
 				[csrfHeader]: csrfToken,

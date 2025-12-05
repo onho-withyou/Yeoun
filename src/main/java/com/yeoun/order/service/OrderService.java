@@ -2,6 +2,7 @@ package com.yeoun.order.service;
 
 import java.util.List;
 
+import com.yeoun.order.dto.WorkOrderSearchDTO;
 import org.springframework.stereotype.Service;
 
 import com.yeoun.order.dto.WorkOrderListDTO;
@@ -17,7 +18,7 @@ public class OrderService {
 	
 	private final OrderMapper orderMapper;
 	
-	public List<WorkOrderListDTO> loadAllOrders (WorkOrderListDTO dto){
+	public List<WorkOrderListDTO> loadAllOrders (WorkOrderSearchDTO dto){
 		return orderMapper.selectOrderList(dto);
 	}
 	

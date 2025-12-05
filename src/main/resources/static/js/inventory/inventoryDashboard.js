@@ -1,9 +1,9 @@
-/**
- * Inventory Dashboard Script
- */
+// 전역변수
+let inventoryInfo;
 
-document.addEventListener('DOMContentLoaded', function () {
-
+document.addEventListener('DOMContentLoaded', async function () {
+	inventoryInfo = await fetchInventoryData();
+	console.log("@@@@@@@@@@@@@@@@", inventoryInfo)
     // 1. Warehouse Usage Chart (Donut) -> Zone Usage
     const warehouseOptions = {
         series: [44, 13, 33],
@@ -101,3 +101,41 @@ document.addEventListener('DOMContentLoaded', function () {
     const trendChart = new ApexCharts(document.querySelector("#trendChart"), trendOptions);
     trendChart.render();
 });
+
+// ----------------------------------------------------------------------
+// 데이터 정보 가져오기
+
+// 재고정보 가져오기
+async function fetchInventoryData() {
+	const response = 
+		await fetch('/api/inventories', {
+			method: 'POST',
+			headers: {
+				[csrfHeader]: csrfToken,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify()
+		});
+//	console.log(response);
+	if (!response.ok) {
+		throw new Error('재고데이터를 가져올 수 없습니다.')
+	}
+	return await response.json();
+} 
+
+// 상품별 재고 정보(그룹화)
+async function fetchInventoryData() {
+	const response = 
+		await fetch('/api/inventories/summary', {
+			method: 'GET',
+			headers: {
+				[csrfHeader]: csrfToken,
+				'Content-Type': 'application/json'
+			},
+		});
+//	console.log(response);
+	if (!response.ok) {
+		throw new Error('재고데이터를 가져올 수 없습니다.')
+	}
+	return await response.json();
+}
