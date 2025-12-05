@@ -17,15 +17,16 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @Transactional
 public class ProductMstService {
-	private ProductMstRepository productMstRepository;
+	
+	private final ProductMstRepository productMstRepository;
 	//1. 완제품 그리드 조회
 	@Transactional(readOnly = true)
-	public List<ProductMst> getProductAll() {
+	public List<ProductMst> findAll() {
+		log.info("productMstRepository.findAll() 조회된개수 - {}",productMstRepository.findAll());
 		return productMstRepository.findAll();
 	}
 
 	//2. 완제품 그리드 수정
-	
 	//3. 완제품 그리드 삭제
 
 }

@@ -2,6 +2,7 @@ package com.yeoun.inbound.controller;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -88,8 +89,13 @@ public class InboundController {
 	
 	// 원재료 입고 처리
 	@PostMapping("/mat/complete")
-	public String materialComplete(@RequestBody ReceiptDTO receiptDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
+	public  Map<String, Object> materialComplete(@RequestBody ReceiptDTO receiptDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
 		inboundService.updateInbound(receiptDTO, loginDTO.getEmpId());
-		return "redirect:/inventory/inbound/list";
+		
+		Map<String, Object> result = new HashMap<>();
+		
+		result.put("success", true);
+		
+		return result;
 	}
 }

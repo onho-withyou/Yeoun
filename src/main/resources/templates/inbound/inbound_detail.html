@@ -22,7 +22,7 @@
 						</div>
 						<div class="col">
 						    <div class="text-secondary mb-1">납기일자</div>
-						    <div class="fw-semibold" th:text="${receiptDTO.expectArrivalDate}"></div>
+						    <div class="fw-semibold" th:text="${#temporals.format(receiptDTO.expectArrivalDate, 'yyyy-MM-dd')}"></div>
 						</div>
 						<div class="col">
 						    <div class="text-secondary mb-1">발주번호</div>
@@ -30,7 +30,16 @@
 						</div>
 						<div class="col">
 							<div class="text-secondary mb-1">상태</div>
-							<div>대기</div>
+							<div>
+							    <span th:if="${receiptDTO.inboundStatus == 'PENDING_ARRIVAL'}" class="badge bg-warning text-dark">대기</span>
+							    <span th:if="${receiptDTO.inboundStatus == 'COMPLETED'}" class="badge bg-success">입고완료</span>
+							</div>
+						</div>
+						<div class="col">
+							<div class="text-secondary mb-1">발주내역</div>
+							<i class="fa-regular fa-window-restore"  style="cursor:pointer;"  
+								th:attr="data-material-id=${receiptDTO.materialId}"
+								onclick="openDetailWindow(this.dataset.materialId)"></i>
 						</div>
 					 </div>
 				</div>
@@ -44,39 +53,64 @@
 					<div class="table-responsive">
 						<input type="hidden" id="inboundStatus" th:value="${receiptDTO.inboundStatus}">
 						<input type="hidden" id="inboundId" th:value="${receiptDTO.inboundId}">
-						<table class="table table-bordered table-hover mb-0">
-							<thead class="table-light">
-								<tr class="text-center">
-									<th>원재료명</th>
-									<th>발주 수량</th>
-									<th style="width: 9em;">입고 수량</th>
-									<th style="width: 9em;">불량 수량</th>
-									<th>ZONE</th>
-									<th>RACK</th>
-									<th>ROW</th>
-									<th>COLUMN</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr th:each="item, iterStat  : ${receiptDTO.items}">
-									<td th:text="${item.itemName}" th:attr="data-id=${item.inboundItemId}"></td>
-									<td>
-										<span class="requestAmount" th:text="${item.requestAmount}" th:attr="data-index=${iterStat.index}"></span>
-									</td>
-									<td>
-										<input type="number" min="0" step="1" class="form-control inboundAmount" th:attr="data-index=${iterStat.index}"/>
-									</td>
-									<td>
-										<span class="disposeAmount" th:attr="data-index=${iterStat.index}" th:text="${item.disposeAmount}"></span>
-										<input type="hidden" th:value="${item.itemType}" class="itemType" />
-										<input type="hidden" th:value="${item.itemId}" class="itemId" />
-									</td>
-									<td><select class="moveZone form-select" th:attr="data-index=${iterStat.index}"></select></td>
-									<td><select class="moveRack form-select" th:attr="data-index=${iterStat.index}"></select></td>
-									<td><select class="moveRow form-select" th:attr="data-index=${iterStat.index}"></select></td>
-									<td><select class="moveColumn form-select" th:attr="data-index=${iterStat.index}"></select></td>
-								</tr>
-							</tbody>
+						<table class="table table-bordered table-hover mb-0 text-center">
+							<th:block th:if="${receiptDTO.inboundStatus == 'PENDING_ARRIVAL'}">
+								<thead class="table-light">
+									<tr class="text-center">
+										<th>원재료명</th>
+										<th>발주 수량</th>
+										<th style="width: 9em;">입고 수량</th>
+										<th style="width: 9em;">불량 수량</th>
+										<th>ZONE</th>
+										<th>RACK</th>
+										<th>ROW</th>
+										<th>COLUMN</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr th:each="item, iterStat  : ${receiptDTO.items}">
+										<td th:text="${item.itemName}" th:attr="data-name=${item.itemName}"></td>
+										<td>
+											<span class="requestAmount" th:text="${item.requestAmount}" th:attr="data-index=${iterStat.index}"></span>
+										</td>
+										<td>
+											<input type="number" min="0" step="1" class="form-control inboundAmount" th:attr="data-index=${iterStat.index}"/>
+										</td>
+										<td>
+											<span class="disposeAmount" th:attr="data-index=${iterStat.index}" th:text="${item.disposeAmount}"></span>
+											<input type="hidden" th:value="${item.itemType}" class="itemType" />
+											<input type="hidden" th:value="${item.itemId}" class="itemId" />
+											<input type="hidden" th:value="${item.inboundItemId}" class="inboundItemId" />
+										</td>
+										<td><select class="moveZone form-select" th:attr="data-index=${iterStat.index}"></select></td>
+										<td><select class="moveRack form-select" th:attr="data-index=${iterStat.index}"></select></td>
+										<td><select class="moveRow form-select" th:attr="data-index=${iterStat.index}"></select></td>
+										<td><select class="moveColumn form-select" th:attr="data-index=${iterStat.index}"></select></td>
+									</tr>
+								</tbody>
+							 </th:block>
+							 <th:block th:unless="${receiptDTO.inboundStatus == 'PENDING_ARRIVAL'}">
+							 	<thead class="table-light">
+									<tr class="text-center">
+										<th>원재료명</th>
+										<th>발주 수량</th>
+										<th style="width: 9em;">입고 수량</th>
+										<th style="width: 9em;">불량 수량</th>
+										<th>창고위치</th>
+										<th>LOT번호</th>
+									</tr>
+								</thead>
+							 	<tbody class="">
+									 <tr th:each="item, iterStat  : ${receiptDTO.items}">
+							            <td th:text="${item.itemName}"></td>
+							            <td th:text="${item.requestAmount}"></td>
+							            <td th:text="${item.inboundAmount}"></td>
+							            <td th:text="${item.disposeAmount}"></td>
+							            <td th:text="${item.locationId}" class="locationId" th:attr="data-index=${iterStat.index}"></td>
+							            <td th:text="${item.lotNo}"></td>
+							        </tr>
+							 	</tbody>
+							 </th:block>
 						</table>
 					</div>
 				
@@ -85,6 +119,7 @@
 			</div>
 		</div>
 		<th:block layout:fragment="myScript">
+			<script src="https://kit.fontawesome.com/a96e186b03.js" crossorigin="anonymous"></script>
 			<script type="text/javascript" src="https://uicdn.toast.com/tui.pagination/v3.4.0/tui-pagination.js"></script>
 			<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 			<script src="/js/inbound/materialGrid.js"></script>

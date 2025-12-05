@@ -78,7 +78,7 @@ public class InventoryHistory {
 	private Long prevAmount = 0l; // 이전수량
 	
 	@Column(nullable = true)
-	private Long currentAmount  = 0l; // 현재수량
+	private Long currentAmount = 0l; // 현재수량
 	
 	@Column(nullable = true)
 	private String reason; // 이유

@@ -241,6 +241,12 @@ public class InventoryService {
 		return historyList.stream().map(InventoryHistoryDTO::fromEntity).toList(); 
 	}
 	
+	// 재고 등록(입고 시 사용)
+	@Transactional
+	public void registInventory(InventoryDTO inventoryDTO) {
+		Inventory inventory = inventoryDTO.toEntity();
+		inventoryRepository.save(inventory);
+	}
 	// 특정위치의 재고목록 불러오기
 	public List<InventoryDTO> getlocationInventories(String locationId) {
 		WarehouseLocation location = warehouseLocationRepository.findById(locationId).orElseThrow(() -> new EntityNotFoundException("존재하지않는 로케이션입니다.") ); 
@@ -255,6 +261,11 @@ public class InventoryService {
 		return inventoryRepository.getIvSummaryWithSafetyStock();
 	}
 	
-	
+	// 재고 이력 등록
+	@Transactional
+	public void registInventoryHistory(InventoryHistoryDTO inventoryHistoryDTO) {
+		InventoryHistory inventoryHistory = inventoryHistoryDTO.toEntity();
+		inventoryHistoryRepository.save(inventoryHistory);
+	}
 
 }
