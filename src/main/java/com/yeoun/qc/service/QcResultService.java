@@ -173,9 +173,9 @@ public class QcResultService {
 				qdrDTO.setStdText(item.getStdText());
 			}
 			
-			qdrDTO.setMeasureValue(null);
-			qdrDTO.setResult(null);
-			qdrDTO.setRemark(null);
+			qdrDTO.setMeasureValue(d.getMeasureValue());
+			qdrDTO.setResult(d.getResult());
+			qdrDTO.setRemark(d.getRemark());
 			
 			qcDetailRowDTO.add(qdrDTO);
 			

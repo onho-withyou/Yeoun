@@ -27,6 +27,7 @@ public interface QcResultRepository extends JpaRepository<QcResult, Long> {
     // QC 등록 목록용 DTO 조회 (PENDING 상태만)
     @Query("""
         SELECT new com.yeoun.qc.dto.QcRegistDTO(
+    		q.qcResultId,
             q.orderId,
             w.product.prdId,
             w.product.prdName,

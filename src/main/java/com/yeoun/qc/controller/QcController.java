@@ -34,7 +34,7 @@ public class QcController {
 	public List<QcRegistDTO> qcRegistListForGrid() {
 		return qcResultService.getQcResultListForRegist();
 	}
-	
+
 	// QC 등록 모달 데이터
 	@GetMapping("/{qcResultId}/details")
 	@ResponseBody

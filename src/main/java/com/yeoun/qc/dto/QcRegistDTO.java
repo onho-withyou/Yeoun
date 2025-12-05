@@ -13,6 +13,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class QcRegistDTO {
 	
+	private Long qcResultId;
+	
 	// 작업지시번호
 	private String orderId;
 	
