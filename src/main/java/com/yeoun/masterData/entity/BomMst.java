@@ -3,8 +3,6 @@ package com.yeoun.masterData.entity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
