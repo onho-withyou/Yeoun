@@ -7,6 +7,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.production.enums.BomStatus;
 import com.yeoun.production.enums.ProductionStatus;
 
@@ -69,5 +70,10 @@ public class ProductionPlanItem {
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS", length = 20, nullable = false)
     private ProductionStatus status;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PRD_ID", insertable = false, updatable = false)
+    private ProductMst product;
+
 
 }

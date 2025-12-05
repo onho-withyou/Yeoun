@@ -2,6 +2,9 @@
           xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
           layout:decorate="~{/layouts/layout}">
 
+<!-- ==============================
+      1) CONTENT 영역 
+============================== -->
 <th:block layout:fragment="content">
 
 <div class="custom-body container-xxl flex-grow-1 container-p-y">
@@ -18,17 +21,14 @@
 
                 <div class="col-md-2">
                     <button id="btnSearch" class="btn btn-primary w-100">검색</button> <hr>
-                    <button class="btn btn-primary" onclick="location.href='/production/create'">  생산계획 생성</button>
-
+                    <button class="btn btn-primary" onclick="location.href='/production/create'">
+                        생산계획 생성
+                    </button>
                 </div>
             </div>
 
         </div>
-    
-    
-    
-</div>
-    
+    </div>
 
     <div class="card">
         <div class="card-body">
@@ -38,23 +38,32 @@
 
 </div>
 
+<!-- AG Grid -->
+<script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.noStyle.js"></script>
+
+<!-- 모달 -->
+<div th:replace="~{production/plan_detail_modal :: modal}"></div>
+
+</th:block> <!-- content fragment 끝 -->
 
 
-    
-<!-- AG Grid CSS -->
-<link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-quartz.css" />
 
-<!-- AG Grid JS (createGrid 지원되는 빌드) -->
-<script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
-
-<div th:replace="production/plan_detail_modal :: *"></div>
-<script src="/js/production/plan_detail_modal.js"></script>
-
-
+<!-- ==============================
+      2) SCRIPT 영역 (★layout에서 출력됨)
+============================== -->
 <th:block layout:fragment="myScript">
-    <script th:src="@{/js/production/plan_list.js}"></script>
-</th:block>
-    
+
+    <!-- 디버깅용: JS가 로드됐는지 확인 -->
+    <script>
+        console.log("📌 myScript fragment 로드됨");
+    </script>
+
+    <!-- 상세 모달 스크립트 로드 -->
+    <script src="/js/production/plan_detail_modal.js"></script>
+
+    <!-- 리스트 스크립트 로드 -->
+    <script src="/js/production/plan_list.js"></script>
 
 </th:block>
+
 </th:block>

@@ -16,7 +16,12 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PlanDetailDTO {
 
-    private ProductionPlan plan;
-    private List<ProductionPlanItem> planItems;
+    private String planId;
+    private String createdAt;
+    private String itemName;   // 🔥 제품명
+    private Integer planQty;   // 🔥 이미 PLAN_QTY 있으니 이거 사용
+    private String status;
+
+    private List<ProductionPlanItemDTO> planItems;
     private Map<String, List<OrderItemDTO>> orderItemMap;
 }
