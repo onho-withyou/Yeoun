@@ -1,8 +1,8 @@
 package com.yeoun.qc.controller;
 
-import java.security.Principal;
 import java.util.List;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.qc.dto.QcDetailRowDTO;
 import com.yeoun.qc.dto.QcRegistDTO;
 import com.yeoun.qc.dto.QcResultListDTO;
@@ -26,8 +27,11 @@ public class QcController {
 	
 	// QC 등록 목록 페이지
 	@GetMapping("/regist")
-	public String qcRegistList(Model model, Principal principal) {
-		model.addAttribute("loginEmpId", principal.getName());
+	public String qcRegistList(Model model, @AuthenticationPrincipal LoginDTO loginUser) {
+		
+		model.addAttribute("loginEmpId", loginUser.getEmpId());
+		model.addAttribute("loginEmpName", loginUser.getEmpName());
+		
 		return "/qc/regist_list";
 	}
 	

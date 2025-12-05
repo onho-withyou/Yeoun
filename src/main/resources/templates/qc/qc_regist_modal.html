@@ -8,7 +8,7 @@
 
       <div class="modal-header">
 		<h5 class="modal-title">
-		  QC 검사 등록 –
+		  QC등록 –
 		  <span id="qcModalTitleOrder"></span> /
 		  <span id="qcModalTitleProductName"></span>
 		  <small class="text-muted" id="qcModalTitleProductCode"></small>
@@ -54,11 +54,17 @@
 			  </div>
 			  <div class="col-md-3">
 			    <label class="form-label required">검사자</label>
-			    <input type="text"
-				       class="form-control form-control-sm"
+			    <!-- 실제 저장용 사번 -->
+				<input type="hidden"
 				       id="inspectorId"
 				       name="inspectorId"
-				       th:value="${loginEmpId}"
+				       th:value="${loginEmpId}">
+				
+				<!-- 화면에 보여줄 이름 -->
+				<input type="text"
+				       class="form-control form-control-sm"
+				       id="inspectorName"
+				       th:value="${loginEmpName}"
 				       readonly>
 			  </div>
 			</div>
