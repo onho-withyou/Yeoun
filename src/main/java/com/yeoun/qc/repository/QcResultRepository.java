@@ -49,7 +49,8 @@ public interface QcResultRepository extends JpaRepository<QcResult, Long> {
                 p.prdId,
                 p.prdName,
                 r.inspectionDate,
-                r.overallResult
+                r.overallResult,
+                r.failReason
             )
             from QcResult r
               join WorkOrder w on r.orderId = w.orderId

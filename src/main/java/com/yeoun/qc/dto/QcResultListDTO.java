@@ -31,4 +31,7 @@ public class QcResultListDTO {
 	// 전체판정
 	private String overallResult;
 	
+	// 불합격사유
+	private String failReason;
+	
 }

@@ -148,7 +148,7 @@ public class QcResultService {
         return qcResultRepository.findRegistListByStatus("PENDING");
     }
 
-    // QC 등록 모달 
+    // QC 등록 모달 목록
 	public List<QcDetailRowDTO> getDetailRows(Long qcResultId) {
 		
 		// QC 결과 ID 조회
