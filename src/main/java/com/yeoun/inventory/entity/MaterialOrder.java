@@ -65,4 +65,7 @@ public class MaterialOrder {
 		this.totalAmount = totalAmount;
 	}
 	
+	public void changeStatus(String status) {
+		this.status = status;
+	}
 }
