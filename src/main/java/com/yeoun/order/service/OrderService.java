@@ -71,23 +71,23 @@ public class OrderService {
 	
 	// =======================================================
 	// BOM 조회 (여기서부터 재고까지 보류)
-	public List<BomMstDTO> loadBom(String prdId) {
-		List<BomMst> bomMst = bomMstRepository.findByPrdId(prdId);
-		return bomMst.stream()
-				.map(mst -> new BomMstDTO(
-						mst.getBomId(),
-						mst.getPrdId(),
-						mst.getMatId(),
-						mst.getMatQty(),
-						mst.getMatUnit(),
-						mst.getBomSeqNo(),
-						mst.getCreatedId(),
-						mst.getCreatedDate(),
-						mst.getUpdatedId(),
-						mst.getUpdatedDate()
-					))
-				.toList();
-	}
+//	public List<BomMstDTO> loadBom(String prdId) {
+//		List<BomMst> bomMst = bomMstRepository.findByPrdId(prdId);
+//		return bomMst.stream()
+//				.map(mst -> new BomMstDTO(
+//						mst.getBomId(),
+//						mst.getPrdId(),
+//						mst.getMatId(),
+//						mst.getMatQty(),
+//						mst.getMatUnit(),
+//						mst.getBomSeqNo(),
+//						mst.getCreatedId(),
+//						mst.getCreatedDate(),
+//						mst.getUpdatedId(),
+//						mst.getUpdatedDate()
+//					))
+//				.toList();
+//	}
 	
 
 }
