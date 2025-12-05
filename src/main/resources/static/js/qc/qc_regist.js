@@ -88,11 +88,12 @@ function loadQcRegistGrid() {
 // 모달을 열면서 데이터 넣는 함수
 function openQcRegModal(rowData) {
 
-    document.getElementById("qcModalTitleOrder").innerText = rowData.orderId;
-    document.getElementById("qcModalTitleProduct").innerText = rowData.prdId + " / " + rowData.prdName;
+	document.getElementById("qcModalTitleOrder").innerText = rowData.orderId;
+	document.getElementById("qcModalTitleProductName").innerText = rowData.prdName;
+	document.getElementById("qcModalTitleProductCode").innerText = `(${rowData.prdId})`;
 
     document.getElementById("qcOrderIdText").innerText = rowData.orderId;
-    document.getElementById("qcProductText").innerText = rowData.prdId + " / " + rowData.prdName;
+    document.getElementById("qcProductText").innerText = rowData.prdName;
     document.getElementById("qcPlanQtyText").innerText = rowData.planQty + " EA";
 
     // hidden
@@ -102,7 +103,6 @@ function openQcRegModal(rowData) {
 	// 폼/테이블 초기화
 	document.getElementById("qcDetailTbody").innerHTML = "";
 	document.getElementById("inspectionDate").value = new Date().toISOString().substring(0, 10);
-	document.getElementById("inspectorId").value = "";
 	document.getElementById("overallResult").value = "";
 	document.getElementById("failReason").value = "";
 
@@ -139,35 +139,35 @@ function renderQcDetailTable(detailList) {
   detailList.forEach((row, idx) => {
     const tr = document.createElement("tr");
 
-    tr.innerHTML = `
-      <td>
-        ${row.qcItemId} / ${row.itemName ?? ""}
-        <input type="hidden" name="details[${idx}].qcResultDtlId" value="${row.qcResultDtlId}">
-        <input type="hidden" name="details[${idx}].qcItemId" value="${row.qcItemId}">
-      </td>
-      <td>${row.unit ?? ""}</td>
-      <td>${row.stdText ?? ""}</td>
-      <td>
-        <input type="text"
-               class="form-control form-control-sm"
-               name="details[${idx}].measureValue"
-               value="${row.measureValue ?? ""}">
-      </td>
-      <td>
-        <select class="form-select form-select-sm"
-                name="details[${idx}].result">
-          <option value="">-</option>
-          <option value="PASS" ${row.result === "PASS" ? "selected" : ""}>PASS</option>
-          <option value="FAIL" ${row.result === "FAIL" ? "selected" : ""}>FAIL</option>
-        </select>
-      </td>
-      <td>
-        <input type="text"
-               class="form-control form-control-sm"
-               name="details[${idx}].remark"
-               value="${row.remark ?? ""}">
-      </td>
-    `;
+	tr.innerHTML = `
+	  <td>
+	    ${row.itemName ?? ""}
+	    <input type="hidden" name="details[${idx}].qcResultDtlId" value="${row.qcResultDtlId}">
+	    <input type="hidden" name="details[${idx}].qcItemId" value="${row.qcItemId}">
+	  </td>
+	  <td>${row.unit ?? ""}</td>
+	  <td>${row.stdText ?? ""}</td>
+	  <td>
+	    <input type="text"
+	           class="form-control form-control-sm"
+	           name="details[${idx}].measureValue"
+	           value="${row.measureValue ?? ""}">
+	  </td>
+	  <td>
+	    <select class="form-select form-select-sm"
+	            name="details[${idx}].result">
+	      <option value="">-</option>
+	      <option value="PASS" ${row.result === "PASS" ? "selected" : ""}>PASS</option>
+	      <option value="FAIL" ${row.result === "FAIL" ? "selected" : ""}>FAIL</option>
+	    </select>
+	  </td>
+	  <td>
+	    <input type="text"
+	           class="form-control form-control-sm"
+	           name="details[${idx}].remark"
+	           value="${row.remark ?? ""}">
+	  </td>
+	`;
 
     tbody.appendChild(tr);
   });

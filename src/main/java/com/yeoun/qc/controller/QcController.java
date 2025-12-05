@@ -1,8 +1,10 @@
 package com.yeoun.qc.controller;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,9 +24,10 @@ public class QcController {
 	
 	private final QcResultService qcResultService;
 	
-	// QC 등록 페이지
+	// QC 등록 목록 페이지
 	@GetMapping("/regist")
-	public String qcRegistList() {
+	public String qcRegistList(Model model, Principal principal) {
+		model.addAttribute("loginEmpId", principal.getName());
 		return "/qc/regist_list";
 	}
 	
