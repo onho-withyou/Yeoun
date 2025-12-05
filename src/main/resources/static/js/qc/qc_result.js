@@ -1,8 +1,13 @@
 // qc_result.js
 
 let qcResultGrid = null;
+let qcResultModal = null;
 
 document.addEventListener("DOMContentLoaded", () => {
+	
+	// 모달 초기화
+	const modalEl = document.getElementById("qcResultModal");
+	qcResultModal = new bootstrap.Modal(modalEl);
 	
 	// 그리드 초기화
 	const gridEl = document.getElementById("qcResultGrid");
@@ -77,4 +82,20 @@ function loadQcResultGrid() {
         .then(data => {
             qcResultGrid.resetData(data);
         });
+}
+
+// 모달을 열면서 데이터 넣는 함수
+function openQcResultModal(rowData) {
+
+    document.getElementById("qcModalTitleOrder").innerText = rowData.orderId;
+    document.getElementById("qcModalTitleProduct").innerText = rowData.prdId + " / " + rowData.prdName;
+
+    document.getElementById("qcOrderIdText").innerText = rowData.orderId;
+    document.getElementById("qcProductText").innerText = rowData.prdId + " / " + rowData.prdName;
+    document.getElementById("qcPlanQtyText").innerText = rowData.planQty + " EA";
+
+    // hidden
+    document.getElementById("orderId").value = rowData.orderId;
+
+    qcResultModal.show();
 }
