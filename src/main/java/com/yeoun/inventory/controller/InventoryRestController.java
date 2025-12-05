@@ -36,9 +36,9 @@ public class InventoryRestController {
 	
 	// 재고리스트 조회
 	@PostMapping("")
-	public ResponseEntity<List<InventoryDTO>> inventories(@RequestBody InventoryDTO inventoryDTO) {
+	public ResponseEntity<List<InventoryDTO>> inventories(@RequestBody(required = false) InventoryDTO inventoryDTO) {
 		
-		List<InventoryDTO> inventoryDTOList = inventoryService.getInventoryInfo(inventoryDTO);
+		List<InventoryDTO> inventoryDTOList = inventoryService.getInventoryInfo(inventoryDTO != null ? inventoryDTO : new InventoryDTO());
 		
 		return ResponseEntity.ok(inventoryDTOList);
 	}
@@ -114,7 +114,16 @@ public class InventoryRestController {
 		return ResponseEntity.ok(inventoryDTOList);
 	}
 	
+	// ----------------------------------------------------------------------------
+	// 대시보드
 	
+	// 상품별 재고정보 조회
+	@GetMapping("/summary")
+	public ResponseEntity<List<Map<String, String>>> getIvSummary() {
+		List<Map<String, String>> ivSummaryList = inventoryService.getIvSummary();
+		
+		return ResponseEntity.ok(ivSummaryList);
+	}	
 	
 }
 
