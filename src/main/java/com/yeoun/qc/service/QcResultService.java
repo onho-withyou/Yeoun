@@ -1,5 +1,5 @@
 package com.yeoun.qc.service;
-
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.security.core.Authentication;
@@ -10,6 +10,7 @@ import com.yeoun.masterData.entity.QcItem;
 import com.yeoun.masterData.repository.QcItemRepository;
 import com.yeoun.order.entity.WorkOrder;
 import com.yeoun.order.repository.WorkOrderRepository;
+import com.yeoun.qc.dto.QcDetailRowDTO;
 import com.yeoun.qc.dto.QcRegistDTO;
 import com.yeoun.qc.entity.QcResult;
 import com.yeoun.qc.entity.QcResultDetail;
@@ -140,14 +141,46 @@ public class QcResultService {
     }
 
 
+    // -------------------------------------------------------------
     // QC 등록 목록
     public List<QcRegistDTO> getQcResultListForRegist() {
         return qcResultRepository.findRegistListByStatus("PENDING");
     }
-    
-    
-    
-    
+
+    // QC 등록 모달 
+	public List<QcDetailRowDTO> getDetailRows(Long qcResultId) {
+		
+		// QC 결과 ID 조회
+		List<QcResultDetail> details = 
+				qcResultDetailRepository.findByQcResultId(String.valueOf(qcResultId));
+		
+		List<QcDetailRowDTO> qcDetailRowDTO = new ArrayList<>();
+		
+		for (QcResultDetail d : details) {
+			
+			QcItem item = qcItemRepository.findById(d.getQcItemId())
+					.orElse(null);
+			
+			QcDetailRowDTO qdrDTO = new QcDetailRowDTO();
+			
+			qdrDTO.setQcResultDtlId(d.getQcResultDtlId());
+			qdrDTO.setQcItemId(d.getQcItemId());
+			
+			if(item != null) {
+				qdrDTO.setItemName(item.getItemName());
+				qdrDTO.setUnit(item.getUnit());
+				qdrDTO.setStdText(item.getStdText());
+			}
+			
+			qdrDTO.setMeasureValue(null);
+			qdrDTO.setResult(null);
+			qdrDTO.setRemark(null);
+			
+		}
+		
+		return qcDetailRowDTO;
+	}
+
     
     
     
