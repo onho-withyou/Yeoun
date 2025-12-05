@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yeoun.auth.dto.LoginDTO;
+import com.yeoun.inbound.dto.InboundDTO;
+import com.yeoun.inbound.dto.ReceiptDTO;
 import com.yeoun.inventory.dto.InventoryModalRequestDTO;
 import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryDTO;
@@ -38,8 +40,9 @@ public class InventoryRestController {
 	// 재고리스트 조회
 	@PostMapping("")
 	public ResponseEntity<List<InventoryDTO>> inventories(@RequestBody(required = false) InventoryDTO inventoryDTO) {
-		
-		List<InventoryDTO> inventoryDTOList = inventoryService.getInventoryInfo(inventoryDTO != null ? inventoryDTO : new InventoryDTO());
+				
+		List<InventoryDTO> inventoryDTOList = 
+				inventoryService.getInventoryInfo(inventoryDTO != null ? inventoryDTO : new InventoryDTO());
 		
 		return ResponseEntity.ok(inventoryDTOList);
 	}
@@ -122,13 +125,9 @@ public class InventoryRestController {
 	@GetMapping("/inventorySafetyStockCheckInfo")
 	public ResponseEntity<List<InventorySafetyCheckDTO>> getIvSummary() {
 		List<InventorySafetyCheckDTO> ivSummaryList = inventoryService.getIvSummary();
-		log.info("@@@@@@@@@@@@@@@@@@@@@@@@!@#!!!!!!!!!!!!!!!!!!!!!!!!");
-		log.info("ivSummaryList" + ivSummaryList);
-		log.info("@@@@@@@@@@@@@@@@@@@@@@@@!@#!!!!!!!!!!!!!!!!!!!!!!!!");
 		return ResponseEntity.ok(ivSummaryList);
 	}	
 	
-	// 안전재고와 재고 정보 비교
 	
 	
 }

@@ -1,13 +1,15 @@
 // 전역변수
 let inventoryInfo;
 let inventorySafetyStockInfo;
+let todayInboundData;
 
 document.addEventListener('DOMContentLoaded', async function () {
 	inventoryInfo = await fetchInventoryData();
 	console.log("@@@@@@@@@@@@@@@@", inventoryInfo)
-	inventorySafetyStockInfo = await fetchInventorySafetyStockData();
+//	inventorySafetyStockInfo = await fetchInventorySafetyStockData();
 	console.log("@@@!@#!@#!@#!@#!@#!@", inventorySafetyStockInfo);
-	
+//	todayInboundData = await fetchTodayInboundData();
+	console.log("######################", todayInboundData);
     // 1. Warehouse Usage Chart (Donut) -> Zone Usage
     const warehouseOptions = {
         series: [44, 13, 33],
@@ -117,8 +119,7 @@ async function fetchInventoryData() {
 			headers: {
 				[csrfHeader]: csrfToken,
 				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify()
+			}
 		});
 //	console.log(response);
 	if (!response.ok) {
@@ -145,19 +146,31 @@ async function fetchInventorySafetyStockData() {
 }
 
 // 오늘 입고정보 조회함수
-async function fetchInventorySafetyStockData() {
+async function fetchTodayInboundData() {
+	const today = new Date();
+	const startDate = today.toISOString().slice(0, 10);
+	const endDate = today.toISOString().slice(0, 10);
+	 
+	const MATERIAL_INBOUND_LIST = 
+		`/inventory/inbound/materialList/data` +
+		`?startDate=${startDate}` +
+		`&endDate=${endDate}` + 
+		`&searchType=` +
+		`&keyword=`
+			
 	const response = 
-		await fetch('/api/inventories/inventorySafetyStockCheckInfo', {
+		await fetch(MATERIAL_INBOUND_LIST, {
 			method: 'GET',
 			headers: {
 				[csrfHeader]: csrfToken,
 				'Content-Type': 'application/json'
 			}
 		});
-//	console.log(response);
+
 	if (!response.ok) {
-		throw new Error('재고와 안전재고 비교 데이터를 가져올 수 없습니다.')
+		throw new Error('입고 정보를 조회할 수 없습니다.')
 	}
+	
 	return await response.json();
 }
 
