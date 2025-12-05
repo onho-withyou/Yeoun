@@ -3,6 +3,7 @@ package com.yeoun.masterData.entity;
 import java.time.LocalDate;
 
 import org.springframework.data.annotation.CreatedDate;
+
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
@@ -13,12 +14,14 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+
 @Entity
 @Table(name = "SAFETY_STOCK")
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class) 
 public class SafetyStock {
+
 
 	@Id
 	@Column(name="ITEM_ID", length = 50)
