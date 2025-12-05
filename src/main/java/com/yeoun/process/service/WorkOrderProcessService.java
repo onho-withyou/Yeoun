@@ -49,7 +49,7 @@ public class WorkOrderProcessService {
     public List<WorkOrderProcessDTO> getWorkOrderListForStatus() {
 
         // 1) 공정현황 대상이 되는 작업지시 조회 (예: RELEASED 상태만)
-        List<String> statuses = List.of("RELEASED");
+        List<String> statuses = List.of("RELEASED", "IN_PROGRESS");
         List<WorkOrder> workOrders = workOrderRepository.findByStatusIn(statuses);
 
         if (workOrders.isEmpty()) {
