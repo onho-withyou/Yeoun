@@ -99,4 +99,9 @@ public class PurchaseService {
 		// 발주 등록 후 입고 테이블 데이터 입력
 		inboundService.saveInbound(materialOrder);
 	}
+
+	// 발주 상세 정보
+	public MaterialOrderDTO getPurchaseOrder(String id) {
+		return purchaseMapper.findPurchaseOrder(id);
+	}
 }
