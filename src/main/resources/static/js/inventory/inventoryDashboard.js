@@ -6,11 +6,27 @@ let todayInboundData;
 document.addEventListener('DOMContentLoaded', async function () {
 	inventoryInfo = await fetchInventoryData();
 	console.log("@@@@@@@@@@@@@@@@", inventoryInfo)
-//	inventorySafetyStockInfo = await fetchInventorySafetyStockData();
+	inventorySafetyStockInfo = await fetchInventorySafetyStockData();
 	console.log("@@@!@#!@#!@#!@#!@#!@", inventorySafetyStockInfo);
-//	todayInboundData = await fetchTodayInboundData();
+	todayInboundData = await fetchTodayInboundData();
 	console.log("######################", todayInboundData);
-    // 1. Warehouse Usage Chart (Donut) -> Zone Usage
+    
+	// 금일 입고 예정양
+	const todayInboundTotalEl = document.getElementById('todayInboundTotal');
+	todayInboundTotalEl.innerHTML = todayInboundData.length;
+	// 금일입고 처리완료 수 조회
+	let completeCnt = 0;
+	todayInboundData.forEach(inbound => {
+		if(inbound.inboundStatus ==='COMPLETED') completeCnt++;
+	});
+	// 금일입고처리완료수 보이기 
+	const todayInboundCompleteEl = document.getElementById('todayInboundComplete');
+	todayInboundCompleteEl.innerHTML = `<i class='bx bx-up-arrow-alt'></i>처리 : ${completeCnt}`;
+	
+	
+	
+	
+	// 1. Warehouse Usage Chart (Donut) -> Zone Usage
     const warehouseOptions = {
         series: [44, 13, 33],
         chart: {
