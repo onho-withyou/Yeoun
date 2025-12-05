@@ -756,7 +756,493 @@
 			textDecoration: 'none',
 			cursor: 'pointer'
 		});
+<<<<<<< Updated upstream
 		return link;
+=======
+		container.appendChild(link);
+	}
+
+	return container;
+};
+
+// 결재 문서 첨부파일 로드 및 렌더링
+async function loadAndRenderFiles(docId) {
+	const container = document.getElementById('downloadArea');
+	if (!container) return console.error('다운로드 영역을 찾을 수 없습니다.');
+
+	container.innerHTML = '파일 목록을 불러오는 중...';
+
+	try {
+		const response = await fetch(`/approval/file/${docId}`);
+		if (!response.ok) throw new Error(`상태: ${response.status}`);
+
+		const files = await response.json();
+		container.innerHTML = '';
+
+		if (!files.length) {
+			container.textContent = '첨부된 파일이 없습니다.';
+			return;
+		}
+
+		files.forEach(file => {
+			const fileId = file.fileId;
+			const fileName = file.originFileName || file.fileName;
+			if (fileId && fileName) container.appendChild(createFileLink(fileId, fileName));
+		});
+
+	} catch (error) {
+		console.error('첨부파일 로드 실패:', error);
+		container.innerHTML = `⚠️ 파일을 불러올 수 없습니다. (${error.message})`;
+	}
+}
+
+// 결재 문서 파일 데이터 로드
+const getApprovalDocFileData = (approvalId) => loadAndRenderFiles(approvalId);
+
+
+//f- 등록버튼,폼 결재권한자 데이터 말아서 보내는 함수
+document.getElementById('modal-doc').addEventListener('submit', async function (event) {
+	// 폼의 기본 제출 동작 방지
+	event.preventDefault();
+
+	// FormData 객체를 사용하여 폼 데이터 수집
+	const formData = new FormData(this);
+
+	//결재문서
+	if (approverArr.length != 0) { //결재권한자가 있으면
+		formData.append('docStatus', '1차대기');//문서상태
+		formData.append('docApprover', approverArr[0].empId);//결재권한자//1차 empId
+	}
+
+	if (approverArr.length === 0) {
+		console.log("결재자 배열이 비어있습니다.");
+		return;
+	}
+	//결재권한자 3명까지
+	if (approverArr.length > 0) {
+
+		//결재권한자 사번,오더순서,열람여부,전결상태
+		if (approverArr[0] !== undefined)
+			formData.append('approverEmpIdOVD1', approverArr[0].empId + ","
+				+ approverArr[0].approverOrder + "," + "Y" + "," + approverArr[0].delegateStatus); //결재권한자 아이디 3게
+		if (approverArr[1] !== undefined)
+			formData.append('approverEmpIdOVD2', approverArr[1].empId + ","
+				+ approverArr[1].approverOrder + "," + "N" + "," + approverArr[1].delegateStatus);
+		if (approverArr[2] !== undefined)
+			formData.append('approverEmpIdOVD3', approverArr[2].empId + ","
+				+ approverArr[2].approverOrder + "," + "N" + "," + approverArr[2].delegateStatus);
+		//formData.append('approvalStatus', false);//권한자상태 필요없음
+	}
+
+
+	// FormData를 일반 JavaScript 객체로 변환
+	//const dataObject = Object.fromEntries(formData.entries());
+
+	await fetch("/approval/approval_doc", {
+		method: 'POST',
+		headers: {
+			[csrfHeader]: csrfToken
+		},
+		body: formData // 요청 본문에 JSON 데이터 포함
+	})
+		.then(response => {
+			// 1. 응답이 성공적인지 확인
+			if (!response.ok) {	
+					throw new Error('서버 응답이 실패했습니다. 상태 코드: ' + response.status);	
+			}else{
+					// 모달 닫기
+				const modalElement = document.getElementById('approval-modal');
+				const modalInstance = bootstrap.Modal.getInstance(modalElement);
+				modalInstance.hide();
+			}
+			// 2. 응답 본문을 JSON으로 파싱
+			return response.json(); 
+		})
+		.then(result => {	
+    		// 3. 서버에서 보낸 JSON 객체의 'message' 필드에 접근
+			const successMessage = result.message;	 
+		
+			// 4. 받아온 메시지 사용 (예: 사용자에게 알림)
+			if (successMessage) {
+				alert(successMessage); 
+			
+			} else {
+				console.error("서버 응답에 message 필드가 없습니다.");
+			}})
+});
+
+//f- 결재권한자변경(전결자) 라디오버튼에 관련된 함수
+document.addEventListener("change", function (event) {
+
+	if (!event.target.matches('input[name="radioJeongyeolja"]')) return;
+
+	const selectBoxElement = document.getElementById('delegetedApprover');
+	const selectedEmpName = selectBoxElement.options[selectBoxElement.selectedIndex].text;
+	const targetDiv = document.getElementById(`approver_${elemApproverIdNum}`);
+	const selectedValue = event.target.value;
+	console.log("선택된 이름", selectedEmpName);
+	console.log("선택된 전결 상태:", selectedValue);
+	console.log("클릭될때", event.target.clicked);
+	//console.log("targetDiv");
+	if (selectedValue === 'N') {// 결재권한자변경상태가 없음일때
+
+		approverArr.forEach(approver => {
+
+			if (targetDiv) {
+				targetDiv.querySelectorAll('span').forEach(span => span.remove());
+			}
+			approver.delegateStatus = 'N';
+			approver.empId = approver.originalEmpId;  // 원래 사번 복구
+
+			console.log(`결재권한자 ${approver.approverOrder} delegateStatus = N`);
+		});
+		document.getElementById('delegetedApprover').style.display = "none";
+		document.getElementById(`approvalBtn_${elemApproverIdNum}`).style.display = "none";
+	} else {
+		document.getElementById('delegetedApprover').style.display = "block";
+		document.getElementById(`approvalBtn_${elemApproverIdNum}`).style.display = "block";
+	}
+});
+
+//f- 결재권한자 변경/전결 적용 함수
+function applyDelegateChange(button) {
+
+	console.log("적용 버튼이 클릭되었습니다.");
+	const count = Number(button.dataset.count); // 버튼 자체의 data-count 사용
+	console.log();
+
+	//전결에 필요한 로직추가 approverArr 배열에 delegateStatus 값 변경
+	// 라디오 버튼값 가져오기
+	const radioJeongyeolja = document.getElementsByName('radioJeongyeolja');
+	const targetDiv = document.getElementById(`approver_${elemApproverIdNum}`);
+
+	let selectedValue;
+	for (const radio of radioJeongyeolja) {
+		// console.log("radio value:", radio.value, "checked:", radio.checked);
+		if (radio.checked) {
+			selectedValue = radio.value;
+			break;
+		}
+	}
+
+	//alert(count + "번 결재권한자를 전결자로 지정\n부모 div id: " + id);
+	// console.log("적용 버튼 클릭 div id:", id);
+	// console.log("적용 버튼 클릭 div count:", count);
+	// console.log("선택된 전결 상태:", selectedValue);
+
+	// console.log("이전의 approverArr:", approverArr);
+
+	// toastui selectbox에서 선택된 사번 가져오기#select-box
+	const selectBoxElement = document.getElementById('delegetedApprover');
+	const selectedEmpId = selectBoxElement.value;//선택된 사번
+	const selectedEmpName = selectBoxElement.options[selectBoxElement.selectedIndex].text;
+
+	if (selectedValue == 'N') {
+
+		approverArr.forEach(approver => {
+
+			if (targetDiv) {
+				targetDiv.querySelectorAll('span').forEach(span => span.remove());
+			}
+			approver.delegateStatus = 'N';
+			approver.empId = approver.originalEmpId;  // 원래 사번 복구
+
+			console.log(`결재권한자 ${approver.approverOrder} delegateStatus = N`);
+		});
+	}
+	if (targetDiv) {
+		// 새로운 전결자 표시
+		if (selectedValue != 'N') {
+			targetDiv.querySelectorAll('span').forEach(span => span.remove());
+			targetDiv.innerHTML += `<span style="color:blue;"> ${selectedValue} <br> ${selectedEmpName} </span>`;
+		}
+	}
+	approverArr.forEach((value, key) => {
+		console.log("비교 중인 approverOrder:", value.approverOrder, "==", count);
+		if (value.approverOrder === count && selectedValue != 'N') {
+			// 선택된 전결 상태에 따라 delegateStatus 값 설정
+			value.empId = selectedEmpId;//셀렉트 박스 값을 가져와서 넣어야함
+			value.delegateStatus = selectedValue;//전결상태 변경
+
+			console.log("매핑된 결재권한자:", value);
+			console.log(`결재권한자 순서 ${count}의 전결상태가 ${selectedValue}로 변경되었습니다.`);
+
+		}
+	});
+	console.log("Updated approverArr:", approverArr);
+}
+
+const Grid = tui.Grid;
+// g- 결재사항
+const grid1 = new Grid({
+	el: document.getElementById('approvalGrid'),
+	rowHeaders: ['rowNum'],
+	columns: [
+
+		{ header: '순번', name: 'row_no', align: 'center', hidden: true }
+		, { header: '문서id', name: 'approval_id', align: 'center', hidden: true }
+		, { header: '문서제목', name: 'approval_title', align: 'center', width: 370 }
+		, { header: '양식', name: 'form_type', align: 'center', width: 136, filter: "select" }
+		, { header: '사원번호', name: 'emp_id', align: 'center' }
+		, { header: '기안자', name: 'emp_name', align: 'center' }
+		, { header: '직급코드', name: 'pos_code', align: 'center', hidden: true }
+		, { header: '직급', name: 'pos_name', align: 'center', width: 51 }
+		, { header: '부서코드', name: 'dept_id', align: 'center', hidden: true }
+		, { header: '부서명', name: 'dept_name', align: 'center' }
+		, { header: '결재권한자id', name: 'approver', align: 'center', hidden: true }
+		, { header: '결재권한자', name: 'approver_name', align: 'center' }
+		, { header: '생성일', name: 'created_date', align: 'center' }
+		, { header: '결재완료일자', name: 'finish_date', align: 'center' }
+		, { header: '휴가시작일자', name: 'start_date', align: 'center', hidden: true }
+		, { header: '휴가종료일자', name: 'end_date', align: 'center', hidden: true }
+		, { header: '연차유형', name: 'leave_type', align: 'center', hidden: true }
+		, { header: '변경직급', name: 'to_pos_code', align: 'center', hidden: true }
+		, { header: '발령부서', name: 'to_dept_id', align: 'center', hidden: true }
+		, { header: '지출종류', name: 'expnd_type', align: 'center', hidden: true }
+		, { header: '결재사유내용', name: 'reason', align: 'center', hidden: true }
+		, { header: '상태', name: 'doc_status', align: 'center' }
+		, {
+			header: '상세보기', name: 'view_details', align: 'center', width: 100
+			, formatter: (rowInfo) => {
+				return `<button type='button' class='btn btn-primary btn-sm' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
+			}
+		}
+	],
+	data: []
+	, bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
+	, height: 100
+	, columnOptions: {
+		resizable: true
+	}
+	, pageOptions: {
+		useClient: true,
+		perPage: 10
+	}
+});
+
+
+// g- 전체결재
+const grid2 = new Grid({
+	el: document.getElementById('allApprovalGrid'), // 전체결재
+	rowHeaders: ['rowNum'],
+	columns: [
+
+		{ header: '순번', name: 'row_no', align: 'center', hidden: true }
+		, { header: '문서id', name: 'approval_id', align: 'center', hidden: true }
+		, { header: '문서제목', name: 'approval_title', align: 'center', width: 370 }
+		, { header: '양식', name: 'form_type', align: 'center', width: 136, filter: "select" }
+		, { header: '사원번호', name: 'emp_id', align: 'center' }
+		, { header: '기안자', name: 'emp_name', align: 'center' }
+		, { header: '직급코드', name: 'pos_code', align: 'center', hidden: true }
+		, { header: '직급', name: 'pos_name', align: 'center', width: 51 }
+		, { header: '부서코드', name: 'dept_id', align: 'center', hidden: true }
+		, { header: '부서명', name: 'dept_name', align: 'center' }
+		, { header: '결재권한자id', name: 'approver', align: 'center', hidden: true }
+		, { header: '결재권한자', name: 'approver_name', align: 'center' }
+		, { header: '생성일', name: 'created_date', align: 'center' }
+		, { header: '결재완료일자', name: 'finish_date', align: 'center' }
+		, { header: '휴가시작일자', name: 'start_date', align: 'center', hidden: true }
+		, { header: '휴가종료일자', name: 'end_date', align: 'center', hidden: true }
+		, { header: '연차유형', name: 'leave_type', align: 'center', hidden: true }
+		, { header: '변경직급', name: 'to_pos_code', align: 'center', hidden: true }
+		, { header: '발령부서', name: 'to_dept_id', align: 'center', hidden: true }
+		, { header: '지출종류', name: 'expnd_type', align: 'center', hidden: true }
+		, { header: '결재사유내용', name: 'reason', align: 'center', hidden: true }
+		, { header: '상태', name: 'doc_status', align: 'center' }
+		, {
+			header: '상세보기', name: 'view_details', align: 'center'
+			, formatter: (rowInfo) => {
+				return `<button type='button' class='btn btn-primary btn-sm' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
+			}
+		}
+	],
+	data: []
+	, bodyHeight: 500
+	, columnOptions: {
+		resizable: true
+	}
+	, pageOptions: {
+		useClient: true,
+		perPage: 10
+	}
+});
+//g- 내결재목록
+const grid3 = new Grid({
+	el: document.getElementById('myApprovalGrid'), // 내 결재목록
+	rowHeaders: ['rowNum'],
+	columns: [
+
+		{ header: '순번', name: 'row_no', align: 'center', hidden: true }
+		, { header: '문서id', name: 'approval_id', align: 'center', hidden: true }
+		, { header: '문서제목', name: 'approval_title', align: 'center', width: 370 }
+		, { header: '양식', name: 'form_type', align: 'center', width: 136, filter: "select" }
+		, { header: '사원번호', name: 'emp_id', align: 'center' }
+		, { header: '기안자', name: 'emp_name', align: 'center' }
+		, { header: '직급코드', name: 'pos_code', align: 'center', hidden: true }
+		, { header: '직급', name: 'pos_name', align: 'center', width: 51 }
+		, { header: '부서코드', name: 'dept_id', align: 'center', hidden: true }
+		, { header: '부서명', name: 'dept_name', align: 'center' }
+		, { header: '결재권한자id', name: 'approver', align: 'center', hidden: true }
+		, { header: '결재권한자', name: 'approver_name', align: 'center' }
+		, { header: '생성일', name: 'created_date', align: 'center' }
+		, { header: '결재완료일자', name: 'finish_date', align: 'center' }
+		, { header: '휴가시작일자', name: 'start_date', align: 'center', hidden: true }
+		, { header: '휴가종료일자', name: 'end_date', align: 'center', hidden: true }
+		, { header: '연차유형', name: 'leave_type', align: 'center', hidden: true }
+		, { header: '변경직급', name: 'to_pos_code', align: 'center', hidden: true }
+		, { header: '발령부서', name: 'to_dept_id', align: 'center', hidden: true }
+		, { header: '지출종류', name: 'expnd_type', align: 'center', hidden: true }
+		, { header: '결재사유내용', name: 'reason', align: 'center', hidden: true }
+		, { header: '상태', name: 'doc_status', align: 'center' }
+		, {
+			header: '상세보기', name: 'view_details', align: 'center'
+			, formatter: function (rowInfo) {
+				return `<button type='button' class='btn btn-primary btn-sm' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
+			}
+		}
+	],
+	data: []
+	, bodyHeight: 500
+	, columnOptions: {
+		resizable: true
+	}
+	, pageOptions: {
+		useClient: true,
+		perPage: 10
+	}
+});
+//g- 결재대기
+const grid4 = new Grid({
+	el: document.getElementById('waitingApprovalGrid'), //결재대기
+	rowHeaders: ['rowNum'],
+	columns: [
+
+		{ header: '순번', name: 'row_no', align: 'center', hidden: true }
+		, { header: '문서id', name: 'approval_id', align: 'center', hidden: true }
+		, { header: '문서제목', name: 'approval_title', align: 'center', width: 370 }
+		, { header: '양식', name: 'form_type', align: 'center', width: 136, filter: "select" }
+		, { header: '사원번호', name: 'emp_id', align: 'center' }
+		, { header: '기안자', name: 'emp_name', align: 'center' }
+		, { header: '직급코드', name: 'pos_code', align: 'center', hidden: true }
+		, { header: '직급', name: 'pos_name', align: 'center', width: 51 }
+		, { header: '부서코드', name: 'dept_id', align: 'center', hidden: true }
+		, { header: '부서명', name: 'dept_name', align: 'center' }
+		, { header: '결재권한자id', name: 'approver', align: 'center', hidden: true }
+		, { header: '결재권한자', name: 'approver_name', align: 'center' }
+		, { header: '생성일', name: 'created_date', align: 'center' }
+		, { header: '결재완료일자', name: 'finish_date', align: 'center' }
+		, { header: '휴가시작일자', name: 'start_date', align: 'center', hidden: true }
+		, { header: '휴가종료일자', name: 'end_date', align: 'center', hidden: true }
+		, { header: '연차유형', name: 'leave_type', align: 'center', hidden: true }
+		, { header: '변경직급', name: 'to_pos_code', align: 'center', hidden: true }
+		, { header: '발령부서', name: 'to_dept_id', align: 'center', hidden: true }
+		, { header: '지출종류', name: 'expnd_type', align: 'center', hidden: true }
+		, { header: '결재사유내용', name: 'reason', align: 'center', hidden: true }
+		, { header: '상태', name: 'doc_status', align: 'center' }
+		, {
+			header: '상세보기', name: 'view_details', align: 'center'
+			, formatter: function (rowInfo) {
+				return `<button type='button' class='btn btn-primary btn-sm' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
+			}
+		}
+	],
+	data: []
+	, bodyHeight: 500
+	, columnOptions: {
+		resizable: true
+	}
+	, pageOptions: {
+		useClient: true,
+		perPage: 10
+	}
+});
+//g- 결재완료
+const grid5 = new Grid({
+	el: document.getElementById('doneApprovalGrid'), //결재완료
+	rowHeaders: ['rowNum'],
+	columns: [
+
+		{ header: '순번', name: 'row_no', align: 'center', hidden: true }
+		, { header: '문서id', name: 'approval_id', align: 'center', hidden: true }
+		, { header: '문서제목', name: 'approval_title', align: 'center', width: 370 }
+		, { header: '양식', name: 'form_type', align: 'center', width: 136, filter: "select" }
+		, { header: '사원번호', name: 'emp_id', align: 'center' }
+		, { header: '기안자', name: 'emp_name', align: 'center' }
+		, { header: '직급코드', name: 'pos_code', align: 'center', hidden: true }
+		, { header: '직급', name: 'pos_name', align: 'center', width: 51 }
+		, { header: '부서코드', name: 'dept_id', align: 'center', hidden: true }
+		, { header: '부서명', name: 'dept_name', align: 'center' }
+		, { header: '결재권한자id', name: 'approver', align: 'center', hidden: true }
+		, { header: '결재권한자', name: 'approver_name', align: 'center' }
+		, { header: '생성일', name: 'created_date', align: 'center' }
+		, { header: '결재완료일자', name: 'finish_date', align: 'center' }
+		, { header: '휴가시작일자', name: 'start_date', align: 'center', hidden: true }
+		, { header: '휴가종료일자', name: 'end_date', align: 'center', hidden: true }
+		, { header: '연차유형', name: 'leave_type', align: 'center', hidden: true }
+		, { header: '변경직급', name: 'to_pos_code', align: 'center', hidden: true }
+		, { header: '발령부서', name: 'to_dept_id', align: 'center', hidden: true }
+		, { header: '지출종류', name: 'expnd_type', align: 'center', hidden: true }
+		, { header: '결재사유내용', name: 'reason', align: 'center', hidden: true }
+		, { header: '상태', name: 'doc_status', align: 'center' }
+		, {
+			header: '상세보기', name: 'view_details', align: 'center'
+			, formatter: function (rowInfo) {
+				return `<button type='button' class='btn btn-primary btn-sm' data-row-key='${rowInfo.row.rowKey}'>상세</button>`;
+			}
+		}
+	],
+	data: []
+	, bodyHeight: 500
+	, columnOptions: {
+		resizable: true
+	}
+	, pageOptions: {
+		useClient: true,
+		perPage: 10
+	}
+});
+
+
+// -----------------------------------------
+// 탭클릭시 그리드를 다시 그려주는 로직
+// -----------------------------------------
+document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
+	tab.addEventListener('shown.bs.tab', function (e) {
+		const targetId = e.target.getAttribute('data-bs-target');
+
+		if (targetId === '#nav-approval-tab') {
+			console.log("결재사항 탭 클릭!");
+			grid1.refreshLayout();
+		} else if (targetId === '#navs-all-tab') {
+			console.log("전체결재 탭 클릭!");
+			grid2.refreshLayout();
+		} else if (targetId === '#navs-my-tab') {
+			console.log("내결재목록 탭 클릭!");
+			grid3.refreshLayout();
+		} else if (targetId === '#navs-waiting-tab') {
+			console.log("결재대기 탭 클릭!");
+			grid4.refreshLayout();
+		} else if (targetId === '#navs-done-tab') {
+			console.log("결재완료 탭 클릭!");
+			grid5.refreshLayout();
+		}
+	});
+});
+// -----------------------------------------
+// -----------------------------------------
+// -----------------------------------------
+
+
+Grid.applyTheme('clean'); // Call API of static method
+//f- 날짜,기안자,문서양식 조회 불러오는 함수
+function AllGridSearch() {
+	const params = {
+
+		createDate: document.getElementById("searchStartDate").value ?? "",
+		finishDate: document.getElementById("searchEndDate").value ?? "",
+		empName: document.getElementById("searchEmpIdAndformType").value ?? "",
+		approvalTitle: document.getElementById("searchEmpIdAndformType").value ?? ""
+>>>>>>> Stashed changes
 	};
 
 	// 결재 문서 첨부파일 로드 및 렌더링

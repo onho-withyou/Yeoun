@@ -13,13 +13,12 @@ import lombok.Getter;
 import lombok.Setter;
 import oracle.sql.NUMBER;
 
-@Entity
 @Table(name = "BOM_MST")
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
 public class BomMst {
-	@Id
+	
 	@Column(name="BOM_ID", length = 20)
 	private NUMBER bomId; //BOMid
 	
