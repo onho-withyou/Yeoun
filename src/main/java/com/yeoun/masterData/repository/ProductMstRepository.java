@@ -3,9 +3,9 @@ package com.yeoun.masterData.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.yeoun.masterData.entity.RouteHeader;
+import com.yeoun.masterData.entity.ProductMst;
 
 @Repository
-public interface RouteHeaderRepository extends JpaRepository<RouteHeader, String> {
-	
+public interface ProductMstRepository extends JpaRepository<ProductMst, String> {
+
 }
