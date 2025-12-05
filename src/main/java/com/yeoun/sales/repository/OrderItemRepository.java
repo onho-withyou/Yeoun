@@ -17,6 +17,8 @@ import org.springframework.data.repository.query.Param;
 public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 
 	List<OrderItem> findByOrderId(String orderId);	
+	//  제품ID로 주문 상세 찾기
+    List<OrderItem> findByPrdId(String prdId);
 	
 	@Query(value = """
 		    SELECT 

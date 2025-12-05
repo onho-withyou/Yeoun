@@ -1,3 +1,5 @@
+// /js/production/plan_list.js
+console.log("✔ plan_list.js 로드됨!");
 
 let planGridApi = null;
 
@@ -17,7 +19,10 @@ function initPlanGrid() {
         {
             headerName: "상세",
             width: 100,
-            cellRenderer: () => `<button class="btn btn-sm btn-primary">보기</button>`
+            // 👉 여기서 전역 함수 openPlanDetail 만 호출
+            cellRenderer: (params) =>
+                `<button class="btn btn-sm btn-primary"
+                          onclick="openPlanDetail('${params.data.planId}')">보기</button>`
         }
     ];
 
@@ -34,8 +39,11 @@ function loadPlanList() {
         .then(res => res.json())
         .then(data => {
             console.log("📌 서버에서 받아온 데이터:", data);
+            if (!planGridApi) {
+                console.error("📌 planGridApi가 아직 준비되지 않았습니다.");
+                return;
+            }
             planGridApi.setGridOption("rowData", data);
         })
-        .catch(err => console.error("📌 에러 발생:", err));
+        .catch(err => console.error("📌 목록 조회 에러:", err));
 }
-
