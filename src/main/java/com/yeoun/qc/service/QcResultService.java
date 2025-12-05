@@ -1,4 +1,5 @@
 package com.yeoun.qc.service;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -170,7 +171,7 @@ public class QcResultService {
 			if(item != null) {
 				qdrDTO.setItemName(item.getItemName());
 				qdrDTO.setUnit(item.getUnit());
-				qdrDTO.setStdText(item.getStdText());
+				qdrDTO.setStdText(buildStdText(item));
 			}
 			
 			qdrDTO.setMeasureValue(d.getMeasureValue());
@@ -182,6 +183,34 @@ public class QcResultService {
 		}
 		
 		return qcDetailRowDTO;
+	}
+	
+	// 기준값 문자열 메서드
+	private String buildStdText(QcItem item) {
+		
+		if (item == null) return "";
+		
+		// 설명형 기준값이 있으면 우선
+		if (item.getStdText() != null && !item.getStdText().isBlank()) {
+			return item.getStdText();
+		}
+		
+		// 수지형 기준값(min/max) 사용
+		BigDecimal min = item.getMinValue();
+		BigDecimal max = item.getMaxValue();
+		
+		if (min != null && max != null) {
+			return min.stripTrailingZeros().toPlainString()
+					+ " ~ "
+					+ max.stripTrailingZeros().toPlainString();
+		} else if (min != null) {
+			return "≥ " + min.stripTrailingZeros().toPlainString();
+		} else if (max != null) {
+			return "≤ " + max.stripTrailingZeros().toPlainString();
+		}
+		
+		// 정말 아무것도 없을 경우
+		return "";
 	}
 
 	// ----------------------------------------------------------

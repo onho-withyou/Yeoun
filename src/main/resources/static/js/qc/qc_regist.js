@@ -156,7 +156,6 @@ function renderQcDetailTable(detailList) {
 	  <td>
 	    <select class="form-select form-select-sm"
 	            name="details[${idx}].result">
-	      <option value="">-</option>
 	      <option value="PASS" ${row.result === "PASS" ? "selected" : ""}>PASS</option>
 	      <option value="FAIL" ${row.result === "FAIL" ? "selected" : ""}>FAIL</option>
 	    </select>
