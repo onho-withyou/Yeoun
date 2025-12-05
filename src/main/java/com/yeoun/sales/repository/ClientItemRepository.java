@@ -25,16 +25,21 @@ public interface ClientItemRepository extends JpaRepository<ClientItem, Long> {
 			        ci.itemId,
 			        ci.materialId,
 			        m.matName,
-			        m.matUnit,
+			        m.matUnit,       
+			        ci.unit,         
+			        ci.orderUnit,
 			        ci.unitPrice,
 			        ci.minOrderQty,
-			        ci.supplyAvailable
+			        ci.supplyAvailable,
+			        ci.leadDays,
+			        m.matType
 			    )
-			    FROM ClientItem ci
+			    FROM ClientItem ci 
 			    JOIN MaterialMst m ON ci.materialId = m.matId
 			    WHERE ci.clientId = :clientId
 			""")
-			List<ClientItemDTO> findItemsWithMaterialInfo(@Param("clientId")String clientId);
+			List<ClientItemDTO> findItemsWithMaterialInfo(@Param("clientId") String clientId);
+
 
 	
 }

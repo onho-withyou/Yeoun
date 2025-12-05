@@ -20,53 +20,94 @@ document.addEventListener("DOMContentLoaded", () => {
 ======================================================= */
 function initItemGrid() {
 
-    const columnDefs = [
-        { headerName: "품목ID", field: "itemId", width: 120 },
+    
+	const columnDefs = [
+	    { headerName: "품목ID", field: "itemId", width: 100 },
 
-        // 자재코드 (materialId 또는 matId 중 있는 값 사용)
-        {
-            headerName: "자재코드",
-            width: 140,
-            valueGetter: p => p.data.materialId || p.data.matId || ""
-        },
+	    {
+	        headerName: "카테고리",
+	        field: "matType",
+	        width: 110,
+	        cellRenderer: p => {
+	            const v = p.value;
+	            if (v === "RAW") return "원재료";
+	            if (v === "SUB") return "부자재";
+	            if (v === "PKG") return "포장재";
+	            return "";
+	        }
+	    },
 
-        // 품명 (materialName 또는 matName 중 있는 값 사용)
-        {
-            headerName: "품명",
-            flex: 1,
-            valueGetter: p => p.data.materialName || p.data.matName || ""
-        },
+	    // 자재코드
+	    {
+	        headerName: "자재코드",
+	        width: 130,
+	        valueGetter: p => p.data.materialId || p.data.matId || ""
+	    },
 
-        // 단위 (unit 또는 matUnit 중 있는 값 사용)
-        {
-            headerName: "단위",
-            width: 90,
-            valueGetter: p => p.data.unit || p.data.matUnit || ""
-        },
+	    // 품명
+	    {
+	        headerName: "품명",
+	        flex: 1,
+	        minWidth: 160,
+	        valueGetter: p => p.data.materialName || p.data.matName || ""
+	    },
 
-        { headerName: "단가", field: "unitPrice", width: 120 },
+		// 자재 기본 단위 (제품단위)
+		   {
+		       headerName: "BOM단위",
+		       width: 90,
+		       valueGetter: p => p.data.matUnit ?? ""
+		   },
 
-        {
-            headerName: "MOQ",
-            width: 120,
-            valueGetter: p => {
-                // DTO에 따라 필드명이 다를 수 있어 둘 다 체크
-                return p.data.moq ?? p.data.minOrderQty ?? "";
-            }
-        },
+		   // 협력사 발주 지정 단위
+		   {
+		       headerName: "공급단위",
+		       width: 100,
+		       valueGetter: p => p.data.unit ?? ""
+		   },
 
-        {
-            headerName: "공급",
-            field: "supplyAvailable",
-            width: 100,
-            cellRenderer: p => {
-                const v = p.value;
-                if (v === "Y") return "가능";
-                if (v === "N") return "불가";
-                return v ?? "";
-            }
-        }
-    ];
+
+	    // 발주 단위 (ORDER_UNIT)
+	    {
+	        headerName: "발주단위",
+	        width: 110,
+	        valueGetter: p => p.data.orderUnit ?? ""
+	    },
+
+	    // MOQ
+	    {
+	        headerName: "MOQ",
+	        width: 100,
+	        valueGetter: p => p.data.moq ?? p.data.minOrderQty ?? ""
+	    },
+
+	    // 리드타임(납기일)
+	    {
+	        headerName: "납기일",
+	        width: 100,
+	        valueGetter: p => p.data.leadDays ?? ""
+	    },
+
+	    // 단가
+	    {
+	        headerName: "단가",
+	        field: "unitPrice",
+	        width: 110,
+	        cellRenderer: p => {
+	            if (!p.value) return "";
+	            return Number(p.value).toLocaleString();
+	        }
+	    },
+
+	    // 공급 여부
+	    {
+	        headerName: "공급",
+	        field: "supplyAvailable",
+	        width: 90,
+	        cellRenderer: p => (p.value === "Y" ? "가능" : "불가")
+	    }
+	];
+
 
     const gridOptions = {
         columnDefs,
