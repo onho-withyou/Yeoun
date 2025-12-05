@@ -22,12 +22,12 @@ public interface OrdersRepository extends JpaRepository<Orders, String> {
 		        o.orderDate,
 		        o.deliveryDate,
 		        o.orderStatus,
-		        e.empName,      
+		        e.empName,
 		        o.orderMemo
 		    )
 		    FROM Orders o
-		    LEFT JOIN Client c ON c.clientId = o.clientId
-		    LEFT JOIN Emp e ON e.empId = o.empId   
+		    LEFT JOIN o.client c
+		    LEFT JOIN Emp e ON e.empId = o.empId
 		    WHERE (:status IS NULL OR o.orderStatus = :status)
 		      AND (:startDate IS NULL OR o.orderDate >= :startDate)
 		      AND (:endDate IS NULL OR o.deliveryDate <= :endDate)

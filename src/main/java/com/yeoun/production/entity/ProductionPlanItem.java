@@ -32,7 +32,7 @@ public class ProductionPlanItem {
 
     @Column(name = "ORDER_ITEM_ID", length = 30, nullable = false)
     @Comment("어떤 수주 상세에서 온 항목인지")
-    private String orderItemId;
+    private Long orderItemId;
 
     @Column(name = "PRD_ID", length = 20, nullable = false)
     private String prdId;

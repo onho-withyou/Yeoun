@@ -1,89 +1,93 @@
 // /js/production/plan_detail_modal.js
 
+let modalPlanItemGridApi;
+let modalOrderItemGridApi;
+let orderItemMap = {};
+
 /* ===============================
    생산계획 상세 모달 호출 함수
 ================================= */
 function openPlanDetail(planId) {
-
-    console.log("상세조회 요청:", planId);
-
     fetch(`/production/plan/detail/${planId}`)
         .then(res => res.json())
         .then(data => {
-            console.log("상세조회 데이터:", data);
+            console.log("받은 데이터:", data);
+            
+            // 전역에 저장
+            orderItemMap = data.orderItemMap || {};
 
-            /* ================================
-               1. PLAN 기본 정보 세팅
-               (서버 JSON 구조에 맞게 수정됨!)
-            ================================= */
-            document.getElementById("d_planId").innerText   = data.planId;
+            // 기본 정보
+            document.getElementById("d_planId").innerText = data.planId;
             document.getElementById("d_createdAt").innerText = data.createdAt;
-            document.getElementById("d_dueDate").innerText   = data.dueDate ?? "-";
-            document.getElementById("d_status").innerText    = data.status;
-            document.getElementById("d_memo").innerText      = data.memo ?? "-";
+            document.getElementById("d_dueDate").innerText = data.dueDate || "-";
+            document.getElementById("d_status").innerText = data.status;
+            document.getElementById("d_memo").innerText = data.memo || "-";
 
-            /* ================================
-               2. PLAN_ITEM GRID 세팅
-            ================================= */
-            modalPlanItemGridApi.setGridOption("rowData", data.planItems);
+            // 생산 아이템 그리드
+            modalPlanItemGridApi.setGridOption('rowData', data.planItems);
 
-            // OrderItemGrid 초기화
-            modalOrderItemGridApi.setGridOption("rowData", []);
+            // ✅ 첫 번째 제품의 수주 목록 자동 표시
+            if (data.planItems && data.planItems.length > 0) {
+                const firstPrdId = data.planItems[0].prdId;
+                const firstOrders = orderItemMap[firstPrdId] || [];
+                modalOrderItemGridApi.setGridOption('rowData', firstOrders);
+                console.log("첫 번째 제품의 수주 자동 로드:", firstPrdId, firstOrders);
+            } else {
+                modalOrderItemGridApi.setGridOption('rowData', []);
+            }
 
-            /* ================================
-               PLAN_ITEM 클릭 시 → ORDER_ITEM 표시
-            ================================= */
-            modalPlanItemGridApi.setGridOption("onRowClicked", (e) => {
-                const list = data.orderItemMap[e.data.prdId] || [];
-                modalOrderItemGridApi.setGridOption("rowData", list);
-            });
-
-            /* ================================
-               3. 모달 오픈
-            ================================= */
+            // 모달 열기
             const modal = new bootstrap.Modal(document.getElementById("planDetailModal"));
             modal.show();
         })
-        .catch(err => console.error("상세 조회 에러:", err));
+        .catch(err => console.error("에러:", err));
 }
 
-/* ===============================
-   전역 등록 (onclick에서 사용)
-================================= */
 window.openPlanDetail = openPlanDetail;
 
-
 /* ===============================
-   AG GRID – 상세 아이템
+   AG GRID 초기화
 ================================= */
-const modalPlanItemGridApi = agGrid.createGrid(
-    document.getElementById("modalPlanItemGrid"),
-    {
-        columnDefs: [
-            { headerName: "제품ID", field: "prdId", width: 120 },
-            { headerName: "제품명", field: "prdName", width: 180 },
-            { headerName: "계획수량", field: "planQty", width: 120 },
-            { headerName: "BOM부족", field: "bomStatus", width: 120 },
-            { headerName: "상태", field: "status", width: 120 }
-        ],
-        rowData: [],
-        rowSelection: "single"
-    }
-);
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // 생산 아이템 그리드
+    modalPlanItemGridApi = agGrid.createGrid(
+        document.getElementById("modalPlanItemGrid"),
+        {
+            columnDefs: [
+                { field: "prdId", headerName: "제품ID", width: 120 },
+                { field: "prdName", headerName: "제품명", width: 180 },
+                { field: "planQty", headerName: "계획수량", width: 120 },
+                { field: "bomStatus", headerName: "BOM부족", width: 120 },
+                { field: "status", headerName: "상태", width: 120 }
+            ],
+            rowSelection: { mode: 'singleRow' },
+            onRowClicked: function(event) {
+                const prdId = event.data.prdId;
+                const orders = orderItemMap[prdId] || [];
+                
+                console.log("클릭한 제품:", prdId);
+                console.log("해당 제품의 수주:", orders);
+                
+                // ✅ 완전히 새로운 데이터로 교체
+                modalOrderItemGridApi.setGridOption('rowData', orders);
+            }
+        }
+    );
 
-/* ===============================
-   AG GRID – 수주 상세 항목
-================================= */
-const modalOrderItemGridApi = agGrid.createGrid(
-    document.getElementById("modalOrderItemGrid"),
-    {
-        columnDefs: [
-            { headerName:"수주번호",  field:"orderId",      width:140 },
-            { headerName:"거래처",    field:"clientName",   width:150 },
-            { headerName:"주문수량",  field:"orderQty",     width:120 },
-            { headerName:"수주일자",  field:"orderDate",    width:140 },
-            { headerName:"납기일",    field:"deliveryDate", width:140 }
-        ],
-        rowData: []
-    }
-);
+    // 수주 그리드
+    modalOrderItemGridApi = agGrid.createGrid(
+        document.getElementById("modalOrderItemGrid"),
+        {
+            columnDefs: [
+                { field: "orderId", headerName: "수주번호", width: 140 },
+                { field: "clientName", headerName: "거래처", width: 150 },
+                { field: "orderQty", headerName: "주문수량", width: 120 },
+                { field: "orderDate", headerName: "수주일자", width: 140 },
+                { field: "deliveryDate", headerName: "납기일", width: 140 }
+            ]
+        }
+    );
+    
+    console.log("그리드 초기화 완료");
+});

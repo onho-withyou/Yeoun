@@ -74,78 +74,85 @@ public class ProductionPlanService {
     }
 
     /* ================================
-    생산계획 생성 
-=============================== */
-@Transactional
-public String createPlan(List<PlanCreateItemDTO> items, String createdBy, String memo) {
+    	생산계획 생성 
+		=============================== */
+    @Transactional
+    public String createPlan(List<PlanCreateItemDTO> items, String createdBy, String memo) {
 
-    if (items == null || items.isEmpty()) {
-        throw new IllegalArgumentException("생산계획 생성 실패: 선택된 수주 항목이 없습니다.");
-    }
-
-    String prdId = null;
-    List<Long> orderItemIdList = new ArrayList<>();
-
-    for (PlanCreateItemDTO dto : items) {
-        OrderItem oi = orderItemRepository.findById(dto.getOrderItemId())
-                .orElseThrow(() -> new IllegalArgumentException("OrderItem 없음: " + dto.getOrderItemId()));
-
-        orderItemIdList.add(oi.getOrderItemId()); // 상태변경 대상 수집
-
-        if (prdId == null) prdId = oi.getPrdId();
-        else if (!prdId.equals(oi.getPrdId())) {
-            throw new IllegalArgumentException("생산계획은 동일 제품만 묶어서 생성할 수 있습니다.");
+        if (items == null || items.isEmpty()) {
+            throw new IllegalArgumentException("생산계획 생성 실패: 선택된 수주 항목이 없습니다.");
         }
-    }
 
-    // 총 생산계획수량
-    BigDecimal totalPlanQty = items.stream()
-            .map(dto -> BigDecimal.valueOf(dto.getQty()))
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        String prdId = null;
+        List<Long> orderItemIdList = new ArrayList<>();
 
-    String planId = generatePlanId();
+        int totalPlanQty = 0;  // ⭐ 제품 총량 합산
 
-    ProductionPlan plan = ProductionPlan.builder()
-            .planId(planId)
-            .prdId(prdId)
-            .planQty(totalPlanQty.intValue())
-            .planDate(LocalDate.now())
-            .dueDate(LocalDate.now().plusDays(7))
-            .status(ProductionStatus.PLANNING) // ★ ENUM 적용
-            .planMemo(memo)
-            .createdBy(createdBy)
-            .build();
+        for (PlanCreateItemDTO dto : items) {
+            OrderItem oi = orderItemRepository.findById(dto.getOrderItemId())
+                    .orElseThrow(() -> new IllegalArgumentException("OrderItem 없음: " + dto.getOrderItemId()));
 
-    planRepo.save(plan);
+            orderItemIdList.add(oi.getOrderItemId());
 
-    // 상세 생성
-    for (PlanCreateItemDTO dto : items) {
+            if (prdId == null) prdId = oi.getPrdId();
+            else if (!prdId.equals(oi.getPrdId())) {
+                throw new IllegalArgumentException("생산계획은 동일 제품만 묶어서 생성할 수 있습니다.");
+            }
 
-        OrderItem oi = orderItemRepository.findById(dto.getOrderItemId())
-                .orElseThrow(() -> new IllegalArgumentException("OrderItem 없음: " + dto.getOrderItemId()));
+            totalPlanQty += dto.getQty();   // ⭐ 수량 누적
+        }
 
-        ProductionPlanItem item = ProductionPlanItem.builder()
-                .planItemId(generatePlanItemId())
+        String planId = generatePlanId();
+
+        /* -------------------------------------
+           1) 생산계획 마스터 1개 생성
+        -------------------------------------- */
+        ProductionPlan plan = ProductionPlan.builder()
                 .planId(planId)
                 .prdId(prdId)
-                .orderQty(oi.getOrderQty())
-                .planQty(BigDecimal.valueOf(dto.getQty()))
-                .bomStatus(BomStatus.WAIT)
+                .planQty(totalPlanQty)   // ⭐ 총합 수량
+                .planDate(LocalDate.now())
+                .dueDate(LocalDate.now().plusDays(7))
                 .status(ProductionStatus.PLANNING)
-                .itemMemo("")
+                .planMemo(memo)
                 .createdBy(createdBy)
                 .build();
 
-        itemRepo.save(item);
+        planRepo.save(plan);
+
+        /* -------------------------------------
+           2) 상세 항목은 제품당 1개만 생성
+        -------------------------------------- */      
+     for (PlanCreateItemDTO dto : items) {
+
+         OrderItem oi = orderItemRepository.findById(dto.getOrderItemId())
+                 .orElseThrow(() -> new IllegalArgumentException("OrderItem 없음: " + dto.getOrderItemId()));
+
+         ProductionPlanItem detail = ProductionPlanItem.builder()
+                 .planItemId(generatePlanItemId())
+                 .planId(planId)
+                 .prdId(prdId)
+                 .orderItemId(oi.getOrderItemId())   
+                 .orderQty(oi.getOrderQty())         
+                 .planQty(oi.getOrderQty())         
+                 .bomStatus(BomStatus.WAIT)
+                 .status(ProductionStatus.PLANNING)
+                 .itemMemo("")
+                 .createdBy(createdBy)
+                 .build();
+
+         itemRepo.save(detail);
+     }
+
+
+        /* -------------------------------------
+           3) OrderItem 상태를 일괄 PLANNED로 변경
+        -------------------------------------- */
+        orderItemIdList.forEach(orderItemRepository::updateStatusToPlanned);
+
+        return planId;
     }
 
-    /* =====================================
-        OrderItem 상태 변경 PLANNED
-    ===================================== */
-    orderItemIdList.forEach(orderItemRepository::updateStatusToPlanned);
-
-    return planId;
-}
 
     
  // 엔티티 목록 조회
@@ -262,7 +269,7 @@ public String createPlan(List<PlanCreateItemDTO> items, String createdBy, String
 	            .planQty(planQty)
 	            .planDate(LocalDate.now())
 	            .dueDate(LocalDate.now().plusDays(7))
-	            .status(ProductionStatus.PLANNING) // ★ ENUM 적용
+	            .status(ProductionStatus.PLANNING) 
 	            .planMemo("추천 기반 자동 생성 계획")
 	            .createdBy(createdBy)
 	            .build();
@@ -287,15 +294,17 @@ public String createPlan(List<PlanCreateItemDTO> items, String createdBy, String
                          .orElseThrow(() -> new IllegalArgumentException("OrderItem 찾을 수 없음: " + orderItemId));
 
                  ProductionPlanItem detail = ProductionPlanItem.builder()
-                         .planItemId(generatePlanItemId())
-                         .planId(planId)
-                         .prdId(prdId)
-                         .orderQty(oi.getOrderQty())
-                         .planQty(oi.getOrderQty())   // 상세는 주문수량 기준
-                         .bomStatus(BomStatus.WAIT)
-                         .status(ProductionStatus.PLANNING)
-                         .createdBy(createdBy)
-                         .build();
+                		    .planItemId(generatePlanItemId())
+                		    .planId(planId)
+                		    .prdId(prdId)
+                		    .orderItemId(oi.getOrderItemId())   
+                		    .orderQty(oi.getOrderQty())
+                		    .planQty(oi.getOrderQty())
+                		    .bomStatus(BomStatus.WAIT)
+                		    .status(ProductionStatus.PLANNING)
+                		    .createdBy(createdBy)
+                		    .build();
+
 
                  itemRepo.save(detail);
              }
@@ -308,12 +317,10 @@ public String createPlan(List<PlanCreateItemDTO> items, String createdBy, String
  }
  
  
+
  /* ============================
-  		생산계획 상세 모달
- ============================ */
- /* ============================
- 생산계획 상세 모달 서비스
-============================ */
+	 생산계획 상세 모달 서비스
+	============================ */
 @Transactional(readOnly = true)
 public PlanDetailDTO getPlanDetailForModal(String planId) {
 
@@ -324,16 +331,37 @@ public PlanDetailDTO getPlanDetailForModal(String planId) {
  // 2) PLAN_ITEM 목록 조회
  List<ProductionPlanItem> planItems = itemRepo.findByPlanId(planId);
 
- // 2-1) PLAN_ITEM → DTO 변환
- List<ProductionPlanItemDTO> planItemDTOs = planItems.stream()
-         .map(i -> new ProductionPlanItemDTO(
-                 i.getPlanItemId(),
-                 i.getPrdId(),
-                 i.getPlanQty().intValue(),
-                 i.getBomStatus().name(),
-                 i.getStatus().name()
-         ))
-         .toList();
+ /* =======================================================
+ ★ 2-1) PLAN_ITEM → DTO (제품별로 1개로 병합)
+======================================================= */
+Map<String, ProductionPlanItemDTO> merged = new HashMap<>();
+
+for (ProductionPlanItem item : planItems) {
+
+  String prdId = item.getPrdId();
+  int qty = item.getPlanQty().intValue();
+
+  if (merged.containsKey(prdId)) {
+      // 이미 등록된 제품 → 수량 합산
+      ProductionPlanItemDTO dto = merged.get(prdId);
+      dto.setPlanQty(dto.getPlanQty() + qty);
+  } else {
+      // 신규 등록
+      merged.put(prdId,
+              new ProductionPlanItemDTO(
+                      item.getPlanItemId(),
+                      item.getPrdId(),
+                      item.getProduct().getPrdName(),
+                      qty,
+                      item.getBomStatus().name(),
+                      item.getStatus().name()
+              )
+      );
+  }
+}
+
+List<ProductionPlanItemDTO> planItemDTOs = new ArrayList<>(merged.values());
+
 
 
  // 3) 제품별 수주(OrderItem) 매핑
@@ -341,24 +369,27 @@ public PlanDetailDTO getPlanDetailForModal(String planId) {
 
  for (ProductionPlanItem item : planItems) {
 
-     String prdId = item.getPrdId();
+     Long orderItemId = Long.valueOf(item.getOrderItemId());
 
-     List<OrderItem> orderItems = orderItemRepository.findByPrdId(prdId);
+     OrderItem oi = orderItemRepository.findById(orderItemId)
+             .orElse(null);
 
-     List<OrderItemDTO> dtoList = orderItems.stream()
-             .map(o -> new OrderItemDTO(
-                     String.valueOf(o.getOrderItemId()),
-                     o.getOrderId(),
-                     o.getPrdId(),
-                     o.getProduct().getPrdName(),
-                     o.getOrderQty().intValue(),
-                     o.getOrder().getDeliveryDate()
-             ))
-             .toList();
-
-     orderItemMap.put(prdId, dtoList);
+     if (oi != null) {
+    	 OrderItemDTO dto = new OrderItemDTO(
+    			    oi.getOrderItemId(),
+    			    oi.getOrderId(),
+    			    oi.getPrdId(),
+    			    oi.getProduct().getPrdName(),
+    			    oi.getOrderQty().intValue(),
+    			    oi.getOrder().getClient().getClientName(),  // ⭐ 거래처명
+    			    oi.getOrder().getOrderDate(),        // ⭐ 수주일자
+    			    oi.getOrder().getDeliveryDate()     // ⭐ 납기일
+    			    
+    			);
+    
+         orderItemMap.computeIfAbsent(item.getPrdId(), k -> new ArrayList<>()).add(dto);
+     }
  }
-
 
  // 4) 제품명 가져오기
  String itemName = planItems.isEmpty()

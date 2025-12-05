@@ -120,7 +120,19 @@ public class ProductionPlanController {
     @GetMapping("/plan/detail/{planId}")
     @ResponseBody
     public PlanDetailDTO getPlanDetail(@PathVariable("planId") String planId) {
-        return planService.getPlanDetailForModal(planId);
+
+        PlanDetailDTO dto = planService.getPlanDetailForModal(planId);
+
+        // ================================
+        // 🔍 디버깅용 로그 추가
+        // ================================
+        System.out.println("====== [PLAN_DETAIL_RESPONSE] ======");
+        System.out.println("PlanId: " + dto.getPlanId());
+        System.out.println("PlanItems: " + dto.getPlanItems());
+        System.out.println("OrderItemMap: " + dto.getOrderItemMap());
+        System.out.println("====================================");
+
+        return dto;
     }
 
 
