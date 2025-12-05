@@ -51,6 +51,6 @@ public class OutboundItem {
 	private String itemType; // 아이템타입
 
 	@Column(nullable = true)
-	private String locationId; //창고위치
+	private Long ivId; // 재고Id
 	
 }
