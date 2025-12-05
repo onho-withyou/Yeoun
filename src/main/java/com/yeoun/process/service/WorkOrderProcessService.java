@@ -337,12 +337,17 @@ public class WorkOrderProcessService {
         proc.setStatus("IN_PROGRESS");
         proc.setStartTime(LocalDateTime.now());
 
+        // 작업지시 시작일/상태 변경
         // 최초 시작일자 기록 (이미 값 있으면 유지)
         WorkOrder workOrder = proc.getWorkOrder();
         if (workOrder.getActStartDate() == null) {
             workOrder.setActStartDate(LocalDateTime.now());
         }
-
+        if ("RELEASED".equals(workOrder.getStatus())) {
+        	workOrder.setStatus("IN_PROGRESS");
+        }
+        workOrderRepository.save(workOrder);
+        
         WorkOrderProcess saved = workOrderProcessRepository.save(proc);
         return toStepDTO(saved);
     }
