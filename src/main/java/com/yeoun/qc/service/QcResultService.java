@@ -176,6 +176,8 @@ public class QcResultService {
 			qdrDTO.setResult(null);
 			qdrDTO.setRemark(null);
 			
+			qcDetailRowDTO.add(qdrDTO);
+			
 		}
 		
 		return qcDetailRowDTO;
