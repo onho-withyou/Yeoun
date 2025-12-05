@@ -17,27 +17,36 @@ import lombok.RequiredArgsConstructor;
 public class ClientItemService {
 
     private final ClientItemRepository repo;
+    
 
     @Transactional
     public void addItems(String clientId, List<ClientItemDTO> items, String empId) {
 
         for (ClientItemDTO dto : items) {
-            ClientItem item = ClientItem.builder()
-                    .clientId(clientId)
-                    .materialId(dto.getMaterialId())
-                    .unitPrice(dto.getUnitPrice())
-                    .minOrderQty(dto.getMoq())
-                    .unit(dto.getUnit())
-                    .supplyAvailable("Y")
-                    .createdAt(LocalDateTime.now())
-                    .createdBy(empId)
-                    .build();
+        	ClientItem item = ClientItem.builder()
+        	        .clientId(clientId)
+        	        .materialId(dto.getMaterialId())
+        	        .unitPrice(dto.getUnitPrice())
+        	        .minOrderQty(dto.getMoq())
+        	        .unit(dto.getUnit())
+        	        .orderUnit(dto.getOrderUnit())   
+        	        .leadDays(dto.getLeadDays())     
+        	        .supplyAvailable(dto.getSupplyAvailable())
+        	        .createdAt(LocalDateTime.now())
+        	        .createdBy(empId)
+        	        .build();
+
 
             repo.save(item);
         }
     }
 
-    public List<ClientItem> getItems(String clientId) {
-        return repo.findByClientId(clientId);
+    /** 🔥 품명 + 단위까지 포함된 DTO 목록 반환 */
+    public List<ClientItemDTO> getItems(String clientId) {
+        return repo.findItemsWithMaterialInfo(clientId);
     }
+   
+    
+    
+    
 }

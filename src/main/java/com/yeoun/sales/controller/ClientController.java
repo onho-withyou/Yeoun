@@ -5,6 +5,8 @@ import com.yeoun.masterData.entity.MaterialMst;
 import com.yeoun.masterData.repository.MaterialMstRepository;
 import com.yeoun.sales.dto.ClientItemDTO;
 import com.yeoun.sales.entity.Client;
+import com.yeoun.sales.entity.ClientItem;
+import com.yeoun.sales.repository.ClientItemRepository;
 import com.yeoun.sales.service.ClientItemService;
 import com.yeoun.sales.service.ClientService;
 
@@ -16,6 +18,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -26,6 +30,7 @@ public class ClientController {
     private final ClientService clientService;
     private final ClientItemService itemService;
     private final MaterialMstRepository materialRepository;  
+    private final ClientItemRepository itemRepository;  
 
 
     /* ======================================================
@@ -85,6 +90,8 @@ public class ClientController {
 
         // ▶ SUPPLIER → 협력사 상세 페이지
         model.addAttribute("items", itemService.getItems(clientId));
+        model.addAttribute("materials", materialRepository.findAll());
+        
         return "sales/supplier_detail";
     }
 
@@ -150,7 +157,7 @@ public class ClientController {
     @PostMapping("/{clientId}/items")
     @ResponseBody
     public String saveItems(
-            @PathVariable String clientId,
+    		 @PathVariable("clientId") String clientId,
             @RequestBody List<ClientItemDTO> items,
             @AuthenticationPrincipal LoginDTO login
     ) {
@@ -164,6 +171,64 @@ public class ClientController {
         return materialRepository.findAll();
     }
 
+    
+    
+    /* ======================================================
+    	9. 협력사 취급제품 등록
+ 	====================================================== */
+  
+    
+    @GetMapping("/{clientId}/items/create")
+    public String itemCreatePage(
+            @PathVariable("clientId") String clientId,
+            @RequestParam(value="cat", defaultValue="RAW") String category,
+            Model model
+    ){
+        List<MaterialMst> list = materialRepository.findByMatType(category);
+
+        model.addAttribute("clientId", clientId);
+        model.addAttribute("materials", list);
+        model.addAttribute("category", category);
+
+        return "sales/supplier_item_create";
+    }
+
+
+    @PostMapping("/{clientId}/items/create")
+    public String itemCreateProcess(
+            @PathVariable("clientId") String clientId,
+            @RequestParam("materialId") String materialId,
+            @RequestParam("unitPrice") BigDecimal unitPrice,
+            @RequestParam("moq") BigDecimal moq,
+            @RequestParam("supplyAvailable") String supplyAvailable,
+            @RequestParam("unit") String unit,
+            @RequestParam("orderUnit") BigDecimal orderUnit,
+            @RequestParam("leadDays") BigDecimal leadDays,
+            @RequestParam("category") String category,
+            @AuthenticationPrincipal LoginDTO login
+    ) {
+
+        ClientItem item = ClientItem.builder()
+                .clientId(clientId)
+                .materialId(materialId)
+                .unitPrice(unitPrice)
+                .minOrderQty(moq)
+                .unit(unit)
+                .orderUnit(orderUnit)
+                .leadDays(leadDays)
+                .supplyAvailable(supplyAvailable)
+                .createdBy(login.getEmpId())
+                .build();
+
+        itemRepository.save(item);
+
+        // 🔥 저장 후 취급품목 탭으로 이동
+        return "redirect:/sales/client/" 
+        + clientId 
+        + "?tab=item";
+
+
+    }
 
 
 }
