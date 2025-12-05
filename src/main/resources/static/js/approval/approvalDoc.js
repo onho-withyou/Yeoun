@@ -1928,13 +1928,14 @@ document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
 Grid.applyTheme('clean'); // Call API of static method
 //f- 날짜,기안자,문서양식 조회 불러오는 함수
 function AllGridSearch() {
-	console.log("AllGridSearch()-----> 해당함수 로딩시실행잘되나??");
+	
 	const params = {
 
 		createDate: document.getElementById("searchStartDate").value ?? "",
 		finishDate: document.getElementById("searchEndDate").value ?? "",
 		empName: document.getElementById("searchEmpIdAndformType").value ?? "",
 		approvalTitle: document.getElementById("searchEmpIdAndformType").value ?? ""
+
 	};
 
 	fetch('/approval/searchAllGrids', {

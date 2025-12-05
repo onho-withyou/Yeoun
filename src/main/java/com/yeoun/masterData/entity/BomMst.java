@@ -12,13 +12,12 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
 @Table(name = "BOM_MST")
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
 public class BomMst {
-	@Id
+	
 	@Column(name="BOM_ID", length = 20)
 	private String bomId; //BOMid
 	

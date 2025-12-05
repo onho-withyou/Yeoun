@@ -10,6 +10,9 @@ import com.yeoun.masterData.entity.MaterialMst;
 public interface MaterialMstRepository extends JpaRepository<MaterialMst, String> {
 
 	// 원자재 조회
-	Optional<MaterialMst> findByMatId(MaterialOrder materialOrder);
+	Optional<MaterialMst> findByMatId(String materialOrder);
+	
+	//2. 원자재 수정
+	//3. 원자재 삭제
 
 }
