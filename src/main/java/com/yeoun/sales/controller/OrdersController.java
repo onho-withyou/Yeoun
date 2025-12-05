@@ -16,11 +16,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.masterData.entity.ProductMst;
+import com.yeoun.sales.dto.OrderItemDTO;
 import com.yeoun.sales.dto.OrderListDTO;
-import com.yeoun.sales.entity.Client;
 import com.yeoun.sales.service.ClientService;
 import com.yeoun.sales.service.OrdersService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -30,10 +31,11 @@ public class OrdersController {
 
     private final OrdersService ordersService;
     private final ClientService clientService;
-//    private final ProductService productService;
-    
 
-    /** 화면 + 상태탭 포함 */
+
+    /* ================================
+       수주 목록 화면
+    ================================= */
     @GetMapping
     public String listPage(
             @RequestParam(value="status", required = false) String status,
@@ -43,38 +45,47 @@ public class OrdersController {
         return "sales/orders_list";
     }
 
-    /** AG-Grid 조회 데이터 */
+
+    /* ================================
+       AG-Grid 목록 조회 API
+    ================================= */
     @GetMapping("/list")
     @ResponseBody
     public List<OrderListDTO> list(
             @RequestParam(value ="status", required = false) String status,
-            @RequestParam(value ="startDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
-            @RequestParam(value ="endDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
+            @RequestParam(value ="startDate", required = false)
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam(value ="endDate", required = false)
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
             @RequestParam(value ="keyword",required = false) String keyword
     ) {
         return ordersService.search(status, startDate, endDate, keyword);
     }
-    
 
-  
-    /* 등록 */
+
+
+    /* ================================
+       신규 수주 등록 화면
+    ================================= */
     @GetMapping("/new")
     public String createPage(
             Model model,
-            @AuthenticationPrincipal LoginDTO login   // ← ⭐ 로그인 정보 주입
+            @AuthenticationPrincipal LoginDTO login
     ) {
+        List<ProductMst> products = ordersService.getProducts();
 
-        // 제품 목록
-        List<ProductMst> products = ordersService.getProducts();      
-      
-
-        // 모델에 추가
-        model.addAttribute("products", products);       
-        model.addAttribute("login", login);   
+        model.addAttribute("products", products);
+        model.addAttribute("productList", products);
+        model.addAttribute("login", login);
 
         return "sales/orders_create";
     }
 
+
+
+    /* ================================
+       거래처 자동완성 API
+    ================================= */
     @GetMapping("/search-customer")
     @ResponseBody
     public List<Map<String, String>> searchCustomer(
@@ -83,23 +94,66 @@ public class OrdersController {
         return ordersService.searchCustomer(keyword);
     }
 
-    
-    
+
+
+    /* ================================
+       신규 수주 저장
+    ================================= */
     @PostMapping("/create")
     public String createOrder(
-            @RequestParam(value="clientId", required = false) String clientId,
-            @RequestParam(value="orderDate", required = false) String orderDate,
-            @RequestParam(value="deliveryDate", required = false) String deliveryDate,
-            @RequestParam(value="empId", required = false) String empId,
-            @RequestParam(value="orderMemo",required = false) String orderMemo
+            @RequestParam(name = "clientId") String clientId,
+            @RequestParam(name = "orderDate") String orderDate,
+            @RequestParam(name = "deliveryDate") String deliveryDate,
+            @RequestParam(name = "empId") String empId,
+
+            @RequestParam(name = "managerName", required = false) String managerName,
+            @RequestParam(name = "managerTel", required = false) String managerTel,
+            @RequestParam(name = "managerEmail", required = false) String managerEmail,
+
+            @RequestParam(name = "dPostcode", required = false) String postcode,
+            @RequestParam(name = "dAddress1", required = false) String addr,
+            @RequestParam(name = "dAddress2", required = false) String addrDetail,
+
+            @RequestParam(name = "orderMemo", required = false) String orderMemo,
+
+            HttpServletRequest request
     ) {
 
-        // TODO: DB 저장 로직 추가 (OrdersService 이용)
+        ordersService.createOrder(
+                clientId,
+                orderDate,
+                deliveryDate,
+                empId,
+                managerName,
+                managerTel,
+                managerEmail,
+                postcode,
+                addr,
+                addrDetail,
+                orderMemo,
+                request
+        );
 
-        // 저장 후 목록 페이지로 이동
         return "redirect:/sales/orders";
     }
+    
+    /* ================================
+    생산계획 작성용 — 수주항목 조회 API
+    (제품 정보까지 JOIN)
+ ================================ */
+	 @GetMapping("/order-items")
+	 @ResponseBody
+	 public List<Map<String, Object>> getOrderItemsForPlan(
+	         @RequestParam(required = false) String group
+	 ) {
+	     return ordersService.getOrderItemsForPlan(group);
+ }
 
+	 @GetMapping("/confirmed-items")
+	 @ResponseBody
+	 public List<OrderItemDTO> getConfirmedOrderItems() {
+	     return ordersService.getConfirmedOrderItems();
+	 }
 
 
 }

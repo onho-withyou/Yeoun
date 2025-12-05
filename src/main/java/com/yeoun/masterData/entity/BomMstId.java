@@ -22,7 +22,7 @@ public class BomMstId implements Serializable{
 	public BomMstId() {
     }
 	
-	// 2. 💡 필수: equals() 메서드 재정의
+		// 2. 💡 필수: equals() 메서드 재정의
 		@Override
 		public boolean equals(Object o) {
 			if (this == o) return true;

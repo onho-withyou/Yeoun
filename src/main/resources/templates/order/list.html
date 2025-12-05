@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layouts/layout.html}">
+<head>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+  body {
+    background: #f4f3fb;
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    color: #2f2b43;
+  }
+
+  .title {
+    font-size: 1.8em;
+    margin-bottom: 1.8rem;
+    color: #697a8d;
+    font-weight: 500;
+  }
+
+  .order-card {
+    border-radius: 12px;
+    border: 1px solid #e2e1f3;
+    background: #ffffff;
+    box-shadow: 0 10px 25px rgba(80, 72, 180, 0.08);
+    padding: 16px 18px;
+    margin-bottom: 18px;
+  }
+
+  .order-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .card-title {
+    font-size: 1.6em;
+    font-weight: 600;
+    color: #41388f;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .yeoun-badge-outline {
+    border-radius: 999px;
+    border: 1px solid rgba(111, 92, 236, 0.4);
+    color: #6f5cec;
+    padding: 2px 10px;
+    font-size: 11px;
+    background: rgba(111, 92, 236, 0.04);
+  }
+
+  .status-badge {
+    width: 90px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 3px 20px;
+  }
+
+  .status-create     { background: #e7eef7; color: #3a5a8a; }
+  .status-release    { background: #f0eaff; color: #6a4cc3; }
+  .status-progress   { background: #e6f5ec; color: #15803d; }
+  .status-complete   { background: #e8f1ff; color: #1d4ed8; }
+  .status-cancel     { background: #fdecec; color: #c0392b; }
+
+
+  .form-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #514d7a;
+    margin-bottom: 4px;
+  }
+
+  .form-control,
+  .form-select {
+    font-size: 13px;
+    border-radius: 8px;
+    border-color: #d9d8f2;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #6f5cec;
+    box-shadow: 0 0 0 0.15rem rgba(111, 92, 236, 0.2);
+  }
+
+  .form-text {
+    font-size: 11px;
+    color: #9a96c0;
+  }
+
+  .btn-yeoun-primary {
+    font-size: 15px;               /* 버튼 글자 키움 */
+    font-weight: 600;
+    padding: 10px 22px;            /* 버튼 크기 증가 */
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #6f5cec, #9479ff);
+    color: white;
+  }
+
+  .btn-yeoun-outline {
+    border-radius: 999px;
+    border: 1px solid #c9c6f3;
+    background: #fff;
+    color: #655dc0;
+    font-size: 13px;
+    padding: 8px 14px;
+  }
+
+  .badge-priority {
+    border-radius: 999px;
+    font-size: 11px;
+    padding: 3px 8px;
+    background: #fdf4e2;
+    color: #d97907;
+  }
+
+  .search-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .search-row .form-control,
+  .search-row .form-select {
+    font-size: 12px;
+    height: 32px;
+    padding: 4px 10px;
+  }
+
+  .search-row .btn {
+    height: 32px;
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+
+  /** modal **/
+
+  /* 메인 카드형 모달 */
+  .yeoun-modal {
+    border-radius: 18px;
+    border: none;
+    background: #ffffff;
+    box-shadow: 0 15px 35px rgba(90, 75, 180, 0.15);
+  }
+
+  /* 헤더 */
+  .yeoun-modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #eeeafc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-title-wrap i {
+    color: #6a5acd;
+    font-size: 20px;
+    margin-right: 6px;
+  }
+
+  .modal-title {
+    font-weight: 600;
+    color: #3b336d;
+  }
+
+  /* 바디 */
+  .yeoun-modal-body {
+    padding: 24px 28px;
+  }
+
+  /* 탭 */
+  .yeoun-tabs .nav-link {
+    border: none;
+    color: #867ccc;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .yeoun-tabs .nav-link.active {
+    color: #4b3fbf;
+    background: #f3f1ff;
+    font-weight: 600;
+  }
+
+  /* 정보 그리드 */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+
+  .info-item label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #776fb5;
+    margin-bottom: 4px;
+  }
+
+  /* 진행률 */
+  .info-progress {
+    grid-column: 1 / span 3;
+  }
+
+  .yeoun-progress {
+    background: #ece9ff;
+    height: 10px;
+    border-radius: 999px;
+  }
+
+  .yeoun-progress .progress-bar {
+    background: linear-gradient(135deg, #6f5cec, #9479ff);
+    border-radius: 999px;
+    font-size: 11px;
+  }
+
+  /* 테이블 */
+  .yeoun-table thead {
+    background: #f5f3ff;
+    color: #5b53a1;
+  }
+
+  .yeoun-table td {
+    font-size: 13px;
+  }
+
+  /* 푸터 */
+  .yeoun-modal-footer {
+    border-top: 1px solid #eeeafc;
+    padding: 16px 24px;
+    text-align: right;
+  }
+
+  /* 입력폼 스타일 보완 */
+  #workCreateForm .form-label {
+    color: #6a63b9;
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  #workCreateForm .form-control,
+  #workCreateForm .form-select {
+    background: #faf9ff;
+    border-color: #dcd6fe;
+  }
+
+  #workCreateForm .form-control:focus,
+  #workCreateForm .form-select:focus {
+    border-color: #6a5acd;
+    box-shadow: 0 0 0 0.15rem rgba(106, 92, 205, 0.2);
+  }
+
+  /* info-value는 read-only 표현 */
+  .info-value {
+    background: #faf9ff;
+    border: 1px solid #e3dfff;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #4a436d;
+  }
+
+  .status-tag {
+    font-weight: 600;
+    color: #6a5acd;
+  }
+
+  /* 테이블 */
+  .yeoun-table thead {
+    background: #f5f3ff;
+    color: #5b53a1;
+  }
+
+</style>
+</head>
+<body>
+<th:block layout:fragment="content">
+<div class="custom-body container-xxl flex-grow-1 container-p-y">
+  <div class="mb-3 d-flex justify-content-between align-items-center">
+    <div class="title">
+      <i class="bi bi-kanban-fill"></i>
+      작업지시 관리
+    </div>
+    <button class="btn btn-yeoun-primary" id="btnCreate">
+      <i class="bi bi-plus-circle"></i> 새로 등록
+    </button>
+  </div>
+  <!-- ===== 왼쪽: 작업지시 목록 ===== -->
+  <div>
+    <div class="order-card">
+      <div class="order-card-header">
+        <div class="card-title">
+          작업지시 목록
+        </div>
+        <span class="yeoun-badge-outline">
+                오늘 기준 작업지시 8건
+        </span>
+      </div>
+
+      <!-- 검색 / 필터 영역 -->
+      <div class="mb-2 search-row">
+        <input id="searchKeyword" type="text" class="form-control" placeholder="품목명 / 작업지시 번호 검색" />
+        <select id="searchStatus" class="form-select" style="max-width: 150px;">
+          <option value="ALL">전체 상태</option>
+          <option value="CREATED">준비</option>
+          <option value="RELEASED">확정</option>
+          <option value="IN_PROGRESS">진행</option>
+          <option value="COMPLETED">완료</option>
+          <option value="CANCELED">취소</option>
+        </select>
+        <input type="date" class="form-control" id="startDateFrom" style="max-width: 150px;" />
+        <button id="btnSearchOrder" class="btn btn-sm btn-outline-secondary">
+          <i class="las la-search drop-shadow fs-5"></i>
+        </button>
+      </div>
+
+      <div id="workOrderGrid"></div>
+    </div>
+  </div>
+</div>
+
+  <!-- 모달 HTML -->
+  <!-- =================================== 등록 모달 ========================================== -->
+  <div class="modal fade" id="workCreateModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content yeoun-modal">
+
+        <!-- Header -->
+        <div class="yeoun-modal-header">
+          <div class="modal-title-wrap">
+            <i class="bi bi-file-earmark-plus"></i>
+            <h5 class="modal-title">작업지시 등록</h5>
+          </div>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <!-- Body -->
+        <div class="yeoun-modal-body">
+          <form id="workCreateForm">
+
+            <!-- 품목 / 라인 -->
+            <div class="row g-3 mb-3">
+              <div class="col-7">
+                <label class="form-label">품목</label>
+                <input type="text" class="form-control" id="itemName" placeholder="라벤더 퍼퓸 50ml">
+                <div class="form-text">품목코드/검색 기능 연동 예정</div>
+              </div>
+              <div class="col-5">
+                <label class="form-label">라인</label>
+                <select class="form-select" id="line">
+                  <option disabled selected>선택</option>
+                  <option>1라인</option>
+                  <option>2라인</option>
+                  <option>예비라인</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 날짜 / 시간 -->
+            <div class="row g-3 mb-3">
+              <div class="col-4">
+                <label class="form-label">계획 일자</label>
+                <input type="date" class="form-control" id="planDate">
+              </div>
+              <div class="col-4">
+                <label class="form-label">시작 시간</label>
+                <input type="time" class="form-control" id="startTime">
+              </div>
+              <div class="col-4">
+                <label class="form-label">종료 시간</label>
+                <input type="time" class="form-control" id="endTime">
+              </div>
+            </div>
+
+            <!-- 계획 수량 / 우선순위 -->
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label">계획 수량</label>
+                <input type="number" class="form-control" id="qty" placeholder="예) 250">
+              </div>
+              <div class="col-6">
+                <label class="form-label">우선순위</label>
+                <select class="form-select" id="priority">
+                  <option value="N" selected>일반</option>
+                  <option value="H">긴급</option>
+                  <option value="L">낮음</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 작업자 / 상태 -->
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label">작업자</label>
+                <select class="form-select" id="worker">
+                  <option disabled selected>선택</option>
+                  <option value="A">김작업</option>
+                  <option value="B">이향수</option>
+                  <option value="C">박QC</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label">초기 상태</label>
+                <select class="form-select" id="status">
+                  <option>Planned</option>
+                  <option>In Progress</option>
+                  <option>Hold</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 비고 -->
+            <div class="mb-3">
+              <label class="form-label">비고</label>
+              <textarea class="form-control" id="remark" rows="3" placeholder="특이사항, 주의사항 등을 입력하세요."></textarea>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="yeoun-modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">닫기</button>
+          <button type="button" class="btn btn-yeoun-primary" id="btnCreateSubmit">
+            <i class="bi bi-check2-circle"></i> 저장
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- =============================== 상세 모달 ================================= -->
+  <div class="modal fade" id="workDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content yeoun-modal">
+
+        <!-- HEADER -->
+        <div class="yeoun-modal-header">
+          <div class="modal-title-wrap">
+            <i class="bi bi-eye-fill"></i>
+            <h5 class="modal-title" id="detailModalTitle">작업지시 상세</h5>
+          </div>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <!-- BODY -->
+        <div class="yeoun-modal-body">
+
+          <!-- 탭 -->
+          <ul class="nav yeoun-tabs mb-4" role="tablist">
+            <li class="nav-item">
+              <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#detail-basic">기본 정보</button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#detail-route">공정 라우트</button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#detail-lot">LOT 정보</button>
+            </li>
+          </ul>
+
+          <div class="tab-content">
+
+            <!-- ======================== 기본 정보 ======================== -->
+            <div class="tab-pane fade show active" id="detail-basic">
+
+              <div class="info-grid">
+
+                <div class="info-item">
+                  <label>작업지시번호</label>
+                  <div class="info-value" id="detailWoId"></div>
+                </div>
+
+                <div class="info-item">
+                  <label>품목명</label>
+                  <div class="info-value" id="detailItemName"></div>
+                </div>
+
+                <div class="info-item">
+                  <label>상태</label>
+                  <div class="info-value status-tag" id="detailStatus"></div>
+                </div>
+
+                <div class="info-item">
+                  <label>계획 수량</label>
+                  <div class="info-value" id="detailPlanQty"></div>
+                </div>
+
+                <div class="info-item">
+                  <label>생산 일자</label>
+                  <div class="info-value" id="detailPlanDate"></div>
+                </div>
+
+                <div class="info-item">
+                  <label>생산 시간</label>
+                  <div class="info-value" id="detailPlanTime"></div>
+                </div>
+
+                <div class="info-item">
+                  <label>할당 라인</label>
+                  <div class="info-value" id="detailLineName"></div>
+                </div>
+
+                <div class="info-item">
+                  <label>할당 설비</label>
+                  <div class="info-value" id="detailEquipName"></div>
+                </div>
+
+                <div class="info-item">
+                  <label>담당 작업자</label>
+                  <div class="info-value" id="detailWorkerName"></div>
+                </div>
+
+                <!-- 진행률 -->
+                <div class="info-progress">
+                  <label>공정 진행률</label>
+                  <div class="progress yeoun-progress">
+                    <div id="detailProgressBar" class="progress-bar" style="width: 0%">0%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ======================== 공정 라우트 ======================== -->
+            <div class="tab-pane fade" id="detail-route">
+              <table class="table yeoun-table">
+                <thead>
+                <tr>
+                  <th>STEP</th>
+                  <th>공정명</th>
+                  <th>설비</th>
+                  <th>기준시간</th>
+                  <th>상태</th>
+                </tr>
+                </thead>
+                <tbody id="detailRouteTable"></tbody>
+              </table>
+            </div>
+
+            <!-- ======================== LOT 정보 ======================== -->
+            <div class="tab-pane fade" id="detail-lot">
+              <table class="table yeoun-table">
+                <thead>
+                <tr>
+                  <th>LOT 번호</th>
+                  <th>품목</th>
+                  <th>투입량</th>
+                  <th>창고</th>
+                  <th>비고</th>
+                </tr>
+                </thead>
+                <tbody id="detailLotTable"></tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="yeoun-modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+</th:block>
+
+<th:block layout:fragment="myScript">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+
+  let workOrderGrid = null;
+
+  document.addEventListener("DOMContentLoaded", () => {
+
+    const gridEl = document.getElementById("workOrderGrid");
+    if (!gridEl) {
+      console.error("workOrderGrid 요소 없음!");
+      return;
+    }
+
+    // 1) Grid 생성
+    workOrderGrid = new tui.Grid ({
+      el: gridEl,
+      bodyHeight: 450,
+      rowHeaders: ["rowNum"],
+      scrollX: false,
+      scrollY: true,
+      pageOptions: {
+        useClient: true,
+        perPage: 10
+      },
+      columnOptions: {resizable: true},
+      columns: [
+        {header: "작업지시번호", name: "orderId", width: 160, align: "center"},
+        {header: "품번", name: "prdId", align: "center"},
+        {header: "품목군", name: "prdName", align: "left"},
+        {header: "계획수량", name: "planQty", align: "right"},
+        {
+          header: "시작시간",
+          name: "startDate",
+          align: "center",
+          formatter: ({ value }) => formatDate(value)
+        },
+        {
+          header: "종료시간",
+          name: "endDate",
+          align: "center",
+          formatter: ({ value }) => formatDate(value)
+        },
+        {
+          header: "상태",
+          name: "status",
+          align: "center",
+          formatter: ({ value }) => formatStatusBadge(value)
+        },
+        {header: "출고여부", name: "outboundYn", align: "center"},
+        {
+          header: "상세",
+          name: "btn",
+          width: 90,
+          align: "center",
+          formatter: () => "<button class='btn btn-primary btn-sm grid-detail'>상세</button>"
+        }
+      ]
+    });
+
+    // 2) 검색 버튼 클릭 시 조회
+    document.getElementById("btnSearchOrder").addEventListener("click", () => {
+      loadWorkOrderGrid();
+    });
+
+    // 3) 페이지 로드 시 전체 조회
+    loadWorkOrderGrid();
+
+    // 4) 상세 버튼 클릭 이벤트
+    workOrderGrid.on("click", (event) => {
+      if (event.columnName !== "btn") return;
+      const row = workOrderGrid.getRow(event.rowKey);
+      openDetailModal(row.orderId);
+    });
+
+  });
+
+  // ======================================================
+  // 작업지시 목록 조회
+  // ======================================================
+  function loadWorkOrderGrid(){
+
+    const keyword = document.getElementById("searchKeyword").value || "";
+    const status  = document.getElementById("searchStatus").value  || "";
+    const date    = document.getElementById("startDateFrom").value || "";
+
+    const query = new URLSearchParams({
+      keyword,
+      status,
+      date
+    });
+
+    fetch("/order/list/data?" + query.toString())
+            .then(res => {
+              if (!res.ok) throw new Error("HTTP " + res.status);
+              return res.json();
+            })
+            .then(data => {
+              console.log("작업지시 목록 : ", data);
+              workOrderGrid.resetData(data);
+            })
+            .catch(err => {
+              console.error("작업지시 목록 조회 오류", err);
+              alert("조회 중 오류 발생");
+            });
+
+  }
+
+  function formatStatusBadge(status) {
+
+    const map = {
+      "CREATED":      { text: "준비",       cls: "status-badge status-create" },
+      "RELEASED":     { text: "확정",       cls: "status-badge status-release" },
+      "IN_PROGRESS":  { text: "진행중",     cls: "status-badge status-progress" },
+      "COMPLETED":    { text: "완료",       cls: "status-badge status-complete" },
+      "CANCELED":     { text: "취소",       cls: "status-badge status-cancel" }
+    };
+
+    const item = map[status] || { text: status, cls: "status-badge" };
+
+    return `<span class="${item.cls}">${item.text}</span>`;
+  }
+
+  function formatDate(dt) {
+    if (!dt) return "-";
+
+    // dt = "2025-12-04T09:00:00"
+    const d = new Date(dt);
+
+    if (isNaN(d.getTime())) return dt; // 잘못된 날짜면 원본 그대로
+
+    const yy = String(d.getFullYear()).substring(2);
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mi = String(d.getMinutes()).padStart(2, "0");
+
+    return `${yy}-${mm}-${dd} ${hh}:${mi}`;
+  }
+
+
+
+  // 등록 모달 열기
+  document.getElementById("btnCreate").addEventListener("click", () => {
+    document.getElementById("workCreateForm").reset(); // 등록 전용 폼 초기화
+    const modal = new bootstrap.Modal(document.getElementById("workCreateModal"));
+    modal.show();
+  });
+
+  // 상세 모달 열기
+  document.addEventListener("click", function(e) {
+
+    if (!e.target.classList.contains("btn-detail")) return;
+
+    const workId = e.target.dataset.id;   // ← 여기!
+    openDetailModal(workId);              // ← 전달
+
+  });
+
+  function openDetailModal(workId) {
+    console.log("Detail:", workId);
+    const modal = new bootstrap.Modal(document.getElementById("workDetailModal"));
+
+    // 1) 기본 정보 로드
+    fetch(`/api/work-order/${workId}`)
+            .then(res => res.json())
+            .then(data => {
+              document.getElementById("detailWoId").innerText = data.woId;
+              document.getElementById("detailItemName").innerText = data.itemName;
+              document.getElementById("detailStatus").innerText = data.status;
+              document.getElementById("detailPlanQty").innerText = data.quantity;
+              document.getElementById("detailPlanDate").innerText = data.planDate;
+              document.getElementById("detailPlanTime").innerText =
+                      `${data.planStart} ~ ${data.planEnd}`;
+              document.getElementById("detailLineName").innerText = data.lineName;
+              document.getElementById("detailEquipName").innerText = data.equipName;
+              document.getElementById("detailWorkerName").innerText = data.worker;
+
+              // 진행률 처리
+              const p = data.progress;
+              const bar = document.getElementById("detailProgressBar");
+              bar.style.width = p + "%";
+              bar.innerText = p + "%";
+            });
+
+    // 2) 라우팅 정보
+    fetch(`/api/work-order/${workId}/routing`)
+            .then(res => res.json())
+            .then(list => {
+              const t = document.getElementById("detailRouteTable");
+              t.innerHTML = "";
+              list.forEach(r => {
+                t.innerHTML += `
+          <tr>
+            <td>${r.step}</td>
+            <td>${r.processName}</td>
+            <td>${r.equipment}</td>
+            <td>${r.stdTime} min</td>
+            <td>${r.status}</td>
+          </tr>`;
+              });
+            });
+
+    // 3) LOT 정보
+    fetch(`/api/work-order/${workId}/lot`)
+            .then(res => res.json())
+            .then(list => {
+              const t = document.getElementById("detailLotTable");
+              t.innerHTML = "";
+              list.forEach(l => {
+                t.innerHTML += `
+          <tr>
+            <td>${l.lotNo}</td>
+            <td>${l.itemName}</td>
+            <td>${l.qty}</td>
+            <td>${l.warehouse}</td>
+            <td>${l.remark}</td>
+          </tr>`;
+              });
+            });
+
+    modal.show();
+  }
+
+</script>
+</th:block>
+
+</body>
+</html>
+
+<!--
+
+function openDetailModal(workId){
+  // 1) 기본 정보 로드
+  fetch(`/api/work-order/${workId}`)
+    .then(res=>res.json())
+    .then(data=>{
+      document.getElementById("woId").value = data.woId;
+      document.getElementById("itemName").value = data.itemName;
+      document.getElementById("planQty").value = data.quantity;
+      document.getElementById("status").value = data.status;
+      document.getElementById("planDate").value = data.planDate;
+      document.getElementById("planTime").value = data.planStart + " ~ " + data.planEnd;
+      document.getElementById("lineName").value = data.lineName;
+      document.getElementById("equipName").value = data.equipName;
+      document.getElementById("workerName").value = data.worker;
+
+      // 진행률
+      const p = data.progress;
+      const bar = document.getElementById("progressBar");
+      bar.style.width = p + "%";
+      bar.innerText = p + "%";
+    });
+
+  // 2) 공정 라우트 로드
+  fetch(`/api/work-order/${workId}/routing`)
+    .then(res=>res.json())
+    .then(list=>{
+      const tbody = document.getElementById("routeTable");
+      tbody.innerHTML = "";
+      list.forEach(r=>{
+        tbody.innerHTML += `
+          <tr>
+            <td>${r.step}</td>
+            <td>${r.processName}</td>
+            <td>${r.equipment}</td>
+            <td>${r.stdTime} min</td>
+            <td>${r.status}</td>
+          </tr>`;
+      });
+    });
+
+  // 3) LOT 정보 로드
+  fetch(`/api/work-order/${workId}/lot`)
+    .then(res=>res.json())
+    .then(list=>{
+      const tbody = document.getElementById("lotTable");
+      tbody.innerHTML = "";
+      list.forEach(l=>{
+        tbody.innerHTML += `
+          <tr>
+            <td>${l.lotNo}</td>
+            <td>${l.itemName}</td>
+            <td>${l.qty}</td>
+            <td>${l.warehouse}</td>
+            <td>${l.remark}</td>
+          </tr>`;
+      });
+    });
+
+  // 마지막 → 모달 열기
+  new bootstrap.Modal(document.getElementById("workModal")).show();
+}
+-->

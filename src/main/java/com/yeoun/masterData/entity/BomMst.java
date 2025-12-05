@@ -12,7 +12,6 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import oracle.sql.NUMBER;
 
 @Entity
 @Table(name = "BOM_MST")

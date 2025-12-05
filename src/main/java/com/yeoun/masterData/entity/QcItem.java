@@ -1,5 +1,6 @@
 package com.yeoun.masterData.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -35,17 +36,17 @@ public class QcItem {
 	@Column(name="STD_TEXT", length = 200)
 	private String stdText; //기준값텍스트
 	
-	@Column(name="MIN_VALUE", length = 10)
-	private Number minValue; //허용하한값
+	@Column(name = "MIN_VALUE", precision = 10, scale = 2)
+	private BigDecimal minValue; //허용하한값
 	
-	@Column(name="MAX_VALUE", length = 10)
-	private Number maxValue; //허용상한값
+	@Column(name = "MAX_VALUE", precision = 10, scale = 2)
+	private BigDecimal maxValue; //허용상한값
 	
 	@Column(name="USE_YN", length = 1)
 	private String useYn; //사용여부
 	
-	@Column(name="SORT_ORDER", length = 3)
-	private Number sortOrder; //정렬순서
+	@Column(name = "SORT_ORDER")
+	private Integer sortOrder; //정렬순서
 	
 	@Column(name="CREATED_ID", length = 7)
 	private String createdId; //생성자 id
