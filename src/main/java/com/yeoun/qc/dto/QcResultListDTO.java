@@ -11,8 +11,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class QcRegistDTO {
+public class QcResultListDTO {
 	
+	// QC 결과 ID
 	private Long qcResultId;
 	
 	// 작업지시번호
@@ -24,13 +25,13 @@ public class QcRegistDTO {
 	// 제품명
 	private String prdName;
 	
-	// 계획수량
-	private Integer planQty;
+	// 검사일자
+	private LocalDate inspectionDate;
 	
-	// QC 상태
+	// 전체판정
 	private String overallResult;
 	
-	// 검사일
-	private LocalDate inspectionDate;
-
+	// 불합격사유
+	private String failReason;
+	
 }

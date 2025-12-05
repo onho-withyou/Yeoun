@@ -2,6 +2,7 @@ package com.yeoun.process.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -48,8 +49,8 @@ public class WorkOrderProcessService {
     @Transactional(readOnly = true)
     public List<WorkOrderProcessDTO> getWorkOrderListForStatus() {
 
-        // 1) 공정현황 대상이 되는 작업지시 조회 (예: RELEASED 상태만)
-        List<String> statuses = List.of("RELEASED");
+        // 1) 공정현황 대상이 되는 작업지시 조회 (RELEASE, IN_PROGRESS)
+        List<String> statuses = List.of("RELEASED", "IN_PROGRESS");
         List<WorkOrder> workOrders = workOrderRepository.findByStatusIn(statuses);
 
         if (workOrders.isEmpty()) {
@@ -57,6 +58,13 @@ public class WorkOrderProcessService {
         }
 
         // 작업지시번호 리스트 추출
+        // 정렬
+        workOrders.sort(
+        	    Comparator.comparing((WorkOrder w) -> statusPriority(w.getStatus()))
+        	              .thenComparing(WorkOrder::getOrderId)
+    	);
+
+        
         List<String> orderIds = workOrders.stream()
                 .map(WorkOrder::getOrderId)
                 .toList();
@@ -89,15 +97,22 @@ public class WorkOrderProcessService {
                 })
                 .collect(Collectors.toList());
     }
+    
+    private int statusPriority(String status) {
+        return switch (status) {
+            case "IN_PROGRESS" -> 1;
+            case "RELEASED"    -> 2;
+            default            -> 3;
+        };
+    }
+
 
     /**
      * 공정현황 목록용 요약 DTO 생성
      */
-    private WorkOrderProcessDTO toProcessSummaryDto(
-            WorkOrder workOrder,
-            List<WorkOrderProcess> processes,
-            QcResult qcResult
-    ) {
+    private WorkOrderProcessDTO toProcessSummaryDto(WorkOrder workOrder,
+    												List<WorkOrderProcess> processes,
+    												QcResult qcResult) {
 
         // 양품수량: 작업지시당 QC_RESULT 1건 기준
         int goodQty = 0;
@@ -337,12 +352,17 @@ public class WorkOrderProcessService {
         proc.setStatus("IN_PROGRESS");
         proc.setStartTime(LocalDateTime.now());
 
+        // 작업지시 시작일/상태 변경
         // 최초 시작일자 기록 (이미 값 있으면 유지)
         WorkOrder workOrder = proc.getWorkOrder();
         if (workOrder.getActStartDate() == null) {
             workOrder.setActStartDate(LocalDateTime.now());
         }
-
+        if ("RELEASED".equals(workOrder.getStatus())) {
+        	workOrder.setStatus("IN_PROGRESS");
+        }
+        workOrderRepository.save(workOrder);
+        
         WorkOrderProcess saved = workOrderProcessRepository.save(proc);
         return toStepDTO(saved);
     }

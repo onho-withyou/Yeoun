@@ -1,5 +1,6 @@
 package com.yeoun.qc.service;
-
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.security.core.Authentication;
@@ -10,7 +11,9 @@ import com.yeoun.masterData.entity.QcItem;
 import com.yeoun.masterData.repository.QcItemRepository;
 import com.yeoun.order.entity.WorkOrder;
 import com.yeoun.order.repository.WorkOrderRepository;
+import com.yeoun.qc.dto.QcDetailRowDTO;
 import com.yeoun.qc.dto.QcRegistDTO;
+import com.yeoun.qc.dto.QcResultListDTO;
 import com.yeoun.qc.entity.QcResult;
 import com.yeoun.qc.entity.QcResultDetail;
 import com.yeoun.qc.repository.QcResultDetailRepository;
@@ -140,14 +143,92 @@ public class QcResultService {
     }
 
 
+    // -------------------------------------------------------------
     // QC 등록 목록
     public List<QcRegistDTO> getQcResultListForRegist() {
         return qcResultRepository.findRegistListByStatus("PENDING");
     }
-    
-    
-    
-    
+
+    // QC 등록 모달 목록
+	public List<QcDetailRowDTO> getDetailRows(Long qcResultId) {
+		
+		// QC 결과 ID 조회
+		List<QcResultDetail> details = 
+				qcResultDetailRepository.findByQcResultId(String.valueOf(qcResultId));
+		
+		List<QcDetailRowDTO> qcDetailRowDTO = new ArrayList<>();
+		
+		for (QcResultDetail d : details) {
+			
+			QcItem item = qcItemRepository.findById(d.getQcItemId())
+					.orElse(null);
+			
+			QcDetailRowDTO qdrDTO = new QcDetailRowDTO();
+			
+			qdrDTO.setQcResultDtlId(d.getQcResultDtlId());
+			qdrDTO.setQcItemId(d.getQcItemId());
+			
+			if(item != null) {
+				qdrDTO.setItemName(item.getItemName());
+				qdrDTO.setUnit(item.getUnit());
+				qdrDTO.setStdText(buildStdText(item));
+			}
+			
+			qdrDTO.setMeasureValue(d.getMeasureValue());
+			qdrDTO.setResult(d.getResult());
+			qdrDTO.setRemark(d.getRemark());
+			
+			qcDetailRowDTO.add(qdrDTO);
+			
+		}
+		
+		return qcDetailRowDTO;
+	}
+	
+	// 기준값 문자열 메서드
+	private String buildStdText(QcItem item) {
+		
+		if (item == null) return "";
+		
+		// 설명형 기준값이 있으면 우선
+		if (item.getStdText() != null && !item.getStdText().isBlank()) {
+			return item.getStdText();
+		}
+		
+		// 수지형 기준값(min/max) 사용
+		BigDecimal min = item.getMinValue();
+		BigDecimal max = item.getMaxValue();
+		
+		if (min != null && max != null) {
+			return min.stripTrailingZeros().toPlainString()
+					+ " ~ "
+					+ max.stripTrailingZeros().toPlainString();
+		} else if (min != null) {
+			return "≥ " + min.stripTrailingZeros().toPlainString();
+		} else if (max != null) {
+			return "≤ " + max.stripTrailingZeros().toPlainString();
+		}
+		
+		// 정말 아무것도 없을 경우
+		return "";
+	}
+
+	// ----------------------------------------------------------
+	// QC 결과 목록 조회
+	public List<QcResultListDTO> getQcResultListForView() {
+		return qcResultRepository.findResultListForView();
+	}
+
+	// ----------------------------------------------------------
+	// QC 결과 저장 (등록 모달에서 입력한 값 반영)
+	public void saveQcResult(Long qcResultId, List<QcDetailRowDTO> detailRows) {
+		
+		// 1) QC 결과 헤더 조회 (없으면 예외)
+		// 2) 상세 항목 반복 처리
+		// 3) 전체 판정 계산
+	}
+
+
     
     
     
