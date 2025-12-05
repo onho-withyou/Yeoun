@@ -105,6 +105,14 @@ public class OrdersService {
             String orderMemo,
             HttpServletRequest req
     ) {
+    	
+    	  /* -----------------------------------
+         * 0) 거래처(Client) 조회 
+         ------------------------------------ */
+        Client clientEntity = em.find(Client.class, clientId);
+        if (clientEntity == null) {
+            throw new IllegalArgumentException("거래처 정보를 찾을 수 없습니다: " + clientId);
+        }
 
         /* -----------------------------
            1) 주문번호 생성
@@ -117,7 +125,7 @@ public class OrdersService {
         ----------------------------- */
         Orders order = Orders.builder()
                 .orderId(orderId)
-                .clientId(clientId)
+                .client(clientEntity) 
                 .empId(empId)
                 .orderDate(LocalDate.parse(orderDate))
                 .deliveryDate(LocalDate.parse(deliveryDate))

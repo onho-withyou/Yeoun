@@ -30,15 +30,15 @@ import lombok.extern.log4j.Log4j2;
 @RestController
 @Log4j2
 @RequiredArgsConstructor
-@RequestMapping("/api/inventorys")
+@RequestMapping("/api/inventories")
 public class InventoryRestController {
 	private final InventoryService inventoryService;
 	
 	// 재고리스트 조회
 	@PostMapping("")
-	public ResponseEntity<List<InventoryDTO>> inventorys(@RequestBody InventoryDTO inventoryDTO) {
+	public ResponseEntity<List<InventoryDTO>> inventories(@RequestBody(required = false) InventoryDTO inventoryDTO) {
 		
-		List<InventoryDTO> inventoryDTOList = inventoryService.getInventoryInfo(inventoryDTO);
+		List<InventoryDTO> inventoryDTOList = inventoryService.getInventoryInfo(inventoryDTO != null ? inventoryDTO : new InventoryDTO());
 		
 		return ResponseEntity.ok(inventoryDTOList);
 	}
@@ -60,7 +60,7 @@ public class InventoryRestController {
 		Map result = new HashMap<String, String>();
 		String empId = loginUser.getEmpId();
 		requestDTO.setIvId(ivId);
-		
+//		log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ :" + requestDTO);
 		inventoryService.adjustQty(requestDTO, empId);
 		
 		return ResponseEntity.ok(result);
@@ -75,7 +75,6 @@ public class InventoryRestController {
 		String empId = loginUser.getEmpId();
 		requestDTO.setIvId(ivId);
 		
-//		log.info(requestDTO);
 		inventoryService.moveInventory(requestDTO, empId);
 		
 		return ResponseEntity.ok(result);
@@ -90,7 +89,6 @@ public class InventoryRestController {
 		String empId = loginUser.getEmpId();
 		requestDTO.setIvId(ivId);
 		
-		log.info(requestDTO);
 		inventoryService.disposeInventory(requestDTO, empId);
 		
 		return ResponseEntity.ok(result);
@@ -98,18 +96,34 @@ public class InventoryRestController {
 	
 	//-----------------------------------------------------------------------------
 	// 재고이력 정보
-	//창고 정보 조회
 	@GetMapping("/historys")
 	public ResponseEntity<List<InventoryHistoryDTO>> historys() {
 		
 		List<InventoryHistoryDTO> historyDTOList = inventoryService.getInventoryHistorys();
 		
-		log.info("@@@@@@@@@@@@@@@@historyDTOList" + historyDTOList);
-		
 		return ResponseEntity.ok(historyDTOList);
 	}
 	
+	//-----------------------------------------------------------------------------
+	// 재고실사 - 위치의 재고정보 불러오기
+	@GetMapping("/{locationId}")
+	public ResponseEntity<List<InventoryDTO>> locationInventories(@PathVariable("locationId") String locationId) {
+		
+		List<InventoryDTO> inventoryDTOList = inventoryService.getlocationInventories(locationId);
+		
+		return ResponseEntity.ok(inventoryDTOList);
+	}
 	
+	// ----------------------------------------------------------------------------
+	// 대시보드
+	
+	// 상품별 재고정보 조회
+	@GetMapping("/summary")
+	public ResponseEntity<List<Map<String, String>>> getIvSummary() {
+		List<Map<String, String>> ivSummaryList = inventoryService.getIvSummary();
+		
+		return ResponseEntity.ok(ivSummaryList);
+	}	
 	
 }
 
