@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;
 
+import com.yeoun.masterData.entity.ProductMst;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -67,6 +69,16 @@ public class OrderItem {
     @Column(name = "UPDATED_AT")
     @Comment("데이터 수정 일시")
     private LocalDateTime updatedAt;
+    
+    
+    @ManyToOne
+    @JoinColumn(name="ORDER_ID", insertable=false, updatable=false)
+    private Orders order;
+
+    @ManyToOne
+    @JoinColumn(name="PRD_ID", insertable=false, updatable=false)
+    private ProductMst product;
+
     
  
     // =============================

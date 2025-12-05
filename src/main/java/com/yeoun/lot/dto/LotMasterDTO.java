@@ -58,7 +58,7 @@ public class LotMasterDTO {
 	// DTO <-> Entity 변환
 	private static ModelMapper modelMapper = new ModelMapper();
 	
-	// 엔티티 타입으로 변환
+	// 엔터티 타입으로 변환
 	public LotMaster toEntity() {
 //		LotMaster lotMaster = modelMapper.map(this, LotMaster.class);
 //		

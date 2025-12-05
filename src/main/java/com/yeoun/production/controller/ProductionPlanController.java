@@ -2,7 +2,10 @@ package com.yeoun.production.controller;
 
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.production.dto.PlanCreateRequestDTO;
+import com.yeoun.production.dto.PlanDetailDTO;
 import com.yeoun.production.dto.ProductionPlanListDTO;
+import com.yeoun.production.entity.ProductionPlan;
+import com.yeoun.production.entity.ProductionPlanItem;
 import com.yeoun.production.service.ProductionPlanService;
 import com.yeoun.sales.dto.OrderPlanSuggestDTO;
 
@@ -110,5 +113,29 @@ public class ProductionPlanController {
 
         return result;
     }
+    
+    /* ============================
+    7) 생산계획 상세 모달
+    ============================ */
+    @GetMapping("/plan/detail/{planId}")
+    @ResponseBody
+    public PlanDetailDTO getPlanDetail(@PathVariable("planId") String planId) {
+
+        PlanDetailDTO dto = planService.getPlanDetailForModal(planId);
+
+        // ================================
+        // 🔍 디버깅용 로그 추가
+        // ================================
+        System.out.println("====== [PLAN_DETAIL_RESPONSE] ======");
+        System.out.println("PlanId: " + dto.getPlanId());
+        System.out.println("PlanItems: " + dto.getPlanItems());
+        System.out.println("OrderItemMap: " + dto.getOrderItemMap());
+        System.out.println("====================================");
+
+        return dto;
+    }
+
+
+
 
 }

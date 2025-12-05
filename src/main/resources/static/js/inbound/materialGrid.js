@@ -17,10 +17,12 @@ const grid = new tui.Grid({
 		{
 			header: "입고예정일",
 			name: "expectArrivalDate",
+			formatter: ({value}) => formatDate(value)
 		},
 		{
 			header: "상태",
 			name: "inboundStatus",
+			filter: "select"
 		},
 		{
 			header: " ",
@@ -45,6 +47,13 @@ grid.on("click", (ev) => {
 
 const startDateInput = document.querySelector("#startDate");
 const endDateInput = document.querySelector("#endDate");
+
+// 날짜 포맷 함수
+function formatDate(isoDate) {
+	if (!isoDate) return "";
+	
+	return isoDate.split("T")[0]; // YYYY-MM-dd 형식
+}
 
 // 원재료 정보 불러오기
 async function loadMaterialInbound(startDate, endDate, searchType, keyword) {

@@ -6,12 +6,14 @@ import com.yeoun.inventory.entity.MaterialOrderItem;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
 public class MaterialOrderItemDTO {
 	private Long orderItemId; //발주품목Id
 	private String orderId; // 발주Id
@@ -21,6 +23,8 @@ public class MaterialOrderItemDTO {
 	private Long supplyAmount; // 공급가액
 	private Long VAT; // 부가세
 	private Long totalPrice; //총금액
+	
+	private String matName;     // 자재 이름
 	
 	@Builder
 	public MaterialOrderItemDTO(String orderId, Long itemId, Long orderAmount, Long unitPrice,
