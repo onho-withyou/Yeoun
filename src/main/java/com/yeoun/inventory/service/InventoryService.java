@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.yeoun.inventory.dto.InventoryModalRequestDTO;
+import com.yeoun.inventory.dto.InventorySafetyCheckDTO;
 import com.yeoun.common.entity.Dispose;
 import com.yeoun.common.repository.DisposeRepository;
 import com.yeoun.inventory.dto.InventoryDTO;
@@ -247,10 +248,11 @@ public class InventoryService {
 		
 		return inventoryList.stream().map(InventoryDTO::fromEntity).toList();
 	}
-
-	public List<Map<String, String>> getIvSummary() {
-		// TODO Auto-generated method stub
-		return null;
+	
+	// 안전재고와 재고통계 조회
+	public List<InventorySafetyCheckDTO> getIvSummary() {
+		
+		return inventoryRepository.getIvSummaryWithSafetyStock();
 	}
 	
 	

@@ -1,9 +1,13 @@
 // 전역변수
 let inventoryInfo;
+let inventorySafetyStockInfo;
 
 document.addEventListener('DOMContentLoaded', async function () {
 	inventoryInfo = await fetchInventoryData();
 	console.log("@@@@@@@@@@@@@@@@", inventoryInfo)
+	inventorySafetyStockInfo = await fetchInventorySafetyStockData();
+	console.log("@@@!@#!@#!@#!@#!@#!@", inventorySafetyStockInfo);
+	
     // 1. Warehouse Usage Chart (Donut) -> Zone Usage
     const warehouseOptions = {
         series: [44, 13, 33],
@@ -123,19 +127,46 @@ async function fetchInventoryData() {
 	return await response.json();
 } 
 
-// 상품별 재고 정보(그룹화)
-async function fetchInventoryData() {
+// 안전재고/재고 비교 정보 데이터
+async function fetchInventorySafetyStockData() {
 	const response = 
-		await fetch('/api/inventories/summary', {
+		await fetch('/api/inventories/inventorySafetyStockCheckInfo', {
 			method: 'GET',
 			headers: {
 				[csrfHeader]: csrfToken,
 				'Content-Type': 'application/json'
-			},
+			}
 		});
 //	console.log(response);
 	if (!response.ok) {
-		throw new Error('재고데이터를 가져올 수 없습니다.')
+		throw new Error('재고와 안전재고 비교 데이터를 가져올 수 없습니다.')
 	}
 	return await response.json();
 }
+
+// 오늘 입고정보 조회함수
+async function fetchInventorySafetyStockData() {
+	const response = 
+		await fetch('/api/inventories/inventorySafetyStockCheckInfo', {
+			method: 'GET',
+			headers: {
+				[csrfHeader]: csrfToken,
+				'Content-Type': 'application/json'
+			}
+		});
+//	console.log(response);
+	if (!response.ok) {
+		throw new Error('재고와 안전재고 비교 데이터를 가져올 수 없습니다.')
+	}
+	return await response.json();
+}
+
+
+
+
+
+
+
+
+
+

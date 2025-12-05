@@ -20,6 +20,7 @@ import com.yeoun.inventory.dto.InventoryModalRequestDTO;
 import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryDTO;
 import com.yeoun.inventory.dto.WarehouseLocationDTO;
+import com.yeoun.inventory.dto.InventorySafetyCheckDTO;
 import com.yeoun.inventory.entity.WarehouseLocation;
 import com.yeoun.inventory.service.InventoryService;
 
@@ -118,12 +119,17 @@ public class InventoryRestController {
 	// 대시보드
 	
 	// 상품별 재고정보 조회
-	@GetMapping("/summary")
-	public ResponseEntity<List<Map<String, String>>> getIvSummary() {
-		List<Map<String, String>> ivSummaryList = inventoryService.getIvSummary();
-		
+	@GetMapping("/inventorySafetyStockCheckInfo")
+	public ResponseEntity<List<InventorySafetyCheckDTO>> getIvSummary() {
+		List<InventorySafetyCheckDTO> ivSummaryList = inventoryService.getIvSummary();
+		log.info("@@@@@@@@@@@@@@@@@@@@@@@@!@#!!!!!!!!!!!!!!!!!!!!!!!!");
+		log.info("ivSummaryList" + ivSummaryList);
+		log.info("@@@@@@@@@@@@@@@@@@@@@@@@!@#!!!!!!!!!!!!!!!!!!!!!!!!");
 		return ResponseEntity.ok(ivSummaryList);
 	}	
+	
+	// 안전재고와 재고 정보 비교
+	
 	
 }
 

@@ -139,7 +139,7 @@ function initGrid() {
 		    perPage: 20       // 페이지당 20개 행
 		},	
 		columns: [
-		  { header: 'LOT 번호',  name: 'lotNo',    minWidth: 180 },
+		  { header: 'LOT 번호',  name: 'lotNo',    minWidth: 220 },
 		  { header: '상품명',    name: 'prodName', minWidth: 180 },
 		  { header: '재고량',    name: 'ivAmount', width: 80, align: 'right' },
 		  { header: '출고예정',    name: 'expectObAmount', width: 80, align: 'right' },
