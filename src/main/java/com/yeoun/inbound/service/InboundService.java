@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.yeoun.common.dto.DisposeDTO;
+import com.yeoun.common.service.DisposeService;
 import com.yeoun.inbound.dto.InboundDTO;
 import com.yeoun.inbound.dto.InboundItemDTO;
 import com.yeoun.inbound.dto.ReceiptDTO;
@@ -19,9 +21,12 @@ import com.yeoun.inbound.entity.InboundItem;
 import com.yeoun.inbound.mapper.InboundMapper;
 import com.yeoun.inbound.repository.InboundItemRepository;
 import com.yeoun.inbound.repository.InboundRepository;
+import com.yeoun.inventory.dto.InventoryDTO;
+import com.yeoun.inventory.dto.InventoryHistoryDTO;
 import com.yeoun.inventory.entity.MaterialOrder;
 import com.yeoun.inventory.entity.MaterialOrderItem;
 import com.yeoun.inventory.repository.MaterialOrderRepository;
+import com.yeoun.inventory.service.InventoryService;
 import com.yeoun.inventory.util.InventoryIdUtil;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.dto.LotMasterDTO;
@@ -45,6 +50,8 @@ public class InboundService {
 	private final MaterialMstRepository materialMstRepository;
 	private final MaterialOrderRepository materialOrderRepository;
 	private final LotTraceService lotTraceService;
+	private final InventoryService inventoryService;
+	private final DisposeService disposeService;
 	private final InboundMapper inboundMapper;
 	
 	// 입고대기 등록
@@ -125,7 +132,7 @@ public class InboundService {
 		return inboundMapper.findInbound(inboundId);
 	}
 
-	// 입고완료 처리
+	// 입고완료 처리(원재료)
 	@Transactional
 	public void updateInbound(ReceiptDTO receiptDTO, String empId) {
 		// 입고 조회
@@ -149,6 +156,7 @@ public class InboundService {
 				.stream()
 				.collect(Collectors.toMap(InboundItem::getInboundItemId, item -> item));
 		
+		// 반복문 통해서 입고 품목 LOT 생성 및 수량 정보 업데이트
 		for (ReceiptItemDTO itemDTO : receiptDTO.getItems()) {
 			
 			InboundItem inboundItem = inboundItemMap.get(itemDTO.getInboundItemId());
@@ -159,6 +167,7 @@ public class InboundService {
 			
 			Integer qty = itemDTO.getInboundAmount().intValue();
 			
+			// ----------------------------------------------------------------
 			// LotMasterDTO 생성
 			LotMasterDTO lotMasterDTO = LotMasterDTO.builder()
 					.lotType(itemDTO.getItemType())
@@ -177,19 +186,98 @@ public class InboundService {
 			inboundItem.updateInfo(lotNo, itemDTO.getInboundAmount(), itemDTO.getDisposeAmount(), itemDTO.getLocationId());
 			
 			// lotHistory 생성
-			LotHistoryDTO lotHistoryDTO = LotHistoryDTO.builder()
+			LotHistoryDTO createLotHistoryDTO = LotHistoryDTO.builder()
 					.lotNo(lotNo)
 					.orderId("")
 					.processId("")
 					.eventType("CREATE")
 					.status("NEW")
 					.locationType("WH")
-					.locationId("WH" + itemDTO.getLocationId())
+					.locationId("WH-" + itemDTO.getLocationId())
 					.quantity(qty)
 					.workedId(empId)
 					.build();
 			
-			lotTraceService.registLotHistory(lotHistoryDTO);
+			lotTraceService.registLotHistory(createLotHistoryDTO);
+			
+			// ------------------------------------------------------
+			// 재고 등록
+			InventoryDTO inventoryDTO = InventoryDTO.builder()
+					.lotNo(lotNo)
+					.locationId(itemDTO.getLocationId())
+					.itemId(itemDTO.getItemId())
+					.ivAmount(itemDTO.getInboundAmount())
+					.expirationDate(inboundItem.getExpirationDate())
+					.manufactureDate(inboundItem.getManufactureDate())
+					.ibDate(LocalDateTime.now())
+					.ivStatus("NORMAL")
+					.expectObAmount(0L)
+					.itemType(itemDTO.getItemType())
+					.build();
+			
+			inventoryService.registInventory(inventoryDTO);
+			
+			// 재고이력 등록
+			InventoryHistoryDTO inventoryHistoryDTO = InventoryHistoryDTO.builder()
+					.lotNo(lotNo)
+					.itemName(itemDTO.getItemName())
+					.empId(empId)
+					.workType("INBOUND")
+					.prevAmount(0L)
+					.currentAmount(itemDTO.getInboundAmount())
+					.reason(receiptDTO.getInboundId())
+					.currentLocationId(itemDTO.getLocationId())
+					.build();
+			
+			inventoryService.registInventoryHistory(inventoryHistoryDTO);
+			
+			// ---------------------------------------------
+			// 재고 등록 후 LOT HISTORY 업데이트
+			// lotHistory 생성
+			LotHistoryDTO updateLotHistoryDTO = LotHistoryDTO.builder()
+					.lotNo(lotNo)
+					.orderId("")
+					.processId("")
+					.eventType("RM_RECEIVE")
+					.status("IN_STOCK")
+					.locationType("WH")
+					.locationId("WH-" + itemDTO.getLocationId())
+					.quantity(qty)
+					.workedId(empId)
+					.build();
+			
+			lotTraceService.registLotHistory(updateLotHistoryDTO);
+			// ------------------------------------------------------
+			
+			if (itemDTO.getDisposeAmount() > 0) {
+				DisposeDTO dispose = DisposeDTO.builder()
+						.lotNo(lotNo)
+						.itemId(itemDTO.getItemId())
+						.workType("INBOUND")
+						.empId(empId)
+						.disposeAmount(itemDTO.getDisposeAmount())
+						.disposeReason("입고폐기")
+						.build();
+				
+				disposeService.registDispose(dispose);
+				
+				Integer disposeQty = itemDTO.getDisposeAmount().intValue();
+				
+				// 폐기한 원재료 LOT 이력에 업데이트
+				LotHistoryDTO disposeLotHistoryDTO = LotHistoryDTO.builder()
+						.lotNo(lotNo)
+						.orderId("")
+						.processId("")
+						.eventType("SCRAPPED")
+						.status("SCRAPPED")
+						.locationType("WH")
+						.locationId("WH-" + itemDTO.getLocationId())
+						.quantity(disposeQty)
+						.workedId(empId)
+						.build();
+				
+				lotTraceService.registLotHistory(disposeLotHistoryDTO);
+			}
 		}
 		
 	}
