@@ -219,6 +219,15 @@ public class QcResultService {
 		return qcResultRepository.findResultListForView();
 	}
 
+	// ----------------------------------------------------------
+	// QC 결과 저장 (등록 모달에서 입력한 값 반영)
+	public void saveQcResult(Long qcResultId, List<QcDetailRowDTO> detailRows) {
+		
+		// 1) QC 결과 헤더 조회 (없으면 예외)
+		// 2) 상세 항목 반복 처리
+		// 3) 전체 판정 계산
+	}
+
 
     
     
