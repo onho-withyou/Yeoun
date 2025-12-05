@@ -12,8 +12,7 @@ import com.yeoun.process.entity.WorkOrderProcess;
 public interface WorkOrderProcessRepository extends JpaRepository<WorkOrderProcess, String> {
 	
 	// 목록 조회용 - 여러 작업지시에 대한 공정 전체 목록을 한 번에 조회
-	List<WorkOrderProcess> findByWorkOrderOrderIdInOrderByWorkOrderOrderIdAscStepSeqAsc(
-            List<String> orderIds);
+	List<WorkOrderProcess> findByWorkOrderOrderIdInOrderByWorkOrderOrderIdAscStepSeqAsc(List<String> orderIds);
 	
     // 상세 모달용 - 작업지시번호 기준 공정 전체 목록 조회
     List<WorkOrderProcess> findByWorkOrderOrderIdOrderByStepSeqAsc(String orderId);
