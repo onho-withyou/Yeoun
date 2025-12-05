@@ -21,7 +21,6 @@ import lombok.Setter;
 public class BomMst {
 	
 	@Column(name="BOM_ID", length = 20, nullable = false)
-
 	private String bomId; //BOMid
 	
 	@Id
