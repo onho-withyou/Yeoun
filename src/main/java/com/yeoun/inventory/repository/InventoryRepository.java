@@ -18,6 +18,7 @@ public interface InventoryRepository
 	Optional<Inventory> findByWarehouseLocationAndLotNo(WarehouseLocation location, String lotNo);
 	
 	// 생산계획시 필요한 제품(PRD_ID / ITEM_ID) 기준 전체 재고 조회
+
 		@Query(value = """
 		    SELECT 
 		        ITEM_ID AS prdId,
@@ -25,8 +26,9 @@ public interface InventoryRepository
 		    FROM INVENTORY		   
 		    GROUP BY ITEM_ID
 		""", nativeQuery = true)
-		List<Map<String, Object>> findCurrentStockGrouped();
-		
+		List<Map<String, Object>> findCurrentStockGrouped();		
 
+
+	List<Inventory> findByWarehouseLocation(WarehouseLocation location);
 
 }
