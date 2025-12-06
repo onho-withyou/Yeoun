@@ -20,4 +20,5 @@ public class OutboundOrderDTO {
 	private String createdId;   // 작성자Id(출고요청자)
 	private LocalDateTime startDate; // 출고예정일
 	private List<OutboundOrderItemDTO> items; // 출고품목
+	private String type; // MAT / FG
 }

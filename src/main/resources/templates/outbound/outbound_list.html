@@ -124,10 +124,12 @@
 											class="form-select" id="workOrderSelect">
 											<option value="">작업지시서를 선택하세요</option>
 										</select>
+										<input type="hidden" id="workId"/>
 									</div>
 									<div class="col-md-6">
 										<label class="form-label fw-bold">담당자</label> 
 										<input class="form-control" type="text" id="managerName" readonly>
+										<input type="hidden" id="managerId"/>
 									</div>
 								</div>
 								<!-- 생산 제품 선택 -->
@@ -170,7 +172,7 @@
 						</div>
 						<div class="modal-footer mt-3 p-0">
 							<button type="button" class="btn btn-primary"
-								onclick="submitOrder()">등록</button>
+								onclick="submitOutbound()">등록</button>
 						</div>
 					</div>
 				</div>

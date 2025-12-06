@@ -1,19 +1,23 @@
 package com.yeoun.outbound.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -22,6 +26,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class Outbound {
 	@Id @Column(name = "OUTBOUND_ID", updatable = false)
@@ -50,5 +55,29 @@ public class Outbound {
 	
 	@CreatedDate
 	private LocalDateTime createdDate; // 등록 일시
+	
+	@OneToMany(mappedBy = "outbound", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<OutboundItem> items = new ArrayList<>();
+
+	@Builder
+	public Outbound(String outboundId, String requestBy, String processBy, String workOrderId, String shipmentId,
+			String status, LocalDateTime expectOutboundDate, LocalDateTime outboundDate, LocalDateTime createdDate,
+			List<OutboundItem> items) {
+		this.outboundId = outboundId;
+		this.requestBy = requestBy;
+		this.processBy = processBy;
+		this.workOrderId = workOrderId;
+		this.shipmentId = shipmentId;
+		this.status = status;
+		this.expectOutboundDate = expectOutboundDate;
+		this.outboundDate = outboundDate;
+		this.createdDate = createdDate;
+	}
+	
+	// 품목 저장
+	public void addItem(OutboundItem item) {
+		this.items.add(item);
+		item.setOutbound(this);
+	}
 	
 }

@@ -3,9 +3,12 @@ const managerName = document.querySelector("#managerName");
 const productName = document.querySelector("#productName");
 const dueDate = document.querySelector("#dueDate");
 const bomTbody = document.querySelector("#bomTbody");
+const workId = document.querySelector("#workId");
+const managerId = document.querySelector("#managerId");
 
 // 작업지시서 전역변수로 저장
 let workOrderList = [];
+let outboundDate;
 
 // 작업지시 정보 가져오기
 async function loadOrderList() {
@@ -42,6 +45,8 @@ workOrderSelect.addEventListener("focus", async () => {
 		opt.value = el.orderId;
 		opt.textContent = `${el.orderId} - ${el.productName}`;
 		opt.dataset.productId = el.productId;
+		workId.value = el.orderId;
+		managerId.value = el.createdId;
 		
 		workOrderSelect.appendChild(opt);
 	});
@@ -61,12 +66,12 @@ workOrderSelect.addEventListener("change", async () => {
 		return;
 	}
 	
-	console.log(workOrder);
-	
 	// 선택한 작업지시에 따른 담당자, 제품명, 출고일 정보 입력
 	managerName.value = workOrder.createdUserName;
 	productName.value = workOrder.productName + "|" + workOrder.planQty;
 	dueDate.value = workOrder.planStartDate?.split("T")[0] || "0";
+	
+	outboundDate = workOrder.planStartDate;
 	
 	// BOM 조회
 	loadBomList(workOrder.productId, workOrder.planQty);
@@ -77,8 +82,6 @@ async function loadBomList(productId, planQty) {
 	try {
 		const res = await fetch(`/bom/list/data/${productId}`);
 		const bomList = await res.json();
-		
-		console.log(bomList);
 		
 		// bom 목록 초기화
 		bomTbody.innerHTML = "";
@@ -93,12 +96,15 @@ async function loadBomList(productId, planQty) {
 			
 			const row = `
 				<tr>
-					<td>${bom.matId}</td>
+					<td >${bom.matId}</td>
 					<td>${bom.matName}</td>
 					<td>${bom.matUnit}</td>
 					<td>${needQty}</td>
 					<td>${stock.stock}</td>
-					<td><input type="number" class="form-control outboundQty" min="0"></td>
+					<td>
+						<input type="number" class="form-control outboundQty" min="0">
+						<input type="hidden" name="matId" value="${bom.matId}"/>
+					</td>
 				</tr>
 			`;
 			
@@ -107,8 +113,54 @@ async function loadBomList(productId, planQty) {
 		
 	} catch(error) {
 		console.error(error);
+		alert("BOM을 조회할 수 없습니다.");
 	}
 }
 
-
+// 출고 등록
+const submitOutbound = async () => {
+	// 출고 품목을 담을 변수
+	const items = [];
+	
+	// 출고 품목들을 items에 추가
+	document.querySelectorAll("#bomTbody tr").forEach(tr => {
+		items.push({
+			matId : tr.querySelector("input[name=matId]").value,
+			outboundQty: tr.querySelector(".outboundQty").value
+		});
+	});
+	
+	// body에 담아서 보낼 내용
+	const payload = {
+		workOrderId: workId.value,
+		createdId: managerId.value,
+		startDate: outboundDate,
+		type: "MAT",
+		items
+	};
+	
+	console.log(payload);
+	
+	const res = await fetch("/inventory/outbound/mat/regist", {
+		method: "POST",
+		headers: {
+			[csrfHeader]: csrfToken, 
+			"Content-Type": "application/json"
+		},
+		body: JSON.stringify(payload)
+	});
+	
+	if (!res.ok) {
+		console.error("요청 처리 중 오류가 발생했습니다.");
+		return;
+	}
+	
+	const result = await res.json();
+	
+	alert("출고 등록이 완료되었습니다." || result.message);
+	
+	setTimeout(() => {
+		location.reload();
+	}, 300);
+}
 

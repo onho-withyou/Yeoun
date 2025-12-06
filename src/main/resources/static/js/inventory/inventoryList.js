@@ -139,7 +139,7 @@ function initGrid() {
 		    perPage: 20       // 페이지당 20개 행
 		},	
 		columns: [
-		  { header: 'LOT 번호',  name: 'lotNo',    minWidth: 180 },
+		  { header: 'LOT 번호',  name: 'lotNo',    minWidth: 220 },
 		  { header: '상품명',    name: 'prodName', minWidth: 180 },
 		  { header: '재고량',    name: 'ivAmount', width: 80, align: 'right' },
 		  { header: '출고예정',    name: 'expectObAmount', width: 80, align: 'right' },
@@ -164,7 +164,16 @@ function initGrid() {
 		  { header: '유통기한',  name: 'expirationDate', minWidth: 120, 
 			formatter: ({ value }) => value ? value.substring(0, 10) : '없음'
 		  },
-		  { header: '상태',      name: 'ivStatus', width: 80 },
+		  { header: '상태',      name: 'ivStatus', width: 80, 
+			formatter: ({ value }) => {
+				switch(value) {
+					case 'NORMAL'          : return '정상';
+					case 'EXPIRED'         : return '만료';
+					case 'DISPOSAL_WAIT': return '임박';
+					default:     return value ?? '';
+			    }
+			}
+		  },
 		  {
 		  	header: '상세',      name: "btn", width: 100, align: "center",
 		  	formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary btn-sm' data-row='${cellInfo.rowKey}' >상세</button>"
