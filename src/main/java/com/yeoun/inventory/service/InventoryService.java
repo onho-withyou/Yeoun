@@ -1,5 +1,7 @@
 package com.yeoun.inventory.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -8,10 +10,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.yeoun.inventory.dto.InventoryModalRequestDTO;
+import com.yeoun.inventory.dto.InventorySafetyCheckDTO;
 import com.yeoun.common.entity.Dispose;
 import com.yeoun.common.repository.DisposeRepository;
 import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryDTO;
+import com.yeoun.inventory.dto.InventoryHistoryGroupDTO;
 import com.yeoun.inventory.dto.WarehouseLocationDTO;
 import com.yeoun.inventory.entity.Inventory;
 import com.yeoun.inventory.entity.InventoryHistory;
@@ -179,14 +183,18 @@ public class InventoryService {
 		Long disposeQty = requestDTO.getDisposeAmount();
 		// 이전 수량
 		Long prevIvQty = inventory.getIvAmount();
-		// 폐기수 재고 수량
+		// 재고수량 - 출고예정수량
+		Long expectIvQty =prevIvQty - inventory.getExpectObAmount();
+		
+		// 폐기후 재고 수량
 		Long remainQty = prevIvQty - disposeQty;
 		
+		
 		// 유효성검사
-	    if (disposeQty > remainQty) {
+	    if (disposeQty > expectIvQty) {
 	        throw new IllegalArgumentException(
 	            String.format("폐기 불가능합니다. 현재 재고: %d, 출고예정: %d, 폐기가능: %d, 요청폐기: %d", 
-	                inventory.getIvAmount(), inventory.getExpectObAmount(), remainQty, disposeQty)
+	            		prevIvQty, inventory.getExpectObAmount(), expectIvQty, disposeQty)
 	        );
 	    }
 		// 이동요청 수량이 1보다 작을때
@@ -195,7 +203,7 @@ public class InventoryService {
 		}
 		
 		// 폐기수량이 재고의 전체 수량일 경우 재고 삭제
-		if(disposeQty == inventory.getIvAmount()) {
+		if(disposeQty.equals(prevIvQty)) {
 			inventoryRepository.delete(inventory);
 		} else { // 폐기후 남는 수량이 있을 경우
 			inventory.setIvAmount(remainQty);
@@ -253,10 +261,11 @@ public class InventoryService {
 		
 		return inventoryList.stream().map(InventoryDTO::fromEntity).toList();
 	}
-
-	public List<Map<String, String>> getIvSummary() {
-		// TODO Auto-generated method stub
-		return null;
+	
+	// 안전재고와 재고통계 조회
+	public List<InventorySafetyCheckDTO> getIvSummary() {
+		
+		return inventoryRepository.getIvSummaryWithSafetyStock();
 	}
 	
 	// 재고 이력 등록
@@ -264,6 +273,47 @@ public class InventoryService {
 	public void registInventoryHistory(InventoryHistoryDTO inventoryHistoryDTO) {
 		InventoryHistory inventoryHistory = inventoryHistoryDTO.toEntity();
 		inventoryHistoryRepository.save(inventoryHistory);
+	}
+	
+	// 재고 유통기한 체크
+	@Transactional
+	public void changeIvStatus() {
+	    LocalDateTime today = LocalDateTime.now();
+	    inventoryRepository.updateAllStatusByExpirationDate(today, today.plusDays(30));
+	}
+	
+	
+	// 입출고추이 차트를 그리기위한 데이터 조회(재고내역 그룹화)
+	public List<InventoryHistoryGroupDTO> getIvHistoryGroupData(LocalDateTime now, LocalDateTime oneYearAgo) {
+
+	    List<Object[]> rows = inventoryHistoryRepository.getIvHistoryGroupData(now, oneYearAgo);
+	    
+	    // Objectp[]로 조회결과를 받고 데이터타입을 맞춰서 dto생성
+	    return rows.stream()
+	        .map(r -> {
+	            // TRUNC(created_date)
+	            Object dateObj = r[0];
+	            LocalDate createdDate;
+	            if (dateObj instanceof java.sql.Timestamp ts) {
+	                createdDate = ts.toLocalDateTime().toLocalDate();
+	            } else if (dateObj instanceof java.sql.Date d) {
+	                createdDate = d.toLocalDate();
+	            } else {
+	                throw new IllegalStateException("Unknown date type: " + dateObj.getClass());
+	            }
+	            
+	            String workType = (String) r[1];
+	            Long sumCurrent = ((Number) r[2]).longValue();
+	            Long sumPrev    = ((Number) r[3]).longValue();
+	            
+	            InventoryHistoryGroupDTO dto = new InventoryHistoryGroupDTO();
+	            dto.setCreatedDate(createdDate);
+	            dto.setWorkType(workType);
+	            dto.setSumCurrent(sumCurrent);
+	            dto.setSumPrev(sumPrev);
+	            return dto;
+	        })
+	        .toList();
 	}
 
 }

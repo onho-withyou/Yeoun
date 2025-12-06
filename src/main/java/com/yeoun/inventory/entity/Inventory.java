@@ -100,7 +100,7 @@ public class Inventory {
 	private Long expectObAmount = 0l; // 출고예정수량
 	
 	@Column(nullable = false)
-	private String ivStatus; // 재고상태 : 정상NORMAL/임박DISPOSAL_WAIT/폐기DISPOSAL
+	private String ivStatus; // 재고상태 : 정상NORMAL/임박DISPOSAL_WAIT/유통기한지남EXPIRED
 	
 	public Inventory createMovedInventory(WarehouseLocation newLocation, Long moveQty) {
 	    Inventory movedInventory = new Inventory();
