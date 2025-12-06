@@ -137,7 +137,7 @@ const grid1 = new Grid({
 		,{header: '유효일자' ,name: 'effectiveDate' ,align: 'center',editor: 'text'
 			,renderer:{ type: StatusModifiedRenderer}
 		}
-        ,{header: '제품상세설명' ,name: 'prdSpec' ,align: 'center',editor: 'text'
+        ,{header: '제품상세설명' ,name: 'prdSpec' ,align: 'center',editor: 'text',width: 370
 			,renderer:{ type: StatusModifiedRenderer}
 		}
         ,{header: '생성자ID' ,name: 'createdId' ,align: 'center',editor: 'text'
