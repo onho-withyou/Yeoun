@@ -29,7 +29,7 @@ const grid1 = new Grid({
   	  }
 	  ,pageOptions: {
     		useClient: true,
-    		perPage: 10
+    		perPage: 20
   	  }
 	});
 	
@@ -60,7 +60,7 @@ const grid2 = new Grid({
 	  	  }
 		  ,pageOptions: {
 	    		useClient: true,
-	    		perPage: 10
+	    		perPage: 20
 	  	  }
 });
 

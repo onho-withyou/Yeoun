@@ -30,19 +30,19 @@ const grid1 = new Grid({
 	  columns: [
 
 	    {header: '순번' ,name: 'row_no' ,align: 'center',hidden: true}
-		,{header: '품번' ,name: 'prd_id' ,align: 'center'}
-		,{header: '품목명' ,name: 'item_name' ,align: 'center',width: 230}
-		,{header: '제품명' ,name: 'prd_name' ,align: 'center',filter: "select"}
-		,{header: '제품유형' ,name: 'prd_cat' ,align: 'center'}
-		,{header: '단위' ,name: 'prd_unit' ,align: 'center'}
-		,{header: '단가' ,name: 'unit_price' ,align: 'center'}
-        ,{header: '상태' ,name: 'prd_status' ,align: 'center'}
-		,{header: '유효일자' ,name: 'effective_date' ,align: 'center'}
-        ,{header: '제품상세설명' ,name: 'prd_spec' ,align: 'center'}
-        ,{header: '생성자ID' ,name: 'created_id' ,align: 'center'}
-        ,{header: '생성일자' ,name: 'created_date' ,align: 'center'}
-        ,{header: '수정자ID' ,name: 'updated_id' ,align: 'center'}
-        ,{header: '수정일시' ,name: 'updated_date' ,align: 'center'}           
+		,{header: '품번' ,name: 'prdId' ,align: 'center'}
+		,{header: '품목명' ,name: 'itemName' ,align: 'center',width: 230}
+		,{header: '제품명' ,name: 'prdName' ,align: 'center',filter: "select"}
+		,{header: '제품유형' ,name: 'prdCat' ,align: 'center'}
+		,{header: '단위' ,name: 'prdUnit' ,align: 'center'}
+		,{header: '단가' ,name: 'unitPrice' ,align: 'center'}
+        ,{header: '상태' ,name: 'prdStatus' ,align: 'center'}
+		,{header: '유효일자' ,name: 'effectiveDate' ,align: 'center'}
+        ,{header: '제품상세설명' ,name: 'prdSpec' ,align: 'center'}
+        ,{header: '생성자ID' ,name: 'createdId' ,align: 'center'}
+        ,{header: '생성일자' ,name: 'createdDate' ,align: 'center'}
+        ,{header: '수정자ID' ,name: 'updatedId' ,align: 'center'}
+        ,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}           
 	  ],
 	  data: []
 	  ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
@@ -52,7 +52,7 @@ const grid1 = new Grid({
   	  }
 	  ,pageOptions: {
     		useClient: true,
-    		perPage: 10
+    		perPage: 20
   	  }
 	});
 	
