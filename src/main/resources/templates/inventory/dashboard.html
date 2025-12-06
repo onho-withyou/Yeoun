@@ -93,10 +93,72 @@
 	<th:block th:insert="~{inventory/modal/moveStockModal}"></th:block>
 	<th:block th:insert="~{inventory/modal/adjustQtyModal}"></th:block>
 	<th:block th:insert="~{inventory/modal/disposalModal}"></th:block>
+	
+	<!-- 발주 모달 -->
+	<div class="modal fade" id="modalCenter" tabindex="-1" style="display: none;" aria-hidden="true">
+				<div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="modalCenterTitle">발주등록</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<div class="modal-body">
+							<div id="purchaseForm">
+								<div class="row mb-6">
+									<div class="col mb-0">
+										<label class="form-label">거래처</label>
+										<div class="position-relative" >
+										    <input type="text" class="form-control" id="clientSearch" placeholder="거래처 검색">
+										    <ul class="list-group position-absolute w-100 shadow-sm mt-1 d-none" id="clientResult"></ul>
+										</div>
+										
+										<input type="hidden" name="clientId" id="clientId">
+									</div>
+									<div class="col mb-0">
+										<label class="form-label">담당자</label>
+										<input class="form-control" type="text" id="managerName" name="managerName" readonly/>
+									</div>
+								</div>
+								<div class="row mb-6">
+									<div class="col mb-0">
+										<label class="form-label">발주품목</label>
+										<select class="form-select" name="materialOrderItem" id="itemSelect" disabled></select>
+									</div>
+									<div class="col mb-0">
+										<label class="form-label">예상도착일</label>
+										<input class="form-control" type="date" id="dueDate" name="dueDate"/>
+									</div>
+								</div>
+								<hr>
+								<table class="table" id="orderTable">
+									<thead>
+										<tr>
+											<th>품목명</th>
+											<th>최소수량</th>
+											<th>주문수량</th>
+											<th>단가</th>
+											<th>공급가액</th>
+											<th>부가세</th>
+											<th>합계</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody></tbody>
+								</table>
+								<div class="modal-footer mt-3 p-0">
+									<button type="button" class="btn btn-primary" onclick="submitOrder()">등록</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
 </th:block>
 
 <th:block layout:fragment="myScript">
     <script th:src="@{/js/inventory/inventoryDashboard.js}"></script>
+	<script src="/js/purchase/purchase_regist.js"></script>
 </th:block>
 
 </html>
