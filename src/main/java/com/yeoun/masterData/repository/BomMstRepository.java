@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import com.yeoun.masterData.entity.BomMst;
 import com.yeoun.masterData.entity.BomMstId;
-import com.yeoun.masterData.entity.MaterialMst;
 
 @Repository
 public interface BomMstRepository extends JpaRepository<BomMst, BomMstId>{

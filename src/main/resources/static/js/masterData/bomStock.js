@@ -40,15 +40,17 @@ const grid2 = new Grid({
 	      rowHeaders: ['rowNum','checkbox'],
 		  columns: [
 
-		    {header: '순번' ,name: 'row_no' ,align: 'center',hidden: true}
-			,{header: 'QC항목ID' ,name: 'prd_id' ,align: 'center',hidden: true}
-			,{header: '항목명' ,name: 'item_name' ,align: 'center',width: 230}
-			,{header: '대상구분' ,name: 'prd_name' ,align: 'center',filter: "select"}
-			,{header: '단위' ,name: 'prd_cat' ,align: 'center'}
-			,{header: '기준 텍스트' ,name: 'prd_unit' ,align: 'center'}
-			,{header: 'MIN' ,name: 'unit_price' ,align: 'center'}
-	        ,{header: 'MAX' ,name: 'prd_status' ,align: 'center'}
-			,{header: '사용' ,name: 'prd_status' ,align: 'center'}           
+		    {header: '품목코드' ,name: 'itemId' ,align: 'center'}
+			,{header: '품목종류' ,name: 'itemType' ,align: 'center'}
+			,{header: '품목명' ,name: 'itemName' ,align: 'center',width: 230}
+			,{header: '용량' ,name: 'volume' ,align: 'center',filter: "select"}
+			,{header: '단위' ,name: 'itemUnit' ,align: 'center'}
+			,{header: '정책방식' ,name: 'policyType' ,align: 'center'}
+			,{header: '정책일수' ,name: 'policyDays' ,align: 'center'}
+	        ,{header: '일별 안전재고 수량' ,name: 'safetyStockQtyDaily' ,align: 'center'}
+			,{header: '총 안전재고 수량' ,name: 'safetyStockQty' ,align: 'center'}
+			,{header: '상태' ,name: 'status' ,align: 'center'}
+			,{header: '비고' ,name: 'remark' ,align: 'center'}           
 		  ],
 		  data: []
 		  ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
@@ -101,6 +103,49 @@ function bomGridAllSearch() {
 		.catch(err => {
 			console.error("조회오류", err);
 			grid1.resetData([]);
+		
+		});
+
+}
+
+function safetyStockGridAllSearch() {
+
+	fetch('/safetyStock/list', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+		
+	})
+	.then(res => {
+	    if (!res.ok) {
+	        throw new Error(`HTTP error! status: ${res.status}`);
+	    }
+	    
+	    // 💡 추가된 로직: 응답 본문이 비어 있는지 확인
+	    const contentType = res.headers.get("content-type");
+	    if (!contentType || !contentType.includes("application/json")) {
+	        // Content-Type이 JSON이 아니거나, 200 OK인데 본문이 비어있다면 (Empty)
+	        if (res.status === 204 || res.headers.get("Content-Length") === "0") {
+	             return []; // 빈 배열 반환하여 grid 오류 방지
+	        }
+	        // JSON이 아닌 다른 데이터(HTML 오류 등)가 있다면 텍스트로 읽어 오류 발생
+	        return res.text().then(text => {
+	            throw new Error(`Expected JSON but received: ${text.substring(0, 100)}...`);
+	        });
+	    }
+
+	    return res.json(); // 유효한 JSON일 때만 파싱 시도
+	})
+		.then(data => {
+			
+			console.log("검색데이터:", data);
+			grid2.resetData(data);
+		})
+		.catch(err => {
+			console.error("조회오류", err);
+			grid2.resetData([]);
 		
 		});
 

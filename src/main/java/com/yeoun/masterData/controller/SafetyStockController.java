@@ -10,24 +10,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
-import com.yeoun.masterData.entity.MaterialMst;
-import com.yeoun.masterData.service.MaterialMstService;
+import com.yeoun.masterData.entity.SafetyStock;
+import com.yeoun.masterData.service.SafetyStockService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 @Controller
-@RequestMapping("/material")
+@RequestMapping("/safetyStock")
 @RequiredArgsConstructor
 @Log4j2
-public class MaterialMstController {
+public class SafetyStockController {
 	
-	private final MaterialMstService materialMstService;
+	private final SafetyStockService safetyStockService;
 	
-	//원재료 조회
+	//안전재고 조회
 	@ResponseBody
   	@GetMapping("/list")
-  	public List<MaterialMst> materialList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
-		return materialMstService.findAll();
+  	public List<SafetyStock> safetyStockList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+		return safetyStockService.findAll();
   	}
 
 }
