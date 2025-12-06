@@ -1,6 +1,7 @@
 package com.yeoun.outbound.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +19,7 @@ import com.yeoun.outbound.dto.OutboundOrderDTO;
 import com.yeoun.outbound.dto.OutboundOrderItemDTO;
 import com.yeoun.outbound.entity.Outbound;
 import com.yeoun.outbound.entity.OutboundItem;
+import com.yeoun.outbound.mapper.OutboundMapper;
 import com.yeoun.outbound.repository.OutboundRepository;
 
 import jakarta.transaction.Transactional;
@@ -28,9 +30,15 @@ import lombok.extern.log4j.Log4j2;
 @RequiredArgsConstructor
 @Log4j2
 public class OutboundService {
-	private final OutboundRepository outboundRepository;
 	private final InventoryService inventoryService;
+	private final OutboundRepository outboundRepository;
 	private final InventoryRepository inventoryRepository;
+	private final OutboundMapper outboundMapper;
+	
+	// 출고 리스트 조회
+	public List<OutboundOrderDTO> getOuboundList(LocalDateTime start, LocalDateTime end, String keyword) {
+		return outboundMapper.findAllOutboundList(start, end, keyword);
+	}
 
 	// 출고 등록
 	@Transactional

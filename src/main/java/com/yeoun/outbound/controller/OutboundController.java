@@ -1,5 +1,8 @@
 package com.yeoun.outbound.controller;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -11,8 +14,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.yeoun.auth.dto.LoginDTO;
+import com.yeoun.inbound.dto.ReceiptDTO;
 import com.yeoun.outbound.dto.OutboundOrderDTO;
 import com.yeoun.outbound.service.OutboundService;
 
@@ -65,5 +70,20 @@ public class OutboundController {
 		}
 	}
 	
+	// 출고 리스트 조회
+	@GetMapping("/list/data/data")
+	public ResponseEntity<List<OutboundOrderDTO>> outboundList(
+			@RequestParam(required = false, name = "startDate") String startDate, 
+			@RequestParam(required = false, name = "endDate") String endDate,
+			@RequestParam(required = false, name = "keyword") String keyword
+			) {
+		// 문자열로 들어온 날짜 데이터를 변환
+		LocalDateTime start = (startDate != null) ? LocalDate.parse(startDate).atStartOfDay() : LocalDate.now().withDayOfMonth(1).atStartOfDay();
+		LocalDateTime end = (endDate != null) ? LocalDate.parse(endDate).atTime(23, 59, 59) : LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()).atTime(23, 59, 59);
+		
+		List<OutboundOrderDTO> outboundList = outboundService.getOuboundList(start, end, keyword);
+		
+		return ResponseEntity.ok(outboundList);
+	}
 	
 }

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeoun.outbound.mapper.OutboundMapper">
+
+	<!-- 원재료 리스트 조회 -->
+	<resultMap type="com.yeoun.outbound.dto.OutboundOrderDTO" id="OutboundOrderMap">
+		<id property="outboundId" column="OUTBOUND_ID"/>
+		<result property="workOrderId"  column="WORK_ORDER_ID"/>
+		<result property="shipmentId"  column="SHIPMENT_ID"/>
+		<result property="status"  column="STATUS"/>
+		<result property="startDate"  column="EXPECT_OUTBOUND_DATE"/>
+		<result property="outboundDate"  column="OUTBOUND_DATE"/>
+		<result property="createdName"  column="CREATEDUSER"/>
+		<result property="processEmpName"  column="PROCESSEMPNAME"/>
+		
+		<collection property="items" ofType="com.yeoun.outbound.dto.OutboundItemDTO">
+			<id property="outboundItemId" column="OUTBOUND_ITEM_ID"/>
+			<result property="outboundId" column="OUTBOUND_ID"/>
+			<result property="matId" column="MAT_ID"/>
+			<result property="matName" column="MAT_NAME"/>
+			<result property="prdId" column="PRD_ID"/>
+			<result property="prdName" column="PRD_NAME"/>
+			<result property="lotNo" column="LOT_NO"/>
+			<result property="outboundQty" column="OUTBOUND_AMOUNT"/>
+		</collection>
+	</resultMap>
+	
+	<select id="findAllOutboundList" resultMap="OutboundOrderMap">
+		SELECT
+			o.OUTBOUND_ID
+			, e1.EMP_NAME AS CREATEDUSER
+			, e2.EMP_NAME AS PROCESSEMPNAME
+			, o.WORK_ORDER_ID
+			, o.SHIPMENT_ID
+			, o.STATUS
+			, o.EXPECT_OUTBOUND_DATE
+			, o.OUTBOUND_DATE
+			, oi.OUTBOUND_ITEM_ID
+			, oi.OUTBOUND_ID
+			, oi.LOT_NO
+			, oi.OUTBOUND_AMOUNT
+			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN mat.MAT_ID END AS MAT_ID
+			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN mat.MAT_NAME END AS MAT_NAME
+			, CASE WHEN o.SHIPMENT_ID IS NOT NULL THEN prd.PRD_ID END AS PRD_ID
+			, CASE WHEN o.SHIPMENT_ID IS NOT NULL THEN prd.PRD_NAME END AS PRD_NAME		
+		FROM
+			OUTBOUND o
+		LEFT JOIN
+			OUTBOUND_ITEM oi
+		ON
+			o.OUTBOUND_ID = oi.OUTBOUND_ID
+		LEFT JOIN
+			EMP e1
+		ON
+			o.REQUEST_BY = e1.EMP_ID
+		LEFT JOIN
+			EMP e2
+		ON
+			o.PROCESS_BY = e2.EMP_ID
+		LEFT JOIN
+			MATERIAL_MST mat
+		ON
+			oi.ITEM_ID = mat.MAT_ID
+		LEFT JOIN
+			PRODUCT_MST prd
+		ON
+			oi.ITEM_ID = prd.PRD_ID
+		WHERE 
+			i.EXPECT_ARRIVAL_DATE &gt;= #{startDate}
+		AND 
+			i.EXPECT_ARRIVAL_DATE &lt;= #{endDate}
+		<if test="keyword != null and keyword != ''">
+    		AND (
+    		 mat.MAT_NAME LIKE '%' || #{keyword} || '%'
+    		 OR prd.PRD_NAME LIKE '%' || #{keyword} || '%'
+    		 OR oi.LOT_NO LIKE '%' || #{keyword} || '%'
+    		)
+		</if>
+		ORDER BY
+			i.EXPECT_OUTBOUND_DATE DESC
+	</select>
+</mapper>
+
+
+
+
+

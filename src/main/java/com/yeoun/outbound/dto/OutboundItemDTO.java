@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class OutboundItemDTO {
-	private Long OutboundItemId; // 입고대기품목 id
+	private Long outboundItemId; // 입고대기품목 id
 	private String outboundId; // 출고ID 
 	private String itemId; // 원자재/부자재, 완제품의 기준정보 고유값
 	private String lotNo;
