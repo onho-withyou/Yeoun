@@ -149,8 +149,6 @@ itemSelect.addEventListener("change", () => {
 	const tax = Math.round(supplyPrice * 0.1);
 	const total = supplyPrice + tax;
 	
-	console.log(option);
-	
 	// 테이블에 추가할 row 작성
 	const row = `
 		<tr>

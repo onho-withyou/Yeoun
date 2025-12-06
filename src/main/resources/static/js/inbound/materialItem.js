@@ -1,7 +1,7 @@
 // 창고 ZONE, RACK, ROW, COL 가져오기
 async function getLocationInfo() {
 	const response = 
-		await fetch('/api/inventorys/locations', {
+		await fetch('/api/inventories/locations', {
 			method: 'GET',
 			headers: {
 				[csrfHeader]: csrfToken,
@@ -233,7 +233,6 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 		});
 	});
 	
-	
 	const inboundId = document.querySelector("#inboundId").value;
 	
 	const res = await fetch("/inventory/inbound/mat/complete", {
@@ -253,7 +252,7 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 		return;
 	}
 	
-	const data = res.json();
+	const data = await res.json();
 	
 	if (data.success) {
 		alert("입고가 완료되었습니다.");

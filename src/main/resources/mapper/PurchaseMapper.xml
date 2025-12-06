@@ -107,7 +107,7 @@
 		LEFT JOIN
 			CLIENT_ITEM ci
 		ON
-			c.CLIENT_ID = ci.CLIENT_ID
+			mi.ITEM_ID = ci.ITEM_ID
 		LEFT JOIN
 			MATERIAL_MST mat
 		ON
