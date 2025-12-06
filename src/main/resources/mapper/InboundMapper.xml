@@ -89,7 +89,7 @@
 			MATERIAL_MST mat
 		ON
 			it.ITEM_ID = mat.MAT_ID
-			AND it.ITEM_TYPE IN ('RAW', 'SUB')
+			AND it.ITEM_TYPE IN ('RAW', 'SUB', 'PKG')
 		LEFT JOIN
 			PRODUCT_MST prd
 		ON
@@ -179,7 +179,7 @@
 			MATERIAL_MST mat
 		ON
 			it.ITEM_ID = mat.MAT_ID
-			AND it.ITEM_TYPE IN ('RAW', 'SUB')
+			AND it.ITEM_TYPE IN ('RAW', 'SUB', 'PKG')
 		LEFT JOIN
 			PRODUCT_MST prd
 		ON
