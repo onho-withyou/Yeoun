@@ -18,7 +18,6 @@ public interface InventoryRepository
 	Optional<Inventory> findByWarehouseLocationAndLotNo(WarehouseLocation location, String lotNo);
 	
 	// 생산계획시 필요한 제품(PRD_ID / ITEM_ID) 기준 전체 재고 조회
-
 		@Query(value = """
 		    SELECT 
 		        ITEM_ID AS prdId,
@@ -30,5 +29,14 @@ public interface InventoryRepository
 
 
 	List<Inventory> findByWarehouseLocation(WarehouseLocation location);
+
+	// id로 재고 조회
+	@Query("""
+		    SELECT COALESCE(SUM(i.ivAmount), 0)
+		    FROM Inventory i
+		    WHERE i.itemId = :id
+		      AND i.ivStatus <> 'EXPIRED'
+		""")
+	Integer findAvailableStock(@Param("id") String id);
 
 }

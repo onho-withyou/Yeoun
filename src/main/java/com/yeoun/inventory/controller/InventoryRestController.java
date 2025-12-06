@@ -125,6 +125,13 @@ public class InventoryRestController {
 		return ResponseEntity.ok(ivSummaryList);
 	}	
 	
+	// 원재료id로 재고 수량 조회
+	@GetMapping("/stock/{id}")
+	public ResponseEntity<Map<String, Integer>> getIvStock(@PathVariable("id") String id) {
+		Integer stock = inventoryService.getTotalStock(id);
+		
+		return ResponseEntity.ok(Map.of("stock", stock));
+	}
 }
 
 

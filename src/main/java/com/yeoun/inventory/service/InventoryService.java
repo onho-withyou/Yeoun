@@ -266,4 +266,9 @@ public class InventoryService {
 		inventoryHistoryRepository.save(inventoryHistory);
 	}
 
+	// id로 재고 조회
+	public Integer getTotalStock(String id) {
+		return inventoryRepository.findAvailableStock(id);
+	}
+
 }

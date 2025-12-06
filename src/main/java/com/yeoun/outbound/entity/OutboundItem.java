@@ -1,4 +1,4 @@
-package com.yeoun.inventory.entity;
+package com.yeoun.outbound.entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
