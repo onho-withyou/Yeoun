@@ -259,7 +259,6 @@ public class InventoryService {
 		return null;
 	}
 	
-	
 	// 재고 이력 등록
 	@Transactional
 	public void registInventoryHistory(InventoryHistoryDTO inventoryHistoryDTO) {

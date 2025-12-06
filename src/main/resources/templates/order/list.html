@@ -96,12 +96,16 @@
   .btn-yeoun-primary {
     font-size: 15px;               /* 버튼 글자 키움 */
     font-weight: 600;
-    padding: 10px 22px;            /* 버튼 크기 증가 */
     display: inline-flex;
     align-items: center;
     gap: 6px;
     background: linear-gradient(135deg, #6f5cec, #9479ff);
     color: white;
+  }
+  
+  .btn-yeoun-primary:hover {
+  	background: linear-gradient(135deg, #b8b3ff, #d9d4ff);
+  	color: #5c4ac7 !important;
   }
 
   .btn-yeoun-outline {
@@ -169,6 +173,60 @@
     font-weight: 600;
     color: #3b336d;
   }
+  
+  /* 작업자 배치 */
+  .worker-flow-container {
+	  display: flex;
+	  justify-content: space-between;
+	  align-items: stretch;
+	  gap: 14px;
+	  padding: 16px;
+	  background: #faf9ff;
+	  border: 1px solid #e2defc;
+	  border-radius: 14px;
+	  box-shadow: 0 8px 18px rgba(110, 94, 230, 0.08);
+	}
+	
+	.flow-item {
+	  flex: 1;
+	  min-width: 160px;
+	  background: #ffffff;
+	  border-radius: 12px;
+	  border: 1px solid #dedbf7;
+	  padding: 14px 12px;
+	  text-align: center;
+	  box-shadow: 0 5px 12px rgba(150, 140, 240, 0.10);
+	}
+	
+	.flow-title {
+	  font-size: 15px;
+	  font-weight: 700;
+	  color: #5a51c8;
+	  margin-bottom: 3px;
+	}
+	
+	.flow-desc {
+	  font-size: 12px;
+	  color: #7e78aa;
+	  margin-bottom: 10px;
+	}
+	
+	.flow-select {
+	  width: 100%;
+	  padding: 8px 10px;
+	  border-radius: 8px;
+	  border: 1px solid #d1cdf6;
+	  background: #fafaff;
+	  font-size: 13px;
+	  color: #4b4470;
+	}
+	
+	.flow-select:focus {
+	  border-color: #7b6fff;
+	  box-shadow: 0 0 0 0.15rem rgba(130, 115, 255, 0.25);
+	}
+
+  
 
   /* 바디 */
   .yeoun-modal-body {
@@ -300,7 +358,7 @@
           작업지시 목록
         </div>
         <span class="yeoun-badge-outline">
-                오늘 기준 작업지시 8건
+            미처리 생산계획 8건
         </span>
       </div>
 
@@ -329,13 +387,12 @@
   <!-- 모달 HTML -->
   <!-- =================================== 등록 모달 ========================================== -->
   <div class="modal fade" id="workCreateModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content yeoun-modal">
 
         <!-- Header -->
         <div class="yeoun-modal-header">
           <div class="modal-title-wrap">
-            <i class="bi bi-file-earmark-plus"></i>
             <h5 class="modal-title">작업지시 등록</h5>
           </div>
           <button class="btn-close" data-bs-dismiss="modal"></button>
@@ -344,84 +401,166 @@
         <!-- Body -->
         <div class="yeoun-modal-body">
           <form id="workCreateForm">
+          
+          	<div class="row g-3 mb-3">
+          		<div class="col-6">
+          			<label class="form-label">생산 계획서</label>
+          			<select name="planId" class="form-select" id="planId" style="color: red;">
+          				<option disabled selected>생산 계획을 먼저 선택해주세요.</option>
+          				<th:block th:each="plan : ${plans}">
+          					<option th:value="${plan.planId}"
+          							th:text="${plan.planId}"
+          							th:data-name="${plan.itemName}"
+          							th:data-qty="${plan.totalQty}"
+          							style="color: #888;"
+          					></option>
+          				</th:block>
+          			</select>
+          		</div>
+          		<div class="col-3">
+          			<label class="form-label">품목 및 수량</label> <!-- view 용도. form 전송값 없음 -->
+          			<div id="planDetail" class="form-control">
+          				생산 계획을 선택해주세요.
+          			</div> 
+          		</div>
+          		<div class="col-3">
+          			<label class="form-label">공정 코드(라우트)</label>
+          			<input type="text" class="form-control" id="routeHeader" name="routeId"
+          				placeholder="생산 계획을 선택해주세요."/>
+<!--           			<div id="routeHeader" class="form-control">
+          				생산 계획을 선택해주세요.
+          			</div> -->
+          		</div>
+          	</div>
 
             <!-- 품목 / 라인 -->
             <div class="row g-3 mb-3">
-              <div class="col-7">
+              <div class="col-4">
                 <label class="form-label">품목</label>
-                <input type="text" class="form-control" id="itemName" placeholder="라벤더 퍼퓸 50ml">
-                <div class="form-text">품목코드/검색 기능 연동 예정</div>
-              </div>
-              <div class="col-5">
-                <label class="form-label">라인</label>
-                <select class="form-select" id="line">
-                  <option disabled selected>선택</option>
-                  <option>1라인</option>
-                  <option>2라인</option>
-                  <option>예비라인</option>
+                <select name="prdId" class="form-select" id="prdName">
+                	<option disabled selected>생산 계획을 선택해주세요.</option>
+                	<th:block th:each="prod : ${prods}">
+                		<option th:value="${prod.prdId}" th:text="${prod.prdName}"></option>
+                	</th:block>
                 </select>
+              </div>
+              <div class="col-4">
+                <label class="form-label">라인</label>
+                <select name="lineId" class="form-select" id="line">
+                  <option disabled selected>눌러서 선택</option>
+                  <th:block th:each="line : ${lines}">
+                  	<option th:value="${line.lineId}" th:text="${line.lineName}"></option>
+                  </th:block>
+                </select>
+              </div>
+              <div class="col-4">
+                <label class="form-label">계획 수량</label>
+                <input name="planQty" type="number" class="form-control" id="planQty" placeholder="예) 250">
               </div>
             </div>
 
             <!-- 날짜 / 시간 -->
             <div class="row g-3 mb-3">
-              <div class="col-4">
+              <div class="col-3">
+          			<label class="form-label">예상 소요 시간</label>
+          			<div id="referTime" class="form-control">
+          				생산 계획을 선택해주세요.
+          			</div>
+          		</div>
+              <div class="col-3">
                 <label class="form-label">계획 일자</label>
                 <input type="date" class="form-control" id="planDate">
               </div>
-              <div class="col-4">
+              <div class="col-3">
                 <label class="form-label">시작 시간</label>
                 <input type="time" class="form-control" id="startTime">
               </div>
-              <div class="col-4">
+              <div class="col-3">
                 <label class="form-label">종료 시간</label>
                 <input type="time" class="form-control" id="endTime">
               </div>
+              <input type="hidden" name="planStartDate" id="planStartDate">
+			  <input type="hidden" name="planEndDate" id="planEndDate">
             </div>
 
-            <!-- 계획 수량 / 우선순위 -->
-            <div class="row g-3 mb-3">
-              <div class="col-6">
-                <label class="form-label">계획 수량</label>
-                <input type="number" class="form-control" id="qty" placeholder="예) 250">
-              </div>
-              <div class="col-6">
-                <label class="form-label">우선순위</label>
-                <select class="form-select" id="priority">
-                  <option value="N" selected>일반</option>
-                  <option value="H">긴급</option>
-                  <option value="L">낮음</option>
-                </select>
-              </div>
-            </div>
+            
+            <div class="worker-flow-container">
+			
+			  <div class="flow-item">
+			    <div class="flow-title">블렌딩</div>
+			    <div class="flow-desc">혼합탱크·교반기</div>
+			    <select class="flow-select" id="blendSelect">
+			      <option selected disabled>선택</option>
+			      <th:block th:each="worker : ${workers}">
+                  	<option th:value="${worker.empId}"
+                  			th:text="|${worker.empName} (${worker.posName})|"
+                  	></option>
+                  </th:block>
+			    </select>
+			  </div>
+			  
+			  <div class="flow-item">
+			    <div class="flow-title">여과</div>
+			    <div class="flow-desc">여과기</div>
+			    <select class="flow-select" id="filterSelect">
+			      <option selected disabled>선택</option>
+			      <th:block th:each="worker : ${workers}">
+                  	<option th:value="${worker.empId}"
+                  			th:text="|${worker.empName} (${worker.posName})|"
+                  	></option>
+                  </th:block>
+			    </select>
+			  </div>
+			
+			  <div class="flow-item">
+			    <div class="flow-title">충전</div>
+			    <div class="flow-desc">충전기</div>
+			    <select class="flow-select" id="fillSelect">
+			      <option selected disabled>선택</option>
+			      <th:block th:each="worker : ${workers}">
+                  	<option th:value="${worker.empId}"
+                  			th:text="|${worker.empName} (${worker.posName})|"
+                  	></option>
+                  </th:block>
+			    </select>
+			  </div>
+			
+			  <div class="flow-item">
+			    <div class="flow-title">조립 + 캡핑</div>
+			    <div class="flow-desc">반자동 캡핑기</div>
+			    <select class="flow-select" id="cappingSelect">
+			      <option selected disabled>선택</option>
+			      <th:block th:each="worker : ${workers}">
+                  	<option th:value="${worker.empId}"
+                  			th:text="|${worker.empName} (${worker.posName})|"
+                  	></option>
+                  </th:block>
+			    </select>
+			  </div>
+			
+			  <div class="flow-item">
+			    <div class="flow-title">라벨링 + 포장</div>
+			    <div class="flow-desc">라벨러·포장기</div>
+			    <select class="flow-select" id="labelPackSelect">
+			      <option selected disabled>선택</option>
+			      <th:block th:each="worker : ${workers}">
+                  	<option th:value="${worker.empId}"
+                  			th:text="|${worker.empName} (${worker.posName})|"
+                  	></option>
+                  </th:block>
+			    </select>
+			  </div>
+			
+			</div>
 
-            <!-- 작업자 / 상태 -->
-            <div class="row g-3 mb-3">
-              <div class="col-6">
-                <label class="form-label">작업자</label>
-                <select class="form-select" id="worker">
-                  <option disabled selected>선택</option>
-                  <option value="A">김작업</option>
-                  <option value="B">이향수</option>
-                  <option value="C">박QC</option>
-                </select>
-              </div>
-              <div class="col-6">
-                <label class="form-label">초기 상태</label>
-                <select class="form-select" id="status">
-                  <option>Planned</option>
-                  <option>In Progress</option>
-                  <option>Hold</option>
-                </select>
-              </div>
-            </div>
-
+            
             <!-- 비고 -->
             <div class="mb-3">
               <label class="form-label">비고</label>
-              <textarea class="form-control" id="remark" rows="3" placeholder="특이사항, 주의사항 등을 입력하세요."></textarea>
+              <textarea name="remark" class="form-control" id="remark" rows="3" placeholder="특이사항, 주의사항 등을 입력하세요."
+              			style="resize: none;"
+              ></textarea>
             </div>
-
           </form>
         </div>
 
@@ -542,22 +681,6 @@
                 </tr>
                 </thead>
                 <tbody id="detailRouteTable"></tbody>
-              </table>
-            </div>
-
-            <!-- ======================== LOT 정보 ======================== -->
-            <div class="tab-pane fade" id="detail-lot">
-              <table class="table yeoun-table">
-                <thead>
-                <tr>
-                  <th>LOT 번호</th>
-                  <th>품목</th>
-                  <th>투입량</th>
-                  <th>창고</th>
-                  <th>비고</th>
-                </tr>
-                </thead>
-                <tbody id="detailLotTable"></tbody>
               </table>
             </div>
 
@@ -684,6 +807,7 @@
 
   }
 
+  // 상태 뱃지 포맷
   function formatStatusBadge(status) {
 
     const map = {
@@ -699,6 +823,7 @@
     return `<span class="${item.cls}">${item.text}</span>`;
   }
 
+  // 생산 일정 포맷
   function formatDate(dt) {
     if (!dt) return "-";
 
@@ -717,23 +842,102 @@
   }
 
 
+  // ======================================================
+  // 작업지시 등록 모달
+  // ======================================================
 
   // 등록 모달 열기
   document.getElementById("btnCreate").addEventListener("click", () => {
     document.getElementById("workCreateForm").reset(); // 등록 전용 폼 초기화
+    document.getElementById("planDetail").innerText = "생산 계획을 선택해주세요.";
+    document.getElementById("referTime").innerText = "생산 계획을 선택해주세요.";
+    document.getElementById("routeHeader").innerText = "생산 계획을 선택해주세요.";
     const modal = new bootstrap.Modal(document.getElementById("workCreateModal"));
     modal.show();
   });
+  
+  let maxQty = null;
 
-  // 상세 모달 열기
-  document.addEventListener("click", function(e) {
+  // 생산계획서 정보 불러오기
+  document.getElementById("planId").addEventListener("change", function() {
+	    const option = this.selectedOptions[0];
+	    const product = option.dataset.name;
+	    const qty = option.dataset.qty;
+	    
+	    maxQty = qty;	// 수량 저장
+	    referTime = calcRecommendedHours(qty);	// 소요시간 계산
 
-    if (!e.target.classList.contains("btn-detail")) return;
+	    document.getElementById("planDetail").innerText = `${product} / ${qty}개`;
+	    document.getElementById("referTime").innerText = referTime;
+	    if (qty < 336) {
+	    	document.getElementById("planQty").value = qty;
+	    }
+	    
+	    const matchedOption = selectOptionByText("prdName", product);
 
-    const workId = e.target.dataset.id;   // ← 여기!
-    openDetailModal(workId);              // ← 전달
-
+	    if (matchedOption) {
+	        const prdId = matchedOption.value;     // ⭐ 여기 쓰면 됨!
+	        document.getElementById("routeHeader").innerText = `RT-${prdId}`;
+	    }
+	});
+  
+  // 품목 자동 선택
+  function selectOptionByText(selectId, text) {
+	    const select = document.getElementById(selectId);
+	    for (let option of select.options) {
+	        if (option.text.trim() === text.trim()) {
+	            option.selected = true;
+	            return option;
+	        }
+	    }
+	    return null;
+	}
+  
+  // 계획 수량 제한
+  document.getElementById("planQty").addEventListener("input", function () {
+    if (maxQty && Number(this.value) > maxQty) {
+        alert(`이 생산계획의 최대 수량은 ${maxQty}개입니다.`);
+        this.value = maxQty;
+    }
   });
+  
+  // 예상 소요 시간 계산
+  function calcRecommendedHours(qty) {
+	   const hours = qty / 42;
+	   return "약 " + Math.ceil(qty / 42) + "시간(" + Math.round(hours * 10) / 10 + "시간) 소요 예상";
+  }
+  
+  // 시간 합쳐 input value 지정
+  document.getElementById("btnCreateSubmit").addEventListener("click", function () {
+	    
+	    const date = document.getElementById("planDate").value;
+	    const start = document.getElementById("startTime").value;
+	    const end = document.getElementById("endTime").value;
+
+	    if (date && start) {
+	        document.getElementById("planStartDate").value = `${date}T${start}`;
+	    }
+
+	    if (date && end) {
+	        document.getElementById("planEndDate").value = `${date}T${end}`;
+	    }
+
+	    document.getElementById("workCreateForm").submit();
+	});
+
+
+  
+  // ======================================================
+  // 작업지시 상세 모달
+  // ======================================================
+  
+  // 상세 모달 열기
+  workOrderGrid.on("click", (event) => {
+	  if (event.columnName !== "btn") return;
+	  const row = workOrderGrid.getRow(event.rowKey);
+	  openDetailModal(row.orderId);
+  });
+
 
   function openDetailModal(workId) {
     console.log("Detail:", workId);

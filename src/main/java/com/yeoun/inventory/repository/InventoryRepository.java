@@ -22,7 +22,7 @@ public interface InventoryRepository
 		@Query(value = """
 		    SELECT 
 		        ITEM_ID AS prdId,
-		        SUM(IV_AMOUNT) AS currentStock
+		        SUM(IV_AMOUNT-EXPECT_OB_AMOUNT) AS currentStock
 		    FROM INVENTORY		   
 		    GROUP BY ITEM_ID
 		""", nativeQuery = true)
