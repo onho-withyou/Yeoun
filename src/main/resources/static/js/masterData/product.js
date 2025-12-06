@@ -278,11 +278,66 @@ saveProductRowBtn.addEventListener('click', function() {
 
 	const modifiedData = (typeof grid1.getModifiedRows === 'function') ? (grid1.getModifiedRows() || {}) : {};
 	const updatedRows = Array.isArray(modifiedData.updatedRows) ? modifiedData.updatedRows : [];
-	const createdRows = Array.isArray(modifiedData.createdRows) ? modifiedData.createdRows : [];
-	
+	let createdRows = Array.isArray(modifiedData.createdRows) ? modifiedData.createdRows : [];
+
+	// 새로 추가된 행 중 모든 필드가 비어있는(빈 행) 경우 그리드에서 제거하고 서버 전송 대상에서 제외
+	const isRowEmpty = (row) => {
+		if (!row) return true;
+		const vals = Object.values(row);
+		if (vals.length === 0) return true;
+		return vals.every(v => v === null || v === undefined || (typeof v === 'string' && v.trim() === ''));
+	};
+	const emptyCreated = createdRows.filter(isRowEmpty);
+	if (emptyCreated.length > 0) {
+		emptyCreated.forEach(r => {
+			try {
+				const key = r && (r.rowKey || r.prdId);
+				if (key && typeof grid1.removeRow === 'function') {
+					grid1.removeRow(key);
+				} else if (key && typeof grid1.deleteRow === 'function') {
+					grid1.deleteRow(key);
+				}
+			} catch (e) {
+				console.warn('빈 행 삭제 실패', e);
+			}
+		});
+		// 서버로 보낼 createdRows에서 빈 행 제외
+		createdRows = createdRows.filter(r => !isRowEmpty(r));
+		// 반영: modifiedData 객체에도 반영해 전송값 일관성 유지
+		try { modifiedData.createdRows = createdRows; } catch (e) {}
+	}
 
 	if (updatedRows.length === 0 && createdRows.length === 0) {
 		alert('수정된 내용이 없습니다.');
+		return;
+	}
+
+	// 저장 전 필수값 검사: prdId는 반드시 필요합니다 (신규 행도 먼저 품번 입력 필요)
+	const requiredFields = ['prdId', 'itemName', 'prdName'];
+	const fieldLabels = { prdId: '품번', itemName: '품목명', prdName: '제품명' };
+	const rowsToCheck = [...createdRows, ...updatedRows];
+	const invalidRows = rowsToCheck.map((row, idx) => {
+		const missing = requiredFields.filter(f => {
+			try {
+				const v = row[f];
+				return v === null || v === undefined || (typeof v === 'string' && v.trim() === '');
+			} catch (e) {
+				return true;
+			}
+		});
+		if (missing.length > 0) {
+			const id = row.prdId || row.rowKey || ('#' + (idx + 1));
+			return { id, missing };
+		}
+		return null;
+	}).filter(Boolean);
+
+	if (invalidRows.length > 0) {
+		const lines = invalidRows.map(r => {
+			const missNames = r.missing.map(m => fieldLabels[m] || m).join(', ');
+			return `${r.id} (누락: ${missNames})`;
+		});
+		alert('다음 행에 필수값이 비어 있어 저장할 수 없습니다.\n특히 신규 행은 먼저 품번을 입력해 주세요.\n' + lines.join('\n'));
 		return;
 	}
 
@@ -297,17 +352,22 @@ saveProductRowBtn.addEventListener('click', function() {
 	})
 	.then(res => {
 		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		const ct = (res.headers.get('content-type') || '').toLowerCase();
+		if (ct.includes('application/json')) return res.json();
 		return res.text();
 	})
 	.then(parsed => {
-		if (typeof parsed === 'string') {
-			const trimmed = parsed.trim().toLowerCase();
-			const okTexts = ['success', 'ok', 'true'];
-			if (!okTexts.includes(trimmed)) throw new Error('Unexpected response: ' + parsed);
-			console.log('저장 성공 (text):', parsed);
-		} else {
-			console.log('저장 성공 (json):', parsed);
-		}
+		const okTexts = ['success', 'ok', 'true'];
+		const isSuccess = (p) => {
+			if (typeof p === 'string') return okTexts.includes(p.trim().toLowerCase());
+			if (!p) return false;
+			const status = (p.status || p.result || '').toString().toLowerCase();
+			const message = (p.message || '').toString().toLowerCase();
+			return status === 'success' || okTexts.includes(message) || message.includes('success');
+		};
+
+		if (!isSuccess(parsed)) throw new Error('Unexpected response: ' + JSON.stringify(parsed));
+		console.log('저장 성공:', parsed);
 		productGridAllSearch();
 	})
 	.catch(err => {
@@ -319,7 +379,6 @@ saveProductRowBtn.addEventListener('click', function() {
 //row 삭제: POST JSON형식으로 서버에 요청
 const deleteProductRowBtn = document.getElementById('deleteProductRowBtn');
 deleteProductRowBtn.addEventListener('click', async function() {
-	if (!confirm('선택된 행을 삭제하시겠습니까?')) return;
 
 	// 체크된 rowKey들 수집
 	let rowKeysToDelete = [];
@@ -329,7 +388,16 @@ deleteProductRowBtn.addEventListener('click', async function() {
 		} else if (typeof grid1.getCheckedRows === 'function') {
 			const checkedRows = grid1.getCheckedRows() || [];
 			rowKeysToDelete = checkedRows.map(r => r && (r.rowKey || r.prdId)).filter(Boolean);
+		}else  {
+			// 그리드 빈행 제거
+			console.log('체크된 행 키:', rowKeysToDelete);
+
+			rowKeysToDelete.forEach((key, i) => {
+				grid1.deleteRow(rowKeysToDelete[i]);
+			});
+
 		}
+		
 	} catch (e) {
 		console.warn('체크된 행 조회 실패', e);
 	}
@@ -352,41 +420,90 @@ deleteProductRowBtn.addEventListener('click', async function() {
 		}
 	}).filter(Boolean);
 
-		fetch('/masterData/product/delete', {
-			method: 'POST',
-			credentials: 'same-origin',
-			headers: {
-				[csrfHeader]: csrfToken,
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(prdIds)
-		})
-		.then(res => {
-			if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-			const ct = (res.headers.get('content-type') || '').toLowerCase();
-			if (ct.includes('application/json')) return res.json();
-			return res.text();
-		})
-		.then(parsed => {
-			console.log('삭제 응답:', parsed);
-			if (typeof parsed === 'string') {
-				const trimmed = parsed.trim().toLowerCase();
-				const okTexts = ['success', 'ok', 'true'];
-				if (!okTexts.includes(trimmed)) throw new Error('Unexpected response: ' + parsed);
-				productGridAllSearch();
-				return;
+		// 구분: 빈 행(또는 prdId가 없는 행)은 화면에서만 삭제하고, prdId가 있는 행만 서버에 삭제 요청
+		try {
+			const getAllData = () => (typeof grid1.getData === 'function' ? grid1.getData() : (grid1.data || []));
+			const data = getAllData();
+			// 그리드의 수정 정보에서 생성된(신규) 행들을 조회하여, 신규행은 UI에서만 삭제하도록 처리
+			const modified = (typeof grid1.getModifiedRows === 'function') ? (grid1.getModifiedRows() || {}) : {};
+			const createdRows = Array.isArray(modified.createdRows) ? modified.createdRows : [];
+			const uiOnlyKeys = []; // 화면에서만 제거할 rowKey
+			const serverPrdIds = []; // 서버에 삭제 요청할 prdId 목록
+			for (const key of rowKeysToDelete) {
+				// 우선 해당 키가 생성된(신규) 행인지 확인
+				const isCreated = createdRows.some(r => r && (String(r.rowKey) === String(key) || String(r.prdId) === String(key)));
+				if (isCreated) {
+					uiOnlyKeys.push(key);
+					continue;
+				}
+				let row = null;
+				if (typeof grid1.getRow === 'function') row = grid1.getRow(key);
+				if (!row) row = data.find(d => d && (String(d.rowKey) === String(key) || String(d.prdId) === String(key)));
+				// 빈 행 판단: 모든 필드가 비어있거나 prdId가 없으면 UI에서만 삭제
+				const vals = row ? Object.values(row) : [];
+				const allEmpty = !row || vals.length === 0 || vals.every(v => v === null || v === undefined || (typeof v === 'string' && v.trim() === ''));
+				if (allEmpty || !row || !row.prdId) {
+					uiOnlyKeys.push(key);
+				} else {
+					serverPrdIds.push(String(row.prdId));
+				}
 			}
-			if (parsed && parsed.status === 'success') {
-				productGridAllSearch();
+
+			// UI에서만 제거할 행들 삭제
+			let removedUi = 0;
+			if (uiOnlyKeys.length > 0) {
+				for (const k of uiOnlyKeys) {
+					try {
+						if (typeof grid1.removeRow === 'function') { grid1.removeRow(k); removedUi++; continue; }
+						if (typeof grid1.deleteRow === 'function') { grid1.deleteRow(k); removedUi++; continue; }
+						const newData = data.filter(r => !(r && (String(r.rowKey) === String(k) || String(r.prdId) === String(k))));
+						grid1.resetData(newData);
+						removedUi++;
+					} catch (e) { console.warn('UI 전용 행 삭제 실패', k, e); }
+				}
+			}
+
+			// 서버에 삭제 요청 보낼 prdId가 있으면 기존 로직 수행
+			if (serverPrdIds.length > 0) {
+				// prdId가 있는 항목이 포함된 경우에만 삭제 확인창 표시
+				if (!confirm('서버에서 실제로 삭제할 항목이 포함되어 있습니다. 선택한 항목을 삭제하시겠습니까?')) return;
+				fetch('/masterData/product/delete', {
+					method: 'POST',
+					credentials: 'same-origin',
+					headers: {
+						[csrfHeader]: csrfToken,
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(serverPrdIds)
+				})
+				.then(res => {
+					if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+					const ct = (res.headers.get('content-type') || '').toLowerCase();
+					if (ct.includes('application/json')) return res.json();
+					return res.text();
+				})
+				.then(parsed => {
+					console.log('삭제 응답:', parsed);
+					const okTexts = ['success','ok','true'];
+					if (typeof parsed === 'string') {
+						if (!okTexts.includes(parsed.trim().toLowerCase())) throw new Error('Unexpected response: ' + parsed);
+					} else if (!(parsed && (parsed.status === 'success' || okTexts.includes((parsed.message||'').toString().toLowerCase())))) {
+						throw new Error('삭제 실패: ' + JSON.stringify(parsed));
+					}
+					// 서버 삭제 성공 시 그리드 재조회
+					productGridAllSearch();
+				})
+				.catch(err => {
+					console.error('삭제 중 오류', err);
+					try { alert('삭제 중 오류가 발생했습니다. ' + (err && err.message ? err.message : '')); } catch (e) {}
+				});
 			} else {
-				const msg = parsed && parsed.message ? parsed.message : JSON.stringify(parsed);
-				throw new Error('삭제 실패: ' + msg);
+				if (removedUi > 0) alert('추가한 행을 화면에서만 삭제했습니다. (DB에는 반영되지 않음)');
 			}
-		})
-		.catch(err => {
-			console.error('삭제 중 오류', err);
-			try { alert('삭제 중 오류가 발생했습니다. ' + (err && err.message ? err.message : '')); } catch (e) {}
-		});
+		} catch (e) {
+			console.error('삭제 처리 중 오류', e);
+			try { alert('삭제 처리 중 오류가 발생했습니다. ' + (e && e.message ? e.message : '')); } catch (err) {}
+		}
 	
 });
 
