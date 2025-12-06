@@ -1,5 +1,7 @@
 package com.yeoun.inventory.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,6 +15,7 @@ import com.yeoun.common.entity.Dispose;
 import com.yeoun.common.repository.DisposeRepository;
 import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryDTO;
+import com.yeoun.inventory.dto.InventoryHistoryGroupDTO;
 import com.yeoun.inventory.dto.WarehouseLocationDTO;
 import com.yeoun.inventory.entity.Inventory;
 import com.yeoun.inventory.entity.InventoryHistory;
@@ -266,6 +269,48 @@ public class InventoryService {
 	public void registInventoryHistory(InventoryHistoryDTO inventoryHistoryDTO) {
 		InventoryHistory inventoryHistory = inventoryHistoryDTO.toEntity();
 		inventoryHistoryRepository.save(inventoryHistory);
+	}
+	
+	// 재고 유통기한 체크
+	@Transactional
+	public void changeIvStatus() {
+	    LocalDateTime today = LocalDateTime.now();
+	    inventoryRepository.updateAllStatusByExpirationDate(today, today.plusDays(30));
+	}
+	
+	
+	// 입출고추이 차트를 그리기위한 데이터 조회(재고내역 그룹화)
+	public List<InventoryHistoryGroupDTO> getIvHistoryGroupData() {
+	    LocalDateTime now = LocalDateTime.now();
+	    LocalDateTime oneYearAgo = now.minusYears(1);
+	    List<Object[]> rows = inventoryHistoryRepository.getIvHistoryGroupData(now, oneYearAgo);
+	    
+	    // Objectp[]로 조회결과를 받고 데이터타입을 맞춰서 dto생성
+	    return rows.stream()
+	        .map(r -> {
+	            // 0: TRUNC(created_date)
+	            Object dateObj = r[0];
+	            LocalDate createdDate;
+	            if (dateObj instanceof java.sql.Timestamp ts) {
+	                createdDate = ts.toLocalDateTime().toLocalDate();
+	            } else if (dateObj instanceof java.sql.Date d) {
+	                createdDate = d.toLocalDate();
+	            } else {
+	                throw new IllegalStateException("Unknown date type: " + dateObj.getClass());
+	            }
+	
+	            String workType = (String) r[1];
+	            Long sumCurrent = ((Number) r[2]).longValue();
+	            Long sumPrev    = ((Number) r[3]).longValue();
+	
+	            InventoryHistoryGroupDTO dto = new InventoryHistoryGroupDTO();
+	            dto.setCreatedDate(createdDate);
+	            dto.setWorkType(workType);
+	            dto.setSumCurrent(sumCurrent);
+	            dto.setSumPrev(sumPrev);
+	            return dto;
+	        })
+	        .toList();
 	}
 
 }

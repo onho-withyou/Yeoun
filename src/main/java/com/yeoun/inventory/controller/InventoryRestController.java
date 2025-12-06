@@ -21,6 +21,7 @@ import com.yeoun.inbound.dto.ReceiptDTO;
 import com.yeoun.inventory.dto.InventoryModalRequestDTO;
 import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryDTO;
+import com.yeoun.inventory.dto.InventoryHistoryGroupDTO;
 import com.yeoun.inventory.dto.WarehouseLocationDTO;
 import com.yeoun.inventory.dto.InventorySafetyCheckDTO;
 import com.yeoun.inventory.entity.WarehouseLocation;
@@ -126,7 +127,15 @@ public class InventoryRestController {
 	public ResponseEntity<List<InventorySafetyCheckDTO>> getIvSummary() {
 		List<InventorySafetyCheckDTO> ivSummaryList = inventoryService.getIvSummary();
 		return ResponseEntity.ok(ivSummaryList);
-	}	
+	}
+	
+	// 입출고 내역 데이터 조회
+	@GetMapping("/ivHistoryGroup")
+	public ResponseEntity<List<InventoryHistoryGroupDTO>> getIvHistoryGroup() {
+		List<InventoryHistoryGroupDTO> ivHistoryGroupList = inventoryService.getIvHistoryGroupData();
+		
+		return ResponseEntity.ok(ivHistoryGroupList);
+	}
 	
 	
 	

@@ -13,17 +13,17 @@
         <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">재고 관리 /</span> 대시보드</h4>
 
         <!-- Expiry Alert -->
-        <div class="alert alert-danger d-flex align-items-center" role="alert" id="expiryAlert">
-            <i class='bx bx-error me-2'></i>
-            <div>
-                <strong>유통기한 임박!</strong> 7일 이내 만료되는 품목이 <span class="fw-bold">3</span>건 있습니다.
-            </div>
-        </div>
+<!--         <div class="alert alert-danger d-flex align-items-center" role="alert" id="expiryAlert"> -->
+<!--             <i class='bx bx-error me-2'></i> -->
+<!--             <div> -->
+<!--                 <strong>유통기한 임박!</strong> 7일 이내 만료되는 품목이 <span class="fw-bold">3</span>건 있습니다. -->
+<!--             </div> -->
+<!--         </div> -->
 
         <div class="row">
             <!-- Summary Cards -->
-            <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card">
+            <div class="col-md-6 col-lg-3 mb-4 d-flex">
+                <div class="card w-100">
                     <div class="card-body">
                         <span class="d-block mb-1">금일 입고 예정</span>
                         <h3 class="card-title text-nowrap mb-2" id="todayInboundTotal"></h3>
@@ -31,8 +31,8 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card">
+            <div class="col-md-6 col-lg-3 mb-4 d-flex">
+                <div class="card w-100">
                     <div class="card-body">
                         <span class="d-block mb-1">금일 출고 지시</span>
                         <h3 class="card-title text-nowrap mb-2">5</h3>
@@ -40,39 +40,27 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card">
+            <div class="col-md-6 col-lg-3 mb-4 d-flex">
+                <div class="card w-100">
                     <div class="card-body">
                         <span class="d-block mb-1">안전재고 미달</span>
-                        <h3 class="card-title text-nowrap mb-2">2</h3>
-                        <small class="text-warning fw-semibold">발주 필요</small>
+                        <h3 class="card-title text-nowrap mb-2" id="orderCnt"></h3>
+                        <small id="orderStatus"></small>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card">
+            <div class="col-md-6 col-lg-3 mb-4 d-flex">
+                <div class="card w-100">
                     <div class="card-body">
-                        <span class="d-block mb-1">악성 재고 (>1년)</span>
-                        <h3 class="card-title text-nowrap mb-2">15</h3>
-                        <small class="text-muted">확인 요망</small>
+                        <span class="d-block mb-1">임박 재고(<30일)</span>
+                        <h3 class="card-title text-nowrap mb-2" id="expireCnt"></h3>
+                        <small class="text-danger" id="disposalCnt"></small>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="row">
-            <!-- Warehouse Usage Chart -->
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                        <h5 class="card-title m-0 me-2">창고 사용률</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="warehouseUsageChart"></div>
-                    </div>
-                </div>
-            </div>
-
             <!-- In/Out Trends Chart -->
             <div class="col-md-6 col-lg-8 mb-4">
                 <div class="card h-100">

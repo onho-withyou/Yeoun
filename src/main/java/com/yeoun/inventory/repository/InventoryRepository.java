@@ -1,14 +1,18 @@
 package com.yeoun.inventory.repository;
 
+import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventorySafetyCheckDTO;
 import com.yeoun.inventory.entity.Inventory;
 import com.yeoun.inventory.entity.WarehouseLocation;
@@ -67,5 +71,22 @@ public interface InventoryRepository
         """,
         nativeQuery = true)
 	List<InventorySafetyCheckDTO> getIvSummaryWithSafetyStock();
+	
+	
+	@Modifying
+	@Query("""
+	    UPDATE Inventory i 
+	    SET i.ivStatus = CASE
+		    WHEN i.expirationDate IS NULL THEN i.ivStatus
+	        WHEN i.expirationDate < :today THEN 'EXPIRED'
+	        WHEN i.expirationDate BETWEEN :today AND :disposalWaitDate THEN 'DISPOSAL_WAIT'
+	        ELSE 'NORMAL'
+	    END
+	    WHERE i.expirationDate IS NOT NULL
+			AND i.ivStatus IN ('NORMAL', 'DISPOSAL_WAIT')
+	""")
+	void updateAllStatusByExpirationDate(@Param("today") LocalDateTime today, 
+		    @Param("disposalWaitDate") LocalDateTime disposalWaitDate);
+	
 
 }
