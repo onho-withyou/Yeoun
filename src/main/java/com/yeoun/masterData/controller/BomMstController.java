@@ -2,16 +2,19 @@ package com.yeoun.masterData.controller;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.masterData.entity.BomMst;
 import com.yeoun.masterData.service.BomMstService;
+import com.yeoun.outbound.dto.OutboundOrderItemDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -36,5 +39,15 @@ public class BomMstController {
  	    // 3. 변수를 반환
  	    return bomList;
   	}
+ 	
+ 	// prdId에 해당하는 BOM 리스트 조회
+ 	@GetMapping("/list/data/{prdId}")
+ 	@ResponseBody
+ 	public ResponseEntity<List<OutboundOrderItemDTO>> outboundBomList(@PathVariable("prdId") String prdId) {
+ 		
+ 		List<OutboundOrderItemDTO> bomList = bomMstService.getBomListByPrdId(prdId);
+ 		
+ 		return ResponseEntity.ok(bomList);
+ 	}
 
 }
