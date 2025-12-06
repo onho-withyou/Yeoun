@@ -183,14 +183,18 @@ public class InventoryService {
 		Long disposeQty = requestDTO.getDisposeAmount();
 		// 이전 수량
 		Long prevIvQty = inventory.getIvAmount();
-		// 폐기수 재고 수량
+		// 재고수량 - 출고예정수량
+		Long expectIvQty =prevIvQty - inventory.getExpectObAmount();
+		
+		// 폐기후 재고 수량
 		Long remainQty = prevIvQty - disposeQty;
 		
+		
 		// 유효성검사
-	    if (disposeQty > remainQty) {
+	    if (disposeQty > expectIvQty) {
 	        throw new IllegalArgumentException(
 	            String.format("폐기 불가능합니다. 현재 재고: %d, 출고예정: %d, 폐기가능: %d, 요청폐기: %d", 
-	                inventory.getIvAmount(), inventory.getExpectObAmount(), remainQty, disposeQty)
+	            		prevIvQty, inventory.getExpectObAmount(), expectIvQty, disposeQty)
 	        );
 	    }
 		// 이동요청 수량이 1보다 작을때
@@ -199,7 +203,7 @@ public class InventoryService {
 		}
 		
 		// 폐기수량이 재고의 전체 수량일 경우 재고 삭제
-		if(disposeQty == inventory.getIvAmount()) {
+		if(disposeQty.equals(prevIvQty)) {
 			inventoryRepository.delete(inventory);
 		} else { // 폐기후 남는 수량이 있을 경우
 			inventory.setIvAmount(remainQty);
@@ -280,15 +284,14 @@ public class InventoryService {
 	
 	
 	// 입출고추이 차트를 그리기위한 데이터 조회(재고내역 그룹화)
-	public List<InventoryHistoryGroupDTO> getIvHistoryGroupData() {
-	    LocalDateTime now = LocalDateTime.now();
-	    LocalDateTime oneYearAgo = now.minusYears(1);
+	public List<InventoryHistoryGroupDTO> getIvHistoryGroupData(LocalDateTime now, LocalDateTime oneYearAgo) {
+
 	    List<Object[]> rows = inventoryHistoryRepository.getIvHistoryGroupData(now, oneYearAgo);
 	    
 	    // Objectp[]로 조회결과를 받고 데이터타입을 맞춰서 dto생성
 	    return rows.stream()
 	        .map(r -> {
-	            // 0: TRUNC(created_date)
+	            // TRUNC(created_date)
 	            Object dateObj = r[0];
 	            LocalDate createdDate;
 	            if (dateObj instanceof java.sql.Timestamp ts) {
@@ -298,11 +301,11 @@ public class InventoryService {
 	            } else {
 	                throw new IllegalStateException("Unknown date type: " + dateObj.getClass());
 	            }
-	
+	            
 	            String workType = (String) r[1];
 	            Long sumCurrent = ((Number) r[2]).longValue();
 	            Long sumPrev    = ((Number) r[3]).longValue();
-	
+	            
 	            InventoryHistoryGroupDTO dto = new InventoryHistoryGroupDTO();
 	            dto.setCreatedDate(createdDate);
 	            dto.setWorkType(workType);

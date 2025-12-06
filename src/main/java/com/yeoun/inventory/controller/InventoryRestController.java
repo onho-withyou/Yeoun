@@ -1,5 +1,6 @@
 package com.yeoun.inventory.controller;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,13 +130,27 @@ public class InventoryRestController {
 		return ResponseEntity.ok(ivSummaryList);
 	}
 	
+	
 	// 입출고 내역 데이터 조회
 	@GetMapping("/ivHistoryGroup")
-	public ResponseEntity<List<InventoryHistoryGroupDTO>> getIvHistoryGroup() {
-		List<InventoryHistoryGroupDTO> ivHistoryGroupList = inventoryService.getIvHistoryGroupData();
+	public ResponseEntity<IvHistoryGroupResponse > getIvHistoryGroup() {
+	    LocalDateTime now = LocalDateTime.now();
+	    LocalDateTime oneYearAgo = now.minusYears(1);
+	    
+		List<InventoryHistoryGroupDTO> ivHistoryGroupList = inventoryService.getIvHistoryGroupData(now, oneYearAgo);
 		
-		return ResponseEntity.ok(ivHistoryGroupList);
+		return ResponseEntity.ok(new IvHistoryGroupResponse(
+            oneYearAgo.toLocalDate().toString(),
+            now.toLocalDate().toString(),
+            ivHistoryGroupList
+		));
 	}
+	// 데이터 보내기위해 묶음 설정
+	public record IvHistoryGroupResponse(
+			String startDate,
+			String endDate,
+			List<InventoryHistoryGroupDTO> data
+			) {}
 	
 	
 	

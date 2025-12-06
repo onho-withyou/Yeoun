@@ -23,6 +23,7 @@ public interface InventoryHistoryRepository	extends JpaRepository<InventoryHisto
             SUM(h.prev_amount)           AS sumPrev
         FROM INVENTORY_HISTORY h
         WHERE h.created_date BETWEEN :oneYearAgo AND :now
+    		AND h.work_type IN('INBOUND', 'OUTBOUND', 'DISPOSE')
         GROUP BY TRUNC(h.created_date), h.work_type
         ORDER BY TRUNC(h.created_date)
         """,

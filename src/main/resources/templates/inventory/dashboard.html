@@ -4,7 +4,6 @@
 
 <head>
     <title>재고 관리 - 대시보드</title>
-    <!-- Inventory Specific CSS -->
     <link rel="stylesheet" th:href="@{/css/inventory/inventory.css}" />
 </head>
 
@@ -21,7 +20,7 @@
 <!--         </div> -->
 
         <div class="row">
-            <!-- Summary Cards -->
+            <!-- 통계카드 -->
             <div class="col-md-6 col-lg-3 mb-4 d-flex">
                 <div class="card w-100">
                     <div class="card-body">
@@ -60,57 +59,40 @@
             </div>
         </div>
 
-        <div class="row">
-            <!-- In/Out Trends Chart -->
-            <div class="col-md-6 col-lg-8 mb-4">
+            <!-- 재고 입고/출고/폐기 차트 -->
+            <div class="mb-4">
                 <div class="card h-100">
                     <div class="card-header d-flex align-items-center justify-content-between">
-                        <h5 class="card-title m-0 me-2">입출고 추이 (주간)</h5>
+		                <div class="btn-group btn-group-sm" role="group" aria-label="기간 선택">
+		                    <button id="btnMonth" type="button" class="btn btn-outline-primary chart-type active">월</button>
+		                    <button id="btnWeek"  type="button" class="btn btn-outline-primary chart-type">주</button>
+		                    <button id="btnDay"   type="button" class="btn btn-outline-primary chart-type">일</button>
+		                </div>
+                        <h5 class="card-title m-0 text-center flex-grow-1">재고 현황 추적</h5>
                     </div>
                     <div class="card-body">
                         <div id="trendChart"></div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Bad Stock List -->
-        <div class="card">
-            <h5 class="card-header">장기 미출고 재고 (악성 재고)</h5>
-            <div class="table-responsive text-nowrap">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>상품명</th>
-                            <th>LOT 번호</th>
-                            <th>입고일</th>
-                            <th>경과일</th>
-                            <th>위치</th>
-                            <th>수량</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-border-bottom-0">
-                        <tr>
-                            <td><strong>풀향 300ml</strong></td>
-                            <td>LOT-20230101-001</td>
-                            <td>2023-01-01</td>
-                            <td><span class="badge bg-label-danger">600일</span></td>
-                            <td>WH1-A-01</td>
-                            <td>500ea</td>
-                        </tr>
-                        <tr>
-                            <td><strong>고체향수</strong></td>
-                            <td>LOT-20230515-002</td>
-                            <td>2023-05-15</td>
-                            <td><span class="badge bg-label-warning">450일</span></td>
-                            <td>WH2-B-05</td>
-                            <td>200ea</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <!-- 안전재고 미달 리스트 -->
+        <div class="card" id="safetyStockCard">
+            <h5 class="card-header">안전재고 미달 리스트</h5>
+            <div id="safetyStockGrid" ></div>
         </div>
+		<!-- 유통기한 관리 리스트 -->
+		<div class="card mt-3" id="expireDisposalCard">
+		    <h5 class="card-header">유통기한 임박/폐기 재고 리스트</h5>
+		    <div id="expireDisposalGrid"></div>
+		</div>
     </div>
+
+	<!-- 모달창 삽입 -->
+	<th:block th:insert="~{inventory/modal/inventoryDetailModal}"></th:block>
+	<th:block th:insert="~{inventory/modal/moveStockModal}"></th:block>
+	<th:block th:insert="~{inventory/modal/adjustQtyModal}"></th:block>
+	<th:block th:insert="~{inventory/modal/disposalModal}"></th:block>
 </th:block>
 
 <th:block layout:fragment="myScript">
