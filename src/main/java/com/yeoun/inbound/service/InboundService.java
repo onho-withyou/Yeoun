@@ -169,9 +169,23 @@ public class InboundService {
 			
 			// ----------------------------------------------------------------
 			// LotMasterDTO 생성
+			
+			String prdId = itemDTO.getItemId();
+			
+			// 원재료Id가 6글자인 경우 5글자로 변환하기
+			if (prdId.length() >= 6) {
+				prdId = prdId.replace("-", ""); //CAP-003이면 CAP003으로 변환
+				
+				String prefix = prdId.substring(0,3); // 앞부분의 3글자
+				String lastTwo = prdId.substring(prdId.length() - 2); // 뒤에 2글자
+				
+				prdId = prefix + lastTwo;
+			}
+			
+			
 			LotMasterDTO lotMasterDTO = LotMasterDTO.builder()
 					.lotType(itemDTO.getItemType())
-					.prdId(itemDTO.getItemId())
+					.prdId(prdId)
 					.quantity(qty)
 					.currentStatus("NEW")
 					.currentLocType("WH")
