@@ -1,4 +1,4 @@
-package com.yeoun.inventory.entity;
+package com.yeoun.outbound.entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,9 +12,13 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -30,13 +34,15 @@ import lombok.ToString;
 @Setter
 @ToString
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor
 public class OutboundItem {
 	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "OUTBOUND_ITEM_GENERATOR")
 	@Column(name = "OUTBOUND_ITEM_ID", updatable = false)
 	private Long OutboundItemId; // 입고대기품목 id
 	
-	@Column(nullable = false)
-	private String outboundId; // 출고ID 
+	@ManyToOne
+	@JoinColumn(name = "OUTBOUND_ID")
+	private Outbound outbound; // 출고ID 
 	
 	@Column(nullable = false)
 	private String itemId; // 원자재/부자재, 완제품의 기준정보 고유값
@@ -52,5 +58,18 @@ public class OutboundItem {
 
 	@Column(nullable = true)
 	private Long ivId; // 재고Id
+
+	@Builder
+	public OutboundItem(Outbound outbound, String outboundId, String itemId, String lotNo, Long outboundAmount,
+			String itemType, Long ivId) {
+		this.itemId = itemId;
+		this.lotNo = lotNo;
+		this.outboundAmount = outboundAmount;
+		this.itemType = itemType;
+		this.ivId = ivId;
+		this.outbound = outbound;
+	}
+	
+	
 	
 }

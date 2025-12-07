@@ -316,4 +316,9 @@ public class InventoryService {
 	        .toList();
 	}
 
+	// id로 재고 조회
+	public Integer getTotalStock(String id) {
+		return inventoryRepository.findAvailableStock(id);
+	}
+
 }

@@ -4,15 +4,20 @@ import com.yeoun.order.dto.WorkOrderSearchDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.yeoun.order.dto.WorkOrderDTO;
 import com.yeoun.order.dto.WorkOrderListDTO;
 import com.yeoun.order.service.OrderService;
+
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
@@ -54,5 +59,16 @@ public class OrderController {
     @GetMapping("/line")
     public String line (){
         return "/order/line";
+    }
+    
+    // ========================================
+    // 지정한 날짜에 해당하는 작업지시 목록 조회
+    @GetMapping("/orderList/data")
+    @ResponseBody
+    public ResponseEntity<List<WorkOrderDTO>> workList() {
+    	
+		List<WorkOrderDTO> orderDTOList = orderService.findAllWorkList();
+		
+		return ResponseEntity.ok(orderDTOList);
     }
 }
