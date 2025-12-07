@@ -139,17 +139,21 @@ public class InboundService {
 		Inbound inbound = inboundRepository.findByinboundId(receiptDTO.getInboundId())
 				.orElseThrow(() -> new NoSuchElementException("입고 내역을 찾을 수 없습니다."));
 		
-		// 발주 조회
-		MaterialOrder materialOrder = materialOrderRepository.findByOrderId(inbound.getMaterialId())
-				.orElseThrow(() -> new NoSuchElementException("발주 내역을 찾을 수 없습니다."));
+		// 원자재 입고완료 처리시에만 시행
+		if(inbound.getMaterialId() != null && !inbound.getMaterialId().isEmpty()) {
+			// 발주 조회
+			MaterialOrder materialOrder = materialOrderRepository.findByOrderId(inbound.getMaterialId())
+					.orElseThrow(() -> new NoSuchElementException("발주 내역을 찾을 수 없습니다."));
+			
+			// 발주 상태를 완료로 변경
+			materialOrder.changeStatus("COMPLETED");
+		}
 		
 		// 입고담당자 등록
 		inbound.registEmpId(empId);
 		
 		// 입고 상태를 완료로 변경
 		inbound.changeStatus("COMPLETED");
-		// 발주 상태를 완료로 변경
-		materialOrder.changeStatus("COMPLETED");
 		
 		Map<Long, InboundItem> inboundItemMap = inboundItemRepository
 				.findAllByInbound_InboundId(receiptDTO.getInboundId())
@@ -171,48 +175,55 @@ public class InboundService {
 			// LotMasterDTO 생성
 			
 			String prdId = itemDTO.getItemId();
+			String lotNo = "";
+			// 로트번호가 존재하지 않을때 만 실행
+			if(itemDTO.getLotNo() == null || itemDTO.getLotNo().isEmpty()) {
 			
-			// 원재료Id가 6글자인 경우 5글자로 변환하기
-			if (prdId.length() >= 6) {
-				prdId = prdId.replace("-", ""); //CAP-003이면 CAP003으로 변환
+				// 원재료Id가 6글자인 경우 5글자로 변환하기
+				if (prdId.length() >= 6) {
+					prdId = prdId.replace("-", ""); //CAP-003이면 CAP003으로 변환
+					
+					String prefix = prdId.substring(0,3); // 앞부분의 3글자
+					String lastTwo = prdId.substring(prdId.length() - 2); // 뒤에 2글자
+					
+					prdId = prefix + lastTwo;
+				}
 				
-				String prefix = prdId.substring(0,3); // 앞부분의 3글자
-				String lastTwo = prdId.substring(prdId.length() - 2); // 뒤에 2글자
 				
-				prdId = prefix + lastTwo;
+				LotMasterDTO lotMasterDTO = LotMasterDTO.builder()
+						.lotType(itemDTO.getItemType())
+						.prdId(prdId)
+						.quantity(qty)
+						.currentStatus("NEW")
+						.currentLocType("WH")
+						.currentLocId("WH" + itemDTO.getLocationId())
+						.statusChangeDate(LocalDateTime.now())
+						.build();
+				
+				// LOT 생성 및 LOT번호 반환
+				lotNo = lotTraceService.registLotMaster(lotMasterDTO, "00");
+				// lotHistory 생성
+				LotHistoryDTO createLotHistoryDTO = LotHistoryDTO.builder()
+						.lotNo(lotNo)
+						.orderId("")
+						.processId("")
+						.eventType("CREATE")
+						.status("NEW")
+						.locationType("WH")
+						.locationId("WH-" + itemDTO.getLocationId())
+						.quantity(qty)
+						.workedId(empId)
+						.build();
+				lotTraceService.registLotHistory(createLotHistoryDTO);
+			} else {
+				// 완제품은 lotNo가 정해져있음
+				lotNo = itemDTO.getLotNo();
+				// 완제품은 LotMst, LotHistory 생성 등록 필요없음
 			}
-			
-			
-			LotMasterDTO lotMasterDTO = LotMasterDTO.builder()
-					.lotType(itemDTO.getItemType())
-					.prdId(prdId)
-					.quantity(qty)
-					.currentStatus("NEW")
-					.currentLocType("WH")
-					.currentLocId("WH" + itemDTO.getLocationId())
-					.statusChangeDate(LocalDateTime.now())
-					.build();
-			
-			// LOT 생성 및 LOT번호 반환
-			String lotNo = lotTraceService.registLotMaster(lotMasterDTO, "00");
-			
+				
 			// InboundItem 업데이트
 			inboundItem.updateInfo(lotNo, itemDTO.getInboundAmount(), itemDTO.getDisposeAmount(), itemDTO.getLocationId());
-			
-			// lotHistory 생성
-			LotHistoryDTO createLotHistoryDTO = LotHistoryDTO.builder()
-					.lotNo(lotNo)
-					.orderId("")
-					.processId("")
-					.eventType("CREATE")
-					.status("NEW")
-					.locationType("WH")
-					.locationId("WH-" + itemDTO.getLocationId())
-					.quantity(qty)
-					.workedId(empId)
-					.build();
-			
-			lotTraceService.registLotHistory(createLotHistoryDTO);
+				
 			
 			// ------------------------------------------------------
 			// 재고 등록
@@ -248,11 +259,17 @@ public class InboundService {
 			// ---------------------------------------------
 			// 재고 등록 후 LOT HISTORY 업데이트
 			// lotHistory 생성
+			// eventType 설정 : RM_RECEIVE / FG_INBOUND
+			String eventType = "RM_RECEIVE";
+			if ("FG".equals(itemDTO.getItemType())) {
+				eventType = "FG_INBOUND";
+			}
+			
 			LotHistoryDTO updateLotHistoryDTO = LotHistoryDTO.builder()
 					.lotNo(lotNo)
 					.orderId("")
 					.processId("")
-					.eventType("RM_RECEIVE")
+					.eventType(eventType)
 					.status("IN_STOCK")
 					.locationType("WH")
 					.locationId("WH-" + itemDTO.getLocationId())

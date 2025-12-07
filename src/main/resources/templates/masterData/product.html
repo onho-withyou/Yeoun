@@ -28,49 +28,6 @@
     color: #c2185b !important;           /* 진한 자주색 */
     font-weight: bold;
 }
-/* normal cell 전체 배경색 변경 */
-.tui-grid-table .tui-grid-row > td.tui-grid-cell {
-  background-color: lightcoral !important;
-}
-
-/* 특정 컬럼만 바꾸려면 data-column-name 속성 사용 */
-.tui-grid-table td[data-column-name="prdId"] {
-  background-color: #ffecec !important;
-}
-
-.highlight-row {
-  background-color: lightcoral !important;
-}
-.highlight-row td {
-  background-color: lightcoral !important;
-}
-
-/* rowKey로 직접 td 선택할 때 */
-.my-highlight {
-  background-color: #e6ab0bff !important;
-  color: black !important;
-}
-
-/* 또는 모든 td에 적용 */
-.my-highlight td {
-  background-color: #e6ab0bff !important;
-  color: black !important;
-}
-
-/* JS에서 추가하는 클래스: highlight-modified-row */
-.highlight-modified-row,
-.highlight-modified-row td,
-.highlight-modified-row .tui-grid-cell-content,
-.tui-grid-row.highlight-modified-row > td,
-.tui-grid-row.highlight-modified-row > td .tui-grid-cell-content {
-	background-color: #fce4ec !important; /* 연한 핑크 */
-	color: inherit !important;
-}
-
-/* td[data-row-key="..."] 직접 스타일 적용(안전망) */
-td[data-row-key] {
-	/* 기본은 그대로, 필요시 여기에 스타일 추가 가능 */
-}
 
 </style>
 <body>
@@ -103,9 +60,9 @@ td[data-row-key] {
 	           <div class="tab-pane fade" id="navs-material-tab" role="tabpanel">
 	             <h5 class="card-title mb-0">원재료</h5>
 	             <div class="d-flex justify-content-end" style="margin:10px;">
-			  		<button class="btn btn-primary" type="button" data-preset="striped" style="margin-right:5px;">추가</button>
-					<button class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
-			  		<button class="btn btn-danger" type="button">삭제</button>
+			  		<button id="addMaterialRowBtn" class="btn btn-primary" type="button" data-preset="striped" style="margin-right:5px;">추가</button>
+					<button id="saveMaterialRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
+			  		<button id="deleteMaterialRowBtn" class="btn btn-danger" type="button">삭제</button>
 				 </div>
 				 <div id="materialGrid" style="display: grid;margin-right:5px;"></div>
 	           </div>

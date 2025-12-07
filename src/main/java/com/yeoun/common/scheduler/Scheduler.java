@@ -57,9 +57,7 @@ public class Scheduler {
 	// 매일 00시 00분 유통기한 체크후 재고상태 변화
 	@Scheduled(cron = "0 0 0 * * *")
 	public void checkExpired() {
-	    log.info("🧪 테스트: 유통기한 체크 시작");
 	    inventoryService.changeIvStatus();
-	    log.info("🧪 테스트: 유통기한 체크 완료");
 	}
 	
 

@@ -55,7 +55,8 @@ public interface InventoryRepository
               - NVL(inv.PLAN_OUT_QTY, 0)     AS expectIvQty,
             NVL(inv.LOCATIONS_CNT, 0)        AS locationsCnt,
             ss.SAFETY_STOCK_QTY              AS safetyStockQty,
-            ss.SAFETY_STOCK_QTY_DAILY        AS safetyStockQtyDaily
+            ss.SAFETY_STOCK_QTY_DAILY        AS safetyStockQtyDaily,
+            ibit.EXPECT_IBAMOUNT             As expectIbAmount
         FROM SAFETY_STOCK ss
         LEFT JOIN (
             SELECT
@@ -74,6 +75,20 @@ public interface InventoryRepository
             GROUP BY ITEM_ID
         ) inv
             ON inv.ITEM_ID = ss.ITEM_ID
+        LEFT JOIN(
+			SELECT
+				it.ITEM_ID,
+				SUM(it.REQUEST_AMOUNT) as EXPECT_IBAMOUNT
+			FROM
+				INBOUND i
+			LEFT JOIN
+				INBOUND_ITEM it
+				ON i.INBOUND_ID = it.INBOUND_ID
+			WHERE
+				INBOUND_STATUS = 'PENDING_ARRIVAL'
+			GROUP BY ITEM_ID
+		) ibit
+			ON ss.ITEM_ID = ibit.ITEM_ID
         ORDER BY ss.ITEM_ID
         """,
         nativeQuery = true)
