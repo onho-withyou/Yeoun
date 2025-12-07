@@ -12,6 +12,7 @@
 		<result property="outboundDate"  column="OUTBOUND_DATE"/>
 		<result property="createdName"  column="CREATEDUSER"/>
 		<result property="processEmpName"  column="PROCESSEMPNAME"/>
+		<result property="clientName"  column="CLIENT_NAME"/>
 		
 		<collection property="items" ofType="com.yeoun.outbound.dto.OutboundOrderItemDTO">
 			<id property="outboundItemId" column="OUTBOUND_ITEM_ID"/>
@@ -21,6 +22,11 @@
 			<result property="prdName" column="PRD_NAME"/>
 			<result property="lotNo" column="LOT_NO"/>
 			<result property="outboundQty" column="OUTBOUND_AMOUNT"/>
+			<result property="orderqQty" column="ORDER_QTY"/>
+			<result property="matQty" column="MAT_QTY"/>
+			<result property="shipmentQty" column="SHIPMENT_QTY"/>
+			<result property="ivId" column="IV_ID"/>
+			<result property="locationId" column="LOCATION_ID"/>
 		</collection>
 	</resultMap>
 	
@@ -37,6 +43,7 @@
 			, oi.OUTBOUND_ITEM_ID
 			, oi.LOT_NO
 			, oi.OUTBOUND_AMOUNT
+			, s.CLIENT_NAME
 			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN mat.MAT_ID END AS MAT_ID
 			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN mat.MAT_NAME END AS MAT_NAME
 			, CASE WHEN o.SHIPMENT_ID IS NOT NULL THEN prd.PRD_ID END AS PRD_ID
@@ -63,6 +70,10 @@
 			PRODUCT_MST prd
 		ON
 			oi.ITEM_ID = prd.PRD_ID
+		LEFT JOIN
+			SHIPMENT s
+		ON
+			o.SHIPMENT_ID = s.SHIPMENT_ID
 		WHERE 
 			o.EXPECT_OUTBOUND_DATE &gt;= #{start}
 		AND 
@@ -74,6 +85,77 @@
 		        OR UPPER(NVL(oi.LOT_NO, ' '))  LIKE '%' || #{keyword} || '%'
     		)
 		</if>
+		ORDER BY
+			o.EXPECT_OUTBOUND_DATE DESC
+	</select>
+	
+	<select id="findOutbound" resultMap="OutboundOrderMap">
+		SELECT
+			o.OUTBOUND_ID
+			, e1.EMP_NAME AS CREATEDUSER
+			, e2.EMP_NAME AS PROCESSEMPNAME
+			, o.WORK_ORDER_ID
+			, o.SHIPMENT_ID
+			, o.STATUS
+			, o.EXPECT_OUTBOUND_DATE
+			, o.OUTBOUND_DATE
+			, oi.OUTBOUND_ITEM_ID
+			, oi.LOT_NO
+			, oi.OUTBOUND_AMOUNT
+			, oi.IV_ID
+			, i.LOCATION_ID
+			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN mat.MAT_ID END AS MAT_ID
+			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN mat.MAT_NAME END AS MAT_NAME
+			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN bom.MAT_QTY END AS MAT_QTY
+			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN w.PLAN_QTY END AS ORDER_QTY
+			, CASE WHEN o.SHIPMENT_ID IS NOT NULL THEN prd.PRD_ID END AS PRD_ID
+			, CASE WHEN o.SHIPMENT_ID IS NOT NULL THEN prd.PRD_NAME END AS PRD_NAME	
+			, CASE WHEN o.SHIPMENT_ID IS NOT NULL THEN s.SHIPMENT_QTY END AS SHIPMENT_QTY	
+		FROM
+			OUTBOUND o
+		LEFT JOIN
+			OUTBOUND_ITEM oi
+		ON
+			o.OUTBOUND_ID = oi.OUTBOUND_ID
+		LEFT JOIN
+			EMP e1
+		ON
+			o.REQUEST_BY = e1.EMP_ID
+		LEFT JOIN
+			EMP e2
+		ON
+			o.PROCESS_BY = e2.EMP_ID
+		LEFT JOIN
+			MATERIAL_MST mat
+		ON
+			oi.ITEM_ID = mat.MAT_ID
+		LEFT JOIN
+			PRODUCT_MST prd
+		ON
+			oi.ITEM_ID = prd.PRD_ID
+		LEFT JOIN
+			WORK_ORDER w
+		ON
+			w.ORDER_ID = o.WORK_ORDER_ID
+		LEFT JOIN
+			SHIPMENT s
+		ON
+			s.SHIPMENT_ID = o.SHIPMENT_ID
+		LEFT JOIN
+			BOM_MST bom
+		ON 
+			bom.PRD_ID = w.PRD_ID
+			AND bom.MAT_ID = oi.ITEM_ID
+		LEFT JOIN
+			INVENTORY i
+		ON
+			oi.IV_ID = i.IV_ID
+		LEFT JOIN
+			WAREHOUSE_LOCATION wl
+		ON
+			wl.LOCATION_ID = i.LOCATION_ID
+		WHERE
+			o.OUTBOUND_ID = #{outboundId}
 		ORDER BY
 			o.EXPECT_OUTBOUND_DATE DESC
 	</select>

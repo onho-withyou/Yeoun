@@ -246,6 +246,7 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 		},
 		body: JSON.stringify({
 			inboundId,
+			type: "MAT",
 			items
 		})
 	});

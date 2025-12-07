@@ -384,28 +384,26 @@ public class WorkOrderProcessService {
         }
 
         String processId = proc.getProcess().getProcessId();
+        
+        // 1) 공정 상태는 항상 DONE 으로
+        proc.setStatus("DONE");
 
+        // 2) 캡/펌프 공정인 경우에만 QC_RESULT PENDING 생성
         if ("PRC-CAP".equals(processId)) {
-        	// 1) 공정 상태: QC 대기
-            proc.setStatus("QC_PENDING");
-            
-            // 2) QC 결과 헤더 자동 생성
             qcResultService.createPendingQcResultForOrder(orderId);
-        } else {
-        	// 일반 공정은 바로 완료
-            proc.setStatus("DONE");
         }
 
+        // 3) 공정 종료 시간
         proc.setEndTime(LocalDateTime.now());
 
-        // 마지막 단계인지 확인
+        // 4) 마지막 단계인지 확인
         WorkOrder workOrder = proc.getWorkOrder();
         boolean hasLaterStep =
                 workOrderProcessRepository.existsByWorkOrderOrderIdAndStepSeqGreaterThan(orderId, stepSeq);
 
         if (!hasLaterStep) {
-            // 마지막 공정까지 완료 → 작업지시 완료 처리
-            workOrder.setStatus("COMPLETED");              // 상태코드는 네 프로젝트 값에 맞게
+            // 마지막 공정까지 완료 -> 작업지시 완료 처리
+            workOrder.setStatus("COMPLETED");              
             workOrder.setActEndDate(LocalDateTime.now());
         }
 

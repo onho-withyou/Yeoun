@@ -80,4 +80,18 @@ public class Outbound {
 		item.setOutbound(this);
 	}
 	
+	// 출고 담당자 등록
+	public void registProcessBy(String empId) {
+		this.processBy = empId;
+	}
+	
+	// 출고일 등록
+	public void registOutboundDate(LocalDateTime outboundDate) {
+		this.outboundDate = outboundDate;
+	}
+	
+	// 출고 상태 변경
+	public void updateStatus(String status) {
+		this.status = status;
+	}
 }
