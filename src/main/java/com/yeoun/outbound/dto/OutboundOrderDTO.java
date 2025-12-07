@@ -1,5 +1,6 @@
 package com.yeoun.outbound.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -26,4 +27,5 @@ public class OutboundOrderDTO {
 	private List<OutboundOrderItemDTO> items; // 출고품목
 	private String type; // MAT / FG
 	private String status;
+	private String clientName;   // 거래처이름
 }

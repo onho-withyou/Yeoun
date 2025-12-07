@@ -12,6 +12,7 @@
 		<result property="outboundDate"  column="OUTBOUND_DATE"/>
 		<result property="createdName"  column="CREATEDUSER"/>
 		<result property="processEmpName"  column="PROCESSEMPNAME"/>
+		<result property="clientName"  column="CLIENT_NAME"/>
 		
 		<collection property="items" ofType="com.yeoun.outbound.dto.OutboundOrderItemDTO">
 			<id property="outboundItemId" column="OUTBOUND_ITEM_ID"/>
@@ -42,6 +43,7 @@
 			, oi.OUTBOUND_ITEM_ID
 			, oi.LOT_NO
 			, oi.OUTBOUND_AMOUNT
+			, s.CLIENT_NAME
 			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN mat.MAT_ID END AS MAT_ID
 			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN mat.MAT_NAME END AS MAT_NAME
 			, CASE WHEN o.SHIPMENT_ID IS NOT NULL THEN prd.PRD_ID END AS PRD_ID
@@ -68,6 +70,10 @@
 			PRODUCT_MST prd
 		ON
 			oi.ITEM_ID = prd.PRD_ID
+		LEFT JOIN
+			SHIPMENT s
+		ON
+			o.SHIPMENT_ID = s.SHIPMENT_ID
 		WHERE 
 			o.EXPECT_OUTBOUND_DATE &gt;= #{start}
 		AND 
