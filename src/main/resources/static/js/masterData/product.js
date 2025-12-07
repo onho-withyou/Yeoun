@@ -76,7 +76,7 @@ const grid1 = new Grid({
 	  el: document.getElementById('productGrid'),
       rowHeaders: [
 			{ type: 'rowNum', header: 'No.'},
-			{ type: 'checkbox' } // 체크박스를 사용한다면 이것도 추가
+			{ type: 'checkbox' } 
 		],
 	  columns: [
 		{header: '품번' ,name: 'prdId' ,align: 'center',editor: 'text',width: 100
@@ -140,16 +140,16 @@ const grid1 = new Grid({
         ,{header: '제품상세설명' ,name: 'prdSpec' ,align: 'center',editor: 'text',width: 370
 			,renderer:{ type: StatusModifiedRenderer}
 		}
-        ,{header: '생성자ID' ,name: 'createdId' ,align: 'center',editor: 'text'
+        ,{header: '생성자ID' ,name: 'createdId' ,align: 'center'
 			,renderer:{ type: StatusModifiedRenderer}
 		}
-        ,{header: '생성일자' ,name: 'createdDate' ,align: 'center',editor: 'text'
+        ,{header: '생성일자' ,name: 'createdDate' ,align: 'center'
 			,renderer:{ type: StatusModifiedRenderer}
 		}
-        ,{header: '수정자ID' ,name: 'updatedId' ,align: 'center',editor: 'text'
+        ,{header: '수정자ID' ,name: 'updatedId' ,align: 'center'
 			,renderer:{ type: StatusModifiedRenderer}
 		}
-        ,{header: '수정일시' ,name: 'updatedDate' ,align: 'center',editor: 'text'
+        ,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'
 			,renderer:{ type: StatusModifiedRenderer}
 		}           
 	  ]
@@ -168,18 +168,58 @@ const grid1 = new Grid({
 //g-grid2 원재료(하위품번)
 const grid2 = new Grid({
 	    el: document.getElementById('materialGrid'),
-        rowHeaders: ['rowNum','checkbox'],
+          rowHeaders: [
+			{ type: 'rowNum', header: 'No.'},
+			{ type: 'checkbox' } 
+		],
 	    columns: [
-		    {header: '원재료ID' ,name: 'matId' ,align: 'center'}
-		    ,{header: '원재료 품목명' ,name: 'matName' ,align: 'center'}//
-		    ,{header: '원재료 유형' ,name: 'matType' ,align: 'center',filter: "select"}
-		    ,{header: '단위' ,name: 'matUnit' ,align: 'center'}
-	        ,{header: '유효일자' ,name: 'effectiveDate' ,align: 'center'}
-	        ,{header: '상세설명(원재료)' ,name: 'matDesc' ,align: 'center',width: 280}
+		    {header: '원재료ID' ,name: 'matId' ,align: 'center',editor: 'text'
+				,renderer:{ type: StatusModifiedRenderer}	
+			}
+		    ,{header: '원재료 품목명' ,name: 'matName' ,align: 'center',editor: 'text'
+				,renderer:{ type: StatusModifiedRenderer}	
+			}
+		    ,{header: '원재료 유형' ,name: 'matType' ,align: 'center',editor: 'text',filter: "select"
+				,renderer:{ type: StatusModifiedRenderer}	
+				,editor: {
+					type: 'select', // 드롭다운 사용
+					options: {
+						// value는 실제 데이터 값, text는 사용자에게 보이는 값
+						listItems: [
+							{ text: '원재료', value: 'RAW' },
+							{ text: '부자재', value: 'SUB' },
+							{ text: '포장재', value: 'PKG' },
+							{ text: '공정중', value: 'WIP' },
+							{ text: '생산품', value: 'FIN' },
+							{ text: '박스', value: 'BOX' }
+						]
+					}
+				}
+			}
+		    ,{header: '단위' ,name: 'matUnit' ,align: 'center',editor: 'text'
+				,renderer:{ type: StatusModifiedRenderer}	
+				,editor: {
+					type: 'select', // 드롭다운 사용
+					options: {
+						// value는 실제 데이터 값, text는 사용자에게 보이는 값
+						listItems: [
+							{ text: 'g', value: 'g' },
+							{ text: 'ml', value: 'ml' },
+							{ text: 'EA', value: 'EA' }
+						]
+					}
+				}
+			}
+	        ,{header: '유효일자' ,name: 'effectiveDate' ,align: 'center',editor: 'text'
+				,renderer:{ type: StatusModifiedRenderer}	
+			}
+	        ,{header: '상세설명(원재료)' ,name: 'matDesc' ,align: 'center',editor: 'text',width: 280
+				,renderer:{ type: StatusModifiedRenderer}	
+			}
 	        ,{header: '생성자ID' ,name: 'createdId' ,align: 'center'}
 	        ,{header: '생성일자' ,name: 'createdDate' ,align: 'center'}
-	        ,{header: '수정자ID' ,name: 'updatedId' ,align: 'center',hidden: true}
-	        ,{header: '수정일시' ,name: 'updatedDate' ,align: 'center',hidden: true}           
+	        ,{header: '수정자ID' ,name: 'updatedId' ,align: 'center'}
+	        ,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}           
 	    ],
 	    data: []
 	    ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
@@ -266,13 +306,18 @@ function materialGridAllSearch() {
 
 }
 
-//row 추가
+//완제품 row 추가
 const addProductRowBtn = document.getElementById('addProductRowBtn');
 addProductRowBtn.addEventListener('click', function() {
    grid1.prependRow();
 });
+//원재료 row 추가
+const addMaterialRowBtn = document.getElementById('addMaterialRowBtn');
+addMaterialRowBtn.addEventListener('click', function() {
+   grid2.prependRow();
+});
 
-//row 저장: POST JSON형식으로 서버에 요청
+//완제품 row 저장: POST JSON형식으로 서버에 요청
 const saveProductRowBtn = document.getElementById('saveProductRowBtn');
 saveProductRowBtn.addEventListener('click', function() {
 
@@ -376,7 +421,79 @@ saveProductRowBtn.addEventListener('click', function() {
 	});
 });
 
-//row 삭제: POST JSON형식으로 서버에 요청
+//원재료 row 저장: POST JSON형식으로 서버에 요청
+const saveMaterialRowBtn = document.getElementById('saveMaterialRowBtn');
+saveMaterialRowBtn.addEventListener('click', function() {
+	const modifiedData = (typeof grid2.getModifiedRows === 'function') ? (grid2.getModifiedRows() || {}) : {};
+	const updatedRows = Array.isArray(modifiedData.updatedRows) ? modifiedData.updatedRows : [];
+	let createdRows = Array.isArray(modifiedData.createdRows) ? modifiedData.createdRows : [];
+	// 새로 추가된 행 중 모든 필드가 비어있는(빈 행) 경우 그리드에서 제거하고 서버 전송 대상에서 제외
+	const isRowEmpty = (row) => {
+		if (!row) return true;
+		const vals = Object.values(row);
+		if (vals.length === 0) return true;
+		return vals.every(v => v === null || v === undefined || (typeof v === 'string' && v.trim() === ''));
+	};
+	const emptyCreated = createdRows.filter(isRowEmpty);
+	if (emptyCreated.length > 0) {
+		emptyCreated.forEach(r => {
+			try {
+				const key = r && (r.rowKey || r.matId);
+				if (key && typeof grid2.removeRow === 'function') {
+					grid2.removeRow(key);
+				} else if (key && typeof grid2.deleteRow === 'function') {
+					grid2.deleteRow(key);
+				}
+			} catch (e) {
+				console.warn('빈 행 삭제 실패', e);
+			}
+		});
+		// 서버로 보낼 createdRows에서 빈 행 제외
+		createdRows = createdRows.filter(r => !isRowEmpty(r));
+		// 반영: modifiedData 객체에도 반영해 전송값 일관성 유지
+		try { modifiedData.createdRows = createdRows; } catch (e) {}
+	}
+
+	if (updatedRows.length === 0 && createdRows.length === 0) {
+		alert('수정된 내용이 없습니다.');
+		return;
+	}
+	fetch('/material/save', {
+		method: 'POST',
+		credentials: 'same-origin',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(modifiedData)
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		const ct = (res.headers.get('content-type') || '').toLowerCase();
+		if (ct.includes('application/json')) return res.json();
+		return res.text();
+	})
+	.then(parsed => {
+		const okTexts = ['success', 'ok', 'true'];
+		const isSuccess = (p) => {
+			if (typeof p === 'string') return okTexts.includes(p.trim().toLowerCase());
+			if (!p) return false;	
+			const status = (p.status || p.result || '').toString().toLowerCase();
+			const message = (p.message || '').toString().toLowerCase();
+			return status === 'success' || okTexts.includes(message) || message.includes('success');
+		};
+		if (!isSuccess(parsed)) throw new Error('Unexpected response: ' + JSON.stringify(parsed));
+		console.log('저장 성공:', parsed);
+		materialGridAllSearch();
+	})
+	.catch(err => {
+		console.error('저장 오류', err);
+		try { alert('저장 중 오류가 발생했습니다. ' + (err && err.message ? err.message : '')); } catch (e) {}
+	});
+});
+
+
+//완제품row 삭제: POST JSON형식으로 서버에 요청
 const deleteProductRowBtn = document.getElementById('deleteProductRowBtn');
 deleteProductRowBtn.addEventListener('click', async function() {
 
@@ -506,5 +623,76 @@ deleteProductRowBtn.addEventListener('click', async function() {
 		}
 	
 });
+
+//원재료row 삭제: POST JSON형식으로 서버에 요청
+const deleteMaterialRowBtn = document.getElementById('deleteMaterialRowBtn');
+deleteMaterialRowBtn.addEventListener('click', async function() {
+	console
+
+	// 체크된 rowKey들 수집
+	let rowKeysToDelete = [];
+	try {
+		if (typeof grid2.getCheckedRowKeys === 'function') {
+			rowKeysToDelete = grid2.getCheckedRowKeys() || [];
+		} else if (typeof grid2.getCheckedRows === 'function') {
+			const checkedRows = grid2.getCheckedRows() || [];
+			rowKeysToDelete = checkedRows.map(r => r && (r.rowKey || r.matId)).filter(Boolean);
+		}
+	} catch (e) {
+		console.warn('체크된 행 조회 실패', e);
+	}
+	if (!Array.isArray(rowKeysToDelete) || rowKeysToDelete.length === 0) {
+		alert('삭제할 행을 선택(체크)해주세요.');
+		return;
+	}
+	// 간결한 방식으로 각 rowKey로부터 matId(또는 식별 가능한 ID)를 수집
+	const getAllData = () => (typeof grid2.getData === 'function' ? grid2.getData() : (grid2.data || []));
+	const matIds = rowKeysToDelete.map(key => {
+		try {
+			const row = (typeof grid2.getRow === 'function' && grid2.getRow(key)) ||
+				getAllData().find(d => d && (String(d.rowKey) === String(key) || String(d.matId) === String(key)));
+			return row && row.matId ? String(row.matId) : String(key);
+		}
+		catch (e) {
+			console.warn('삭제 ID 수집 중 오류', e);
+			return String(key);
+		}
+	}).filter(Boolean);
+
+	if (!confirm('선택한 항목을 삭제하시겠습니까?')) return;
+	fetch('/material/delete', {
+		method: 'POST',
+		credentials: 'same-origin',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(matIds)
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		const ct = (res.headers.get('content-type') || '').toLowerCase();
+		if (ct.includes('application/json')) return res.json();
+		return res.text();
+	}
+	)
+	.then(parsed => {
+		console.log('삭제 응답:', parsed);
+		const okTexts = ['success','ok','true'];
+		if (typeof parsed === 'string') {
+			if (!okTexts.includes(parsed.trim().toLowerCase())) throw new Error('Unexpected response: ' + parsed);
+		}
+		else if (!(parsed && (parsed.status === 'success' || okTexts.includes((parsed.message||'').toString().toLowerCase())))) {
+			throw new Error('삭제 실패: ' + JSON.stringify(parsed));
+		}
+		// 서버 삭제 성공 시 그리드 재조회
+		materialGridAllSearch();
+	})
+	.catch(err => {
+		console.error('삭제 중 오류', err);
+		try { alert('삭제 중 오류가 발생했습니다. ' + (err && err.message ? err.message : '')); } catch (e) {}
+	});
+});
+
 
 

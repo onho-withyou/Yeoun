@@ -46,32 +46,11 @@ public class ProductMstController {
   	}
 
 	@ResponseBody
-	@PostMapping("/product/save")
-	public ResponseEntity<java.util.Map<String,Object>> productSave(Model model,
-			@AuthenticationPrincipal LoginDTO loginDTO,
-			@RequestBody Map<String, Object> param) {
-		log.info("param------------->{}", param);
-		java.util.Map<String,Object> resp = new java.util.HashMap<>();
-		try {
-			String empId = (loginDTO != null && loginDTO.getEmpId() != null) ? loginDTO.getEmpId() : "SYSTEM";
-			String result = productMstService.saveProductMst(empId, param);
-			// service returns "success" or "error: ..."; normalize to structured response
-			if (result != null && result.trim().toLowerCase().startsWith("success")) {
-				resp.put("status", "success");
-				resp.put("message", result);
-				return ResponseEntity.ok(resp);
-			} else {
-				resp.put("status", "error");
-				resp.put("message", result == null ? "unknown error" : result);
-				return ResponseEntity.status(500).body(resp);
-			}
-		} catch (Exception e) {
-			log.error("productSave error", e);
-			resp.put("status", "error");
-			resp.put("message", e.getMessage());
-			return ResponseEntity.status(500).body(resp);
-		}
-	}
+  	@PostMapping("/product/save")
+	public String productSave(Model model, @AuthenticationPrincipal LoginDTO loginDTO,@RequestBody Map<String, Object> param) {
+  		log.info("param------------->{}",param);
+		return productMstService.saveProductMst(loginDTO.getEmpId(),param);
+  	}
 
 	@ResponseBody
 	@PostMapping("/product/delete")
