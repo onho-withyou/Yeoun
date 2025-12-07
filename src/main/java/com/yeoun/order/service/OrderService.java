@@ -1,9 +1,13 @@
 package com.yeoun.order.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.yeoun.order.dto.WorkOrderSearchDTO;
+import com.yeoun.order.entity.WorkOrder;
+
 import org.springframework.stereotype.Service;
 
 import com.yeoun.emp.dto.EmpListDTO;
@@ -14,8 +18,11 @@ import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.masterData.repository.BomMstRepository;
 import com.yeoun.masterData.repository.ProdLineRepository;
 import com.yeoun.masterData.repository.ProductMstRepository;
+import com.yeoun.order.dto.WorkOrderDTO;
 import com.yeoun.order.dto.WorkOrderListDTO;
 import com.yeoun.order.mapper.OrderMapper;
+import com.yeoun.order.repository.WorkOrderRepository;
+import com.yeoun.outbound.dto.OutboundOrderDTO;
 import com.yeoun.production.dto.ProductionPlanListDTO;
 import com.yeoun.production.entity.ProductionPlan;
 import com.yeoun.production.repository.ProductionPlanRepository;
@@ -33,6 +40,7 @@ public class OrderService {
 	private final ProdLineRepository prodLineRepository;
 	private final ProductMstRepository productMstRepository;
 	private final ProductionPlanRepository productionPlanRepository;
+	private final WorkOrderRepository workOrderRepository;
 	
 	// =======================================================
 	// 작업지시 목록 조회
@@ -67,6 +75,18 @@ public class OrderService {
 	// 작업자 조회
 	public List<EmpListDTO> loadAllWorkers(String pos) {
 		return orderMapper.selectWorkers(pos);
+	}
+
+	// =======================================================
+	// 작업지시서 전체 조회
+	public List<WorkOrderDTO> findAllWorkList() {
+//		List<WorkOrder> workOrders = workOrderRepository.findByOutboundYn("N");
+		// 상태가 "N"인게 없어서 "Y"로 작업 후 변경할 예정
+		List<WorkOrder> workOrders = workOrderRepository.findByOutboundYn("Y");
+		
+		return workOrders.stream()
+				.map(WorkOrderDTO::fromEntity)
+				.collect(Collectors.toList());
 	}
 	
 	// =======================================================

@@ -1,7 +1,6 @@
 package com.yeoun.inventory.repository;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,7 +11,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventorySafetyCheckDTO;
 import com.yeoun.inventory.entity.Inventory;
 import com.yeoun.inventory.entity.WarehouseLocation;
@@ -23,7 +21,6 @@ public interface InventoryRepository
 	Optional<Inventory> findByWarehouseLocationAndLotNo(WarehouseLocation location, String lotNo);
 	
 	// 생산계획시 필요한 제품(PRD_ID / ITEM_ID) 기준 전체 재고 조회
-
 		@Query(value = """
 		    SELECT 
 		        ITEM_ID AS prdId,
@@ -35,6 +32,16 @@ public interface InventoryRepository
 
 
 	List<Inventory> findByWarehouseLocation(WarehouseLocation location);
+
+
+	// id로 재고 수량 조회
+	@Query("""
+		    SELECT COALESCE(SUM(i.ivAmount), 0)
+		    FROM Inventory i
+		    WHERE i.itemId = :id
+		      AND i.ivStatus <> 'EXPIRED'
+		""")
+	Integer findAvailableStock(@Param("id") String id);
 
 	
 	@Query(value = """
@@ -87,6 +94,22 @@ public interface InventoryRepository
 	""")
 	void updateAllStatusByExpirationDate(@Param("today") LocalDateTime today, 
 		    @Param("disposalWaitDate") LocalDateTime disposalWaitDate);
+
+	// itemId로 재고 조회
+	@Query("""
+		    SELECT i
+		    FROM Inventory i
+		    WHERE i.itemId = :itemId
+		      AND i.ivStatus <> :status
+		    ORDER BY
+			    i.expirationDate ASC,
+			    i.ibDate ASC,
+			    i.ivAmount DESC
+		""")
+	List<Inventory> findByItemIdAndIvStatusNot(@Param("itemId") String itemId, @Param("status") String status);
+
+	// 재고삭제
+	void delete(Inventory stock);
 	
 
 }
