@@ -139,8 +139,6 @@ const submitOutbound = async () => {
 		items
 	};
 	
-	console.log(payload);
-	
 	const res = await fetch("/inventory/outbound/mat/regist", {
 		method: "POST",
 		headers: {
