@@ -76,7 +76,6 @@ public class BomMstService {
 			bomMstRepository.flush();
 			return "Success: BOM 저장이 완료되었습니다. (created=" + createdCount + ")";
 	}
-		// Removed try/catch to allow exceptions to propagate
 
 	// Map을 BomMst 엔티티로 변환하는 헬퍼 메서드
 	private BomMst mapToBom(Map<String, Object> row) {
@@ -117,25 +116,25 @@ public class BomMstService {
 	}
 
 	//4. BOM 그리드 삭제(자세히 볼필요 있음)
-	public String deleteBomMst(String empId,List<String> rowKeys) {
-		log.info("bomMstDeleteList------------->{}",rowKeys);
-		try {
-			int deletedTotal = 0;
-			for (String prdId : rowKeys) {
-				if (prdId == null) continue;
-				// prdId로 해당 prdId에 속한 모든 BOM 레코드를 찾아서 삭제
-				java.util.List<BomMst> found = bomMstRepository.findByPrdId(prdId);
-				if (found != null && !found.isEmpty()) {
-					bomMstRepository.deleteAll(found);
-					deletedTotal += found.size();
-				}
-			}
-			return "Success: BOM 삭제가 완료되었습니다. (deleted=" + deletedTotal + ")";
-		} catch (Exception e) {
-			log.error("deleteBomMst error", e);
-			return "error: " + e.getMessage();
-		}
-	}
+	// public String deleteBomMst(String empId,List<String> rowKeys) {
+	// 	log.info("bomMstDeleteList------------->{}",rowKeys);
+	// 	try {
+	// 		int deletedTotal = 0;
+	// 		for (String prdId : rowKeys) {
+	// 			if (prdId == null) continue;
+	// 			// prdId로 해당 prdId에 속한 모든 BOM 레코드를 찾아서 삭제
+	// 			java.util.List<BomMst> found = bomMstRepository.findByPrdId(prdId);
+	// 			if (found != null && !found.isEmpty()) {
+	// 				bomMstRepository.deleteAll(found);
+	// 				deletedTotal += found.size();
+	// 			}
+	// 		}
+	// 		return "Success: BOM 삭제가 완료되었습니다. (deleted=" + deletedTotal + ")";
+	// 	} catch (Exception e) {
+	// 		log.error("deleteBomMst error", e);
+	// 		return "error: " + e.getMessage();
+	// 	}
+	// }
 
 	//4-2. BOM 삭제 (prdId + matId 쌍으로 삭제 요청 처리)
 	public String deleteBomMstByPairs(String empId, List<java.util.Map<String, String>> rows) {
@@ -163,7 +162,7 @@ public class BomMstService {
 			}
 		}
 		return "Success: BOM 삭제가 완료되었습니다. (deleted=" + deletedTotal + ")";
-	
+	}
 	// =================================================================
 	// prdId에 해당하는 BOM 리스트 조회
 	public List<OutboundOrderItemDTO> getBomListByPrdId(String prdId) {

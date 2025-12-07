@@ -8,7 +8,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -46,12 +48,12 @@ public class BomMstController {
    	}
     //BOM 삭제 (prdId + matId 쌍으로 삭제)
     @ResponseBody
-    	@PostMapping("/delete")
-    	public String bomDelete(Model model, @AuthenticationPrincipal LoginDTO loginDTO,@RequestBody List<java.util.Map<String, String>> rows) {
+    @PostMapping("/delete")
+    public String bomDelete(Model model, @AuthenticationPrincipal LoginDTO loginDTO,@RequestBody List<java.util.Map<String, String>> rows) {
 		String empId = (loginDTO != null && loginDTO.getEmpId() != null) ? loginDTO.getEmpId() : "SYSTEM";
 		log.info("bomDelete (pairs)------------->{}", rows);
 		return bomMstService.deleteBomMstByPairs(empId, rows);
-    	}
+    }
  	
  	// prdId에 해당하는 BOM 리스트 조회
  	@GetMapping("/list/data/{prdId}")
