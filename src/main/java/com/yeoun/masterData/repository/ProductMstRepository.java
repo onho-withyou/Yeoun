@@ -1,5 +1,7 @@
 package com.yeoun.masterData.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
   
@@ -13,5 +15,7 @@ public interface ProductMstRepository extends JpaRepository<ProductMst, String> 
 	//Optional<ProductMst> findByProductAll();
 	//2. 완제품 수정
 	//3. 완제품 삭제
+
+	Optional<ProductMst> findByItemNameAndPrdName(String itemName, String prdName);
 
 }

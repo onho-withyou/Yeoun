@@ -441,17 +441,123 @@ function renderSafetyStockGrid() {
     });
 	
 	// 발주 버튼 동작
-	safetyStockGrid	.on("click", (event) => {
+	safetyStockGrid	.on("click", async (event) => {
 		if(event.columnName == "btn") {
 			const target = event.nativeEvent.target;
 			if (target && target.tagName === "BUTTON") {
 				
 				const rowData = safetyStockGrid.getRow(event.rowKey);
 				console.log(rowData);
+
+				//모달 열기
+				const modalEl = document.getElementById("modalCenter");
+				const bsModal = new bootstrap.Modal(modalEl);
+				bsModal.show();
+				
+				// 모달세팅
+				await initPurchaseModalByRow(rowData);
 			}
 		}
 	});
 }
+// 발주 모달 초기화, 선택한 안전재고 발주
+async function initPurchaseModalByRow(rowData) {
+    // 모달 초기화
+    clientInput.value = "";             
+    hiddenId.value = "";               
+    document.querySelector("#managerName").value = "";
+    itemSelect.innerHTML = "";
+    itemSelect.disabled = true;
+    orderTableBody.innerHTML = "";
+    dueDateInput.value = "";
+
+    // 공급업체 전체 데이터 가져오기
+    const data = await supplierList();
+    if (!data) return;
+
+    // 이 품목을 공급하는 거래처 찾기
+    // supplierItemList 안에 materialId가 rowData.itemId인 곳
+    const targetMaterialId = rowData.itemId;
+
+	let supplier = null;
+	let targetItem = null;
+	
+	// 거래처, 거래처품목에서 발주선택한 안전재고 찾기
+	for (const client of data) {
+	    const found = client.supplierItemList?.find(
+	        item => String(item.materialId) === String(targetMaterialId)
+	    );
+	    if (found) {
+	        supplier = client;
+	        targetItem = found;
+	        break;
+	    }
+	}
+	
+	// 품목의 거래처가 없을때
+	if (!supplier || !targetItem) {
+	    alert("해당 품목을 공급하는 거래처가 없습니다.");
+	    return;
+	}
+	
+	// 거래처 선택 
+	selectClient(supplier, data);
+
+	// itemId로 옵션 선택
+	const targetItemId = targetItem.itemId;
+	
+	// 거래처선택후 채워진 공급처 옵션에서 해당품목 찾기
+	const optionToSelect = Array.from(itemSelect.options).find(
+		opt => Number(opt.value) === Number(targetItemId)
+	);
+
+	if (!optionToSelect) {
+		alert("선택된 거래처에 이 품목이 없습니다.");
+		return;
+	}
+
+	itemSelect.value = optionToSelect.value;
+
+	// change 이벤트 실행
+	const changeEvent = new Event("change");
+	itemSelect.dispatchEvent(changeEvent);
+	
+	// 발주필요 수량주문수량에 입력
+	// 발주필요수량
+	const needOrderQty = Math.max(0, rowData.safetyStockQty - rowData.expectIvQty);
+	
+	// orderTableBody(purchase_regist.js에선언되어있음)의 마지막추가된 row정보
+	const lastRow = orderTableBody.lastElementChild;
+	if (!lastRow) return;
+	// 발주수량 입력 인풋엘리먼트
+	const qtyInput = lastRow.querySelector("input[name=orderAmount]");
+	if (!qtyInput) return;
+	// 최소수량, 단위, 단가 정보(input에 설정되어있는값가져오기)
+	const minOrder = parseInt(qtyInput.dataset.min, 10);
+	const unit     = parseInt(qtyInput.dataset.unit, 10);
+	const price    = parseInt(qtyInput.dataset.price, 10);
+	
+	// 발주필요수량을 최소주문수량, 주문단위규칙에 맞게 변형하기위해 저장
+	let qty = needOrderQty;
+	// 최소주문수량 체크
+	if(qty < minOrder) qty = minOrder;
+	// 주문단위 설정 올림(발주필요수량 / 주문단위) x 주문단위
+	if(qty % unit !== 0) qty = Math.ceil(qty / unit) * unit;
+	// 입력
+	qtyInput.value = qty;
+	
+	// 금액 계산 후 입력
+	const supplyPrice = qty * unitPrice;
+	const tax = Math.round(supplyPrice * 0.1);
+	const total = supplyPrice + tax;
+	
+	lastRow.querySelector(".supplyPrice").textContent = supplyPrice.toLocaleString();
+	lastRow.querySelector(".taxPrice").textContent    = tax.toLocaleString();
+	lastRow.querySelector(".totalPrice").textContent  = total.toLocaleString();
+	
+	
+}
+
 // ----------------------------------------------------------------------
 // 유통기한 목록 리스트
 // 임박, 폐기 재고 데이터필터함수
@@ -645,6 +751,8 @@ async function fetchIvHistoryData() {
 }
 
 
+
+// --------------------------------------------------------------
 // 그리드 랭기지 설정
 function gridLangSet(grid) {
 	// 1. 그리드 한글 언어셋 설정 (필터 및 각종 텍스트 한글화)

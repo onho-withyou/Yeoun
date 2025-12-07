@@ -30,13 +30,10 @@ public class BomMstController {
  	@ResponseBody
   	@GetMapping("/list")
   	public List<BomMst> bomList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
- 	// 1. DB 조회는 한 번만 수행
  	    List<BomMst> bomList = bomMstService.findAll();
  	    
- 	    // 2. 로그를 찍을 때 변수를 사용
  	    log.info("bomMstService.findAll()-------------> 조회된 개수: {}", bomList.size());
  	    
- 	    // 3. 변수를 반환
  	    return bomList;
   	}
  	
