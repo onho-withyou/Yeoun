@@ -59,6 +59,12 @@
 				ELSE 
 					prd.PRD_NAME
 			  END AS itemName
+			, CASE
+				WHEN
+					mat.MAT_ID IS NOT NULL THEN mat.MAT_ID
+				ELSE 
+					prd.PRD_ID
+			  END AS itemId
 		FROM
 			INBOUND i
 		LEFT JOIN

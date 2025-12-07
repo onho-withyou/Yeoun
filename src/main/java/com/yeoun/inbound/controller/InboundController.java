@@ -35,7 +35,7 @@ public class InboundController {
 	private final InboundService inboundService;
 
 	// 입고관리 페이지
-	@GetMapping("/list")
+	@GetMapping("")
 	public String inboundList(Model model) {
 		// 탭 활성화를 위한 정보
 		model.addAttribute("activeTab", "mat");
@@ -90,9 +90,9 @@ public class InboundController {
 	// 원재료 입고 처리
 	@PostMapping("/mat/complete")
 	@ResponseBody
-	public  Map<String, Object> materialComplete(@RequestBody ReceiptDTO receiptDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
+	public Map<String, Object> materialComplete(@RequestBody ReceiptDTO receiptDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
 		inboundService.updateInbound(receiptDTO, loginDTO.getEmpId());
-		
+//		System.out.println(receiptDTO);
 		Map<String, Object> result = new HashMap<>();
 		
 		result.put("success", true);

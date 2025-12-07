@@ -84,12 +84,15 @@ async function loadMaterialInbound(startDate, endDate, searchType, keyword) {
 			COMPLETED: "입고완료"
 		}
 		
+		// 원재료정보만필터
+		data = data.filter(row => row.materialId != null && row.materialId !== '');
+		
 		// 상태값이 영어로 들어오는 것을 한글로 변환해서 기존 data에 덮어씌움
 		data = data.map(item => ({
 			...item,
 			inboundStatus: statusMap[item.inboundStatus] || item.inboundStatus
 		}));
-		
+		console.log("@@@@",data);
 		grid.resetData(data);
 		
 	} catch (error) {

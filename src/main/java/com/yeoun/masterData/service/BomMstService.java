@@ -8,7 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.masterData.entity.BomMst;
 import com.yeoun.masterData.entity.MaterialMst;
+import com.yeoun.masterData.mapper.BomMstMapper;
 import com.yeoun.masterData.repository.BomMstRepository;
+import com.yeoun.outbound.dto.OutboundOrderItemDTO;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -17,8 +20,9 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @Transactional
 public class BomMstService {
-	
 	private final BomMstRepository bomMstRepository;
+	private final BomMstMapper bomMstMapper;
+	
 	//1. 완제품 그리드 조회
 	@Transactional(readOnly = true)
 	public List<BomMst> findAll() {
@@ -112,7 +116,7 @@ public class BomMstService {
 		return b;
 	}
 
-	//4. BOM 그리드 삭제
+	//4. BOM 그리드 삭제(자세히 볼필요 있음)
 	public String deleteBomMst(String empId,List<String> rowKeys) {
 		log.info("bomMstDeleteList------------->{}",rowKeys);
 		try {
@@ -159,6 +163,11 @@ public class BomMstService {
 			}
 		}
 		return "Success: BOM 삭제가 완료되었습니다. (deleted=" + deletedTotal + ")";
+	
+	// =================================================================
+	// prdId에 해당하는 BOM 리스트 조회
+	public List<OutboundOrderItemDTO> getBomListByPrdId(String prdId) {
+		return bomMstMapper.findByPrdIdList(prdId);
 	}
 
 }
