@@ -221,6 +221,8 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 		const itemId = row.querySelector(".itemId").value;
 		const itemType = row.querySelector(".itemType").value;
 		const inboundItemId = row.querySelector(".inboundItemId").value;
+		// 로트넘버 추가
+		const lotNo = row.querySelector(".prodLotNo").value;
 		
 		items.push({
 			inboundAmount,
@@ -229,7 +231,8 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 			inboundItemId,
 			itemId,
 			itemType,
-			itemName
+			itemName,
+			lotNo
 		});
 	});
 	
@@ -257,7 +260,7 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 	if (data.success) {
 		alert("입고가 완료되었습니다.");
 		setTimeout(() => {
-			window.location.href = "/inventory/inbound/list";
+			window.location.href = "/inventory/inbound";
 		}, 10); 
 	}
 	

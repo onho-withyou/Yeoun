@@ -14,9 +14,9 @@ const today = new Date();
 
 document.addEventListener('DOMContentLoaded', async function () {
 	inventoryInfo = await fetchInventoryData();
-	console.log("@@@@@@@@@@@@@@@@", inventoryInfo)
+//	console.log("@@@@@@@@@@@@@@@@", inventoryInfo)
 	inventorySafetyStockInfo = await fetchInventorySafetyStockData();
-//	console.log("@@@!@#!@#!@#!@#!@#!@", inventorySafetyStockInfo);
+	console.log("@@@!@#!@#!@#!@#!@#!@", inventorySafetyStockInfo);
 	todayInboundData = await fetchTodayInboundData();
 //	console.log("######################", todayInboundData);
 	const RawChartData = await fetchIvHistoryData();
@@ -49,11 +49,11 @@ document.addEventListener('DOMContentLoaded', async function () {
 	let lowStockCnt = 0;
 	inventorySafetyStockInfo.forEach(stock => {
 		// 안전재고수량보다 예상재고량(재고량 - 출고예정량)이 작을경우
-		if(stock.safetyStockQty > stock.expectIvQty) lowStockCnt++;
+		if(stock.safetyStockQty > stock.expectIvQty + stock.expectIbAmount) lowStockCnt++;
 	})
 	const orderEl = document.getElementById('orderCnt');
 //	console.log(lowStockCnt);
-	orderEl.innerHTML = lowStockCnt;
+	orderEl.innerText = `${lowStockCnt} / ${inventorySafetyStockInfo.length}`;
 	
 	const orderStatusEl = document.getElementById('orderStatus');
 	if (lowStockCnt > 0) {
@@ -379,7 +379,7 @@ function getLowStockRows() {
     return inventorySafetyStockInfo.filter(stock => {
         // 예상재고량 = ivQty - planOutQty (지금 구조 기준)
         const expectIvQty = stock.ivQty - stock.planOutQty;
-        return stock.safetyStockQty > expectIvQty;
+        return stock.safetyStockQty > expectIvQty + stock.expectIbAmount;
     });
 }
 
@@ -429,10 +429,11 @@ function renderSafetyStockGrid() {
 			  formatter: ({value}) => value.toLocaleString() },
             { header: '출고후재고', name: 'expectIvQty', width: 90, align: 'right', 
               formatter: ({row}) => (row.ivQty - row.planOutQty).toLocaleString() },
+            { header: '입고예정', name: 'expectIbAmount', width: 90, align: 'right'}, 
             { header: '안전재고', name: 'safetyStockQty', width: 100, align: 'right', 
 			  formatter: ({value}) => value.toLocaleString() },
             { header: '발주필요', name: 'safetyStockQtyDaily', width: 90, align: 'right', 
-			  formatter: ({row}) => row.safetyStockQty - row.expectIvQty},
+			  formatter: ({row}) => row.safetyStockQty - row.expectIvQty - row.expectIbAmount},
 			{ header: '상세',      name: "btn", width: 100, align: "center",
 			  formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary btn-sm' data-row='${cellInfo.rowKey}' >발주</button>"
 			}
