@@ -22,7 +22,6 @@ import com.yeoun.masterData.service.ProductMstService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import oracle.jdbc.proxy.annotation.Post;
 
 @Controller
 @RequestMapping("/masterData")

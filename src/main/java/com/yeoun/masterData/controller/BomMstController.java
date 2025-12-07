@@ -1,11 +1,13 @@
 package com.yeoun.masterData.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -24,14 +26,28 @@ public class BomMstController {
 	
 	private final BomMstService bomMstService; 
 	
+	//BOM 조회
  	@ResponseBody
   	@GetMapping("/list")
   	public List<BomMst> bomList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
  	    List<BomMst> bomList = bomMstService.findAll();
- 	    
- 	    log.info("bomMstService.findAll()-------------> 조회된 개수: {}", bomList.size());
- 	    
  	    return bomList;
   	}
+	//BOM 저장
+    @ResponseBody
+   	@PostMapping("/save")
+   	public String bomSave(Model model, @AuthenticationPrincipal LoginDTO loginDTO,@org.springframework.web.bind.annotation.RequestBody Map<String, Object> param) {
+    	String empId = (loginDTO != null && loginDTO.getEmpId() != null) ? loginDTO.getEmpId() : "SYSTEM";
+    	log.info("bomSave------------->{}", param);
+    	return bomMstService.saveBomMst(empId,param);
+   	}
+    //BOM 삭제 (prdId + matId 쌍으로 삭제)
+    @ResponseBody
+    	@PostMapping("/delete")
+    	public String bomDelete(Model model, @AuthenticationPrincipal LoginDTO loginDTO,@org.springframework.web.bind.annotation.RequestBody List<java.util.Map<String, String>> rows) {
+		String empId = (loginDTO != null && loginDTO.getEmpId() != null) ? loginDTO.getEmpId() : "SYSTEM";
+		log.info("bomDelete (pairs)------------->{}", rows);
+		return bomMstService.deleteBomMstByPairs(empId, rows);
+    	}
 
 }

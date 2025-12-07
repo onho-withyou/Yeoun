@@ -1,11 +1,13 @@
 package com.yeoun.masterData.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.masterData.entity.BomMst;
+import com.yeoun.masterData.entity.MaterialMst;
 import com.yeoun.masterData.repository.BomMstRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -22,6 +24,141 @@ public class BomMstService {
 	public List<BomMst> findAll() {
 		log.info("bomMstRepository.findAll() 조회된개수 - {}",bomMstRepository.findAll());
 		return bomMstRepository.findAll();
+	}
+	//2. BOM 그리드 저장
+	public String saveBomMst(String empId,Map<String,Object> param) {
+		log.info("bomMstSaveList------------->{}",param);
+		
+			Object createdObj = param.get("createdRows");
+			int createdCount = 0;
+			if (createdObj instanceof List) {
+				@SuppressWarnings("unchecked")
+				List<Map<String,Object>> created = (List<Map<String,Object>>) createdObj;
+				for (Map<String,Object> row : created) {
+					BomMst b = mapToBom(row);
+					// server-side validation: matQty must not be null
+					if (b.getMatQty() == null) {
+						throw new IllegalArgumentException("matQty is required for BOM row (prdId=" + b.getPrdId() + ", matId=" + b.getMatId() + ")");
+					}
+					b.setCreatedId(empId);
+					bomMstRepository.save(b);
+					createdCount++;
+				}
+			}
+			// // updatedRows handling if needed (kept simple)
+			// Object updatedObj = param.get("updatedRows");
+			// if (updatedObj instanceof List) {
+			// 	@SuppressWarnings("unchecked")
+			// 	List<Map<String,Object>> updated = (List<Map<String,Object>>) updatedObj;
+			// 	for (Map<String,Object> row : updated) {
+			// 		Object prdObj = row.get("prdId");
+			// 		Object matObj = row.get("matId");
+			// 		if (prdObj != null && matObj != null) {
+			// 			String prdId = String.valueOf(prdObj);
+			// 			String matId = String.valueOf(matObj);
+			// 			bomMstRepository.findByPrdIdAndMatId(prdId, matId).ifPresent(existing -> {
+			// 				BomMst b = mapToBom(row);
+			// 				if (b.getMatQty() == null) {
+			// 					throw new IllegalArgumentException("matQty is required for BOM row (prdId=" + b.getPrdId() + ", matId=" + b.getMatId() + ")");
+			// 				}
+			// 				b.setBomId(existing.getBomId());
+			// 				b.setCreatedId(existing.getCreatedId());
+			// 				bomMstRepository.save(b);
+			// 			});
+			// 		}
+			// 	}
+			// }
+			// Force flush so DB constraint errors occur inside try/catch and we can return meaningful message
+			bomMstRepository.flush();
+			return "Success: BOM 저장이 완료되었습니다. (created=" + createdCount + ")";
+	}
+		// Removed try/catch to allow exceptions to propagate
+
+	// Map을 BomMst 엔티티로 변환하는 헬퍼 메서드
+	private BomMst mapToBom(Map<String, Object> row) {
+		BomMst b = new BomMst();
+		if (row.get("bomId") != null) {
+			b.setBomId(String.valueOf(row.get("bomId")));
+		}
+		if (row.get("prdId") != null) {
+			b.setPrdId(String.valueOf(row.get("prdId")));
+		}
+		if (row.get("matId") != null) {
+			b.setMatId(String.valueOf(row.get("matId")));
+		}
+		if (row.get("matQty") != null) {
+			b.setMatQty(new java.math.BigDecimal(String.valueOf(row.get("matQty"))));
+		}
+		if (row.get("matUnit") != null) {
+			b.setMatUnit(String.valueOf(row.get("matUnit")));
+		}
+		if (row.get("bomSeqNo") != null) {
+			Object seqObj = row.get("bomSeqNo");
+			Long seqNo = null;
+			if (seqObj instanceof Number) {
+				seqNo = ((Number) seqObj).longValue();
+			} else {
+				String s = String.valueOf(seqObj).trim();
+				if (!s.isEmpty()) {
+					try {
+						seqNo = Long.parseLong(s);
+					} catch (NumberFormatException nfe) {
+						log.warn("bomSeqNo is not an integer, skipping: {}", seqObj);
+					}
+				}
+			}
+			if (seqNo != null) b.setBomSeqNo(seqNo);
+		}
+		return b;
+	}
+
+	//4. BOM 그리드 삭제
+	public String deleteBomMst(String empId,List<String> rowKeys) {
+		log.info("bomMstDeleteList------------->{}",rowKeys);
+		try {
+			int deletedTotal = 0;
+			for (String prdId : rowKeys) {
+				if (prdId == null) continue;
+				// prdId로 해당 prdId에 속한 모든 BOM 레코드를 찾아서 삭제
+				java.util.List<BomMst> found = bomMstRepository.findByPrdId(prdId);
+				if (found != null && !found.isEmpty()) {
+					bomMstRepository.deleteAll(found);
+					deletedTotal += found.size();
+				}
+			}
+			return "Success: BOM 삭제가 완료되었습니다. (deleted=" + deletedTotal + ")";
+		} catch (Exception e) {
+			log.error("deleteBomMst error", e);
+			return "error: " + e.getMessage();
+		}
+	}
+
+	//4-2. BOM 삭제 (prdId + matId 쌍으로 삭제 요청 처리)
+	public String deleteBomMstByPairs(String empId, List<java.util.Map<String, String>> rows) {
+		log.info("deleteBomMstByPairs called by {} rows={}", empId, rows);
+		int deletedTotal = 0;
+		if (rows == null || rows.isEmpty()) {
+			return "Success: BOM 삭제가 완료되었습니다. (deleted=0)";
+		}
+		for (java.util.Map<String, String> row : rows) {
+			if (row == null) continue;
+			String prdId = row.get("prdId");
+			String matId = row.get("matId");
+			if (prdId == null || matId == null) {
+				log.warn("Skipping delete pair because prdId or matId is missing: {}", row);
+				continue;
+			}
+			bomMstRepository.findByPrdIdAndMatId(prdId, matId).ifPresent(entity -> {
+				bomMstRepository.delete(entity);
+			});
+			// Note: we cannot increment deletedTotal inside lambda easily; re-check existence/size
+			// For simplicity, check again
+			if (!bomMstRepository.findByPrdIdAndMatId(prdId, matId).isPresent()) {
+				// assume deletion succeeded or record did not exist
+				deletedTotal++;
+			}
+		}
+		return "Success: BOM 삭제가 완료되었습니다. (deleted=" + deletedTotal + ")";
 	}
 
 }
