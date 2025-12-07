@@ -45,8 +45,6 @@ public interface ProductionPlanRepository extends JpaRepository<ProductionPlan, 
     """, nativeQuery = true)
     List<ProductionPlanListDTO> findPlanList();
 
-
-
 }
 
 

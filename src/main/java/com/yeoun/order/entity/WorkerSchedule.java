@@ -17,6 +17,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+/*************************사용하지않는엔티티***************************/
 @Entity
 @Table(name = "WORKER_SCHEDULE")
 @Getter

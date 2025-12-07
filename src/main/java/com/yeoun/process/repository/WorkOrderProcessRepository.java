@@ -22,4 +22,7 @@ public interface WorkOrderProcessRepository extends JpaRepository<WorkOrderProce
     
  	// 마지막 단계 판별 - 현재 작업지시에서 나보다 뒤(stepSeq가 더 큰) 공정 단계가 존재하는지 여부
     boolean existsByWorkOrderOrderIdAndStepSeqGreaterThan(String orderId, Integer stepSeq);
+
+    // 공정 id와 status로 탐색하여 해당하는 갯수 세기
+    Integer countByWorkOrder_OrderIdAndStatus (String orderId, String status);
 }
