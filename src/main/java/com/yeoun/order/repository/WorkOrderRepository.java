@@ -1,6 +1,7 @@
 package com.yeoun.order.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -15,5 +16,8 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, String> {
 
 	// 출고 상태가 'N'인 작업지시서 조회
 	List<WorkOrder> findByOutboundYn(String outboundYn);
+
+	// 작업지시서 조회
+	Optional<WorkOrder> findByOrderId(String workOrderId);
 
 }

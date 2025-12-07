@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,8 @@ import com.yeoun.inventory.entity.Inventory;
 import com.yeoun.inventory.repository.InventoryRepository;
 import com.yeoun.inventory.service.InventoryService;
 import com.yeoun.inventory.util.InventoryIdUtil;
+import com.yeoun.order.entity.WorkOrder;
+import com.yeoun.order.repository.WorkOrderRepository;
 import com.yeoun.outbound.dto.OutboundDTO;
 import com.yeoun.outbound.dto.OutboundItemDTO;
 import com.yeoun.outbound.dto.OutboundOrderDTO;
@@ -20,6 +23,7 @@ import com.yeoun.outbound.dto.OutboundOrderItemDTO;
 import com.yeoun.outbound.entity.Outbound;
 import com.yeoun.outbound.entity.OutboundItem;
 import com.yeoun.outbound.mapper.OutboundMapper;
+import com.yeoun.outbound.repository.OutboundItemRepository;
 import com.yeoun.outbound.repository.OutboundRepository;
 
 import jakarta.transaction.Transactional;
@@ -33,6 +37,8 @@ public class OutboundService {
 	private final InventoryService inventoryService;
 	private final OutboundRepository outboundRepository;
 	private final InventoryRepository inventoryRepository;
+	private final WorkOrderRepository workOrderRepository;
+	private final OutboundItemRepository outboundItemRepository;
 	private final OutboundMapper outboundMapper;
 	
 	// 출고 리스트 조회
@@ -89,47 +95,28 @@ public class OutboundService {
 			for (Inventory stock : inventoryList) {
 				if (remaining <= 0) break;
 				
-				Long available = stock.getIvAmount();
+				// 기존 예정 수량
+				Long currentExpect = stock.getExpectObAmount();
+				// 실제 사용 가능한 수량
+				Long canUse = stock.getIvAmount() - currentExpect;
 				
-				if (available <= 0) continue;
+				// 가용 재고가 없으면 다름 LOT로 넘어감
+				if (canUse <= 0) continue;
 				
-				// 현재 재고가 필요한 양보다 많은 경우
-				if (available > remaining) {
-					// 재고 차감
-					stock.setIvAmount(available - remaining);
-					remaining = 0L;
-				} else { // 재고가 부족한 경우 모두 사용
-					remaining -= available;
-					stock.setIvAmount(0L);
-				}
+				// LOT번호마다 사용 가능한 수량
+				Long useQty = Math.min(canUse, remaining);
 				
-				// 재고가 0이 되면 삭제
-				if (stock.getIvAmount() == 0) {
-					inventoryRepository.delete(stock);
-				} else {
-					inventoryRepository.save(stock);
-				}
+				// 기존 예정수량 + 새 예정 수량
+				stock.setExpectObAmount(currentExpect + useQty);
 				
-				// 재고 이력 남기기
-				InventoryHistoryDTO inventoryHistoryDTO = InventoryHistoryDTO.builder()
-						.lotNo(stock.getLotNo())
-						.itemName(stock.getItemName())
-						.empId(empId)
-						.workType("OUTBOUND")
-						.prevAmount(available)
-						.currentAmount(remaining)
-						.reason(outboundId)
-						.currentLocationId(stock.getWarehouseLocation().getLocationId())
-						.build();
-				
-				inventoryService.registInventoryHistory(inventoryHistoryDTO);
+				remaining -= useQty;
 				
 				// 출고품목 생성 로직
 				OutboundItemDTO outboundItemDTO = OutboundItemDTO.builder()
 						.outboundId(outboundId)
 						.itemId(itemId)
 						.lotNo(stock.getLotNo())
-						.outboundAmount(requireQty)
+						.outboundAmount(useQty)
 						.itemType(stock.getItemType())
 						.ivId(stock.getIvId())
 						.build();
@@ -155,6 +142,80 @@ public class OutboundService {
 		}
 		
 		outboundRepository.save(outbound);
+	}
+
+	// 출고 상세 페이지
+	public OutboundOrderDTO getMaterialOutbound(String outboundId) {
+		return outboundMapper.findOutbound(outboundId);
+	}
+
+	// 출고 완료
+	@Transactional
+	public void updateOutbound(OutboundOrderDTO outboundOrderDTO, String empId) {
+		// 출고 조회
+		Outbound outbound = outboundRepository.findByOutboundId(outboundOrderDTO.getOutboundId())
+				.orElseThrow(() -> new NoSuchElementException("출고 내역을 찾을 수 없습니다."));
+		
+		// 출고 담당자 등록
+		outbound.registProcessBy(empId);
+		// 출고일 등록
+		outbound.registOutboundDate(LocalDateTime.now());
+		
+		// 원재료 출고일 경우
+		if ("MAT".equals(outboundOrderDTO.getType())) {
+		WorkOrder workOrder = workOrderRepository.findByOrderId(outboundOrderDTO.getWorkOrderId())
+				.orElseThrow(() -> new NoSuchElementException("작업지시 내역을 찾을 수 없습니다."));
+		
+			// 작업지시서의 출고여부 상태 업데이트
+			workOrder.updateOutboundYn("Y");
+		} 
+		
+		// 출고 아이템 조회
+		List<OutboundItem> items = outboundItemRepository.findByOutbound_OutboundId(outboundOrderDTO.getOutboundId());
+		
+		for (OutboundItem item : items) {
+			// 재고 조회
+			Inventory stock = inventoryRepository.findByIvId(item.getIvId())
+					.orElseThrow(() -> new IllegalArgumentException("재고가 존재하지 않습니다."));
+			
+			// 사용 가능한 재고
+			Long available = stock.getIvAmount(); 
+			// 출고 수량
+			Long outboundQty = item.getOutboundAmount();
+			// 출고 예정 수량
+			Long expectObAmount = stock.getExpectObAmount();
+			
+			if (available < outboundQty) {
+				throw new IllegalArgumentException("재고 부족");
+			}
+			
+			// 실제 재고 차감 
+			stock.setIvAmount(available - outboundQty);
+			stock.setExpectObAmount(expectObAmount- outboundQty);
+			
+			// 재고 이력 기록
+			InventoryHistoryDTO inventoryHistoryDTO = InventoryHistoryDTO.builder()
+					.empId(empId)
+					.lotNo(stock.getLotNo())
+					.itemName(stock.getItemName())
+					.workType("OUTBOUND")
+					.prevAmount(available)
+					.currentAmount(stock.getIvAmount())
+					.reason(outboundOrderDTO.getOutboundId())
+					.currentLocationId(stock.getWarehouseLocation().getLocationId())
+					.build();
+			
+			inventoryService.registInventoryHistory(inventoryHistoryDTO);
+			
+			// 재고 수량이 0이면 삭제
+			if (stock.getIvAmount() == 0) {
+				inventoryRepository.delete(stock);
+			} else {
+				inventoryRepository.save(stock);
+			}
+		}
+		// 출고 상태 업데이트
+		outbound.updateStatus("COMPLETED");
 	}
 
 }

@@ -41,8 +41,9 @@ grid.on("click", (ev) => {
 	
 	if (columnName === "btn") {
 		const row = grid.getRow(rowKey);
+		console.log(row);
 		// 입고 상세 페이지로 이동
-		location.href = `/inventory/inbound/mat/${row.inboundId}`
+		location.href = `/inventory/outbound/mat/${row.outboundId}`
 	}
 });
 
