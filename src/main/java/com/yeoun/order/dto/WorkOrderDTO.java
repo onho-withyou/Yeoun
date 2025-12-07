@@ -35,6 +35,8 @@ public class WorkOrderDTO {
     
     // 작업이 이름 추가
     private String createdUserName;
+    // 출고확인
+    private String outboundYn;
     
     // --------------------------------------------------------------
     private static ModelMapper modelMapper = new ModelMapper();

@@ -2,9 +2,15 @@
 let inventoryInfo; // 창고정보
 let inventorySafetyStockInfo; // 안전재고 정보
 let todayInboundData; // 입고정보
+let todayOutboundData; // 입고정보
 let chartData; // 가공한차트데이터
+let orderData; //작업지시서데이터
+
+let outboundNOrderGrid; // 작업지시서그리드객체
+
 let viewMode = 'month'; // 차트 뷰모드
 let trendChart; // 차트객체
+
 let safetyStockGrid; // 안전재고그리드객체
 let expireDisposalGrid; // 유통기한관리그리드객체
 
@@ -13,18 +19,22 @@ const today = new Date();
 
 
 document.addEventListener('DOMContentLoaded', async function () {
+	// 재고정보 
 	inventoryInfo = await fetchInventoryData();
-//	console.log("@@@@@@@@@@@@@@@@", inventoryInfo)
+	// 안전재고 수량정보
 	inventorySafetyStockInfo = await fetchInventorySafetyStockData();
-	console.log("@@@!@#!@#!@#!@#!@#!@", inventorySafetyStockInfo);
+	// 오늘 입고 정보
 	todayInboundData = await fetchTodayInboundData();
-//	console.log("######################", todayInboundData);
+	// 오늘 출고 정보
+	todayOutboundData = await fetchTodayOutboundData();
+	// 차트데이터
 	const RawChartData = await fetchIvHistoryData();
-//	console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$",RawChartData);
-//	console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$",RawChartData.data);
+	// 차트데이터 가공
 	chartData = normalizeIvHistory(RawChartData);
-//	console.log("#############################", chartData);
-	
+	// 작업지시서 데이터
+	orderData = await fetchOrderListData();
+
+		
 	// 차트타입 버튼 active 설정
 	document.querySelectorAll('.chart-type').forEach(btn => {
 	    btn.addEventListener('click', onChartTypeClick);
@@ -36,15 +46,29 @@ document.addEventListener('DOMContentLoaded', async function () {
 	const todayInboundTotalEl = document.getElementById('todayInboundTotal');
 	todayInboundTotalEl.innerHTML = todayInboundData.length;
 	// 금일입고 처리완료 수 조회
-	let completeCnt = 0;
+	let IbCompleteCnt = 0;
 	todayInboundData.forEach(inbound => {
-		if(inbound.inboundStatus ==='COMPLETED') completeCnt++;
+		if(inbound.inboundStatus ==='COMPLETED') IbCompleteCnt++;
 	});
 	// 금일입고처리완료수 보이기 
 	const todayInboundCompleteEl = document.getElementById('todayInboundComplete');
-	todayInboundCompleteEl.innerHTML = `<i class='bx bx-up-arrow-alt'></i>처리 : ${completeCnt}`;
+	todayInboundCompleteEl.innerHTML = `<i class='bx bx-up-arrow-alt'></i>처리 : ${IbCompleteCnt}`;
 	
-	
+	// 금일 출고 예정양
+	const todayOutboundTotalEl = document.getElementById('todayOutboundTotal');
+	todayOutboundTotalEl.innerHTML = todayOutboundData.length;
+	// 금일 출고 처리 완료 수 조회
+	let ObCompleteCnt = 0;
+	todayOutboundData.forEach(outbound => {
+		if(outbound.status === 'COMPLETED') ObCompleteCnt++;
+	})
+	// 금일 출고 처리완료수 보이기
+	const todayOutboundCompleteEl = document.getElementById('todayOutboundComplete');
+	todayOutboundCompleteEl.innerHTML = `<i class='bx bx-down-arrow-alt'></i> 처리 : ${ObCompleteCnt}`
+
+	// 출고등록 필요한 작업지시서 표시
+	renderOrderGrid();
+		
 	//안전재고 미달 수량 표시
 	let lowStockCnt = 0;
 	inventorySafetyStockInfo.forEach(stock => {
@@ -52,7 +76,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 		if(stock.safetyStockQty > stock.expectIvQty + stock.expectIbAmount) lowStockCnt++;
 	})
 	const orderEl = document.getElementById('orderCnt');
-//	console.log(lowStockCnt);
 	orderEl.innerText = `${lowStockCnt} / ${inventorySafetyStockInfo.length}`;
 	
 	const orderStatusEl = document.getElementById('orderStatus');
@@ -369,6 +392,90 @@ function onChartTypeClick(event) {
 	    xaxis: { type: 'category' },
 	    series: series
 	}, false, true);
+}
+
+// -----------------------------------------------------------------------
+// 출고지시 안된 작업지시서 그리드
+function renderOrderGrid() {
+	// 출고등록안한 작업지시서데이터	
+	const outboundNList = orderData.filter(order => {
+		return order.outboundYn === 'N';
+	});
+	
+	// 그리드 보이는 카드
+	const cardEl = document.getElementById('outboundNOrderCard');
+	
+	if(outboundNList.length === 0) {
+		cardEl.style.display = 'none';
+		return;
+	}
+	
+	cardEl.style.display = 'block';
+	
+	const gridEl = document.getElementById('outboundNOrderGrid');
+	const Grid = tui.Grid;
+	
+	if(outboundNOrderGrid) {
+		outboundNOrderGrid.distroy();
+	}
+	
+	gridLangSet(Grid)
+	
+	// 안전재고 그리드
+	    outboundNOrderGrid = new Grid({
+	        el: gridEl,
+	//        scrollX: false,
+	//        scrollY: true,
+	        bodyHeight: 120,
+	        rowHeaders: ['rowNum'],
+			pageOptions: {
+			    useClient: true, 
+			    perPage: 5 
+			},
+	        columns: [
+	            { header: '작업지시서',   name: 'orderId', minWidth: 160 },
+	            { header: '생산 품목', name: 'productName', minWidth: 110, align: 'center' },
+	            { header: '작업 시작시간',     name: 'planStartDate', minWidth: 80,  align: 'center',
+				  formatter: function({ value }) {
+					  if (!value) return '';
+					  return value.replace('T', ' ');
+	      		  }	
+				},
+				{ header: '상세',      name: "btn", width: 100, align: "center",
+				  formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary btn-sm' data-row='${cellInfo.rowKey}' >발주</button>"
+				}
+	        ],
+	        data: outboundNList
+	    });
+		
+		// 발주 버튼 동작
+		outboundNOrderGrid	.on("click", async (event) => {
+			if(event.columnName == "btn") {
+				const target = event.nativeEvent.target;
+				if (target && target.tagName === "BUTTON") {
+					
+					const rowData = outboundNOrderGrid.getRow(event.rowKey);
+					console.log(rowData);
+
+					//모달 열기
+					const modalEl = document.getElementById("modalCenter");
+					const bsModal = new bootstrap.Modal(modalEl);
+					bsModal.show();
+//					
+//					// 모달세팅
+					await initOutboundModalByRow(rowData);
+				}
+			}
+		});
+}
+
+async function initOutboundModalByRow(data) {
+	const workOrderSelectEl = document.getElementById('workOrderSelect');
+	const workIdEl = document.getElementById('workId');
+	const managerNameEl = document.getElementById('managerName');
+	const managerIdEl = document.getElementById('managerId');
+	const bomTbodyEl = document.getElementById('bomTbody');
+	
 }
 
 // ------------------------------------------------------------------
@@ -734,6 +841,34 @@ async function fetchTodayInboundData() {
 	return await response.json();
 }
 
+// 오늘 출고정보 조회함수
+async function fetchTodayOutboundData() {
+	
+	const startDate = today.toISOString().slice(0, 10);
+	const endDate = today.toISOString().slice(0, 10);
+	 console.log(startDate, endDate);
+	const MATERIAL_OUTBOUND_LIST = 
+		`/inventory/outbound/list/data` +
+		`?startDate=${startDate}` +
+		`&endDate=${endDate}` +
+		`&keyword=`;
+			
+	const response = 
+		await fetch(MATERIAL_OUTBOUND_LIST, {
+			method: 'GET',
+			headers: {
+				[csrfHeader]: csrfToken,
+				'Content-Type': 'application/json'
+			}
+		});
+
+	if (!response.ok) {
+		throw new Error('출고 정보를 조회할 수 없습니다.')
+	}
+	
+	return await response.json();
+}
+
 // 재고내역 조회
 async function fetchIvHistoryData() {
 	const response = await fetch('/api/inventories/ivHistoryGroup', {
@@ -751,6 +886,23 @@ async function fetchIvHistoryData() {
 	return await response.json();
 }
 
+// 작업지시서 리스트 가져오기
+// 작업지시 정보 가져오기
+async function fetchOrderListData() {
+		const response = await fetch("/api/inventories/orderData", {
+			method: "GET",
+			headers: {
+				[csrfHeader]: csrfToken,
+				'Content-Type': 'application/json'
+			}
+		});
+		
+		if (!response.ok) {
+			throw new Error("데이터 로드 실패!");
+		}
+		
+		return await response.json();
+}
 
 
 // --------------------------------------------------------------

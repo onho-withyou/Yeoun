@@ -24,6 +24,8 @@ import com.yeoun.inventory.repository.InventoryHistoryRepository;
 import com.yeoun.inventory.repository.InventoryRepository;
 import com.yeoun.inventory.repository.WarehouseLocationRepository;
 import com.yeoun.inventory.specification.InventorySpecs;
+import com.yeoun.order.dto.WorkOrderDTO;
+import com.yeoun.order.repository.WorkOrderRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -36,6 +38,7 @@ public class InventoryService {
 	private final InventoryHistoryRepository inventoryHistoryRepository;
 	private final WarehouseLocationRepository warehouseLocationRepository;
 	private final DisposeRepository disposeRepository;
+	private final WorkOrderRepository workOrderRepository;
 	
 	// 검색조건을 통해 재고리스트 조회
 	public List<InventoryDTO> getInventoryInfo(InventoryDTO inventoryDTO) {
@@ -319,6 +322,12 @@ public class InventoryService {
 	// id로 재고 조회
 	public Integer getTotalStock(String id) {
 		return inventoryRepository.findAvailableStock(id);
+	}
+	
+	// 작업지시서 목록 데이터 조회하기
+	public List<WorkOrderDTO> getOrderData() {
+		return workOrderRepository.findAll().stream()
+				.map(WorkOrderDTO::fromEntity).toList();
 	}
 
 }

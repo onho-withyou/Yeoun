@@ -27,6 +27,7 @@ import com.yeoun.inventory.dto.WarehouseLocationDTO;
 import com.yeoun.inventory.dto.InventorySafetyCheckDTO;
 import com.yeoun.inventory.entity.WarehouseLocation;
 import com.yeoun.inventory.service.InventoryService;
+import com.yeoun.order.dto.WorkOrderDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -161,6 +162,16 @@ public class InventoryRestController {
 		
 		return ResponseEntity.ok(Map.of("stock", stock));
 	}
+	
+	
+	// 원재료id로 재고 수량 조회
+	@GetMapping("/orderData")
+	public ResponseEntity<List<WorkOrderDTO>> getOrderData() {
+		List<WorkOrderDTO> workOrderDTOList = inventoryService.getOrderData();
+		
+		return ResponseEntity.ok(workOrderDTOList);
+	}
+	
 }
 
 
