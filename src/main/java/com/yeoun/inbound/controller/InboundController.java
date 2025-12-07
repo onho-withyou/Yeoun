@@ -90,7 +90,7 @@ public class InboundController {
 	// 원재료 입고 처리
 	@PostMapping("/mat/complete")
 	@ResponseBody
-	public  Map<String, Object> materialComplete(@RequestBody ReceiptDTO receiptDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
+	public Map<String, Object> materialComplete(@RequestBody ReceiptDTO receiptDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
 		inboundService.updateInbound(receiptDTO, loginDTO.getEmpId());
 		
 		Map<String, Object> result = new HashMap<>();

@@ -2,6 +2,7 @@ package com.yeoun.outbound.controller;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,10 +12,12 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.inbound.dto.ReceiptDTO;
@@ -86,4 +89,26 @@ public class OutboundController {
 		return ResponseEntity.ok(outboundList);
 	}
 	
+	// 원재료 출고 상세페이지
+	@GetMapping("/mat/{outboundId}")
+	public String materialDetail(@PathVariable("outboundId") String outboundId, Model model) {
+		OutboundOrderDTO outboundOrderDTO = outboundService.getMaterialOutbound(outboundId);
+		
+		model.addAttribute("outboundOrderDTO", outboundOrderDTO);
+		
+		return "outbound/material_detail";
+	}
+	
+	// 출고완료
+	@PostMapping("/mat/complete")
+	@ResponseBody
+	public Map<String, Object> materialComplete(@RequestBody OutboundOrderDTO OutboundOrderDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
+		outboundService.updateOutbound(OutboundOrderDTO, loginDTO.getEmpId());
+		
+		Map<String, Object> result = new HashMap<>();
+		
+		result.put("success", true);
+		
+		return result;
+	}
 }

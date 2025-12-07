@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
 
@@ -91,6 +92,7 @@ public class OutboundService {
 				
 				Long available = stock.getIvAmount();
 				
+				// 가용 재고가 없으면 다름 LOT로 넘어감
 				if (available <= 0) continue;
 				
 				// 현재 재고가 필요한 양보다 많은 경우
@@ -155,6 +157,22 @@ public class OutboundService {
 		}
 		
 		outboundRepository.save(outbound);
+	}
+
+	// 출고 상세 페이지
+	public OutboundOrderDTO getMaterialOutbound(String outboundId) {
+		return outboundMapper.findOutbound(outboundId);
+	}
+
+	// 출고 완료
+	@Transactional
+	public void updateOutbound(OutboundOrderDTO outboundOrderDTO, String empId) {
+		// 출고 조회
+		Outbound outbound = outboundRepository.findByOutboundId(outboundOrderDTO.getOutboundId())
+				.orElseThrow(() -> new NoSuchElementException("출고 내역을 찾을 수 없습니다."));
+		
+		outbound.registProcessBy(empId);
+		
 	}
 
 }

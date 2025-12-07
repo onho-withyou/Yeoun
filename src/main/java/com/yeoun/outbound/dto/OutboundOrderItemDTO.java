@@ -17,7 +17,8 @@ public class OutboundOrderItemDTO {
 	private String prdId;        // 완제품 ID
 	private String prdName;      // 완제품 이름
 	private String matUnit;         // 단위
-	private Long orderqQty;      // 필요수량
+	private Long orderqQty;      // 원재료필요수량
+	private Long shipmentQty;    // 출하요청수량
 	private Long outboundQty;    // 출고수량
 	private String lotNo;       // LOT 번호
 	private BigDecimal matQty;      // 원재료 사용량

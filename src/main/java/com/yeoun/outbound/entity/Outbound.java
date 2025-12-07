@@ -80,4 +80,9 @@ public class Outbound {
 		item.setOutbound(this);
 	}
 	
+	// 출고 담당자 등록
+	public void registProcessBy(String empId) {
+		this.processBy = empId;
+	}
+	
 }
