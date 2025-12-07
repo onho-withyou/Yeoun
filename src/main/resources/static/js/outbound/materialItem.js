@@ -18,16 +18,20 @@ async function getLocationInfo() {
 // 창고위치 저장할 변수
 let locationInfo = [];
 
-// 같은 index에 있는 select 한번에 찾기
-function getRowSelects(index) {
-	return {
-		zone: document.querySelector(`.moveZone[data-index="${index}"]`), 
-		rack: document.querySelector(`.moveRack[data-index="${index}"]`),
-		row: document.querySelector(`.moveRow[data-index="${index}"]`),
-		col: document.querySelector(`.moveColumn[data-index="${index}"]`)
-	}
-}
-
+// 페이지 로딩될 때 lcationId를 사용자가 보기 쉬운 형태로 변환
+document.addEventListener("DOMContentLoaded", async () => {
+	locationInfo = await getLocationInfo();
+	
+	document.querySelectorAll(".locationId").forEach(td => {
+		const rawId = td.textContent.trim();
+		const loc = locationInfo.find(l => String(l.locationId) === rawId);
+		
+		if (loc) {
+			td.textContent = `${loc.zone}-${loc.rack}-${loc.rackRow}-${loc.rackCol}`;
+		}
+	});
+	
+});
 
 // 출고 등록 버튼 이벤트
 document.getElementById("completeOutboundBtn").addEventListener("click", async () => {
@@ -52,9 +56,7 @@ document.getElementById("completeOutboundBtn").addEventListener("click", async (
 	})
 	
 	
-	
-	
-	const inboundId = document.querySelector("#outboundId").value;
+	const outboundId = document.querySelector("#outboundId").value;
 	
 	const res = await fetch("/inventory/outbound/mat/complete", {
 		method: "POST",
@@ -63,7 +65,7 @@ document.getElementById("completeOutboundBtn").addEventListener("click", async (
 			[csrfHeader]: csrfToken
 		},
 		body: JSON.stringify({ 
-			inboundId,
+			outboundId,
 			items
 		})
 	});

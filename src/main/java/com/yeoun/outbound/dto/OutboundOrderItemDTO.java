@@ -22,4 +22,6 @@ public class OutboundOrderItemDTO {
 	private Long outboundQty;    // 출고수량
 	private String lotNo;       // LOT 번호
 	private BigDecimal matQty;      // 원재료 사용량
+	private Long ivId;     // 재고번호
+	private String locationId; // 창고위치
 }

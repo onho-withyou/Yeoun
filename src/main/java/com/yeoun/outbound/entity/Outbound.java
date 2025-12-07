@@ -85,4 +85,13 @@ public class Outbound {
 		this.processBy = empId;
 	}
 	
+	// 출고일 등록
+	public void registOutboundDate(LocalDateTime outboundDate) {
+		this.outboundDate = outboundDate;
+	}
+	
+	// 출고 상태 변경
+	public void updateStatus(String status) {
+		this.status = status;
+	}
 }

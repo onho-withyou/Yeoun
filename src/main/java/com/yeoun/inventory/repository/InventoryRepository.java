@@ -110,6 +110,9 @@ public interface InventoryRepository
 
 	// 재고삭제
 	void delete(Inventory stock);
+
+	// 재고 조회
+	Optional<Inventory> findByIvId(Long ivId);
 	
 
 }

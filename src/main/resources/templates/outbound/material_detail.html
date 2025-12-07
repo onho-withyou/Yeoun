@@ -35,7 +35,7 @@
 							<div class="text-secondary mb-1">상태</div>
 							<div>
 							    <span th:if="${outboundOrderDTO.status == 'WAITING'}" class="badge bg-warning text-dark">출고대기</span>
-							    <span th:if="${outboundOrderDTO.status == 'COMPLETED'}" class="badge bg-success">입고완료</span>
+							    <span th:if="${outboundOrderDTO.status == 'COMPLETED'}" class="badge bg-success">출고완료</span>
 							</div>
 						</div>
 					 </div>
@@ -56,6 +56,7 @@
 									<th>원재료명</th>
 									<th>필요수량</th>
 									<th>출고수량</th>
+									<th>창고위치</th>
 									<th>LOT번호</th>
 								</tr>
 							</thead>
@@ -65,6 +66,7 @@
 									<td th:text="${item.matName}"></td>
 									<td th:text="${#numbers.formatDecimal(item.orderqQty * item.matQty, 0, 0)}"></td>
 									<td th:text="${item.outboundQty}" th:attr="data-index=${iterStat.index}" class="outboundQty"></td>
+									<td th:text="${item.locationId}" class="locationId" th:attr="data-index=${iterStat.index}"></td>
 									<td th:text="${item.lotNo}" class="lotNo"></td>
 									<input type="hidden" class="ivId" th:value="${item.ivId}">
 								</tr>
