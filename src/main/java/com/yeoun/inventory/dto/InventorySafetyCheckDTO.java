@@ -31,6 +31,7 @@ public class InventorySafetyCheckDTO {
     private Long locationsCnt;
     private Long safetyStockQty;
     private Long safetyStockQtyDaily;
+    private Long expectIbAmount;
 
     // ★ 네이티브 쿼리 매핑용 생성자 (순서/타입 정확히 일치)
     public InventorySafetyCheckDTO(String itemId,
@@ -41,7 +42,8 @@ public class InventorySafetyCheckDTO {
                                    Number expectIvQty,
                                    Number locationsCnt,
                                    Number safetyStockQty,
-                                   Number safetyStockQtyDaily) {
+                                   Number safetyStockQtyDaily,
+                                   Number expectIbAmount) {
         this.itemId = itemId;
         this.itemName = itemName;
         this.itemType = itemType;
@@ -51,6 +53,7 @@ public class InventorySafetyCheckDTO {
         this.locationsCnt = locationsCnt == null ? 0L : locationsCnt.longValue();
         this.safetyStockQty = safetyStockQty == null ? 0L : safetyStockQty.longValue();
         this.safetyStockQtyDaily = safetyStockQtyDaily == null ? 0L : safetyStockQtyDaily.longValue();
+        this.expectIbAmount = expectIbAmount == null ? 0L : expectIbAmount.longValue();
     }
 	
 }
