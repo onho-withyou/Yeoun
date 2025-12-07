@@ -11,6 +11,7 @@ import lombok.ToString;
 @ToString
 public class OutboundOrderItemDTO {
 	private Long outboundItemId; // 출고 품목 ID
+	private String outboundId;
 	private String matId;        // 원재료 ID
 	private String matName;      // 원재료 이름
 	private String prdId;        // 완제품 ID
@@ -18,6 +19,6 @@ public class OutboundOrderItemDTO {
 	private String matUnit;         // 단위
 	private Long orderqQty;      // 필요수량
 	private Long outboundQty;    // 출고수량
-	private String lotNol;       // LOT 번호
+	private String lotNo;       // LOT 번호
 	private BigDecimal matQty;      // 원재료 사용량
 }

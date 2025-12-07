@@ -4,24 +4,25 @@ const grid = new tui.Grid({
 	columns: [
 		{
 			header: "출고번호",
-			name: "",
-		},
-		{
-			header: "요청자",
-			name: "clientName",
+			name: "outboundId",
 		},
 		{
 			header: "담당자",
-			name: "orderEmpName",
+			name: "processEmpName",
 		},
 		{
 			header: "출고예정일",
-			name: "expectArrivalDate",
+			name: "startDate",
+			formatter: ({value}) => formatDate(value)
+		},
+		{
+			header: "출고일",
+			name: "outboundDate",
 			formatter: ({value}) => formatDate(value)
 		},
 		{
 			header: "상태",
-			name: "inboundStatus",
+			name: "status",
 			filter: "select"
 		},
 		{
@@ -56,7 +57,7 @@ function formatDate(isoDate) {
 }
 
 // 원재료 정보 불러오기
-async function loadMaterialInbound(startDate, endDate, keyword) {
+async function loadMaterialOutbound(startDate, endDate, keyword) {
 	const MATERIAL_OUTBOUND_LIST = 
 		`/inventory/outbound/list/data` +
 		`?startDate=${startDate}` +
@@ -80,14 +81,14 @@ async function loadMaterialInbound(startDate, endDate, keyword) {
 		}
 		
 		const statusMap = {
-			WAITING  : "출고대기",
+			WAITING : "출고대기",
 			COMPLETED: "출고완료"
 		}
 		
 		// 상태값이 영어로 들어오는 것을 한글로 변환해서 기존 data에 덮어씌움
 		data = data.map(item => ({
 			...item,
-			status: statusMap[item.inboundStatus] || item.inboundStatus
+			status: statusMap[item.status] || item.status
 		}));
 		
 		grid.resetData(data);
@@ -112,7 +113,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	startDateInput.value = startDate;
 	endDateInput.value = endDate;
 	
-	await loadMaterialInbound(startDate, endDate, null);
+	await loadMaterialOutbound(startDate, endDate, null);
 });
 
 // 검색
@@ -120,14 +121,13 @@ document.querySelector("#searchbtn").addEventListener("click", async () => {
 	const startDate = startDateInput.value;
 	const endDate = endDateInput.value;
 	const keyword = document.querySelector("#materialKeyword").value;
-	const searchType = document.querySelector("select[name='searchType']").value;
 	
 	if (!startDate || !endDate) {
 		alert("조회할 기간을 선택해주세요!");
 		return;
 	}
 	
-	await loadMaterialInbound(startDate, endDate, searchType, keyword);
+	await loadMaterialOutbound(startDate, endDate, keyword);
 });
 
 // 시작날짜 클릭 시 데이터 조회
@@ -137,7 +137,7 @@ document.querySelector("#startDate").addEventListener("input", async () => {
 	const keyword = document.querySelector("#materialKeyword").value;
 	const searchType = document.querySelector("select[name='searchType']").value;
 	
-	await loadMaterialInbound(startDate, endDate, keyword, searchType);
+	await loadMaterialOutbound(startDate, endDate, keyword);
 });
 
 // 종료날짜 클릭 시 데이터 조회
@@ -147,5 +147,5 @@ document.querySelector("#endDate").addEventListener("input", async () => {
 	const keyword = document.querySelector("#materialKeyword").value;
 	const searchType = document.querySelector("select[name='searchType']").value;
 	
-	await loadMaterialInbound(startDate, endDate, keyword, searchType);
+	await loadMaterialOutbound(startDate, endDate, keyword);
 });

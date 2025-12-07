@@ -71,7 +71,7 @@ public class OutboundController {
 	}
 	
 	// 출고 리스트 조회
-	@GetMapping("/list/data/data")
+	@GetMapping("/list/data")
 	public ResponseEntity<List<OutboundOrderDTO>> outboundList(
 			@RequestParam(required = false, name = "startDate") String startDate, 
 			@RequestParam(required = false, name = "endDate") String endDate,
