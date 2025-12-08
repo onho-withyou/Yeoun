@@ -2,9 +2,17 @@
 // 전역변수
 let inventoryHistoryGrid; // 그리드 객체 변수
 let inventoryHistoryData = []; // 그리드로 그려지는 데이터 저장
+
+function showSpinner() {
+	document.getElementById('loading-overlay').style.display = 'flex';
+}
+function hideSpinner() {
+	document.getElementById('loading-overlay').style.display = 'none';
+}
 // 문서 로딩 후 시작
 document.addEventListener('DOMContentLoaded', async function () {
-
+	
+	showSpinner();
 	initGrid();
 
 	//최초로딩
@@ -56,6 +64,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 		inventoryHistoryGrid.resetData(filteredData);
 		inventoryHistoryGrid.sort('createdDate', false);
 	});
+	hideSpinner();
 });
 
 // 재고내역 데이터 정보 가져오기

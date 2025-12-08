@@ -1011,6 +1011,7 @@ async function fetchIvOrderCheckData() {
 	return await response.json();
 }
 
+// 
 
 // --------------------------------------------------------------
 // 그리드 랭기지 설정

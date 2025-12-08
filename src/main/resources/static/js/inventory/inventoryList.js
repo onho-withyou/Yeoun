@@ -4,9 +4,16 @@ let inventoryGrid; // 그리드 객체 변수
 let inventoryData = []; // 그리드로 그려지는 데이터 저장
 let locationInfo = [];
 
+function showSpinner() {
+	document.getElementById('loading-overlay').style.display = 'flex';
+}
+function hideSpinner() {
+	document.getElementById('loading-overlay').style.display = 'none';
+}
 
 // 문서 로딩 후 시작
 document.addEventListener('DOMContentLoaded', async function () {
+	
 	// 창고정보 저장
 	locationInfo = await getLocationInfo();
 	inputLocationInfo(locationInfo);
@@ -21,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 	inventoryGrid.sort('ibDate', true);
 	// 그리드생성한 재고데이터를 저장
 	inventoryData = firstData;	
-	
+	hideSpinner();
 });
 
 // 검색 데이터 설정(검색, 상세검색 입력값으로 requestBody생성)
@@ -79,6 +86,8 @@ const btnSearch = document.getElementById('btnSearch');
 btnSearch.addEventListener('click', async () => {
 	event.preventDefault(); // 폼제출 막기
 	
+	showSpinner();
+	
 	const searchData = await getSearchData();
 	const gridData = await fetchInventoryData(searchData)
 	// 받아온 데이터로 그리드 생성
@@ -86,6 +95,7 @@ btnSearch.addEventListener('click', async () => {
 	// 그리드생성한 재고데이터를 저장
 	inventoryData = gridData;	
 	
+	hideSpinner();
 
 });
 
