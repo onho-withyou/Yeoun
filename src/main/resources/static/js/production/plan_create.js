@@ -1,7 +1,12 @@
 let suggestGridApi = null;
+let orderItemGridApi = null;
 
+/* ========================================================
+   INIT
+======================================================== */
 document.addEventListener("DOMContentLoaded", () => {
     initSuggestGrid();
+    initOrderItemGrid();
 
     document.getElementById("btnLoadSuggested")
         .addEventListener("click", loadSuggestList);
@@ -10,17 +15,38 @@ document.addEventListener("DOMContentLoaded", () => {
         .addEventListener("click", createProductionPlan);
 });
 
-/* =========================================
-   1) 추천 생산 목록 GRID 초기화
-========================================= */
+
+/* ========================================================
+   1) 추천 생산 목록 GRID
+======================================================== */
 function initSuggestGrid() {
 
     const columnDefs = [
-        { headerName: "선택", checkboxSelection: true, headerCheckboxSelection: true, width: 60 },
-        { headerName: "제품명", field: "prdName", width: 180 },
-        { headerName: "총 주문수량", field: "totalOrderQty", width: 120 },
-        { headerName: "현재 재고", field: "currentStock", width: 120 },
-        { headerName: "부족수량", field: "shortageQty", width: 120 },
+		{ headerName: "선택", checkboxSelection: true, width: 60 },
+		    { headerName: "제품명", field: "prdName", width: 150 },
+		    { headerName: "총 주문수량", field: "totalOrderQty", width: 120 },
+		    { headerName: "현재 재고", field: "currentStock", width: 120 },
+		    { headerName: "부족수량", field: "shortageQty", width: 120 },
+		    { headerName: "수주건수", field: "orderCount", width: 100 },        
+			{
+			           headerName: "가장 빠른 납기",
+			           field: "earliestDeliveryDate",
+			           width: 140,
+			           cellRenderer: p => p.value ? p.value : "-"
+			       },
+
+			       {
+			           headerName: "원자재 재고",
+			           field: "bomStatus",   // ⭐ 필드명 수정
+			           width: 120,
+			           cellRenderer: p => {
+			               if (!p.value) return "-";
+
+			               return p.value === "부족"
+			                   ? "<span style='color:red;'>❌ 부족</span>"
+			                   : "<span style='color:green;'>✔ 가능</span>";
+			           }
+			       },
 
         {
             headerName: "생산 필요",
@@ -32,68 +58,100 @@ function initSuggestGrid() {
                     : `<span style="color:#5cb85c;">NO</span>`;
             }
         },
+
         {
             headerName: "상세",
             width: 100,
             cellRenderer: params => {
-                const json = encodeURIComponent(JSON.stringify(params.data.orderItems));
-                return `<button class="btn btn-sm btn-secondary" onclick='showOrderItems("${json}")'>
-                            보기
-                        </button>`;
+                return `
+                    <button class="btn btn-sm btn-secondary"
+                            onclick='showOrderItems("${params.data.prdId}")'>
+                        보기
+                    </button>`;
             }
         }
     ];
 
-    const gridOptions = {
-        columnDefs,
-        rowSelection: "multiple",
-        suppressRowClickSelection: true
-    };
+	suggestGridApi = agGrid.createGrid(
+	    document.getElementById("suggestGrid"),
+	    {
+	        columnDefs,
+	        rowSelection: "multiple",
+	        suppressRowClickSelection: true,
+	        rowData: [],
 
-    suggestGridApi = agGrid.createGrid(
-        document.getElementById("suggestGrid"),
-        gridOptions
-    );
+	        // ⭐ No Rows 메시지 변경
+	        localeText: {
+	            noRowsToShow: "생산목록 조회 중입니다"
+	        }
+	    }
+	);
+
 }
 
-/* =========================================
-   2) 추천 생산 목록 조회
-========================================= */
+
+/* ========================================================
+   2) 추천 목록 조회
+======================================================== */
 function loadSuggestList() {
+
     const group = document.getElementById("productGroup").value;
 
     fetch(`/production/suggest?group=${group}`)
         .then(res => res.json())
         .then(data => {
-            console.log("📌 조회된 데이터:", data);
             suggestGridApi.setGridOption("rowData", data);
-        })
-        .catch(err => {
-            console.error("추천 목록 조회 오류:", err);
         });
 }
 
-/* =========================================
-   3) 상세 보기
-========================================= */
-function showOrderItems(json) {
-    const arr = JSON.parse(decodeURIComponent(json));
 
-    let text = `📌 포함된 수주 내역\n\n`;
+/* ========================================================
+   3) 상세보기 → 서버에서 OrderItemDTO 리스트 조회 후 모달 표시
+======================================================== */
+function initOrderItemGrid() {
 
-    arr.forEach(o => {
-        text += `• 수주번호: ${o.orderId}\n`;
-        text += `  수량: ${o.orderQty}\n`;
-        text += `  납기일: ${o.dueDate}\n\n`;
-    });
+    const colDefs = [
+        { headerName: "수주번호", field: "orderId", width: 150 },
+		{ headerName: "거래처명", field: "clientName", width: 150 },
+        { headerName: "제품명", field: "prdName", width: 150 },
+        { headerName: "주문수량", field: "orderQty", width: 120 },
+		{ headerName: "내부 담당자", field: "empName", width: 150 },
+        { headerName: "납기일", field: "deliveryDate", width: 150 },        
+        { headerName: "담당자명", field: "managerName", width: 150 },
+        { headerName: "연락처", field: "managerTel", width: 150 },
+        { headerName: "이메일", field: "managerEmail", width: 200 }
+    ];
 
-    alert(text);
+    orderItemGridApi = agGrid.createGrid(
+        document.getElementById("orderItemGrid"),
+        {
+            columnDefs: colDefs,
+            defaultColDef: { sortable: true, filter: true, resizable: true }
+        }
+    );
 }
 
-/* =========================================
-   4) 생산계획 자동 생성 (CSRF 적용 완성본)
-========================================= */
-function createProductionPlan(e) {
+
+/* ⭐⭐⭐ 여기 완전히 새로 만듦 — DTO 불러오는 새로운 방식 */
+function showOrderItems(prdId) {
+
+    fetch(`/production/order-items/${prdId}`)
+        .then(res => res.json())
+        .then(data => {
+            console.log("📌 수주 상세 데이터:", data);
+
+            orderItemGridApi.setGridOption("rowData", data);
+
+            const modal = new bootstrap.Modal(document.getElementById("orderItemModal"));
+            modal.show();
+        });
+}
+
+
+/* ========================================================
+   4) 생산계획 생성 (메모 + CSRF 포함)
+======================================================== */
+function createProductionPlan() {
 
     const selected = suggestGridApi.getSelectedRows();
     if (selected.length === 0) {
@@ -101,21 +159,19 @@ function createProductionPlan(e) {
         return;
     }
 
-    // DTO 전송 구조 변환
-    const payload = [];
-
+    const items = [];
     selected.forEach(item => {
         item.orderItems.forEach(order => {
-            payload.push({
+            items.push({
                 orderItemId: order.orderItemId,
                 qty: order.orderQty
             });
         });
     });
 
-    console.log("📌 [DEBUG] 최종 Payload:", payload);
+    const memo = document.getElementById("planMemo")?.value || "";
 
-    const csrfToken = document.querySelector('meta[name="_csrf_token"]').content;
+    const payload = { items, memo };
 
     fetch("/production/create/submit", {
         method: "POST",
@@ -123,33 +179,21 @@ function createProductionPlan(e) {
             "Content-Type": "application/json",
             "X-CSRF-TOKEN": csrfToken
         },
-        body: JSON.stringify({
-            items: payload,
-            memo: ""
-        })
+        body: JSON.stringify(payload)
     })
-    .then(async res => {
-        const text = await res.text();
-        console.log("📌 [DEBUG] 서버 RAW:", text);
-
-        if (text.startsWith("<") || text.includes("<html")) {
-            console.error("HTML 응답(로그인 만료 or 권한 문제)");
-            alert("서버가 HTML을 반환했습니다.\n로그인 만료 또는 권한 오류입니다.");
-            return;
-        }
-
-        const data = JSON.parse(text);
-        console.log("📌 [DEBUG] JSON:", data);
-
-        if (data.success) {
-            alert("🎉 생산계획 생성 완료! PLAN ID: " + data.planId);
-            location.href = "/production/plan";
-        } else {
-            alert("❌ 실패: " + data.message);
-        }
-    })
-    .catch(e => {
-        console.error("Fetch 오류:", e);
-        alert("서버 통신 중 오류 발생");
-    });
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert("🎉 생산계획 생성 완료!");
+                location.href = "/production/plan";
+            } else {
+                alert("❌ 실패: " + data.message);
+            }
+        });
 }
+
+// ⭐ 생산조회 버튼 클릭 → resultSection 표시
+document.getElementById("btnLoadSuggested").addEventListener("click", () => {
+    document.getElementById("placeholderMessage").style.display = "none";
+    document.getElementById("resultSection").style.display = "block";
+});

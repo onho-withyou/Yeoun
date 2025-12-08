@@ -7,6 +7,7 @@ import com.yeoun.production.dto.ProductionPlanListDTO;
 import com.yeoun.production.entity.ProductionPlan;
 import com.yeoun.production.entity.ProductionPlanItem;
 import com.yeoun.production.service.ProductionPlanService;
+import com.yeoun.sales.dto.OrderItemDTO;
 import com.yeoun.sales.dto.OrderPlanSuggestDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -92,27 +93,42 @@ public class ProductionPlanController {
 
     /* ============================
        6) 자동 생산계획 생성
-       ============================ */
-    @PostMapping("/plan/auto-create")
-    @ResponseBody
-    public Map<String, Object> autoCreatePlan(
-            @RequestBody List<Map<String, Object>> req,
-            @AuthenticationPrincipal LoginDTO login
-    ) {
+       ============================ */   
+	@PostMapping("/plan/auto-create")
+	@ResponseBody
+	public Map<String, Object> autoCreatePlan(
+	        @RequestBody Map<String, Object> req,
+	        @AuthenticationPrincipal LoginDTO login
+	) {
+	
+	    Map<String, Object> result = new HashMap<>();
+	
+	    try {
+	
+	        // 1) 요청 데이터 파싱
+	        List<Map<String, Object>> requestList =
+	                (List<Map<String, Object>>) req.get("requestList");
+	
+	        String memo = (String) req.get("memo");  // 🔥 메모 받기
+	
+	        // 2) 서비스 호출 (memo 포함)
+	        String planIds = planService.createAutoPlan(
+	                requestList,
+	                login.getEmpId(),
+	                memo
+	        );
+	
+	        result.put("success", true);
+	        result.put("planIds", planIds);
+	
+	    } catch (Exception e) {
+	        result.put("success", false);
+	        result.put("message", e.getMessage());
+	    }
+	
+	    return result;
+	}
 
-        Map<String, Object> result = new HashMap<>();
-
-        try {
-            String planIds = planService.createAutoPlan(req, login.getEmpId());
-            result.put("success", true);
-            result.put("planIds", planIds);
-        } catch (Exception e) {
-            result.put("success", false);
-            result.put("message", e.getMessage());
-        }
-
-        return result;
-    }
     
     /* ============================
     7) 생산계획 상세 모달
@@ -135,6 +151,14 @@ public class ProductionPlanController {
         return dto;
     }
 
+    /* ============================
+    8) 추천 목록 → 제품별 수주 상세 조회
+    ============================ */
+	 @GetMapping("/order-items/{prdId}")
+	 @ResponseBody
+	 public List<OrderItemDTO> getOrderItemsByProduct(@PathVariable("prdId") String prdId) {
+	     return planService.getOrderItemsByProduct(prdId);
+ }
 
 
 
