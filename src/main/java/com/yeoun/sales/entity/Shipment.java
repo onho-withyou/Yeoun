@@ -32,17 +32,7 @@ public class Shipment {
     // 3) 출하일자
     @Column(name = "SHIPMENT_DATE")
     @Comment("출하 처리 일자")
-    private LocalDate shipmentDate;
-
-    // 4) 출하수량
-    @Column(name = "SHIPMENT_QTY", precision = 18, scale = 2, nullable = false)
-    @Comment("출하된 수량")
-    private BigDecimal shipmentQty;
-
-    // 5) LOT 번호
-    @Column(name = "LOT_NO", length = 50, nullable = false)
-    @Comment("출하에 사용된 LOT 식별 번호")
-    private String lotNo;
+    private LocalDate shipmentDate;    
 
     // 6) 출하상태
     @Column(name = "SHIPMENT_STATUS", length = 20, nullable = false)
