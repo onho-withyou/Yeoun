@@ -54,7 +54,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 		""")
 		List<Map<String, Object>> findConfirmedGrouped(@Param("group") String group);
 
-
+  
 
     // 2) 특정 제품에 대한 확정된 수주 상세 조회
     @Query(value = """
