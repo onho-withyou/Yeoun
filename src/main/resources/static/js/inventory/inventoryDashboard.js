@@ -17,9 +17,18 @@ let expireDisposalGrid; // 유통기한관리그리드객체
 
 const today = new Date();
 
-
+// 스피너 보이기 끄기
+function showSpinner() {
+	document.getElementById('loading-overlay').style.display = 'flex';
+}
+function hideSpinner() {
+	document.getElementById('loading-overlay').style.display = 'none';
+}
 
 document.addEventListener('DOMContentLoaded', async function () {
+	//스피너 on
+	showSpinner();
+	
 	// 재고정보 
 	inventoryInfo = await fetchInventoryData();
 	// 안전재고 수량정보
@@ -135,6 +144,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 	    xaxis: { type: 'category' },
 	    series: series
 	}, false, true);
+	
+	
+	//스피너  off
+	hideSpinner();
 	
 });
 
