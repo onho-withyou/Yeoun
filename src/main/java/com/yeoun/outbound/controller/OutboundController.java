@@ -114,6 +114,18 @@ public class OutboundController {
 		return "outbound/material_detail";
 	}
 	
+	// 완제품 출고 상세페이지
+	@GetMapping("/prd/{outboundId}")
+	public String productDetail(@PathVariable("outboundId") String outboundId, Model model) {
+		OutboundOrderDTO outboundOrderDTO = outboundService.getMaterialOutbound(outboundId);
+		
+		log.info(">>>>>>>>>>>>>>>> outboundOrderDTO : " + outboundOrderDTO);
+		
+		model.addAttribute("outboundOrderDTO", outboundOrderDTO);
+		
+		return "outbound/product_detail";
+	}
+	
 	// 출고완료
 	@PostMapping("/mat/complete")
 	@ResponseBody

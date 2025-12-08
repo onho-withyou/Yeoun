@@ -41,7 +41,6 @@ productGrid.on("click", (ev) => {
 	
 	if (columnName === "btn") {
 		const row = productGrid.getRow(rowKey);
-		console.log(row);
 		// 입고 상세 페이지로 이동
 		location.href = `/inventory/outbound/prd/${row.outboundId}`
 	}

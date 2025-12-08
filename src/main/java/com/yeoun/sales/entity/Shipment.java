@@ -90,4 +90,9 @@ public class Shipment {
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+    
+    // 상태값 변경
+    public void changeStatus(String shipmentStatus) {
+    	this.shipmentStatus = shipmentStatus;
+    }
 }

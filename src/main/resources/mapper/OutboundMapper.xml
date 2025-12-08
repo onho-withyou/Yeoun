@@ -23,8 +23,8 @@
 			<result property="lotNo" column="LOT_NO"/>
 			<result property="outboundQty" column="OUTBOUND_AMOUNT"/>
 			<result property="orderqQty" column="ORDER_QTY"/>
-			<result property="matQty" column="MAT_QTY"/>
 			<result property="shipmentQty" column="SHIPMENT_QTY"/>
+			<result property="matQty" column="MAT_QTY"/>
 			<result property="ivId" column="IV_ID"/>
 			<result property="locationId" column="LOCATION_ID"/>
 		</collection>
@@ -110,7 +110,7 @@
 			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN w.PLAN_QTY END AS ORDER_QTY
 			, CASE WHEN o.SHIPMENT_ID IS NOT NULL THEN prd.PRD_ID END AS PRD_ID
 			, CASE WHEN o.SHIPMENT_ID IS NOT NULL THEN prd.PRD_NAME END AS PRD_NAME	
-			, CASE WHEN o.SHIPMENT_ID IS NOT NULL THEN s.SHIPMENT_QTY END AS SHIPMENT_QTY	
+			, CASE WHEN o.SHIPMENT_ID IS NOT NULL THEN si.LOT_QTY END AS "SHIPMENT_QTY"	
 		FROM
 			OUTBOUND o
 		LEFT JOIN
@@ -154,6 +154,10 @@
 			WAREHOUSE_LOCATION wl
 		ON
 			wl.LOCATION_ID = i.LOCATION_ID
+		LEFT JOIN
+			SHIPMENT_ITEM si
+		ON
+			si.SHIPMENT_ID = s.SHIPMENT_ID
 		WHERE
 			o.OUTBOUND_ID = #{outboundId}
 		ORDER BY
@@ -196,7 +200,7 @@
 			, sl.LOT_QTY AS SHIPMENT_QTY
 			, sl.PRD_ID 
 			, prd.PRD_NAME
-			, ( SELECT COALESCE(SUM(iv.IV_AMOUNT), 0) 
+			, ( SELECT COALESCE(SUM(iv.IV_AMOUNT), 0) - COALESCE(SUM(iv.EXPECT_OB_AMOUNT), 0) 
              	FROM INVENTORY iv 
                 WHERE iv.ITEM_ID = sl.PRD_ID) AS ORDER_QTY
             , ROW_NUMBER() OVER (PARTITION BY s.SHIPMENT_ID ORDER BY sl.PRD_ID) AS ITEM_ID

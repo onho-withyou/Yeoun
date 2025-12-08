@@ -141,6 +141,11 @@ public class OutboundService {
 			outbound.addItem(outboundItem);
 		}
 		
+		// 출고 등록이 되면 출하지시서 상태 변경하기
+//		if (outboundOrderDTO.getShipmentId() != null || !outboundOrderDTO.getShipmentId().isEmpty()) {
+//			
+//		}
+		
 		outboundRepository.save(outbound);
 	}
 
@@ -148,6 +153,11 @@ public class OutboundService {
 	public OutboundOrderDTO getMaterialOutbound(String outboundId) {
 		return outboundMapper.findOutbound(outboundId);
 	}
+	
+	// 완제품 출고 상세페이지
+//	public OutboundOrderDTO getProductOutbound(String outboundId) {
+//		return outboundMapper.;
+//	}
 
 	// 출고 완료
 	@Transactional
@@ -217,7 +227,8 @@ public class OutboundService {
 		// 출고 상태 업데이트
 		outbound.updateStatus("COMPLETED");
 	}
-
+	
+	// ===========================================================================
 	// 출하지시서 목록 조회 (추후 출하지시 관련된 작업으로 옮길 예정)
 	public List<OutboundOrderDTO> getShipmentList() {
 		return outboundMapper.findAllShipment();
