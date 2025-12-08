@@ -10,6 +10,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.yeoun.inventory.dto.InventoryModalRequestDTO;
+import com.yeoun.inventory.dto.InventoryOrderCheckViewDTO;
 import com.yeoun.inventory.dto.InventorySafetyCheckDTO;
 import com.yeoun.common.entity.Dispose;
 import com.yeoun.common.repository.DisposeRepository;
@@ -21,6 +22,7 @@ import com.yeoun.inventory.entity.Inventory;
 import com.yeoun.inventory.entity.InventoryHistory;
 import com.yeoun.inventory.entity.WarehouseLocation;
 import com.yeoun.inventory.repository.InventoryHistoryRepository;
+import com.yeoun.inventory.repository.InventoryOrderCheckViewRepository;
 import com.yeoun.inventory.repository.InventoryRepository;
 import com.yeoun.inventory.repository.WarehouseLocationRepository;
 import com.yeoun.inventory.specification.InventorySpecs;
@@ -39,6 +41,7 @@ public class InventoryService {
 	private final WarehouseLocationRepository warehouseLocationRepository;
 	private final DisposeRepository disposeRepository;
 	private final WorkOrderRepository workOrderRepository;
+	private final InventoryOrderCheckViewRepository ivOrderCheckViewRepository;
 	
 	// 검색조건을 통해 재고리스트 조회
 	public List<InventoryDTO> getInventoryInfo(InventoryDTO inventoryDTO) {
@@ -328,6 +331,13 @@ public class InventoryService {
 	public List<WorkOrderDTO> getOrderData() {
 		return workOrderRepository.findAll().stream()
 				.map(WorkOrderDTO::fromEntity).toList();
+	}
+	
+	// 발주위해 필요한데이터 조회(예상 재고수량, 생산계획필요수량, 작업지시서를 토대로 출고된 수량, 안전재고수량, 예상입고량)
+	public List<InventoryOrderCheckViewDTO> getIvOrderCheckData() {
+		
+		return ivOrderCheckViewRepository.findAll().stream()
+				.map(InventoryOrderCheckViewDTO::fromEntity).toList();
 	}
 
 }

@@ -20,6 +20,7 @@ import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.inbound.dto.InboundDTO;
 import com.yeoun.inbound.dto.ReceiptDTO;
 import com.yeoun.inventory.dto.InventoryModalRequestDTO;
+import com.yeoun.inventory.dto.InventoryOrderCheckViewDTO;
 import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryGroupDTO;
@@ -170,6 +171,14 @@ public class InventoryRestController {
 		List<WorkOrderDTO> workOrderDTOList = inventoryService.getOrderData();
 		
 		return ResponseEntity.ok(workOrderDTOList);
+	}
+	
+	// 재고 발주 체크 데이터
+	@GetMapping("/inventoryOrderCheck")
+	public ResponseEntity<List<InventoryOrderCheckViewDTO>> getIv() {
+		List<InventoryOrderCheckViewDTO> inventoryOrderCheckDTOList = inventoryService.getIvOrderCheckData();
+		
+		return ResponseEntity.ok(inventoryOrderCheckDTOList);
 	}
 	
 }

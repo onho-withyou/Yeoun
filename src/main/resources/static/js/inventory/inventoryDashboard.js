@@ -5,6 +5,7 @@ let todayInboundData; // 입고정보
 let todayOutboundData; // 입고정보
 let chartData; // 가공한차트데이터
 let orderData; //작업지시서데이터
+let ivOrderCheckData;
 
 let outboundNOrderGrid; // 작업지시서그리드객체
 
@@ -33,6 +34,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 	chartData = normalizeIvHistory(RawChartData);
 	// 작업지시서 데이터
 	orderData = await fetchOrderListData();
+	// 발주체크 데이터
+	ivOrderCheckData = await fetchIvOrderCheckData();
+	console.log(ivOrderCheckData,'@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
 
 		
 	// 차트타입 버튼 active 설정
@@ -69,14 +73,25 @@ document.addEventListener('DOMContentLoaded', async function () {
 	// 출고등록 필요한 작업지시서 표시
 	renderOrderGrid();
 		
-	//안전재고 미달 수량 표시
+	//발주 필요 수량 표시
 	let lowStockCnt = 0;
-	inventorySafetyStockInfo.forEach(stock => {
-		// 안전재고수량보다 예상재고량(재고량 - 출고예정량)이 작을경우
-		if(stock.safetyStockQty > stock.expectIvQty + stock.expectIbAmount) lowStockCnt++;
+	ivOrderCheckData.forEach(stock => {
+		// 출고 예정 수량 : 생산계획수량 - 작업지시(출고완)수량
+		const EXPECT_OBPLAN_QTY = stock.productPlanQty - stock.outboundPlanQty;
+		// 예상 재고 수량(재고수량 - 예상출고수량) + 예상입고수량
+		const EXPECT_IV_QTY = stock.expectIvQty + stock.expectIbQty;
+		// 최종 재고 수량 : 예상재고수량 + 예상입고수량 - (생산계획수량 - 작업지시수량)
+		const FINAL_IV_QTY = EXPECT_IV_QTY - EXPECT_OBPLAN_QTY;
+		const SAFETY_QTY = stock.safetyQty
+		
+		if(FINAL_IV_QTY < SAFETY_QTY) lowStockCnt++;
 	})
+//	inventorySafetyStockInfo.forEach(stock => {
+//		// 안전재고수량보다 예상재고량(재고량 - 출고예정량)이 작을경우
+//		if(stock.safetyStockQty > stock.expectIvQty + stock.expectIbAmount) lowStockCnt++;
+//	})
 	const orderEl = document.getElementById('orderCnt');
-	orderEl.innerText = `${lowStockCnt} / ${inventorySafetyStockInfo.length}`;
+	orderEl.innerText = `${lowStockCnt} / ${ivOrderCheckData.length}`;
 	
 	const orderStatusEl = document.getElementById('orderStatus');
 	if (lowStockCnt > 0) {
@@ -86,8 +101,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 	    orderStatusEl.className = 'text-success', 'fw-semibold'; 
 	    orderStatusEl.innerHTML = '정상';
 	}
+	// 발주필요 목록 표시
 	// 안전재고 미달목록표시
-	renderSafetyStockGrid();
+	renderNeedOrderStockGrid();
 	
 	//유통기한 임박 수량 표시
 	let expireCnt = 0;
@@ -421,7 +437,7 @@ function renderOrderGrid() {
 	
 	gridLangSet(Grid)
 	
-	// 안전재고 그리드
+	// 미등록 출고 재고 그리드
 	    outboundNOrderGrid = new Grid({
 	        el: gridEl,
 	//        scrollX: false,
@@ -441,14 +457,14 @@ function renderOrderGrid() {
 					  return value.replace('T', ' ');
 	      		  }	
 				},
-				{ header: '상세',      name: "btn", width: 100, align: "center",
-				  formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary btn-sm' data-row='${cellInfo.rowKey}' >발주</button>"
+				{ header: '출고등록',      name: "btn", width: 100, align: "center",
+				  formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary btn-sm' data-row='${cellInfo.rowKey}' >출고등록</button>"
 				}
 	        ],
 	        data: outboundNList
 	    });
 		
-		// 발주 버튼 동작
+		// 출고등록 버튼 동작
 		outboundNOrderGrid	.on("click", async (event) => {
 			if(event.columnName == "btn") {
 				const target = event.nativeEvent.target;
@@ -458,10 +474,10 @@ function renderOrderGrid() {
 					console.log(rowData);
 
 					//모달 열기
-					const modalEl = document.getElementById("modalCenter");
+					const modalEl = document.getElementById("matObModal");
 					const bsModal = new bootstrap.Modal(modalEl);
 					bsModal.show();
-//					
+					console.log(rowData);
 //					// 모달세팅
 					await initOutboundModalByRow(rowData);
 				}
@@ -469,12 +485,40 @@ function renderOrderGrid() {
 		});
 }
 
-async function initOutboundModalByRow(data) {
-	const workOrderSelectEl = document.getElementById('workOrderSelect');
-	const workIdEl = document.getElementById('workId');
-	const managerNameEl = document.getElementById('managerName');
-	const managerIdEl = document.getElementById('managerId');
-	const bomTbodyEl = document.getElementById('bomTbody');
+async function initOutboundModalByRow(rowData) {
+	// 초기화
+	matObWorkOrderSelect.innerHTML = `<option value="">작업지시서를 선택하세요</option>`;
+	matObManagerName.value = "";
+	matObProductName.value = "";
+	matObDueDate.value = "";
+	matObBomTbody.innerHTML = "";
+	matObWorkId.value = "";
+	matObManagerId.value = "";
+	outboundDate = null;
+	
+	// 작업리스트 목록
+	workOrderList = await loadOrderList();
+	
+	if (!workOrderList || workOrderList.length === 0) {
+	    alert("작업지시 데이터를 찾을 수 없습니다.");
+	    return;
+	}
+	
+	// 셀렉트 옵션 구성
+	workOrderList.forEach(el => {
+	    const opt = document.createElement("option");
+	    opt.value = el.orderId;
+	    opt.textContent = `${el.orderId} - ${el.productName}`;
+	    opt.dataset.productId = el.productId;
+	    matObWorkOrderSelect.appendChild(opt);
+	});
+	
+	// 그리드에서 선택한 작업지시서 선택상태로변경
+	matObWorkOrderSelect.value = rowData.orderId;
+	
+	// change 이벤트 강제 발생
+	const changeEvent = new Event("change");
+	matObWorkOrderSelect.dispatchEvent(changeEvent);
 	
 }
 
@@ -490,14 +534,34 @@ function getLowStockRows() {
     });
 }
 
+function getNeedOrderStocks() {
+	return ivOrderCheckData.filter(stock => {
+		// 출고 예정 수량 : 생산계획수량 - 작업지시(출고완)수량
+		const EXPECT_OBPLAN_QTY = stock.productPlanQty - stock.outboundPlanQty;
+		// 예상 재고 수량(재고수량 - 예상출고수량) + 예상입고수량
+		const EXPECT_IV_QTY = stock.expectIvQty + stock.expectIbQty;
+		// 최종 재고 수량 : 예상재고수량 + 예상입고수량 - (생산계획수량 - 작업지시수량)
+		const FINAL_IV_QTY = EXPECT_IV_QTY - EXPECT_OBPLAN_QTY;
+		const SAFETY_QTY = stock.safetyQty
+
+		return FINAL_IV_QTY < SAFETY_QTY; 
+	})
+}
+
 // 안전재고 미달목록 그리드 그리기
-function renderSafetyStockGrid() {
+function renderNeedOrderStockGrid() {
 	// 안전재고 미달 데이터 
-    const lowStocks = getLowStockRows();
+//    const lowStocks = getLowStockRows();
+	// 발주필요 재고 데이터
+	const needOrderStocks = getNeedOrderStocks();
+	
+	console.log(needOrderStocks,"!!!!!!!!!!!!!!!!!!@#")
+	
+	
 	// 그리드 보이는 카드
     const cardEl = document.getElementById('safetyStockCard');
 
-    if (lowStocks.length === 0) {
+    if (needOrderStocks.length === 0) {
         // 미달 없으면 카드 숨김
         cardEl.style.display = 'none';
         return;
@@ -529,23 +593,32 @@ function renderSafetyStockGrid() {
         columns: [
             { header: '품목명',   name: 'itemName', minWidth: 160 },
 //            { header: '품목코드', name: 'itemId', width: 110, align: 'center' },
-            { header: '유형',     name: 'itemType', width: 80,  align: 'center' },
-            { header: '현재고',   name: 'ivQty', width: 90, align: 'right', 
+            { header: '재고',     name: 'expectIvQty', minWidth: 80,  align: 'center' },
+            { header: '입고예정',     name: 'expectIbQty', minWidth: 80,  align: 'center' },
+            { header: '생산계획',   name: 'productPlanQty', minWidth: 90, align: 'right', 
 			  formatter: ({value}) => value.toLocaleString() },
-            { header: '출고예정', name: 'planOutQty', width: 90, align: 'right', 
+            { header: '생산계획(출고완)', name: 'outboundPlanQty', minWidth: 90, align: 'right', 
 			  formatter: ({value}) => value.toLocaleString() },
-            { header: '출고후재고', name: 'expectIvQty', width: 90, align: 'right', 
-              formatter: ({row}) => (row.ivQty - row.planOutQty).toLocaleString() },
-            { header: '입고예정', name: 'expectIbAmount', width: 90, align: 'right'}, 
-            { header: '안전재고', name: 'safetyStockQty', width: 100, align: 'right', 
-			  formatter: ({value}) => value.toLocaleString() },
-            { header: '발주필요', name: 'safetyStockQtyDaily', width: 90, align: 'right', 
-			  formatter: ({row}) => row.safetyStockQty - row.expectIvQty - row.expectIbAmount},
-			{ header: '상세',      name: "btn", width: 100, align: "center",
+            { header: '안전재고수량', name: 'safetyQty', minWidth: 90, align: 'right', 
+              formatter: ({value}) => value.toLocaleString() },
+            { header: '발주필요', name: '', minWidth: 90, align: 'right', 
+			  formatter: ({row}) => {
+				// 출고 예정 수량 : 생산계획수량 - 작업지시(출고완)수량
+				const EXPECT_OBPLAN_QTY = row.productPlanQty - row.outboundPlanQty;
+				// 예상 재고 수량(재고수량 - 예상출고수량) + 예상입고수량
+				const EXPECT_IV_QTY = row.expectIvQty + row.expectIbQty;
+				// 최종 재고 수량 : 예상재고수량 + 예상입고수량 - (생산계획수량 - 작업지시수량)
+				const FINAL_IV_QTY = EXPECT_IV_QTY - EXPECT_OBPLAN_QTY;
+				const SAFETY_QTY = row.safetyQty;
+				
+				return SAFETY_QTY - FINAL_IV_QTY;
+				}
+		    },
+			{ header: '발주',      name: "btn", width: 100, align: "center",
 			  formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary btn-sm' data-row='${cellInfo.rowKey}' >발주</button>"
 			}
         ],
-        data: lowStocks
+        data: needOrderStocks
     });
 	
 	// 발주 버튼 동작
@@ -632,7 +705,10 @@ async function initPurchaseModalByRow(rowData) {
 	
 	// 발주필요 수량주문수량에 입력
 	// 발주필요수량
-	const needOrderQty = Math.max(0, rowData.safetyStockQty - rowData.expectIvQty);
+	const needOrderQty = Math.max(0, 
+		rowData.safetyQty - 
+		(rowData.expectIvQty + rowData.expectIbQty - (rowData.productPlanQty - rowData.outboundPlanQty))
+	);
 	
 	// orderTableBody(purchase_regist.js에선언되어있음)의 마지막추가된 row정보
 	const lastRow = orderTableBody.lastElementChild;
@@ -643,7 +719,7 @@ async function initPurchaseModalByRow(rowData) {
 	// 최소수량, 단위, 단가 정보(input에 설정되어있는값가져오기)
 	const minOrder = parseInt(qtyInput.dataset.min, 10);
 	const unit     = parseInt(qtyInput.dataset.unit, 10);
-	const price    = parseInt(qtyInput.dataset.price, 10);
+	const unitPrice    = parseInt(qtyInput.dataset.price, 10);
 	
 	// 발주필요수량을 최소주문수량, 주문단위규칙에 맞게 변형하기위해 저장
 	let qty = needOrderQty;
@@ -898,10 +974,28 @@ async function fetchOrderListData() {
 		});
 		
 		if (!response.ok) {
-			throw new Error("데이터 로드 실패!");
+			throw new Error("작업지시서 데이터 로드 실패!");
 		}
 		
 		return await response.json();
+}
+
+
+// 발주 필요 수량 체크
+async function fetchIvOrderCheckData() {
+	const response = await fetch("/api/inventories/inventoryOrderCheck", {
+		method: "GET",
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		}
+	});
+	
+	if(!response.ok) {
+		throw new Error("발주체크 데이터 로드 실패")
+	}
+	
+	return await response.json();
 }
 
 
