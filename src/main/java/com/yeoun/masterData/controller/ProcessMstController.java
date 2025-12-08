@@ -4,12 +4,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.masterData.entity.ProcessMst;
@@ -38,8 +40,10 @@ public class ProcessMstController {
   	
   	//제품별 공정라우트 조회
   	@GetMapping("/process/list")
-  	public List<ProcessMst> processList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,@RequestBody Map<String,Object> searchParams) {
-		return processMstService.findAll(searchParams);
+  	public ResponseEntity<?> processList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,
+  			@RequestParam("prdId") String prdId,
+  		    @RequestParam("routeName") String routeName) {
+		return null;
   	}
     
 }

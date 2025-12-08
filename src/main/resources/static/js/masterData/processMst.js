@@ -73,17 +73,17 @@ function openProcessLookupModal() {
 function productRouteSearch(){
 	
 	const params = {
-
 		prdId: document.getElementById("processprdId").value ?? "",
 		routeName: document.getElementById("routeName").value ?? "",		
 	};
-	fetch('/masterData/process/list', {
+	
+	const queryString = new URLSearchParams(params).toString();
+	fetch(`/masterData/process/list?${queryString}`, {
 		method: 'GET',
 		headers: {
 			[csrfHeader]: csrfToken,
 			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify(params)
+		}
 	})
 	.then(res => {
 	    if (!res.ok) {
