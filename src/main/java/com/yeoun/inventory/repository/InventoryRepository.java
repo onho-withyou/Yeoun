@@ -43,7 +43,7 @@ public interface InventoryRepository
 		""")
 	Integer findAvailableStock(@Param("id") String id);
 
-	
+	// 현재재고수량, 안전재고수량 통계
 	@Query(value = """
         SELECT
             ss.ITEM_ID                       AS itemId,
