@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ProductionPlanViewDTO {
     private String planId;
-    private LocalDateTime createdAt;
+    private String createdAt;
     private String itemName;
     private int totalQty;
     private int createdQty;
