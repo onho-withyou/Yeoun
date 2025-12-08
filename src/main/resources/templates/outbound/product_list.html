@@ -40,6 +40,7 @@
 					<div id="outboundForm">
 						<div class="row mb-4">
 							<div class="col-md-6">
+								<input type="hidden" id="shipmentId"/>
 								<label class="form-label fw-bold">출하지시서</label> 
 								<select
 									class="form-select" id="shipmnetSelect">
@@ -50,14 +51,14 @@
 							<div class="col-md-6">
 								<label class="form-label fw-bold">담당자</label> 
 								<input class="form-control" type="text" id="processByName" readonly>
-								<input type="hidden" id="managerId"/>
+								<input class="processById" type="hidden">
 							</div>
 						</div>
 <!-- 								생산 제품 선택 -->
 						<div class="row mb-4">
 							<div class="col-md-6">
 								<label class="form-label fw-bold">거래처</label>
-								<input class="form-control" type="text" id="prdName" readonly>
+								<input class="form-control" type="text" id="shopClientName" readonly>
 							</div>
 							<div class="col-md-6">
 								<label class="form-label">예상도착일</label>
@@ -84,7 +85,7 @@
 				</div>
 				<div class="modal-footer mt-3 p-0">
 					<button type="button" class="btn btn-primary"
-						onclick="submitOutbound()">등록</button>
+						onclick="submitPrdOutbound()">등록</button>
 				</div>
 			</div>
 		</div>
