@@ -216,7 +216,12 @@ public class ProductionPlanService {
                             ((Number) i.get("ORDER_ITEM_ID")).longValue(),
                             (String) i.get("ORDER_ID"),
                             ((Number) i.get("ORDER_QTY")).intValue(),
-                            (String) i.get("dueDate")
+                            (String) i.get("dueDate"),
+                            (String) i.get("CLIENT_NAME"),
+                            (String) i.get("MANAGER_NAME"),
+                            (String) i.get("MANAGER_TEL"),
+                            (String) i.get("MANAGER_EMAIL"),
+                            (String) i.get("PRD_NAME")
                     ))
                     .toList();
 
@@ -403,6 +408,7 @@ List<ProductionPlanItemDTO> planItemDTOs = new ArrayList<>(merged.values());
          itemName,
          plan.getPlanQty(),
          plan.getStatus().name(),
+         plan.getPlanMemo(), 
          planItemDTOs,
          orderItemMap
  );

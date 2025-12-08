@@ -9,4 +9,5 @@ public interface ProductionPlanListDTO {
     String getItemName();
     BigDecimal getTotalQty();
     String getStatus();
+    String getMemo();
 }

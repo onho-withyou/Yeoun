@@ -51,6 +51,30 @@ function initPlanGrid() {
             },
             width: 140
         },
+		{
+		    headerName: "메모",
+		    field: "memo",
+		    width: 250,
+		    tooltipField: "memo",
+		    cellRenderer: params => {
+		        if (!params.value) return "-";
+
+		        const text = params.value;
+		        const maxLength = 20; // 🔥 원하는 표시 글자수 조절 가능
+
+		        // 20자 이상이면 … 처리
+		        const display = text.length > maxLength 
+		            ? text.substring(0, maxLength) + "..." 
+		            : text;
+
+		        return `
+		            <span title="${params.value}" style="cursor:pointer;">
+		                ${display}
+		            </span>
+		        `;
+		    }
+		},
+
 
         {
             headerName: "상세",

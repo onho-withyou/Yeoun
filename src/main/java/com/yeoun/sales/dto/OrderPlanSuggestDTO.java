@@ -30,5 +30,10 @@ public class OrderPlanSuggestDTO {
         private String orderId;
         private int orderQty;
         private String dueDate;
+        private String clientName;
+        private String managerName;
+        private String managerTel;
+        private String managerEmail;
+        private String prdName;
     }
 }

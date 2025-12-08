@@ -21,7 +21,7 @@ public class OrderItemDTO {
     
     private String clientName;       // ⭐ 거래처명 추가    
     private LocalDate orderDate;     // ⭐ 수주일자 추가
-    private LocalDate deliveryDate;  // ⭐ 납기일 (기존 dueDate → deliveryDate로 이름 변경)
+    private LocalDate deliveryDate;  // ⭐ 납기일 
    
 }
 

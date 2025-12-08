@@ -31,7 +31,8 @@ public interface ProductionPlanRepository extends JpaRepository<ProductionPlan, 
     	        TO_CHAR(p.CREATED_AT, 'YYYY-MM-DD HH24:MI:SS') AS createdAt,
     	        COALESCE(MIN(pr.PRD_NAME), '미정') AS itemName,
     	        COALESCE(SUM(i.PLAN_QTY), 0) AS totalQty,
-    	        p.STATUS             AS status
+    	        p.STATUS             AS status,
+    	        p.PLAN_MEMO      AS memo
     	    FROM PRODUCTION_PLAN p
     	    LEFT JOIN PRODUCTION_PLAN_ITEM i 
     	      ON p.PLAN_ID = i.PLAN_ID
@@ -40,7 +41,8 @@ public interface ProductionPlanRepository extends JpaRepository<ProductionPlan, 
     	    GROUP BY 
     	        p.PLAN_ID,
     	        p.CREATED_AT,
-    	        p.STATUS
+    	        p.STATUS,
+    	        p.PLAN_MEMO
     	    ORDER BY p.CREATED_AT DESC
     	""", nativeQuery = true)
     	List<ProductionPlanListDTO> findPlanList();
