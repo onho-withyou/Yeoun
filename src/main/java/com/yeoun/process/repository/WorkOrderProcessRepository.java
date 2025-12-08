@@ -25,5 +25,8 @@ public interface WorkOrderProcessRepository extends JpaRepository<WorkOrderProce
     
 	// QC 공정 한 건 조회 (orderId + processId 기준)
     Optional<WorkOrderProcess> findByWorkOrderOrderIdAndProcessProcessId(String orderId, String processId);
+
+    // 공정 Id로 정보 조회
+	Optional<WorkOrderProcess> findByWopId(String wopId);
     
 }

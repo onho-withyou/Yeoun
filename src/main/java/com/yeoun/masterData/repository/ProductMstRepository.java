@@ -18,4 +18,7 @@ public interface ProductMstRepository extends JpaRepository<ProductMst, String> 
 
 	Optional<ProductMst> findByItemNameAndPrdName(String itemName, String prdName);
 
+	// 제품ID로 조회
+	Optional<ProductMst> findByPrdId(String prdId);
+
 }
