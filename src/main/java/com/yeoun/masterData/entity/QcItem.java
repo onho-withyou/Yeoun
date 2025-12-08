@@ -3,6 +3,7 @@ package com.yeoun.masterData.entity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
@@ -51,6 +52,7 @@ public class QcItem {
 	@Column(name="CREATED_ID", length = 7)
 	private String createdId; //생성자 id
 	
+	@CreatedDate
 	@Column(name="CREATED_DATE")
 	private LocalDate createdDate; //생성일시
 	

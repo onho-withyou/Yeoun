@@ -1,10 +1,9 @@
 package com.yeoun.masterData.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.HashMap;
 
 import org.springframework.dao.DataIntegrityViolationException;
 
@@ -148,9 +147,9 @@ public class ProductMstService {
 	 * 입력으로 Long, Integer, String 등 다양한 형태의 키를 허용합니다.
 	 * 반환값은 처리 결과 메시지이며, 성공 시 삭제된 건수를 포함합니다.
 	 */
-	public java.util.Map<String, Object> deleteProduct(Map<String, Object> param) {
+	public Map<String, Object> deleteProduct(Map<String, Object> param) {
 		log.info("deleteProduct------------->{}",param);
-		java.util.Map<String, Object> result = new java.util.HashMap<>();
+		Map<String, Object> result = new HashMap<>();
 		try {
 			Object rowKeysObj = param.get("rowKeys");
 			if (!(rowKeysObj instanceof List)) {

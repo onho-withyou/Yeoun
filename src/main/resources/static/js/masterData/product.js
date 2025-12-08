@@ -1,7 +1,7 @@
 
 window.onload = function () {	
 	productGridAllSearch();//완제품 그리드 조회
-	materialGridAllSearch()//원재료 그리드 조회
+	materialGridAllSearch();//원재료 그리드 조회
 
 }
 
