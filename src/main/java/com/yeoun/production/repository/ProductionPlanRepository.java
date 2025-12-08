@@ -4,6 +4,7 @@ import com.yeoun.production.dto.ProductionPlanListDTO;
 import com.yeoun.production.entity.ProductionPlan;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -46,6 +47,18 @@ public interface ProductionPlanRepository extends JpaRepository<ProductionPlan, 
     	    ORDER BY p.CREATED_AT DESC
     	""", nativeQuery = true)
     	List<ProductionPlanListDTO> findPlanList();
+
+
+    //*BOM 조회
+    @Query(value = """
+    	    SELECT 
+    	        b.MAT_ID AS matId,
+    	        b.MAT_QTY AS matQty
+    	    FROM BOM_MST b
+    	    WHERE b.PRD_ID = :prdId
+    	    """,
+    	    nativeQuery = true)
+    	List<Map<String, Object>> findBomItems(@Param("prdId") String prdId);
 
 
 

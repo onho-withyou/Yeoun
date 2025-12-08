@@ -36,15 +36,15 @@ function initSuggestGrid() {
 			       },
 
 			       {
-			           headerName: "원자재 부족",
+			           headerName: "원자재 재고",
 			           field: "bomStatus",   // ⭐ 필드명 수정
 			           width: 120,
 			           cellRenderer: p => {
 			               if (!p.value) return "-";
 
-			               return p.value === "LACK"
+			               return p.value === "부족"
 			                   ? "<span style='color:red;'>❌ 부족</span>"
-			                   : "<span style='color:green;'>✔ 정상</span>";
+			                   : "<span style='color:green;'>✔ 가능</span>";
 			           }
 			       },
 
@@ -82,7 +82,7 @@ function initSuggestGrid() {
 
 	        // ⭐ No Rows 메시지 변경
 	        localeText: {
-	            noRowsToShow: "생산 조회 버튼을 클릭해주세요"
+	            noRowsToShow: "생산목록 조회 중입니다"
 	        }
 	    }
 	);

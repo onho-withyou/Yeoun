@@ -38,16 +38,17 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 	
 	// 1) 확정된 수주를 제품별로 그룹화
 	@Query("""
-		    SELECT 
+		    SELECT
 		        oi.prdId AS prdId,
 		        p.prdName AS prdName,
 		        SUM(oi.orderQty) AS totalOrderQty,
-		        COUNT(*) AS orderCount,                     
-		        MIN(o.deliveryDate) AS earliestDeliveryDate  
+		        COUNT(*) AS orderCount,
+		        MIN(o.deliveryDate) AS earliestDeliveryDate
 		    FROM OrderItem oi
 		    JOIN oi.order o
 		    JOIN oi.product p
 		    WHERE o.orderStatus = 'CONFIRMED'
+		      AND oi.itemStatus <> 'PLANNED'          
 		      AND (:group IS NULL OR p.itemName = :group)
 		    GROUP BY oi.prdId, p.prdName
 		""")

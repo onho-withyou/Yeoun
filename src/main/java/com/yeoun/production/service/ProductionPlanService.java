@@ -15,6 +15,8 @@ import com.yeoun.sales.entity.OrderItem;
 import com.yeoun.sales.repository.OrderItemRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class ProductionPlanService {
@@ -169,82 +172,91 @@ public class ProductionPlanService {
     /* ================================
        생산 추천 목록 생성
     ================================ */
-    
- public List<OrderPlanSuggestDTO> getPlanSuggestions(String group) {
+    public List<OrderPlanSuggestDTO> getPlanSuggestions(String group) {
 
-     // 1) 제품별 확정 수주량, 납기, 건수 등을 그룹화 조회
-     List<Map<String, Object>> groups = orderItemRepository.findConfirmedGrouped(group);
+        List<Map<String, Object>> groups = orderItemRepository.findConfirmedGrouped(group);
 
-     // 2) 전체 재고 조회 (제품별)
-     List<Map<String, Object>> stockList = inventoryRepository.findCurrentStockGrouped();
+        List<Map<String, Object>> stockList = inventoryRepository.findCurrentStockGrouped();
 
-     Map<String, Integer> stockMap = new HashMap<>();
-     for (Map<String, Object> s : stockList) {
-         stockMap.put(
-                 (String) s.get("prdId"),
-                 ((BigDecimal) s.get("currentStock")).intValue()
-         );
-     }
+        Map<String, Integer> stockMap = new HashMap<>();
+        for (Map<String, Object> s : stockList) {
+            stockMap.put(
+                    (String) s.get("prdId"),
+                    ((BigDecimal) s.get("currentStock")).intValue()
+            );
+        }
 
-     List<OrderPlanSuggestDTO> results = new ArrayList<>();
+        List<OrderPlanSuggestDTO> results = new ArrayList<>();
 
-     // 3) 제품별 생산 추천 정보 계산
-     for (Map<String, Object> g : groups) {
+        for (Map<String, Object> g : groups) {
 
-         String prdId = (String) g.get("prdId");
-         String prdName = (String) g.get("prdName");
+            String prdId = (String) g.get("prdId");
+            String prdName = (String) g.get("prdName");
 
-         int totalOrderQty = ((BigDecimal) g.get("totalOrderQty")).intValue();
+            int totalOrderQty = ((BigDecimal) g.get("totalOrderQty")).intValue();
+            int orderCount = ((Number) g.get("orderCount")).intValue();
+            LocalDate earliestDelivery = (LocalDate) g.get("earliestDeliveryDate");
 
-         int orderCount = ((Number) g.get("orderCount")).intValue();   // ⭐ 수주건수
-         LocalDate earliestDelivery = (LocalDate) g.get("earliestDeliveryDate"); // ⭐ 가장 빠른 납기
+            int currentStock = stockMap.getOrDefault(prdId, 0);
+            int shortageQty = Math.max(totalOrderQty - currentStock, 0);
 
-         int currentStock = stockMap.getOrDefault(prdId, 0);
-         int shortageQty = Math.max(totalOrderQty - currentStock, 0);
+            // ================================
+            // 🔍 LOGGING
+            // ================================
+            log.info("============ 🔎 생산 추천 계산 ============");
+            log.info("제품ID = {}, 제품명 = {}", prdId, prdName);
+            log.info("총 주문수량(totalOrderQty) = {}", totalOrderQty);
+            log.info("현재 재고(currentStock) = {}", currentStock);
+            log.info("수주 건수(orderCount) = {}", orderCount);
 
-         // 원자재/재고 부족 여부 표시
-         String bomStatus = shortageQty > 0 ? "부족" : "정상";
+            // 1) 수주 상세 목록 조회
+            List<Map<String, Object>> items = orderItemRepository.findItemsByProduct(prdId);
 
-         // 4) 해당 제품의 수주 상세 목록 가져오기
-         List<Map<String, Object>> items = orderItemRepository.findItemsByProduct(prdId);
+            // 2) 정확한 BOM 기반 원자재 부족 계산
+            boolean bomShortage = checkBomShortage(prdId, totalOrderQty);
+            String bomStatus = bomShortage ? "부족" : "정상";
 
-         List<OrderPlanSuggestDTO.OrderItemInfo> orderItems = items.stream()
-                 .map(i -> new OrderPlanSuggestDTO.OrderItemInfo(
-                         ((Number) i.get("ORDER_ITEM_ID")).longValue(),
-                         (String) i.get("ORDER_ID"),
-                         ((Number) i.get("ORDER_QTY")).intValue(),
-                         (String) i.get("dueDate"),
-                         (String) i.get("CLIENT_NAME"),
-                         (String) i.get("MANAGER_NAME"),
-                         (String) i.get("MANAGER_TEL"),
-                         (String) i.get("MANAGER_EMAIL"),
-                         (String) i.get("PRD_NAME")
-                 ))
-                 .toList();
+            // ================================
+            // 🔍 BOM 결과 LOGGING
+            // ================================
+            log.info("BOM 부족여부(bomShortage) = {}", bomShortage);
+            log.info("BOM 상태(bomStatus) = {}", bomStatus);
 
-         // 5) DTO 생성하여 리스트에 추가
-         results.add(
-                 OrderPlanSuggestDTO.builder()
-                         .prdId(prdId)
-                         .prdName(prdName)
-                         .totalOrderQty(totalOrderQty)
-                         .currentStock(currentStock)
-                         .shortageQty(shortageQty)
-                         .needProduction(shortageQty > 0 ? "YES" : "NO")
-                         .orderCount(orderCount)  // ⭐ 추가
-                         .earliestDeliveryDate(
-                                 earliestDelivery != null
-                                         ? earliestDelivery.toString()
-                                         : "-"
-                         )                       // ⭐ 추가
-                         .bomStatus(bomStatus)  // ⭐ 원자재 상태
-                         .orderItems(orderItems)
-                         .build()
-         );
-     }
+            // 3) DTO 변환
+            List<OrderPlanSuggestDTO.OrderItemInfo> orderItems = items.stream()
+                .map(i -> new OrderPlanSuggestDTO.OrderItemInfo(
+                        ((Number) i.get("ORDER_ITEM_ID")).longValue(),
+                        (String) i.get("ORDER_ID"),
+                        ((Number) i.get("ORDER_QTY")).intValue(),
+                        (String) i.get("dueDate"),
+                        (String) i.get("CLIENT_NAME"),
+                        (String) i.get("MANAGER_NAME"),
+                        (String) i.get("MANAGER_TEL"),
+                        (String) i.get("MANAGER_EMAIL"),
+                        (String) i.get("PRD_NAME")
+                ))
+                .toList();
 
-     return results;
- }
+            results.add(
+                OrderPlanSuggestDTO.builder()
+                    .prdId(prdId)
+                    .prdName(prdName)
+                    .totalOrderQty(totalOrderQty)
+                    .currentStock(currentStock)
+                    .shortageQty(shortageQty)
+                    .needProduction(shortageQty > 0 ? "YES" : "NO")
+                    .orderCount(orderCount)
+                    .earliestDeliveryDate(
+                            earliestDelivery != null ? earliestDelivery.toString() : "-"
+                    )
+                    .bomStatus(bomStatus)
+                    .orderItems(orderItems)
+                    .build()
+            );
+        }
+
+        return results;
+    }
 
 
     /* ============================
@@ -396,6 +408,76 @@ public class ProductionPlanService {
         }
 
         return dtoList;
+    }
+      
+ 
+    /**
+     * 특정 제품의 원자재 부족 여부 계산 (정확 버전)
+     * @param prdId         제품ID
+     * @param totalOrderQty 이번 추천에서 생산해야 하는 총 수량
+     */
+    private boolean checkBomShortage(String prdId, int totalOrderQty) {
+
+        // 주문이 0개면 굳이 원자재 검사할 필요 없음
+        if (totalOrderQty <= 0) {
+            log.info("🔎 prdId={} : totalOrderQty=0 → BOM 검사 스킵 (부족 아님으로 처리)", prdId);
+            return false;
+        }
+
+        // ✔ 제품 BOM 조회
+        List<Map<String, Object>> bomList = planRepo.findBomItems(prdId);
+
+        log.info("🔍 prdId={} 의 BOM 개수 = {}", prdId, bomList.size());
+        log.info("🔍 prdId={} 의 BOM = {}", prdId, bomList);
+
+        for (Map<String, Object> bom : bomList) {
+
+            String matId = (String) bom.get("matId");
+            BigDecimal matQty = (BigDecimal) bom.get("matQty");
+
+            if (matQty == null) {
+                log.warn("⚠ MAT_QTY null → 0으로 처리. prdId={}, matId={}", prdId, matId);
+                matQty = BigDecimal.ZERO;
+            }
+
+            // ▶ 필요한 총 원자재 수량 : (1개 생산에 필요한 수량 × 주문 총 수량)
+            BigDecimal required = matQty.multiply(BigDecimal.valueOf(totalOrderQty));
+
+            log.info("  --------------------------------------------------");
+            log.info("  🧮 원자재 검사 시작 → matId={}", matId);
+            log.info("   • 1개 생산당 필요수량(matQty) = {}", matQty);
+            log.info("   • 전체 주문수량(totalOrderQty) = {}", totalOrderQty);
+            log.info("   • 전체 주문에 필요한 총 원자재(required) = {}", required);
+
+            // ▶ 현재 재고 조회
+            Map<String, Object> stock = inventoryRepository.findMaterialStock(matId);
+
+            // ⚠ 재고 데이터 자체가 없으면 → 바로 부족
+            if (stock == null) {
+                log.warn("❌ 재고 테이블에 데이터 없음 → 부족 처리 :: matId={}", matId);
+                return true;
+            }
+
+            log.info("   • 재고조회 결과(stock raw) = {}", stock);
+
+            BigDecimal current = new BigDecimal(stock.get("ivAmount").toString());
+            log.info("   • 현재 재고(current) = {}", current);
+
+            // ⚠ 재고가 필요한 수량보다 적으면 즉시 부족
+            if (current.compareTo(required) < 0) {
+                log.warn("❌ 원자재 부족 발생!");
+                log.warn("   - matId={} ", matId);
+                log.warn("   - 필요한 required={} ", required);
+                log.warn("   - 현재 current={} ", current);
+                return true;
+            }
+
+            log.info("✅ 원자재 충분함 → matId={} (required={} / current={})",
+                    matId, required, current);
+        }
+
+        log.info("✅ prdId={} : 모든 원자재 충분 → BOM 정상", prdId);
+        return false;
     }
 
 }
