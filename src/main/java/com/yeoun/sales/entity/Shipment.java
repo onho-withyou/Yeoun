@@ -22,12 +22,12 @@ public class Shipment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "SHIPMENT_ID", nullable = false)
     @Comment("출하 이력을 구분하기 위한 고유 식별자 (SHP + YYYYMMDD + 4자리 Sequence)")
-    private Long shipmentId;
+    private String shipmentId;
 
     // 2) 수주ID (ORDER FK)
     @Column(name = "ORDER_ID", nullable = false)
     @Comment("수주 마스터의 식별자 (FK)")
-    private Long orderId;
+    private String orderId;
 
     // 3) 출하일자
     @Column(name = "SHIPMENT_DATE")
