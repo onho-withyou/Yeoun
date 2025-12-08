@@ -1,13 +1,19 @@
 package com.yeoun.masterData.controller;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
+import org.apache.ibatis.annotations.Delete;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
@@ -37,6 +43,27 @@ public class ProductMstController {
   		log.info("productMstService.getProductAll()------------->{}",productMstService.findAll());
 		return productMstService.findAll();
   	}
+
+	@ResponseBody
+  	@PostMapping("/product/save")
+	public String productSave(Model model, @AuthenticationPrincipal LoginDTO loginDTO,@RequestBody Map<String, Object> param) {
+  		log.info("param------------->{}",param);
+		return productMstService.saveProductMst(loginDTO.getEmpId(),param);
+  	}
+
+	@ResponseBody
+	@PostMapping("/product/delete")
+	public ResponseEntity<Map<String, Object>> productDelete(Model model,
+		@AuthenticationPrincipal LoginDTO loginDTO,
+		@RequestBody List<String> rowKeys) {
+
+		log.info("rowKeys------------->{}", rowKeys);
+		Map<String, Object> param = new java.util.HashMap<>();
+		param.put("rowKeys", rowKeys);
+		Map<String, Object> res = productMstService.deleteProduct(param);
+		return ResponseEntity.ok(res);
+	}
+
   	//BOM 연결페이지
   	@GetMapping("/bom_stock")
   	public String bomStock(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {

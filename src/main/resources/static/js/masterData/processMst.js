@@ -1,3 +1,7 @@
+window.onload = function () {	
+	productRouteSearch();//제품별 공정라우트 그리드 조회
+	processCodeGridAllSearch();//공정코드 관리 그리드 조회
+}
 
 const Grid = tui.Grid;
 //g-grid1 공정그리드
@@ -60,7 +64,61 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-
+// + 신규라우트 -->  공정코드 조회 2번째 모달
 function openProcessLookupModal() {
     processLookupModal.show();
   }
+  
+//제품별 공정라우트 그리드 조회
+function productRouteSearch(){
+	
+	const params = {
+
+		prdId: document.getElementById("processprdId").value ?? "",
+		routeName: document.getElementById("routeName").value ?? "",		
+	};
+	fetch('/masterData/process/list', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(params)
+	})
+	.then(res => {
+	    if (!res.ok) {
+	        throw new Error(`HTTP error! status: ${res.status}`);
+	    }
+	    
+	    // 💡 추가된 로직: 응답 본문이 비어 있는지 확인
+	    const contentType = res.headers.get("content-type");
+	    if (!contentType || !contentType.includes("application/json")) {
+	        // Content-Type이 JSON이 아니거나, 200 OK인데 본문이 비어있다면 (Empty)
+	        if (res.status === 204 || res.headers.get("Content-Length") === "0") {
+	             return []; // 빈 배열 반환하여 grid 오류 방지
+	        }
+	        // JSON이 아닌 다른 데이터(HTML 오류 등)가 있다면 텍스트로 읽어 오류 발생
+	        return res.text().then(text => {
+	            throw new Error(`Expected JSON but received: ${text.substring(0, 100)}...`);
+	        });
+	    }
+
+	    return res.json(); // 유효한 JSON일 때만 파싱 시도
+	})
+		.then(data => {
+			
+			console.log("검색데이터:", data);
+			grid1.resetData(data);
+		})
+		.catch(err => {
+			console.error("조회오류", err);
+			//grid1.resetData([]);
+		
+		});
+	
+}
+
+//공정코드 관리 그리드 조회
+function processCodeGridAllSearch() {
+	
+}

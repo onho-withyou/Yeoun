@@ -63,8 +63,6 @@ public class PurchaseController {
 		
 		model.addAttribute("materialOrderDTO", materialOrderDTO);
 		
-		log.info(">>>>>>>>>>>>>>>>> materialOrderDTO" + materialOrderDTO);
-		
 		return "purchase/purchase_info";
 	}
 }  

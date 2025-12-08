@@ -1,5 +1,6 @@
 package com.yeoun.inventory.controller;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,12 +17,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yeoun.auth.dto.LoginDTO;
+import com.yeoun.inbound.dto.InboundDTO;
+import com.yeoun.inbound.dto.ReceiptDTO;
 import com.yeoun.inventory.dto.InventoryModalRequestDTO;
+import com.yeoun.inventory.dto.InventoryOrderCheckViewDTO;
 import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryDTO;
+import com.yeoun.inventory.dto.InventoryHistoryGroupDTO;
 import com.yeoun.inventory.dto.WarehouseLocationDTO;
+import com.yeoun.inventory.dto.InventorySafetyCheckDTO;
 import com.yeoun.inventory.entity.WarehouseLocation;
 import com.yeoun.inventory.service.InventoryService;
+import com.yeoun.order.dto.WorkOrderDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -37,8 +44,9 @@ public class InventoryRestController {
 	// 재고리스트 조회
 	@PostMapping("")
 	public ResponseEntity<List<InventoryDTO>> inventories(@RequestBody(required = false) InventoryDTO inventoryDTO) {
-		
-		List<InventoryDTO> inventoryDTOList = inventoryService.getInventoryInfo(inventoryDTO != null ? inventoryDTO : new InventoryDTO());
+				
+		List<InventoryDTO> inventoryDTOList = 
+				inventoryService.getInventoryInfo(inventoryDTO != null ? inventoryDTO : new InventoryDTO());
 		
 		return ResponseEntity.ok(inventoryDTOList);
 	}
@@ -118,12 +126,60 @@ public class InventoryRestController {
 	// 대시보드
 	
 	// 상품별 재고정보 조회
-	@GetMapping("/summary")
-	public ResponseEntity<List<Map<String, String>>> getIvSummary() {
-		List<Map<String, String>> ivSummaryList = inventoryService.getIvSummary();
-		
+	@GetMapping("/inventorySafetyStockCheckInfo")
+	public ResponseEntity<List<InventorySafetyCheckDTO>> getIvSummary() {
+		List<InventorySafetyCheckDTO> ivSummaryList = inventoryService.getIvSummary();
 		return ResponseEntity.ok(ivSummaryList);
-	}	
+	}
+	
+	
+	// 입출고 내역 데이터 조회
+	@GetMapping("/ivHistoryGroup")
+	public ResponseEntity<IvHistoryGroupResponse > getIvHistoryGroup() {
+	    LocalDateTime now = LocalDateTime.now();
+	    LocalDateTime oneYearAgo = now.minusYears(1);
+	    
+		List<InventoryHistoryGroupDTO> ivHistoryGroupList = inventoryService.getIvHistoryGroupData(now, oneYearAgo);
+		
+		return ResponseEntity.ok(new IvHistoryGroupResponse(
+            oneYearAgo.toLocalDate().toString(),
+            now.toLocalDate().toString(),
+            ivHistoryGroupList
+		));
+	}
+	// 데이터 보내기위해 묶음 설정
+	public record IvHistoryGroupResponse(
+			String startDate,
+			String endDate,
+			List<InventoryHistoryGroupDTO> data
+			) {}
+	
+	
+	
+	// 원재료id로 재고 수량 조회
+	@GetMapping("/stock/{id}")
+	public ResponseEntity<Map<String, Integer>> getIvStock(@PathVariable("id") String id) {
+		Integer stock = inventoryService.getTotalStock(id);
+		
+		return ResponseEntity.ok(Map.of("stock", stock));
+	}
+	
+	
+	// 원재료id로 재고 수량 조회
+	@GetMapping("/orderData")
+	public ResponseEntity<List<WorkOrderDTO>> getOrderData() {
+		List<WorkOrderDTO> workOrderDTOList = inventoryService.getOrderData();
+		
+		return ResponseEntity.ok(workOrderDTOList);
+	}
+	
+	// 재고 발주 체크 데이터
+	@GetMapping("/inventoryOrderCheck")
+	public ResponseEntity<List<InventoryOrderCheckViewDTO>> getIv() {
+		List<InventoryOrderCheckViewDTO> inventoryOrderCheckDTOList = inventoryService.getIvOrderCheckData();
+		
+		return ResponseEntity.ok(inventoryOrderCheckDTOList);
+	}
 	
 }
 

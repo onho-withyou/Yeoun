@@ -1,7 +1,7 @@
 // 창고 ZONE, RACK, ROW, COL 가져오기
 async function getLocationInfo() {
 	const response = 
-		await fetch('/api/inventorys/locations', {
+		await fetch('/api/inventories/locations', {
 			method: 'GET',
 			headers: {
 				[csrfHeader]: csrfToken,
@@ -221,6 +221,8 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 		const itemId = row.querySelector(".itemId").value;
 		const itemType = row.querySelector(".itemType").value;
 		const inboundItemId = row.querySelector(".inboundItemId").value;
+		// 로트넘버 추가
+		const lotNo = row.querySelector(".prodLotNo").value;
 		
 		items.push({
 			inboundAmount,
@@ -229,10 +231,10 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 			inboundItemId,
 			itemId,
 			itemType,
-			itemName
+			itemName,
+			lotNo
 		});
 	});
-	
 	
 	const inboundId = document.querySelector("#inboundId").value;
 	
@@ -244,6 +246,7 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 		},
 		body: JSON.stringify({
 			inboundId,
+			type: "MAT",
 			items
 		})
 	});
@@ -253,12 +256,12 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 		return;
 	}
 	
-	const data = res.json();
+	const data = await res.json();
 	
 	if (data.success) {
 		alert("입고가 완료되었습니다.");
 		setTimeout(() => {
-			window.location.href = "/inventory/inbound/list";
+			window.location.href = "/inventory/inbound";
 		}, 10); 
 	}
 	

@@ -16,17 +16,18 @@
 	<h2>BOM/안전재고 -모달</h2>
 	 <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="card-title mb-0">BOM/안전재고</h5>
-        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#qcItemModal">
+        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#safetyStockModal">
            안전재고 보기
         </button>
       </div>
       	<div class="d-flex justify-content-end" style="margin:10px;">
-			 <button class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>
-			 <button class="btn btn-danger" type="button">삭제</button>
+			<button id="addBomRowBtn" class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>
+			<button id="saveBomRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
+			<button id="deleteBomRowBtn" class="btn btn-danger" type="button">삭제</button>
 		</div>
-		<div id="bomGrid" style="display: grid;"></div>
+		<div id="bomGrid" style="display: grid;margin:10px;"></div>
 		<!-- QC 항목 등록 모달 -->
-		<div class="modal fade" id="qcItemModal" tabindex="-1">
+		<div class="modal fade" id="safetyStockModal" tabindex="-1">
 		  <div class="modal-dialog modal-xl modal-dialog-centered">
 		    <div class="modal-content">
 		      <div class="modal-header">
@@ -36,14 +37,14 @@
 		
 		      <div class="modal-body small-text">
 		       	<div class="d-flex justify-content-end" style="margin:10px;">
-			  		<button class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>
-			  		<button class="btn btn-danger" type="button">삭제</button>
+			  		<button id="addSafetyStockRowBtn" class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>
+					<button id="saveSafetyStockRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
+			  		<button id="deleteSafetyStockRowBtn" class="btn btn-danger" type="button">삭제</button>
 				 </div>
-		         <div id="safetyStockGrid" style="display: grid;"></div>
+		         <div id="safetyStockGrid" style="display: grid;margin-right:5px;"></div>
 		      </div>
 		      <div class="modal-footer">
-		        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">닫기</button>
-		        <button class="btn btn-primary btn-sm">저장</button>
+		        <button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
 		      </div>
 		    </div>
 		  </div>

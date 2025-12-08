@@ -1,7 +1,12 @@
 package com.yeoun.masterData.service;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.dao.DataIntegrityViolationException;
+
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +31,178 @@ public class ProductMstService {
 		return productMstRepository.findAll();
 	}
 
-	//2. 완제품 그리드 수정
+	//2. 완제품 그리드 저장
+	// 프론트엔드에서 보낼 것으로 예상되는 구조:
+	// { createdRows: [{prdId:..., itemName:...}, ...], updatedRows: [...], deletedRows: [...] }
+	public String saveProductMst(String empId, Map<String,Object> param) {
+		log.info("productMstSaveList------------->{}",param);
+		try {
+			// createdRows
+			Object createdObj = param.get("createdRows");
+			if (createdObj instanceof List) {
+				@SuppressWarnings("unchecked")
+				List<Map<String,Object>> created = (List<Map<String,Object>>) createdObj;
+				for (Map<String,Object> row : created) {
+					ProductMst p = mapToProduct(row);
+					p.setCreatedId(empId);
+					productMstRepository.save(p);
+				}
+			}
+
+			// updatedRows
+			// Object updatedObj = param.get("updatedRows");
+			// if (updatedObj instanceof List) {
+			// 	@SuppressWarnings("unchecked")
+			// 	List<Map<String,Object>> updated = (List<Map<String,Object>>) updatedObj;
+			// 	java.util.List<String> missingIds = new ArrayList<>();
+			// 	for (Map<String,Object> row : updated) {
+			// 		Object idObj = row.get("prdId");
+			// 		String prdId = (idObj == null) ? "" : String.valueOf(idObj).trim();
+
+			// 		ProductMst target = null;
+			// 		if (!prdId.isEmpty()) {
+			// 			Optional<ProductMst> opt = productMstRepository.findById(prdId);
+			// 			if (opt.isPresent()) target = opt.get();
+			// 		}
+
+			// 		// prdId가 비어있거나 조회 실패한 경우, itemName+prdName로 매핑을 시도
+			// 		if (target == null) {
+			// 			Object itemNameObj = row.get("itemName");
+			// 			Object prdNameObj = row.get("prdName");
+			// 			if (itemNameObj != null && prdNameObj != null) {
+			// 				String itemName = String.valueOf(itemNameObj);
+			// 				String prdName = String.valueOf(prdNameObj);
+			// 				Optional<ProductMst> opt2 = productMstRepository.findByItemNameAndPrdName(itemName, prdName);
+			// 				if (opt2.isPresent()) target = opt2.get();
+			// 			}
+			// 		}
+
+			// 		if (target != null) {
+			// 			// 기존 레코드 업데이트
+			// 			applyMapToProduct(existingToMap(target), target, row);
+			// 			target.setUpdatedId(empId);
+			// 			productMstRepository.save(target);
+			// 		} else {
+			// 			// 존재하지 않는 prdId가 명시된 경우: PK 변경 시 의도치 않은 insert를 막기 위해 에러 처리
+			// 			if (!prdId.isEmpty()) {
+			// 				missingIds.add(prdId);
+			// 				continue;
+			// 			}
+			// 			// prdId가 비어있고 매칭되는 기존 레코드가 없으면 새로 저장 (신규 추가 케이스)
+			// 			ProductMst p = mapToProduct(row);
+			// 			p.setCreatedId(empId);
+			// 			productMstRepository.save(p);
+			// 		}
+			// 	}
+			// 	if (!missingIds.isEmpty()) {
+			// 		// 명시된 prdId들이 존재하지 않음: 롤백을 유도하고 에러 반환
+			// 		throw new IllegalArgumentException("Unknown prdId(s) for update: " + String.join(",", missingIds));
+			// 	}
+			// }
+
+			// // deletedRows
+			// Object deletedObj = param.get("deletedRows");
+			// if (deletedObj instanceof java.util.List) {
+			// 	@SuppressWarnings("unchecked")
+			// 	java.util.List<java.util.Map<String,Object>> deleted = (java.util.List<java.util.Map<String,Object>>) deletedObj;
+			// 	for (java.util.Map<String,Object> row : deleted) {
+			// 		Object idObj = row.get("prdId");
+			// 		if (idObj == null) continue;
+			// 		String prdId = String.valueOf(idObj);
+			// 		if (productMstRepository.existsById(prdId)) {
+			// 			productMstRepository.deleteById(prdId);
+			// 		}
+			// 	}
+			// }
+
+			return "success";
+		} catch (Exception e) {
+			log.error("saveProductMst error", e);
+			return "error: " + e.getMessage();
+		}
+	}
+
+	// 유틸: Map 데이터를 ProductMst 엔티티로 변환
+	private ProductMst mapToProduct(Map<String,Object> row) {
+		ProductMst p = new ProductMst();
+		if (row == null) return p;
+		if (row.get("prdId") != null) p.setPrdId(String.valueOf(row.get("prdId")));
+		if (row.get("itemName") != null) p.setItemName(String.valueOf(row.get("itemName")));
+		if (row.get("prdName") != null) p.setPrdName(String.valueOf(row.get("prdName")));
+		if (row.get("prdCat") != null) p.setPrdCat(String.valueOf(row.get("prdCat")));
+		if (row.get("prdUnit") != null) p.setPrdUnit(String.valueOf(row.get("prdUnit")));
+		if (row.get("prdStatus") != null) p.setPrdStatus(String.valueOf(row.get("prdStatus")));
+		if (row.get("prdSpec") != null) p.setPrdSpec(String.valueOf(row.get("prdSpec")));
+		if (row.get("unitPrice") != null) {
+			try { p.setUnitPrice(new java.math.BigDecimal(String.valueOf(row.get("unitPrice")))); } catch(Exception e) {}
+		}
+		if (row.get("effectiveDate") != null) {
+			try { p.setEffectiveDate(Integer.valueOf(String.valueOf(row.get("effectiveDate")))); } catch(Exception e) {}
+		}
+		return p;
+	}
 	//3. 완제품 그리드 삭제
+	/**
+	 * 주어진 키 목록에 해당하는 제품을 삭제합니다.
+	 * 입력으로 Long, Integer, String 등 다양한 형태의 키를 허용합니다.
+	 * 반환값은 처리 결과 메시지이며, 성공 시 삭제된 건수를 포함합니다.
+	 */
+	public Map<String, Object> deleteProduct(Map<String, Object> param) {
+		log.info("deleteProduct------------->{}",param);
+		Map<String, Object> result = new HashMap<>();
+		try {
+			Object rowKeysObj = param.get("rowKeys");
+			if (!(rowKeysObj instanceof List)) {
+				result.put("status", "no_data");
+				result.put("deletedCount", 0);
+				return result;
+			}
+			@SuppressWarnings("unchecked")
+			List<Object> rowKeys = (List<Object>) rowKeysObj;
+			List<String> prdIds = rowKeys.stream()
+				.map(key -> {
+					if (key instanceof Number) {
+						return String.valueOf(((Number) key).longValue());
+					} else {
+						return String.valueOf(key);
+					}
+				})
+				.filter(s -> s != null && !s.trim().isEmpty())
+				.collect(Collectors.toList());
+
+			if (prdIds.isEmpty()) {
+				result.put("status", "no_data");
+				result.put("deletedCount", 0);
+				return result;
+			}
+
+			List<ProductMst> existing = productMstRepository.findAllById(prdIds);
+			if (existing == null || existing.isEmpty()) {
+				result.put("status", "no_exist");
+				result.put("deletedCount", 0);
+				return result;
+			}
+
+			try {
+				productMstRepository.deleteAll(existing);
+			} catch (DataIntegrityViolationException dive) {
+				log.error("deleteProduct DataIntegrityViolation (FK constraint?)", dive);
+				result.put("status", "constraint_violation");
+				result.put("message", "삭제 실패: 연관된 데이터가 존재합니다. 먼저 관련 데이터를 삭제하세요.");
+				result.put("deletedCount", 0);
+				return result;
+			}
+
+			result.put("status", "success");
+			result.put("deletedCount", existing.size());
+			return result;
+		} catch (Exception e) {
+			log.error("deleteProduct error", e);
+			result.put("status", "error");
+			result.put("message", e.getMessage());
+			result.put("deletedCount", 0);
+			return result;
+		}
+	}
 
 }

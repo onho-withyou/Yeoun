@@ -2,6 +2,11 @@ package com.yeoun.order.dto;
 
 import java.time.LocalDateTime;
 
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
+
+import com.yeoun.order.entity.WorkOrder;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,4 +32,28 @@ public class WorkOrderDTO {
     private LocalDateTime createdDate;		// 작성일자
     private LocalDateTime updatedDate;		// 수정일자
     private String remark;					// 비고(특이사항 및 메모)
+    
+    // 작업이 이름 추가
+    private String createdUserName;
+    // 출고확인
+    private String outboundYn;
+    
+    // --------------------------------------------------------------
+    private static ModelMapper modelMapper = new ModelMapper();
+    
+    // static 블록을 사용하여 설정 초기화
+    static {
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+    }
+    
+    public static WorkOrderDTO fromEntity(WorkOrder order) {
+    	WorkOrderDTO workOrderDTO = modelMapper.map(order, WorkOrderDTO.class);
+    	workOrderDTO.setProductId(order.getProduct().getPrdId());
+    	workOrderDTO.setProductName(order.getProduct().getPrdName());
+    	workOrderDTO.setLineId(order.getLine().getLineId());
+    	workOrderDTO.setCreatedId(order.getCreatedEmp().getEmpId());
+    	workOrderDTO.setCreatedUserName(order.getCreatedEmp().getEmpName());
+    	
+    	return workOrderDTO;
+    }
 }

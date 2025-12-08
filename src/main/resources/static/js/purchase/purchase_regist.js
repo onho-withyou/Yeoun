@@ -92,6 +92,13 @@ function selectClient(item, data) {
 	// 기존 내용 초기화
 	itemSelect.innerHTML = "";
 	
+	// 기본 안내 옵션
+	const defaultOption = document.createElement("option");
+	defaultOption.value = "";
+	defaultOption.textContent = "품목을 선택하세요";
+	defaultOption.selected = true; // 기본으로 선택
+	itemSelect.appendChild(defaultOption);
+	
 	// 공급 가능한 품목이 없는 경우
 	if (availableItems.length === 0) {
 		const option = document.createElement("option");
@@ -128,7 +135,40 @@ function selectClient(item, data) {
 itemSelect.addEventListener("change", () => {
 	const option = itemSelect.options[itemSelect.selectedIndex];
 	
+	// 값이 없으면 리턴
 	if (!option.value) return;
+	
+	// 중복 품목 체크 로직
+	let isDuplicate = false;
+	const existingRow = orderTableBody.querySelectorAll("tr");
+	const selectedItemId = option.value;
+	const orderUnit = parseInt(option.dataset.unit) || 1; // 주문단위
+	
+	existingRow.forEach(row => {
+		 const itemIdInput = row.querySelector("input[name=itemId]");
+		 
+		 if (itemIdInput && itemIdInput.value === selectedItemId) {
+			// 이미 존재하는 품목이면 수량만 증가
+			const qtyInput = row.querySelector(".orderQty");
+			let currentQty = parseInt(qtyInput.value);
+			
+			// 주문 단위만큼 증가
+			currentQty += orderUnit;
+			qtyInput.value = currentQty;
+			
+			// change 이벤트 강제 발생시켜 가격 재계산 로직 실행
+			qtyInput.dispatchEvent(new Event("change", { bubbles: true }));
+			
+			isDuplicate = true;
+		 }
+	});
+	
+	// 중복이면 함수 종료(새 행을 추가 하지 않음)
+	if (isDuplicate) {
+		itemSelect.value = "";
+		return;
+	}
+	
 	
 	// 선택한 품목의 리드타임 적용(오늘 날짜 + 리드타임)
 	const leadDays = parseInt(option.dataset.leadDays, 10);
@@ -148,8 +188,6 @@ itemSelect.addEventListener("change", () => {
 	const supplyPrice = minOrder * unitPrice;
 	const tax = Math.round(supplyPrice * 0.1);
 	const total = supplyPrice + tax;
-	
-	console.log(option);
 	
 	// 테이블에 추가할 row 작성
 	const row = `

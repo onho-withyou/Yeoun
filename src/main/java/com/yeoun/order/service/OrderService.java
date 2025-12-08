@@ -23,12 +23,22 @@ import com.yeoun.process.entity.WorkOrderProcess;
 import com.yeoun.process.repository.WorkOrderProcessRepository;
 import com.yeoun.production.entity.ProductionPlan;
 import com.yeoun.production.enums.ProductionStatus;
+import com.yeoun.order.dto.WorkOrderSearchDTO;
+
 import org.springframework.stereotype.Service;
 
 import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.masterData.entity.ProdLine;
 import com.yeoun.masterData.entity.ProductMst;
+
+import com.yeoun.masterData.repository.BomMstRepository;
+import com.yeoun.masterData.repository.ProdLineRepository;
+import com.yeoun.masterData.repository.ProductMstRepository;
+import com.yeoun.order.dto.WorkOrderDTO;
+import com.yeoun.order.dto.WorkOrderListDTO;
 import com.yeoun.order.mapper.OrderMapper;
+import com.yeoun.order.repository.WorkOrderRepository;
+import com.yeoun.outbound.dto.OutboundOrderDTO;
 import com.yeoun.production.dto.ProductionPlanListDTO;
 import com.yeoun.production.repository.ProductionPlanRepository;
 
@@ -46,6 +56,7 @@ public class OrderService {
 	private final ProductMstRepository productMstRepository;
 	private final ProductionPlanRepository productionPlanRepository;
 	private final WorkOrderRepository workOrderRepository;
+
 	private final EmpRepository empRepository;
 	private final WorkScheduleRepository workScheduleRepository;
 	private final ProcessMstRepository processMstRepository;
@@ -53,6 +64,7 @@ public class OrderService {
 	private final RouteStepRepository routeStepRepository;
 	private final RouteHeaderRepository routeHeaderRepository;
 	private final WorkOrderProcessRepository workOrderProcessRepository;
+
 
 	// =======================================================
 	// 작업지시 목록 조회
@@ -328,6 +340,18 @@ public class OrderService {
 				.build();
 
 	}
+  
+	// 작업지시서 전체 조회
+	public List<WorkOrderDTO> findAllWorkList() {
+  //		List<WorkOrder> workOrders = workOrderRepository.findByOutboundYn("N");
+		// 상태가 "N"인게 없어서 "Y"로 작업 후 변경할 예정
+		List<WorkOrder> workOrders = workOrderRepository.findByOutboundYn("Y");
+		
+		return workOrders.stream()
+				.map(WorkOrderDTO::fromEntity)
+				.collect(Collectors.toList());
+	}
+	
 
 	// =======================================================
 	// BOM 조회 (여기서부터 재고까지 보류)

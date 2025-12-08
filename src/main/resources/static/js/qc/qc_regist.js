@@ -74,6 +74,12 @@ document.addEventListener("DOMContentLoaded", () => {
 		
         openQcRegModal(row);
     });
+	
+	// qc 등록 저장 버튼 클릭 이벤트
+	const btnSave = document.getElementById("btnQcSave");
+	if (btnSave) {
+		btnSave.addEventListener("click", onClickSaveQcResult);
+	}
 });
 
 // 목록 조회
@@ -170,4 +176,86 @@ function renderQcDetailTable(detailList) {
 
     tbody.appendChild(tr);
   });
+}
+
+function collectDetailRowsFromTable() {
+	const tbody = document.getElementById("qcDetailTbody");
+	const trs = tbody.querySelectorAll("tr");
+	const detailRows = [];
+	
+	trs.forEach((tr) => {
+		const qcResultDtlId = tr.querySelector('input[name$=".qcResultDtlId"]').value;
+	    const qcItemId = tr.querySelector('input[name$=".qcItemId"]').value;
+	    const measureValue = tr.querySelector('input[name$=".measureValue"]').value;
+	    const result = tr.querySelector('select[name$=".result"]').value;
+	    const remark = tr.querySelector('input[name$=".remark"]').value;
+
+		detailRows.push({
+			qcResultDtlId,
+			qcItemId,
+	        measureValue,
+	        result,
+	        remark
+		});
+	});
+	
+	return detailRows;
+}
+
+
+function onClickSaveQcResult() {
+  const qcResultId = document.getElementById("qcResultId").value;
+  if (!qcResultId) {
+    alert("QC 결과 ID가 없습니다.");
+    return;
+  }
+
+  const detailRows = collectDetailRowsFromTable();
+
+  // 혹시 하나도 없으면 방어 로직
+  if (detailRows.length === 0) {
+    alert("저장할 QC 항목이 없습니다.");
+    return;
+  }
+
+  // CSRF 토큰 (layout에 이미 meta로 넣어놨던 거 재사용)
+  // <meta name="_csrf_token" th:content="${_csrf.token}">
+  // <meta name="_csrf_headerName" th:content="${_csrf.headerName}">
+  const csrfTokenMeta = document.querySelector('meta[name="_csrf_token"]');
+  const csrfHeaderMeta = document.querySelector('meta[name="_csrf_headerName"]');
+
+  const csrfToken = csrfTokenMeta ? csrfTokenMeta.content : null;
+  const csrfHeaderName = csrfHeaderMeta ? csrfHeaderMeta.content : null;
+
+  fetch(`/qc/${qcResultId}/save`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(csrfToken && csrfHeaderName ? { [csrfHeaderName]: csrfToken } : {})
+    },
+    body: JSON.stringify(detailRows)
+  })
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error("HTTP " + res.status);
+      }
+      return res.json();
+    })
+    .then((data) => {
+      console.log("QC 저장 결과:", data);
+
+      if (data.success) {
+        alert(data.message || "QC 검사 결과가 저장되었습니다.");
+
+        // 모달 닫고 목록 새로고침
+        qcRegModal.hide();
+        loadQcRegistGrid();
+      } else {
+        alert(data.message || "QC 저장 중 오류가 발생했습니다.");
+      }
+    })
+    .catch((err) => {
+      console.error("QC 저장 오류:", err);
+      alert("QC 저장 중 오류가 발생했습니다.");
+    });
 }

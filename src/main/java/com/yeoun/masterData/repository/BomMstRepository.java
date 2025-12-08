@@ -7,12 +7,13 @@ import org.springframework.stereotype.Repository;
 
 import com.yeoun.masterData.entity.BomMst;
 import com.yeoun.masterData.entity.BomMstId;
-import com.yeoun.masterData.entity.MaterialMst;
 
 @Repository
 public interface BomMstRepository extends JpaRepository<BomMst, BomMstId>{
   
   // 특정 품목의 bom 찾기
 	List<BomMst> findByPrdId(String prdId);
+
+	java.util.Optional<BomMst> findByPrdIdAndMatId(String prdId, String matId);
 
 }

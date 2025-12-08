@@ -37,21 +37,24 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 		List<OrderItemDTO> findConfirmedOrderItems();	
 	
 	// 1) 확정된 수주를 제품별로 그룹화
-	@Query(value = """
+	@Query("""
 		    SELECT
-		        oi.PRD_ID AS prdId,
-		        p.PRD_NAME AS prdName,
-		        SUM(oi.ORDER_QTY) AS totalOrderQty
-		    FROM ORDER_ITEM oi
-		    JOIN PRODUCT_MST p ON p.PRD_ID = oi.PRD_ID
-		    JOIN ORDERS o ON o.ORDER_ID = oi.ORDER_ID
-		    WHERE o.ORDER_STATUS = 'CONFIRMED'
-		      AND oi.ITEM_STATUS != 'PLANNED' 
-		      AND (:group = '' OR :group IS NULL OR p.ITEM_NAME = :group)
-		    GROUP BY oi.PRD_ID, p.PRD_NAME
-		""", nativeQuery = true)
-		List<Map<String,Object>> findConfirmedGrouped(@Param("group") String group);
+		        oi.prdId AS prdId,
+		        p.prdName AS prdName,
+		        SUM(oi.orderQty) AS totalOrderQty,
+		        COUNT(*) AS orderCount,
+		        MIN(o.deliveryDate) AS earliestDeliveryDate
+		    FROM OrderItem oi
+		    JOIN oi.order o
+		    JOIN oi.product p
+		    WHERE o.orderStatus = 'CONFIRMED'
+		      AND oi.itemStatus <> 'PLANNED'          
+		      AND (:group IS NULL OR p.itemName = :group)
+		    GROUP BY oi.prdId, p.prdName
+		""")
+		List<Map<String, Object>> findConfirmedGrouped(@Param("group") String group);
 
+  
 
     // 2) 특정 제품에 대한 확정된 수주 상세 조회
     @Query(value = """

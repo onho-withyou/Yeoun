@@ -101,5 +101,10 @@ public class WorkOrder {
     @Column
     private String remark;
 	
+    // ======================================
+    // 출고 상태 업데이트
+    public void updateOutboundYn(String outboundYn) {
+    	this.outboundYn = outboundYn;
+    }
 	
 }

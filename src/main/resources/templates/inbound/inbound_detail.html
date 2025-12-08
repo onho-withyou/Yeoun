@@ -12,11 +12,12 @@
 			<div class="card p-4 mb-5">
 				<div class="card-body">
 					 <div class="row row-cols-3 g-4">
-						<div class="col">
+						<div class="col" th:if="${receiptDTO.materialId != null}">
 						    <div class="text-secondary mb-1">거래처명</div>
 						    <div class="fw-semibold" th:text="${receiptDTO.clientName}"></div>
 						</div>
-						<div class="col">
+
+						<div class="col" th:if="${receiptDTO.materialId != null}">
 						    <div class="text-secondary mb-1">담당자</div>
 						    <div class="fw-semibold" th:text="${receiptDTO.clientName}"></div>
 						</div>
@@ -24,9 +25,23 @@
 						    <div class="text-secondary mb-1">납기일자</div>
 						    <div class="fw-semibold" th:text="${#temporals.format(receiptDTO.expectArrivalDate, 'yyyy-MM-dd')}"></div>
 						</div>
-						<div class="col">
+						<div class="col" th:if="${receiptDTO.prodId != null}">
+						    <div class="text-secondary mb-1">작업지시서</div>
+						    <div class="d-flex">
+						    	<div class="fw-semibold" th:text="${receiptDTO.prodId}"></div>
+	   							<i class="fa-regular fa-window-restore"  style="cursor:pointer;"  
+									th:attr="data-material-id=${receiptDTO.materialId}"
+									onclick="openDetailWindow(this.dataset.materialId)"></i>
+						    </div>
+						</div>
+						<div class="col" th:if="${receiptDTO.materialId != null}">
 						    <div class="text-secondary mb-1">발주번호</div>
-						    <div class="fw-semibold" th:text="${receiptDTO.materialId}"></div>
+						    <div class="d-flex">
+							    <div class="fw-semibold" th:text="${receiptDTO.materialId}"></div>
+	   							<i class="fa-regular fa-window-restore"  style="cursor:pointer;"  
+									th:attr="data-material-id=${receiptDTO.materialId}"
+									onclick="openDetailWindow(this.dataset.materialId)"></i>
+						    </div>
 						</div>
 						<div class="col">
 							<div class="text-secondary mb-1">상태</div>
@@ -35,12 +50,12 @@
 							    <span th:if="${receiptDTO.inboundStatus == 'COMPLETED'}" class="badge bg-success">입고완료</span>
 							</div>
 						</div>
-						<div class="col">
-							<div class="text-secondary mb-1">발주내역</div>
-							<i class="fa-regular fa-window-restore"  style="cursor:pointer;"  
-								th:attr="data-material-id=${receiptDTO.materialId}"
-								onclick="openDetailWindow(this.dataset.materialId)"></i>
-						</div>
+<!-- 						<div class="col" th:if="${receiptDTO.materialId != null}"> -->
+<!-- 							<div class="text-secondary mb-1">발주내역</div> -->
+<!-- 							<i class="fa-regular fa-window-restore"  style="cursor:pointer;"   -->
+<!-- 								th:attr="data-material-id=${receiptDTO.materialId}" -->
+<!-- 								onclick="openDetailWindow(this.dataset.materialId)"></i> -->
+<!-- 						</div> -->
 					 </div>
 				</div>
 			</div>
@@ -57,8 +72,8 @@
 							<th:block th:if="${receiptDTO.inboundStatus == 'PENDING_ARRIVAL'}">
 								<thead class="table-light">
 									<tr class="text-center">
-										<th>원재료명</th>
-										<th>발주 수량</th>
+										<th>입고 상품</th>
+										<th>요청 수량</th>
 										<th style="width: 9em;">입고 수량</th>
 										<th style="width: 9em;">불량 수량</th>
 										<th>ZONE</th>
@@ -81,6 +96,7 @@
 											<input type="hidden" th:value="${item.itemType}" class="itemType" />
 											<input type="hidden" th:value="${item.itemId}" class="itemId" />
 											<input type="hidden" th:value="${item.inboundItemId}" class="inboundItemId" />
+											<input type="hidden" th:value="${item.lotNo}" class="prodLotNo">
 										</td>
 										<td><select class="moveZone form-select" th:attr="data-index=${iterStat.index}"></select></td>
 										<td><select class="moveRack form-select" th:attr="data-index=${iterStat.index}"></select></td>
@@ -92,8 +108,8 @@
 							 <th:block th:unless="${receiptDTO.inboundStatus == 'PENDING_ARRIVAL'}">
 							 	<thead class="table-light">
 									<tr class="text-center">
-										<th>원재료명</th>
-										<th>발주 수량</th>
+										<th>입고 상품</th>
+										<th>요청 수량</th>
 										<th style="width: 9em;">입고 수량</th>
 										<th style="width: 9em;">불량 수량</th>
 										<th>창고위치</th>
