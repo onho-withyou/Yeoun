@@ -37,7 +37,7 @@ public class InboundItem {
 	@Column(name = "INBOUND_ITEM_ID", updatable = false)
 	private Long InboundItemId; // 입고대기품목 id
 	
-	@Column(nullable = false)
+	@Column(nullable = true)
 	private String lotNo; // 로트넘버
 	
 	@ManyToOne
