@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 	orderData = await fetchOrderListData();
 	// 발주체크 데이터
 	ivOrderCheckData = await fetchIvOrderCheckData();
-	console.log(ivOrderCheckData,'@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
+//	console.log(ivOrderCheckData,'@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
 
 		
 	// 차트타입 버튼 active 설정
@@ -471,13 +471,13 @@ function renderOrderGrid() {
 				if (target && target.tagName === "BUTTON") {
 					
 					const rowData = outboundNOrderGrid.getRow(event.rowKey);
-					console.log(rowData);
+//					console.log(rowData);
 
 					//모달 열기
 					const modalEl = document.getElementById("matObModal");
 					const bsModal = new bootstrap.Modal(modalEl);
 					bsModal.show();
-					console.log(rowData);
+//					console.log(rowData);
 //					// 모달세팅
 					await initOutboundModalByRow(rowData);
 				}
@@ -555,7 +555,7 @@ function renderNeedOrderStockGrid() {
 	// 발주필요 재고 데이터
 	const needOrderStocks = getNeedOrderStocks();
 	
-	console.log(needOrderStocks,"!!!!!!!!!!!!!!!!!!@#")
+//	console.log(needOrderStocks,"!!!!!!!!!!!!!!!!!!@#")
 	
 	
 	// 그리드 보이는 카드
@@ -628,7 +628,7 @@ function renderNeedOrderStockGrid() {
 			if (target && target.tagName === "BUTTON") {
 				
 				const rowData = safetyStockGrid.getRow(event.rowKey);
-				console.log(rowData);
+//				console.log(rowData);
 
 				//모달 열기
 				const modalEl = document.getElementById("modalCenter");
@@ -834,7 +834,7 @@ function renderExpireDisposalGrid() {
 			if (target && target.tagName === "BUTTON") {
 				
 				const rowData = expireDisposalGrid.getRow(event.rowKey);
-				console.log(rowData);
+//				console.log(rowData);
 				// 같은 LOT, 같은 상품(itemId)만 필터
 				const sameLotList = inventoryInfo.filter(item =>
 					item.lotNo === rowData.lotNo &&
@@ -922,7 +922,7 @@ async function fetchTodayOutboundData() {
 	
 	const startDate = today.toISOString().slice(0, 10);
 	const endDate = today.toISOString().slice(0, 10);
-	 console.log(startDate, endDate);
+//	 console.log(startDate, endDate);
 	const MATERIAL_OUTBOUND_LIST = 
 		`/inventory/outbound/list/data` +
 		`?startDate=${startDate}` +
