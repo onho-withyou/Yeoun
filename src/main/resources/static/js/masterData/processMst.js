@@ -57,7 +57,7 @@ const grid2 = new Grid({
 	    	perPage: 10
         }
 });
-/*//
+
 //g-grid3 신규라우트 모달 그리드 - 공정단계
 const grid3 = new Grid({
 	    el: document.getElementById('processStepGrid'),
@@ -68,7 +68,7 @@ const grid3 = new Grid({
 	    ,{header: '표준시간(분)' ,name: 'mat_id' ,align: 'center',filter: "select"}
 	    ,{header: 'QC 여부' ,name: 'mat_name' ,align: 'center',filter: "select"}
         ,{header: '비고' ,name: 'mat_qty' ,align: 'center'}
-	    ,{header: '삭제' ,name: 'mat_unit' ,align: 'center'}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               '}
+	    ,{header: '삭제' ,name: 'mat_unit' ,align: 'center'}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
           
 	    ],
 	    data: []
@@ -81,7 +81,33 @@ const grid3 = new Grid({
 	    	useClient: true,
 	    	perPage: 10
         }
-});*/
+});
+
+
+//g-grid3 신규라우트 모달 그리드 - 공정코드조회 모달
+const grid4 = new Grid({
+	    el: document.getElementById('routeStepCodeGrid'),
+        rowHeaders: ['rowNum','checkbox'],
+	    columns: [
+	    {header: '공정코드' ,name: 'bom_id' ,align: 'center'}
+	    ,{header: '공정명' ,name: 'prd_id' ,align: 'center',width: 230}
+	    ,{header: '표준시간(분)' ,name: 'mat_id' ,align: 'center',filter: "select"}
+	    ,{header: 'QC 여부' ,name: 'mat_name' ,align: 'center',filter: "select"}
+        ,{header: '비고' ,name: 'mat_qty' ,align: 'center'}
+	    ,{header: '삭제' ,name: 'mat_unit' ,align: 'center'}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+          
+	    ],
+	    data: []
+	    ,bodyHeight: 200 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
+	    ,height:100
+	    ,columnOptions: {
+	    	resizable: true
+        }
+	    /*,pageOptions: {
+	    	useClient: true,
+	    	perPage: 10
+        }*/
+});
 
 let processLookupModal; // 공정코드 조회 모달
 document.addEventListener("DOMContentLoaded", () => {
