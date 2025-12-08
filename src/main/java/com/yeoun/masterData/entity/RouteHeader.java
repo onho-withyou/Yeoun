@@ -33,7 +33,7 @@ public class RouteHeader {
 	// 제품코드
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "PRD_ID", nullable = false)
-	private ProductMst product;
+	private ProductMst prdId;
 	
 	// 라우트명
 	@Column(name = "ROUTE_NAME", length = 100, nullable = false)
