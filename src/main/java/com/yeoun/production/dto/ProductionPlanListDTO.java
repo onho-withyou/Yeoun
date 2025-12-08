@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 public interface ProductionPlanListDTO {
     String getPlanId();
-    LocalDateTime getCreatedAt();
+    String getCreatedAt();
     String getItemName();
     BigDecimal getTotalQty();
     String getStatus();

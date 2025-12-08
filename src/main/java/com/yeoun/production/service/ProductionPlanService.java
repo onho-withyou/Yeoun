@@ -241,7 +241,7 @@ public class ProductionPlanService {
     자동 추천 기반 생산계획 생성
  ============================================================ */
  @Transactional
- public String createAutoPlan(List<Map<String, Object>> requestList, String createdBy) {
+ public String createAutoPlan(List<Map<String, Object>> requestList, String createdBy, String memo) {
 
      if (requestList == null || requestList.isEmpty()) {
          throw new IllegalArgumentException("자동 생산계획 생성 실패: 요청 데이터 없음");
@@ -270,7 +270,7 @@ public class ProductionPlanService {
 	            .planDate(LocalDate.now())
 	            .dueDate(LocalDate.now().plusDays(7))
 	            .status(ProductionStatus.PLANNING) 
-	            .planMemo("추천 기반 자동 생성 계획")
+	            .planMemo(memo)
 	            .createdBy(createdBy)
 	            .build();
 	
