@@ -60,8 +60,6 @@ public interface ProductionPlanRepository extends JpaRepository<ProductionPlan, 
     	    nativeQuery = true)
     	List<Map<String, Object>> findBomItems(@Param("prdId") String prdId);
 
-
-
 }
 
 

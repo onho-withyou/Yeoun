@@ -1,6 +1,6 @@
 package com.yeoun.order.controller;
 
-import com.yeoun.order.dto.WorkOrderSearchDTO;
+import com.yeoun.order.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -8,11 +8,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import com.yeoun.order.dto.WorkOrderDTO;
 import com.yeoun.order.dto.WorkOrderListDTO;
@@ -49,6 +49,23 @@ public class OrderController {
     @ResponseBody
     public List<WorkOrderListDTO> listData (WorkOrderSearchDTO dto){
         return orderService.loadAllOrders(dto);
+    }
+
+    // =====================================================
+    // 새 작업지시 등록
+    @PostMapping("/create")
+    public String createWorkOrder (
+            @ModelAttribute("workOrderRequest")WorkOrderRequest req, Authentication auth){
+        orderService.createWorkOrder(req, auth.getName());
+        return "redirect:/order/list";
+    }
+
+    // =====================================================
+    // 새 작업지시 등록
+    @GetMapping("/detail/{id}")
+    @ResponseBody
+    public WorkOrderDetailDTO getWorkOrderDetail (@PathVariable("id") String id){
+        return orderService.getDetailWorkOrder(id);
     }
 
     @GetMapping("/schedule")
