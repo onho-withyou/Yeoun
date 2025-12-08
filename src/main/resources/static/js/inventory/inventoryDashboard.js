@@ -8,6 +8,7 @@ let orderData; //작업지시서데이터
 let ivOrderCheckData;
 
 let outboundNOrderGrid; // 작업지시서그리드객체
+let outboundShipmentGrid; // 출하지시서 그리드 객체
 
 let viewMode = 'month'; // 차트 뷰모드
 let trendChart; // 차트객체
@@ -81,6 +82,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 	// 출고등록 필요한 작업지시서 표시
 	renderOrderGrid();
+	// 출고등록 필요한 출하지시서 표시\
+	renderShipmentGrid();
 		
 	//발주 필요 수량 표시
 	let lowStockCnt = 0;
@@ -533,6 +536,113 @@ async function initOutboundModalByRow(rowData) {
 	const changeEvent = new Event("change");
 	matObWorkOrderSelect.dispatchEvent(changeEvent);
 	
+}
+
+// -------------------------------------------------------------------
+// 출고지시 내려지지않은 출하지시서 그리드
+async function renderShipmentGrid() {
+	const shipmentData = await loadShipmentList();
+	
+//	const filteredData = shipmentData.filter(shipment => {
+//		shipment.
+//	})
+	if(!shipmentData) return;
+	const gridEl = document.getElementById('outboundShipmentGrid');
+	const Grid = tui.Grid;
+
+	if (outboundShipmentGrid) outboundShipmentGrid.destroy();
+
+	gridLangSet(Grid);
+	
+	outboundShipmentGrid = new Grid({
+	   el: gridEl,
+	   bodyHeight: 160,
+	   rowHeaders: ['rowNum'],
+	   pageOptions: { useClient: true, perPage: 5 },
+	   columns: [
+		{ header: '출하지시서', name: 'shipmentId', minWidth: 140 },
+		{ header: '거래처',     name: 'clientName', minWidth: 120 },
+		{ header: '출고예정일', name: 'startDate',  minWidth: 120, align: 'center',
+			formatter: ({ value }) => value ? value.replace('T', ' ') : ''
+		},
+		{
+			header: '출고등록',
+			name: 'btn',
+			width: 100,
+			align: 'center',
+			formatter: ({ rowKey }) =>
+			`<button type="button" class="btn btn-primary btn-sm" data-row="${rowKey}">출고등록</button>`
+		}
+		],
+		data: shipmentData   // 여기서 /api/shipment/list 결과 사용
+	 });
+	 
+	outboundShipmentGrid.on('click', async (event) => {
+		if (event.columnName !== 'btn') return;
+		const target = event.nativeEvent.target;
+		if (!target || target.tagName !== 'BUTTON') return;
+		
+		const rowData = outboundShipmentGrid.getRow(event.rowKey);
+		if (!rowData) return;
+		
+		const modalEl = document.getElementById('prdObModal');
+		const bsModal = new bootstrap.Modal(modalEl);
+		bsModal.show();
+		
+		await initShipmentModalByRow(rowData);
+	});
+}
+
+async function initShipmentModalByRow(rowData) {
+	const shipmentSelect  = document.querySelector("#shipmentSelect");
+	const shipmentIdInput = document.querySelector("#shipmentId");
+	const processByName   = document.querySelector("#processByName");
+	const processByEmpId  = document.querySelector("#processByEmpId");
+	const shopClientName  = document.querySelector("#shopClientName");
+	const expectDate      = document.querySelector("#expectDate");
+	
+	// 초기화
+	shipmentSelect.innerHTML = `<option value="">출하지시서를 선택하세요</option>`;
+	shipmentIdInput.value = '';
+	processByName.value = '';
+	processByEmpId.value = '';
+	shopClientName.value = '';
+	expectDate.value = '';
+	shipTbody.innerHTML = '';
+	prdOutboundDate = null;
+	
+	// 혹시 shipmentList가 아직 안 채워져 있으면 한 번만 불러오기
+	if (!shipmentList || shipmentList.length === 0) {
+	  shipmentList = await loadShipmentList();
+	}
+	
+	 // 셀렉트 옵션 구성
+	shipmentList.forEach(el => {
+	    const opt = document.createElement("option");
+	    opt.value = el.shipmentId;
+	    opt.textContent = el.shipmentId;
+	    shipmentSelect.appendChild(opt);
+	});
+
+	// 그리드에서 선택한 출하지시서 선택
+	shipmentSelect.value = rowData.shipmentId;
+
+	// 실제 데이터 찾기
+	const shipOrder = shipmentList.find(el => String(el.shipmentId) === String(rowData.shipmentId));
+	if (!shipOrder) {
+		alert("출하지시서 데이터를 찾을 수 없습니다.");
+		return;
+	}
+
+	shipmentIdInput.value = shipOrder.shipmentId;
+	processByName.value   = shipOrder.createdName;
+	processByEmpId.value  = shipOrder.createdId;
+	shopClientName.value  = shipOrder.clientName;
+	expectDate.value      = shipOrder.startDate?.split("T")[0] || "";
+
+	prdOutboundDate = shipOrder.startDate;
+
+	renderProductList(shipOrder.items);
 }
 
 // ------------------------------------------------------------------

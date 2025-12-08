@@ -285,22 +285,22 @@
 							<div class="col-md-6">
 								<label class="form-label fw-bold">출하지시서</label> 
 								<select
-									class="form-select" id="shipmnetSelect">
+									class="form-select" id="shipmentSelect">
 									<option value="">출하지시서를 선택하세요</option>
 								</select>
-								<input type="hidden" id="SHIPMENT_ID"/>
+								<input type="hidden" id="shipmentId"/>
 							</div>
 							<div class="col-md-6">
 								<label class="form-label fw-bold">담당자</label> 
 								<input class="form-control" type="text" id="processByName" readonly>
-								<input type="hidden" id="managerId"/>
+								<input type="hidden" id="processByEmpId"/>
 							</div>
 						</div>
 <!-- 								생산 제품 선택 -->
 						<div class="row mb-4">
 							<div class="col-md-6">
 								<label class="form-label fw-bold">거래처</label>
-								<input class="form-control" type="text" id="prdName" readonly>
+								<input class="form-control" type="text" id="shopClientName" readonly>
 							</div>
 							<div class="col-md-6">
 								<label class="form-label">예상도착일</label>
@@ -310,7 +310,7 @@
 <!-- 								출고 등록 품목 -->
 						<h6 class="fw-bold mb-3">출고 등록 품목</h6>
 						<div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-							<table class="table table-bordered align-middle mb-0" id="bomTable">
+							<table class="table table-bordered align-middle mb-0" id="shipTable">
 								<thead class="table-light text-center sticky-top">
 									<tr>
 										<th>품목코드</th>
@@ -327,7 +327,7 @@
 				</div>
 				<div class="modal-footer mt-3 p-0">
 					<button type="button" class="btn btn-primary"
-						onclick="submitOutbound()">등록</button>
+						onclick="submitPrdOutbound()">등록</button>
 				</div>
 			</div>
 		</div>

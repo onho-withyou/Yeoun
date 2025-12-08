@@ -1,8 +1,8 @@
 // =============================================================
 // 출고 등록 로직
-const shipmentSelect = document.querySelector("#shipmnetSelect");
+const shipmentSelect = document.querySelector("#shipmentSelect");
 const processByName = document.querySelector("#processByName");
-const processByEmpId = document.querySelector(".processById");
+const processByEmpId = document.querySelector("#processByEmpId");
 const shopClientName = document.querySelector("#shopClientName");
 const expectDate = document.querySelector("#expectDate");
 const shipTbody = document.querySelector("#shipTbody");
@@ -13,7 +13,7 @@ let shipmentList = [];
 let prdOutboundDate;
 
 // 출하지시서 정보 가져오기
-async function loadShipmnetList() {
+async function loadShipmentList() {
 	try {
 		
 		// 출하지시서 데이터 가져오는 API 작성하기
@@ -36,7 +36,7 @@ async function loadShipmnetList() {
 
 // 출하지시서 선택 이벤트
 shipmentSelect.addEventListener("focus", async () => {
-	shipmentList = await loadShipmnetList();
+	shipmentList = await loadShipmentList();
 	
 	if (shipmentList.length === 0) {
 		return;
@@ -56,30 +56,31 @@ shipmentSelect.addEventListener("focus", async () => {
 		shipmentSelect.appendChild(opt);
 	});
 	
-	shipmentSelect.addEventListener("change", async () => {
-		const shipId = shipmentSelect.value;
-		
-		if (!shipId) return;
-		
-		// 선택한 출하지시서 리스트에서 찾기
-		const shipOrder = shipmentList.find(el => el.shipmentId === shipId);
-		
-		if (!shipOrder) {
-			alert("출하지시서 데이터를 찾을 수 없습니다.");
-			return;
-		}
-		
-		// 선택한 출하지시서에 따른 담당자, 거래처명, 출고일 정보 입력
-		processByName.value = shipOrder.createdName;
-		shopClientName.value = shipOrder.clientName;
-		expectDate.value = shipOrder.startDate?.split("T")[0] || "0";
-		
-		prdOutboundDate = shipOrder.startDate;
-		
-		// 선택한 출하지시서의 품목 리스트 렌더링
-		renderProductList(shipOrder.items);
-		
-	});
+});
+
+shipmentSelect.addEventListener("change", async () => {
+	const shipId = shipmentSelect.value;
+	
+	if (!shipId) return;
+	
+	// 선택한 출하지시서 리스트에서 찾기
+	const shipOrder = shipmentList.find(el => el.shipmentId === shipId);
+	
+	if (!shipOrder) {
+		alert("출하지시서 데이터를 찾을 수 없습니다.");
+		return;
+	}
+	
+	// 선택한 출하지시서에 따른 담당자, 거래처명, 출고일 정보 입력
+	processByName.value = shipOrder.createdName;
+	shopClientName.value = shipOrder.clientName;
+	expectDate.value = shipOrder.startDate?.split("T")[0] || "0";
+	
+	prdOutboundDate = shipOrder.startDate;
+	
+	// 선택한 출하지시서의 품목 리스트 렌더링
+	renderProductList(shipOrder.items);
+	
 });
 
 // 출하지시서에 해당하는 품목 렌더링
