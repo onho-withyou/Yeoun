@@ -73,6 +73,21 @@ public class OutboundController {
 		}
 	}
 	
+	// 출고 등록(완제품)
+	@PostMapping("/fg/regist")
+	public ResponseEntity<Map<String, String>> registFgOutbound(@RequestBody OutboundOrderDTO outboundOrderDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
+		try {
+			outboundService.saveOutbound(outboundOrderDTO, loginDTO.getEmpId());
+			
+			return ResponseEntity.status(HttpStatus.CREATED)
+					.body(Map.of("message", "등록 완료"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.CONFLICT)
+					.body(Map.of("message", e.getMessage()));
+		}
+	}
+	
 	// 출고 리스트 조회
 	@GetMapping("/list/data")
 	public ResponseEntity<List<OutboundOrderDTO>> outboundList(
@@ -97,6 +112,18 @@ public class OutboundController {
 		model.addAttribute("outboundOrderDTO", outboundOrderDTO);
 		
 		return "outbound/material_detail";
+	}
+	
+	// 완제품 출고 상세페이지
+	@GetMapping("/prd/{outboundId}")
+	public String productDetail(@PathVariable("outboundId") String outboundId, Model model) {
+		OutboundOrderDTO outboundOrderDTO = outboundService.getMaterialOutbound(outboundId);
+		
+		log.info(">>>>>>>>>>>>>>>> outboundOrderDTO : " + outboundOrderDTO);
+		
+		model.addAttribute("outboundOrderDTO", outboundOrderDTO);
+		
+		return "outbound/product_detail";
 	}
 	
 	// 출고완료

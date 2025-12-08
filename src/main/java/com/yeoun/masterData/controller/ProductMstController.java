@@ -53,14 +53,14 @@ public class ProductMstController {
 
 	@ResponseBody
 	@PostMapping("/product/delete")
-	public ResponseEntity<java.util.Map<String, Object>> productDelete(Model model,
+	public ResponseEntity<Map<String, Object>> productDelete(Model model,
 		@AuthenticationPrincipal LoginDTO loginDTO,
 		@RequestBody List<String> rowKeys) {
 
 		log.info("rowKeys------------->{}", rowKeys);
 		Map<String, Object> param = new java.util.HashMap<>();
 		param.put("rowKeys", rowKeys);
-		java.util.Map<String, Object> res = productMstService.deleteProduct(param);
+		Map<String, Object> res = productMstService.deleteProduct(param);
 		return ResponseEntity.ok(res);
 	}
 

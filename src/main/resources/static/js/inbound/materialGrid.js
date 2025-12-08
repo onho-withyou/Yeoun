@@ -12,7 +12,7 @@ const grid = new tui.Grid({
 		},
 		{
 			header: "담당자",
-			name: "orderEmpName",
+			name: "materialEmpName",
 		},
 		{
 			header: "입고예정일",
@@ -92,7 +92,7 @@ async function loadMaterialInbound(startDate, endDate, searchType, keyword) {
 			...item,
 			inboundStatus: statusMap[item.inboundStatus] || item.inboundStatus
 		}));
-		console.log("@@@@",data);
+		
 		grid.resetData(data);
 		
 	} catch (error) {
@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	startDateInput.value = startDate;
 	endDateInput.value = endDate;
 	
-	await loadMaterialInbound(startDate, endDate, null);
+	await loadMaterialInbound(startDate, endDate, "all", "");
 });
 
 // 검색
@@ -140,7 +140,7 @@ document.querySelector("#startDate").addEventListener("input", async () => {
 	const keyword = document.querySelector("#materialKeyword").value;
 	const searchType = document.querySelector("select[name='searchType']").value;
 	
-	await loadMaterialInbound(startDate, endDate, keyword, searchType);
+	await loadMaterialInbound(startDate, endDate, searchType, keyword);
 });
 
 // 종료날짜 클릭 시 데이터 조회
@@ -150,5 +150,5 @@ document.querySelector("#endDate").addEventListener("input", async () => {
 	const keyword = document.querySelector("#materialKeyword").value;
 	const searchType = document.querySelector("select[name='searchType']").value;
 	
-	await loadMaterialInbound(startDate, endDate, keyword, searchType);
+	await loadMaterialInbound(startDate, endDate, searchType, keyword);
 });

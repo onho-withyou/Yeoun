@@ -13,13 +13,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "SHIPMENT_LOT")
+@Table(name = "SHIPMENT_ITEM")
 public class ShipmentLot {
 
     // 1) 출하 LOT ID (PK)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "SHIPMENT_LOT_ID", nullable = false)
+    @Column(name = "SHIPMENT_ITEM_ID", nullable = false)
     @Comment("출하 LOT 상세 PK (시스템 자동번호)")
     private Long shipmentLotId;
 
@@ -27,11 +27,12 @@ public class ShipmentLot {
     @Column(name = "SHIPMENT_ID", nullable = false)
     @Comment("어떤 출하 건인지 연결 (출하 이력 FK)")
     private Long shipmentId;
+    
 
-    // 3) LOT 번호
-    @Column(name = "LOT_NO", length = 50, nullable = false)
-    @Comment("사용된 LOT 식별 번호 (생산/입고 LOT)")
-    private String lotNo;
+    // 2-1) 제품ID (PRODUCT FK)
+    @Column(name = "PRD_ID", length = 30, nullable = false)
+    @Comment("해당 출하에 포함된 제품 ID")
+    private String prdId;   
 
     // 4) 출하수량
     @Column(name = "LOT_QTY", precision = 18, scale = 2, nullable = false)

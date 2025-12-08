@@ -12,27 +12,6 @@
 <th:block layout:fragment="content">
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
 	<h2>공정관리</h2>
-	   <!-- SEARCH / FILTER -->
-		<div class="d-flex justify-content-between">
-			<div class="d-flex justify-content-start">
-             	 <div class="mb-6 mb-0" style="width: 260px;">
-	        	    <select class="form-select" onchange="draftValFn(this)">
-	        	    	<option value="">제품군</option>
-                    	<option value="PF-FRUIT">PF-FRUIT (과일/꽃 액체향수)</option>
-                    	<option value="PF-NATUR">PF-NATUR (자연/풀 액체향수)</option>
-                    	<option value="PF-SOLID">PF-SOLID (고체향수)</option>
-	        	    </select>
-	        	  </div>
-	         	  <div class="mb-6 mb-0" style="width: 280px;margin-left:5px;">
-             			<input type="text" class="form-control" id="searchRouteName" placeholder="라우트명">
-           		  </div>
-           			<button type="button" class="btn btn-primary" onclick="searchRoute()" style="margin-left:5px;">조회</button>
-			 </div>
-			 <div class="col-md-4 text-md-end">
-             	 <button type="button" class="btn btn-success ms-1" data-bs-toggle="modal" data-bs-target="#route-modal" onclick="openRouteModalForCreate()">+ 신규 라우트</button>
-           	 </div>
-		</div>
-		<br>
 	 	<div class="nav-align-top mb-4">
 	         <ul class="nav nav-tabs" role="tablist">
 	           <li class="nav-item">
@@ -48,7 +27,29 @@
 	         </ul>
 	         <div class="tab-content" >
 	           <div class="tab-pane fade show active"  id="navs-process-tab" role="tabpanel">
-	             <h2>제품별 공정 라우트</h2>
+	           		<h2>제품별 공정 라우트</h2>
+	           		<div class="d-flex justify-content-between">
+						<div class="d-flex justify-content-start">
+			             	 <div class="mb-6 mb-0" style="width: 260px;">
+				        	    <select  id="processprdId" class="form-select" onchange="draftValFn(this)">
+				        	    	<option value="" selected disabled hidden>제품명(제품코드)</option>
+			        	    		 <option th:each="item, iterStat : ${prdMstList}" 
+										 		th:value="${item.prdId}" 
+										 		th:text="${item.prdName} +' (' + ${item.prdId} + ')'"
+												name="prdId">
+									</option>
+				        	    </select>
+				        	  </div>
+				         	  <div class="mb-6 mb-0" style="width: 280px;margin-left:5px;">
+			             			<input type="text" id="routeName" name="routeName" class="form-control"  placeholder="라우트명">
+			           		  </div>
+			           			<button type="button" class="btn btn-primary" onclick="productRouteSearch()" style="margin-left:5px;">조회</button>
+						 </div>
+						 <div class="col-md-4 text-md-end">
+			             	 <button type="button" class="btn btn-success ms-1" data-bs-toggle="modal" data-bs-target="#route-modal" onclick="openRouteModalForCreate()">+ 신규 라우트</button>
+			           	 </div>
+					</div>
+	             	<br>
 	             <div id="processGrid" style="display: grid;margin-right:10px;"></div>
 	           </div>
 	           <div class="tab-pane fade" id="navs-processCode-tab" role="tabpanel">

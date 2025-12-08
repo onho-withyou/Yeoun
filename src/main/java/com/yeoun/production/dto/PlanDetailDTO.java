@@ -18,9 +18,10 @@ public class PlanDetailDTO {
 
     private String planId;
     private String createdAt;
-    private String itemName;   // 🔥 제품명
-    private Integer planQty;   // 🔥 이미 PLAN_QTY 있으니 이거 사용
+    private String itemName;   
+    private Integer planQty;   
     private String status;
+    private String memo;
 
     private List<ProductionPlanItemDTO> planItems;
     private Map<String, List<OrderItemDTO>> orderItemMap;
