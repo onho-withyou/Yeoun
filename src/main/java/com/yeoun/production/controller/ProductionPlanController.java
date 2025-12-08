@@ -7,6 +7,7 @@ import com.yeoun.production.dto.ProductionPlanListDTO;
 import com.yeoun.production.entity.ProductionPlan;
 import com.yeoun.production.entity.ProductionPlanItem;
 import com.yeoun.production.service.ProductionPlanService;
+import com.yeoun.sales.dto.OrderItemDTO;
 import com.yeoun.sales.dto.OrderPlanSuggestDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -150,6 +151,14 @@ public class ProductionPlanController {
         return dto;
     }
 
+    /* ============================
+    8) 추천 목록 → 제품별 수주 상세 조회
+    ============================ */
+	 @GetMapping("/order-items/{prdId}")
+	 @ResponseBody
+	 public List<OrderItemDTO> getOrderItemsByProduct(@PathVariable("prdId") String prdId) {
+	     return planService.getOrderItemsByProduct(prdId);
+ }
 
 
 

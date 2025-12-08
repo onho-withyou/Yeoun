@@ -13,15 +13,21 @@ import lombok.Setter;
 @AllArgsConstructor
 public class OrderItemDTO {
 
-    private Long orderItemId;    // PK
-    private String orderId;      // 수주번호
-    private String prdId;        // 제품ID
-    private String prdName;      // 제품명
-    private Integer orderQty;    // 주문수량
+    private Long orderItemId;
+    private String orderId;
+    private String prdId;
+    private String prdName;
+    private Integer orderQty;
+
+    private String clientName;   // 거래처명
+    private String managerName;  // 담당자명 ⭐추가
+    private String managerTel;   // 연락처 ⭐추가
+    private String managerEmail; // 이메일 ⭐추가
+
+    private LocalDate orderDate;     // 수주일자
+    private LocalDate deliveryDate;  // 납기일
     
-    private String clientName;       // ⭐ 거래처명 추가    
-    private LocalDate orderDate;     // ⭐ 수주일자 추가
-    private LocalDate deliveryDate;  // ⭐ 납기일 
-   
+    private String empName;   // ⭐ 수주 담당자명 (내부 사용자)
+
 }
 
