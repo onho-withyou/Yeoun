@@ -93,7 +93,6 @@ public class InboundService {
 			
 			// 입고대기 품목 생성
 			InboundItemDTO inboundItemDTO = InboundItemDTO.builder()
-					.lotNo("testLot")
 					.inboundId(inboundId)
 					.itemId(clientItem.getMaterialId())
 					.requestAmount(item.getOrderAmount())
@@ -254,7 +253,6 @@ public class InboundService {
 			String lotNo = "";
 			// 로트번호가 존재하지 않을때 만 실행
 			if(itemDTO.getLotNo() == null || itemDTO.getLotNo().isEmpty()) {
-			
 				// 원재료Id가 6글자인 경우 5글자로 변환하기
 				if (prdId.length() >= 6) {
 					prdId = prdId.replace("-", ""); //CAP-003이면 CAP003으로 변환
@@ -278,6 +276,9 @@ public class InboundService {
 				
 				// LOT 생성 및 LOT번호 반환
 				lotNo = lotTraceService.registLotMaster(lotMasterDTO, "00");
+				
+				log.info(">>>>>>>>>>>>>> lotNo " + lotNo);
+				
 				// lotHistory 생성
 				LotHistoryDTO createLotHistoryDTO = LotHistoryDTO.builder()
 						.lotNo(lotNo)
