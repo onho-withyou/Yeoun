@@ -27,6 +27,12 @@ public class ShipmentLot {
     @Column(name = "SHIPMENT_ID", nullable = false)
     @Comment("어떤 출하 건인지 연결 (출하 이력 FK)")
     private Long shipmentId;
+    
+
+    // 2-1) 제품ID (PRODUCT FK)
+    @Column(name = "PRD_ID", length = 30, nullable = false)
+    @Comment("해당 출하에 포함된 제품 ID")
+    private String prdId;
 
     // 3) LOT 번호
     @Column(name = "LOT_NO", length = 50, nullable = false)

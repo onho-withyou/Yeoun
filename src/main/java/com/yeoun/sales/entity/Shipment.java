@@ -84,10 +84,6 @@ public class Shipment {
     @Comment("수주 대상 거래처 ID")
     private String clientId;
 
-    // 14) 제품ID (PRODUCT FK)
-    @Column(name = "PRD_ID", length = 30, nullable = false)
-    @Comment("해당 출하에 포함된 제품 ID")
-    private String prdId;
 
 
     // =============================
