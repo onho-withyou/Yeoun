@@ -156,7 +156,7 @@ const managerName = document.querySelector("#managerName");
 const productName = document.querySelector("#productName");
 const dueDate = document.querySelector("#dueDate");
 const bomTbody = document.querySelector("#bomTbody");
-const workId = document.querySelector("#workId");
+const workOrderId = document.querySelector("#workId");
 const managerId = document.querySelector("#managerId");
 
 // 작업지시서 전역변수로 저장
@@ -198,7 +198,6 @@ workOrderSelect.addEventListener("focus", async () => {
 		opt.value = el.orderId;
 		opt.textContent = `${el.orderId} - ${el.productName}`;
 		opt.dataset.productId = el.productId;
-		workId.value = el.orderId;
 		managerId.value = el.createdId;
 		
 		workOrderSelect.appendChild(opt);
@@ -208,6 +207,8 @@ workOrderSelect.addEventListener("focus", async () => {
 // 작업지시 선택 시 상세 정보 입력
 workOrderSelect.addEventListener("change", async () => {
 	const workId = workOrderSelect.value;
+	
+	workOrderId.value = workId;
 	
 	if (!workId) return;
 	
@@ -285,12 +286,14 @@ const submitOutbound = async () => {
 	
 	// body에 담아서 보낼 내용
 	const payload = {
-		workOrderId: workId.value,
+		workOrderId: workOrderId.value,
 		createdId: managerId.value,
 		startDate: outboundDate,
 		type: "MAT",
 		items
 	};
+	
+	console.log("workId", workOrderId.value);
 	
 	const res = await fetch("/inventory/outbound/mat/regist", {
 		method: "POST",

@@ -23,8 +23,8 @@
 			<result property="lotNo" column="LOT_NO"/>
 			<result property="outboundQty" column="OUTBOUND_AMOUNT"/>
 			<result property="orderqQty" column="ORDER_QTY"/>
-			<result property="matQty" column="MAT_QTY"/>
 			<result property="shipmentQty" column="SHIPMENT_QTY"/>
+			<result property="matQty" column="MAT_QTY"/>
 			<result property="ivId" column="IV_ID"/>
 			<result property="locationId" column="LOCATION_ID"/>
 		</collection>
@@ -103,14 +103,13 @@
 			, oi.LOT_NO
 			, oi.OUTBOUND_AMOUNT
 			, oi.IV_ID
-			, i.LOCATION_ID
+			, oi.LOCATION_ID
 			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN mat.MAT_ID END AS MAT_ID
 			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN mat.MAT_NAME END AS MAT_NAME
-			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN bom.MAT_QTY END AS MAT_QTY
+			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN NVL(bom.MAT_QTY, 0) END AS MAT_QTY
 			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN w.PLAN_QTY END AS ORDER_QTY
 			, CASE WHEN o.SHIPMENT_ID IS NOT NULL THEN prd.PRD_ID END AS PRD_ID
 			, CASE WHEN o.SHIPMENT_ID IS NOT NULL THEN prd.PRD_NAME END AS PRD_NAME	
-			, CASE WHEN o.SHIPMENT_ID IS NOT NULL THEN s.SHIPMENT_QTY END AS SHIPMENT_QTY	
 		FROM
 			OUTBOUND o
 		LEFT JOIN
@@ -142,14 +141,14 @@
 		ON
 			s.SHIPMENT_ID = o.SHIPMENT_ID
 		LEFT JOIN
+			INVENTORY i
+		ON
+			oi.IV_ID = i.IV_ID
+		LEFT JOIN
 			BOM_MST bom
 		ON 
 			bom.PRD_ID = w.PRD_ID
 			AND bom.MAT_ID = oi.ITEM_ID
-		LEFT JOIN
-			INVENTORY i
-		ON
-			oi.IV_ID = i.IV_ID
 		LEFT JOIN
 			WAREHOUSE_LOCATION wl
 		ON
@@ -169,6 +168,9 @@
 	    <result property="startDate" column="SHIPMENT_DATE"/>
 	    <result property="createdName" column="CREATED_NAME"/>
 	    <result property="createdId" column="CREATED_ID"/>
+	    <result property="status"  column="STATUS"/>
+	    <result property="outboundId" column="OUTBOUND_ID"/>
+	    <result property="processEmpName" column="PROCESS_BY"/>
 	    <!-- 필요하다면 다른 상위 필드 추가 (outboundId 등은 쿼리에 없으므로 제외하거나 null 처리됨) -->
 	
 	    <!-- 하위 객체 리스트 (Items) -->
@@ -180,7 +182,10 @@
 	        <result property="prdId" column="PRD_ID"/>
 	        <result property="prdName" column="PRD_NAME"/>
 	        <result property="shipmentQty" column="SHIPMENT_QTY"/>
-	        <result property="orderqQty" column="ORDER_QTY"/> <!-- DTO 필드명이 orderqQty인지 확인 필요 -->
+	        <result property="orderqQty" column="ORDER_QTY"/>
+	        <result property="lotNo" column="LOT_NO"/>
+	        <result property="locationId" column="LOCATION_ID"/>
+	        <result property="ivId" column="IV_ID"/>
 	    </collection>
 	</resultMap>
 	
@@ -196,7 +201,7 @@
 			, sl.LOT_QTY AS SHIPMENT_QTY
 			, sl.PRD_ID 
 			, prd.PRD_NAME
-			, ( SELECT COALESCE(SUM(iv.IV_AMOUNT), 0) 
+			, ( SELECT COALESCE(SUM(iv.IV_AMOUNT), 0) - COALESCE(SUM(iv.EXPECT_OB_AMOUNT), 0) 
              	FROM INVENTORY iv 
                 WHERE iv.ITEM_ID = sl.PRD_ID) AS ORDER_QTY
             , ROW_NUMBER() OVER (PARTITION BY s.SHIPMENT_ID ORDER BY sl.PRD_ID) AS ITEM_ID
@@ -227,6 +232,62 @@
 		    , sl.PRD_ID
 		    , prd.PRD_NAME
 		    , sl.LOT_QTY
+		ORDER BY
+       		s.SHIPMENT_ID, sl.PRD_ID
+	</select>
+	
+	<!-- 완제품 출고 상세 정보 조회 -->
+	<select id="findShipmentOutbound" resultMap="ShipmentOrderMap">
+		SELECT
+			s.SHIPMENT_ID
+			, s.CLIENT_NAME
+			, s.EMP_ID AS CREATED_ID
+			, s.SHIPMENT_DATE
+			, o.STATUS
+			, o.OUTBOUND_ID
+			, e1.emp_name AS CREATED_NAME
+			, e2.emp_name AS PROCESS_BY
+			, NVL(sl.LOT_QTY, 0) AS SHIPMENT_QTY
+			, sl.PRD_ID 
+			, prd.PRD_NAME
+			, oi.LOCATION_ID
+			, oi.LOT_NO
+			, oi.IV_ID
+			, NVL(oi.OUTBOUND_AMOUNT, 0) AS ORDER_QTY
+		FROM
+			SHIPMENT s
+		LEFT JOIN
+			SHIPMENT_ITEM sl
+		ON
+			s.SHIPMENT_ID = sl.SHIPMENT_ID
+		LEFT JOIN
+			PRODUCT_MST prd
+		ON
+			prd.PRD_ID = sl.PRD_ID
+		LEFT JOIN
+			EMP e1
+		ON
+			s.EMP_ID = e1.EMP_ID
+		LEFT JOIN
+			OUTBOUND o
+		ON
+			o.SHIPMENT_ID = s.SHIPMENT_ID
+		LEFT JOIN
+			EMP e2
+		ON
+			o.PROCESS_BY = e2.EMP_ID
+		LEFT JOIN
+			OUTBOUND_ITEM oi
+		ON
+			oi.OUTBOUND_ID = o.OUTBOUND_ID
+			AND oi.ITEM_ID = sl.PRD_ID
+		LEFT JOIN
+			INVENTORY iv
+		ON
+			iv.ITEM_ID = sl.PRD_ID
+			AND iv.LOT_NO = oi.LOT_NO
+		WHERE
+			o.OUTBOUND_ID = #{outboundId}
 		ORDER BY
        		s.SHIPMENT_ID, sl.PRD_ID
 	</select>

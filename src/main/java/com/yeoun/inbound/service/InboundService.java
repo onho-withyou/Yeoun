@@ -277,8 +277,6 @@ public class InboundService {
 				// LOT 생성 및 LOT번호 반환
 				lotNo = lotTraceService.registLotMaster(lotMasterDTO, "00");
 				
-				log.info(">>>>>>>>>>>>>> lotNo " + lotNo);
-				
 				// lotHistory 생성
 				LotHistoryDTO createLotHistoryDTO = LotHistoryDTO.builder()
 						.lotNo(lotNo)
