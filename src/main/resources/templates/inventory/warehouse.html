@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/layout}">
+
+<head>
+    <title>재고 관리 - 창고</title>
+    <!-- Inventory Specific CSS -->
+</head>
+
+<th:block layout:fragment="content">
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h2 class="fw-bold py-3 mb-4">창고</h2>
+        
+        <div id="container"></div>
+    </div>
+</th:block>
+<th:block layout:fragment="myScript">
+	<script src="https://unpkg.com/konva@9.3.3/konva.min.js"></script>
+	<script th:src="@{/js/inventory/warehouse.js}"></script>
+</th:block>
+</html>

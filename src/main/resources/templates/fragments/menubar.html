@@ -205,6 +205,11 @@
                             <div data-i18n="Menu4" class="menu-link-sub">출고관리</div>
                         </a>
                     </li>
+                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                        <a th:href="@{/inventory/warehouse}" class="menu-link">
+                            <div data-i18n="Menu4" class="menu-link-sub">출고관리</div>
+                        </a>
+                    </li>
 
                 </ul>
             </li>
