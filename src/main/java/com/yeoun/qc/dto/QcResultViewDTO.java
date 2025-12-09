@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
+// QC 결과 상세 모달
 @Getter
 @Setter
 public class QcResultViewDTO {

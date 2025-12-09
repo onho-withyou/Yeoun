@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+// QC 등록 화면 목록용
 @Getter
 @Setter
 @NoArgsConstructor
