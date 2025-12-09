@@ -228,7 +228,7 @@ function openDetailModal(orderId) {
 		  // 버튼
 		  let workBtnHtml = "";
 
-		  // ✅ QC 공정(PRC-QC)인 경우
+		  // QC 공정(PRC-QC)인 경우
 		  if (step.processId === "PRC-QC") {
 
 		    if (step.status === "DONE") {
@@ -251,7 +251,7 @@ function openDetailModal(orderId) {
 		    }
 
 		  } else {
-		    // ✅ 나머지 공정은 기존 로직 그대로
+		    // 나머지 공정은 기존 로직 그대로
 		    if (step.canStart) {
 		      workBtnHtml += `
 		        <button type="button"
@@ -345,7 +345,7 @@ document.addEventListener("click", (e) => {
     handleFinishStep(orderId, stepSeq);
   }
 
-  // ✅ QC 등록 버튼
+  // QC 등록 버튼
   if (e.target.classList.contains("btn-qc-regist")) {
     const btn     = e.target;
     const orderId = btn.dataset.orderId; // 지금은 안 쓰지만, 나중에 파라미터로 넘길 수 있음
@@ -505,7 +505,7 @@ function updateStepRowInModal(updatedStep) {
   // 버튼
   let workBtnHtml = "";
 
-  // ✅ QC 공정일 때
+  // QC 공정일 때
   if (updatedStep.processId === "PRC-QC") {
 
     if (updatedStep.status === "DONE") {
@@ -556,8 +556,6 @@ function updateStepRowInModal(updatedStep) {
 	  }
 	}
   }
-
-
 
   const memoInputHtml = `
     <input type="text"

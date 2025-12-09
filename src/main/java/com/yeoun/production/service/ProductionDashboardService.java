@@ -3,6 +3,8 @@ package com.yeoun.production.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class ProductionDashboardService {
 	
     private final WorkOrderRepository workOrderRepository;
-    private final WorkOrderProcessService workOrderProcessService; // ⭐ 기존 공정현황 서비스 사용
+    private final WorkOrderProcessService workOrderProcessService; 
 
     @Transactional(readOnly = true)
     public ProductionDashboardDTO getDashboardData() {
@@ -54,10 +56,22 @@ public class ProductionDashboardService {
                 .sum();
 
         // -------------------------------
-        // 4) 라인별 생산량 차트 (지금은 더미)
+        // 4) 라인별 생산량 차트 
         // -------------------------------
-        List<String> lineLabels = List.of("라인1","라인2","라인3","라인4","라인5","라인6");
-        List<Long> lineSeries   = List.of(0L, 0L, 0L, 0L, 0L, 0L);
+        Map<String, Long> lineQtyMap = processList.stream()
+                .collect(Collectors.groupingBy(
+                        dto -> dto.getLineName() == null ? "미지정" : dto.getLineName(),
+                        Collectors.summingLong(dto -> dto.getGoodQty() == null ? 0L : dto.getGoodQty())
+                ));
+
+        // 순서 예쁘게 정렬 (라인ID/이름 기준)
+        List<String> lineLabels = lineQtyMap.keySet().stream()
+                .sorted()
+                .toList();
+
+        List<Long> lineSeries = lineLabels.stream()
+                .map(lineQtyMap::get)
+                .toList();
 
         // -------------------------------
         // 5) 최종 DTO 조립

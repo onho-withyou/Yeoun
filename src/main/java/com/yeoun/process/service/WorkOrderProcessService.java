@@ -166,6 +166,12 @@ public class WorkOrderProcessService {
         dto.setPrdName(workOrder.getProduct().getPrdName());
         dto.setPlanQty(workOrder.getPlanQty());
         dto.setStatus(workOrder.getStatus());
+        
+        // 라인 정보
+        if (workOrder.getLine() != null) {
+            dto.setLineId(workOrder.getLine().getLineId());
+            dto.setLineName(workOrder.getLine().getLineName());
+        }
 
         dto.setGoodQty(goodQty);
         dto.setDefectQty(defectQty);
@@ -662,7 +668,7 @@ public class WorkOrderProcessService {
     }
 
     /**
-     * 엔티티 → 단계 DTO 변환 (start/finish/메모 응답용)
+     * 엔티티 -> 단계 DTO 변환 (start/finish/메모 응답용)
      */
     private WorkOrderProcessStepDTO toStepDTO(WorkOrderProcess proc) {
         WorkOrderProcessStepDTO dto = new WorkOrderProcessStepDTO();

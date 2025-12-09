@@ -23,7 +23,6 @@ public class ProductionDashboardController {
 		// 1) 서비스에서 대시보드용 데이터 한 번에 조회
 		ProductionDashboardDTO dashboard = productionDashboardService.getDashboardData();
 		
-		// 2) 뷰에 전달
 		model.addAttribute("dashboard", dashboard);
 				
 		return "/production/dashboard";

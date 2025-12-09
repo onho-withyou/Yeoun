@@ -20,6 +20,10 @@ public class WorkOrderProcessDTO {
 	// 제품명
 	private String prdName;
 	
+	// 라인 정보
+	private String lineId;     
+    private String lineName;
+	
 	// 계획수량
 	private Integer planQty;
 	
