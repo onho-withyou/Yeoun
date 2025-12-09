@@ -24,17 +24,19 @@ document.addEventListener("DOMContentLoaded", () => {
     // 탭 클릭 이벤트
     document.querySelectorAll("#shipmentTabs .nav-link")?.forEach(tab => {
         tab.addEventListener("click", (e) => {
+            e.preventDefault();
+
+            const target = e.currentTarget;
 
             document.querySelector("#shipmentTabs .active")?.classList.remove("active");
-            e.target.classList.add("active");
+            target.classList.add("active");
 
-            const status = e.target.dataset.status;
+            const status = target.dataset.status;
             loadShipmentList(status);
         });
     });
 
-});
-
+});   // ← 올바르게 닫힘
 
 // =========================================
 // 2) GRID 컬럼 정의
@@ -46,15 +48,16 @@ function initGrid() {
         { headerName: "거래처명", field: "clientName", width: 130 },
         { headerName: "제품명", field: "prdName", width: 130 },
         { headerName: "수주수량", field: "orderQty", width: 100 },
-        { headerName: "현재재고", field: "currentStock", width: 100 },
-        { headerName: "납기요청일", field: "deliveryDate", width: 120 },
+		{ headerName: "현재재고", field: "stockQty", width: 100 },
+		{ headerName: "납기요청일", field: "dueDate", width: 120 },
 
-        {
-            headerName: "출하상태",
-            field: "shipmentStatus",
-            width: 120,
-            cellRenderer: params => renderStatusBadge(params.value)
-        },
+		{
+		    headerName: "출하상태",
+		    field: "status",
+		    width: 120,
+		    cellRenderer: params => renderStatusBadge(params.value)
+		},
+
 
         {
             headerName: "상세",

@@ -57,20 +57,30 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
   
 
     // 2) 특정 제품에 대한 확정된 수주 상세 조회
-    @Query(value = """
-        SELECT 
-            oi.ORDER_ITEM_ID,
-            oi.ORDER_ID,
-            oi.PRD_ID,
-            oi.ORDER_QTY,
-            TO_CHAR(o.DELIVERY_DATE, 'YYYY-MM-DD') AS dueDate
-        FROM ORDER_ITEM oi
-        JOIN ORDERS o ON o.ORDER_ID = oi.ORDER_ID
-        WHERE o.ORDER_STATUS = 'CONFIRMED'
-          AND oi.PRD_ID = :prdId
-          AND oi.ITEM_STATUS != 'PLANNED'
-    """, nativeQuery = true)
-    List<Map<String,Object>> findItemsByProduct(@Param("prdId") String prdId);
+	@Query(value = """
+		    SELECT 
+		        oi.ORDER_ITEM_ID          AS ORDER_ITEM_ID,
+		        oi.ORDER_ID               AS ORDER_ID,
+		        oi.PRD_ID                 AS PRD_ID,
+		        pm.PRD_NAME               AS PRD_NAME,
+		        oi.ORDER_QTY              AS ORDER_QTY,
+		        TO_CHAR(o.DELIVERY_DATE, 'YYYY-MM-DD') AS dueDate,
+		        c.CLIENT_NAME             AS CLIENT_NAME,
+		        c.MANAGER_NAME            AS MANAGER_NAME,
+		        c.MANAGER_TEL             AS MANAGER_TEL,
+		        c.MANAGER_EMAIL           AS MANAGER_EMAIL
+		    FROM ORDER_ITEM oi
+		    JOIN ORDERS o       ON o.ORDER_ID = oi.ORDER_ID
+		    JOIN CLIENT c       ON c.CLIENT_ID = o.CLIENT_ID
+		    JOIN PRODUCT_MST pm ON pm.PRD_ID = oi.PRD_ID
+		    WHERE o.ORDER_STATUS = 'CONFIRMED'
+		      AND oi.PRD_ID = :prdId
+		      AND oi.ITEM_STATUS = 'PLANNED'
+		    ORDER BY o.DELIVERY_DATE
+		""", nativeQuery = true)
+		List<Map<String,Object>> findItemsByProduct(@Param("prdId") String prdId);
+
+
 
     /*상태값 변경*/      
     @Modifying
