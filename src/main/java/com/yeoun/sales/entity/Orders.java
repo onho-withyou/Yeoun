@@ -108,4 +108,10 @@ public class Orders {
         if (this.createdAt == null) this.createdAt = LocalDateTime.now();
         if (this.orderDate == null) this.orderDate = LocalDate.now();
     }
+    
+    // -----------------------------
+    // 수주 상태값 변경
+    public void changeStatus(String orderStatus) {
+    	this.orderStatus = orderStatus;
+    }
 }
