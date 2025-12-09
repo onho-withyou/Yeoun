@@ -211,33 +211,64 @@ function openDetailModal(orderId) {
             statusBadge = `<span class="badge bg-label-success">완료</span>`;
           }
 
-          // 버튼
-          let workBtnHtml = "";
-          if (step.canStart) {
-            workBtnHtml += `
-              <button type="button"
-                      class="btn btn-primary btn-sm btn-step-start"
-                      data-order-id="${summary.orderId}"
-                      data-step-seq="${step.stepSeq}">
-                시작
-              </button>
-            `;
-          }
-          if (step.canFinish) {
-            workBtnHtml += `
-              <button type="button"
-                      class="btn btn-success btn-sm btn-step-finish ms-1"
-                      data-order-id="${summary.orderId}"
-                      data-step-seq="${step.stepSeq}">
-                종료
-              </button>
-            `;
-          }
-          if (!step.canStart && !step.canFinish) {
-            workBtnHtml = (step.status === 'DONE')
-              ? '<span class="text-muted">완료</span>'
-              : '-';
-          }
+		  // 버튼
+		  let workBtnHtml = "";
+
+		  // ✅ QC 공정(PRC-QC)인 경우
+		  if (step.processId === "PRC-QC") {
+
+		    if (step.status === "DONE") {
+		      // 3) QC 검사까지 완료된 상태 → 그냥 완료 표시
+		      workBtnHtml = '<span class="text-muted">완료</span>';
+
+		    } else if (step.canStart) {
+		      // 2) CAP 공정이 끝나서 이제 QC 가능해진 상태 → QC 등록 버튼 노출
+		      workBtnHtml = `
+		        <button type="button"
+		                class="btn btn-outline-info btn-sm btn-qc-regist"
+		                data-order-id="${summary.orderId}">
+		          QC 등록
+		        </button>
+		      `;
+
+		    } else {
+		      // 1) 아직 이전 공정(CAP)이 안 끝난 상태 → 대기
+		      workBtnHtml = '<span class="text-muted">대기</span>';
+		    }
+
+		  } else {
+		    // ✅ 나머지 공정은 기존 로직 그대로
+		    if (step.canStart) {
+		      workBtnHtml += `
+		        <button type="button"
+		                class="btn btn-primary btn-sm btn-step-start"
+		                data-order-id="${summary.orderId}"
+		                data-step-seq="${step.stepSeq}">
+		          시작
+		        </button>
+		      `;
+		    }
+		    if (step.canFinish) {
+		      workBtnHtml += `
+		        <button type="button"
+		                class="btn btn-success btn-sm btn-step-finish ms-1"
+		                data-order-id="${summary.orderId}"
+		                data-step-seq="${step.stepSeq}">
+		          종료
+		        </button>
+		      `;
+		    }
+			if (!step.canStart && !step.canFinish) {
+			  if (step.status === 'DONE') {
+			    workBtnHtml = '<span class="text-muted">완료</span>';
+			  } else if (step.status === 'READY') {
+			    workBtnHtml = '<span class="text-muted">대기</span>';
+			  } else {
+			    workBtnHtml = '-';
+			  }
+			}
+		  }
+
 
           // 메모 input (현장 비고용)
           const memoInputHtml = `
@@ -282,7 +313,7 @@ function openDetailModal(orderId) {
 // 공정 단계 시작/종료/메모 이벤트
 // -------------------------------
 
-// 시작/종료 버튼 공통 이벤트 (이벤트 위임)
+// 시작/종료/QC등록 버튼 공통 이벤트 (이벤트 위임)
 document.addEventListener("click", (e) => {
   if (e.target.classList.contains("btn-step-start")) {
     const btn     = e.target;
@@ -299,7 +330,17 @@ document.addEventListener("click", (e) => {
 
     handleFinishStep(orderId, stepSeq);
   }
+
+  // ✅ QC 등록 버튼
+  if (e.target.classList.contains("btn-qc-regist")) {
+    const btn     = e.target;
+    const orderId = btn.dataset.orderId; // 지금은 안 쓰지만, 나중에 파라미터로 넘길 수 있음
+
+    // 그냥 QC 등록 목록으로 이동
+    window.location.href = "/qc/regist";
+  }
 });
+
 
 // 메모 change 시 저장
 document.addEventListener("change", (e) => {
@@ -449,31 +490,60 @@ function updateStepRowInModal(updatedStep) {
 
   // 버튼
   let workBtnHtml = "";
-  if (updatedStep.canStart) {
-    workBtnHtml += `
-      <button type="button"
-              class="btn btn-primary btn-sm btn-step-start"
-              data-order-id="${updatedStep.orderId}"
-              data-step-seq="${updatedStep.stepSeq}">
-        시작
-      </button>
-    `;
+
+  // ✅ QC 공정일 때
+  if (updatedStep.processId === "PRC-QC") {
+
+    if (updatedStep.status === "DONE") {
+      workBtnHtml = '<span class="text-muted">완료</span>';
+
+    } else if (updatedStep.canStart) {
+      workBtnHtml = `
+        <button type="button"
+                class="btn btn-outline-info btn-sm btn-qc-regist"
+                data-order-id="${updatedStep.orderId}">
+          QC 등록
+        </button>
+      `;
+
+    } else {
+      workBtnHtml = '<span class="text-muted">대기</span>';
+    }
+
+  } else {
+    // 나머지 공정은 기존 로직 유지
+    if (updatedStep.canStart) {
+      workBtnHtml += `
+        <button type="button"
+                class="btn btn-primary btn-sm btn-step-start"
+                data-order-id="${updatedStep.orderId}"
+                data-step-seq="${updatedStep.stepSeq}">
+          시작
+        </button>
+      `;
+    }
+    if (updatedStep.canFinish) {
+      workBtnHtml += `
+        <button type="button"
+                class="btn btn-success btn-sm btn-step-finish ms-1"
+                data-order-id="${updatedStep.orderId}"
+                data-step-seq="${updatedStep.stepSeq}">
+          종료
+        </button>
+      `;
+    }
+	if (!updatedStep.canStart && !updatedStep.canFinish) {
+	  if (updatedStep.status === 'DONE') {
+	    workBtnHtml = '<span class="text-muted">완료</span>';
+	  } else if (updatedStep.status === 'READY') {
+	    workBtnHtml = '<span class="text-muted">대기</span>';
+	  } else {
+	    workBtnHtml = '-';
+	  }
+	}
   }
-  if (updatedStep.canFinish) {
-    workBtnHtml += `
-      <button type="button"
-              class="btn btn-success btn-sm btn-step-finish ms-1"
-              data-order-id="${updatedStep.orderId}"
-              data-step-seq="${updatedStep.stepSeq}">
-        종료
-      </button>
-    `;
-  }
-  if (!updatedStep.canStart && !updatedStep.canFinish) {
-    workBtnHtml = (updatedStep.status === 'DONE')
-      ? '<span class="text-muted">완료</span>'
-      : '-';
-  }
+
+
 
   const memoInputHtml = `
     <input type="text"

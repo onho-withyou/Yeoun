@@ -130,6 +130,7 @@ function openQcRegModal(rowData) {
     // hidden
 	document.getElementById("qcResultId").value = rowData.qcResultId;
     document.getElementById("orderId").value = rowData.orderId;
+	document.getElementById("qcPlanQty").value  = rowData.planQty;
 	
 	// 폼/테이블 초기화
 	document.getElementById("qcDetailTbody").innerHTML = "";
@@ -235,6 +236,10 @@ function collectDetailRowsFromTable() {
 	    const measureValue = tr.querySelector('input[name$=".measureValue"]').value;
 	    const result = tr.querySelector('select[name$=".result"]').value;
 	    const remark = tr.querySelector('input[name$=".remark"]').value;
+		
+		if (!measureValue || measureValue.trim() === "") {
+		      hasEmptyMeasure = true;
+	    }
 
 		detailRows.push({
 			qcResultDtlId,
@@ -244,6 +249,11 @@ function collectDetailRowsFromTable() {
 	        remark
 		});
 	});
+	
+	// 측정값 비어있는 행이 있으면 null 반환해서 밖에서 막기
+    if (hasEmptyMeasure) {
+      return null;
+    }
 	
 	return detailRows;
 }
@@ -258,7 +268,11 @@ function onClickSaveQcResult() {
 
   // 1) 디테일 행 수집
   const detailRows = collectDetailRowsFromTable();
-  if (!detailRows || detailRows.length === 0) {
+  if (!detailRows) {
+    alert("모든 QC 항목의 측정값을 입력해주세요.");
+    return;
+  }
+  if (detailRows.length === 0) {
     alert("저장할 QC 항목이 없습니다.");
     return;
   }
@@ -274,28 +288,56 @@ function onClickSaveQcResult() {
 	const overallResult = overallResultEl ? overallResultEl.value : "";
 	const failReason    = failReasonEl ? failReasonEl.value.trim() : "";
 
+	// ✅ 전체 판정 필수
+	if (!overallResult) {
+	  alert("전체 판정을 선택해주세요.");
+	  overallResultEl?.focus();
+	  return;
+	}
+
 	// ✅ FAIL인데 불합격 사유가 없으면 막기
 	if (overallResult === "FAIL" && failReason === "") {
 	  alert("전체 판정이 FAIL인 경우, 불합격 사유를 입력해주세요.");
-	  if (failReasonEl) {
-	    failReasonEl.removeAttribute("readonly"); // 이미 FAIL이면 어차피 풀려있지만 혹시 몰라서
-	    failReasonEl.focus();
+	  failReasonEl?.removeAttribute("readonly");
+	  failReasonEl?.focus();
+	  return;
+	}
+
+	// 🔹 양품/불량 수량 필수
+	if (goodQtyVal === "" || defectQtyVal === "") {
+	  alert("양품 수량과 불량 수량을 모두 입력해주세요.");
+	  if (goodQtyVal === "") {
+	    document.getElementById("qcGoodQty")?.focus();
+	  } else {
+	    document.getElementById("qcDefectQty")?.focus();
 	  }
 	  return;
 	}
 
+	const goodQty   = Number(goodQtyVal);
+	const defectQty = Number(defectQtyVal);
 
-    const goodQty   = goodQtyVal   !== "" ? Number(goodQtyVal)   : null;
-    const defectQty = defectQtyVal !== "" ? Number(defectQtyVal) : null;
+	if (isNaN(goodQty) || isNaN(defectQty)) {
+	  alert("양품/불량 수량은 숫자만 입력 가능합니다.");
+	  return;
+	}
+	if (goodQty < 0 || defectQty < 0) {
+	  alert("양품/불량 수량은 0 이상이어야 합니다.");
+	  return;
+	}
+	
+	// (선택) good + defect = planQty 체크
+	const planQtyVal = document.getElementById("qcPlanQty")?.value;
+	const planQty = planQtyVal ? Number(planQtyVal) : null;
 
-    if (goodQty !== null && isNaN(goodQty)) {
-      alert("양품 수량이 숫자가 아닙니다.");
-      return;
-    }
-    if (defectQty !== null && isNaN(defectQty)) {
-      alert("불량 수량이 숫자가 아닙니다.");
-      return;
-    }
+	if (planQty !== null && !isNaN(planQty)) {
+	  if (goodQty + defectQty !== planQty) {
+	    alert("양품 수량 + 불량 수량이 지시수량과 일치하지 않습니다.");
+	    // 필요하면 여기서 return 빼고 경고만 띄우게 바꿀 수도 있어
+	    return;
+	  }
+	}
+
 
     // 3) 서버로 보낼 payload (QcSaveRequestDTO와 동일 구조)
     const payload = {
