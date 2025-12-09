@@ -18,6 +18,7 @@ import com.yeoun.qc.dto.QcDetailRowDTO;
 import com.yeoun.qc.dto.QcRegistDTO;
 import com.yeoun.qc.dto.QcResultListDTO;
 import com.yeoun.qc.dto.QcResultViewDTO;
+import com.yeoun.qc.dto.QcSaveRequestDTO;
 import com.yeoun.qc.service.QcResultService;
 
 import lombok.RequiredArgsConstructor;
@@ -70,9 +71,9 @@ public class QcController {
 	@PostMapping("/{qcResultId}/save")
 	@ResponseBody
 	public Map<String, Object> saveQcResult(@PathVariable("qcResultId") Long qcResultId,
-											@RequestBody List<QcDetailRowDTO> detailRows) {
+											@RequestBody QcSaveRequestDTO qcSaveRequestDTO) {
 		
-		qcResultService.saveQcResult(qcResultId, detailRows);
+		qcResultService.saveQcResult(qcResultId, qcSaveRequestDTO);
 		
 		return Map.of(
 				"success", true,

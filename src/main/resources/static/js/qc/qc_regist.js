@@ -75,6 +75,31 @@ document.addEventListener("DOMContentLoaded", () => {
         openQcRegModal(row);
     });
 	
+	// ✅ 전체 판정에 따라 불합격 사유 활성/비활성 (readonly 버전)
+	const overallResultSelect = document.getElementById("overallResult");
+	const failReasonTextarea = document.getElementById("failReason");
+
+	function updateFailReasonState() {
+	  if (!overallResultSelect || !failReasonTextarea) return;
+
+	  const val = overallResultSelect.value;
+
+	  if (val === "FAIL") {
+	    // FAIL일 때: 입력 가능
+	    failReasonTextarea.removeAttribute("readonly");
+	  } else {
+	    // PASS 또는 미선택: 값 지우고 읽기 전용 + 회색
+	    failReasonTextarea.value = "";
+	    failReasonTextarea.setAttribute("readonly", "readonly");
+	  }
+	}
+
+	if (overallResultSelect) {
+	  overallResultSelect.addEventListener("change", updateFailReasonState);
+	  // 초기 상태도 한 번 세팅
+	  updateFailReasonState();
+	}
+	
 	// qc 등록 저장 버튼 클릭 이벤트
 	const btnSave = document.getElementById("btnQcSave");
 	if (btnSave) {
@@ -111,6 +136,27 @@ function openQcRegModal(rowData) {
 	document.getElementById("inspectionDate").value = new Date().toISOString().substring(0, 10);
 	document.getElementById("overallResult").value = "";
 	document.getElementById("failReason").value = "";
+	
+	// FAIL 사유 필드 비활성화 + 회색 처리
+	const overallResultSelect = document.getElementById("overallResult");
+	const failReasonTextarea = document.getElementById("failReason");
+	if (overallResultSelect && failReasonTextarea) {
+	  overallResultSelect.value = "";
+	  failReasonTextarea.value = "";
+	  failReasonTextarea.setAttribute("readonly", "readonly"); // ✅ readonly
+	}
+
+
+	
+	// 추가: 수량/비고 초기화
+	const goodInput = document.getElementById("qcGoodQty");
+	const defectInput = document.getElementById("qcDefectQty");
+	const remarkInput = document.getElementById("qcRemark");
+
+	if (goodInput)   goodInput.value = "";
+	if (defectInput) defectInput.value = "";
+	if (remarkInput) remarkInput.value = "";
+
 
 	// 상세행 조회해서 tbody 채우기
 	loadQcDetailRows(rowData.qcResultId);
@@ -210,52 +256,94 @@ function onClickSaveQcResult() {
     return;
   }
 
+  // 1) 디테일 행 수집
   const detailRows = collectDetailRowsFromTable();
-
-  // 혹시 하나도 없으면 방어 로직
-  if (detailRows.length === 0) {
+  if (!detailRows || detailRows.length === 0) {
     alert("저장할 QC 항목이 없습니다.");
     return;
   }
+  
+  // 2) 헤더 영역 값 읽기
+    const goodQtyVal   = document.getElementById("qcGoodQty")?.value;
+    const defectQtyVal = document.getElementById("qcDefectQty")?.value;
+    const remark       = document.getElementById("qcRemark")?.value || "";
 
-  // CSRF 토큰 (layout에 이미 meta로 넣어놨던 거 재사용)
-  // <meta name="_csrf_token" th:content="${_csrf.token}">
-  // <meta name="_csrf_headerName" th:content="${_csrf.headerName}">
-  const csrfTokenMeta = document.querySelector('meta[name="_csrf_token"]');
-  const csrfHeaderMeta = document.querySelector('meta[name="_csrf_headerName"]');
+	const overallResultEl = document.getElementById("overallResult");
+	const failReasonEl    = document.getElementById("failReason");
 
-  const csrfToken = csrfTokenMeta ? csrfTokenMeta.content : null;
-  const csrfHeaderName = csrfHeaderMeta ? csrfHeaderMeta.content : null;
+	const overallResult = overallResultEl ? overallResultEl.value : "";
+	const failReason    = failReasonEl ? failReasonEl.value.trim() : "";
 
-  fetch(`/qc/${qcResultId}/save`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(csrfToken && csrfHeaderName ? { [csrfHeaderName]: csrfToken } : {})
-    },
-    body: JSON.stringify(detailRows)
-  })
-    .then((res) => {
-      if (!res.ok) {
-        throw new Error("HTTP " + res.status);
-      }
-      return res.json();
+	// ✅ FAIL인데 불합격 사유가 없으면 막기
+	if (overallResult === "FAIL" && failReason === "") {
+	  alert("전체 판정이 FAIL인 경우, 불합격 사유를 입력해주세요.");
+	  if (failReasonEl) {
+	    failReasonEl.removeAttribute("readonly"); // 이미 FAIL이면 어차피 풀려있지만 혹시 몰라서
+	    failReasonEl.focus();
+	  }
+	  return;
+	}
+
+
+    const goodQty   = goodQtyVal   !== "" ? Number(goodQtyVal)   : null;
+    const defectQty = defectQtyVal !== "" ? Number(defectQtyVal) : null;
+
+    if (goodQty !== null && isNaN(goodQty)) {
+      alert("양품 수량이 숫자가 아닙니다.");
+      return;
+    }
+    if (defectQty !== null && isNaN(defectQty)) {
+      alert("불량 수량이 숫자가 아닙니다.");
+      return;
+    }
+
+    // 3) 서버로 보낼 payload (QcSaveRequestDTO와 동일 구조)
+    const payload = {
+      qcResultId: Number(qcResultId),
+      goodQty: goodQty,
+      defectQty: defectQty,
+      failReason: failReason,
+      remark: remark,
+      detailRows: detailRows
+    };
+
+    // 4) CSRF 토큰
+    const csrfTokenMeta  = document.querySelector('meta[name="_csrf_token"]');
+    const csrfHeaderMeta = document.querySelector('meta[name="_csrf_headerName"]');
+
+    const csrfToken     = csrfTokenMeta ? csrfTokenMeta.content : null;
+    const csrfHeaderName = csrfHeaderMeta ? csrfHeaderMeta.content : null;
+
+    // 5) fetch 호출 (⚠️ body: payload 로 변경!)
+    fetch(`/qc/${qcResultId}/save`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(csrfToken && csrfHeaderName ? { [csrfHeaderName]: csrfToken } : {})
+      },
+      body: JSON.stringify(payload)
     })
-    .then((data) => {
-      console.log("QC 저장 결과:", data);
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("HTTP " + res.status);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        console.log("QC 저장 결과:", data);
 
-      if (data.success) {
-        alert(data.message || "QC 검사 결과가 저장되었습니다.");
+        if (data.success) {
+          alert(data.message || "QC 검사 결과가 저장되었습니다.");
 
-        // 모달 닫고 목록 새로고침
-        qcRegModal.hide();
-        loadQcRegistGrid();
-      } else {
-        alert(data.message || "QC 저장 중 오류가 발생했습니다.");
-      }
-    })
-    .catch((err) => {
-      console.error("QC 저장 오류:", err);
-      alert("QC 저장 중 오류가 발생했습니다.");
-    });
-}
+          // 모달 닫고 목록 새로고침
+          qcRegModal.hide();
+          loadQcRegistGrid();
+        } else {
+          alert(data.message || "QC 저장 중 오류가 발생했습니다.");
+        }
+      })
+      .catch((err) => {
+        console.error("QC 저장 오류:", err);
+        alert("QC 저장 중 오류가 발생했습니다.");
+      });
+  }
