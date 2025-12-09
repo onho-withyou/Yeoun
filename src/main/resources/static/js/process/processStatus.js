@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
     el: gridEl,
     bodyHeight: 400,
     rowHeaders: ["rowNum"],
-    scrollX: false,
+    scrollX: true,
     scrollY: true,
     columnOptions: {
       resizable: true

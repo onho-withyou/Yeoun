@@ -15,8 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
 	qcRegistGrid = new tui.Grid({
 		el: gridEl,
 		rowHeaders: ["rowNum"],
-		scrollX: false,
-		scrollY: false,
+		scrollX: true,
+		scrollY: true,
 		columnOptions: {
 			resizable: true
 	    },
