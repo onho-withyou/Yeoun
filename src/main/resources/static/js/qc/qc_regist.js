@@ -126,6 +126,7 @@ function openQcRegModal(rowData) {
     document.getElementById("qcOrderIdText").innerText = rowData.orderId;
     document.getElementById("qcProductText").innerText = rowData.prdName;
     document.getElementById("qcPlanQtyText").innerText = rowData.planQty + " EA";
+	document.getElementById("qcLotNoText").innerText = rowData.lotNo || "-";
 
     // hidden
 	document.getElementById("qcResultId").value = rowData.qcResultId;

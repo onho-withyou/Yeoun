@@ -34,4 +34,7 @@ public class QcRegistDTO {
 	// 검사일
 	private LocalDate inspectionDate;
 
+	// LOT 번호
+	private String lotNo;
+
 }
