@@ -85,11 +85,25 @@ document.addEventListener("DOMContentLoaded", () => {
         name: "currentProcess",
         align: "center"
       },
-      {
-        header: "상태",
-        name: "status",
-        align: "center"
-      },
+	  {
+	    header: "상태",
+	    name: "status",
+	    align: "center",
+	    formatter: ({ value }) => {
+	      switch (value) {
+	        case "IN_PROGRESS":
+	          return "진행중";
+	        case "RELEASED":
+	          return "확정";
+	        case "DONE":
+	          return "완료";
+	        case "CANCELLED":
+	          return "취소";
+	        default:
+	          return value || "-";
+	      }
+	    }
+	  },
       {
         header: "경과시간",
         name: "elapsedTime",
