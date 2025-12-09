@@ -1,13 +1,13 @@
 // qc_result.js
 
 let qcResultGrid = null;
-let qcResultModal = null;
+let qcViewModal = null;
 
 document.addEventListener("DOMContentLoaded", () => {
 	
 	// 모달 초기화
-	const modalEl = document.getElementById("qcResultModal");
-	qcResultModal = new bootstrap.Modal(modalEl);
+	const modalEl = document.getElementById("qcViewModal");
+	qcViewModal = new bootstrap.Modal(modalEl);
 	
 	// 그리드 초기화
 	const gridEl = document.getElementById("qcResultGrid");
@@ -15,8 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
 	qcResultGrid = new tui.Grid({
 		el: gridEl,
 		rowHeaders: ["rowNum"],
-		scrollX: false,
-		scrollY: false,
+		scrollX: true,
+		scrollY: true,
 		columnOptions: {
 			resizable: true
 	    },
@@ -69,9 +69,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (ev.columnName !== "btn") return;
 
 		const row = qcResultGrid.getRow(ev.rowKey);
-	    if (!row || !row.orderId) return;
+	    if (!row || !row.qcResultId) return;
 		
-        openQcResultModal(row);
+        openQcViewModal(row.qcResultId);
     });
 });
 
@@ -85,17 +85,116 @@ function loadQcResultGrid() {
 }
 
 // 모달을 열면서 데이터 넣는 함수
-function openQcResultModal(rowData) {
+function openQcViewModal(qcResultId) {
 
-    document.getElementById("qcModalTitleOrder").innerText = rowData.orderId;
-    document.getElementById("qcModalTitleProduct").innerText = rowData.prdId + " / " + rowData.prdName;
+  fetch(`/qc/result/${qcResultId}`)
+    .then(res => res.json())
+    .then(data => {
 
-    document.getElementById("qcOrderIdText").innerText = rowData.orderId;
-    document.getElementById("qcProductText").innerText = rowData.prdId + " / " + rowData.prdName;
-    document.getElementById("qcPlanQtyText").innerText = rowData.planQty + " EA";
+      // ===== 타이틀 영역 =====
+      document.getElementById("qcViewTitleOrder").innerText        = data.orderId;
+      document.getElementById("qcViewTitleProductName").innerText  = data.productName || "";
+      document.getElementById("qcViewTitleProductCode").innerText  = data.productCode || "";
 
-    // hidden
-    document.getElementById("orderId").value = rowData.orderId;
+      // ===== 기본 작업 정보 =====
+      document.getElementById("qcViewOrderIdText").innerText = data.orderId;
 
-    qcResultModal.show();
+      // 제품명 (코드 포함)
+      document.getElementById("qcViewProductText").innerText =
+        `${data.productName || ""} (${data.productCode || ""})`;
+
+      document.getElementById("qcViewPlanQtyText").innerText =
+        (data.planQty ?? "") + " EA";
+
+      document.getElementById("qcViewLotNoText").innerText =
+        data.lotNo || "-";
+
+      // ===== 검사/수량 정보 =====
+	  document.getElementById("qcViewInspectionDateText").innerText =
+	    data.inspectionDate || "";
+
+	  document.getElementById("qcViewInspectorNameText").innerText =
+	    data.inspectorName || "";
+
+	  document.getElementById("qcViewInspectionQtyText").innerText =
+	    data.inspectionQty ?? "";
+
+	  document.getElementById("qcViewGoodQtyText").innerText =
+	    data.goodQty ?? "";
+
+	  document.getElementById("qcViewDefectQtyText").innerText =
+	    data.defectQty ?? "";
+
+		// ===== 전체 판정 / 사유 / 비고 =====
+		const overall = data.overallResult || "-";
+		const overallBadge = document.getElementById("qcViewOverallResultBadge");
+
+		// 텍스트 세팅
+		overallBadge.textContent = overall;
+
+		// 클래스 초기화 후 상태별 색 입히기
+		overallBadge.className = "badge w-100 py-2 fs-6 text-center";
+
+		if (overall === "PASS") {
+		  overallBadge.classList.add("bg-success");
+		} else if (overall === "FAIL") {
+		  overallBadge.classList.add("bg-danger");
+		} else {
+		  overallBadge.classList.add("bg-secondary");
+		}
+
+		// 불합격 사유 / 비고
+		const failReasonEl      = document.getElementById("qcViewFailReason");
+		const failReasonWrapper = failReasonEl.closest(".col-md-5");
+		const remarkEl          = document.getElementById("qcViewRemark");
+		const remarkWrapper     = remarkEl.closest(".col-md-4");
+
+		// 값 세팅
+		failReasonEl.value = data.failReason || "";
+		remarkEl.value     = data.remark || "";
+
+		// PASS면 불합격 사유 영역 숨기기
+		if (overall === "FAIL") {
+		  failReasonWrapper.style.display = "";
+		} else {
+		  failReasonWrapper.style.display = "none";
+		}
+
+		// 비고가 없으면 비고 영역 숨기기
+		if (data.remark && data.remark.trim() !== "") {
+		  remarkWrapper.style.display = "";
+		} else {
+		  remarkWrapper.style.display = "none";
+		}
+
+
+      // ===== 디테일 리스트 =====
+      const tbody = document.getElementById("qcViewDetailTbody");
+      tbody.innerHTML = "";
+
+      (data.details || []).forEach(row => {
+        const badge =
+          row.result === "PASS"
+            ? "<span class='badge bg-success'>PASS</span>"
+            : row.result === "FAIL"
+              ? "<span class='badge bg-danger'>FAIL</span>"
+              : "";
+
+        const tr = `
+          <tr>
+            <td>${row.itemName || ""}</td>
+            <td>${row.unit || ""}</td>
+            <td>${row.stdText || ""}</td>
+            <td>${row.measureValue || ""}</td>
+            <td>${badge}</td>
+            <td>${row.remark || ""}</td>
+          </tr>
+        `;
+
+        tbody.insertAdjacentHTML("beforeend", tr);
+      });
+
+      qcViewModal.show();
+    })
+    .catch(() => alert("QC 결과 조회 중 오류가 발생했습니다."));
 }

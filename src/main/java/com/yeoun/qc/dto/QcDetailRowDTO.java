@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+// QC 상세 모달 목록용
 @Getter
 @Setter
 @NoArgsConstructor

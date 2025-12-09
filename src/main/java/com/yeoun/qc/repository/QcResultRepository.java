@@ -33,10 +33,12 @@ public interface QcResultRepository extends JpaRepository<QcResult, Long> {
             w.product.prdName,
             w.planQty,
             q.overallResult,
-            q.inspectionDate
+            q.inspectionDate,
+            wop.lotNo
         )
         FROM QcResult q
         JOIN WorkOrder w ON w.orderId = q.orderId
+        LEFT JOIN WorkOrderProcess wop ON wop.workOrder = w AND wop.stepSeq = 1
         WHERE q.overallResult = :status
         ORDER BY w.createdDate DESC
         """)
