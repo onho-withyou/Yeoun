@@ -3,6 +3,18 @@ window.onload = function () {
 	processCodeGridAllSearch();//공정코드 관리 그리드 조회
 }
 
+document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
+    tab.addEventListener('shown.bs.tab', function (e) {
+        const targetId = e.target.getAttribute('data-bs-target');
+
+        if (targetId === '#navs-process-tab') {//탭
+            grid1.refreshLayout();
+        } else if (targetId === '#navs-processCode-tab') {//탭
+            grid2.refreshLayout();
+        }
+    });
+});
+
 const Grid = tui.Grid;
 //g-grid1 공정그리드
 const grid1 = new Grid({
@@ -10,14 +22,15 @@ const grid1 = new Grid({
       rowHeaders: ['rowNum','checkbox'],
 	  columns: [
 
-	    {header: '순번' ,name: 'row_no' ,align: 'center',hidden: true}
-		,{header: '라우트ID' ,name: 'prd_id' ,align: 'center',hidden: true}
-		,{header: '제품군' ,name: 'item_name' ,align: 'center',width: 230}
-		,{header: '라우트명' ,name: 'prd_name' ,align: 'center',filter: "select"}
-		,{header: '사용' ,name: 'prd_cat' ,align: 'center'}
-		,{header: '공정단계 수' ,name: 'prd_unit' ,align: 'center'}
-		,{header: '비고' ,name: 'unit_price' ,align: 'center'}
-        ,{header: '작업' ,name: 'prd_status' ,align: 'center'}           
+		{header: '라우트ID' ,name: 'routeId' ,align: 'center'}
+		,{header: '제품코드' ,name: 'prdId' ,align: 'center'}
+		,{header: '라우트명' ,name: 'routeName' ,align: 'center',width: 150,filter: "select"}
+		,{header: '설명' ,name: 'description' ,align: 'center',width: 230}
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center'}  
+		,{header: '생성자' ,name: 'createdId' ,align: 'center'}  
+		,{header: '생성일시' ,name: 'createdDate' ,align: 'center'}  
+		,{header: '수정자' ,name: 'updatedId' ,align: 'center'}  
+		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}        
 	  ],
 	  data: []
 	  ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
@@ -36,15 +49,15 @@ const grid2 = new Grid({
 	    el: document.getElementById('processCodeGrid'),
         rowHeaders: ['rowNum','checkbox'],
 	    columns: [
-	    {header: '순번' ,name: 'row_no' ,align: 'center',hidden: true}
-	    ,{header: '공정ID' ,name: 'bom_id' ,align: 'center'}
-	    ,{header: '공정명' ,name: 'prd_id' ,align: 'center',width: 230}
-	    ,{header: '유형' ,name: 'mat_id' ,align: 'center',filter: "select"}
-	    ,{header: '사용' ,name: 'mat_name' ,align: 'center',filter: "select"}
-        ,{header: '설명' ,name: 'mat_qty' ,align: 'center'}
-	    ,{header: '단위' ,name: 'mat_unit' ,align: 'center'}
-        ,{header: '작업' ,name: 'bom_seq_no' ,align: 'center}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 '}
-          
+	    {header: '공정ID' ,name: 'processId' ,align: 'center'}
+	    ,{header: '공정명' ,name: 'processName' ,align: 'center',width: 230}
+	    ,{header: '공정유형' ,name: 'processType' ,align: 'center',filter: "select"}
+	    ,{header: '설명' ,name: 'description' ,align: 'center',filter: "select"}
+        ,{header: '사용여부' ,name: 'useYn' ,align: 'center'}
+		,{header: '생성자' ,name: 'createdId' ,align: 'center'}
+		,{header: '생성일시' ,name: 'createdDate' ,align: 'center'}
+		,{header: '수정자' ,name: 'updatedId' ,align: 'center'}
+		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}
 	    ],
 	    data: []
 	    ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
@@ -157,8 +170,10 @@ function productRouteSearch(){
 	    return res.json(); // 유효한 JSON일 때만 파싱 시도
 	})
 		.then(data => {
-			
 			console.log("검색데이터:", data);
+			data.map(item => {
+				item.prdId = item.prdId.prdId;
+			});
 			grid1.resetData(data);
 		})
 		.catch(err => {
@@ -171,5 +186,27 @@ function productRouteSearch(){
 
 //공정코드 관리 그리드 조회
 function processCodeGridAllSearch() {
-	
+	fetch('/masterData/processCode/list', {
+			method: 'GET',
+			headers: {
+				[csrfHeader]: csrfToken,
+				'Content-Type': 'application/json'
+			},
+		})
+		.then(res => {
+		    if (!res.ok) {
+		        throw new Error(`HTTP error! status: ${res.status}`);
+			}
+			return res.json();
+		})
+		.then(data => {
+			console.log("검색데이터:", data);
+			grid2.resetData(data);
+		})
+		.catch(err => {	
+			console.error("조회오류", err);
+			//grid2.resetData([]);
+		});
+
+
 }

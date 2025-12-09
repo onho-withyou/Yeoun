@@ -23,7 +23,6 @@ import lombok.extern.log4j.Log4j2;
 public class ProcessMstService {
 	
 	private final ProcessMstRepository processMstRepository;
-	@Autowired
 	private final RouteHeaderRepository routeHeaderRepository;
 	
 	//제품별공정 라우트 제품코드 드롭다운
@@ -31,12 +30,18 @@ public class ProcessMstService {
 	public List<ProductMst> getPrdMst() {
 		return routeHeaderRepository.findAllPrd();
 	}
-	
-	//제품별 공정 라우트 그리드 조회
+	// 제품별 공정 라우트 그리드 조회
 	@Transactional(readOnly = true)
-	public List<ProcessMst> getProcessMstList(String prdId, String routeName) {
-		log.info("searchParams 조회된개수 - {}",prdId+routeName);
-		return processMstRepository.findByPrdIdAndRouteName(prdId, routeName);
+	public List<RouteHeader> getRouteHeaderList(String prdId, String routeName) {
+		log.info("searchParams 조회된개수 - {}", prdId + routeName);
+		
+		return routeHeaderRepository.findByPrdIdAndRouteName(prdId, routeName);
+	}
+	// 공정코드 그리드 조회
+	@Transactional(readOnly = true)
+	public List<ProcessMst> getProcessCodeList() {
+		log.info("getProcessCodeList 조회");
+		return processMstRepository.findAll();
 	}
 
 }
