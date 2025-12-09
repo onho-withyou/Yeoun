@@ -136,6 +136,25 @@ public class WorkOrderProcessService {
         if (qcResult != null && qcResult.getGoodQty() != null) { // 필드명 맞게 수정
             goodQty = qcResult.getGoodQty();
         }
+        
+        // 2) 불량수량
+        int defectQty = 0;
+        
+        if (qcResult != null && qcResult.getDefectQty() != null) {
+            // 1순위: QC_RESULT.DEFECT_QTY
+            defectQty = qcResult.getDefectQty();
+        } else {
+            // 2순위: 공정 마지막 단계(최종 공정)의 DEFECT_QTY 사용
+            WorkOrderProcess lastStep = processes.stream()
+                    .max(Comparator.comparing(
+                            p -> p.getStepSeq() == null ? 0 : p.getStepSeq()
+                    ))
+                    .orElse(null);
+
+            if (lastStep != null && lastStep.getDefectQty() != null) {
+                defectQty = lastStep.getDefectQty();
+            }
+        }
 
         int progressRate = calculateProgressRate(processes);
         String currentProcess = resolveCurrentProcess(processes);
@@ -149,6 +168,7 @@ public class WorkOrderProcessService {
         dto.setStatus(workOrder.getStatus());
 
         dto.setGoodQty(goodQty);
+        dto.setDefectQty(defectQty);
         dto.setProgressRate(progressRate);
         dto.setCurrentProcess(currentProcess);
         dto.setElapsedTime(elapsedTime);

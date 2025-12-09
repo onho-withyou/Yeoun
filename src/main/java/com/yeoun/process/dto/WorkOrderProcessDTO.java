@@ -26,6 +26,9 @@ public class WorkOrderProcessDTO {
 	// 양품수량 (= 최종 공정 기준 양품수량)
 	private Integer goodQty;
 	
+	// 불량수량
+	private Integer defectQty;
+	
 	// 진행률 (공정 단계 기반 == (완료 단계 수 / 전체 단계 수) * 100)
 	private Integer progressRate;
 	
