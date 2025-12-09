@@ -1,0 +1,49 @@
+package com.yeoun.sales.dto;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+@Getter
+@Setter
+@NoArgsConstructor
+public class ShipmentListDTO {
+
+    private String orderId;
+    private String clientName;
+    private String prdName;
+    private BigDecimal orderQty;
+    private BigDecimal stockQty;
+    private LocalDate dueDate;
+    private String status;
+
+    public ShipmentListDTO(
+            String orderId,
+            String clientName,
+            String prdName,
+            BigDecimal orderQty,
+            BigDecimal stockQty,
+            Object dueDate,   
+            String status
+    ) {
+        this.orderId = orderId;
+        this.clientName = clientName;
+        this.prdName = prdName;
+        this.orderQty = orderQty;
+        this.stockQty = stockQty;
+
+        // ⭐ Timestamp → LocalDate 변환
+        if (dueDate instanceof java.sql.Timestamp ts) {
+            this.dueDate = ts.toLocalDateTime().toLocalDate();
+        } else if (dueDate instanceof java.sql.Date d) {
+            this.dueDate = d.toLocalDate();
+        } else {
+            this.dueDate = null;
+        }
+
+        this.status = status;
+    }
+}

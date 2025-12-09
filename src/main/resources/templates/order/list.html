@@ -400,8 +400,9 @@
 
         <!-- Body -->
         <div class="yeoun-modal-body">
-          <form id="workCreateForm">
-          
+          <form th:action="@{/order/create}" id="workCreateForm" method="post">
+          <input type="hidden" name="${_csrf.headerName}" value="${_csrf.token}">
+
           	<div class="row g-3 mb-3">
           		<div class="col-6">
           			<label class="form-label">생산 계획서</label>
@@ -411,7 +412,8 @@
           					<option th:value="${plan.planId}"
           							th:text="${plan.planId}"
           							th:data-name="${plan.itemName}"
-          							th:data-qty="${plan.totalQty}"
+                                    th:data-remain="${plan.remainingQty}"
+          							th:data-total="${plan.totalQty}"
           							style="color: #888;"
           					></option>
           				</th:block>
@@ -489,7 +491,7 @@
 			  <div class="flow-item">
 			    <div class="flow-title">블렌딩</div>
 			    <div class="flow-desc">혼합탱크·교반기</div>
-			    <select class="flow-select" id="blendSelect">
+			    <select name="prcBld" class="flow-select" id="blendSelect">
 			      <option selected disabled>선택</option>
 			      <th:block th:each="worker : ${workers}">
                   	<option th:value="${worker.empId}"
@@ -502,7 +504,7 @@
 			  <div class="flow-item">
 			    <div class="flow-title">여과</div>
 			    <div class="flow-desc">여과기</div>
-			    <select class="flow-select" id="filterSelect">
+			    <select name="prcFlt" class="flow-select" id="filterSelect">
 			      <option selected disabled>선택</option>
 			      <th:block th:each="worker : ${workers}">
                   	<option th:value="${worker.empId}"
@@ -515,7 +517,7 @@
 			  <div class="flow-item">
 			    <div class="flow-title">충전</div>
 			    <div class="flow-desc">충전기</div>
-			    <select class="flow-select" id="fillSelect">
+			    <select name="prcFil" class="flow-select" id="fillSelect">
 			      <option selected disabled>선택</option>
 			      <th:block th:each="worker : ${workers}">
                   	<option th:value="${worker.empId}"
@@ -528,7 +530,7 @@
 			  <div class="flow-item">
 			    <div class="flow-title">조립 + 캡핑</div>
 			    <div class="flow-desc">반자동 캡핑기</div>
-			    <select class="flow-select" id="cappingSelect">
+			    <select name="prcCap" class="flow-select" id="cappingSelect">
 			      <option selected disabled>선택</option>
 			      <th:block th:each="worker : ${workers}">
                   	<option th:value="${worker.empId}"
@@ -541,7 +543,7 @@
 			  <div class="flow-item">
 			    <div class="flow-title">라벨링 + 포장</div>
 			    <div class="flow-desc">라벨러·포장기</div>
-			    <select class="flow-select" id="labelPackSelect">
+			    <select name="prcLbl" class="flow-select" id="labelPackSelect">
 			      <option selected disabled>선택</option>
 			      <th:block th:each="worker : ${workers}">
                   	<option th:value="${worker.empId}"
@@ -593,19 +595,6 @@
         <!-- BODY -->
         <div class="yeoun-modal-body">
 
-          <!-- 탭 -->
-          <ul class="nav yeoun-tabs mb-4" role="tablist">
-            <li class="nav-item">
-              <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#detail-basic">기본 정보</button>
-            </li>
-            <li class="nav-item">
-              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#detail-route">공정 라우트</button>
-            </li>
-            <li class="nav-item">
-              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#detail-lot">LOT 정보</button>
-            </li>
-          </ul>
-
           <div class="tab-content">
 
             <!-- ======================== 기본 정보 ======================== -->
@@ -615,12 +604,12 @@
 
                 <div class="info-item">
                   <label>작업지시번호</label>
-                  <div class="info-value" id="detailWoId"></div>
+                  <div class="info-value" id="detailOrderId"></div>
                 </div>
 
                 <div class="info-item">
                   <label>품목명</label>
-                  <div class="info-value" id="detailItemName"></div>
+                  <div class="info-value" id="detailPrdName"></div>
                 </div>
 
                 <div class="info-item">
@@ -649,13 +638,13 @@
                 </div>
 
                 <div class="info-item">
-                  <label>할당 설비</label>
-                  <div class="info-value" id="detailEquipName"></div>
+                  <label>진행 공정</label>
+                  <div class="info-value" id="detailRouteId"></div>
                 </div>
 
                 <div class="info-item">
                   <label>담당 작업자</label>
-                  <div class="info-value" id="detailWorkerName"></div>
+                  <div class="info-value" id="detailWorkers"></div>
                 </div>
 
                 <!-- 진행률 -->
@@ -667,24 +656,15 @@
                 </div>
               </div>
             </div>
-
-            <!-- ======================== 공정 라우트 ======================== -->
-            <div class="tab-pane fade" id="detail-route">
-              <table class="table yeoun-table">
-                <thead>
-                <tr>
-                  <th>STEP</th>
-                  <th>공정명</th>
-                  <th>설비</th>
-                  <th>기준시간</th>
-                  <th>상태</th>
-                </tr>
-                </thead>
-                <tbody id="detailRouteTable"></tbody>
-              </table>
-            </div>
-
           </div>
+        </div>
+
+        <div class="mt-3 d-flex gap-2">
+          <button class="btn btn-outline-primary"
+                  id="btnRoutePage">공정 페이지</button>
+
+          <button class="btn btn-outline-secondary"
+                  id="btnLotPage">LOT 페이지</button>
         </div>
 
         <!-- FOOTER -->
@@ -862,22 +842,23 @@
   document.getElementById("planId").addEventListener("change", function() {
 	    const option = this.selectedOptions[0];
 	    const product = option.dataset.name;
-	    const qty = option.dataset.qty;
+	    const total = option.dataset.total;
+        const remain = option.dataset.remain;
 	    
-	    maxQty = qty;	// 수량 저장
-	    referTime = calcRecommendedHours(qty);	// 소요시간 계산
+	    maxQty = remain;	// 수량 저장
+	    referTime = calcRecommendedHours(total);	// 소요시간 계산
 
-	    document.getElementById("planDetail").innerText = `${product} / ${qty}개`;
+	    document.getElementById("planDetail").innerText = `${product} (${remain} / ${total}개)`;
 	    document.getElementById("referTime").innerText = referTime;
-	    if (qty < 336) {
-	    	document.getElementById("planQty").value = qty;
+	    if (total < 336) {
+	    	document.getElementById("planQty").value = total;
 	    }
 	    
 	    const matchedOption = selectOptionByText("prdName", product);
 
 	    if (matchedOption) {
-	        const prdId = matchedOption.value;     // ⭐ 여기 쓰면 됨!
-	        document.getElementById("routeHeader").innerText = `RT-${prdId}`;
+	        const prdId = matchedOption.value;
+	        document.getElementById("routeHeader").value = `RT-${prdId}`;
 	    }
 	});
   
@@ -902,9 +883,9 @@
   });
   
   // 예상 소요 시간 계산
-  function calcRecommendedHours(qty) {
-	   const hours = qty / 42;
-	   return "약 " + Math.ceil(qty / 42) + "시간(" + Math.round(hours * 10) / 10 + "시간) 소요 예상";
+  function calcRecommendedHours(remain) {
+	   const hours = remain / 42;
+	   return "약 " + Math.ceil(remain / 42) + "시간(" + Math.round(hours * 10) / 10 + "시간) 소요 예상";
   }
   
   // 시간 합쳐 input value 지정
@@ -944,133 +925,43 @@
     const modal = new bootstrap.Modal(document.getElementById("workDetailModal"));
 
     // 1) 기본 정보 로드
-    fetch(`/api/work-order/${workId}`)
+    fetch(`/order/detail/${workId}`)
             .then(res => res.json())
             .then(data => {
-              document.getElementById("detailWoId").innerText = data.woId;
-              document.getElementById("detailItemName").innerText = data.itemName;
-              document.getElementById("detailStatus").innerText = data.status;
-              document.getElementById("detailPlanQty").innerText = data.quantity;
-              document.getElementById("detailPlanDate").innerText = data.planDate;
-              document.getElementById("detailPlanTime").innerText =
-                      `${data.planStart} ~ ${data.planEnd}`;
-              document.getElementById("detailLineName").innerText = data.lineName;
-              document.getElementById("detailEquipName").innerText = data.equipName;
-              document.getElementById("detailWorkerName").innerText = data.worker;
+                console.log("정보:::: " , data);
 
-              // 진행률 처리
-              const p = data.progress;
-              const bar = document.getElementById("detailProgressBar");
-              bar.style.width = p + "%";
-              bar.innerText = p + "%";
+                  document.getElementById("detailOrderId").innerText = data.orderId;
+                  document.getElementById("detailPrdName").innerText = data.prdName;
+                  document.getElementById("detailStatus").innerText = data.status;
+                  document.getElementById("detailPlanQty").innerText = data.planQty;
+                  document.getElementById("detailPlanDate").innerText = data.planDate;
+                  document.getElementById("detailPlanTime").innerText = data.planTime;
+                  document.getElementById("detailLineName").innerText = data.lineName;
+                  document.getElementById("detailRouteId").innerText = data.routeId;
+                  document.getElementById("detailWorkers").innerText =
+                      data.workers.map(w => `${w.processName}: ${w.workerName}`).join(", ");
+
+                  // 진행률 처리
+                  const p = data.progress;
+                  const bar = document.getElementById("detailProgressBar");
+                  bar.style.width = p + "%";
+                  bar.innerText = p + "%";
             });
 
-    // 2) 라우팅 정보
-    fetch(`/api/work-order/${workId}/routing`)
-            .then(res => res.json())
-            .then(list => {
-              const t = document.getElementById("detailRouteTable");
-              t.innerHTML = "";
-              list.forEach(r => {
-                t.innerHTML += `
-          <tr>
-            <td>${r.step}</td>
-            <td>${r.processName}</td>
-            <td>${r.equipment}</td>
-            <td>${r.stdTime} min</td>
-            <td>${r.status}</td>
-          </tr>`;
-              });
-            });
-
-    // 3) LOT 정보
-    fetch(`/api/work-order/${workId}/lot`)
-            .then(res => res.json())
-            .then(list => {
-              const t = document.getElementById("detailLotTable");
-              t.innerHTML = "";
-              list.forEach(l => {
-                t.innerHTML += `
-          <tr>
-            <td>${l.lotNo}</td>
-            <td>${l.itemName}</td>
-            <td>${l.qty}</td>
-            <td>${l.warehouse}</td>
-            <td>${l.remark}</td>
-          </tr>`;
-              });
-            });
-
-    modal.show();
+      modal.show();
   }
+
+  document.getElementById("btnRoutePage").onclick = function() {
+      location.href = `/work/process/${document.getElementById("detailWoId").innerText}`;
+  };
+
+  document.getElementById("btnLotPage").onclick = function() {
+      location.href = `/work/lot/${document.getElementById("detailWoId").innerText}`;
+  };
+
 
 </script>
 </th:block>
 
 </body>
 </html>
-
-<!--
-
-function openDetailModal(workId){
-  // 1) 기본 정보 로드
-  fetch(`/api/work-order/${workId}`)
-    .then(res=>res.json())
-    .then(data=>{
-      document.getElementById("woId").value = data.woId;
-      document.getElementById("itemName").value = data.itemName;
-      document.getElementById("planQty").value = data.quantity;
-      document.getElementById("status").value = data.status;
-      document.getElementById("planDate").value = data.planDate;
-      document.getElementById("planTime").value = data.planStart + " ~ " + data.planEnd;
-      document.getElementById("lineName").value = data.lineName;
-      document.getElementById("equipName").value = data.equipName;
-      document.getElementById("workerName").value = data.worker;
-
-      // 진행률
-      const p = data.progress;
-      const bar = document.getElementById("progressBar");
-      bar.style.width = p + "%";
-      bar.innerText = p + "%";
-    });
-
-  // 2) 공정 라우트 로드
-  fetch(`/api/work-order/${workId}/routing`)
-    .then(res=>res.json())
-    .then(list=>{
-      const tbody = document.getElementById("routeTable");
-      tbody.innerHTML = "";
-      list.forEach(r=>{
-        tbody.innerHTML += `
-          <tr>
-            <td>${r.step}</td>
-            <td>${r.processName}</td>
-            <td>${r.equipment}</td>
-            <td>${r.stdTime} min</td>
-            <td>${r.status}</td>
-          </tr>`;
-      });
-    });
-
-  // 3) LOT 정보 로드
-  fetch(`/api/work-order/${workId}/lot`)
-    .then(res=>res.json())
-    .then(list=>{
-      const tbody = document.getElementById("lotTable");
-      tbody.innerHTML = "";
-      list.forEach(l=>{
-        tbody.innerHTML += `
-          <tr>
-            <td>${l.lotNo}</td>
-            <td>${l.itemName}</td>
-            <td>${l.qty}</td>
-            <td>${l.warehouse}</td>
-            <td>${l.remark}</td>
-          </tr>`;
-      });
-    });
-
-  // 마지막 → 모달 열기
-  new bootstrap.Modal(document.getElementById("workModal")).show();
-}
--->

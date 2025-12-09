@@ -1,16 +1,20 @@
 package com.yeoun.qc.service;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.masterData.entity.QcItem;
 import com.yeoun.masterData.repository.QcItemRepository;
 import com.yeoun.order.entity.WorkOrder;
 import com.yeoun.order.repository.WorkOrderRepository;
+import com.yeoun.process.repository.WorkOrderProcessRepository;
 import com.yeoun.qc.dto.QcDetailRowDTO;
 import com.yeoun.qc.dto.QcRegistDTO;
 import com.yeoun.qc.dto.QcResultListDTO;
@@ -29,6 +33,7 @@ public class QcResultService {
     private final WorkOrderRepository workOrderRepository;
     private final QcItemRepository qcItemRepository;
     private final QcResultDetailRepository qcResultDetailRepository;
+    private final WorkOrderProcessRepository workOrderProcessRepository;
     
     // --------------------------------------------------------------
     // 캡/펌프 공정 종료 시 호출되는 QC 결과 생성 메서드
@@ -221,11 +226,81 @@ public class QcResultService {
 
 	// ----------------------------------------------------------
 	// QC 결과 저장 (등록 모달에서 입력한 값 반영)
+	@Transactional
 	public void saveQcResult(Long qcResultId, List<QcDetailRowDTO> detailRows) {
 		
+		// 0) 로그인한 직원 ID (검사자 / 수정자 공통)
+	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	    String loginEmpId = null;
+
+	    if (authentication != null && authentication.isAuthenticated()
+	            && !"anonymousUser".equals(authentication.getPrincipal())) {
+	        loginEmpId = authentication.getName();
+	    }
+		
 		// 1) QC 결과 헤더 조회 (없으면 예외)
+		QcResult header = qcResultRepository.findById(qcResultId)
+	            .orElseThrow(() -> new IllegalArgumentException("QC 결과가 존재하지 않습니다. ID = " + qcResultId));
+		
 		// 2) 상세 항목 반복 처리
+		boolean allPass = true;   // 전체 판정 계산용
+		int failCount = 0;
+		
+		for (QcDetailRowDTO row : detailRows) {
+
+	        // 2-1) 상세 엔티티 조회 (pk: qcResultDtlId)
+	        QcResultDetail detail = qcResultDetailRepository.findById(row.getQcResultDtlId())
+	                .orElseThrow(() -> new IllegalArgumentException(
+	                        "QC 상세가 존재하지 않습니다. ID = " + row.getQcResultDtlId()));
+
+	        // 2-2) 모달에서 입력한 값 반영
+	        detail.setMeasureValue(row.getMeasureValue()); // 측정값
+	        detail.setResult(row.getResult());             // PASS / FAIL
+	        detail.setRemark(row.getRemark());             // 비고
+
+	        // 2-3) 수정자 
+	        detail.setUpdatedUser(loginEmpId);
+
+	        // 2-3) 전체 판정 계산용 체크
+	        if (row.getResult() != null && row.getResult().equalsIgnoreCase("FAIL")) {
+	            allPass = false;
+	            failCount++;
+	        }
+
+	        // 2-4) 상세 저장
+	        qcResultDetailRepository.save(detail);
+	    }
+		
 		// 3) 전체 판정 계산
+		header.setOverallResult(allPass ? "PASS" : "FAIL");
+	    header.setInspectionDate(LocalDate.now());
+	    header.setInspectorId(loginEmpId);  // 실제 검사한 사람
+	    header.setUpdatedId(loginEmpId);    // 수정자(최종 저장한 사람)
+	    
+	    // 3-4) 양품/불량 수량은 지금은 단순 예시로
+	    //      - FAIL 개수를 defectQty로 보고,
+	    //      - 검사 수량 - FAIL 개수 = goodQty 로 계산
+	    if (header.getInspectionQty() != null) {
+	        int total = header.getInspectionQty();
+	        header.setDefectQty(failCount);
+	        header.setGoodQty(total - failCount);
+	    }
+	    
+	    qcResultRepository.save(header);
+	    
+	    // 4) QC 공정(WorkOrderProcess) 자동 종료 처리
+	    String orderId = header.getOrderId();
+	    
+	    workOrderProcessRepository
+        .findByWorkOrderOrderIdAndProcessProcessId(orderId, "PRC-QC")
+        .ifPresent(qcProc -> {
+            // 이미 DONE이면 건너뛰기
+            if (!"DONE".equals(qcProc.getStatus())) {
+                qcProc.setStatus("DONE");
+                qcProc.setEndTime(LocalDateTime.now());
+                workOrderProcessRepository.save(qcProc);
+            }
+        });
 	}
 
 

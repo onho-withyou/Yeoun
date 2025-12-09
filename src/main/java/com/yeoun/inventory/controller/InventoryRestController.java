@@ -20,6 +20,7 @@ import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.inbound.dto.InboundDTO;
 import com.yeoun.inbound.dto.ReceiptDTO;
 import com.yeoun.inventory.dto.InventoryModalRequestDTO;
+import com.yeoun.inventory.dto.InventoryOrderCheckViewDTO;
 import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryGroupDTO;
@@ -27,6 +28,7 @@ import com.yeoun.inventory.dto.WarehouseLocationDTO;
 import com.yeoun.inventory.dto.InventorySafetyCheckDTO;
 import com.yeoun.inventory.entity.WarehouseLocation;
 import com.yeoun.inventory.service.InventoryService;
+import com.yeoun.order.dto.WorkOrderDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -161,6 +163,24 @@ public class InventoryRestController {
 		
 		return ResponseEntity.ok(Map.of("stock", stock));
 	}
+	
+	
+	// 원재료id로 재고 수량 조회
+	@GetMapping("/orderData")
+	public ResponseEntity<List<WorkOrderDTO>> getOrderData() {
+		List<WorkOrderDTO> workOrderDTOList = inventoryService.getOrderData();
+		
+		return ResponseEntity.ok(workOrderDTOList);
+	}
+	
+	// 재고 발주 체크 데이터
+	@GetMapping("/inventoryOrderCheck")
+	public ResponseEntity<List<InventoryOrderCheckViewDTO>> getIv() {
+		List<InventoryOrderCheckViewDTO> inventoryOrderCheckDTOList = inventoryService.getIvOrderCheckData();
+		
+		return ResponseEntity.ok(inventoryOrderCheckDTOList);
+	}
+	
 }
 
 

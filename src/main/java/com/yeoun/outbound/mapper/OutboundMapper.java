@@ -18,4 +18,7 @@ public interface OutboundMapper {
 	// 출고 상세페이지
 	OutboundOrderDTO findOutbound(String outboundId);
 
+	// 출하지시서 목록 조회
+	List<OutboundOrderDTO> findAllShipment();
+
 }

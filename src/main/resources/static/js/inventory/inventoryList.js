@@ -3,6 +3,8 @@
 let inventoryGrid; // 그리드 객체 변수
 let inventoryData = []; // 그리드로 그려지는 데이터 저장
 let locationInfo = [];
+
+
 // 문서 로딩 후 시작
 document.addEventListener('DOMContentLoaded', async function () {
 	// 창고정보 저장
@@ -19,6 +21,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 	inventoryGrid.sort('ibDate', true);
 	// 그리드생성한 재고데이터를 저장
 	inventoryData = firstData;	
+	
 });
 
 // 검색 데이터 설정(검색, 상세검색 입력값으로 requestBody생성)
@@ -53,7 +56,6 @@ async function getSearchData() {
 
 // 검색데이터에 기반하여 재고 데이터 정보 가져오기
 async function fetchInventoryData(searchData) {
-	console.log(await searchData,"DDD");
 	const response = 
 		await fetch('/api/inventories', {
 			method: 'POST',
@@ -83,6 +85,8 @@ btnSearch.addEventListener('click', async () => {
 	inventoryGrid.resetData(gridData);
 	// 그리드생성한 재고데이터를 저장
 	inventoryData = gridData;	
+	
+
 });
 
 // 그리드 설정

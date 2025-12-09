@@ -86,6 +86,8 @@ public class WebSecurityConfig {
 	                // 공지 관리
 	                // MES 관리자
 	                // MES 일반 사용자
+						.requestMatchers("/order/**")
+						.permitAll()
 
 	                // 그 외 나머지는 로그인만 되어있으면 접근 허용
 	                .anyRequest().authenticated()

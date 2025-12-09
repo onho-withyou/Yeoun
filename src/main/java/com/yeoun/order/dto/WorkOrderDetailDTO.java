@@ -1,14 +1,43 @@
 package com.yeoun.order.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString
+@Builder
 public class WorkOrderDetailDTO {
+
+    private String orderId;     // 작업지시 번호
+    private String prdId;       // 제품코드
+    private String prdName;     // 품명
+    private String status;      // CREATE / IN_PROGRESS / RELEASED
+    private Integer planQty;    // 계획 수량
+
+    private String planDate;    // yyyy-MM-dd
+    private String planTime;    // HH:mm ~ HH:mm
+
+    private String lineName;    // 1번 라인
+    private String routeId;     // 라우트 코드
+
+
+    private List<WorkInfo> workers;     // 작업자
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class WorkInfo {
+        private String processName;
+        private String workerName;
+    }
+
+    private Integer progress;
+
+
 
 }

@@ -218,4 +218,9 @@ public class OutboundService {
 		outbound.updateStatus("COMPLETED");
 	}
 
+	// 출하지시서 목록 조회 (추후 출하지시 관련된 작업으로 옮길 예정)
+	public List<OutboundOrderDTO> getShipmentList() {
+		return outboundMapper.findAllShipment();
+	}
+
 }

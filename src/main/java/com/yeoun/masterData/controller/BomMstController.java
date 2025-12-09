@@ -48,12 +48,12 @@ public class BomMstController {
    	}
     //BOM 삭제 (prdId + matId 쌍으로 삭제)
     @ResponseBody
-    	@PostMapping("/delete")
-    	public String bomDelete(Model model, @AuthenticationPrincipal LoginDTO loginDTO,@RequestBody List<java.util.Map<String, String>> rows) {
+    @PostMapping("/delete")
+    public String bomDelete(Model model, @AuthenticationPrincipal LoginDTO loginDTO,@RequestBody List<java.util.Map<String, String>> rows) {
 		String empId = (loginDTO != null && loginDTO.getEmpId() != null) ? loginDTO.getEmpId() : "SYSTEM";
 		log.info("bomDelete (pairs)------------->{}", rows);
 		return bomMstService.deleteBomMstByPairs(empId, rows);
-    	}
+    }
  	
  	// prdId에 해당하는 BOM 리스트 조회
  	@GetMapping("/list/data/{prdId}")

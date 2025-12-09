@@ -43,7 +43,7 @@ public interface InventoryRepository
 		""")
 	Integer findAvailableStock(@Param("id") String id);
 
-	
+	// 현재재고수량, 안전재고수량 통계
 	@Query(value = """
         SELECT
             ss.ITEM_ID                       AS itemId,
@@ -128,6 +128,18 @@ public interface InventoryRepository
 
 	// 재고 조회
 	Optional<Inventory> findByIvId(Long ivId);
+
 	
+	//생산계획 작성시 필요한 재고 조회 쿼리
+	@Query(value = """
+		    SELECT 
+		        COALESCE(SUM(i.IV_AMOUNT), 0) AS ivAmount,
+		        COALESCE(SUM(i.EXPECT_OB_AMOUNT), 0) AS expectOut
+		    FROM INVENTORY i
+		    WHERE i.ITEM_ID = :matId
+		    """,
+		    nativeQuery = true)
+		Map<String, Object> findMaterialStock(@Param("matId") String matId);
+
 
 }

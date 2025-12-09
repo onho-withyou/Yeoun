@@ -76,7 +76,6 @@ public class BomMstService {
 			bomMstRepository.flush();
 			return "Success: BOM 저장이 완료되었습니다. (created=" + createdCount + ")";
 	}
-		// Removed try/catch to allow exceptions to propagate
 
 	// Map을 BomMst 엔티티로 변환하는 헬퍼 메서드
 	private BomMst mapToBom(Map<String, Object> row) {

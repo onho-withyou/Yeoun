@@ -44,9 +44,7 @@
 		join position p
 			on e.pos_code = p.pos_code
 		where d.dept_id = 'DEP003'
-		<if test= 'pos != null and !pos.equals("")'>
-			and p.pos_code = #{pos}
-		</if>
+			and p.pos_code = 'POS001'
 	</select>
 	
 </mapper>
