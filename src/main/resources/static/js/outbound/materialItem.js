@@ -57,6 +57,7 @@ document.getElementById("completeOutboundBtn").addEventListener("click", async (
 	
 	
 	const outboundId = document.querySelector("#outboundId").value;
+	const workOrderId = document.querySelector("#workOrderId").value;
 	
 	const res = await fetch("/inventory/outbound/mat/complete", {
 		method: "POST",
@@ -66,6 +67,7 @@ document.getElementById("completeOutboundBtn").addEventListener("click", async (
 		},
 		body: JSON.stringify({ 
 			outboundId,
+			workOrderId,
 			type: "MAT",
 			items
 		})

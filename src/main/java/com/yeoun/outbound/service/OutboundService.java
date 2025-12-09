@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import com.yeoun.inventory.repository.InventoryRepository;
 import com.yeoun.inventory.service.InventoryService;
 import com.yeoun.inventory.util.InventoryIdUtil;
 import com.yeoun.lot.dto.LotHistoryDTO;
+import com.yeoun.lot.service.LotTraceService;
 import com.yeoun.order.entity.WorkOrder;
 import com.yeoun.order.repository.WorkOrderRepository;
 import com.yeoun.outbound.dto.OutboundDTO;
@@ -40,6 +42,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class OutboundService {
 	private final InventoryService inventoryService;
+	private final LotTraceService lotTraceService;
 	private final OutboundRepository outboundRepository;
 	private final InventoryRepository inventoryRepository;
 	private final WorkOrderRepository workOrderRepository;
@@ -65,12 +68,18 @@ public class OutboundService {
 		// 출고 아이디 생성
 		String outboundId = InventoryIdUtil.generateId(maxId, "OUT", date);
 		
+		String workOrderId = Optional.ofNullable(outboundOrderDTO.getWorkOrderId())
+                					 .orElse(null);
+		
+		String shipmentId = Optional.ofNullable(outboundOrderDTO.getShipmentId())
+                					.orElse(null);
+		
 		// 출고 DTO 생성
 		OutboundDTO outboundDTO = OutboundDTO.builder()
 				.outboundId(outboundId)
 				.requestBy(outboundOrderDTO.getCreatedId())
-				.workOrderId(outboundOrderDTO.getWorkOrderId())
-				.shipmentId(outboundOrderDTO.getShipmentId())
+				.workOrderId(workOrderId)
+				.shipmentId(shipmentId)
 				.status("WAITING")
 				.expectOutboundDate(outboundOrderDTO.getStartDate())
 				.build();
@@ -126,6 +135,7 @@ public class OutboundService {
 						.outboundAmount(useQty)
 						.itemType(stock.getItemType())
 						.ivId(stock.getIvId())
+						.locationId(stock.getWarehouseLocation().getLocationId())
 						.build();
 				
 				items.add(outboundItemDTO);
@@ -149,7 +159,7 @@ public class OutboundService {
 		}
 		
 		// 출고 등록이 되면 출하지시서 상태 변경하기
-		if (outboundOrderDTO.getShipmentId() != null || !outboundOrderDTO.getShipmentId().isEmpty()) {
+		if (outboundOrderDTO.getType() != null && "FG".equals(outboundOrderDTO.getType())) {
 			Shipment shipment = shipmentRepository.findByShipmentId(outboundOrderDTO.getShipmentId())
 					.orElseThrow(() -> new NoSuchElementException("출하지시서를 찾을 수 없습니다."));
 			
@@ -203,12 +213,12 @@ public class OutboundService {
 			
 			// 실제 재고 차감 
 			stock.setIvAmount(available - outboundQty);
-			stock.setExpectObAmount(expectObAmount- outboundQty);
+			stock.setExpectObAmount(expectObAmount - outboundQty);
 			
 			// 재고 이력 기록
 			InventoryHistoryDTO inventoryHistoryDTO = InventoryHistoryDTO.builder()
 					.empId(empId)
-					.lotNo(stock.getLotNo())
+					.lotNo(item.getLotNo())
 					.itemName(stock.getItemName())
 					.workType("OUTBOUND")
 					.prevAmount(available)
@@ -219,6 +229,25 @@ public class OutboundService {
 			
 			inventoryService.registInventoryHistory(inventoryHistoryDTO);
 			
+			// ----------------------------------------
+			if ("FG".equals(outboundOrderDTO.getType())) {
+				
+				// lotHistory 생성
+				LotHistoryDTO historyDTO = LotHistoryDTO.builder()
+						.lotNo(item.getLotNo())
+						.orderId(outboundOrderDTO.getWorkOrderId())
+						.processId("")
+						.eventType("RM_ISSUE")
+						.status("ISSUED")
+						.locationType("WH")
+						.locationId("WH-" + stock.getWarehouseLocation().getLocationId())
+						.quantity(outboundQty.intValue())
+						.workedId(empId)
+						.build();
+				
+				lotTraceService.registLotHistory(historyDTO);
+			}
+			
 			// 재고 수량이 0이면 삭제
 			if (stock.getIvAmount() == 0) {
 				inventoryRepository.delete(stock);
@@ -226,25 +255,6 @@ public class OutboundService {
 				inventoryRepository.save(stock);
 			}
 			
-			// ----------------------------------------
-			String eventType = "RM_ISSUE";
-			String status = "ISSUED";
-			if ("FG".equals(outboundOrderDTO.getType())) {
-				eventType = "FG_SHIP";
-				status = "SHIPPED";
-			}
-			// lotHistory 생성
-			LotHistoryDTO historyDTO = LotHistoryDTO.builder()
-					.lotNo(stock.getLotNo())
-					.orderId(outboundOrderDTO.getWorkOrderId())
-					.processId("")
-					.eventType(eventType)
-					.status(status)
-					.locationType("WH")
-					.locationId("WH-" + stock.getWarehouseLocation().getLocationId())
-//					.quantity((Integer) outboundQty)
-					.workedId(empId)
-					.build();
 
 		}
 		

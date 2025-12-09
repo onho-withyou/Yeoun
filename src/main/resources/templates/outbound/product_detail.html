@@ -15,9 +15,10 @@
 				<div class="card-body">
 					 <div class="row row-cols-3 g-4">
 					 	<input type="hidden" id="outboundId" th:value="${outboundOrderDTO.outboundId}"/>
+					    <input type="hidden" id="shipmentId" th:value="${outboundOrderDTO.shipmentId}"/>
 						<div class="col">
-						    <div class="text-secondary mb-1">작업지시서</div>
-						    <div class="fw-semibold" th:text="${outboundOrderDTO.workOrderId}"></div>
+						    <div class="text-secondary mb-1">출하지시서</div>
+						    <div class="fw-semibold" th:text="${outboundOrderDTO.shipmentId}"></div>
 						</div>
 						<div class="col">
 						    <div class="text-secondary mb-1">요청자</div>
@@ -48,7 +49,6 @@
 				</div>
 				<div class="card-body p-0">
 					<div class="table-responsive">
-						<input type="hidden" id="outboundId" th:value="${outboundOrderDTO.outboundId}">
 						<table class="table table-bordered table-hover mb-0 text-center">
 							<thead class="table-light">
 								<tr class="text-center">

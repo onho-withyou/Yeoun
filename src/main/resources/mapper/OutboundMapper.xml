@@ -103,7 +103,7 @@
 			, oi.LOT_NO
 			, oi.OUTBOUND_AMOUNT
 			, oi.IV_ID
-			, i.LOCATION_ID
+			, oi.LOCATION_ID
 			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN mat.MAT_ID END AS MAT_ID
 			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN mat.MAT_NAME END AS MAT_NAME
 			, CASE WHEN o.WORK_ORDER_ID IS NOT NULL THEN NVL(bom.MAT_QTY, 0) END AS MAT_QTY
@@ -169,6 +169,8 @@
 	    <result property="createdName" column="CREATED_NAME"/>
 	    <result property="createdId" column="CREATED_ID"/>
 	    <result property="status"  column="STATUS"/>
+	    <result property="outboundId" column="OUTBOUND_ID"/>
+	    <result property="processEmpName" column="PROCESS_BY"/>
 	    <!-- 필요하다면 다른 상위 필드 추가 (outboundId 등은 쿼리에 없으므로 제외하거나 null 처리됨) -->
 	
 	    <!-- 하위 객체 리스트 (Items) -->
@@ -242,11 +244,13 @@
 			, s.EMP_ID AS CREATED_ID
 			, s.SHIPMENT_DATE
 			, o.STATUS
-			, e.emp_name AS CREATED_NAME
+			, o.OUTBOUND_ID
+			, e1.emp_name AS CREATED_NAME
+			, e2.emp_name AS PROCESS_BY
 			, NVL(sl.LOT_QTY, 0) AS SHIPMENT_QTY
 			, sl.PRD_ID 
 			, prd.PRD_NAME
-			, iv.LOCATION_ID
+			, oi.LOCATION_ID
 			, oi.LOT_NO
 			, oi.IV_ID
 			, NVL(oi.OUTBOUND_AMOUNT, 0) AS ORDER_QTY
@@ -261,13 +265,17 @@
 		ON
 			prd.PRD_ID = sl.PRD_ID
 		LEFT JOIN
-			EMP e
+			EMP e1
 		ON
-			s.EMP_ID = e.EMP_ID
+			s.EMP_ID = e1.EMP_ID
 		LEFT JOIN
 			OUTBOUND o
 		ON
 			o.SHIPMENT_ID = s.SHIPMENT_ID
+		LEFT JOIN
+			EMP e2
+		ON
+			o.PROCESS_BY = e2.EMP_ID
 		LEFT JOIN
 			OUTBOUND_ITEM oi
 		ON

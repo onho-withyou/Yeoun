@@ -41,14 +41,14 @@ document.getElementById("completePrdOutboundBtn").addEventListener("click", asyn
 	
 	// 품목들의 데이터를 반복문을 통해서 items 배열 안에 담음
 	rows.forEach((row, index) => {
-		const matId = row.querySelector(".prdId")?.textContent.trim();
+		const prdId = row.querySelector(".prdId")?.textContent.trim();
 		const lotNo = row.querySelector(".lotNo")?.textContent.trim();
 		const outboundQty = Number(row.querySelector(`.outboundQty[data-index="${index}"]`)?.textContent.trim());
 		const ivId = row.querySelector(".ivId")?.value;
 		
 		
 		items.push({
-			matId,
+			prdId,
 			lotNo,
 			outboundQty,
 			ivId
@@ -56,6 +56,7 @@ document.getElementById("completePrdOutboundBtn").addEventListener("click", asyn
 	})
 	
 	const outboundId = document.querySelector("#outboundId").value;
+	const shipmentId = document.querySelector("#shipmentId").value;
 	
 	const res = await fetch("/inventory/outbound/prd/complete", {
 		method: "POST",
@@ -65,6 +66,7 @@ document.getElementById("completePrdOutboundBtn").addEventListener("click", asyn
 		},
 		body: JSON.stringify({ 
 			outboundId,
+			shipmentId,
 			type: "FG",
 			items
 		})

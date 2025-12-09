@@ -58,16 +58,20 @@ public class OutboundItem {
 
 	@Column(nullable = true)
 	private Long ivId; // 재고Id
+	
+	@Column(nullable = true)
+	private String locationId;
 
 	@Builder
 	public OutboundItem(Outbound outbound, String outboundId, String itemId, String lotNo, Long outboundAmount,
-			String itemType, Long ivId) {
+			String itemType, Long ivId, String locationId) {
 		this.itemId = itemId;
 		this.lotNo = lotNo;
 		this.outboundAmount = outboundAmount;
 		this.itemType = itemType;
 		this.ivId = ivId;
 		this.outbound = outbound;
+		this.locationId = locationId;
 	}
 	
 	
