@@ -119,11 +119,43 @@ const grid2 = new Grid({
 	    el: document.getElementById('processCodeGrid'),
         rowHeaders: ['rowNum','checkbox'],
 	    columns: [
-	    {header: '공정ID' ,name: 'processId' ,align: 'center'}
-	    ,{header: '공정명' ,name: 'processName' ,align: 'center',width: 230}
-	    ,{header: '공정유형' ,name: 'processType' ,align: 'center',filter: "select"}
-	    ,{header: '설명' ,name: 'description' ,align: 'center',filter: "select"}
-        ,{header: '사용여부' ,name: 'useYn' ,align: 'center'}
+	    {header: '공정ID' ,name: 'processId' ,align: 'center',editor: 'text'
+			,renderer:{ type: StatusModifiedRenderer}
+		}
+	    ,{header: '공정명' ,name: 'processName' ,align: 'center',editor: 'text' ,width: 230
+			,renderer:{ type: StatusModifiedRenderer}
+		}
+	    ,{header: '공정유형' ,name: 'processType' ,align: 'center',editor: 'text' ,filter: "select"
+			,renderer:{ type: StatusModifiedRenderer}
+			,editor: {
+				type: 'select', // 드롭다운 사용
+				options: {
+					listItems: [
+						{ text: 'MIX', value: 'MIX' },
+						{ text: 'FILTER', value: 'FILTER' },
+						{ text: 'FILL', value: 'FILL' },
+						{ text: 'CAPPING', value: 'CAPPING' },
+						{ text: 'QC', value: 'QC' },
+						{ text: 'PACK', value: 'PACK' }
+					]
+				}
+			}
+		}
+	    ,{header: '설명' ,name: 'description' ,align: 'center',editor: 'text' ,filter: "select"
+			,renderer:{ type: StatusModifiedRenderer}
+		}
+        ,{header: '사용여부' ,name: 'useYn' ,align: 'center'
+			,renderer:{ type: StatusModifiedRenderer}
+			,editor: {
+				type: 'select', // 드롭다운 사용
+				options: {
+					listItems: [
+						{ text: 'Y', value: 'Y' },
+						{ text: 'N', value: 'N' }
+					]
+				}
+			}
+		}
 		,{header: '생성자id' ,name: 'createdId' ,align: 'center'}
 		,{header: '생성일시' ,name: 'createdDate' ,align: 'center'}
 		,{header: '수정자id' ,name: 'updatedId' ,align: 'center'}
@@ -335,6 +367,8 @@ function processStepSearch(routeId) {
 			grid3.resetData([]);
 		});
 }
+
+//제품별 공정라우트 그리드 - 상세보기 버튼 클릭 이벤트
 grid1.on("click", async (ev) => {
 
 	const target = ev.nativeEvent.target;
@@ -388,15 +422,111 @@ function routeModalreset() {
 	grid3.resetData([]);//신규라우트 모달 그리드 - 공정단계 조회 초기화
 	processCodeGridAllSearch();//공정코드 관리 그리드 조회
 }
+
+//공정코드 관리 그리드 추가버튼
+const addProcessCodeRowBtn = document.getElementById('addProcessCodeRowBtn');
+addProcessCodeRowBtn.addEventListener('click', function() {
+	grid2.prependRow();
+});
+
 //라우트모달 공정단계 단계추가
 function addRouteStepRow(){
 	grid3.appendRow();
 }
+//공정코드 관리 그리드 저장
+const saveProcessCodeRowBtn = document.getElementById('saveProcessCodeRowBtn');
+saveProcessCodeRowBtn.addEventListener('click', function() {
+		
+	const modifiedData = (typeof grid2.getModifiedRows === 'function') ? (grid2.getModifiedRows() || {}) : {};
+	const updatedRows = Array.isArray(modifiedData.updatedRows) ? modifiedData.updatedRows : [];
+	let createdRows = Array.isArray(modifiedData.createdRows) ? modifiedData.createdRows : [];
+	
+
+	// 새로 추가된 행 중 모든 필드가 비어있는(빈 행) 경우 그리드에서 제거하고 서버 전송 대상에서 제외
+	const isRowEmpty = (row) => {
+		if (!row) return true;
+		const vals = Object.values(row);
+		if (vals.length === 0) return true;
+		return vals.every(v => v === null || v === undefined || (typeof v === 'string' && v.trim() === ''));
+	};
+	const emptyCreated = createdRows.filter(isRowEmpty);
+	if (emptyCreated.length > 0) {
+		emptyCreated.forEach(r => {
+			try {
+				const key = r && (r.rowKey || r.matId);
+				if (key && typeof grid2.removeRow === 'function') {
+					grid2.removeRow(key);
+				} else if (key && typeof grid2.deleteRow === 'function') {
+					grid2.deleteRow(key);
+				}
+			} catch (e) {
+				console.warn('빈 행 삭제 실패', e);
+			}
+		});
+		// 서버로 보낼 createdRows에서 빈 행 제외
+		createdRows = createdRows.filter(r => !isRowEmpty(r));
+		// 반영: modifiedData 객체에도 반영해 전송값 일관성 유지
+		try { modifiedData.createdRows = createdRows; } catch (e) {}
+	}
+
+	if (updatedRows.length === 0 && createdRows.length === 0) {
+		alert('공정코드 그리드 내용이 없습니다. 계속 진행하시겠습니까?');
+		return;
+		
+	}
+	fetch('/masterData/processCode/save', {
+		method: 'POST',
+		credentials: 'same-origin',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(modifiedData)
+	})
+	.then(async res => {
+	    if (!res.ok) {
+	        throw new Error(`HTTP error! status: ${res.status}`);
+	    }
+	    // 응답 Content-Type 확인: JSON이면 파싱, 아니면 텍스트로 읽음
+	    const contentType = res.headers.get('content-type') || '';
+	    if (contentType.includes('application/json')) {
+	        const data = await res.json();
+			return ({ type: 'json', data });
+	    }
+	    const text = await res.text();
+		return ({ type: 'text', data: text });
+	})
+	.then(resp => {
+	    if (!resp) return;
+	    if (resp.type === 'json') {
+	        console.log('저장결과(JSON):', resp.data);
+	        // 서버에서 JSON 형태로 상태를 보내는 경우 추가 처리 가능
+	        alert('저장 완료');
+	    } else {
+	        const text = String(resp.data || '').trim();
+	        console.log('저장결과(텍스트):', text);
+	        if (text === 'success') {
+	            alert('저장 완료');
+	        } else if (text === 'no-data') {
+	            alert('서버: 전송한 데이터가 없습니다. 내용을 확인하세요.');
+	        } else if (text.startsWith('error')) {
+	            alert('저장 중 오류: ' + text);
+	        } else {
+	            // 미확인 텍스트 응답
+	            alert('저장 완료 (서버 응답: ' + text.substring(0, 200) + ')');
+	        }
+	    }
+	})
+	.catch(err => {
+		console.error('저장오류', err);
+		alert('저장 중 오류가 발생했습니다. 콘솔 로그를 확인하세요.');
+	});
+	
+});
+
 // 라우트모달 공정단계 저장
 const saveRouteBtn = document.getElementById('saveRouteBtn');
 saveRouteBtn.addEventListener('click', function() {
-
-	console.log('저장버튼 클릭됨');
 	
 	const modifiedData = (typeof grid3.getModifiedRows === 'function') ? (grid3.getModifiedRows() || {}) : {};
 	const updatedRows = Array.isArray(modifiedData.updatedRows) ? modifiedData.updatedRows : [];
@@ -409,7 +539,7 @@ saveRouteBtn.addEventListener('click', function() {
 		useYn: document.getElementById('modalRouteUseYn').value ?? "",
 		description: document.getElementById('modalRouteRemark').value ?? ""
 	};
-	console.log('라우트저장데이터:', routeNewData);
+	//console.log('라우트저장데이터:', routeNewData);
 	// 생성된 공정단계의 라우트ID가 라우트정보의 라우트ID와 일치하는지 확인
 	createdRows.forEach(row => {
 		if(row.routeId != routeNewData.routeId){
@@ -513,6 +643,166 @@ saveRouteBtn.addEventListener('click', function() {
 	});
 });
 
+//제품별 공정라우트 그리드 수정(삭제) useYn='N' 처리
+const modifyProcessRowBtn = document.getElementById('modifyProcessRowBtn');
+modifyProcessRowBtn.addEventListener('click', async function() {
+	const checkedRows = grid1.getCheckedRows();
+	if (checkedRows.length === 0) {
+		alert('삭제할 라우트를 선택해주세요.');
+		return;
+	}
+	if (!confirm(`${checkedRows.length}개의 라우트를 삭제하시겠습니까?`)) {
+		return;
+	}
+	try {
+		const response = await fetch('/masterData/process/modify', {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: {
+				[csrfHeader]: csrfToken,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ routes: checkedRows })
+		});
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+		const resultText = await response.text();
+		if (resultText === 'success') {
+			alert('삭제 완료');
+			productRouteSearch();//제품별 공정라우트 그리드 조회
+		} else {
+			alert('삭제 실패: ' + resultText);
+		}
+	} catch (error) {
+		console.error('삭제오류', error);
+		alert('삭제 중 오류가 발생했습니다. 콘솔 로그를 확인하세요.');
+	}
+});
+
+// 공정코드 관리 수정(삭제) useYn='N' 처리
+const modifyProcessCodeRowBtn = document.getElementById('modifyProcessCodeRowBtn');
+//완제품row 삭제: POST JSON형식으로 서버에 요청
+modifyProcessCodeRowBtn.addEventListener('click', async function() {
+
+	// 체크된 rowKey들 수집
+	let rowKeysToDelete = [];
+	try {
+		if (typeof grid2.getCheckedRowKeys === 'function') {
+			rowKeysToDelete = grid2.getCheckedRowKeys() || [];
+		} else if (typeof grid2.getCheckedRows === 'function') {
+			const checkedRows = grid2.getCheckedRows() || [];
+			rowKeysToDelete = checkedRows.map(r => r && (r.rowKey || r.processId)).filter(Boolean);
+		}else  {
+			// 그리드 빈행 제거
+			console.log('체크된 행 키:', rowKeysToDelete);
+
+			rowKeysToDelete.forEach((key, i) => {
+				grid2.deleteRow(rowKeysToDelete[i]);
+			});
+
+		}
+		
+	} catch (e) {
+		console.warn('체크된 행 조회 실패', e);
+	}
+
+	if (!Array.isArray(rowKeysToDelete) || rowKeysToDelete.length === 0) {
+		alert('삭제할 행을 선택(체크)해주세요.');
+		return;
+	}
+
+	// 간결한 방식으로 각 rowKey로부터 prdId(또는 식별 가능한 ID)를 수집
+	const getAllData = () => (typeof grid2.getData === 'function' ? grid2.getData() : (grid2.data || []));
+
+		// 구분: 빈 행(또는 prdId가 없는 행)은 화면에서만 삭제하고, prdId가 있는 행만 서버에 삭제 요청
+		try {
+			const getAllData = () => (typeof grid2.getData === 'function' ? grid2.getData() : (grid2.data || []));
+			const data = getAllData();
+			// 그리드의 수정 정보에서 생성된(신규) 행들을 조회하여, 신규행은 UI에서만 삭제하도록 처리
+			const modified = (typeof grid2.getModifiedRows === 'function') ? (grid2.getModifiedRows() || {}) : {};
+			const createdRows = Array.isArray(modified.createdRows) ? modified.createdRows : [];
+			const uiOnlyKeys = []; // 화면에서만 제거할 rowKey
+			const serverProcessIds = []; // 서버에 삭제 요청할 processId 목록
+			for (const key of rowKeysToDelete) {
+				// 우선 해당 키가 생성된(신규) 행인지 확인
+				const isCreated = createdRows.some(r => r && (String(r.rowKey) === String(key) || String(r.processId) === String(key)));
+				if (isCreated) {
+					uiOnlyKeys.push(key);
+					continue;
+				}
+				let row = null;
+				if (typeof grid2.getRow === 'function') row = grid2.getRow(key);
+				if (!row) row = data.find(d => d && (String(d.rowKey) === String(key) || String(d.processId) === String(key)));
+				// 빈 행 판단: 모든 필드가 비어있거나 processId가 없으면 UI에서만 삭제
+				const vals = row ? Object.values(row) : [];
+				const allEmpty = !row || vals.length === 0 || vals.every(v => v === null || v === undefined || (typeof v === 'string' && v.trim() === ''));
+				if (allEmpty || !row || !row.processId) {
+					uiOnlyKeys.push(key);
+				} else {
+					serverProcessIds.push(String(row.processId));
+				}
+			}
+
+			// UI에서만 제거할 행들 삭제
+			let removedUi = 0;
+			if (uiOnlyKeys.length > 0) {
+				for (const k of uiOnlyKeys) {
+					try {
+						if (typeof grid2.removeRow === 'function') { grid2.removeRow(k); removedUi++; continue; }
+						if (typeof grid2.deleteRow === 'function') { grid2.deleteRow(k); removedUi++; continue; }
+						const newData = data.filter(r => !(r && (String(r.rowKey) === String(k) || String(r.processId) === String(k))));
+						grid2.resetData(newData);
+						removedUi++;
+					} catch (e) { console.warn('UI 전용 행 삭제 실패', k, e); }
+				}
+			}
+
+			// 서버에 삭제 요청 보낼 processId가 있으면 기존 로직 수행
+			if (serverProcessIds.length > 0) {
+				// processId가 있는 항목이 포함된 경우에만 삭제 확인창 표시
+				if (!confirm('서버에서 실제로 삭제할 항목이 포함되어 있습니다. 선택한 항목을 삭제하시겠습니까?')) return;
+				fetch('/masterData/processCode/modify', {
+					method: 'POST',
+					credentials: 'same-origin',
+					headers: {
+						[csrfHeader]: csrfToken,
+						'Content-Type': 'application/json'
+					},
+					// 서버는 RequestBody로 Map<String,Object>를 기대하므로
+					// 배열 자체가 아닌 { processCodes: [...] } 형태로 보냅니다.
+					body: JSON.stringify({ processCodes: serverProcessIds })
+				})
+				.then(res => {
+					if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+					const ct = (res.headers.get('content-type') || '').toLowerCase();
+					if (ct.includes('application/json')) return res.json();
+					return res.text();
+				})
+				.then(parsed => {
+					console.log('삭제 응답:', parsed);
+					const okTexts = ['success','ok','true'];
+					if (typeof parsed === 'string') {
+						if (!okTexts.includes(parsed.trim().toLowerCase())) throw new Error('Unexpected response: ' + parsed);
+					} else if (!(parsed && (parsed.status === 'success' || okTexts.includes((parsed.message||'').toString().toLowerCase())))) {
+						throw new Error('삭제 실패: ' + JSON.stringify(parsed));
+					}
+					// 서버 삭제 성공 시 그리드 재조회
+					processCodeGridAllSearch();
+				})
+				.catch(err => {
+					console.error('삭제 중 오류', err);
+					try { alert('삭제 중 오류가 발생했습니다. ' + (err && err.message ? err.message : '')); } catch (e) {}
+				});
+			} else {
+				if (removedUi > 0) alert('추가한 행을 화면에서만 삭제했습니다. (DB에는 반영되지 않음)');
+			}
+		} catch (e) {
+			console.error('삭제 처리 중 오류', e);
+			try { alert('삭제 처리 중 오류가 발생했습니다. ' + (e && e.message ? e.message : '')); } catch (err) {}
+		}
+	
+});
 
 //모달 움직이게 하기
 const modalHeader = document.querySelector(".modal-header");

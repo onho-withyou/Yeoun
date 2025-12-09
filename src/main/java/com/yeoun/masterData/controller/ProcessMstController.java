@@ -58,6 +58,15 @@ public class ProcessMstController {
         log.info("processStepList controller - {}", routeId);
         return processMstService.getProcessStepList(routeId);
     }
+    //공정코드 저장
+    @ResponseBody
+    @PostMapping("/processCode/save")
+    public String processCodeSave(Model model, @AuthenticationPrincipal LoginDTO loginDTO,@RequestBody Map<String, Object> param){
+        String empId = (loginDTO != null && loginDTO.getEmpId() != null) ? loginDTO.getEmpId() : "SYSTEM";
+        log.info("processCodeSave------------->{}",param);
+       
+        return processMstService.saveProcessCode(empId,param);
+    }
 
     // 공정단계 저장
     @ResponseBody
@@ -68,6 +77,24 @@ public class ProcessMstController {
        
         return processMstService.saveProcess(empId,param);
     }
+    
+    // 공정단계 삭제 yn='N' 처리
+    @ResponseBody
+    @PostMapping("/process/modify")
+    public String modifyProcess(Model model, @AuthenticationPrincipal LoginDTO loginDTO, @RequestBody Map<String, Object> param) {
+        String empId = (loginDTO != null && loginDTO.getEmpId() != null) ? loginDTO.getEmpId() : "SYSTEM";
+        log.info("processStepDelete------------->{}", param);
+        return processMstService.modifyProcess(empId, param);
+    }
 
+    // 공정코드 관리 삭제 yn='N' 처리
+    @ResponseBody
+    @PostMapping("/processCode/modify")
+    public String modifyProcessCode(Model model, @AuthenticationPrincipal LoginDTO loginDTO,
+        @RequestBody Map<String, Object> param) {
+          String empId = (loginDTO != null && loginDTO.getEmpId() != null) ? loginDTO.getEmpId() : "SYSTEM";
+          log.info("processCodeDelete------------->{}", param);
+          return processMstService.modifyProcessCode(empId, param);
+     }
 
 }
