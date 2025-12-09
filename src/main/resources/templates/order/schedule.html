@@ -103,18 +103,62 @@
 <body>
 <th:block layout:fragment="content">
     <div class="custom-body container-xxl flex-grow-1 container-p-y">
-        <div class="mb-3">
-            <div class="title">
-                <i class="bi bi-kanban-fill"></i>
-                작업자 스케줄러
+        <div class="nav-align-top mb-4">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item">
+                    <button type="button" class="nav-link active" role="tab"
+                            data-bs-toggle="tab" data-bs-target="#navs-schedule-tab"
+                            aria-controls="navs-equipment-tab" aria-selected="true">
+                        작업자 스케줄
+                    </button>
+                </li>
+
+                <li class="nav-item">
+                    <button type="button" class="nav-link" role="tab"
+                            data-bs-toggle="tab" data-bs-target="#navs-worker-tab"
+                            aria-controls="navs-line-tab" aria-selected="false">
+                        작업자 목록
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+
+                <!-- =============================== -->
+                <!-- 작업자 스케줄 탭 -->
+                <!-- =============================== -->
+                <div class="tab-pane fade show active" id="navs-schedule-tab" role="tabpanel">
+                    <div class="title">
+                        <i class="bi bi-kanban-fill"></i>
+                        작업자 스케줄러
+                    </div>
+                    <div id="calendar"></div>
+                </div>
+
+                <!-- =============================== -->
+                <!-- 작업자 목록 탭 -->
+                <!-- =============================== -->
+                <div class="tab-pane fade" id="navs-worker-tab" role="tabpanel">
+                    <div class="title">
+                        <i class="bi bi-kanban-fill"></i>
+                        작업자 목록
+                    </div>
+                    <div id="workerList"></div>
+                </div>
+
             </div>
+
         </div>
-        <div id="calendar"></div>
     </div>
 </th:block>
 <th:block layout:fragment="myScript">
     <script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
     <script>
+        document.querySelector('button[data-bs-target="#navs-schedule-tab"]')
+            .addEventListener('shown.bs.tab', function () {
+                calendar.render();
+            });
+
         // v2에서는 전역에 tui.Calendar로 올라옴
         const Calendar = tui.Calendar;
 
