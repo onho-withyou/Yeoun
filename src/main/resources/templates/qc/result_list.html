@@ -68,11 +68,11 @@
       </div>
 
       <div class="modal-body">
-        <!-- 굳이 form 안 써도 됨: readonly니까 -->
+        <!-- hidden -->
         <input type="hidden" id="qcViewResultId">
         <input type="hidden" id="qcViewOrderId">
 
-        <!-- 1행 : 기본 작업 정보 -->
+        <!-- 1행 : 기본 작업 정보 (등록 모달과 동일 구성) -->
         <div class="row mb-3">
           <div class="col-md-3">
             <label class="form-label">작업지시번호</label>
@@ -92,25 +92,38 @@
           </div>
         </div>
 
-        <!-- 2행 : 검사 정보 -->
-        <div class="row mb-3">
-          <div class="col-md-3">
-            <label class="form-label">검사일자</label>
-            <input type="date"
-                   class="form-control form-control-sm"
-                   id="qcViewInspectionDate"
-                   readonly>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">검사자</label>
-            <input type="text"
-                   class="form-control form-control-sm"
-                   id="qcViewInspectorName"
-                   readonly>
-          </div>
-        </div>
+        <!-- 2행 : 검사/수량 정보 -->
+		<div class="row mb-3 g-3">
+		  <div class="col-md-3">
+		    <label class="form-label">검사일자</label>
+		    <div id="qcViewInspectionDateText"
+		         class="form-control-plaintext border rounded bg-light px-2 py-1"></div>
+		  </div>
+		  <div class="col-md-3">
+		    <label class="form-label">검사자</label>
+		    <div id="qcViewInspectorNameText"
+		         class="form-control-plaintext border rounded bg-light px-2 py-1"></div>
+		  </div>
+		  <div class="col-md-2">
+		    <label class="form-label">검사수량</label>
+		    <div id="qcViewInspectionQtyText"
+		         class="form-control-plaintext border rounded bg-light px-2 py-1"></div>
+		  </div>
+		  <div class="col-md-2">
+		    <label class="form-label">양품 수량</label>
+		    <div id="qcViewGoodQtyText"
+		         class="form-control-plaintext border rounded bg-light px-2 py-1"></div>
+		  </div>
+		  <div class="col-md-2">
+		    <label class="form-label">불량 수량</label>
+		    <div id="qcViewDefectQtyText"
+		         class="form-control-plaintext border rounded bg-light px-2 py-1"></div>
+		  </div>
+		</div>
 
-        <!-- 디테일 테이블 -->
+
+
+        <!-- 디테일 테이블 : 등록 모달이랑 구조 동일, readonly만 다름 -->
         <div class="table-responsive mb-3">
           <table class="table table-sm table-bordered align-middle">
             <thead class="table-light">
@@ -127,34 +140,44 @@
           </table>
         </div>
 
+        <!-- 3행 : 전체 판정 + 사유 + 비고 (등록 모달의 하단과 매칭) -->
         <div class="row g-3">
-          <div class="col-md-3">
-            <label class="form-label">전체 판정</label>
-            <input type="text"
-                   class="form-control form-control-sm"
-                   id="qcViewOverallResult"
-                   readonly>
-          </div>
+		  <div class="col-md-3">
+		    <label class="form-label">전체 판정</label>
+		    <div>
+		      <span id="qcViewOverallResultBadge"
+		            class="badge w-100 py-2 fs-6 text-center"></span>
+		    </div>
+		  </div>
+		
+		  <div class="col-md-5">
+		    <label class="form-label">불합격 사유</label>
+		    <textarea class="form-control form-control-sm"
+		              id="qcViewFailReason"
+		              rows="1"
+		              readonly></textarea>
+		  </div>
+		
+		  <div class="col-md-4">
+		    <label class="form-label">비고</label>
+		    <textarea class="form-control form-control-sm"
+		              id="qcViewRemark"
+		              rows="1"
+		              readonly></textarea>
+		  </div>
+		</div>
 
-          <div class="col-md-9">
-            <label class="form-label">불합격 사유</label>
-            <textarea class="form-control form-control-sm"
-                      id="qcViewFailReason"
-                      rows="1"
-                      readonly></textarea>
-          </div>
-        </div>
 
       </div>
 
       <div class="modal-footer">
-        <!-- 필요하면 ‘수정’ 버튼 추가해서 등록 모달 띄우는 것도 가능 -->
         <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">닫기</button>
       </div>
 
     </div>
   </div>
 </div>
+
 
     
 	</div>
