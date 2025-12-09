@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.masterData.entity.QcItem;
 import com.yeoun.masterData.repository.QcItemRepository;
 import com.yeoun.order.entity.WorkOrder;
@@ -18,6 +19,7 @@ import com.yeoun.process.repository.WorkOrderProcessRepository;
 import com.yeoun.qc.dto.QcDetailRowDTO;
 import com.yeoun.qc.dto.QcRegistDTO;
 import com.yeoun.qc.dto.QcResultListDTO;
+import com.yeoun.qc.dto.QcResultViewDTO;
 import com.yeoun.qc.entity.QcResult;
 import com.yeoun.qc.entity.QcResultDetail;
 import com.yeoun.qc.repository.QcResultDetailRepository;
@@ -34,6 +36,7 @@ public class QcResultService {
     private final QcItemRepository qcItemRepository;
     private final QcResultDetailRepository qcResultDetailRepository;
     private final WorkOrderProcessRepository workOrderProcessRepository;
+    private final EmpRepository empRepository;
     
     // --------------------------------------------------------------
     // 캡/펌프 공정 종료 시 호출되는 QC 결과 생성 메서드
@@ -301,6 +304,83 @@ public class QcResultService {
                 workOrderProcessRepository.save(qcProc);
             }
         });
+	}
+
+	// ----------------------------------------------------------
+	// QC 결과 상세 조회 (결과 보기 모달용)
+	// - 헤더 + 디테일 정보를 한 번에 DTO로 반환
+	@Transactional(readOnly = true)
+	public QcResultViewDTO getQcResultView(Long qcResultId) {
+
+	    // 1) 헤더 조회
+	    QcResult header = qcResultRepository.findById(qcResultId)
+	            .orElseThrow(() -> new IllegalArgumentException(
+	                    "QC 결과가 존재하지 않습니다. ID = " + qcResultId));
+
+	    // 2) 작업지시 조회 (제품/수량용)
+	    WorkOrder workOrder = workOrderRepository.findById(header.getOrderId())
+	            .orElse(null);
+
+	    // 3) 디테일 목록 조회
+	    List<QcResultDetail> details =
+	            qcResultDetailRepository.findByQcResultId(String.valueOf(qcResultId));
+
+	    // 4) 디테일 → QcDetailRowDTO 변환
+	    List<QcDetailRowDTO> detailDtos = new ArrayList<>();
+
+	    for (QcResultDetail d : details) {
+
+	        QcItem item = qcItemRepository.findById(d.getQcItemId())
+	                .orElse(null);
+
+	        QcDetailRowDTO dto = new QcDetailRowDTO();
+	        dto.setQcResultDtlId(d.getQcResultDtlId());
+	        dto.setQcItemId(d.getQcItemId());
+
+	        if (item != null) {
+	            dto.setItemName(item.getItemName());
+	            dto.setUnit(item.getUnit());
+	            dto.setStdText(buildStdText(item));
+	        }
+
+	        dto.setMeasureValue(d.getMeasureValue());
+	        dto.setResult(d.getResult());
+	        dto.setRemark(d.getRemark());
+
+	        detailDtos.add(dto);
+	    }
+
+	    // 5) 헤더 + 디테일 합쳐서 ViewDTO 세팅
+	    QcResultViewDTO view = new QcResultViewDTO();
+	    view.setQcResultId(qcResultId);
+	    view.setOrderId(header.getOrderId());
+	    view.setLotNo(header.getLotNo());
+	    view.setInspectionDate(header.getInspectionDate());
+	    view.setOverallResult(header.getOverallResult());
+	    view.setFailReason(header.getFailReason());
+	    view.setInspectionQty(header.getInspectionQty());
+	    view.setGoodQty(header.getGoodQty());
+	    view.setDefectQty(header.getDefectQty());
+
+	    // 검사자 정보
+	    view.setInspectorId(header.getInspectorId());
+	    if (header.getInspectorId() != null) {
+	        empRepository.findById(header.getInspectorId())
+	                .ifPresent(emp -> view.setInspectorName(emp.getEmpName()));
+	    }
+
+	    // 작업지시(제품) 정보
+	    if (workOrder != null) {
+	        view.setPlanQty(workOrder.getPlanQty());
+	        if (workOrder.getProduct() != null) {
+	            view.setProductCode(workOrder.getProduct().getPrdId());
+	            view.setProductName(workOrder.getProduct().getPrdName());
+	        }
+	    }
+
+	    view.setDetails(detailDtos);
+
+	    return view;
 	}
 
 

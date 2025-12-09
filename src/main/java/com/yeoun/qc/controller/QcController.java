@@ -17,6 +17,7 @@ import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.qc.dto.QcDetailRowDTO;
 import com.yeoun.qc.dto.QcRegistDTO;
 import com.yeoun.qc.dto.QcResultListDTO;
+import com.yeoun.qc.dto.QcResultViewDTO;
 import com.yeoun.qc.service.QcResultService;
 
 import lombok.RequiredArgsConstructor;
@@ -78,6 +79,14 @@ public class QcController {
 				"message", "QC 검사 결과가 저장되었습니다."
 		);
 	}
+	
+	// QC 결과 상세 (조회 모달용 헤더 + 디테일)
+	@GetMapping("/result/{qcResultId}")
+	@ResponseBody
+	public QcResultViewDTO getQcResultView(@PathVariable("qcResultId") Long qcResultId) {
+	    return qcResultService.getQcResultView(qcResultId);
+	}
+
 	
 	
 	
