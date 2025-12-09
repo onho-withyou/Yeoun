@@ -1,0 +1,124 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
+
+<th:block layout:fragment="content">
+
+<div class="custom-body container-xxl flex-grow-1 container-p-y">
+
+  <h4 class="mb-4"><b>생산관리 / 대시보드</b></h4>
+
+  <style>
+    .dashboard-card {
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      background: #fff;
+      height: 120px;
+    }
+    .chart-card {
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      padding: 20px;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+  </style>
+
+  <!-- KPI SECTION -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="dashboard-card text-center">
+        <div>오늘 작업지시</div>
+        <h3 class="mt-2">0</h3>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="dashboard-card text-center">
+        <div>진행 중</div>
+        <h3 class="mt-2">0</h3>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="dashboard-card text-center">
+        <div>완료</div>
+        <h3 class="mt-2">0</h3>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="dashboard-card text-center">
+        <div>지연 공정</div>
+        <h3 class="mt-2 text-danger">0</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- 그래프 영역 -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="chart-card">
+        <div class="section-title">라인별 생산량</div>
+        <div id="lineChart"></div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="chart-card">
+        <div class="section-title">불량 비율</div>
+        <div id="defectChart"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 공정 현황 테이블 -->
+  <div class="chart-card mb-4">
+    <div class="section-title">공정 진행 현황</div>
+
+    <table class="table table-hover text-center">
+      <thead class="table-light">
+        <tr>
+          <th>작업지시</th>
+          <th>제품</th>
+          <th>계획수량</th>
+          <th>양품</th>
+          <th>불량</th>
+          <th>현재공정</th>
+          <th>상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="7" class="text-muted">데이터가 없습니다.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div> <!-- custom-body 끝 -->
+
+<!-- ApexCharts CDN -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<script>
+  // --- 라인별 생산량 샘플 ---
+  var lineChart = new ApexCharts(document.querySelector("#lineChart"), {
+    chart: { type: 'line', height: 280 },
+    series: [{ name: "생산량", data: [0, 0, 0, 0, 0, 0] }],
+    xaxis: { categories: ["라인1","라인2","라인3","라인4","라인5","라인6"] }
+  });
+  lineChart.render();
+
+  // --- 불량 비율 차트 ---
+  var defectChart = new ApexCharts(document.querySelector("#defectChart"), {
+    chart: { type: 'donut', height: 280 },
+    labels: ["양품", "불량"],
+    series: [100, 0],
+    colors: ["#00c8a2", "#ff6384"]
+  });
+  defectChart.render();
+</script>
+
+</th:block>
+</th:block>
