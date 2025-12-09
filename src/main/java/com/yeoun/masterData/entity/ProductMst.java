@@ -14,21 +14,29 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+
 @Entity
 @Table(name = "PRODUCT_MST")
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class) 
 public class ProductMst {
+	
 		@Id
 		@Column(name="PRD_ID", length = 50)
 		private String prdId; //제품id
 		
+		@Column(name="ITEM_NAME", length = 50)
+		private String itemName;//품목명
+		
 		@Column(name="PRD_NAME", length = 100)
-		private String prdName; //제품명
+		private String prdName; //제품명	
 		
 		@Column(name="PRD_CAT", length = 50)
 		private String prdCat; //제품유형
+		
+		@Column(name="MIN_QTY")
+		private Long minQty; //최소수량
 		
 		@Column(name="PRD_UNIT", length = 20)
 		private String prdUnit; //단위
@@ -37,14 +45,13 @@ public class ProductMst {
 		private String prdStatus; //상태
 
 		@Column(name="EFFECTIVE_DATE")
-		private Long effectiveDate; //유효일자
+		private Integer effectiveDate; //유효일자
 		
 		@Column(name = "UNIT_PRICE", precision = 18, scale = 2)
 		private BigDecimal unitPrice;
 		
 		@Column(name="PRD_SPEC", length = 225)
 		private String prdSpec; //제품상세설명
-		
 		
 		@Column(name="CREATED_ID")
 		private String createdId; //생성자 id
@@ -58,7 +65,6 @@ public class ProductMst {
 		
 		@Column(name="UPDATED_DATE")
 		private LocalDate updatedDate; //수정일시
-		
 		
 
 	}

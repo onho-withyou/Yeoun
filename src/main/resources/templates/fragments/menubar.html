@@ -143,8 +143,13 @@
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item">
-                        <a th:href="@{/masterData/product_bom}" class="menu-link" target="_blank">
-                            <div data-i18n="Product/BOM Information Management" class="menu-link-sub">제품/BOM 정보관리</div>
+                        <a th:href="@{/masterData/product}" class="menu-link" target="_blank">
+                            <div data-i18n="Product/BOM Information Management" class="menu-link-sub">완제품/원재료</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a th:href="@{/masterData/bom_stock}" class="menu-link" target="_blank">
+                            <div data-i18n="Product/BOM Information Management" class="menu-link-sub">BOM정보/안전재고</div>
                         </a>
                     </li>
                     <li class="menu-item">
@@ -191,8 +196,13 @@
                     </li>
                     
                     <li class="menu-item" sec:authorize="isAuthenticated()">
-                        <a th:href="@{/purchase/purchaseOrder}" class="menu-link">
-                            <div data-i18n="Menu4" class="menu-link-sub">발주관리</div>
+                        <a th:href="@{/inventory/inbound}" class="menu-link">
+                            <div data-i18n="Menu4" class="menu-link-sub">입고관리</div>
+                        </a>
+                    </li>
+                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                        <a th:href="@{/inventory/outbound/list}" class="menu-link">
+                            <div data-i18n="Menu4" class="menu-link-sub">출고관리</div>
                         </a>
                     </li>
 
@@ -217,10 +227,81 @@
 	                </li>
                 
 	                <li class="menu-item" sec:authorize="isAuthenticated()">
-	                    <a th:href="@{/sales/shipments}" class="menu-link">
+	                    <a th:href="@{/sales/shipment}" class="menu-link">
 	                        <div data-i18n="Menu3" class="menu-link-sub">출하관리</div>
 	                    </a>
 	                </li>
+	            </ul>
+            </li>
+
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <div data-i18n="Work order">생산관리</div>
+                </a>               
+                
+                <ul class="menu-sub">
+                <li class="menu-item" sec:authorize="isAuthenticated()">
+                        <a th:href="@{/production/plan}" class="menu-link">
+                            <div data-i18n="Menu1" class="menu-link-sub">생산계획</div>
+                        </a>
+                    </li>
+                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                        <a th:href="@{/order/list}" class="menu-link">
+                            <div data-i18n="Menu2" class="menu-link-sub">작업지시</div>
+                        </a>
+                    </li>
+                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                        <a th:href="@{/order/schedule}" class="menu-link">
+                            <div data-i18n="Menu3" class="menu-link-sub">작업자 스케줄</div>
+                        </a>
+                    </li>
+                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                        <a th:href="@{/order/line}" class="menu-link">
+                            <div data-i18n="Menu4" class="menu-link-sub">라인 운영 현황</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            
+            <!-- 공정 관리 -->              
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <div data-i18n="Process management">공정관리</div>
+                </a>
+                <ul class="menu-sub">
+	                <li class="menu-item" sec:authorize="isAuthenticated()">
+	                     <a th:href="@{/process/status}" class="menu-link">
+	                        <div data-i18n="Menu1" class="menu-link-sub">공정 현황</div>
+	                     </a>
+	                </li>
+                
+	                <li class="menu-item" sec:authorize="isAuthenticated()">
+	                     <a th:href="@{/lot/trace}" class="menu-link">
+	                        <div data-i18n="Menu2" class="menu-link-sub">LOT 추적</div>
+	                     </a>
+	                </li>
+                
+	            </ul>
+            </li>
+            
+            <!-- 품질 관리 -->
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <div data-i18n="Qc management">품질관리</div>
+                </a>
+                <ul class="menu-sub">
+	                <li class="menu-item" sec:authorize="isAuthenticated()">
+	                     <a th:href="@{/qc/regist}" class="menu-link">
+	                        <div data-i18n="Menu1" class="menu-link-sub">QC 등록</div>
+	                     </a>
+	                </li>
+                
+	                <li class="menu-item" sec:authorize="isAuthenticated()">
+	                     <a th:href="@{/qc/result}" class="menu-link">
+	                        <div data-i18n="Menu2" class="menu-link-sub">QC 결과 조회</div>
+	                     </a>
+	                </li>
+                
 	            </ul>
             </li>
 

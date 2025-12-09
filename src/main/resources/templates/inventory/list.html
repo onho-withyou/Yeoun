@@ -11,8 +11,8 @@
 <th:block layout:fragment="content">
 
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">재고 관리 /</span> 재고 리스트</h4>
-
+        <h3 class="fw-bold py-3 mb-4">재고 목록</h3>
+		<!-- 스피너 -->
         <!-- Search Filter -->
         <div class="card mb-4">
             <div class="card-body">
@@ -26,15 +26,15 @@
                             <label class="form-label" for="searchProdName">상품명</label>
                             <input type="text" class="form-control" id="searchProdName" placeholder="상품명 입력">
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <label class="form-label d-block">&nbsp;</label>
-                            <button type="button" class="btn btn-primary w-100" id="btnSearch">검색</button>
+                            <button type="button" class="btn btn-outline-primary" id="btnToggleAdvanced">
+                                상세 조건 <i class='bx bx-chevron-down'></i>
+                            </button>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label d-block">&nbsp;</label>
-                            <button type="button" class="btn btn-outline-primary w-100" id="btnToggleAdvanced">
-                                상세 조건 <i class='bx bx-chevron-down'></i>
-                            </button>
+                            <button type="button" class="btn btn-primary w-100" id="btnSearch">검색</button>
                         </div>
                     </div>
 
@@ -46,22 +46,22 @@
                                 <label class="form-label" for="searchCategory">카테고리</label>
                                 <select class="form-select" id="searchCategory">
                                     <option value="">전체</option>
+                                    <option value="FG">상품</option>
                                     <option value="RAW">원자재</option>
-                                    <option value="PRODUCT">완제품</option>
+                                    <option value="SUB">부자재</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label" for="searchZone">Zone</label>
                                 <select class="form-select" id="searchZone">
                                     <option value="">전체</option>
-                                    <option value="A">A존 (원자재)</option>
-                                    <option value="B">B존 (부자재)</option>
-                                    <option value="C">C존 (완제품)</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label" for="searchRack">Rack</label>
-                                <input type="text" class="form-control" id="searchRack" placeholder="예: 01">
+                                <select class="form-select" id="searchRack">
+                                    <option value="">전체</option>
+                                </select>
                             </div>
                         </div>
                         
@@ -72,6 +72,7 @@
                                     <option value="">전체</option>
                                     <option value="NORMAL">정상</option>
                                     <option value="DISPOSAL_WAIT">임박</option>
+                                    <option value="DISPOSAL">폐기</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
@@ -101,7 +102,7 @@
                 </div>
             </div>
             <div class="card-body">
-                <div id="grid"></div>
+                <div id="inventoryGrid"></div>
             </div>
         </div>
     </div>
@@ -109,13 +110,13 @@
 <!-- 모달창 삽입 -->
 <th:block th:insert="~{inventory/modal/inventoryDetailModal}"></th:block>
 <th:block th:insert="~{inventory/modal/moveStockModal}"></th:block>
-<th:block th:insert="~{inventory/modal/adjustQuantityModal}"></th:block>
+<th:block th:insert="~{inventory/modal/adjustQtyModal}"></th:block>
 <th:block th:insert="~{inventory/modal/disposalModal}"></th:block>
 
 </th:block>
 
 <th:block layout:fragment="myScript">
-    <script th:src="@{/js/inventory/inventory_list.js}"></script>
+    <script th:src="@{/js/inventory/inventoryList.js}"></script>
 </th:block>
 
 </html>
