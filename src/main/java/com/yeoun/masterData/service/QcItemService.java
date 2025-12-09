@@ -37,16 +37,22 @@ public class QcItemService {
 	//삭제
 	@Transactional
 	public String deleteQcItem(List<String> qcItemIds) {
-		log.info("qcItemRepository------------->{}",qcItemIds);
+		log.info("qcItemRepository------------->{}", qcItemIds);
 		try {
-			//qcItemRepository.deleteAll(param);
-			
+			// 기본 삭제 수행
 			qcItemRepository.deleteAllById(qcItemIds);
+			// 즉시 flush 하여 DB 제약(FOREIGN KEY 등) 오류가 있으면 이 시점에 발생하도록 함
+			qcItemRepository.flush();
 			return "success";
+		} catch (DataIntegrityViolationException dive) {
+			// 제약 위반은 구체적으로 로깅하고 사용자에게 명확한 메시지를 반환
+			log.error("QC Item delete constraint violation", dive);
+			String causeMsg = dive.getMostSpecificCause() != null ? dive.getMostSpecificCause().getMessage() : dive.getMessage();
+			return "error: constraint violation - " + (causeMsg != null ? causeMsg : "referential integrity");
 		} catch (Exception e) {
 			log.error("qcItemRepository error", e);
 			return "error: " + e.getMessage();
 		}
-	} 
+	}
 
 }
