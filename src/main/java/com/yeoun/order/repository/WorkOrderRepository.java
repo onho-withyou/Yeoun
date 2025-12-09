@@ -1,10 +1,12 @@
 package com.yeoun.order.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.yeoun.order.entity.WorkOrder;
@@ -31,6 +33,32 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, String> {
 
 	// 작업지시서 조회
 	Optional<WorkOrder> findByOrderId(String workOrderId);
+	
+	
+	// ===================================================
+	// 대시보드 KPI 전용
+	// ===================================================
+	// 1) 오늘 생성된 작업지시 수
+	@Query("""
+        SELECT COUNT(w)
+        FROM WorkOrder w
+        WHERE w.createdDate >= :start
+          AND w.createdDate < :end
+    """)
+	long countCreatedBetween(@Param("start") LocalDateTime start,
+	                         @Param("end") LocalDateTime end);
+
+	// 2) 상태별 작업지시 수 (예: IN_PROGRESS, DONE 등)
+	long countByStatus(String status);
+
+	// 3) 지연 작업지시 수
+	@Query("""
+        SELECT COUNT(w)
+        FROM WorkOrder w
+        WHERE w.planEndDate < :now
+          AND w.status <> 'DONE'
+    """)
+	long countDelayedOrders(@Param("now") LocalDateTime now);
 
 
 }

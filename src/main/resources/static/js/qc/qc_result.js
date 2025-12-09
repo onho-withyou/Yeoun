@@ -46,8 +46,18 @@ document.addEventListener("DOMContentLoaded", () => {
 				name: 'inspectionDate'
 			},
 			{
-				header: '전체판정',
-				name: 'overallResult'
+				header: '상태',
+				name: 'overallResult',
+				formatter: ({ value }) => {
+				    switch (value) {
+				      case "PASS":
+				        return "합격";
+				      case "FAIL":
+				        return "불합격";
+				      default:
+				        return value || "-";
+				    }
+			    }
 			},
 			{
 				header: '불합격사유',

@@ -136,6 +136,25 @@ public class WorkOrderProcessService {
         if (qcResult != null && qcResult.getGoodQty() != null) { // 필드명 맞게 수정
             goodQty = qcResult.getGoodQty();
         }
+        
+        // 2) 불량수량
+        int defectQty = 0;
+        
+        if (qcResult != null && qcResult.getDefectQty() != null) {
+            // 1순위: QC_RESULT.DEFECT_QTY
+            defectQty = qcResult.getDefectQty();
+        } else {
+            // 2순위: 공정 마지막 단계(최종 공정)의 DEFECT_QTY 사용
+            WorkOrderProcess lastStep = processes.stream()
+                    .max(Comparator.comparing(
+                            p -> p.getStepSeq() == null ? 0 : p.getStepSeq()
+                    ))
+                    .orElse(null);
+
+            if (lastStep != null && lastStep.getDefectQty() != null) {
+                defectQty = lastStep.getDefectQty();
+            }
+        }
 
         int progressRate = calculateProgressRate(processes);
         String currentProcess = resolveCurrentProcess(processes);
@@ -147,8 +166,15 @@ public class WorkOrderProcessService {
         dto.setPrdName(workOrder.getProduct().getPrdName());
         dto.setPlanQty(workOrder.getPlanQty());
         dto.setStatus(workOrder.getStatus());
+        
+        // 라인 정보
+        if (workOrder.getLine() != null) {
+            dto.setLineId(workOrder.getLine().getLineId());
+            dto.setLineName(workOrder.getLine().getLineName());
+        }
 
         dto.setGoodQty(goodQty);
+        dto.setDefectQty(defectQty);
         dto.setProgressRate(progressRate);
         dto.setCurrentProcess(currentProcess);
         dto.setElapsedTime(elapsedTime);
@@ -642,7 +668,7 @@ public class WorkOrderProcessService {
     }
 
     /**
-     * 엔티티 → 단계 DTO 변환 (start/finish/메모 응답용)
+     * 엔티티 -> 단계 DTO 변환 (start/finish/메모 응답용)
      */
     private WorkOrderProcessStepDTO toStepDTO(WorkOrderProcess proc) {
         WorkOrderProcessStepDTO dto = new WorkOrderProcessStepDTO();

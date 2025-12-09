@@ -48,7 +48,19 @@ document.addEventListener("DOMContentLoaded", () => {
 			},
 			{
 				header: '상태',
-				name: 'overallResult'
+				name: 'overallResult',
+				formatter: ({ value }) => {
+				    switch (value) {
+					  case "PENDING" :
+						return "검사대기";
+				      case "PASS":
+				        return "합격";
+				      case "FAIL":
+				        return "불합격";
+				      default:
+				        return value || "-";
+				    }
+			    }
 			},
 			{
 				header: '검사일',
