@@ -8,9 +8,12 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.yeoun.common.dto.DisposeDTO;
+import com.yeoun.common.e_num.AlarmDestination;
+import com.yeoun.common.service.AlarmService;
 import com.yeoun.common.service.DisposeService;
 import com.yeoun.inbound.dto.InboundDTO;
 import com.yeoun.inbound.dto.InboundItemDTO;
@@ -62,6 +65,8 @@ public class InboundService {
 	private final WorkOrderRepository workOrderRepository;
 	private final ProductMstRepository productMstRepository;
 	private final InboundMapper inboundMapper;
+	private final SimpMessagingTemplate messagingTemplate;
+	private final AlarmService alarmService;
 	
 	// 입고대기 등록
 	@Transactional
@@ -385,6 +390,11 @@ public class InboundService {
 				lotTraceService.registLotHistory(disposeLotHistoryDTO);
 			}
 		}
+		// 모든 입고완료 처리 완료 후 각 페이지로 메세지 보내기
+		String message = "새로운 입고가 완료되었습니다.";
+		alarmService.sendAlarmMessage(AlarmDestination.INVENTORY, message);
+		alarmService.sendAlarmMessage(AlarmDestination.ORDER, message);
+		alarmService.sendAlarmMessage(AlarmDestination.SALES, message);
 		
 	}
 }
