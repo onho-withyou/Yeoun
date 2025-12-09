@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -25,16 +26,18 @@ public class ShipmentController {
     }
 
     /** 2) 출하 목록 조회 (GET, AJAX) */
-    @GetMapping("/list")
+    @PostMapping("/list")
     @ResponseBody
-    public List<ShipmentListDTO> list(
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String status
-    ) {
+    public List<ShipmentListDTO> list(@RequestBody Map<String, Object> param) {
+
+        String startDate = (String) param.get("startDate");
+        String endDate   = (String) param.get("endDate");
+        String keyword   = (String) param.get("keyword");
+        String status    = (String) param.get("status");
+
         return shipmentService.search(startDate, endDate, keyword, status);
     }
+
 
     /** 3) 출하 예약 (POST) */
     @PostMapping("/reserve")

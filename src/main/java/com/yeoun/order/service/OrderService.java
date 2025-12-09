@@ -119,8 +119,8 @@ public class OrderService {
 	
 	// =======================================================
 	// 작업자 조회
-	public List<EmpListDTO> loadAllWorkers(String pos) {
-		return orderMapper.selectWorkers(pos);
+	public List<EmpListDTO> loadAllWorkers() {
+		return orderMapper.selectWorkers();
 	}
 
 	// =======================================================
