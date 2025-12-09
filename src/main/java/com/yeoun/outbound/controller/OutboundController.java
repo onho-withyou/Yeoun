@@ -114,10 +114,32 @@ public class OutboundController {
 		return "outbound/material_detail";
 	}
 	
+	// 완제품 출고 상세페이지
+	@GetMapping("/prd/{outboundId}")
+	public String productDetail(@PathVariable("outboundId") String outboundId, Model model) {
+		OutboundOrderDTO outboundOrderDTO = outboundService.getProductOutbound(outboundId);
+		
+		model.addAttribute("outboundOrderDTO", outboundOrderDTO);
+		
+		return "outbound/product_detail";
+	}
+	
 	// 출고완료
 	@PostMapping("/mat/complete")
 	@ResponseBody
 	public Map<String, Object> materialComplete(@RequestBody OutboundOrderDTO OutboundOrderDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
+		outboundService.updateOutbound(OutboundOrderDTO, loginDTO.getEmpId());
+		
+		Map<String, Object> result = new HashMap<>();
+		
+		result.put("success", true);
+		
+		return result;
+	}
+	
+	@PostMapping("/prd/complete")
+	@ResponseBody
+	public Map<String, Object> productComplete(@RequestBody OutboundOrderDTO OutboundOrderDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
 		outboundService.updateOutbound(OutboundOrderDTO, loginDTO.getEmpId());
 		
 		Map<String, Object> result = new HashMap<>();

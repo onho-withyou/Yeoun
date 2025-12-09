@@ -34,32 +34,31 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // 출고 등록 버튼 이벤트
-document.getElementById("completeOutboundBtn").addEventListener("click", async () => {
+document.getElementById("completePrdOutboundBtn").addEventListener("click", async () => {
 	const items = [];
 	
 	const rows = document.querySelectorAll("tbody tr");
 	
 	// 품목들의 데이터를 반복문을 통해서 items 배열 안에 담음
 	rows.forEach((row, index) => {
-		const matId = row.querySelector(".matId")?.textContent.trim();
+		const prdId = row.querySelector(".prdId")?.textContent.trim();
 		const lotNo = row.querySelector(".lotNo")?.textContent.trim();
 		const outboundQty = Number(row.querySelector(`.outboundQty[data-index="${index}"]`)?.textContent.trim());
 		const ivId = row.querySelector(".ivId")?.value;
 		
 		
 		items.push({
-			matId,
+			prdId,
 			lotNo,
 			outboundQty,
 			ivId
 		})
 	})
 	
-	
 	const outboundId = document.querySelector("#outboundId").value;
-	const workOrderId = document.querySelector("#workOrderId").value;
+	const shipmentId = document.querySelector("#shipmentId").value;
 	
-	const res = await fetch("/inventory/outbound/mat/complete", {
+	const res = await fetch("/inventory/outbound/prd/complete", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
@@ -67,8 +66,8 @@ document.getElementById("completeOutboundBtn").addEventListener("click", async (
 		},
 		body: JSON.stringify({ 
 			outboundId,
-			workOrderId,
-			type: "MAT",
+			shipmentId,
+			type: "FG",
 			items
 		})
 	});

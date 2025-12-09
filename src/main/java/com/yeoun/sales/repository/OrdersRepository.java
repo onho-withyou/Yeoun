@@ -3,6 +3,7 @@ package com.yeoun.sales.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -78,6 +79,9 @@ public interface OrdersRepository extends JpaRepository<Orders, String> {
 		    """,
 		    nativeQuery = true)
 		List<Map<String, Object>> findOrderItemsForPlan(@Param("group") String group);
+
+		// 수주Id로 조회
+		Optional<Orders> findByOrderId(String orderId);
 
 
 

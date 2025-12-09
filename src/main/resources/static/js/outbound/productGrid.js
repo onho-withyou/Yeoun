@@ -41,7 +41,6 @@ productGrid.on("click", (ev) => {
 	
 	if (columnName === "btn") {
 		const row = productGrid.getRow(rowKey);
-		console.log(row);
 		// 입고 상세 페이지로 이동
 		location.href = `/inventory/outbound/prd/${row.outboundId}`
 	}
@@ -75,8 +74,6 @@ async function loadProductOutbound(startDate, endDate, keyword) {
 		const data = await res.json();
 		
 		let prdOutboundList  = data.filter(item => item.shipmentId != null);
-		
-		console.log(prdOutboundList );
 		
 		// 데이터가 없을 경우 빈배열 반환
 		if (!prdOutboundList  || prdOutboundList .length === 0) {
@@ -154,7 +151,7 @@ document.querySelector("#prdEndDate").addEventListener("input", async () => {
 
 // =============================================================
 // 출고 등록 로직
-const shipmentSelect = document.querySelector("#shipmnetSelect");
+const shipmentSelect = document.querySelector("#shipmentSelect");
 const processByName = document.querySelector("#processByName");
 const processByEmpId = document.querySelector(".processById");
 const shopClientName = document.querySelector("#shopClientName");
@@ -167,7 +164,7 @@ let shipmentList = [];
 let prdOutboundDate;
 
 // 출하지시서 정보 가져오기
-async function loadShipmnetList() {
+async function loadShipmentList() {
 	try {
 		
 		// 출하지시서 데이터 가져오는 API 작성하기
@@ -190,7 +187,7 @@ async function loadShipmnetList() {
 
 // 출하지시서 선택 이벤트
 shipmentSelect.addEventListener("focus", async () => {
-	shipmentList = await loadShipmnetList();
+	shipmentList = await loadShipmentList();
 	
 	if (shipmentList.length === 0) {
 		return;

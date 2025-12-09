@@ -18,16 +18,18 @@ public class OutboundItemDTO {
 	private Long outboundAmount;
 	private String itemType;
 	private Long ivId;
+	private String locationId;
 	
 	@Builder
 	public OutboundItemDTO(Long outboundItemId, String outboundId, String itemId, String lotNo, Long outboundAmount,
-			String itemType, Long ivId) {
+			String itemType, Long ivId, String locationId) {
 		this.outboundId = outboundId;
 		this.itemId = itemId;
 		this.lotNo = lotNo;
 		this.outboundAmount = outboundAmount;
 		this.itemType = itemType;
 		this.ivId = ivId;
+		this.locationId = locationId;
 	}
 	
 	// ----------------------------------------
