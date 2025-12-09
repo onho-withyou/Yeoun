@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.yeoun.inbound.service.InboundService;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.dto.LotMasterDTO;
 import com.yeoun.lot.entity.LotMaster;
@@ -50,6 +51,7 @@ public class WorkOrderProcessService {
     private final RouteStepRepository routeStepRepository;
     private final QcResultRepository qcResultRepository;
     private final QcResultService qcResultService;
+    private final InboundService inboundService;
     
     // LOT 관련
     private final LotTraceService lotTraceService;
@@ -557,7 +559,7 @@ public class WorkOrderProcessService {
             qcResultService.createPendingQcResultForOrder(orderId);
         }
 
-        // 4) 마지막 단계인지 확인
+        // 3) 마지막 단계인지 확인
         WorkOrder workOrder = proc.getWorkOrder();
         boolean hasLaterStep =
                 workOrderProcessRepository.existsByWorkOrderOrderIdAndStepSeqGreaterThan(orderId, stepSeq);
@@ -570,6 +572,11 @@ public class WorkOrderProcessService {
         
         // LOT 종료 공통 처리
         handleLotOnStepEnd(workOrder, proc, hasLaterStep);
+        
+     	// 포장 공정 + 마지막 단계일 때만 완제품 입고대기 생성
+        if (!hasLaterStep && "PRC-LBL".equals(processId)) {
+            inboundService.saveProductInbound(proc.getWopId());
+        }
 
         workOrderRepository.save(workOrder);
         WorkOrderProcess saved = workOrderProcessRepository.save(proc);

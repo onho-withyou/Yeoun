@@ -19,6 +19,7 @@ import com.yeoun.masterData.entity.QcItem;
 import com.yeoun.masterData.repository.QcItemRepository;
 import com.yeoun.order.entity.WorkOrder;
 import com.yeoun.order.repository.WorkOrderRepository;
+import com.yeoun.process.entity.WorkOrderProcess;
 import com.yeoun.process.repository.WorkOrderProcessRepository;
 import com.yeoun.qc.dto.QcDetailRowDTO;
 import com.yeoun.qc.dto.QcRegistDTO;
@@ -289,7 +290,7 @@ public class QcResultService {
 	    header.setInspectorId(loginEmpId);  // 실제 검사한 사람
 	    header.setUpdatedId(loginEmpId);    // 수정자(최종 저장한 사람)
 	    
-	    // ✅ 수량/사유/비고는 요청 DTO에서 그대로 사용
+	    // 수량/사유/비고는 요청 DTO에서 그대로 사용
 	    if (qcSaveRequestDTO.getGoodQty() != null) {
 	        header.setGoodQty(qcSaveRequestDTO.getGoodQty());
 	    }
@@ -297,7 +298,7 @@ public class QcResultService {
 	        header.setDefectQty(qcSaveRequestDTO.getDefectQty());
 	    }
 
-	    // (선택) 검사 수량은 good+defect로 자동 계산
+	    // 검사 수량은 good+defect로 자동 계산
 	    if (header.getGoodQty() != null && header.getDefectQty() != null) {
 	        header.setInspectionQty(header.getGoodQty() + header.getDefectQty());
 	    }
@@ -310,23 +311,43 @@ public class QcResultService {
 	    }
 
 	    qcResultRepository.save(header);
-
-	    // ✅ LOT / WORK_ORDER 연동 (앞에서 만든 메서드 그대로 사용)
-	    applyQcResultToLotAndWorkOrder(header);
-
-	    // 4) QC 공정(WorkOrderProcess) 자동 종료 처리 (기존 로직 그대로)
+	    
 	    String orderId = header.getOrderId();
-
+	    
+	    // 3-1) QC 공정(WOP)에 양품/불량 수량 + 상태 반영
 	    workOrderProcessRepository
 	            .findByWorkOrderOrderIdAndProcessProcessId(orderId, "PRC-QC")
 	            .ifPresent(qcProc -> {
-	                // 이미 DONE이면 건너뛰기
+	                // 양품/불량 수량 반영
+	                qcProc.setGoodQty(header.getGoodQty());
+	                qcProc.setDefectQty(header.getDefectQty());
+
+	                // 상태/종료시간도 같이 정리 (기존 4) 로직 통합)
 	                if (!"DONE".equals(qcProc.getStatus())) {
 	                    qcProc.setStatus("DONE");
-	                    qcProc.setEndTime(LocalDateTime.now());
-	                    workOrderProcessRepository.save(qcProc);
 	                }
+	                if (qcProc.getEndTime() == null) {
+	                    qcProc.setEndTime(LocalDateTime.now());
+	                }
+
+	                workOrderProcessRepository.save(qcProc);
 	            });
+
+	    // 3-2) 마지막 공정(WOP)에도 양품/불량 수량 복사
+	    //      -> 포장 완료 시 saveProductInbound()에서 사용
+	    List<WorkOrderProcess> allSteps =
+	            workOrderProcessRepository.findByWorkOrderOrderIdOrderByStepSeqAsc(orderId);
+
+	    if (!allSteps.isEmpty()) {
+	        WorkOrderProcess lastStep = allSteps.get(allSteps.size() - 1);
+	        lastStep.setGoodQty(header.getGoodQty());
+	        lastStep.setDefectQty(header.getDefectQty());
+	        workOrderProcessRepository.save(lastStep);
+	    }
+
+	    // LOT / WORK_ORDER 연동
+	    applyQcResultToLotAndWorkOrder(header);
+
 	}
 	
 	// ----------------------------------------------------------
