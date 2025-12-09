@@ -35,10 +35,8 @@ public class OrderController {
     	model.addAttribute("plans", orderService.loadAllPlans());		// 생산계획 조회 
     	model.addAttribute("prods", orderService.loadAllProducts());	// 품목 조회
     	model.addAttribute("lines", orderService.loadAllLines());		// 라인 조회
-        model.addAttribute("leadWorkers", 
-        						orderService.loadAllWorkers("POS002"));	// 작업자 조회(작업반장)
         model.addAttribute("workers", 
-        						orderService.loadAllWorkers("POS001"));	// 작업자 조회(작업자)
+        						orderService.loadAllWorkers());	// 작업자 조회(작업자)
         
     	return "/order/list";
     }
