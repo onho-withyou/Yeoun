@@ -315,7 +315,7 @@ function onClickSaveQcResult() {
 	  return;
 	}
 
-	// 🔹 양품/불량 수량 필수
+	// 양품/불량 수량 필수
 	if (goodQtyVal === "" || defectQtyVal === "") {
 	  alert("양품 수량과 불량 수량을 모두 입력해주세요.");
 	  if (goodQtyVal === "") {
@@ -338,7 +338,7 @@ function onClickSaveQcResult() {
 	  return;
 	}
 	
-	// (선택) good + defect = planQty 체크
+	// good + defect = planQty 체크
 	const planQtyVal = document.getElementById("qcPlanQty")?.value;
 	const planQty = planQtyVal ? Number(planQtyVal) : null;
 
@@ -351,7 +351,7 @@ function onClickSaveQcResult() {
 	}
 
 
-    // 3) 서버로 보낼 payload (QcSaveRequestDTO와 동일 구조)
+    // 3) 서버로 보낼 payload
     const payload = {
       qcResultId: Number(qcResultId),
       goodQty: goodQty,
@@ -360,6 +360,22 @@ function onClickSaveQcResult() {
       remark: remark,
       detailRows: detailRows
     };
+	
+	// 저장 전 최종 확인
+    let confirmMsg = `다음 내용으로 QC 결과를 저장하시겠습니까?\n\n`
+                   + `ㆍ전체 판정 : ${overallResult}\n`
+                   + `ㆍ양품 수량 : ${goodQty}\n`
+                   + `ㆍ불량 수량 : ${defectQty}\n`;
+
+    if (overallResult === "FAIL" && failReason) {
+      confirmMsg += `ㆍ불합격 사유 : ${failReason}\n`;
+    }
+    confirmMsg += `\n저장 후에는 수정이 어려울 수 있습니다.`;
+
+    if (!confirm(confirmMsg)) {
+      // 사용자가 "취소" 누르면 저장 중단
+      return;
+    }
 
     // 4) CSRF 토큰
     const csrfTokenMeta  = document.querySelector('meta[name="_csrf_token"]');
@@ -368,7 +384,7 @@ function onClickSaveQcResult() {
     const csrfToken     = csrfTokenMeta ? csrfTokenMeta.content : null;
     const csrfHeaderName = csrfHeaderMeta ? csrfHeaderMeta.content : null;
 
-    // 5) fetch 호출 (⚠️ body: payload 로 변경!)
+    // 5) fetch 호출 
     fetch(`/qc/${qcResultId}/save`, {
       method: "POST",
       headers: {
