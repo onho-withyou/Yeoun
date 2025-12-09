@@ -40,10 +40,10 @@ public class ProcessMstController {
   	
   	//제품별 공정라우트 조회
   	@GetMapping("/process/list")
-  	public ResponseEntity<?> processList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,
+  	public List<ProcessMst> processList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,
   			@RequestParam("prdId") String prdId,
   		    @RequestParam("routeName") String routeName) {
-		return null;
+		return processMstService.getProcessMstList(prdId, routeName);
   	}
     
 }

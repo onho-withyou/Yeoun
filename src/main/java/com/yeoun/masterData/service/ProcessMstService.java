@@ -34,10 +34,9 @@ public class ProcessMstService {
 	
 	//제품별 공정 라우트 그리드 조회
 	@Transactional(readOnly = true)
-	public List<ProcessMst> findAll(Map<String, Object> searchParams) {
-		log.info("searchParams 조회된개수 - {}",searchParams);
-		//return processMstRepository.findByProcessId();
-		return null;
+	public List<ProcessMst> getProcessMstList(String prdId, String routeName) {
+		log.info("searchParams 조회된개수 - {}",prdId+routeName);
+		return processMstRepository.findByPrdIdAndRouteName(prdId, routeName);
 	}
 
 }
