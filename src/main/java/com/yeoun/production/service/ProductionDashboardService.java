@@ -38,7 +38,6 @@ public class ProductionDashboardService {
 
         // -------------------------------
         // 2) 공정 현황 테이블 데이터
-        //    👉 기존 공정현황 목록 서비스 그대로 재사용
         // -------------------------------
         List<WorkOrderProcessDTO> processList =
                 workOrderProcessService.getWorkOrderListForStatus();
@@ -71,7 +70,7 @@ public class ProductionDashboardService {
                 .lineLabels(lineLabels)
                 .lineSeries(lineSeries)
                 .goodQtyTotal(goodTotal)
-                .defectQtyTotal(defectTotal)   // 일단 0으로 내려보내기
+                .defectQtyTotal(defectTotal)   
                 .processList(processList)
                 .build();
     }

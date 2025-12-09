@@ -61,11 +61,25 @@ document.addEventListener("DOMContentLoaded", () => {
         name: "goodQty",
         align: "right"
       },
-      {
-        header: "진행률",
-        name: "progressRate",
-        align: "center"
-      },
+	  {
+	    header: "진행률",
+	    name: "progressRate",
+	    align: "center",
+	    formatter: ({ value }) => {
+	      const percent = value ?? 0;
+	      return `
+	        <div style="width:100%; background:#eee; height:12px; border-radius:8px; overflow:hidden;">
+	          <div style="
+	            width:${percent}%; 
+	            height:100%; 
+	            background:#00c8a2;
+	            transition: width .4s;
+	          "></div>
+	        </div>
+	        <div style="font-size:11px; margin-top:2px;">${percent}%</div>
+	      `;
+	    }
+	  },
       {
         header: "현재공정",
         name: "currentProcess",

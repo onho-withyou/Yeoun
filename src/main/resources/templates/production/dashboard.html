@@ -85,6 +85,7 @@
 		            <th>계획수량</th>
 		            <th>양품</th>
 		            <th>불량</th>
+		            <th>진행률</th>
 		            <th>현재공정</th>
 		            <th>상태</th>
 		        </tr>
@@ -92,7 +93,7 @@
 	      	<tbody>
 		        <!-- 데이터 없을 때 -->
 		        <tr th:if="${#lists.isEmpty(dashboard.processList)}">
-		            <td colspan="7" class="text-muted">데이터가 없습니다.</td>
+		            <td colspan="8" class="text-muted">데이터가 없습니다.</td>
 		        </tr>
 		
 		        <!-- 데이터 있을 때 -->
@@ -102,6 +103,14 @@
 		            <td th:text="${row.planQty}">1000</td>
 		            <td th:text="${row.goodQty}">900</td>
 		            <td th:text="${row.defectQty}">0</td>
+		            <td>
+					  <div class="progress" style="height: 18px;">
+					    <div class="progress-bar bg-success"
+					         role="progressbar"
+					         th:style="'width:' + ${row.progressRate} + '%'"
+					         th:text="${row.progressRate + '%'}"></div>
+					  </div>
+					</td>
 		            <td th:text="${row.currentProcess}">배합</td>
 		            <td th:text="${row.status}">IN_PROGRESS</td>
 		        </tr>
