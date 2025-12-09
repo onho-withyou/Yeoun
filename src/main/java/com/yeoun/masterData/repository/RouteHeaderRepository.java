@@ -23,9 +23,9 @@ public interface RouteHeaderRepository extends JpaRepository<RouteHeader, String
     
 
     // 제품+라우트로 조회 (빈값일 경우 전체조회)
-        @Query("select r from RouteHeader r left join fetch r.prdId p "
-            + "where (:prdId is null or :prdId = '' or p.prdId = :prdId) "
-            + "and (:routeName is null or :routeName = '' or lower(r.routeName) like lower(concat('%', :routeName, '%')))")
+		@Query("select r from RouteHeader r left join fetch r.product p "
+			+ "where (:prdId is null or :prdId = '' or p.prdId = :prdId) "
+			+ "and (:routeName is null or :routeName = '' or lower(r.routeName) like lower(concat('%', :routeName, '%')))")
     List<RouteHeader> findByPrdIdAndRouteName(@Param("prdId") String prdId, @Param("routeName") String routeName);
 
 }

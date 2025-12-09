@@ -30,7 +30,7 @@
 	           		<div class="d-flex justify-content-between">
 						<div class="d-flex justify-content-start">
 			             	 <div class="mb-6 mb-0" style="width: 260px;">
-				        	    <select  id="processprdId" class="form-select" onchange="draftValFn(this)">
+				        	    <select  id="processprdId" class="form-select">
 				        	    	<option value="" selected disabled hidden>제품명(제품코드)</option>
 			        	    		 <option th:each="item, iterStat : ${prdMstList}" 
 										 		th:value="${item.prdId}" 
@@ -74,35 +74,55 @@
 	          <div class="row g-3 small">
 	            <div class="col-md-3">
 	              <label class="form-label">라우트ID</label>
-	              <input type="text" class="form-control" id="routeId" readonly
+	              <input type="text" class="form-control" id="modalRouteId" readonly
 	                     placeholder="저장 시 자동생성 (예: RT-FRUIT)">
 	            </div>
 	            <div class="col-md-3">
-	              <label class="form-label">제품군</label>
-	              <select class="form-select" id="routeFamily">
-	                <option value="">선택</option>
-	                <option value="PF-FRUIT">PF-FRUIT (과일/꽃 액체향수)</option>
-	                <option value="PF-NATUR">PF-NATUR (자연/풀 액체향수)</option>
-	                <option value="PF-SOLID">PF-SOLID (고체향수)</option>
-	              </select>
+	              	<label class="form-label">제품코드</label>
+	              	<select  id="modalProcessprdId" class="form-select">
+						<option value="" selected>제품명(제품코드)</option>
+			    		 <option th:each="item, iterStat : ${prdMstList}" 
+							 		th:value="${item.prdId}" 
+							 		th:text="${item.prdName} +' (' + ${item.prdId} + ')'"
+									name="prdId">
+						</option>
+					</select>
 	            </div>
 	            <div class="col-md-4">
 	              <label class="form-label">라우트명</label>
-	              <input type="text" class="form-control" id="routeName"
-	                     placeholder="예: 과일/꽃향 액체향수 공정 라우트">
+	              <input type="text" class="form-control" id="modalRouteName"
+	                     placeholder="예: 과일향수 공정 라우트">
 	            </div>
 	            <div class="col-md-2">
 	              <label class="form-label">사용여부</label>
-	              <select class="form-select" id="routeUseYn">
+	              <select class="form-select" id="modalRouteUseYn">
 	                <option value="Y">Y</option>
 	                <option value="N">N</option>
 	              </select>
 	            </div>
 	            <div class="col-md-12">
 	              <label class="form-label">비고</label>
-	              <input type="text" class="form-control" id="routeRemark"
+	              <input type="text" class="form-control" id="modalRouteRemark"
 	                     placeholder="예: 숙성 공정 제외, 액체향수 전용 라우트">
 	            </div>
+				<div id="userAndDate">
+					<div class="col-md-3 me-1">
+					<label class="form-label">생성자</label>
+					<input type="text" class="form-control" id="modalRouteCreatedId" readonly>
+					</div>
+					<div class="col-md-3 me-1">
+					<label class="form-label">생성일시</label>
+					<input type="text" class="form-control" id="modalRouteCreatedDate" readonly>
+					</div>
+					<div class="col-md-3 me-1">
+					<label class="form-label">수정자</label>
+					<input type="text" class="form-control" id="modalRouteUpdatedId" readonly>
+					</div>
+					<div class="col-md-3 me-1">
+					<label class="form-label">수정일시</label>
+					<input type="text" class="form-control" id="modalRouteUpdatedDate" readonly>
+					</div>
+				</div>
 	          </div>
 	        </div>
 	
@@ -123,7 +143,7 @@
 	        <div id="processStepGrid" style="display: grid;margin-right:5px;"></div>
 	      </div>
 	      <div class="modal-footer">
-	        <button class="btn btn-primary btn-sm" type="button" onclick="fakeSaveRoute()">저장 (UI 시뮬레이션)</button>
+	        <button id="saveRouteBtn" class="btn btn-primary btn-sm" type="button">저장</button>
 	        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">닫기</button>
 	      </div>
 	    </div>
