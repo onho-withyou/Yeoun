@@ -11,12 +11,21 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.yeoun.lot.dto.LotHistoryDTO;
+import com.yeoun.lot.dto.LotMasterDTO;
+import com.yeoun.lot.entity.LotMaster;
+import com.yeoun.lot.entity.LotRelationship;
+import com.yeoun.lot.repository.LotMasterRepository;
+import com.yeoun.lot.repository.LotRelationshipRepository;
+import com.yeoun.lot.service.LotTraceService;
 import com.yeoun.masterData.entity.RouteHeader;
 import com.yeoun.masterData.entity.RouteStep;
 import com.yeoun.masterData.repository.RouteHeaderRepository;
 import com.yeoun.masterData.repository.RouteStepRepository;
 import com.yeoun.order.entity.WorkOrder;
 import com.yeoun.order.repository.WorkOrderRepository;
+import com.yeoun.outbound.entity.OutboundItem;
+import com.yeoun.outbound.repository.OutboundItemRepository;
 import com.yeoun.process.dto.WorkOrderProcessDTO;
 import com.yeoun.process.dto.WorkOrderProcessDetailDTO;
 import com.yeoun.process.dto.WorkOrderProcessStepDTO;
@@ -41,17 +50,23 @@ public class WorkOrderProcessService {
     private final RouteStepRepository routeStepRepository;
     private final QcResultRepository qcResultRepository;
     private final QcResultService qcResultService;
+    
+    // LOT 관련
+    private final LotTraceService lotTraceService;
+    private final LotMasterRepository lotMasterRepository;
+    private final LotRelationshipRepository lotRelationshipRepository;
+    
+    // 출고(자재) 관련 - LOT_RELATIONSHIP 만들 때 사용
+    private final OutboundItemRepository outboundItemRepository;
 
     // =========================================================================
     // 1. 공정현황 메인 목록
-    //    - 작업지시별 진행률, 현재공정, 경과시간, 양품수량 표시
-    // =========================================================================
     @Transactional(readOnly = true)
     public List<WorkOrderProcessDTO> getWorkOrderListForStatus() {
 
         // 1) 공정현황 대상이 되는 작업지시 조회 (RELEASE, IN_PROGRESS)
         List<String> statuses = List.of("RELEASED", "IN_PROGRESS");
-        List<WorkOrder> workOrders = workOrderRepository.findByStatusIn(statuses);
+        List<WorkOrder> workOrders = workOrderRepository.findByStatusInAndOutboundYn(statuses, "Y");
 
         if (workOrders.isEmpty()) {
             return List.of();
@@ -349,12 +364,19 @@ public class WorkOrderProcessService {
             throw new IllegalStateException("대기 상태(READY)인 공정만 시작할 수 있습니다.");
         }
 
+        WorkOrder workOrder = proc.getWorkOrder();
+        
+        // 1단계(블렌딩) 시작 시 LOT 3개 테이블 처리
+        if (stepSeq == 1) {
+        	handleLotOnFirstStepStart(workOrder, proc);
+        }
+
+        // 기존 공정 시작 로직
         proc.setStatus("IN_PROGRESS");
         proc.setStartTime(LocalDateTime.now());
 
         // 작업지시 시작일/상태 변경
         // 최초 시작일자 기록 (이미 값 있으면 유지)
-        WorkOrder workOrder = proc.getWorkOrder();
         if (workOrder.getActStartDate() == null) {
             workOrder.setActStartDate(LocalDateTime.now());
         }
@@ -366,8 +388,108 @@ public class WorkOrderProcessService {
         WorkOrderProcess saved = workOrderProcessRepository.save(proc);
         return toStepDTO(saved);
     }
+    
+
+	/**
+     * 블렌딩 1단계 시작 시
+     * - LOT_MASTER : WIP LOT 생성
+	 * - LOT_HISTORY : CREATE, PROC_START
+	 * - LOT_RELATIONSHIP : 원자재 LOT 사용 관계 생성
+     */
+    private void handleLotOnFirstStepStart(WorkOrder workOrder, WorkOrderProcess proc) {
+
+        String orderId  = workOrder.getOrderId();
+        String lineCode = workOrder.getLine().getLineId();
+
+        // -----------------------------
+        // 1) LOT_MASTER : WIP LOT 생성
+        // -----------------------------
+        LotMasterDTO lotMasterDTO = LotMasterDTO.builder()
+                .lotType("WIP")                         // 공정용 LOT
+                .orderId(orderId)
+                .prdId(workOrder.getProduct().getPrdId())
+                .quantity(workOrder.getPlanQty())
+                .currentStatus("IN_PROCESS")           // LOT_STATUS
+                .currentLocType("LINE")                // LOCATION_TYPE
+                .currentLocId(lineCode)
+                .build();
+
+        // LOT_MASTER INSERT + LOT_NO 생성
+        String lotNo = lotTraceService.registLotMaster(lotMasterDTO, lineCode);
+
+        // (옵션) WOP에 lotNo 저장하고 싶으면
+        proc.setLotNo(lotNo);
+
+        // -----------------------------
+        // 2) LOT_HISTORY : CREATE
+        // -----------------------------
+        LotHistoryDTO createHist = new LotHistoryDTO();
+        createHist.setLotNo(lotNo);
+        createHist.setOrderId(orderId);
+        createHist.setEventType("CREATE");            // LOT_EVENT_TYPE
+        createHist.setStatus("NEW");                  // LOT_STATUS
+        createHist.setLocationType("LINE");
+        createHist.setLocationId(lineCode);
+        createHist.setQuantity(workOrder.getPlanQty());
+        createHist.setWorkedId(workOrder.getCreatedEmp().getEmpId());
+
+        lotTraceService.registLotHistory(createHist);
+
+        // -----------------------------
+        // 3) LOT_HISTORY : PROC_START
+        // -----------------------------
+        LotHistoryDTO procStartHist = new LotHistoryDTO();
+        procStartHist.setLotNo(lotNo);
+        procStartHist.setOrderId(orderId);
+        procStartHist.setProcessId(proc.getProcess().getProcessId()); // PRC-BLD
+        procStartHist.setEventType("PROC_START");
+        procStartHist.setStatus("IN_PROCESS");
+        procStartHist.setLocationType("LINE");
+        procStartHist.setLocationId(lineCode);
+        procStartHist.setQuantity(workOrder.getPlanQty());
+        procStartHist.setStartTime(LocalDateTime.now());
+        procStartHist.setWorkedId(workOrder.getCreatedEmp().getEmpId());
+
+        lotTraceService.registLotHistory(procStartHist);
+
+        // -----------------------------
+        // 4) LOT_RELATIONSHIP 생성
+        // -----------------------------
+        createLotRelationshipForOrder(orderId, lotNo);
+    }
 
     /**
+     * 해당 작업지시(orderId)로 출고된 원자재 LOT들을 조회하여
+     * LOT_RELATIONSHIP(OUTPUT_LOT = 생산 LOT, INPUT_LOT = 원자재 LOT)을 생성
+     */
+    private void createLotRelationshipForOrder(String orderId, String outputLotNo) {
+
+        // 1) 생산 LOT 조회
+        LotMaster outputLot = lotMasterRepository.findByLotNo(outputLotNo)
+                .orElseThrow(() -> new IllegalArgumentException("생산 LOT 없음: " + outputLotNo));
+
+        // 2) 이 작업지시에 출고된 원자재 출고 아이템 조회
+        List<OutboundItem> items =
+                outboundItemRepository.findByOutbound_WorkOrderIdAndItemType(orderId, "RAW");
+
+        for (OutboundItem item : items) {
+
+            // 원자재 LOT 조회 (OUTBOUND_ITEM.LOT_NO 기준)
+            LotMaster inputLot = lotMasterRepository.findByLotNo(item.getLotNo())
+                    .orElseThrow(() -> new IllegalArgumentException("원자재 LOT 없음: " + item.getLotNo()));
+
+            // 관계 엔티티 생성
+            LotRelationship rel = new LotRelationship();
+            rel.setOutputLot(outputLot);                          // 부모 LOT = 생산 LOT
+            rel.setInputLot(inputLot);                            // 자식 LOT = 원자재 LOT
+            rel.setUsedQty(item.getOutboundAmount().intValue());  // 사용 수량
+
+            lotRelationshipRepository.save(rel);
+        }
+    }
+
+
+	/**
      * 공정 단계 종료 처리
      * - IN_PROGRESS → DONE or QC_PENDING
      * - 마지막 단계 완료 시 WORK_ORDER 상태 COMPLETED + ACT_END_DATE 설정

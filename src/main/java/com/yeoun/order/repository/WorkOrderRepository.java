@@ -12,8 +12,8 @@ import com.yeoun.order.entity.WorkOrder;
 @Repository
 public interface WorkOrderRepository extends JpaRepository<WorkOrder, String> {
 	
-	// 공정 현황 - 진행중/지시 상태만 조회
-	List<WorkOrder> findByStatusIn(List<String> statuses);
+	// 공정현황 전용 (상태 + 출고완료)
+	List<WorkOrder> findByStatusInAndOutboundYn(List<String> statuses, String outboundYn);
 
 	// 가장 최근 작업지시 번호 조회
 	Optional<WorkOrder> findTopByOrderIdStartingWithOrderByOrderIdDesc(String todayPrefix);
