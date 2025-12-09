@@ -48,12 +48,12 @@ public class QcItemController {
   		return "redirect:/masterData/qc_item";
   		
   	}
-  	//품질기준 삭제
-  	@PostMapping("/qcItem/delete")
-  	public String deleteItem(@RequestBody List<String> param) {
-  		qcItemService.deleteQcItem(param);
-  		return "redirect:/masterData/qc_item";
-  	}
+	//품질기준 삭제 (AJAX 호출을 위한 응답: 텍스트 반환)
+	@ResponseBody
+	@PostMapping(value = "/qcItem/delete", consumes = "application/json")
+	public String deleteItem(@RequestBody List<String> param) {
+		return qcItemService.deleteQcItem(param);
+	}
   	
 
 }
