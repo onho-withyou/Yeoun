@@ -226,36 +226,47 @@ function renderQcDetailTable(detailList) {
 }
 
 function collectDetailRowsFromTable() {
-	const tbody = document.getElementById("qcDetailTbody");
-	const trs = tbody.querySelectorAll("tr");
-	const detailRows = [];
-	
-	trs.forEach((tr) => {
-		const qcResultDtlId = tr.querySelector('input[name$=".qcResultDtlId"]').value;
-	    const qcItemId = tr.querySelector('input[name$=".qcItemId"]').value;
-	    const measureValue = tr.querySelector('input[name$=".measureValue"]').value;
-	    const result = tr.querySelector('select[name$=".result"]').value;
-	    const remark = tr.querySelector('input[name$=".remark"]').value;
-		
-		if (!measureValue || measureValue.trim() === "") {
-		      hasEmptyMeasure = true;
-	    }
+  const trs = document.querySelectorAll("#qcDetailTbody tr");
+  const detailRows = [];
 
-		detailRows.push({
-			qcResultDtlId,
-			qcItemId,
-	        measureValue,
-	        result,
-	        remark
-		});
-	});
-	
-	// 측정값 비어있는 행이 있으면 null 반환해서 밖에서 막기
-    if (hasEmptyMeasure) {
-      return null;
+  trs.forEach((tr) => {
+    const dtlInput    = tr.querySelector('input[name$=".qcResultDtlId"]');
+    const itemInput   = tr.querySelector('input[name$=".qcItemId"]');
+    const measureInput= tr.querySelector('input[name$=".measureValue"]');
+    const resultSelect= tr.querySelector('select[name$=".result"]');
+    const remarkInput = tr.querySelector('input[name$=".remark"]');
+
+    const qcResultDtlId = dtlInput    ? dtlInput.value    : null;
+    const qcItemId      = itemInput   ? itemInput.value   : null;
+    const measureValue  = measureInput? measureInput.value: "";
+    const result        = resultSelect? resultSelect.value: "";
+    const remark        = remarkInput ? remarkInput.value : "";
+
+    detailRows.push({
+      qcResultDtlId,
+      qcItemId,
+      measureValue,
+      result,
+      remark
+    });
+  });
+
+  // ✅ 측정값이 비어 있는 행이 하나라도 있는지 체크
+  const emptyIndex = detailRows.findIndex(row =>
+    !row.measureValue || row.measureValue.trim() === ""
+  );
+
+  if (emptyIndex !== -1) {
+    // 어떤 행이 비었는지 포커스까지 주기
+    const trs = document.querySelectorAll("#qcDetailTbody tr");
+    const targetInput = trs[emptyIndex].querySelector('input[name$=".measureValue"]');
+    if (targetInput) {
+      targetInput.focus();
     }
-	
-	return detailRows;
+    return null;  // → onClickSaveQcResult() 에서 알럿 뜸
+  }
+
+  return detailRows;
 }
 
 
