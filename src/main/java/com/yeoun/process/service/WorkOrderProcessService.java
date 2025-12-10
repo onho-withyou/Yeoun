@@ -668,31 +668,26 @@ public class WorkOrderProcessService {
             workOrder.setActEndDate(LocalDateTime.now());
 
             // 2) 같은 PLAN_ID 아래에 아직 완료 안 된 작업지시가 있는지 확인
-            String planId = workOrder.getPlanId();   // 현재 워크오더가 속한 계획
+            String planId = workOrder.getPlanId();
             if (planId != null) {
 
-                boolean existsNotCompleted =
-                        workOrderRepository.existsByPlanIdAndStatusNot(planId, "COMPLETED");
+                // 🔹 PlanItem 기준으로 아직 DONE 아닌 애가 있는지 확인
+                boolean existsNotDoneItem =
+                        productionPlanItemRepository.existsByPlanIdAndStatusNot(planId, ProductionStatus.DONE);
 
-                // 3) 더 이상 미완료 작업지시가 없을 때만
-                //    → 생산계획 + 생산계획 품목을 DONE 으로 변경
-                if (!existsNotCompleted) {
-
-                    // (1) 생산계획 헤더 DONE
+                if (!existsNotDoneItem) {
+                    // (1) Plan DONE
                     ProductionPlan plan = productionPlanRepository.findById(planId)
-                            .orElseThrow(() ->
-                                    new IllegalStateException("생산계획을 찾을 수 없습니다. planId=" + planId));
+                            .orElseThrow(() -> new IllegalStateException("생산계획을 찾을 수 없습니다. planId=" + planId));
                     plan.setStatus(ProductionStatus.DONE);
-                    productionPlanRepository.save(plan);
 
-                    // (2) 생산계획 품목들 DONE
+                    // (2) PlanItem 들은 이미 DONE이라고 가정할 수도 있고,
+                    //     혹시 모를 상태 꼬임 방지용으로 한 번 더 덮어써도 됨.
                     List<ProductionPlanItem> items =
-                            productionPlanItemRepository.findByPlanId(planId); 
-
+                            productionPlanItemRepository.findByPlanId(planId);
                     for (ProductionPlanItem item : items) {
                         item.setStatus(ProductionStatus.DONE);
                     }
-                    productionPlanItemRepository.saveAll(items);
                 }
             }
         }
