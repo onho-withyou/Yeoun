@@ -26,4 +26,23 @@ public interface ProductionPlanItemRepository extends JpaRepository<ProductionPl
     
     // 같은 계획(planId) 아래, DONE이 아닌 애들이 아직 있는지 체크
     boolean existsByPlan_PlanIdAndStatusNot(String planId, ProductionStatus status);
+    
+    //제품이 모두 done상태만 예약하기
+    
+    @Query("""
+    	    SELECT 
+    	        CASE 
+    	            WHEN COUNT(p) = SUM(CASE WHEN p.status = 'DONE' THEN 1 ELSE 0 END)
+    	            THEN true
+    	            ELSE false
+    	        END
+    	    FROM ProductionPlanItem p
+    	    WHERE p.orderItemId IN (
+    	        SELECT oi.orderItemId 
+    	        FROM OrderItem oi 
+    	        WHERE oi.orderId = :orderId
+    	    )
+    	""")
+    	Boolean isAllDoneByOrderId(@Param("orderId") String orderId);
+
 }
