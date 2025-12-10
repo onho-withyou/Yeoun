@@ -103,7 +103,7 @@ function showNewAlarm() {
 function connectWebSocket(onConnected) {
 	const socket = new SockJS("/websocket");  
 	stompClient = Stomp.over(socket);
-	getSectionPath()
+
 	stompClient.connect({
 		// CSRF 토큰 정보를 헤더에 포함
 		[csrfHeader]: csrfToken

@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import com.yeoun.common.service.AlarmService;
 import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryDTO;
 import com.yeoun.inventory.entity.Inventory;
@@ -40,6 +42,8 @@ public class OutboundService {
 	private final WorkOrderRepository workOrderRepository;
 	private final OutboundItemRepository outboundItemRepository;
 	private final OutboundMapper outboundMapper;
+	private final SimpMessagingTemplate messagingTemplate;
+	private final AlarmService alarmService;
 	
 	// 출고 리스트 조회
 	public List<OutboundOrderDTO> getOuboundList(LocalDateTime start, LocalDateTime end, String keyword) {
