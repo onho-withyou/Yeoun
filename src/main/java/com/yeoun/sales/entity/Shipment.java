@@ -20,8 +20,7 @@ import java.time.LocalDateTime;
 public class Shipment {
 
     // 1) 출하ID (PK)
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id   
     @Column(name = "SHIPMENT_ID", nullable = false)
     @Comment("출하 이력을 구분하기 위한 고유 식별자 (SHP + YYYYMMDD + 4자리 Sequence)")
     private String shipmentId;

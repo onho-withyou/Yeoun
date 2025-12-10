@@ -22,4 +22,24 @@ public interface ProductionPlanItemRepository extends JpaRepository<ProductionPl
     
     
     List<ProductionPlanItem> findByPlanId(String planId);
+    
+    
+    //제품이 모두 done상태만 예약하기
+    
+    @Query("""
+    	    SELECT 
+    	        CASE 
+    	            WHEN COUNT(p) = SUM(CASE WHEN p.status = 'DONE' THEN 1 ELSE 0 END)
+    	            THEN true
+    	            ELSE false
+    	        END
+    	    FROM ProductionPlanItem p
+    	    WHERE p.orderItemId IN (
+    	        SELECT oi.orderItemId 
+    	        FROM OrderItem oi 
+    	        WHERE oi.orderId = :orderId
+    	    )
+    	""")
+    	Boolean isAllDoneByOrderId(@Param("orderId") String orderId);
+
 }

@@ -19,6 +19,8 @@ public class ShipmentListDTO {
     private BigDecimal stockQty;
     private LocalDate dueDate;
     private String status;
+    private boolean reservable;
+
 
     public ShipmentListDTO(
             String orderId,
@@ -26,8 +28,9 @@ public class ShipmentListDTO {
             String prdName,
             BigDecimal orderQty,
             BigDecimal stockQty,
-            Object dueDate,   
-            String status
+            Object dueDate,
+            String status,
+            boolean reservable  
     ) {
         this.orderId = orderId;
         this.clientName = clientName;
@@ -35,7 +38,7 @@ public class ShipmentListDTO {
         this.orderQty = orderQty;
         this.stockQty = stockQty;
 
-        // ⭐ Timestamp → LocalDate 변환
+        
         if (dueDate instanceof java.sql.Timestamp ts) {
             this.dueDate = ts.toLocalDateTime().toLocalDate();
         } else if (dueDate instanceof java.sql.Date d) {
@@ -45,5 +48,7 @@ public class ShipmentListDTO {
         }
 
         this.status = status;
+        this.reservable = reservable;  
     }
+
 }
