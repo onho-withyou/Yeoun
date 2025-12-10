@@ -27,24 +27,26 @@ public interface ProductionPlanRepository extends JpaRepository<ProductionPlan, 
     
     /* 생산계획 리스트 조회 */
     @Query(value = """
-    	    SELECT
-    	        p.PLAN_ID            AS planId,
-    	        TO_CHAR(p.CREATED_AT, 'YYYY-MM-DD HH24:MI:SS') AS createdAt,
-    	        COALESCE(MIN(pr.PRD_NAME), '미정') AS itemName,
-    	        COALESCE(SUM(i.PLAN_QTY), 0) AS totalQty,
-    	        p.STATUS             AS status,
-    	        p.PLAN_MEMO      AS memo
-    	    FROM PRODUCTION_PLAN p
-    	    LEFT JOIN PRODUCTION_PLAN_ITEM i 
-    	      ON p.PLAN_ID = i.PLAN_ID
-    	    LEFT JOIN PRODUCT_MST pr
-    	      ON i.PRD_ID = pr.PRD_ID
-    	    GROUP BY 
-    	        p.PLAN_ID,
-    	        p.CREATED_AT,
-    	        p.STATUS,
-    	        p.PLAN_MEMO
-    	    ORDER BY p.CREATED_AT DESC
+    	   SELECT
+			    p.PLAN_ID            AS planId,
+			    TO_CHAR(p.CREATED_AT, 'YYYY-MM-DD HH24:MI:SS') AS createdAt,
+			    COALESCE(MIN(pr.PRD_NAME), '미정') AS itemName,
+			    COALESCE(p.PLAN_QTY, 0) AS totalQty,
+			    p.STATUS             AS status,
+			    p.PLAN_MEMO          AS memo
+			FROM PRODUCTION_PLAN p
+			LEFT JOIN PRODUCTION_PLAN_ITEM i 
+			  ON p.PLAN_ID = i.PLAN_ID
+			LEFT JOIN PRODUCT_MST pr
+			  ON i.PRD_ID = pr.PRD_ID
+			GROUP BY 
+			    p.PLAN_ID,
+			    p.CREATED_AT,
+			    p.PLAN_QTY,
+			    p.STATUS,
+			    p.PLAN_MEMO
+			ORDER BY p.CREATED_AT DESC
+
     	""", nativeQuery = true)
     	List<ProductionPlanListDTO> findPlanList();
 

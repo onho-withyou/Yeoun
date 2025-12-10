@@ -95,72 +95,92 @@ public class ProductionPlanService {
     /* ================================
         생산계획 생성 (수동)
     ================================ */
-    @Transactional
-    public String createPlan(List<PlanCreateItemDTO> items, String createdBy, String memo) {
+    /* ================================
+    생산계획 생성 (수동, 모달 선택 기반)
+ ================================ */
+@Transactional
+public String createPlan(List<PlanCreateItemDTO> items, String createdBy, String memo) {
 
-        if (items == null || items.isEmpty()) {
-            throw new IllegalArgumentException("생산계획 생성 실패: 선택된 수주 항목이 없습니다.");
-        }
+    if (items == null || items.isEmpty()) {
+        throw new IllegalArgumentException("생산계획 생성 실패: 선택된 수주 항목이 없습니다.");
+    }
 
-        String prdId = null;
-        int totalPlanQty = 0;
-        List<Long> orderItemIdList = new ArrayList<>();
+    String prdId = null;
+    int totalPlanQty = 0;
 
-        for (PlanCreateItemDTO dto : items) {
-            OrderItem oi = orderItemRepository.findById(dto.getOrderItemId())
-                    .orElseThrow(() -> new IllegalArgumentException("OrderItem 없음: " + dto.getOrderItemId()));
+    List<Long> orderItemIdList = new ArrayList<>();
 
-            orderItemIdList.add(oi.getOrderItemId());
+    for (PlanCreateItemDTO dto : items) {
 
-            if (prdId == null) prdId = oi.getPrdId();
-            else if (!prdId.equals(oi.getPrdId()))
-                throw new IllegalArgumentException("생산계획은 동일 제품만 묶어서 생성할 수 있습니다.");
+        OrderItem oi = orderItemRepository.findById(dto.getOrderItemId())
+                .orElseThrow(() -> new IllegalArgumentException("OrderItem 없음: " + dto.getOrderItemId()));
 
-            totalPlanQty += dto.getQty();
-        }
+        // 제품 통일성 체크
+        if (prdId == null) prdId = oi.getPrdId();
+        else if (!prdId.equals(oi.getPrdId()))
+            throw new IllegalArgumentException("생산계획은 동일 제품만 묶어서 생성할 수 있습니다.");
 
-        String planId = generatePlanId();
+        // 프론트에서 선택한 qty 사용
+        int qty = dto.getQty();
+        if (qty <= 0) throw new IllegalArgumentException("잘못된 생산 수량: " + qty);
 
-        // 마스터 생성
-        ProductionPlan plan = ProductionPlan.builder()
+        totalPlanQty += qty;
+        orderItemIdList.add(oi.getOrderItemId());
+    }
+
+    // ================================
+    // PLAN MASTER 생성
+    // ================================
+    String planId = generatePlanId();
+
+    ProductionPlan plan = ProductionPlan.builder()
+            .planId(planId)
+            .prdId(prdId)
+            .planQty(totalPlanQty)
+            .planDate(LocalDate.now())
+            .dueDate(LocalDate.now().plusDays(7))
+            .status(ProductionStatus.PLANNING)
+            .planMemo(memo)
+            .createdBy(createdBy)
+            .build();
+
+    planRepo.save(plan);
+
+
+    // ================================
+    // PLAN DETAIL 생성
+    // ================================
+    for (PlanCreateItemDTO dto : items) {
+
+        OrderItem oi = orderItemRepository.findById(dto.getOrderItemId())
+                .orElseThrow(() -> new IllegalArgumentException("OrderItem 없음: " + dto.getOrderItemId()));
+
+        int qty = dto.getQty(); // ⭐ 선택된 qty 그대로 사용
+
+        ProductionPlanItem detail = ProductionPlanItem.builder()
+                .planItemId(generatePlanItemId())
                 .planId(planId)
                 .prdId(prdId)
-                .planQty(totalPlanQty)
-                .planDate(LocalDate.now())
-                .dueDate(LocalDate.now().plusDays(7))
+                .orderItemId(oi.getOrderItemId())
+                .orderQty(oi.getOrderQty())   // 원 수주 수량은 기록만
+                .planQty(BigDecimal.valueOf(qty)) // ⭐ 실제 생산계획 수량
+                .bomStatus(BomStatus.WAIT)
                 .status(ProductionStatus.PLANNING)
-                .planMemo(memo)
+                .itemMemo("")
                 .createdBy(createdBy)
                 .build();
 
-        planRepo.save(plan);
-
-        // 상세 생성
-        for (PlanCreateItemDTO dto : items) {
-            OrderItem oi = orderItemRepository.findById(dto.getOrderItemId())
-                    .orElseThrow(() -> new IllegalArgumentException("OrderItem 없음: " + dto.getOrderItemId()));
-
-            ProductionPlanItem detail = ProductionPlanItem.builder()
-                    .planItemId(generatePlanItemId())
-                    .planId(planId)
-                    .prdId(prdId)
-                    .orderItemId(oi.getOrderItemId())
-                    .orderQty(oi.getOrderQty())
-                    .planQty(oi.getOrderQty())
-                    .bomStatus(BomStatus.WAIT)
-                    .status(ProductionStatus.PLANNING)
-                    .itemMemo("")
-                    .createdBy(createdBy)
-                    .build();
-
-            itemRepo.save(detail);
-        }
-
-        // OrderItem 상태 변경
-        orderItemIdList.forEach(orderItemRepository::updateStatusToPlanned);
-
-        return planId;
+        itemRepo.save(detail);
     }
+
+
+    // ================================
+    // ORDER ITEM 상태 변경
+    // ================================
+    orderItemIdList.forEach(orderItemRepository::updateStatusToPlanned);
+
+    return planId;
+}
 
     /* ================================
        생산계획 목록 조회

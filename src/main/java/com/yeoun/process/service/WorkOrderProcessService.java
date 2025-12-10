@@ -1,6 +1,7 @@
 package com.yeoun.process.service;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -62,9 +63,16 @@ public class WorkOrderProcessService {
     private final OutboundItemRepository outboundItemRepository;
 
     // =========================================================================
-    // 1. 공정현황 메인 목록
     @Transactional(readOnly = true)
     public List<WorkOrderProcessDTO> getWorkOrderListForStatus() {
+        // 기존에 쓰이던 기본 버전
+        // => "검색조건 없음"으로 호출
+        return getWorkOrderListForStatus(null, null, null, null);
+    }
+    
+    // 1. 공정현황 메인 목록
+    @Transactional(readOnly = true)
+    public List<WorkOrderProcessDTO> getWorkOrderListForStatus(LocalDate workDate, String processName, String status, String keyword) {
 
         // 1) 공정현황 대상이 되는 작업지시 조회 (RELEASE, IN_PROGRESS)
         List<String> statuses = List.of("RELEASED", "IN_PROGRESS");
@@ -73,20 +81,39 @@ public class WorkOrderProcessService {
         if (workOrders.isEmpty()) {
             return List.of();
         }
+        
+        // 날짜 필터: 작성일자(createdDate)를 "작업지시일자"로 사용
+        if (workDate != null) {
+            workOrders = workOrders.stream()
+                    .filter(w -> w.getCreatedDate() != null &&
+                                 w.getCreatedDate().toLocalDate().equals(workDate))
+                    .collect(Collectors.toList());
+        }
+        
+        // 상태 필터: 셀렉트에서 넘어온 status 값과 동일한 것만
+        if (status != null && !status.isBlank()) {
+            workOrders = workOrders.stream()
+                    .filter(w -> status.equals(w.getStatus()))
+                    .collect(Collectors.toList());
+        }
+        
+        if (workOrders.isEmpty()) {
+            return List.of();
+        }
 
         // 작업지시번호 리스트 추출
-        // 정렬
+        // 2) 정렬 (상태 우선순위 + 작업지시번호)
         workOrders.sort(
         	    Comparator.comparing((WorkOrder w) -> statusPriority(w.getStatus()))
         	              .thenComparing(WorkOrder::getOrderId)
     	);
 
-        
+        // 3) 작업지시번호 리스트 추출
         List<String> orderIds = workOrders.stream()
                 .map(WorkOrder::getOrderId)
                 .toList();
 
-        // 2) 모든 공정 데이터를 한 번에 조회 (orderId + stepSeq 순)
+        // 4) 모든 공정 데이터를 한 번에 조회 (orderId + stepSeq 순)
         List<WorkOrderProcess> allProcesses =
                 workOrderProcessRepository.findByWorkOrderOrderIdInOrderByWorkOrderOrderIdAscStepSeqAsc(orderIds);
 
@@ -94,7 +121,7 @@ public class WorkOrderProcessService {
         Map<String, List<WorkOrderProcess>> processMap = allProcesses.stream()
                 .collect(Collectors.groupingBy(p -> p.getWorkOrder().getOrderId()));
 
-        // 3) 모든 QC 결과를 한 번에 조회
+        // 5) 모든 QC 결과를 한 번에 조회
         List<QcResult> allQcResults = qcResultRepository.findByOrderIdIn(orderIds);
 
         Map<String, QcResult> qcMap = allQcResults.stream()
@@ -104,8 +131,8 @@ public class WorkOrderProcessService {
                         (q1, q2) -> q1 // 중복 시 첫 번째 사용
                 ));
 
-        // 4) 각 작업지시를 공정현황 DTO로 변환
-        return workOrders.stream()
+        // 6) 각 작업지시를 공정현황 DTO로 변환
+        List<WorkOrderProcessDTO> dtoList = workOrders.stream()
                 .map(w -> {
                     List<WorkOrderProcess> processes =
                             processMap.getOrDefault(w.getOrderId(), List.of());
@@ -113,6 +140,31 @@ public class WorkOrderProcessService {
                     return toProcessSummaryDto(w, processes, qcResult);
                 })
                 .collect(Collectors.toList());
+        
+        // 7) 현재공정 필터 (DTO 단)
+        if (processName != null && !processName.isBlank()) {
+            dtoList = dtoList.stream()
+                    .filter(dto -> processName.equals(dto.getCurrentProcess()))
+                    .toList();
+        }
+        
+        // 8) 검색어 필터 (작업지시번호 / 제품ID / 제품명)
+        if (keyword != null && !keyword.isBlank()) {
+            String kw = keyword.toLowerCase();
+
+            dtoList = dtoList.stream()
+                    .filter(dto ->
+                            (dto.getOrderId() != null &&
+                             dto.getOrderId().toLowerCase().contains(kw))
+                         || (dto.getPrdId() != null &&
+                             dto.getPrdId().toLowerCase().contains(kw))
+                         || (dto.getPrdName() != null &&
+                             dto.getPrdName().toLowerCase().contains(kw))
+                    )
+                    .toList();
+        }
+
+        return dtoList;
     }
     
     private int statusPriority(String status) {
@@ -524,38 +576,49 @@ public class WorkOrderProcessService {
         // -----------------------------
         // 4) LOT_RELATIONSHIP 생성
         // -----------------------------
-//        createLotRelationshipForOrder(orderId, lotNo);
+        createLotRelationshipForOrder(orderId, lotNo);
     }
 
     /**
      * 해당 작업지시(orderId)로 출고된 원자재 LOT들을 조회하여
      * LOT_RELATIONSHIP(OUTPUT_LOT = 생산 LOT, INPUT_LOT = 원자재 LOT)을 생성
      */
-//    private void createLotRelationshipForOrder(String orderId, String outputLotNo) {
-//
-//        // 1) 생산 LOT 조회
-//        LotMaster outputLot = lotMasterRepository.findByLotNo(outputLotNo)
-//                .orElseThrow(() -> new IllegalArgumentException("생산 LOT 없음: " + outputLotNo));
-//
-//        // 2) 이 작업지시에 출고된 원자재 출고 아이템 조회
-//        List<OutboundItem> items =
-//                outboundItemRepository.findByOutbound_WorkOrderIdAndItemType(orderId, "RAW");
-//
-//        for (OutboundItem item : items) {
-//
-//            // 원자재 LOT 조회 (OUTBOUND_ITEM.LOT_NO 기준)
-//            LotMaster inputLot = lotMasterRepository.findByLotNo(item.getLotNo())
-//                    .orElseThrow(() -> new IllegalArgumentException("원자재 LOT 없음: " + item.getLotNo()));
-//
-//            // 관계 엔티티 생성
-//            LotRelationship rel = new LotRelationship();
-//            rel.setOutputLot(outputLot);                          // 부모 LOT = 생산 LOT
-//            rel.setInputLot(inputLot);                            // 자식 LOT = 원자재 LOT
-//            rel.setUsedQty(item.getOutboundAmount().intValue());  // 사용 수량
-//
-//            lotRelationshipRepository.save(rel);
-//        }
-//    }
+    private void createLotRelationshipForOrder(String orderId, String outputLotNo) {
+
+        // 1) 생산 LOT 조회
+        LotMaster outputLot = lotMasterRepository.findByLotNo(outputLotNo)
+                .orElseThrow(() -> new IllegalArgumentException("생산 LOT 없음: " + outputLotNo));
+
+        // 2) 이 작업지시에 출고된 자재 전체 조회 (RAW, SUB, PKG 다 포함)
+        List<String> materialTypes = List.of("RAW", "SUB", "PKG");
+
+        List<OutboundItem> items =
+                outboundItemRepository.findByOutbound_WorkOrderIdAndItemTypeIn(orderId, materialTypes);
+
+        // 3) LOT별 사용 수량 합산 (같은 LOT이 여러 번 출고된 경우)
+        Map<String, Long> usedQtyByLot = items.stream()
+                .collect(Collectors.groupingBy(
+                        OutboundItem::getLotNo,
+                        Collectors.summingLong(OutboundItem::getOutboundAmount)
+                ));
+
+        // 4) LOT 관계 생성
+        for (Map.Entry<String, Long> entry : usedQtyByLot.entrySet()) {
+
+            String inputLotNo = entry.getKey();
+            long usedQty = entry.getValue();
+
+            LotMaster inputLot = lotMasterRepository.findByLotNo(inputLotNo)
+                    .orElseThrow(() -> new IllegalArgumentException("원자재 LOT 없음: " + inputLotNo));
+
+            LotRelationship rel = new LotRelationship();
+            rel.setOutputLot(outputLot);                 // 완제품 LOT (부모)
+            rel.setInputLot(inputLot);                   // 투입 LOT (자식)
+            rel.setUsedQty((int) usedQty);               // 여러 번 출고된 건도 합산된 수량으로 저장
+
+            lotRelationshipRepository.save(rel);
+        }
+    }
 
 
 	/**
@@ -688,4 +751,5 @@ public class WorkOrderProcessService {
 
         return dto;
     }
+
 }
