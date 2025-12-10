@@ -221,6 +221,26 @@ grid1.on('beforeChange', (ev) => {
 	    }
 });
 
+
+grid2.on('beforeChange', (ev) => {
+    const { rowKey, columnName } = ev.changes[0]; // 변경된 데이터 목록 (배열)
+	if (columnName === 'itemId') {
+	        // 💡 핵심 수정: rowKey 대신, 현재 행의 'prdId' 값을 가져옵니다.
+	        const itemIdValue = grid2.getValue(rowKey, 'itemId');
+	        
+	        // itemId 값이 비어있거나 null, undefined인 경우를 '새 행'으로 간주합니다.
+	        const isNewRow = !itemIdValue; 
+
+	        console.log("itemId 값:", itemIdValue," | isNewRow:", isNewRow);
+
+	        // 기존 행일 경우 (isNewRow가 false, 즉 itemIdValue가 있는 경우)
+	        if (!isNewRow) {
+	            ev.stop(); // 편집 모드 진입 차단
+	            alert('기존 품목코드는 수정할 수 없습니다.'); 
+	        }
+	    }
+});
+
 //bom그리드 전체조회
 function bomGridAllSearch() {
 
