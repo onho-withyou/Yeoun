@@ -9,7 +9,6 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryDTO;
 import com.yeoun.inventory.entity.Inventory;
 import com.yeoun.inventory.repository.InventoryRepository;
@@ -232,23 +231,31 @@ public class OutboundService {
 			inventoryService.registInventoryHistory(inventoryHistoryDTO);
 			
 			// ----------------------------------------
+			// LOT 이력 남기기
+			String eventType = "RM_ISSUE";
+			String status = "ISSUED";
+			String orderId = outboundOrderDTO.getWorkOrderId();
+			
 			if ("FG".equals(outboundOrderDTO.getType())) {
 				
-				// lotHistory 생성
-				LotHistoryDTO historyDTO = LotHistoryDTO.builder()
-						.lotNo(item.getLotNo())
-						.orderId(outboundOrderDTO.getWorkOrderId())
-						.processId("")
-						.eventType("RM_ISSUE")
-						.status("ISSUED")
-						.locationType("WH")
-						.locationId("WH-" + stock.getWarehouseLocation().getLocationId())
-						.quantity(outboundQty.intValue())
-						.workedId(empId)
-						.build();
-				
-				lotTraceService.registLotHistory(historyDTO);
+				eventType = "FG_SHIP";
+				status = "SHIPPED";
+				orderId = "";
 			}
+			// lotHistory 생성
+			LotHistoryDTO historyDTO = LotHistoryDTO.builder()
+					.lotNo(item.getLotNo())
+					.orderId(orderId)
+					.processId("")
+					.eventType(eventType)
+					.status(status)
+					.locationType("WH")
+					.locationId("WH-" + stock.getWarehouseLocation().getLocationId())
+					.quantity(outboundQty.intValue())
+					.workedId(empId)
+					.build();
+			
+			lotTraceService.registLotHistory(historyDTO);
 			
 			// 재고 수량이 0이면 삭제
 			if (stock.getIvAmount() == 0) {
@@ -256,10 +263,7 @@ public class OutboundService {
 			} else {
 				inventoryRepository.save(stock);
 			}
-			
-
 		}
-		
 		// 원재료 출고일 경우
 		if ("MAT".equals(outboundOrderDTO.getType())) {
 		WorkOrder workOrder = workOrderRepository.findByOrderId(outboundOrderDTO.getWorkOrderId())
