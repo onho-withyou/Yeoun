@@ -83,10 +83,19 @@ document.addEventListener('DOMContentLoaded', async function () {
 	todayOutboundCompleteEl.innerHTML = `<i class='bx bx-down-arrow-alt'></i> 처리 : ${ObCompleteCnt}`
 
 	// 출고등록 필요한 작업지시서 표시
-	renderOrderGrid();
+	await renderOrderGrid();
 	// 출고등록 필요한 출하지시서 표시\
-	renderShipmentGrid();
+	await renderShipmentGrid();
 	// 하나라도 있으면 div 표시
+	// 그리드 보이는 카드
+	const cardEl = document.getElementById('outboundNOrderCard');
+	if(islistOn) {
+		cardEl.style.display = 'block';
+		console.log(islistOn,"!!!!!!!!!!!!!!");
+	} else {
+		cardEl.style.display = 'none';
+		console.log(islistOn,"@@@@@@@@@@@");
+	}
 
 		
 	//발주 필요 수량 표시
@@ -431,19 +440,19 @@ function onChartTypeClick(event) {
 
 // -----------------------------------------------------------------------
 // 출고지시 안된 작업지시서 그리드
-function renderOrderGrid() {
+async function renderOrderGrid() {
+	// 출고지시안된 작업지시서, 출하지시서 체크 함수 
+	islistOn = false;
 	// 출고등록안한 작업지시서데이터	
 	const outboundNList = orderData.filter(order => {
 		return order.outboundYn === 'N';
 	});
 	
 	// 그리드 보이는 카드
-	const cardEl = document.getElementById('outboundNOrderCard');
-	
 	if(outboundNList.length === 0) {
-		islistOn = false;
 		return;
 	}
+	
 	islistOn = true;	
 	
 	const gridEl = document.getElementById('outboundNOrderGrid');
@@ -539,12 +548,6 @@ async function initOutboundModalByRow(rowData) {
 	const changeEvent = new Event("change");
 	matObWorkOrderSelect.dispatchEvent(changeEvent);
 	
-	const cardEl = document.getElementById('outboundNOrderCard')
-	if(islistOn) {
-		cardEl.style.display = none;
-	} else {
-		cardEl.style.display = block;
-	}
 }
 
 // -------------------------------------------------------------------
@@ -555,14 +558,12 @@ async function renderShipmentGrid() {
 //		shipment.
 //	})
 	// 그리드 보이는 카드
-
 	if(shipmentData.length === 0) {
-		islistOn = false;
 		return;
 	}
 	islistOn = true;
 
-		const gridEl = document.getElementById('outboundShipmentGrid');
+	const gridEl = document.getElementById('outboundShipmentGrid');
 	const Grid = tui.Grid;
 
 	if (outboundShipmentGrid) outboundShipmentGrid.destroy();
@@ -661,13 +662,6 @@ async function initShipmentModalByRow(rowData) {
 	const changeEvent = new Event("change");
 	shipmentSelect.dispatchEvent(changeEvent);
 //	renderProductList(shipOrder.items);
-	
-	const cardEl = document.getElementById('outboundNOrderCard')
-	if(islistOn) {
-		cardEl.style.display = "none";
-	} else {
-		cardEl.style.display = "block";
-	}
 }
 
 // ------------------------------------------------------------------

@@ -58,6 +58,7 @@ shipmentSelect.addEventListener("focus", async () => {
 });
 
 shipmentSelect.addEventListener("change", async () => {
+	console.log("change 실행")
 	const shipId = shipmentSelect.value;
 	
 	if (!shipId) return;
@@ -135,6 +136,8 @@ const submitPrdOutbound = async () => {
 		type: "FG",
 		items
 	};
+	
+	console.log(payload, "페이;로드 출력");
 	
 	const res = await fetch("/inventory/outbound/fg/regist", {
 		method: "POST",
