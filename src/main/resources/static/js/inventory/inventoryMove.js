@@ -34,14 +34,11 @@ function resetMoveModal() {
 // 재고이동 모달 열기
 function openMoveModal(rowData) {
 	resetMoveModal();
-//	console.log(rowData);
+	
 	document.getElementById('ivQtyMove').value = rowData.ivAmount;
 	document.getElementById('exPectObQtyMove').value = rowData.expectObAmount;
 	// 이동가능 수량 전역변수 지정
 	document.getElementById('canMoveAmount').value = canUseQty; 
-	
-	console.log(canUseQty);
-
 	
 	// 이동물량 제한 (1~이동가능수량)
 	const moveQty = document.getElementById('moveQty');
@@ -230,7 +227,7 @@ btnMove.addEventListener('click', async () => {
 				moveAmount: moveQty
 			})
 		});
-	//	console.log(response);
+		
 	if (!response.ok) {
 		throw new Error('재고이동에 실패하였습니다.')
 	}
