@@ -49,8 +49,20 @@ public class LotMaster {
 	private String orderId;
 	
 	// 제품 ID
-	@Column(nullable = false)
+	@Column(name = "PRD_ID", nullable = false)
 	private String prdId;
+	
+	// 완제품(Product) 조인 - prdId가 제품 코드일 때만 매칭됨
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "PRD_ID", insertable = false, updatable = false)
+	@NotFound(action = NotFoundAction.IGNORE)
+	private ProductMst product;
+
+	// 원자재(Material) 조인 - prdId가 원자재 코드일 때만 매칭됨
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "PRD_ID", insertable = false, updatable = false)
+	@NotFound(action = NotFoundAction.IGNORE)
+	private MaterialMst material;
 	
 	// 현재수량
 	@Column(name = "QUANTITY", nullable = true)
