@@ -2,14 +2,17 @@ package com.yeoun.lot.service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.dto.LotMasterDTO;
+import com.yeoun.lot.dto.LotRootDTO;
 import com.yeoun.lot.entity.LotHistory;
 import com.yeoun.lot.entity.LotMaster;
 import com.yeoun.lot.repository.LotHistoryRepository;
@@ -17,7 +20,6 @@ import com.yeoun.lot.repository.LotMasterRepository;
 import com.yeoun.masterData.entity.ProcessMst;
 import com.yeoun.masterData.repository.ProcessMstRepository;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -96,4 +98,46 @@ public class LotTraceService {
 			nextSeq
 		);
 	}
-}
+	
+	// ================================================================================
+	// [LOT 추적 1단계]
+	// 완제품 LOT(FIN) 목록 조회
+	@Transactional(readOnly = true)
+	public List<LotRootDTO> getFinishedLots() {
+		
+		// 1) FIN LOT 목록 조회
+		List<LotMaster> lots = 
+				lotMasterRepository.findByLotTypeOrderByCreatedDateDesc("FIN");
+		
+		return lots.stream()
+	            .map(lm -> new LotRootDTO(
+	                    lm.getLotNo(),
+	                    lm.getDisplayName(),
+	                    lm.getCurrentStatus()
+	            ))
+	            .toList();
+	}
+	
+	// [LOT 추적] 오른쪽 상세 카드에 표시할 LOT 기본 정보 조회
+	@Transactional(readOnly = true)
+    public LotMaster getLotDetail(String lotNo) {
+
+        return lotMasterRepository.findByLotNo(lotNo)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("LOT_MASTER에 존재하지 않는 LOT : " + lotNo));
+    }
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+} // LotTraceService 끝
