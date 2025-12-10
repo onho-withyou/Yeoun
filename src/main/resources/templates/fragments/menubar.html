@@ -163,7 +163,7 @@
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a th:href="@{/masterData/equipment_line}" class="menu-link" target="_blank">
+                        <a th:href="@{/equipment/master}" class="menu-link" target="_blank">
                             <div data-i18n="Equipment/Line" class="menu-link-sub">설비/라인관리</div>
                         </a>
                     </li>
@@ -265,11 +265,25 @@
                             <div data-i18n="Menu3" class="menu-link-sub">작업자메뉴</div>
                         </a>
                     </li>
-                    <!--<li class="menu-item" sec:authorize="isAuthenticated()">
-                        <a th:href="@{/order/line}" class="menu-link">
-                            <div data-i18n="Menu4" class="menu-link-sub">라인현황</div>
-                        </a>
-                    </li>-->
+                </ul>
+            </li>
+            
+            <!-- 설비 관리 -->
+            <li class="menu-item">
+            	<a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <div data-i18n="Equipment management">설비관리</div>
+                </a>
+                <ul class="menu-sub">
+	                <li class="menu-item" sec:authorize="isAuthenticated()">
+	                   <a th:href="@{/equipment/list}" class="menu-link">
+	                       <div data-i18n="Menu1" class="menu-link-sub">설비현황</div>
+	                   </a>
+	                </li>
+	                <li class="menu-item" sec:authorize="isAuthenticated()">
+	                   <a th:href="@{/equipment/line}" class="menu-link">
+	                       <div data-i18n="Menu2" class="menu-link-sub">라인현황</div>
+	                   </a>
+	                </li>
                 </ul>
             </li>
             
