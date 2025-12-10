@@ -39,7 +39,7 @@ public class WorkOrderProcessController {
 	// 공정 현황 목록 데이터
 	@GetMapping("/status/data")
 	@ResponseBody
-	public List<WorkOrderProcessDTO> getWorkOrdersForGrid(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate workDate,
+	public List<WorkOrderProcessDTO> getWorkOrdersForGrid(@RequestParam(name = "workDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate workDate,
 														  @RequestParam(name = "searchProcess", required = false) String processId,
 														  @RequestParam(name = "searchHStatus", required = false) String status,
 														  @RequestParam(name = "searchKeyword", required = false) String keyword) {

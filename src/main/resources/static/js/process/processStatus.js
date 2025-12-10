@@ -147,18 +147,18 @@ document.addEventListener("DOMContentLoaded", () => {
 // -------------------------------
 function loadProcessGrid() {
   const workDate      = document.getElementById("workDate")?.value || "";
-  const searchProduct = document.getElementById("searchProduct")?.value || "";
+  const searchProcess = document.getElementById("searchProcess")?.value || "";
   const searchHStatus = document.getElementById("searchHStatus")?.value || "";
   const searchKeyword = document.getElementById("searchKeyword")?.value || "";
+  
+  const params = new URLSearchParams();
 
-  const query = new URLSearchParams({
-    workDate,
-    prdId: searchProduct,
-    status: searchHStatus,
-    keyword: searchKeyword
-  });
+  if (workDate)      params.append("workDate", workDate);             // LocalDate workDate
+  if (searchProcess) params.append("searchProcess", searchProcess);   // String processName
+  if (searchHStatus) params.append("searchHStatus", searchHStatus);   // String status
+  if (searchKeyword) params.append("searchKeyword", searchKeyword);   // String keyword
 
-  fetch("/process/status/data?" + query.toString())
+  fetch("/process/status/data?" + params.toString())
     .then((res) => {
       if (!res.ok) {
         throw new Error("HTTP " + res.status);
