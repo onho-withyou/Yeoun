@@ -24,9 +24,6 @@ public interface ProductionPlanItemRepository extends JpaRepository<ProductionPl
     
     List<ProductionPlanItem> findByPlanId(String planId);
     
-    // 같은 계획(planId) 아래, DONE이 아닌 애들이 아직 있는지 체크
-    boolean existsByPlanIdAndStatusNot(String planId, ProductionStatus status);
-    
     //제품이 모두 done상태만 예약하기
     
     @Query("""
