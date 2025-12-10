@@ -26,7 +26,7 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, String> {
             FROM WORK_ORDER w
             WHERE w.PLAN_ID = :planId
     """, nativeQuery = true)
-	Integer sumWorkOrderQty(String planId);
+	Integer sumWorkOrderQty(@Param("planId")String planId);
 
 	// 출고 상태가 'N'인 작업지시서 조회
 	List<WorkOrder> findByOutboundYn(String outboundYn);

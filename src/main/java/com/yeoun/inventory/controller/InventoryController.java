@@ -31,4 +31,10 @@ public class InventoryController {
     public String stockTake() {
         return "inventory/stock_take";
     }
+    
+    // 창고 시각화(샘플 화면)
+    @GetMapping("/warehouse")
+    public String warehouse() {
+    	return "inventory/warehouse";
+    }
 }
