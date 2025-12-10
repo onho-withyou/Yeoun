@@ -68,19 +68,19 @@ const grid1 = new Grid({
       rowHeaders: ['rowNum','checkbox'],
 	  columns: [
 
-	    {header: 'BOMId' ,name: 'bomId' ,align: 'center',editor: 'text'
+	    {header: 'BOMId' ,name: 'bomId' ,align: 'center',editor: 'text',filter: "select"
 			,renderer:{ type: StatusModifiedRenderer}	
 		}
-		,{header: '완제품 id' ,name: 'prdId' ,align: 'center',editor: 'text'
+		,{header: '완제품 id' ,name: 'prdId' ,align: 'center',editor: 'text',filter: "select"
 			,renderer:{ type: StatusModifiedRenderer}	
 		}
 		,{header: '원재료 id' ,name: 'matId' ,align: 'center',editor: 'text',width: 230
 			,renderer:{ type: StatusModifiedRenderer}	
 		}
-		,{header: '원재료 사용량' ,name: 'matQty' ,align: 'center',editor: 'text',filter: "select"
+		,{header: '원재료 사용량' ,name: 'matQty' ,align: 'center',editor: 'text'
 			,renderer:{ type: StatusModifiedRenderer}	
 		}
-		,{header: '단위' ,name: 'matUnit' ,align: 'center',editor: 'text'
+		,{header: '단위' ,name: 'matUnit' ,align: 'center',editor: 'text',filter: "select"
 			,renderer:{ type: StatusModifiedRenderer}
 			,editor: {
 				type: 'select', // 드롭다운 사용
@@ -97,8 +97,8 @@ const grid1 = new Grid({
 		,{header: '순서' ,name: 'bomSeqNo' ,align: 'center',editor: 'text'
 			,renderer:{ type: StatusModifiedRenderer}	
 		}
-		,{header: '생성자ID' ,name: 'createdId' ,align: 'center',editor: 'text'}
-		,{header: '생성일자' ,name: 'createdDate' ,align: 'center',editor: 'text'}
+		,{header: '생성자ID' ,name: 'createdId' ,align: 'center'}
+		,{header: '생성일자' ,name: 'createdDate' ,align: 'center'}
 		,{header: '수정자ID' ,name: 'updatedId' ,align: 'center'}
 		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}           
 	  ]
@@ -198,6 +198,27 @@ const grid2 = new Grid({
 	    		useClient: true,
 	    		perPage: 20
 	  	  }
+});
+
+
+grid1.on('beforeChange', (ev) => {
+    const { rowKey, columnName } = ev.changes[0]; // 변경된 데이터 목록 (배열)
+	if (columnName === 'prdId' || columnName === 'matId') {
+	        // 💡 핵심 수정: rowKey 대신, 현재 행의 'prdId' 값을 가져옵니다.
+	        const prdIdValue = grid1.getValue(rowKey, 'prdId');
+			const matIdValue = grid1.getValue(rowKey, 'matId');
+	        
+	        // prdId 값이 비어있거나 null, undefined인 경우를 '새 행'으로 간주합니다.
+	        const isNewRow = !prdIdValue || !matIdValue; 
+
+	        console.log("prdId 값:", prdIdValue,"matId 값:",matIdValue, " | isNewRow:", isNewRow);
+
+	        // 기존 행일 경우 (isNewRow가 false, 즉 prdIdValue가 있는 경우)
+	        if (!isNewRow) {
+	            ev.stop(); // 편집 모드 진입 차단
+	            alert('기존 품번,원재료Id는 수정할 수 없습니다.'); 
+	        }
+	    }
 });
 
 //bom그리드 전체조회

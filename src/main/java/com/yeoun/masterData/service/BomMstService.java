@@ -1,13 +1,17 @@
 package com.yeoun.masterData.service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.masterData.entity.BomMst;
 import com.yeoun.masterData.entity.MaterialMst;
+import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.masterData.mapper.BomMstMapper;
 import com.yeoun.masterData.repository.BomMstRepository;
 import com.yeoun.outbound.dto.OutboundOrderItemDTO;
@@ -40,38 +44,57 @@ public class BomMstService {
 				List<Map<String,Object>> created = (List<Map<String,Object>>) createdObj;
 				for (Map<String,Object> row : created) {
 					BomMst b = mapToBom(row);
-					// server-side validation: matQty must not be null
 					if (b.getMatQty() == null) {
 						throw new IllegalArgumentException("matQty is required for BOM row (prdId=" + b.getPrdId() + ", matId=" + b.getMatId() + ")");
 					}
 					b.setCreatedId(empId);
+					b.setCreatedDate(LocalDate.now());
 					bomMstRepository.save(b);
 					createdCount++;
 				}
 			}
-			// // updatedRows handling if needed (kept simple)
-			// Object updatedObj = param.get("updatedRows");
-			// if (updatedObj instanceof List) {
-			// 	@SuppressWarnings("unchecked")
-			// 	List<Map<String,Object>> updated = (List<Map<String,Object>>) updatedObj;
-			// 	for (Map<String,Object> row : updated) {
-			// 		Object prdObj = row.get("prdId");
-			// 		Object matObj = row.get("matId");
-			// 		if (prdObj != null && matObj != null) {
-			// 			String prdId = String.valueOf(prdObj);
-			// 			String matId = String.valueOf(matObj);
-			// 			bomMstRepository.findByPrdIdAndMatId(prdId, matId).ifPresent(existing -> {
-			// 				BomMst b = mapToBom(row);
-			// 				if (b.getMatQty() == null) {
-			// 					throw new IllegalArgumentException("matQty is required for BOM row (prdId=" + b.getPrdId() + ", matId=" + b.getMatId() + ")");
-			// 				}
-			// 				b.setBomId(existing.getBomId());
-			// 				b.setCreatedId(existing.getCreatedId());
-			// 				bomMstRepository.save(b);
-			// 			});
-			// 		}
-			// 	}
-			// }
+			
+			// updatedRows
+			Object updatedObj = param.get("updatedRows");
+			if (updatedObj instanceof List) {
+				@SuppressWarnings("unchecked")
+				List<Map<String,Object>> updated = (List<Map<String,Object>>) updatedObj;
+				List<String> missingIds = new ArrayList<>();
+				for (Map<String,Object> row : updated) {
+					Object prdIdObj = row.get("prdId");
+					Object matIdObj = row.get("matId");
+					String prdId = (prdIdObj == null) ? "" : String.valueOf(prdIdObj).trim();
+					String matId = (matIdObj == null) ? "" : String.valueOf(matIdObj).trim();
+	
+					BomMst target = null;
+					if (!prdId.isEmpty()) {
+						Optional<BomMst> opt = bomMstRepository.findByPrdIdAndMatId(prdId,matId);
+						if (opt.isPresent()) target = opt.get();
+					}
+	
+					if (target != null) {
+						// 기존 레코드 업데이트
+						BomMst p = mapToBom(row);
+						p.setCreatedId(row.get("createdId").toString());
+						p.setCreatedDate(LocalDate.parse(row.get("createdDate").toString()));
+						p.setUpdatedId(empId);
+						p.setUpdatedDate(LocalDate.now());
+						bomMstRepository.save(p);
+					} else {
+						// 존재하지 않는 prdId,matId가 명시된 경우: PK 변경 시 의도치 않은 insert를 막기 위해 에러 처리
+						if (!prdId.isEmpty() || !matId.isEmpty()) {
+							missingIds.add(prdId);
+							continue;
+						}
+						// prdId가 비어있고 매칭되는 기존 레코드가 없으면 새로 저장 (신규 추가 케이스)
+						BomMst p = mapToBom(row);
+						p.setCreatedId(empId);
+						bomMstRepository.save(p);
+					}
+				}
+			 	
+			}
+			
 			// Force flush so DB constraint errors occur inside try/catch and we can return meaningful message
 			bomMstRepository.flush();
 			return "Success: BOM 저장이 완료되었습니다. (created=" + createdCount + ")";
