@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "SHIPMENT_ITEM")
-public class ShipmentLot {
+public class ShipmentItem {
 
     // 1) 출하 LOT ID (PK)
     @Id

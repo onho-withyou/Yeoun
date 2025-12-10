@@ -5,7 +5,9 @@ import com.yeoun.sales.entity.Shipment;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ShipmentRepository extends JpaRepository<Shipment, String> {
 
@@ -23,4 +25,15 @@ public interface ShipmentRepository extends JpaRepository<Shipment, String> {
 
     // shipmentId로 조회
 	Optional<Shipment> findByShipmentId(String shipmentId);
+	
+	
+	//출하 예약 처리
+	@Modifying
+	@Query("""
+	    UPDATE Shipment s
+	    SET s.shipmentStatus = 'RESERVED'
+	    WHERE s.shipmentId = :shipmentId
+	""")
+	    void updateStatusToReserved(String shipmentId);
+
 }
