@@ -370,10 +370,6 @@ public class OrderService {
 	}
 	
 	// =======================================================
-	// 출고여부 체크
-	public 
-	
-	// =======================================================
 	// 작업지시 확정
 	@Transactional
 	public void modifyOrderStatus(String id) {
