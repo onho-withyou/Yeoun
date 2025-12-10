@@ -1,6 +1,7 @@
 package com.yeoun.production.repository;
 
 import com.yeoun.production.entity.ProductionPlanItem;
+import com.yeoun.production.enums.ProductionStatus;
 
 import java.util.List;
 
@@ -22,4 +23,7 @@ public interface ProductionPlanItemRepository extends JpaRepository<ProductionPl
     
     
     List<ProductionPlanItem> findByPlanId(String planId);
+    
+    // 같은 계획(planId) 아래, DONE이 아닌 애들이 아직 있는지 체크
+    boolean existsByPlan_PlanIdAndStatusNot(String planId, ProductionStatus status);
 }
