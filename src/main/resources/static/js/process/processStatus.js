@@ -147,18 +147,18 @@ document.addEventListener("DOMContentLoaded", () => {
 // -------------------------------
 function loadProcessGrid() {
   const workDate      = document.getElementById("workDate")?.value || "";
-  const searchProduct = document.getElementById("searchProduct")?.value || "";
+  const searchProcess = document.getElementById("searchProcess")?.value || "";
   const searchHStatus = document.getElementById("searchHStatus")?.value || "";
   const searchKeyword = document.getElementById("searchKeyword")?.value || "";
+  
+  const params = new URLSearchParams();
 
-  const query = new URLSearchParams({
-    workDate,
-    prdId: searchProduct,
-    status: searchHStatus,
-    keyword: searchKeyword
-  });
+  if (workDate)      params.append("workDate", workDate);             // LocalDate workDate
+  if (searchProcess) params.append("searchProcess", searchProcess);   // String processName
+  if (searchHStatus) params.append("searchHStatus", searchHStatus);   // String status
+  if (searchKeyword) params.append("searchKeyword", searchKeyword);   // String keyword
 
-  fetch("/process/status/data?" + query.toString())
+  fetch("/process/status/data?" + params.toString())
     .then((res) => {
       if (!res.ok) {
         throw new Error("HTTP " + res.status);
@@ -177,6 +177,139 @@ function loadProcessGrid() {
     });
 }
 
+// 상세 요약 + 단계 테이블 렌더링 공통 함수
+function renderProcessDetail(detail) {
+  const summary = detail.wop;
+  const steps   = detail.steps || [];
+
+  // 1) 상단 요약
+  const summaryEl = document.getElementById("summaryGrid");
+  summaryEl.innerHTML = `
+    <div class="col-md-3">
+      <div class="text-muted">작업지시번호</div>
+      <div class="fw-semibold">${summary.orderId}</div>
+    </div>
+    <div class="col-md-3">
+      <div class="text-muted">제품명</div>
+      <div class="fw-semibold">${summary.prdName}</div>
+    </div>
+    <div class="col-md-3">
+      <div class="text-muted">품번</div>
+      <div class="fw-semibold">${summary.prdId}</div>
+    </div>
+    <div class="col-md-3">
+      <div class="text-muted">계획수량</div>
+      <div class="fw-semibold">${summary.planQty}</div>
+    </div>
+  `;
+
+  // 2) 공정 단계 테이블
+  const tbody = document.querySelector("#stepTable tbody");
+  tbody.innerHTML = "";
+
+  if (steps.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="10" class="text-center text-muted py-4">
+          공정 단계 정보가 없습니다.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  steps.forEach((step) => {
+    const tr = document.createElement("tr");
+
+    // 상태 뱃지
+    let statusBadge = "-";
+    if (step.status === "READY") {
+      statusBadge = `<span class="badge bg-label-secondary">대기</span>`;
+    } else if (step.status === "IN_PROGRESS") {
+      statusBadge = `<span class="badge bg-label-warning text-dark">진행중</span>`;
+    } else if (step.status === "DONE") {
+      statusBadge = `<span class="badge bg-label-success">완료</span>`;
+    }
+
+    // 버튼
+    let workBtnHtml = "";
+
+    if (step.processId === "PRC-QC") {
+      // QC 공정
+      if (step.status === "DONE") {
+        workBtnHtml = '<span class="text-muted">완료</span>';
+      } else if (step.canStart) {
+        workBtnHtml = `
+          <button type="button"
+                  class="btn btn-outline-info btn-sm btn-qc-regist"
+                  data-order-id="${summary.orderId}">
+            QC 등록
+          </button>
+        `;
+      } else {
+        workBtnHtml = '<span class="text-muted">대기</span>';
+      }
+    } else {
+      // 일반 공정
+      if (step.canStart) {
+        workBtnHtml += `
+          <button type="button"
+                  class="btn btn-primary btn-sm btn-step-start"
+                  data-order-id="${summary.orderId}"
+                  data-step-seq="${step.stepSeq}">
+            시작
+          </button>
+        `;
+      }
+      if (step.canFinish) {
+        workBtnHtml += `
+          <button type="button"
+                  class="btn btn-success btn-sm btn-step-finish ms-1"
+                  data-order-id="${summary.orderId}"
+                  data-step-seq="${step.stepSeq}">
+            종료
+          </button>
+        `;
+      }
+      if (!step.canStart && !step.canFinish) {
+        if (step.status === "DONE") {
+          workBtnHtml = '<span class="text-muted">완료</span>';
+        } else if (step.status === "READY") {
+          workBtnHtml = '<span class="text-muted">대기</span>';
+        } else {
+          workBtnHtml = "-";
+        }
+      }
+    }
+
+    const memoInputHtml = `
+      <input type="text"
+             class="form-control form-control-sm step-memo-input"
+             data-order-id="${summary.orderId}"
+             data-step-seq="${step.stepSeq}"
+             value="${step.memo ? step.memo : ""}">
+    `;
+
+    tr.innerHTML = `
+      <td>${step.stepSeq}</td>
+      <td>${step.processId}</td>
+      <td>
+        <span class="badge rounded-pill bg-label-primary">
+          ${step.processName}
+        </span>
+      </td>
+      <td>${statusBadge}</td>
+      <td>${formatDateTime(step.startTime)}</td>
+      <td>${formatDateTime(step.endTime)}</td>
+      <td>${workBtnHtml}</td>
+      <td>${memoInputHtml}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+}
+
+
 // -------------------------------
 // 상세 모달 열기
 // -------------------------------
@@ -189,142 +322,8 @@ function openDetailModal(orderId) {
     .then((data) => {
       console.log("공정 상세 데이터:", data);
 
-      const summary = data.wop;
-      const steps   = data.steps || [];
-
-      // 1) 상단 요약
-      const summaryEl = document.getElementById("summaryGrid");
-      summaryEl.innerHTML = `
-        <div class="col-md-3">
-          <div class="text-muted">작업지시번호</div>
-          <div class="fw-semibold">${summary.orderId}</div>
-        </div>
-        <div class="col-md-3">
-          <div class="text-muted">제품명</div>
-          <div class="fw-semibold">${summary.prdName}</div>
-        </div>
-        <div class="col-md-3">
-          <div class="text-muted">품번</div>
-          <div class="fw-semibold">${summary.prdId}</div>
-        </div>
-        <div class="col-md-3">
-          <div class="text-muted">계획수량</div>
-          <div class="fw-semibold">${summary.planQty}</div>
-        </div>
-      `;
-
-      // 2) 공정 단계 테이블
-      const tbody = document.querySelector("#stepTable tbody");
-      tbody.innerHTML = "";
-
-      if (steps.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="10" class="text-center text-muted py-4">
-              공정 단계 정보가 없습니다.
-            </td>
-          </tr>
-        `;
-      } else {
-        steps.forEach((step) => {
-          const tr = document.createElement("tr");
-
-          // 상태 뱃지
-          let statusBadge = "-";
-          if (step.status === "READY") {
-            statusBadge = `<span class="badge bg-label-secondary">대기</span>`;
-          } else if (step.status === "IN_PROGRESS") {
-            statusBadge = `<span class="badge bg-label-warning text-dark">진행중</span>`;
-          } else if (step.status === "DONE") {
-            statusBadge = `<span class="badge bg-label-success">완료</span>`;
-          }
-
-		  // 버튼
-		  let workBtnHtml = "";
-
-		  // QC 공정(PRC-QC)인 경우
-		  if (step.processId === "PRC-QC") {
-
-		    if (step.status === "DONE") {
-		      // 3) QC 검사까지 완료된 상태 → 그냥 완료 표시
-		      workBtnHtml = '<span class="text-muted">완료</span>';
-
-		    } else if (step.canStart) {
-		      // 2) CAP 공정이 끝나서 이제 QC 가능해진 상태 → QC 등록 버튼 노출
-		      workBtnHtml = `
-		        <button type="button"
-		                class="btn btn-outline-info btn-sm btn-qc-regist"
-		                data-order-id="${summary.orderId}">
-		          QC 등록
-		        </button>
-		      `;
-
-		    } else {
-		      // 1) 아직 이전 공정(CAP)이 안 끝난 상태 → 대기
-		      workBtnHtml = '<span class="text-muted">대기</span>';
-		    }
-
-		  } else {
-		    // 나머지 공정은 기존 로직 그대로
-		    if (step.canStart) {
-		      workBtnHtml += `
-		        <button type="button"
-		                class="btn btn-primary btn-sm btn-step-start"
-		                data-order-id="${summary.orderId}"
-		                data-step-seq="${step.stepSeq}">
-		          시작
-		        </button>
-		      `;
-		    }
-		    if (step.canFinish) {
-		      workBtnHtml += `
-		        <button type="button"
-		                class="btn btn-success btn-sm btn-step-finish ms-1"
-		                data-order-id="${summary.orderId}"
-		                data-step-seq="${step.stepSeq}">
-		          종료
-		        </button>
-		      `;
-		    }
-			if (!step.canStart && !step.canFinish) {
-			  if (step.status === 'DONE') {
-			    workBtnHtml = '<span class="text-muted">완료</span>';
-			  } else if (step.status === 'READY') {
-			    workBtnHtml = '<span class="text-muted">대기</span>';
-			  } else {
-			    workBtnHtml = '-';
-			  }
-			}
-		  }
-
-
-          // 메모 input (현장 비고용)
-          const memoInputHtml = `
-            <input type="text"
-                   class="form-control form-control-sm step-memo-input"
-                   data-order-id="${summary.orderId}"
-                   data-step-seq="${step.stepSeq}"
-                   value="${step.memo ? step.memo : ""}">
-          `;
-
-          tr.innerHTML = `
-            <td>${step.stepSeq}</td>
-            <td>${step.processId}</td>
-            <td>
-              <span class="badge rounded-pill bg-label-primary">
-                ${step.processName}
-              </span>
-            </td>
-            <td>${statusBadge}</td>
-            <td>${formatDateTime(step.startTime)}</td>
-            <td>${formatDateTime(step.endTime)}</td>
-            <td>${workBtnHtml}</td>
-            <td>${memoInputHtml}</td>
-          `;
-
-          tbody.appendChild(tr);
-        });
-      }
+      // ★ 공통 렌더 함수 사용
+      renderProcessDetail(data);
 
       // 모달 띄우기
       const modalEl = document.getElementById("detailModal");
@@ -337,10 +336,10 @@ function openDetailModal(orderId) {
     });
 }
 
+
 // -------------------------------
 // 공정 단계 시작/종료/메모 이벤트
 // -------------------------------
-
 // 시작/종료/QC등록 버튼 공통 이벤트 (이벤트 위임)
 document.addEventListener("click", (e) => {
   if (e.target.classList.contains("btn-step-start")) {
@@ -389,9 +388,7 @@ function handleStartStep(orderId, stepSeq) {
     return;
   }
 
-  const headers = {
-    'Content-Type': 'application/json'
-  };
+  const headers = { 'Content-Type': 'application/json' };
   if (typeof csrfHeader !== 'undefined' && typeof csrfToken !== 'undefined') {
     headers[csrfHeader] = csrfToken;
   }
@@ -410,9 +407,10 @@ function handleStartStep(orderId, stepSeq) {
 
       alert(result.message || '공정을 시작 처리했습니다.');
 
-      const updated = result.updatedStep;
-      if (updated) {
-        updateStepRowInModal(updated);
+      // ★ detail 전체로 모달 다시 렌더링
+      const detail = result.detail;
+      if (detail) {
+        renderProcessDetail(detail);
       }
     })
     .catch(err => {
@@ -422,16 +420,14 @@ function handleStartStep(orderId, stepSeq) {
 }
 
 // -------------------------------
-// 공정 종료 (수량 X, 상태/시간만)
+// 공정 종료
 // -------------------------------
 function handleFinishStep(orderId, stepSeq) {
   if (!confirm('해당 공정을 종료 처리하시겠습니까?')) {
     return;
   }
 
-  const headers = {
-    'Content-Type': 'application/json'
-  };
+  const headers = { 'Content-Type': 'application/json' };
   if (typeof csrfHeader !== 'undefined' && typeof csrfToken !== 'undefined') {
     headers[csrfHeader] = csrfToken;
   }
@@ -450,9 +446,9 @@ function handleFinishStep(orderId, stepSeq) {
 
       alert(result.message || '공정을 종료 처리했습니다.');
 
-      const updated = result.updatedStep;
-      if (updated) {
-        updateStepRowInModal(updated);
+      const detail = result.detail;
+      if (detail) {
+        renderProcessDetail(detail);
       }
     })
     .catch(err => {
