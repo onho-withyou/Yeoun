@@ -124,19 +124,20 @@ function initGrid() {
             }
         },
 
-        {
-            headerName: "상세",
-            width: 100,
-            cellRenderer: params => {
-                if (!params.data) return "";
-                return `
-                    <button class="btn btn-outline-primary btn-sm"
-                            onclick="openDetail('${params.data.orderId}')">
-                        상세
-                    </button>
-                `;
-            }
-        }
+		{
+		    headerName: "상세",
+		    width: 100,
+		    cellRenderer: params => {
+		        if (!params.data) return "";
+		        return `
+		            <button class="btn btn-outline-primary btn-sm"
+		                    onclick="openShipmentDetail('${params.data.orderId}')">
+		                상세
+		            </button>
+		        `;
+		    }
+		}
+
     ];
 
 
