@@ -70,6 +70,32 @@
 	          <h5 class="mb-0">LOT 계층구조</h5>
 	        </div>
 	        <div class="card-body" id="lotTree">
+	        
+	        <ul class="list-group">
+
+  <!-- lotList = List<LotRootDTO> -->
+  <li class="list-group-item"
+      th:each="lot : ${lotList}">
+    
+    <!-- 클릭 시 해당 LOT_NO를 쿼리 파라미터로 넘겨서 선택 LOT 변경 -->
+    <a th:href="@{/lot/trace(lotNo=${lot.lotNo})}"
+       th:classappend="${selectedLot != null and selectedLot.lotNo == lot.lotNo}
+                       ? ' fw-bold text-primary'">
+      
+      <!-- LOT 번호 -->
+      <span th:text="${lot.lotNo}"></span>
+
+      <!-- 제품명 (혹은 prdId) -->
+      <span th:text="' / ' + ${lot.displayName}"></span>
+
+      <!-- 상태 -->
+      <span th:text="' / ' + ${lot.status}"></span>
+    </a>
+  </li>
+
+</ul>
+	        
+	        
 	          <!-- LOT 트리 넣을 자리 (지금은 비워두기) -->
 	        </div>
 	      </div>
