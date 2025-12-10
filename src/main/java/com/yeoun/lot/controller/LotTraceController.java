@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.yeoun.lot.dto.LotProcessNodeDTO;
 import com.yeoun.lot.dto.LotRootDTO;
 import com.yeoun.lot.entity.LotMaster;
 import com.yeoun.lot.service.LotTraceService;
@@ -24,7 +25,9 @@ public class LotTraceController {
 	
 	// LOT 추적 페이지
 	@GetMapping("/trace")
-	public String view(@RequestParam(name = "lotNo", required = false) String lotNo, Model model) {
+	public String view(@RequestParam(name = "lotNo", required = false) String lotNo, 
+					   @RequestParam(name = "stepSeq", required = false) Integer stepSeq,
+					   Model model) {
 		
 		// 1. 왼쪽에 표시할 FIN LOT 목록
 		List<LotRootDTO> lotList = lotTraceService.getFinishedLots(); 
@@ -40,6 +43,18 @@ public class LotTraceController {
         if (lotNo != null) {
             LotMaster selected = lotTraceService.getLotDetail(lotNo);
             model.addAttribute("selectedLot", selected);
+            
+            // 1차: 공정 단계 리스트
+            List<LotProcessNodeDTO> processNodes =
+                    lotTraceService.getProcessNodesForLot(lotNo);
+            model.addAttribute("processNodes", processNodes);
+            
+            if (stepSeq != null) {
+                processNodes.stream()
+                        .filter(p -> p.getStepSeq().equals(stepSeq))
+                        .findFirst()
+                        .ifPresent(p -> model.addAttribute("selectedProcess", p));
+            }
         }
         
 		return "/lot/trace";

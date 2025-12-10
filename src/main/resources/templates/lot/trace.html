@@ -8,12 +8,12 @@
       <!-- 페이지 타이틀 -->
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="mb-0">LOT 추적</h3>
-        <!-- 필요하면 여기에 우측 상단 버튼 추가 (엑셀다운, 전체조회 등) -->
+        <!-- 필요하면 우측 상단 버튼 (엑셀다운, 전체조회 등) -->
       </div>
 
       <!-- LOT 검색 필터 -->
-<!--       <div class="card mb-4"> -->
-<!--         <div class="card-body"> -->
+      <div class="card mb-4">
+        <div class="card-body">
           <form id="lotTraceSearchForm">
             <div class="row gx-3 gy-2 align-items-end">
 
@@ -55,68 +55,154 @@
 
             </div>
           </form>
-<!--         </div> -->
-<!--       </div> -->
+        </div>
+      </div>
 
-	<br>
-
-      <!-- 위치 / 실사 영역 -->
+      <!-- LOT 트리 / 상세 영역 -->
       <div class="row">
-      
-	    <!-- LOT 계층구조 (좌측) -->
-	    <div class="col-md-5">
-	      <div class="card h-100">
-	        <div class="card-header">
-	          <h5 class="mb-0">LOT 계층구조</h5>
-	        </div>
-	        <div class="card-body" id="lotTree">
-	        
-	        <ul class="list-group">
 
-  <!-- lotList = List<LotRootDTO> -->
-  <li class="list-group-item"
-      th:each="lot : ${lotList}">
-    
-    <!-- 클릭 시 해당 LOT_NO를 쿼리 파라미터로 넘겨서 선택 LOT 변경 -->
-    <a th:href="@{/lot/trace(lotNo=${lot.lotNo})}"
-       th:classappend="${selectedLot != null and selectedLot.lotNo == lot.lotNo}
-                       ? ' fw-bold text-primary'">
-      
-      <!-- LOT 번호 -->
-      <span th:text="${lot.lotNo}"></span>
+		<!-- LOT 계층구조 (좌측) -->
+		<div class="col-md-5">
+		  <div class="card h-100">
+		    <div class="card-header">
+		      <h5 class="mb-0">LOT 계층구조</h5>
+		    </div>
+		
+		    <div class="card-body" id="lotTree">
+		
+		      <!-- LOT ROOT 리스트 -->
+		      <ul class="list-group" th:if="${lotList != null and !#lists.isEmpty(lotList)}">
+		
+		        <li class="list-group-item"
+		            th:each="lot : ${lotList}">
+		
+		          <!-- ROOT 한 줄 -->
+		          <a th:href="@{/lot/trace(lotNo=${lot.lotNo})}"
+		             class="d-block text-decoration-none mb-1"
+		             th:classappend="${selectedLot != null and selectedLot.lotNo == lot.lotNo}
+		                             ? ' fw-bold text-primary'">
+		            <span th:text="${lot.lotNo}"></span>
+		            <span th:text="' / ' + ${lot.displayName}"></span>
+		            <span th:text="' / ' + ${lot.status}"></span>
+		          </a>
+		
+		          <!-- 선택된 LOT에만 공정 트리 표시 -->
+		          <ul class="list-unstyled ms-3 mt-1"
+		              th:if="${selectedLot != null and selectedLot.lotNo == lot.lotNo}">
+		
+		            <li class="mb-1">
+		              <span class="fw-semibold text-secondary">▶ 공정</span>
+		            </li>
+		
+		            <li th:each="p : ${processNodes}">
+		              <a th:href="@{/lot/trace(lotNo=${lot.lotNo}, stepSeq=${p.stepSeq})}"
+		                 class="text-decoration-none small"
+		                 th:classappend="${selectedProcess != null and selectedProcess.stepSeq == p.stepSeq}
+		                                 ? ' fw-bold text-primary'">
+		                <span th:text="${p.stepSeq} + '. '"></span>
+		                <span th:text="${p.processName}"></span>
+		                <span class="text-muted"
+		                      th:text="' (' + ${p.status} + ')'"></span>
+		              </a>
+		            </li>
+		
+		          </ul>
+		
+		        </li>
+		
+		      </ul>
+		
+		      <!-- LOT 목록 없을 때 -->
+		      <div th:if="${lotList == null or #lists.isEmpty(lotList)}"
+		           class="text-muted small">
+		        조회된 LOT가 없습니다.
+		      </div>
+		
+		    </div>
+		  </div>
+		</div>
 
-      <!-- 제품명 (혹은 prdId) -->
-      <span th:text="' / ' + ${lot.displayName}"></span>
 
-      <!-- 상태 -->
-      <span th:text="' / ' + ${lot.status}"></span>
-    </a>
-  </li>
 
-</ul>
-	        
-	        
-	          <!-- LOT 트리 넣을 자리 (지금은 비워두기) -->
-	        </div>
-	      </div>
-	    </div>
-	
-	    <!-- LOT 상세 (우측) -->
-	    <div class="col-md-7">
-	      <div class="card h-100">
-	        <div class="card-header">
-	          <h5 class="mb-0">LOT 상세</h5>
-	        </div>
-	        <div class="card-body" id="lotDetail">
-	          <!-- LOT 상세 정보 들어갈 자리 (지금은 비워두기) -->
-	        </div>
-	      </div>
-	    </div>
-    	</div>
+        <!-- LOT 상세 (우측) -->
+        <div class="col-md-7">
+          <div class="card h-100">
+            <div class="card-header">
+              <h5 class="mb-0">LOT 상세</h5>
+            </div>
+            <div class="card-body" id="lotDetail">
+
+              <!-- LOT가 선택된 경우 -->
+              <th:block th:if="${selectedLot != null}">
+
+                <!-- 기본 정보 -->
+                <div class="mb-3">
+                  <h6 class="mb-1" th:text="${selectedLot.lotNo}">LOT NO</h6>
+                  <div class="text-muted small">
+                    <!-- LOT 유형 / 상태 -->
+                    <span th:text="${selectedLot.lotType}">FIN</span>
+                    <span> / </span>
+                    <span th:text="${selectedLot.currentStatus}">PROD_DONE</span>
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col-sm-6">
+                    <div class="mb-1 fw-semibold">제품 코드</div>
+                    <div th:text="${selectedLot.prdId}">PRD-0001</div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="mb-1 fw-semibold">수량</div>
+                    <div th:text="${selectedLot.quantity}">0</div>
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col-sm-6">
+                    <div class="mb-1 fw-semibold">현재 위치</div>
+                    <div th:text="${selectedLot.currentLocType} + ' / ' + ${selectedLot.currentLocId}">
+                      LINE / LINE-01
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="mb-1 fw-semibold">상태 변경일시</div>
+                    <div th:text="${selectedLot.statusChangeDate}">2025-12-10</div>
+                  </div>
+                </div>
+
+                <!-- 1차: 공정 단계 리스트 -->
+                <div class="mt-4" th:if="${processNodes != null}">
+                  <h6 class="mb-2">공정 단계</h6>
+                  <ul class="list-group list-group-flush small">
+                    <li class="list-group-item px-0"
+                        th:each="p : ${processNodes}">
+                      <!-- 예: 1. 충진 / IN_PROCESS -->
+                      <span th:text="${p.stepSeq} + '. '"></span>
+                      <span th:text="${p.processName}"></span>
+                      <span class="text-muted"
+                            th:text="' / ' + ${p.status}"></span>
+                    </li>
+                  </ul>
+                </div>
+
+              </th:block>
+
+              <!-- LOT 선택 안 된 경우 -->
+              <th:block th:if="${selectedLot == null}">
+                <div class="text-muted">
+                  왼쪽에서 LOT를 선택하면 상세 정보가 표시됩니다.
+                </div>
+              </th:block>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
 
       <!-- 나중에 LOT 이력/타임라인, TOAST UI Grid 붙일 자리 -->
       <!--
-      <div class="card">
+      <div class="card mt-4">
         <div class="card-body p-0">
           <div id="grid"></div>
         </div>

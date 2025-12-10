@@ -12,6 +12,7 @@ import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.dto.LotMasterDTO;
+import com.yeoun.lot.dto.LotProcessNodeDTO;
 import com.yeoun.lot.dto.LotRootDTO;
 import com.yeoun.lot.entity.LotHistory;
 import com.yeoun.lot.entity.LotMaster;
@@ -19,6 +20,8 @@ import com.yeoun.lot.repository.LotHistoryRepository;
 import com.yeoun.lot.repository.LotMasterRepository;
 import com.yeoun.masterData.entity.ProcessMst;
 import com.yeoun.masterData.repository.ProcessMstRepository;
+import com.yeoun.process.entity.WorkOrderProcess;
+import com.yeoun.process.repository.WorkOrderProcessRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -31,6 +34,8 @@ public class LotTraceService {
 	private final LotHistoryRepository historyRepository;
 	private final ProcessMstRepository processMstRepository;
 	private final EmpRepository empRepository;
+	private final LotHistoryRepository lotHistoryRepository;
+	private final WorkOrderProcessRepository workOrderProcessRepository; 
 	
 	// LOT 생성
 	@Transactional
@@ -126,6 +131,43 @@ public class LotTraceService {
                 .orElseThrow(() ->
                         new IllegalArgumentException("LOT_MASTER에 존재하지 않는 LOT : " + lotNo));
     }
+	
+	// LotTraceService 안에 추가
+	@Transactional(readOnly = true)
+	public List<LotProcessNodeDTO> getProcessNodesForLot(String lotNo) {
+
+	    LotMaster lot = lotMasterRepository.findByLotNo(lotNo)
+	            .orElseThrow(() -> new IllegalArgumentException("LOT 없음: " + lotNo));
+
+	    String orderId = lot.getOrderId();
+	    if (orderId == null) return List.of();
+
+	    List<WorkOrderProcess> processes =
+	            workOrderProcessRepository
+	                    .findByWorkOrderOrderIdOrderByStepSeqAsc(orderId);
+
+	    return processes.stream()
+	            .map(proc -> {
+	                String processId = proc.getProcess().getProcessId();
+	                String processName = proc.getProcess().getProcessName(); // 네 필드명에 맞게
+
+	                // 🔹 여기서 새 리포지토리 메서드 사용
+	                String status = lotHistoryRepository
+	                        .findTopByLot_LotNoAndProcess_ProcessIdOrderByHistIdDesc(lotNo, processId)
+	                        .map(LotHistory::getStatus)
+	                        .orElse("NEW");
+
+	                return new LotProcessNodeDTO(
+	                        proc.getStepSeq(),
+	                        processId,
+	                        processName,
+	                        status
+	                );
+	            })
+	            .toList();
+	}
+
+
 	
 	
 	
