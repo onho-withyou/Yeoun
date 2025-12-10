@@ -344,9 +344,9 @@ public class OrderService {
   
 	// 작업지시서 전체 조회
 	public List<WorkOrderDTO> findAllWorkList() {
-  //		List<WorkOrder> workOrders = workOrderRepository.findByOutboundYn("N");
+  		List<WorkOrder> workOrders = workOrderRepository.findByOutboundYn("N");
 		// 상태가 "N"인게 없어서 "Y"로 작업 후 변경할 예정
-		List<WorkOrder> workOrders = workOrderRepository.findByOutboundYn("Y");
+//		List<WorkOrder> workOrders = workOrderRepository.findByOutboundYn("Y");
 		
 		return workOrders.stream()
 				.map(WorkOrderDTO::fromEntity)
