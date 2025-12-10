@@ -12,12 +12,15 @@ import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.dto.LotMasterDTO;
+import com.yeoun.lot.dto.LotMaterialNodeDTO;
 import com.yeoun.lot.dto.LotProcessNodeDTO;
 import com.yeoun.lot.dto.LotRootDTO;
 import com.yeoun.lot.entity.LotHistory;
 import com.yeoun.lot.entity.LotMaster;
+import com.yeoun.lot.entity.LotRelationship;
 import com.yeoun.lot.repository.LotHistoryRepository;
 import com.yeoun.lot.repository.LotMasterRepository;
+import com.yeoun.lot.repository.LotRelationshipRepository;
 import com.yeoun.masterData.entity.ProcessMst;
 import com.yeoun.masterData.repository.ProcessMstRepository;
 import com.yeoun.process.entity.WorkOrderProcess;
@@ -36,7 +39,9 @@ public class LotTraceService {
 	private final EmpRepository empRepository;
 	private final LotHistoryRepository lotHistoryRepository;
 	private final WorkOrderProcessRepository workOrderProcessRepository; 
+	private final LotRelationshipRepository lotRelationshipRepository;
 	
+	// ----------------------------------------------------------------------------
 	// LOT 생성
 	@Transactional
 	public String registLotMaster(LotMasterDTO lotMasterDTO, String line) {
@@ -132,7 +137,8 @@ public class LotTraceService {
                         new IllegalArgumentException("LOT_MASTER에 존재하지 않는 LOT : " + lotNo));
     }
 	
-	// LotTraceService 안에 추가
+	// ================================================================================
+	// 선택 LOT 기준 1차 공정 LOT 트리용 노드
 	@Transactional(readOnly = true)
 	public List<LotProcessNodeDTO> getProcessNodesForLot(String lotNo) {
 
@@ -149,9 +155,8 @@ public class LotTraceService {
 	    return processes.stream()
 	            .map(proc -> {
 	                String processId = proc.getProcess().getProcessId();
-	                String processName = proc.getProcess().getProcessName(); // 네 필드명에 맞게
+	                String processName = proc.getProcess().getProcessName();
 
-	                // 🔹 여기서 새 리포지토리 메서드 사용
 	                String status = lotHistoryRepository
 	                        .findTopByLot_LotNoAndProcess_ProcessIdOrderByHistIdDesc(lotNo, processId)
 	                        .map(LotHistory::getStatus)
@@ -168,6 +173,43 @@ public class LotTraceService {
 	}
 
 
+	// ================================================================================
+	// 선택 LOT 기준 2차 자재 LOT 트리용 노드
+	public List<LotMaterialNodeDTO> getMaterialNodesForLot(String lotNo) {
+		
+		List<LotRelationship> rels = 
+				lotRelationshipRepository.findByOutputLot_LotNo(lotNo);
+		
+		if (rels.isEmpty()) {
+			return List.of();
+		}
+		
+		return rels.stream()
+				.map(rel -> {
+					
+					LotMaster child = rel.getInputLot();	// 자재 LOT
+					
+					// child 자체가 null일 가능성도 방어
+	                String lotNoChild   = (child != null) ? child.getLotNo() : null;
+	                String name         = (child != null) ? child.getDisplayName() : "[LOT 없음]";
+
+	                String unit = null;
+	                if (child != null && child.getMaterial() != null) {
+	                    unit = child.getMaterial().getMatUnit();
+	                } else {
+	                    // 임시 방편: 원자재 매핑이 끊어진 LOT
+	                    unit = null;       
+	                }
+					
+					return new LotMaterialNodeDTO(
+							child.getLotNo(), 
+							name, 
+							rel.getUsedQty(), 
+							unit
+					);
+				})
+				.toList();
+	}
 	
 	
 	

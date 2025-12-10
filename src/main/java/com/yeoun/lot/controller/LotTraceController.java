@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.yeoun.lot.dto.LotMaterialNodeDTO;
 import com.yeoun.lot.dto.LotProcessNodeDTO;
 import com.yeoun.lot.dto.LotRootDTO;
 import com.yeoun.lot.entity.LotMaster;
@@ -41,6 +42,8 @@ public class LotTraceController {
 
         // 3) 선택된 LOT 상세 조회 후 오른쪽 카드에 바인딩
         if (lotNo != null) {
+        	
+        	// LOT 상세
             LotMaster selected = lotTraceService.getLotDetail(lotNo);
             model.addAttribute("selectedLot", selected);
             
@@ -48,6 +51,11 @@ public class LotTraceController {
             List<LotProcessNodeDTO> processNodes =
                     lotTraceService.getProcessNodesForLot(lotNo);
             model.addAttribute("processNodes", processNodes);
+            
+            // 2차: 자재 LOT 
+            List<LotMaterialNodeDTO> materialNodes = 
+            		lotTraceService.getMaterialNodesForLot(lotNo);
+            model.addAttribute("materialNodes", materialNodes);
             
             if (stepSeq != null) {
                 processNodes.stream()
