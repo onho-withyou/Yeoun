@@ -60,12 +60,16 @@ public class WorkOrderProcessController {
     @ResponseBody
     public Map<String, Object> startStep(@RequestBody StepRequest req) {
         try {
-            WorkOrderProcessStepDTO updated =
-                    workOrderProcessService.startStep(req.getOrderId(), req.getStepSeq());
+        	workOrderProcessService.startStep(req.getOrderId(), req.getStepSeq());
+        	
+        	// 공정 시작 처리 후, 최신 상세 다시 조회
+        	WorkOrderProcessDetailDTO detail =
+                    workOrderProcessService.getWorkOrderProcessDetail(req.getOrderId());
+        	
             return Map.of(
                     "success", true,
                     "message", "공정을 시작 처리했습니다.",
-                    "updatedStep", updated
+                    "detail", detail
             );
         } catch (Exception e) {
             return Map.of(
@@ -79,12 +83,16 @@ public class WorkOrderProcessController {
     @ResponseBody
     public Map<String, Object> finishStep(@RequestBody StepRequest req) {
         try {
-            WorkOrderProcessStepDTO updated =
-                    workOrderProcessService.finishStep(req.getOrderId(), req.getStepSeq());
+        	workOrderProcessService.finishStep(req.getOrderId(), req.getStepSeq());
+        	
+        	// 공정 종료 처리 후, 최신 상세 다시 조회
+        	WorkOrderProcessDetailDTO detail =
+                    workOrderProcessService.getWorkOrderProcessDetail(req.getOrderId());
+        	
             return Map.of(
                     "success", true,
                     "message", "공정을 종료 처리했습니다.",
-                    "updatedStep", updated
+                    "detail", detail
             );
         } catch (Exception e) {
             return Map.of(
@@ -98,12 +106,17 @@ public class WorkOrderProcessController {
     @ResponseBody
     public Map<String, Object> updateMemo(@RequestBody MemoRequest req) {
         try {
-            WorkOrderProcessStepDTO updated =
-                    workOrderProcessService.updateStepMemo(req.getOrderId(), req.getStepSeq(), req.getMemo());
+        	workOrderProcessService.updateStepMemo(
+                    req.getOrderId(), req.getStepSeq(), req.getMemo());
+        	
+        	// 메모 저장 후, 최신 상세 다시 조회
+            WorkOrderProcessDetailDTO detail =
+                    workOrderProcessService.getWorkOrderProcessDetail(req.getOrderId());
+        	
             return Map.of(
                     "success", true,
                     "message", "메모를 저장했습니다.",
-                    "updatedStep", updated
+                    "detail", detail
             );
         } catch (Exception e) {
             return Map.of(
