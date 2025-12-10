@@ -15,8 +15,11 @@ public interface OutboundMapper {
 	List<OutboundOrderDTO> findAllOutboundList(@Param("start") LocalDateTime start, 
 			@Param("end") LocalDateTime end, @Param("keyword") String keyword);
 
-	// 출고 상세페이지
+	// 출고 상세페이지(원재료)
 	OutboundOrderDTO findOutbound(String outboundId);
+	
+	// 출고 상세페이지(완제품)
+	OutboundOrderDTO findShipmentOutbound(String outboundId);
 
 	// 출하지시서 목록 조회
 	List<OutboundOrderDTO> findAllShipment();

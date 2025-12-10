@@ -17,6 +17,6 @@ public interface OrderMapper {
 	List<WorkOrderListDTO> selectOrderList (WorkOrderSearchDTO dto);
 	
 	// 작업자 리스트
-	List<EmpListDTO> selectWorkers (String pos);
+	List<EmpListDTO> selectWorkers ();
 
 }
