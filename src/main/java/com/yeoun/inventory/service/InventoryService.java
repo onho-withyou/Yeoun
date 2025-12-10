@@ -7,13 +7,16 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.yeoun.inventory.dto.InventoryModalRequestDTO;
 import com.yeoun.inventory.dto.InventoryOrderCheckViewDTO;
 import com.yeoun.inventory.dto.InventorySafetyCheckDTO;
+import com.yeoun.common.e_num.AlarmDestination;
 import com.yeoun.common.entity.Dispose;
 import com.yeoun.common.repository.DisposeRepository;
+import com.yeoun.common.service.AlarmService;
 import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryGroupDTO;
@@ -42,6 +45,8 @@ public class InventoryService {
 	private final DisposeRepository disposeRepository;
 	private final WorkOrderRepository workOrderRepository;
 	private final InventoryOrderCheckViewRepository ivOrderCheckViewRepository;
+	private final SimpMessagingTemplate messagingTemplate;
+	private final AlarmService alarmService;
 	
 	// 검색조건을 통해 재고리스트 조회
 	public List<InventoryDTO> getInventoryInfo(InventoryDTO inventoryDTO) {
@@ -123,6 +128,10 @@ public class InventoryService {
 		// 재고내역 등록
 		inventoryHistoryRepository.save(history);
 		
+		// 재고 수량 조절 후 페이지 알림 
+		String message = "재고 내 변동사항이 있습니다. 새로고침후 작업하십시오";
+		alarmService.sendAlarmMessage(AlarmDestination.INVENTORY, message);
+		
 	}
 	
 	
@@ -177,6 +186,10 @@ public class InventoryService {
 			InventoryHistory history = InventoryHistory.createFromMove(inventory, moveInventory, moveQty, empId);
 			inventoryHistoryRepository.save(history);
 		}
+		
+		// 재고 위치 이동후 
+		String message = "재고 내 변동사항이 있습니다. 새로고침후 작업하십시오";
+		alarmService.sendAlarmMessage(AlarmDestination.INVENTORY, message);
 		
 	}
 	
@@ -243,6 +256,10 @@ public class InventoryService {
 				.build();
 		
 		disposeRepository.save(dispose);
+		
+		// 재고 폐기 후
+		String message = "재고 내 변동사항이 있습니다. 새로고침후 작업하십시오";
+		alarmService.sendAlarmMessage(AlarmDestination.INVENTORY, message);
 	}
 	
 	

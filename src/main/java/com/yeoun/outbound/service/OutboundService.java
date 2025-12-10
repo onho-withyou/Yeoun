@@ -174,18 +174,6 @@ public class OutboundService {
 	
 		outboundRepository.save(outbound);
 		
-		// 모든 출고완료 처리 완료 후 각 페이지로 메세지 보내기
-		// 완제품 입고의 경우
-		if("FG".equals(outboundOrderDTO.getType())) {
-			String message = "새로 등록된 상품 출고가 있습니다. 확인하십시오.";
-			alarmService.sendAlarmMessage(AlarmDestination.INVENTORY, message);
-			alarmService.sendAlarmMessage(AlarmDestination.SALES, message);
-		} else {
-			// 완제품이 아닌 입고일 경우
-			String message = "새로 등록된 원자재 출고가 있습니다. 확인하십시오.";
-			alarmService.sendAlarmMessage(AlarmDestination.INVENTORY, message);
-			alarmService.sendAlarmMessage(AlarmDestination.ORDER, message);
-		}
 	}
 
 	// 출고 상세 페이지
@@ -299,6 +287,18 @@ public class OutboundService {
 		}
 		// 출고 상태 업데이트
 		outbound.updateStatus("COMPLETED");
+		
+		// 모든 출고완료 처리 완료 후 각 페이지로 메세지 보내기
+		if("FG".equals(outboundOrderDTO.getType())) {
+			String message = "새로 등록된 상품 출고가 있습니다. 확인하십시오.";
+			alarmService.sendAlarmMessage(AlarmDestination.INVENTORY, message);
+			alarmService.sendAlarmMessage(AlarmDestination.SALES, message);
+		} else {
+			// 완제품이 아닌 입고일 경우
+			String message = "새로 등록된 원자재 출고가 있습니다. 확인하십시오.";
+			alarmService.sendAlarmMessage(AlarmDestination.INVENTORY, message);
+			alarmService.sendAlarmMessage(AlarmDestination.ORDER, message);
+		}
 	}
 	
 	// ===========================================================================

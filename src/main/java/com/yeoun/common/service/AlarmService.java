@@ -27,6 +27,7 @@ public class AlarmService {
     }
     
     // 개인 알림(1명)
+    @Transactional
     public void sendPersonalMessage(AlarmDTO alarmDTO) {
     	// 받은 alarmDTO를 alarm엔티티로 변경후 저장
     	Alarm alarm = alarmDTO.toEntity(); 
@@ -91,7 +92,8 @@ public class AlarmService {
 	    }
 		
 	}
-
+	
+	//읽지않은 알림 불러오기
 	public List<AlarmDTO> getAlarmStatus(String empId, String alarmStatus) {
 		if(alarmStatus == null || alarmStatus.isEmpty()) {
 			alarmStatus = "N";
