@@ -42,13 +42,17 @@ document.addEventListener("DOMContentLoaded", () => {
 			{ headerName: "담당자", field: "managerName", width: 150 },
 			{ headerName: "메모", field: "memo", flex: 1 },
 						    
-            {
-                headerName: "",
-                width: 100,
-                cellRenderer: p =>
-                    `<button class="btn btn-outline-primary btn-sm"
-                        onclick="location.href='/sales/orders/${p.data.orderId}'">상세</button>`
-            }
+			{
+			    headerName: "상세",
+			    width: 100,
+			    cellRenderer: params => `
+			        <button class="btn btn-outline-primary btn-sm"
+			                onclick="openOrderDetail('${params.data.orderId}')">
+			            상세
+			        </button>
+			    `
+			}
+
         ],
         rowHeight: 42,
 		

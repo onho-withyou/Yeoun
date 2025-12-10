@@ -1,7 +1,9 @@
 package com.yeoun.sales.controller;
 
 import com.yeoun.auth.dto.LoginDTO;
+import com.yeoun.sales.dto.ShipmentDetailDTO;
 import com.yeoun.sales.dto.ShipmentListDTO;
+import com.yeoun.sales.service.ShipmentDetailService;
 import com.yeoun.sales.service.ShipmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,6 +19,7 @@ import java.util.Map;
 public class ShipmentController {
 
     private final ShipmentService shipmentService;
+    private final ShipmentDetailService shipmentDetailService;
 
     /** 1) 출하관리 화면 (GET)  */
     @GetMapping
@@ -52,6 +55,13 @@ public class ShipmentController {
         String shipmentId = shipmentService.reserveShipment(orderId, empId);
 
         return Map.of("success", true, "shipmentId", shipmentId);
+    }
+
+    
+    @GetMapping("/detail")
+    @ResponseBody
+    public ShipmentDetailDTO getShipmentDetail(@RequestParam("orderId") String orderId) {
+        return shipmentDetailService.getDetail(orderId);
     }
 
 
