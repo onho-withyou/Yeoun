@@ -30,6 +30,7 @@ import com.yeoun.outbound.repository.OutboundItemRepository;
 import com.yeoun.outbound.repository.OutboundRepository;
 import com.yeoun.sales.entity.Orders;
 import com.yeoun.sales.entity.Shipment;
+import com.yeoun.sales.enums.ShipmentStatus;
 import com.yeoun.sales.repository.OrdersRepository;
 import com.yeoun.sales.repository.ShipmentRepository;
 
@@ -164,10 +165,10 @@ public class OutboundService {
 					.orElseThrow(() -> new NoSuchElementException("출하지시서를 찾을 수 없습니다."));
 			
 			// 출하지시 상태 변경
-			shipment.changeStatus("RESERVING");
+			shipment.changeStatus(ShipmentStatus.PENDING.toString());
 		}
 		
-		if (!workOrderId.isEmpty()) {
+		if ("MAT".equals(outboundOrderDTO.getType())) {
 			WorkOrder workOrder = workOrderRepository.findByOrderId(workOrderId)
 					.orElseThrow(() -> new NoSuchElementException("작업지시서를 찾을 수 없습니다."));
 			

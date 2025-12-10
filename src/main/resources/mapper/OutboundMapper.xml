@@ -223,6 +223,8 @@
 			EMP e
 		ON
 			s.EMP_ID = e.EMP_ID
+		WHERE 
+			s.SHIPMENT_STATUS = 'RESERVED'
 		GROUP BY
 			s.SHIPMENT_ID
 		    , s.CLIENT_NAME
