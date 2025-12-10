@@ -8,9 +8,12 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.yeoun.common.dto.DisposeDTO;
+import com.yeoun.common.e_num.AlarmDestination;
+import com.yeoun.common.service.AlarmService;
 import com.yeoun.common.service.DisposeService;
 import com.yeoun.inbound.dto.InboundDTO;
 import com.yeoun.inbound.dto.InboundItemDTO;
@@ -62,6 +65,8 @@ public class InboundService {
 	private final WorkOrderRepository workOrderRepository;
 	private final ProductMstRepository productMstRepository;
 	private final InboundMapper inboundMapper;
+	private final SimpMessagingTemplate messagingTemplate;
+	private final AlarmService alarmService;
 	
 	// 입고대기 등록
 	@Transactional
@@ -194,7 +199,9 @@ public class InboundService {
 		
 		InboundItem inboundItem = inboundItemDTO.toEntity();
 		
-		inboundItemRepository.save(inboundItem);
+		inbound.addItem(inboundItem);
+		
+		inboundRepository.save(inbound);
 	}
 
 	// 원재료 목록 데이터(날짜 지정과 검색 기능 포함)
@@ -234,6 +241,9 @@ public class InboundService {
 				.findAllByInbound_InboundId(receiptDTO.getInboundId())
 				.stream()
 				.collect(Collectors.toMap(InboundItem::getInboundItemId, item -> item));
+		
+		// 입고하는 재고의 타입을 확인하기위해 변수설정
+		String inboundItemType = "";
 		
 		// 반복문 통해서 입고 품목 LOT 생성 및 수량 정보 업데이트
 		for (ReceiptItemDTO itemDTO : receiptDTO.getItems()) {
@@ -314,6 +324,8 @@ public class InboundService {
 					.expectObAmount(0L)
 					.itemType(itemDTO.getItemType())
 					.build();
+			// 재고등록시 등록되는 itemType을 설정(원자재, 완제품이 동시에 입고되지않음)
+			inboundItemType = inventoryDTO.getItemType();
 			
 			inventoryService.registInventory(inventoryDTO);
 			
@@ -384,6 +396,18 @@ public class InboundService {
 				
 				lotTraceService.registLotHistory(disposeLotHistoryDTO);
 			}
+		}
+		// 모든 입고완료 처리 완료 후 각 페이지로 메세지 보내기
+		// 완제품 입고의 경우
+		if("FG".equals(inboundItemType)) {
+			String message = "새로 등록된 상품 입고가 있습니다.";
+			alarmService.sendAlarmMessage(AlarmDestination.INVENTORY, message);
+			alarmService.sendAlarmMessage(AlarmDestination.SALES, message);
+		} else {
+			// 완제품이 아닌 입고일 경우
+			String message = "새로 등록된 원자재 입고가 있습니다.";
+			alarmService.sendAlarmMessage(AlarmDestination.INVENTORY, message);
+			alarmService.sendAlarmMessage(AlarmDestination.ORDER, message);
 		}
 		
 	}

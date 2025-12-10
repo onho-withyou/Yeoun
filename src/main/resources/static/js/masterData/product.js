@@ -31,13 +31,13 @@ class StatusModifiedRenderer {
     getElement() {
         return this.el;
     }
-
+	
     render(props) {
         const value = props.value;
         const rowKey = props.rowKey; 
         
         this.el.textContent = value; 
-
+		
         // 💡 수정되거나 추가된 행 상태 확인 로직
         let isUpdatedOrCreated = false;
         
@@ -46,6 +46,7 @@ class StatusModifiedRenderer {
             
             // 1. 수정된 행(updatedRows) 목록에서 현재 rowKey 확인
             const isUpdated = modifiedRows.updatedRows.some(row => String(row.rowKey) === String(rowKey));
+			
             
             // 2. 새로 추가된 행(createdRows) 목록에서 현재 rowKey 확인
             const isCreated = modifiedRows.createdRows.some(row => String(row.rowKey) === String(rowKey));
@@ -80,15 +81,16 @@ const grid1 = new Grid({
 		],
 	  columns: [
 		{header: '품번' ,name: 'prdId' ,align: 'center',editor: 'text',width: 100
+		
 			,renderer:{ type: StatusModifiedRenderer}	
 		}
-		,{header: '품목명' ,name: 'itemName' ,align: 'center',editor: 'text',width: 100
+		,{header: '품목명' ,name: 'itemName' ,align: 'center',editor: 'text',filter: "select",width: 100
 			,renderer:{ type: StatusModifiedRenderer}
 		}
 		,{header: '제품명' ,name: 'prdName' ,align: 'center',editor: 'text'
 			,renderer:{ type: StatusModifiedRenderer}
 		}
-		,{header: '제품유형' ,name: 'prdCat' ,align: 'center',filter: "select"
+		,{header: '제품유형' ,name: 'prdCat' ,align: 'center',filter: "select",width: 100
 			,renderer:{ type: StatusModifiedRenderer}
 			,editor: {
 				type: 'select', // 드롭다운 사용
@@ -196,7 +198,7 @@ const grid2 = new Grid({
 					}
 				}
 			}
-		    ,{header: '단위' ,name: 'matUnit' ,align: 'center',editor: 'text'
+		    ,{header: '단위' ,name: 'matUnit' ,align: 'center',editor: 'text',filter: "select"
 				,renderer:{ type: StatusModifiedRenderer}	
 				,editor: {
 					type: 'select', // 드롭다운 사용
@@ -232,6 +234,48 @@ const grid2 = new Grid({
 	    	perPage: 20
         }
 });
+
+
+grid1.on('beforeChange', (ev) => {
+    const { rowKey, columnName } = ev.changes[0]; // 변경된 데이터 목록 (배열)
+	if (columnName === 'prdId') {
+	        // 💡 핵심 수정: rowKey 대신, 현재 행의 'prdId' 값을 가져옵니다.
+	        const prdIdValue = grid1.getValue(rowKey, 'prdId');
+	        
+	        // prdId 값이 비어있거나 null, undefined인 경우를 '새 행'으로 간주합니다.
+	        const isNewRow = !prdIdValue; 
+
+	        console.log("prdId 값:", prdIdValue, " | isNewRow:", isNewRow);
+
+	        // 기존 행일 경우 (isNewRow가 false, 즉 prdIdValue가 있는 경우)
+	        if (!isNewRow) {
+	            ev.stop(); // 편집 모드 진입 차단
+	            alert('기존 품번은 수정할 수 없습니다.'); 
+	        }
+	    }
+});
+
+grid2.on('beforeChange', (ev) => {
+    const { rowKey, columnName } = ev.changes[0]; // 변경된 데이터 목록 (배열)
+	if (columnName === 'matId') {
+	        // 💡 핵심 수정: rowKey 대신, 현재 행의 'prdId' 값을 가져옵니다.
+	        const matIdValue = grid2.getValue(rowKey, 'matId');
+	        
+	        // prdId 값이 비어있거나 null, undefined인 경우를 '새 행'으로 간주합니다.
+	        const isNewRow = !matIdValue; 
+
+	        console.log("matId 값:", matIdValue, " | isNewRow:", isNewRow);
+
+	        // 기존 행일 경우 (isNewRow가 false, 즉 prdIdValue가 있는 경우)
+	        if (!isNewRow) {
+	            ev.stop(); // 편집 모드 진입 차단
+	            alert('기존 원재료ID는 수정할 수 없습니다.'); 
+	        }
+	    }
+});
+
+
+
 
 function productGridAllSearch() {
 
@@ -594,19 +638,38 @@ deleteProductRowBtn.addEventListener('click', async function() {
 					body: JSON.stringify(serverPrdIds)
 				})
 				.then(res => {
-					if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+					
 					const ct = (res.headers.get('content-type') || '').toLowerCase();
 					if (ct.includes('application/json')) return res.json();
 					return res.text();
 				})
 				.then(parsed => {
-					console.log('삭제 응답:', parsed);
-					const okTexts = ['success','ok','true'];
-					if (typeof parsed === 'string') {
-						if (!okTexts.includes(parsed.trim().toLowerCase())) throw new Error('Unexpected response: ' + parsed);
-					} else if (!(parsed && (parsed.status === 'success' || okTexts.includes((parsed.message||'').toString().toLowerCase())))) {
-						throw new Error('삭제 실패: ' + JSON.stringify(parsed));
-					}
+					
+					// 1. HTTP 500 에러 본문인 경우 (parsed.status가 500인 경우)
+				    if (parsed && parsed.status === 500) {
+				        
+				        // ORA-02292 오류가 포함된 500 에러인지 확인 (message 필드에서 직접 확인)
+				        const errorMessage = parsed.message || parsed.trace;
+				        
+				        if (errorMessage && errorMessage.includes("ORA-02292")) {
+				            // ✅ 요청하신 메시지를 사용자에게 표시
+				            alert("⚠️ 삭제 실패: 연관된 데이터가 존재합니다. 먼저 관련(자식) 데이터를 삭제하세요.");
+				            return; // 여기서 로직 종료
+				        }
+				        
+				        // ORA-02292가 아닌 다른 500 에러인 경우
+				        throw new Error(`서버 내부 오류: ${parsed.error} (${parsed.message ? parsed.message.substring(0, 50) + '...' : ''})`);
+				    }
+					// 3. 성공 상태 확인
+				    if (parsed && parsed.status === 'success') {
+				        alert('✅ 삭제가 성공적으로 완료되었습니다.');
+				        productGridAllSearch();
+				        return;
+				    }
+
+				    // 4. 기타 예상치 못한 응답
+				    throw new Error('삭제 실패: 알 수 없는 응답 형식');
+				
 					// 서버 삭제 성공 시 그리드 재조회
 					productGridAllSearch();
 				})

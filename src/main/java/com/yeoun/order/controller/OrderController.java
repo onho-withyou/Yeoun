@@ -1,6 +1,7 @@
 package com.yeoun.order.controller;
 
 import com.yeoun.order.dto.*;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -12,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import com.yeoun.order.dto.WorkOrderDTO;
@@ -32,12 +34,14 @@ public class OrderController {
     // 작업지시 목록
     @GetMapping("/list")
     public String list (WorkOrderListDTO dto, Model model){
-    	model.addAttribute("plans", orderService.loadAllPlans());		// 생산계획 조회 
+        List<ProductionPlanViewDTO> plans = orderService.loadAllPlans();
+        model.addAttribute("workOrderRequest", new WorkOrderRequest());
+        model.addAttribute("plans", plans);		// 생산계획 조회
     	model.addAttribute("prods", orderService.loadAllProducts());	// 품목 조회
     	model.addAttribute("lines", orderService.loadAllLines());		// 라인 조회
         model.addAttribute("workers", 
         						orderService.loadAllWorkers());	// 작업자 조회(작업자)
-        
+        model.addAttribute("plansLength", plans.size());
     	return "/order/list";
     }
 
@@ -52,14 +56,24 @@ public class OrderController {
     // =====================================================
     // 새 작업지시 등록
     @PostMapping("/create")
-    public String createWorkOrder (
-            @ModelAttribute("workOrderRequest")WorkOrderRequest req, Authentication auth){
+    @ResponseBody
+    public ResponseEntity<?> createWorkOrder (
+            @Valid @RequestBody WorkOrderRequest req,
+            BindingResult bindingResult,
+            Authentication auth){
+
+        log.info("dto.... ::::::: here create...." + req);
+
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
+        }
+
         orderService.createWorkOrder(req, auth.getName());
-        return "redirect:/order/list";
+        return ResponseEntity.ok().build();
     }
 
     // =====================================================
-    // 새 작업지시 등록
+    // 작업지시 상세조회
     @GetMapping("/detail/{id}")
     @ResponseBody
     public WorkOrderDetailDTO getWorkOrderDetail (@PathVariable("id") String id){
