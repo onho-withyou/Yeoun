@@ -30,6 +30,8 @@ import com.yeoun.outbound.repository.OutboundItemRepository;
 import com.yeoun.outbound.repository.OutboundRepository;
 import com.yeoun.sales.entity.Orders;
 import com.yeoun.sales.entity.Shipment;
+import com.yeoun.sales.enums.OrderStatus;
+import com.yeoun.sales.enums.ShipmentStatus;
 import com.yeoun.sales.repository.OrdersRepository;
 import com.yeoun.sales.repository.ShipmentRepository;
 
@@ -163,8 +165,8 @@ public class OutboundService {
 			Shipment shipment = shipmentRepository.findByShipmentId(outboundOrderDTO.getShipmentId())
 					.orElseThrow(() -> new NoSuchElementException("출하지시서를 찾을 수 없습니다."));
 			
-			// 출하지시 상태 변경
-			shipment.changeStatus("RESERVING");
+			// 출하지시서 상태 변경
+			shipment.changeStatus(ShipmentStatus.RESERVED);
 		}
 	
 		outboundRepository.save(outbound);
@@ -270,14 +272,14 @@ public class OutboundService {
 					.orElseThrow(() -> new NoSuchElementException("출하지시서를 찾을 수 없습니다."));
 			
 			// 출하지시 상태 변경
-			shipment.changeStatus("SHIPPED");
+			shipment.changeStatus(ShipmentStatus.SHIPPED);
 			
 			// 수주확인서 조회
 			Orders orders = ordersRepository.findByOrderId(shipment.getOrderId())
 					.orElseThrow(() -> new NoSuchElementException("수주 내역을 찾을 수 없습니다."));
 			
 			// 수주 상태값 변경(출하)
-			orders.changeStatus("SHIPPED");			
+			orders.changeStatus(OrderStatus.SHIPPED.toString());			
 		}
 		// 출고 상태 업데이트
 		outbound.updateStatus("COMPLETED");
