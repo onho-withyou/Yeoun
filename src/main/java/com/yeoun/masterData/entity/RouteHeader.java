@@ -13,6 +13,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +24,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @EntityListeners(AuditingEntityListener.class)
 public class RouteHeader {
 	
@@ -33,7 +37,7 @@ public class RouteHeader {
 	// 제품코드
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "PRD_ID", nullable = false)
-	private ProductMst prdId;
+	private ProductMst product;
 	
 	// 라우트명
 	@Column(name = "ROUTE_NAME", length = 100, nullable = false)

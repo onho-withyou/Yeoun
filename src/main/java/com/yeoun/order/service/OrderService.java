@@ -69,6 +69,7 @@ public class OrderService {
 	// =======================================================
 	// 작업지시 목록 조회
 	public List<WorkOrderListDTO> loadAllOrders (WorkOrderSearchDTO dto){
+		log.info("dto....... loadAll...." + dto);
 		return orderMapper.selectOrderList(dto);
 	}
 	
