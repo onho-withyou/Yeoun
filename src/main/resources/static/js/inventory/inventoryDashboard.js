@@ -16,13 +16,15 @@ let trendChart; // 차트객체
 let safetyStockGrid; // 안전재고그리드객체
 let expireDisposalGrid; // 유통기한관리그리드객체
 
+let islistOn = false;
+
 const today = new Date();
 
 // 스피너 보이기 끄기
 function showSpinner() {
 	document.getElementById('loading-overlay').style.display = 'flex';
 }
-function hideSpinner() {
+ function hideSpinner() {
 	document.getElementById('loading-overlay').style.display = 'none';
 }
 
@@ -84,6 +86,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 	renderOrderGrid();
 	// 출고등록 필요한 출하지시서 표시\
 	renderShipmentGrid();
+	// 하나라도 있으면 div 표시
+
 		
 	//발주 필요 수량 표시
 	let lowStockCnt = 0;
@@ -115,7 +119,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 	}
 	// 발주필요 목록 표시
 	// 안전재고 미달목록표시
-	renderNeedOrderStockGrid();
+	await renderNeedOrderStockGrid();
 	
 	//유통기한 임박 수량 표시
 	let expireCnt = 0;
@@ -131,7 +135,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 	disposalEl.innerHTML = `폐기 : ${disposalCnt}`
 	
 	// 유통기한관리 목록 표시
-	renderExpireDisposalGrid();
+	await renderExpireDisposalGrid();
 	
 // -------------------------------------------------------------------------------
 // 입출고 차트 데이터 입력
@@ -150,8 +154,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 	
 	
 	//스피너  off
-	hideSpinner();
-	
+	hideSpinner();	
 });
 
 // ------------------------------------
@@ -438,11 +441,10 @@ function renderOrderGrid() {
 	const cardEl = document.getElementById('outboundNOrderCard');
 	
 	if(outboundNList.length === 0) {
-		cardEl.style.display = 'none';
+		islistOn = false;
 		return;
 	}
-	
-	cardEl.style.display = 'block';
+	islistOn = true;	
 	
 	const gridEl = document.getElementById('outboundNOrderGrid');
 	const Grid = tui.Grid;
@@ -537,18 +539,30 @@ async function initOutboundModalByRow(rowData) {
 	const changeEvent = new Event("change");
 	matObWorkOrderSelect.dispatchEvent(changeEvent);
 	
+	const cardEl = document.getElementById('outboundNOrderCard')
+	if(islistOn) {
+		cardEl.style.display = none;
+	} else {
+		cardEl.style.display = block;
+	}
 }
 
 // -------------------------------------------------------------------
 // 출고지시 내려지지않은 출하지시서 그리드
 async function renderShipmentGrid() {
 	const shipmentData = await loadShipmentList();
-	
 //	const filteredData = shipmentData.filter(shipment => {
 //		shipment.
 //	})
-	if(!shipmentData) return;
-	const gridEl = document.getElementById('outboundShipmentGrid');
+	// 그리드 보이는 카드
+
+	if(shipmentData.length === 0) {
+		islistOn = false;
+		return;
+	}
+	islistOn = true;
+
+		const gridEl = document.getElementById('outboundShipmentGrid');
 	const Grid = tui.Grid;
 
 	if (outboundShipmentGrid) outboundShipmentGrid.destroy();
@@ -643,7 +657,17 @@ async function initShipmentModalByRow(rowData) {
 
 	prdOutboundDate = shipOrder.startDate;
 
-	renderProductList(shipOrder.items);
+	// change 이벤트 강제 발생
+	const changeEvent = new Event("change");
+	shipmentSelect.dispatchEvent(changeEvent);
+//	renderProductList(shipOrder.items);
+	
+	const cardEl = document.getElementById('outboundNOrderCard')
+	if(islistOn) {
+		cardEl.style.display = "none";
+	} else {
+		cardEl.style.display = "block";
+	}
 }
 
 // ------------------------------------------------------------------
@@ -673,7 +697,7 @@ function getNeedOrderStocks() {
 }
 
 // 안전재고 미달목록 그리드 그리기
-function renderNeedOrderStockGrid() {
+async function renderNeedOrderStockGrid() {
 	// 안전재고 미달 데이터 
 //    const lowStocks = getLowStockRows();
 	// 발주필요 재고 데이터
@@ -873,7 +897,7 @@ function getExpireAndDisposalRows() {
     return inventoryInfo.filter(iv =>  iv.ivStatus === 'DISPOSAL_WAIT' || iv.ivStatus === 'EXPIRED');
 }
 
-function renderExpireDisposalGrid() {
+async function renderExpireDisposalGrid() {
     // 임박 + 폐기 같이 필터
     const rows = getExpireAndDisposalRows();
 

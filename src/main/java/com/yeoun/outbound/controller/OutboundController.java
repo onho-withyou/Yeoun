@@ -79,7 +79,7 @@ public class OutboundController {
 	public ResponseEntity<Map<String, String>> registFgOutbound(@RequestBody OutboundOrderDTO outboundOrderDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
 		try {
 			outboundService.saveOutbound(outboundOrderDTO, loginDTO.getEmpId());
-			
+			System.out.println(outboundOrderDTO + "@@@@@@@@@@@@@@@@@@");
 			return ResponseEntity.status(HttpStatus.CREATED)
 					.body(Map.of("message", "등록 완료"));
 		} catch (Exception e) {
