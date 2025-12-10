@@ -56,7 +56,7 @@ function formatDate(isoDate) {
 	return isoDate.split("T")[0]; // YYYY-MM-dd 형식
 }
 
-// 원재료 정보 불러오기
+// 출고 정보 불러오기
 async function loadProductOutbound(startDate, endDate, keyword) {
 	const MATERIAL_OUTBOUND_LIST = 
 		`/inventory/outbound/list/data` +

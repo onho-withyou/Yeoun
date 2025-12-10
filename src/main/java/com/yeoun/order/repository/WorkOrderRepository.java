@@ -34,6 +34,9 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, String> {
 	// 작업지시서 조회
 	Optional<WorkOrder> findByOrderId(String workOrderId);
 	
+	// 같은 PLAN_ID 아래 아직 완료 안 된 작업지시가 있는지 확인
+	boolean existsByPlanIdAndStatusNot(String planId, String status);
+	
 	
 	// ===================================================
 	// 대시보드 KPI 전용

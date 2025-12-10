@@ -33,6 +33,11 @@ import com.yeoun.process.dto.WorkOrderProcessDetailDTO;
 import com.yeoun.process.dto.WorkOrderProcessStepDTO;
 import com.yeoun.process.entity.WorkOrderProcess;
 import com.yeoun.process.repository.WorkOrderProcessRepository;
+import com.yeoun.production.entity.ProductionPlan;
+import com.yeoun.production.entity.ProductionPlanItem;
+import com.yeoun.production.enums.ProductionStatus;
+import com.yeoun.production.repository.ProductionPlanItemRepository;
+import com.yeoun.production.repository.ProductionPlanRepository;
 import com.yeoun.qc.entity.QcResult;
 import com.yeoun.qc.repository.QcResultRepository;
 import com.yeoun.qc.service.QcResultService;
@@ -61,6 +66,10 @@ public class WorkOrderProcessService {
     
     // 출고(자재) 관련 - LOT_RELATIONSHIP 만들 때 사용
     private final OutboundItemRepository outboundItemRepository;
+    
+    // 생산계획 관련 - 공정 종료 시 상태값 변경
+    private final ProductionPlanRepository productionPlanRepository;
+    private final ProductionPlanItemRepository productionPlanItemRepository;
 
     // =========================================================================
     @Transactional(readOnly = true)
@@ -654,9 +663,33 @@ public class WorkOrderProcessService {
                 workOrderProcessRepository.existsByWorkOrderOrderIdAndStepSeqGreaterThan(orderId, stepSeq);
 
         if (!hasLaterStep) {
-            // 마지막 공정까지 완료 -> 작업지시 완료 처리
-            workOrder.setStatus("COMPLETED");              
+            // 1) 작업지시 완료 처리
+            workOrder.setStatus("COMPLETED");
             workOrder.setActEndDate(LocalDateTime.now());
+
+            // 2) 같은 PLAN_ID 아래에 아직 완료 안 된 작업지시가 있는지 확인
+            String planId = workOrder.getPlanId();
+            if (planId != null) {
+
+                // 🔹 PlanItem 기준으로 아직 DONE 아닌 애가 있는지 확인
+                boolean existsNotDoneItem =
+                        productionPlanItemRepository.existsByPlanIdAndStatusNot(planId, ProductionStatus.DONE);
+
+                if (!existsNotDoneItem) {
+                    // (1) Plan DONE
+                    ProductionPlan plan = productionPlanRepository.findById(planId)
+                            .orElseThrow(() -> new IllegalStateException("생산계획을 찾을 수 없습니다. planId=" + planId));
+                    plan.setStatus(ProductionStatus.DONE);
+
+                    // (2) PlanItem 들은 이미 DONE이라고 가정할 수도 있고,
+                    //     혹시 모를 상태 꼬임 방지용으로 한 번 더 덮어써도 됨.
+                    List<ProductionPlanItem> items =
+                            productionPlanItemRepository.findByPlanId(planId);
+                    for (ProductionPlanItem item : items) {
+                        item.setStatus(ProductionStatus.DONE);
+                    }
+                }
+            }
         }
         
         // LOT 종료 공통 처리
@@ -710,6 +743,11 @@ public class WorkOrderProcessService {
                     .orElseThrow(() -> new IllegalArgumentException("LOT_MASTER 없음: " + lotNo));
             lot.setCurrentStatus("PROD_DONE"); // LOT_STATUS 테이블 참조
             lot.setStatusChangeDate(LocalDateTime.now());
+            
+            // WIP → FIN 변경
+            if ("WIP".equals(lot.getLotType())) {
+                lot.setLotType("FIN");
+            }
         }
     }
 

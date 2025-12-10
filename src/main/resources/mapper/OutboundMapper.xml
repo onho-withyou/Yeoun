@@ -189,7 +189,7 @@
 	    </collection>
 	</resultMap>
 	
-	<!-- 출하 지시서 목록 조회 -->
+	<!-- 출하 지시서 목록 조회(상태추가) -->
 	<select id="findAllShipment" resultMap="ShipmentOrderMap">
 		SELECT
 			s.SHIPMENT_ID
@@ -223,6 +223,8 @@
 			EMP e
 		ON
 			s.EMP_ID = e.EMP_ID
+		WHERE 
+			s.SHIPMENT_STATUS = 'RESERVED'
 		GROUP BY
 			s.SHIPMENT_ID
 		    , s.CLIENT_NAME

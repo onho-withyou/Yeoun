@@ -8,6 +8,7 @@ import lombok.extern.log4j.Log4j2;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import com.yeoun.order.dto.WorkOrderDTO;
 import com.yeoun.order.dto.WorkOrderListDTO;
 import com.yeoun.order.service.OrderService;
-
-import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequiredArgsConstructor
@@ -79,17 +78,24 @@ public class OrderController {
     public WorkOrderDetailDTO getWorkOrderDetail (@PathVariable("id") String id){
         return orderService.getDetailWorkOrder(id);
     }
+    
+    // =====================================================
+    // 작업지시 확정
+    @PatchMapping("/status/{id}")
+    public ResponseEntity<?> released (@PathVariable("id") String id){
+    	
+    	orderService.modifyOrderStatus(id);
 
+    	return ResponseEntity.ok("updated");
+    }
+    
+    // =====================================================
+    // 작업자스케줄 페이지
     @GetMapping("/schedule")
     public String schedule (){
         return "/order/schedule";
     }
 
-    @GetMapping("/line")
-    public String line (){
-        return "/order/line";
-    }
-    
     // ========================================
     // 지정한 날짜에 해당하는 작업지시 목록 조회
     @GetMapping("/orderList/data")

@@ -91,6 +91,103 @@
     </body>
 
     <th:block layout:fragment="myScript">
+		<script>
+	      let equipmentGrid = null;
+	      let lineGrid = null;
+	      
+		  document.addEventListener("DOMContentLoaded", () => {
+		
+		    const gridE = document.getElementById("equipmentGrid");
+		    if (!gridE) {
+		      console.error("equipmentGrid 요소 없음!");
+		      return;
+		    }
+		    const gridL = document.getElementById("lineGrid");
+		    if (!gridL) {
+		      console.error("lineGrid 요소 없음!");
+		      return;
+		    }
+		
+		    // 1) equipmentGrid 생성
+		    equipmentGrid = new tui.Grid ({
+		      el: gridE,
+		      bodyHeight: 450,
+		      rowHeaders: ["rowNum"],
+		      scrollX: false,
+		      scrollY: true,
+		      pageOptions: {
+		        useClient: true,
+		        perPage: 10
+		      },
+		      columnOptions: {resizable: true},
+		      columns: [
+		        {header: "ID", name: "equipId", width: 160, align: "center"},
+		        {header: "이름(한)", name: "koName", align: "left"},
+		        {header: "이름(영)", name: "equipName", align: "left"},
+		        {
+		          header: "등록일자",
+		          name: "createdDate",
+		          align: "center",
+		          formatter: ({ value }) => formatDate(value)
+		        },
+		        {
+		          header: "상세",
+		          name: "btn",
+		          width: 90,
+		          align: "center",
+		          formatter: () => "<button class='btn btn-primary btn-sm grid-detail'>상세</button>"
+		        }
+		      ]
+		    });
+		
+		    // 2) lineGrid 생성
+		    lineGrid = new tui.Grid ({
+		      el: gridL,
+		      bodyHeight: 450,
+		      rowHeaders: ["rowNum"],
+		      scrollX: false,
+		      scrollY: true,
+		      pageOptions: {
+		        useClient: true,
+		        perPage: 10
+		      },
+		      columnOptions: {resizable: true},
+		      columns: [
+		        {header: "ID", name: "lineId", width: 160, align: "center"},
+		        {header: "라인명", name: "lineName", align: "left"},
+		        {header: "상태", name: "status", align: "center"},
+		        {
+		          header: "등록일자",
+		          name: "createdDate",
+		          align: "center",
+		          formatter: ({ value }) => formatDate(value)
+		        },
+		        {
+		          header: "상세",
+		          name: "btn",
+		          width: 90,
+		          align: "center",
+		          formatter: () => "<button class='btn btn-primary btn-sm grid-detail'>상세</button>"
+		        }
+		      ]
+		    });
+		  });
+		  
+		  document
+			  .querySelectorAll('button[data-bs-toggle="tab"]')
+			  .forEach(tab => {
+			    tab.addEventListener('shown.bs.tab', function (e) {
+			      const targetId = e.target.getAttribute('data-bs-target');
+	
+			      if (targetId === '#navs-equipment-tab') {
+			        if (equipmentGrid) equipmentGrid.refreshLayout();
+			      } else if (targetId === '#navs-line-tab') {
+			        if (lineGrid) lineGrid.refreshLayout();
+			      }
+			    });
+			});
+	
+		</script>
     </th:block>
 
 </th:block>
