@@ -134,6 +134,7 @@ const submitOutbound = async () => {
 		});
 	});
 	
+	
 	// body에 담아서 보낼 내용
 	const payload = {
 		workOrderId: matObWorkId.value,
