@@ -252,38 +252,6 @@ function inputLocationInfo(locationInfo) {
 	fillSelect(rackSelect, racks);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // 상세검색버튼
 document.getElementById('btnToggleAdvanced').addEventListener('click', function () {
     const advancedArea = document.getElementById('advancedSearch');
