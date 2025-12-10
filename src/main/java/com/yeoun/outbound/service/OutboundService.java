@@ -82,6 +82,8 @@ public class OutboundService {
 		String shipmentId = Optional.ofNullable(outboundOrderDTO.getShipmentId())
                 					.orElse(null);
 		
+		System.out.println(workOrderId);
+		
 		// 출고 DTO 생성
 		OutboundDTO outboundDTO = OutboundDTO.builder()
 				.outboundId(outboundId)

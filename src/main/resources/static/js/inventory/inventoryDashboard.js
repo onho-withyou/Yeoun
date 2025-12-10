@@ -532,6 +532,7 @@ async function initOutboundModalByRow(rowData) {
 	// 그리드에서 선택한 작업지시서 선택상태로변경
 	matObWorkOrderSelect.value = rowData.orderId;
 	
+	
 	// change 이벤트 강제 발생
 	const changeEvent = new Event("change");
 	matObWorkOrderSelect.dispatchEvent(changeEvent);
@@ -597,7 +598,7 @@ async function initShipmentModalByRow(rowData) {
 	const shipmentSelect  = document.querySelector("#shipmentSelect");
 	const shipmentIdInput = document.querySelector("#shipmentId");
 	const processByName   = document.querySelector("#processByName");
-	const processByEmpId  = document.querySelector("#processByEmpId");
+	const processByEmpId  = document.querySelector(".processByEmpId");
 	const shopClientName  = document.querySelector("#shopClientName");
 	const expectDate      = document.querySelector("#expectDate");
 	

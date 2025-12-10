@@ -62,6 +62,7 @@ public class OutboundController {
 	@PostMapping("/mat/regist")
 	public ResponseEntity<Map<String, String>> registMatOutbound(@RequestBody OutboundOrderDTO outboundOrderDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
 		try {
+			System.out.println("@@@@@@@@@@@@@@@@@@@@@@" + outboundOrderDTO);
 			outboundService.saveOutbound(outboundOrderDTO, loginDTO.getEmpId());
 			
 			return ResponseEntity.status(HttpStatus.CREATED)

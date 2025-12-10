@@ -130,25 +130,27 @@ const submitPrdOutbound = async () => {
 		items
 	};
 	
-	const res = await fetch("/inventory/outbound/fg/regist", {
-		method: "POST",
-		headers: {
-			[csrfHeader]: csrfToken,
-			"Content-Type": "application/json"
-		},
-		body: JSON.stringify(payload)
-	});
+	console.log(payload);
 	
-	if (!res.ok) {
-		console.error("요청 처리 중 오류가 발생했습니다.");
-		return;
-	}
-	
-	const result = await res.json();
-	
-	alert("출고 등록이 완료되었습니다." || result.message);
-	
-	setTimeout(() => {
-		location.reload();
-	}, 300);
+//	const res = await fetch("/inventory/outbound/fg/regist", {
+//		method: "POST",
+//		headers: {
+//			[csrfHeader]: csrfToken,
+//			"Content-Type": "application/json"
+//		},
+//		body: JSON.stringify(payload)
+//	});
+//	
+//	if (!res.ok) {
+//		console.error("요청 처리 중 오류가 발생했습니다.");
+//		return;
+//	}
+//	
+//	const result = await res.json();
+//	
+//	alert("출고 등록이 완료되었습니다." || result.message);
+//	
+//	setTimeout(() => {
+//		location.reload();
+//	}, 300);
 }
