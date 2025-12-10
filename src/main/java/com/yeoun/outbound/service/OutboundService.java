@@ -171,9 +171,17 @@ public class OutboundService {
 			Shipment shipment = shipmentRepository.findByShipmentId(outboundOrderDTO.getShipmentId())
 					.orElseThrow(() -> new NoSuchElementException("출하지시서를 찾을 수 없습니다."));
 			
-			// 출하지시서 상태 변경
-			shipment.changeStatus(ShipmentStatus.RESERVED);
+			// 출하지시 상태 변경
+			shipment.changeStatus(ShipmentStatus.PENDING);
 		}
+    
+		if ("MAT".equals(outboundOrderDTO.getType())) {
+			WorkOrder workOrder = workOrderRepository.findByOrderId(workOrderId)
+					.orElseThrow(() -> new NoSuchElementException("작업지시서를 찾을 수 없습니다."));
+			
+			workOrder.updateOutboundYn("P");
+		}
+
 	
 		outboundRepository.save(outbound);
 		
