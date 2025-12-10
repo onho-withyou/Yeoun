@@ -166,6 +166,13 @@ public class OutboundService {
 			// 출하지시 상태 변경
 			shipment.changeStatus("RESERVING");
 		}
+		
+		if (!workOrderId.isEmpty()) {
+			WorkOrder workOrder = workOrderRepository.findByOrderId(workOrderId)
+					.orElseThrow(() -> new NoSuchElementException("작업지시서를 찾을 수 없습니다."));
+			
+			workOrder.updateOutboundYn("P");
+		}
 	
 		outboundRepository.save(outbound);
 	}
