@@ -88,7 +88,7 @@ public class ScheduleService {
 			AlarmDTO alarmDTO = AlarmDTO.builder()
 					.empId(sharerEmp.getEmpId())
 					.alarmMessage(alarmMessage)
-//					.alarmStatus("N")
+					.alarmStatus("N")
 					.alarmLink("/main")
 					.build();
 			alarmService.sendPersonalMessage(alarmDTO);
@@ -157,7 +157,7 @@ public class ScheduleService {
 				AlarmDTO alarmDTO = AlarmDTO.builder()
 						.empId(sharerEmp.getEmpId())
 						.alarmMessage(alarmMessage)
-//						.alarmStatus("N")
+						.alarmStatus("N")
 						.alarmLink("/main")
 						.build();
 				alarmService.sendPersonalMessage(alarmDTO);

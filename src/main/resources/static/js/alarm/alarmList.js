@@ -32,12 +32,19 @@ startDate.addEventListener('change', function() {
     endDate.min = startDate.value;
 });
 
+// 문서로드 
 document.addEventListener('DOMContentLoaded', async () => {
+	// 날짜범위 지정
 	setDateRange();
 	const alarmData = await getAlarmData();
-	
+	// 알림그리드생성
 	initAlarmGrid();
 	alarmGrid.resetData(alarmData);
+	// 조회한 알림에대해 읽음처리
+	updateAlarmData();
+	// 헤더 종에 새 알림 표시 제거
+	const badgeBell = document.getElementById("badge_bell");
+	badgeBell.style.display = "none";
 	//조회버튼 클릭시 새로조회
 	document.getElementById('searchbtn').addEventListener('click', getAlarmData);
 })
@@ -79,6 +86,36 @@ async function getAlarmData() {
     }
 }
 
+// 알림데이터조회
+async function updateAlarmData() {
+	const params = new URLSearchParams({
+	    startDate: startDate.value || '',
+	    endDate: endDate.value || '',
+		alarmStatus: "Y"
+	});
+	
+    try {
+        const response = await fetch(`/alarm/list?${params}`, {
+            method: "POST",
+            headers: {
+                [csrfHeader]: csrfToken,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error("알림 데이터 상태변경 실패");
+        }
+        
+        const alarmStatusData = await response.json();
+        console.log("알림 데이터 상태변경 완료:", alarmStatusData);
+        
+    } catch (error) {
+        console.error("알림 상태변경 오류:", error);
+        alert("알림 상태를 변경 할 수 없습니다.");
+    }
+}
+
 // 그리드 초기화
 function initAlarmGrid() {
     const Grid = tui.Grid;
@@ -96,8 +133,21 @@ function initAlarmGrid() {
 		},
         columns: [
 //            { header: 'ID', name: 'alarmId', width: 70, align: 'center' },
-            { header: '메시지', name: 'alarmMessage', minWidth: 300 },
-//            { header: '상태', name: 'alarmStatus', width: 80, align: 'center' },
+            { header: '메시지', name: 'alarmMessage', minWidth: 300,
+			  formatter: ({ value, row }) => {
+				    const status = row.alarmStatus; // 숨긴 컬럼 값 사용
+				    if (status === 'N') {
+				        return `
+		                    <span style="display:inline-flex;align-items:center;justify-content:center;gap:6px;width:100%;text-align:center;">
+				                <span>${value ?? ''}</span>
+				                <span style="color:red;font-weight:bold;">NEW</span>
+				            </span>
+				        `;
+				    }
+				    return value ?? '';
+			  }	
+			},
+            { header: '상태', name: 'alarmStatus', width: 80, align: 'center', hidden: true },
 			{
 			    header: '이동',
 			    name: 'alarmLink',

@@ -12,6 +12,7 @@ import com.yeoun.common.e_num.AlarmDestination;
 import com.yeoun.common.entity.Alarm;
 import com.yeoun.common.repository.AlarmRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -37,14 +38,27 @@ public class AlarmService {
     
     // 로그인유저의 알림정보 가져오기
 	public List<AlarmDTO> getAlarmData(String empId, String startDate, String endDate) {
-		
-        // String -> LocalDateTime 변환
-        LocalDateTime startDateTime = LocalDate.parse(startDate)
-            .atStartOfDay();  
-        
-        LocalDateTime endDateTime = LocalDate.parse(endDate)
-            .plusDays(1)      
-            .atStartOfDay();
+	    LocalDateTime startDateTime;
+	    LocalDateTime endDateTime;
+	    // 둘 다 없는 경우 → 전체 기간 조회
+	    if ((startDate == null || startDate.isBlank()) &&
+	        (endDate == null || endDate.isBlank())) {
+
+	        startDateTime = LocalDateTime.of(1970, 1, 1, 0, 0);
+	        endDateTime   = LocalDateTime.of(9999, 12, 31, 23, 59, 59);
+
+	    } else {
+	        LocalDate start = (startDate == null || startDate.isBlank())
+	                ? LocalDate.of(1970, 1, 1)
+	                : LocalDate.parse(startDate);
+
+	        LocalDate end = (endDate == null || endDate.isBlank())
+	                ? LocalDate.of(9999, 12, 31)
+	                : LocalDate.parse(endDate);
+
+	        startDateTime = start.atStartOfDay();
+	        endDateTime   = end.plusDays(1).atStartOfDay();
+	    }
         
         // Repository 호출
         List<Alarm> alarms = alarmRepository
@@ -57,5 +71,32 @@ public class AlarmService {
             .map(AlarmDTO::fromEntity)
             .toList();
     
+	}
+	
+	// 알림 읽음처리
+	@Transactional
+	public void updateAlarmStatus(String empId, String startDate, String endDate, String alarmStatus) {
+        // String -> LocalDateTime 변환
+        LocalDateTime startDateTime = LocalDate.parse(startDate)
+            .atStartOfDay();  
+        
+        LocalDateTime endDateTime = LocalDate.parse(endDate)
+            .plusDays(1)      
+            .atStartOfDay();
+        
+		List<Alarm> alarms = alarmRepository.findAllByEmpIdAndCreatedDateBetweenOrderByCreatedDateDesc(empId, startDateTime, endDateTime);
+		
+	    for (Alarm alarm : alarms) {
+	        alarm.setAlarmStatus(alarmStatus);   // "Y" 읽음 처리
+	    }
+		
+	}
+
+	public List<AlarmDTO> getAlarmStatus(String empId, String alarmStatus) {
+		if(alarmStatus == null || alarmStatus.isEmpty()) {
+			alarmStatus = "N";
+		}
+		return alarmRepository.findAllByEmpIdAndAlarmStatus(empId, alarmStatus).stream()
+				.map(AlarmDTO::fromEntity).toList();
 	}
 }

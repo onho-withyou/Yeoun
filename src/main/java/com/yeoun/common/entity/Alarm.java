@@ -38,8 +38,8 @@ public class Alarm {
 	private String empId;
 	@Column(nullable = false)
 	private String alarmMessage;
-//	@Column(nullable = false)
-//	private String alarmStatus;
+	@Column(nullable = false)
+	private String alarmStatus;
 	@Column(nullable = true)
 	private String alarmLink;
 	@CreatedDate

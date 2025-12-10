@@ -23,7 +23,7 @@ public class AlarmDTO {
 	private Long alarmId;
 	private String empId;
 	private String alarmMessage;
-//	private String alarmStatus;
+	private String alarmStatus;
 	private String alarmLink;
 	private LocalDateTime createdDate;
 	
