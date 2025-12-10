@@ -710,6 +710,11 @@ public class WorkOrderProcessService {
                     .orElseThrow(() -> new IllegalArgumentException("LOT_MASTER 없음: " + lotNo));
             lot.setCurrentStatus("PROD_DONE"); // LOT_STATUS 테이블 참조
             lot.setStatusChangeDate(LocalDateTime.now());
+            
+            // WIP → FIN 변경
+            if ("WIP".equals(lot.getLotType())) {
+                lot.setLotType("FIN");
+            }
         }
     }
 
