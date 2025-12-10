@@ -576,38 +576,49 @@ public class WorkOrderProcessService {
         // -----------------------------
         // 4) LOT_RELATIONSHIP 생성
         // -----------------------------
-//        createLotRelationshipForOrder(orderId, lotNo);
+        createLotRelationshipForOrder(orderId, lotNo);
     }
 
     /**
      * 해당 작업지시(orderId)로 출고된 원자재 LOT들을 조회하여
      * LOT_RELATIONSHIP(OUTPUT_LOT = 생산 LOT, INPUT_LOT = 원자재 LOT)을 생성
      */
-//    private void createLotRelationshipForOrder(String orderId, String outputLotNo) {
-//
-//        // 1) 생산 LOT 조회
-//        LotMaster outputLot = lotMasterRepository.findByLotNo(outputLotNo)
-//                .orElseThrow(() -> new IllegalArgumentException("생산 LOT 없음: " + outputLotNo));
-//
-//        // 2) 이 작업지시에 출고된 원자재 출고 아이템 조회
-//        List<OutboundItem> items =
-//                outboundItemRepository.findByOutbound_WorkOrderIdAndItemType(orderId, "RAW");
-//
-//        for (OutboundItem item : items) {
-//
-//            // 원자재 LOT 조회 (OUTBOUND_ITEM.LOT_NO 기준)
-//            LotMaster inputLot = lotMasterRepository.findByLotNo(item.getLotNo())
-//                    .orElseThrow(() -> new IllegalArgumentException("원자재 LOT 없음: " + item.getLotNo()));
-//
-//            // 관계 엔티티 생성
-//            LotRelationship rel = new LotRelationship();
-//            rel.setOutputLot(outputLot);                          // 부모 LOT = 생산 LOT
-//            rel.setInputLot(inputLot);                            // 자식 LOT = 원자재 LOT
-//            rel.setUsedQty(item.getOutboundAmount().intValue());  // 사용 수량
-//
-//            lotRelationshipRepository.save(rel);
-//        }
-//    }
+    private void createLotRelationshipForOrder(String orderId, String outputLotNo) {
+
+        // 1) 생산 LOT 조회
+        LotMaster outputLot = lotMasterRepository.findByLotNo(outputLotNo)
+                .orElseThrow(() -> new IllegalArgumentException("생산 LOT 없음: " + outputLotNo));
+
+        // 2) 이 작업지시에 출고된 자재 전체 조회 (RAW, SUB, PKG 다 포함)
+        List<String> materialTypes = List.of("RAW", "SUB", "PKG");
+
+        List<OutboundItem> items =
+                outboundItemRepository.findByOutbound_WorkOrderIdAndItemTypeIn(orderId, materialTypes);
+
+        // 3) LOT별 사용 수량 합산 (같은 LOT이 여러 번 출고된 경우)
+        Map<String, Long> usedQtyByLot = items.stream()
+                .collect(Collectors.groupingBy(
+                        OutboundItem::getLotNo,
+                        Collectors.summingLong(OutboundItem::getOutboundAmount)
+                ));
+
+        // 4) LOT 관계 생성
+        for (Map.Entry<String, Long> entry : usedQtyByLot.entrySet()) {
+
+            String inputLotNo = entry.getKey();
+            long usedQty = entry.getValue();
+
+            LotMaster inputLot = lotMasterRepository.findByLotNo(inputLotNo)
+                    .orElseThrow(() -> new IllegalArgumentException("원자재 LOT 없음: " + inputLotNo));
+
+            LotRelationship rel = new LotRelationship();
+            rel.setOutputLot(outputLot);                 // 완제품 LOT (부모)
+            rel.setInputLot(inputLot);                   // 투입 LOT (자식)
+            rel.setUsedQty((int) usedQty);               // 여러 번 출고된 건도 합산된 수량으로 저장
+
+            lotRelationshipRepository.save(rel);
+        }
+    }
 
 
 	/**
