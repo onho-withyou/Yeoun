@@ -12,9 +12,9 @@ public interface OutboundItemRepository extends JpaRepository<OutboundItem, Long
 	List<OutboundItem> findByOutbound_OutboundId(String outboundId);
 	
 	// 작업지시번호 기준 출고 품목 조회 (원자재 LOT 연계용)
-	List<OutboundItem> findByOutbound_WorkOrderIdAndItemType(
-            String workOrderId,   // WORK_ORDER.ORDER_ID
-            String itemType       // "RAW"
+	List<OutboundItem> findByOutbound_WorkOrderIdAndItemTypeIn(
+            String workOrderId,        
+            List<String> itemTypes     
     );
 
 }

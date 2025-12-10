@@ -1,14 +1,18 @@
 package com.yeoun.masterData.service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
 
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.masterData.entity.ProductMst;
@@ -49,71 +53,45 @@ public class ProductMstService {
 				}
 			}
 
+			log.info("param.get(\"updatedRows\")------------------->{}",param.get("updatedRows"));
 			// updatedRows
-			// Object updatedObj = param.get("updatedRows");
-			// if (updatedObj instanceof List) {
-			// 	@SuppressWarnings("unchecked")
-			// 	List<Map<String,Object>> updated = (List<Map<String,Object>>) updatedObj;
-			// 	java.util.List<String> missingIds = new ArrayList<>();
-			// 	for (Map<String,Object> row : updated) {
-			// 		Object idObj = row.get("prdId");
-			// 		String prdId = (idObj == null) ? "" : String.valueOf(idObj).trim();
-
-			// 		ProductMst target = null;
-			// 		if (!prdId.isEmpty()) {
-			// 			Optional<ProductMst> opt = productMstRepository.findById(prdId);
-			// 			if (opt.isPresent()) target = opt.get();
-			// 		}
-
-			// 		// prdId가 비어있거나 조회 실패한 경우, itemName+prdName로 매핑을 시도
-			// 		if (target == null) {
-			// 			Object itemNameObj = row.get("itemName");
-			// 			Object prdNameObj = row.get("prdName");
-			// 			if (itemNameObj != null && prdNameObj != null) {
-			// 				String itemName = String.valueOf(itemNameObj);
-			// 				String prdName = String.valueOf(prdNameObj);
-			// 				Optional<ProductMst> opt2 = productMstRepository.findByItemNameAndPrdName(itemName, prdName);
-			// 				if (opt2.isPresent()) target = opt2.get();
-			// 			}
-			// 		}
-
-			// 		if (target != null) {
-			// 			// 기존 레코드 업데이트
-			// 			applyMapToProduct(existingToMap(target), target, row);
-			// 			target.setUpdatedId(empId);
-			// 			productMstRepository.save(target);
-			// 		} else {
-			// 			// 존재하지 않는 prdId가 명시된 경우: PK 변경 시 의도치 않은 insert를 막기 위해 에러 처리
-			// 			if (!prdId.isEmpty()) {
-			// 				missingIds.add(prdId);
-			// 				continue;
-			// 			}
-			// 			// prdId가 비어있고 매칭되는 기존 레코드가 없으면 새로 저장 (신규 추가 케이스)
-			// 			ProductMst p = mapToProduct(row);
-			// 			p.setCreatedId(empId);
-			// 			productMstRepository.save(p);
-			// 		}
-			// 	}
-			// 	if (!missingIds.isEmpty()) {
-			// 		// 명시된 prdId들이 존재하지 않음: 롤백을 유도하고 에러 반환
-			// 		throw new IllegalArgumentException("Unknown prdId(s) for update: " + String.join(",", missingIds));
-			// 	}
-			// }
-
-			// // deletedRows
-			// Object deletedObj = param.get("deletedRows");
-			// if (deletedObj instanceof java.util.List) {
-			// 	@SuppressWarnings("unchecked")
-			// 	java.util.List<java.util.Map<String,Object>> deleted = (java.util.List<java.util.Map<String,Object>>) deletedObj;
-			// 	for (java.util.Map<String,Object> row : deleted) {
-			// 		Object idObj = row.get("prdId");
-			// 		if (idObj == null) continue;
-			// 		String prdId = String.valueOf(idObj);
-			// 		if (productMstRepository.existsById(prdId)) {
-			// 			productMstRepository.deleteById(prdId);
-			// 		}
-			// 	}
-			// }
+			Object updatedObj = param.get("updatedRows");
+			if (updatedObj instanceof List) {
+				@SuppressWarnings("unchecked")
+				List<Map<String,Object>> updated = (List<Map<String,Object>>) updatedObj;
+				java.util.List<String> missingIds = new ArrayList<>();
+				for (Map<String,Object> row : updated) {
+					Object idObj = row.get("prdId");
+					String prdId = (idObj == null) ? "" : String.valueOf(idObj).trim();
+	
+					ProductMst target = null;
+					if (!prdId.isEmpty()) {
+						Optional<ProductMst> opt = productMstRepository.findById(prdId);
+						if (opt.isPresent()) target = opt.get();
+					}
+	
+					if (target != null) {
+						// 기존 레코드 업데이트
+						ProductMst p = mapToProduct(row);
+						p.setCreatedId(row.get("createdId").toString());
+						p.setCreatedDate(LocalDate.parse(row.get("createdDate").toString()));
+						p.setUpdatedId(empId);
+						p.setUpdatedDate(LocalDate.now());
+						productMstRepository.save(p);
+					} else {
+						// 존재하지 않는 prdId가 명시된 경우: PK 변경 시 의도치 않은 insert를 막기 위해 에러 처리
+						if (!prdId.isEmpty()) {
+							missingIds.add(prdId);
+							continue;
+						}
+						// prdId가 비어있고 매칭되는 기존 레코드가 없으면 새로 저장 (신규 추가 케이스)
+						ProductMst p = mapToProduct(row);
+						p.setCreatedId(empId);
+						productMstRepository.save(p);
+					}
+			}
+			 	
+			}
 
 			return "success";
 		} catch (Exception e) {
@@ -121,6 +99,7 @@ public class ProductMstService {
 			return "error: " + e.getMessage();
 		}
 	}
+
 
 	// 유틸: Map 데이터를 ProductMst 엔티티로 변환
 	private ProductMst mapToProduct(Map<String,Object> row) {
@@ -147,6 +126,7 @@ public class ProductMstService {
 	 * 입력으로 Long, Integer, String 등 다양한 형태의 키를 허용합니다.
 	 * 반환값은 처리 결과 메시지이며, 성공 시 삭제된 건수를 포함합니다.
 	 */
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public Map<String, Object> deleteProduct(Map<String, Object> param) {
 		log.info("deleteProduct------------->{}",param);
 		Map<String, Object> result = new HashMap<>();

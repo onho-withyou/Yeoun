@@ -7,8 +7,13 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+
+import com.yeoun.common.e_num.AlarmDestination;
+import com.yeoun.common.service.AlarmService;
+import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryDTO;
 import com.yeoun.inventory.entity.Inventory;
 import com.yeoun.inventory.repository.InventoryRepository;
@@ -51,6 +56,8 @@ public class OutboundService {
 	private final ShipmentRepository shipmentRepository;
 	private final OrdersRepository ordersRepository;
 	private final OutboundMapper outboundMapper;
+	private final SimpMessagingTemplate messagingTemplate;
+	private final AlarmService alarmService;
 	
 	// 출고 리스트 조회
 	public List<OutboundOrderDTO> getOuboundList(LocalDateTime start, LocalDateTime end, String keyword) {
@@ -169,6 +176,7 @@ public class OutboundService {
 		}
 	
 		outboundRepository.save(outbound);
+		
 	}
 
 	// 출고 상세 페이지
@@ -287,6 +295,18 @@ public class OutboundService {
 		}
 		// 출고 상태 업데이트
 		outbound.updateStatus("COMPLETED");
+		
+		// 모든 출고완료 처리 완료 후 각 페이지로 메세지 보내기
+		if("FG".equals(outboundOrderDTO.getType())) {
+			String message = "새로 등록된 상품 출고가 있습니다. 확인하십시오.";
+			alarmService.sendAlarmMessage(AlarmDestination.INVENTORY, message);
+			alarmService.sendAlarmMessage(AlarmDestination.SALES, message);
+		} else {
+			// 완제품이 아닌 입고일 경우
+			String message = "새로 등록된 원자재 출고가 있습니다. 확인하십시오.";
+			alarmService.sendAlarmMessage(AlarmDestination.INVENTORY, message);
+			alarmService.sendAlarmMessage(AlarmDestination.ORDER, message);
+		}
 	}
 	
 	// ===========================================================================
