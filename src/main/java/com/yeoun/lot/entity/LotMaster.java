@@ -90,6 +90,22 @@ public class LotMaster {
 	private LocalDateTime createdDate;
 	
 	// =======================================================
-	// 상태 변경 메서드 추가 예정
+	// 표준 이름 반환 메서드
+	public String getDisplayName() {
+
+	    // 완제품이면
+	    if (product != null) {
+	        return product.getPrdName();
+	    }
+
+	    // 원자재 LOT이면
+	    if (material != null) {
+	        return material.getMatName();
+	    }
+
+	    // 둘 다 없으면 코드라도
+	    return prdId;
+	}
+
 
 }
