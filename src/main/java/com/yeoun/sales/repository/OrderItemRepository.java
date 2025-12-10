@@ -39,22 +39,20 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 	// 1) 확정된 수주를 제품별로 그룹화
 	@Query("""
 		    SELECT
-		        oi.prdId AS prdId,
+		        p.prdId AS prdId,
 		        p.prdName AS prdName,
 		        SUM(oi.orderQty) AS totalOrderQty,
-		        COUNT(*) AS orderCount,
+		        COUNT(oi) AS orderCount,
 		        MIN(o.deliveryDate) AS earliestDeliveryDate
 		    FROM OrderItem oi
 		    JOIN oi.order o
 		    JOIN oi.product p
-		    WHERE o.orderStatus = 'CONFIRMED'
-		      AND oi.itemStatus <> 'PLANNED'          
+		   WHERE oi.itemStatus = 'CONFIRMED'
 		      AND (:group IS NULL OR p.itemName = :group)
-		    GROUP BY oi.prdId, p.prdName
+		    GROUP BY p.prdId, p.prdName
 		""")
 		List<Map<String, Object>> findConfirmedGrouped(@Param("group") String group);
 
-  
 
     // 2) 특정 제품에 대한 확정된 수주 상세 조회
 	@Query(value = """
@@ -74,14 +72,13 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 		    JOIN CLIENT c       ON c.CLIENT_ID = o.CLIENT_ID
 		    JOIN PRODUCT_MST pm ON pm.PRD_ID = oi.PRD_ID
 		    WHERE o.ORDER_STATUS = 'CONFIRMED'
+		      AND oi.ITEM_STATUS = 'CONFIRMED'   
 		      AND oi.PRD_ID = :prdId
-		      AND oi.ITEM_STATUS = 'PLANNED'
 		    ORDER BY o.DELIVERY_DATE
 		""", nativeQuery = true)
 		List<Map<String,Object>> findItemsByProduct(@Param("prdId") String prdId);
 
-
-
+	
     /*상태값 변경*/      
     @Modifying
     @Transactional

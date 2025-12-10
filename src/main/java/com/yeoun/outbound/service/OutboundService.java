@@ -7,8 +7,12 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+
+import com.yeoun.common.e_num.AlarmDestination;
+import com.yeoun.common.service.AlarmService;
 import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryDTO;
 import com.yeoun.inventory.entity.Inventory;
@@ -30,6 +34,8 @@ import com.yeoun.outbound.repository.OutboundItemRepository;
 import com.yeoun.outbound.repository.OutboundRepository;
 import com.yeoun.sales.entity.Orders;
 import com.yeoun.sales.entity.Shipment;
+import com.yeoun.sales.enums.OrderStatus;
+import com.yeoun.sales.enums.ShipmentStatus;
 import com.yeoun.sales.repository.OrdersRepository;
 import com.yeoun.sales.repository.ShipmentRepository;
 
@@ -50,6 +56,8 @@ public class OutboundService {
 	private final ShipmentRepository shipmentRepository;
 	private final OrdersRepository ordersRepository;
 	private final OutboundMapper outboundMapper;
+	private final SimpMessagingTemplate messagingTemplate;
+	private final AlarmService alarmService;
 	
 	// 출고 리스트 조회
 	public List<OutboundOrderDTO> getOuboundList(LocalDateTime start, LocalDateTime end, String keyword) {
@@ -164,10 +172,19 @@ public class OutboundService {
 					.orElseThrow(() -> new NoSuchElementException("출하지시서를 찾을 수 없습니다."));
 			
 			// 출하지시 상태 변경
-			shipment.changeStatus("RESERVING");
+			shipment.changeStatus(ShipmentStatus.PENDING);
 		}
+    
+		if ("MAT".equals(outboundOrderDTO.getType())) {
+			WorkOrder workOrder = workOrderRepository.findByOrderId(workOrderId)
+					.orElseThrow(() -> new NoSuchElementException("작업지시서를 찾을 수 없습니다."));
+			
+			workOrder.updateOutboundYn("P");
+		}
+
 	
 		outboundRepository.save(outbound);
+		
 	}
 
 	// 출고 상세 페이지
@@ -230,23 +247,31 @@ public class OutboundService {
 			inventoryService.registInventoryHistory(inventoryHistoryDTO);
 			
 			// ----------------------------------------
+			// LOT 이력 남기기
+			String eventType = "RM_ISSUE";
+			String status = "ISSUED";
+			String orderId = outboundOrderDTO.getWorkOrderId();
+			
 			if ("FG".equals(outboundOrderDTO.getType())) {
 				
-				// lotHistory 생성
-				LotHistoryDTO historyDTO = LotHistoryDTO.builder()
-						.lotNo(item.getLotNo())
-						.orderId(outboundOrderDTO.getWorkOrderId())
-						.processId("")
-						.eventType("RM_ISSUE")
-						.status("ISSUED")
-						.locationType("WH")
-						.locationId("WH-" + stock.getWarehouseLocation().getLocationId())
-						.quantity(outboundQty.intValue())
-						.workedId(empId)
-						.build();
-				
-				lotTraceService.registLotHistory(historyDTO);
+				eventType = "FG_SHIP";
+				status = "SHIPPED";
+				orderId = "";
 			}
+			// lotHistory 생성
+			LotHistoryDTO historyDTO = LotHistoryDTO.builder()
+					.lotNo(item.getLotNo())
+					.orderId(orderId)
+					.processId("")
+					.eventType(eventType)
+					.status(status)
+					.locationType("WH")
+					.locationId("WH-" + stock.getWarehouseLocation().getLocationId())
+					.quantity(outboundQty.intValue())
+					.workedId(empId)
+					.build();
+			
+			lotTraceService.registLotHistory(historyDTO);
 			
 			// 재고 수량이 0이면 삭제
 			if (stock.getIvAmount() == 0) {
@@ -254,10 +279,7 @@ public class OutboundService {
 			} else {
 				inventoryRepository.save(stock);
 			}
-			
-
 		}
-		
 		// 원재료 출고일 경우
 		if ("MAT".equals(outboundOrderDTO.getType())) {
 		WorkOrder workOrder = workOrderRepository.findByOrderId(outboundOrderDTO.getWorkOrderId())
@@ -270,17 +292,29 @@ public class OutboundService {
 					.orElseThrow(() -> new NoSuchElementException("출하지시서를 찾을 수 없습니다."));
 			
 			// 출하지시 상태 변경
-			shipment.changeStatus("SHIPPED");
+			shipment.changeStatus(ShipmentStatus.SHIPPED);
 			
 			// 수주확인서 조회
 			Orders orders = ordersRepository.findByOrderId(shipment.getOrderId())
 					.orElseThrow(() -> new NoSuchElementException("수주 내역을 찾을 수 없습니다."));
 			
 			// 수주 상태값 변경(출하)
-			orders.changeStatus("SHIPPED");			
+			orders.changeStatus(OrderStatus.SHIPPED.toString());			
 		}
 		// 출고 상태 업데이트
 		outbound.updateStatus("COMPLETED");
+		
+		// 모든 출고완료 처리 완료 후 각 페이지로 메세지 보내기
+		if("FG".equals(outboundOrderDTO.getType())) {
+			String message = "새로 등록된 상품 출고가 있습니다. 확인하십시오.";
+			alarmService.sendAlarmMessage(AlarmDestination.INVENTORY, message);
+			alarmService.sendAlarmMessage(AlarmDestination.SALES, message);
+		} else {
+			// 완제품이 아닌 입고일 경우
+			String message = "새로 등록된 원자재 출고가 있습니다. 확인하십시오.";
+			alarmService.sendAlarmMessage(AlarmDestination.INVENTORY, message);
+			alarmService.sendAlarmMessage(AlarmDestination.ORDER, message);
+		}
 	}
 	
 	// ===========================================================================

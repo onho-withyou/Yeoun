@@ -42,11 +42,18 @@ public class ShipmentController {
     /** 3) 출하 예약 (POST) */
     @PostMapping("/reserve")
     @ResponseBody
-    public String reserveShipment(
-            @RequestParam String orderId,
+    public Map<String, Object> reserve(
+            @RequestParam("orderId") String orderId,
             @AuthenticationPrincipal LoginDTO login
     ) {
+
         String empId = login.getEmpId();
-        return shipmentService.reserveShipment(orderId, empId);
+
+        String shipmentId = shipmentService.reserveShipment(orderId, empId);
+
+        return Map.of("success", true, "shipmentId", shipmentId);
     }
+
+
+
 }

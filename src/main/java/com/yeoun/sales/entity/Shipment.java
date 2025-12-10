@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;
 
+import com.yeoun.sales.enums.ShipmentStatus;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,8 +20,7 @@ import java.time.LocalDateTime;
 public class Shipment {
 
     // 1) 출하ID (PK)
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id   
     @Column(name = "SHIPMENT_ID", nullable = false)
     @Comment("출하 이력을 구분하기 위한 고유 식별자 (SHP + YYYYMMDD + 4자리 Sequence)")
     private String shipmentId;
@@ -35,9 +36,10 @@ public class Shipment {
     private LocalDate shipmentDate;    
 
     // 6) 출하상태
-    @Column(name = "SHIPMENT_STATUS", length = 20, nullable = false)
-    @Comment("출하 이력 상태 (예: SHIPPED)")
-    private String shipmentStatus;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "SHIPMENT_STATUS")
+    private ShipmentStatus shipmentStatus;
+
 
     // 7) 담당자ID (EMP FK)
     @Column(name = "EMP_ID", length = 20, nullable = false)
@@ -79,20 +81,27 @@ public class Shipment {
     // =============================
     // 기본값 처리
     // =============================
-    @PrePersist
-    public void prePersist() {
-        if (this.shipmentStatus == null) this.shipmentStatus = "SHIPPED";   // Default
-        if (this.shipmentDate == null) this.shipmentDate = LocalDate.now(); // SYSDATE
-        if (this.createdAt == null) this.createdAt = LocalDateTime.now();   // SYSDATE
-    }
 
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-    
-    // 상태값 변경
-    public void changeStatus(String shipmentStatus) {
-    	this.shipmentStatus = shipmentStatus;
-    }
+		@PrePersist
+		public void prePersist() {
+		    // 기본 상태값
+		    if (this.shipmentStatus == null) 
+		        this.shipmentStatus = ShipmentStatus.WAITING;
+		
+		    if (this.shipmentDate == null) 
+		        this.shipmentDate = LocalDate.now();
+		
+		    if (this.createdAt == null) 
+		        this.createdAt = LocalDateTime.now();
+		}
+		
+		@PreUpdate
+		public void preUpdate() {
+		    this.updatedAt = LocalDateTime.now();
+		}
+		
+		// 상태 변경 편의 메서드
+		public void changeStatus(ShipmentStatus status) {
+		    this.shipmentStatus = status;
+		}
 }
