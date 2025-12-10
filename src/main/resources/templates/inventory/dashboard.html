@@ -25,6 +25,7 @@
 		  color: #0d6efd !important;
 		}
     </style>
+<!--      <th:block th:replace="~{inventory/warehouse :: warehouseStyles}"></th:block> -->
 </head>
 
 <th:block layout:fragment="content">
@@ -90,6 +91,9 @@
                 </div>
             </div>
         </div>
+        <th:block>
+<!--         	 <th:block th:replace="~{inventory/warehouse :: warehouseContent}"></th:block> -->
+        </th:block>
 		<!-- 출고등록하지않은 작업지시서리스트 -->
         <div class="card mb-4" id="outboundNOrderCard">
             <h5 class="card-header">미 등록 출고 리스트</h5>
@@ -274,6 +278,7 @@
     <script th:src="@{/js/inventory/inventoryDashboard.js}"></script>
 	<script src="/js/purchase/purchase_regist.js"></script>
 	<script src="/js/inventory/inventoryDashboardOutboundMat.js"></script>
+<!-- 	<th:block th:replace="~{inventory/warehouse :: warehouseScripts}"></th:block> -->
 </th:block>
 
 </html>
