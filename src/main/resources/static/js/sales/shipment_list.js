@@ -55,26 +55,28 @@ function initGrid() {
 		    headerName: "출하상태",
 		    field: "status",
 		    width: 120,
+			aggFunc: "statusAgg",
 		    cellRenderer: params => renderStatusBadge(params.value)
 		},
 		{
 		    headerName: "예약",
 		    width: 110,
 		    cellRenderer: params => {
-		        // WAITING 상태에서만 예약 버튼 표시
-		        if (params.data.status === "WAITING") {
+
+		          if (params.node.group) {
+		            const orderId = params.node.key;  // 그룹의 key = orderId
+
 		            return `
 		                <button class="btn btn-sm btn-primary"
-		                        onclick="reserveShipment('${params.data.orderId}')">
+		                        onclick="reserveShipment('${orderId}')">
 		                    예약
 		                </button>
 		            `;
 		        }
-		        return "-";
+		       
+		        return "";
 		    }
 		},
-
-
 
         {
             headerName: "상세",
@@ -88,15 +90,37 @@ function initGrid() {
         }
     ];
 
-    gridApi = agGrid.createGrid(
-        document.getElementById("shipmentGrid"),
-        {
-            columnDefs,
-            rowSelection: "multiple",
-            suppressRowClickSelection: true,
-            rowData: []
-        }
-    );
+	gridApi = agGrid.createGrid(
+	    document.getElementById("shipmentGrid"),
+	    {
+	        columnDefs,
+	        rowSelection: "multiple",
+	        suppressRowClickSelection: true,
+	        rowData: [],
+	        pagination: true,
+	        paginationPageSize: 20,
+	        paginationPageSizeSelector: [10, 20, 50, 100],
+
+	        // ⭐ 수주번호(orderId) 기준 그룹핑 활성화
+	        groupDisplayType: "groupRows",
+	        autoGroupColumnDef: {
+	            headerName: "수주",
+	            field: "orderId",
+	            width: 200,
+	            suppressCount: true
+	        },
+
+	        // ⭐⭐⭐ 핵심: 그룹의 상태값 계산
+	        aggFuncs: {
+	            statusAgg: values => {
+	                if (values.includes("LACK")) return "LACK";
+	                if (values.every(v => v === "READY")) return "READY";
+	                return "WAITING";
+	            }
+	        }
+	    }
+	);
+
 }
 
 
@@ -109,8 +133,8 @@ function renderStatusBadge(status) {
             return `<span class="badge bg-primary">예약</span>`;
         case "LACK":
             return `<span class="badge bg-danger">부족</span>`;
-        case "COMPLETED":
-            return `<span class="badge bg-warning text-dark">출하완료</span>`;
+        case "SHIPPED":
+            return `<span class="badge bg-success">출하완료</span>`;
         default:
             return `<span class="badge bg-secondary">대기</span>`;
     }
@@ -221,4 +245,4 @@ function reserveShipment(orderId) {
 ========================================================= */
 function openDetail(orderId) {
     alert("상세 페이지 준비 중: " + orderId);
-}
+} 

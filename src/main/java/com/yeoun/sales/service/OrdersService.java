@@ -13,6 +13,7 @@ import com.yeoun.sales.dto.OrderListDTO;
 import com.yeoun.sales.entity.Client;
 import com.yeoun.sales.entity.OrderItem;
 import com.yeoun.sales.entity.Orders;
+import com.yeoun.sales.enums.OrderItemStatus;
 import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.sales.repository.OrderItemRepository;
 import com.yeoun.sales.repository.OrdersRepository;
@@ -165,7 +166,7 @@ public class OrdersService {
                     .unitPrice(new BigDecimal(priceStr))
                     .totalPrice(new BigDecimal(amountStr))
                     .itemMemo(memo)
-                    .itemStatus("ORDER")
+                    .itemStatus(OrderItemStatus.REQUEST.name())
                     .build();
 
             orderItemRepository.save(item);
