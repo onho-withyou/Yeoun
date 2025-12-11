@@ -30,13 +30,43 @@ public class BomMstController {
 	
 	private final BomMstService bomMstService; 
 	
-	//BOM 조회
+	//BOM 정보조회
  	@ResponseBody
   	@GetMapping("/list")
   	public List<BomMst> bomList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
  	    List<BomMst> bomList = bomMstService.findAll();
  	    return bomList;
   	}
+
+	//BOM 상세조회
+ 	@ResponseBody
+  	@GetMapping("/bomDetail/list")
+  	public List<Object[]> bomDetailList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+ 	    List<Object[]> bomDetailList = bomMstService.findAllDetail();
+ 	    return bomDetailList;
+  	}
+	//BOM 상세 -완제품 (JSON 반환)
+	@ResponseBody
+	@GetMapping("/bomDetail/prdList/{bomId}")
+	public List<Object[]> bomDetailPrdList(Model model, @AuthenticationPrincipal LoginDTO loginDTO, @PathVariable("bomId") String bomId) {
+		log.info("bomDetailPrdList bomId------------->{}", bomId);
+		return bomMstService.getBomPrdList(bomId);
+	}
+	//BOM 상세 -원재료 (JSON 반환)
+	@ResponseBody
+	@GetMapping("/bomDetail/matList/{bomId}")
+	public List<Object[]> bomDetailMatList(Model model, @AuthenticationPrincipal LoginDTO loginDTO, @PathVariable("bomId") String bomId) {
+		log.info("bomDetailMatList bomId------------->{}", bomId);
+		return bomMstService.getBomMatList(bomId);
+	}
+	//BOM 상세 -원재료(포장재) (JSON 반환)
+	@ResponseBody
+	@GetMapping("/bomDetail/matTypeList/{bomId}")
+	public List<Object[]> bomDetailMatTypeList(Model model, @AuthenticationPrincipal LoginDTO loginDTO
+		, @PathVariable("bomId") String bomId) {
+		log.info("bomDetailMatTypeList bomId------------->{}", bomId);
+		return bomMstService.getBomMatTypeList(bomId);
+	}
   
 	//BOM 저장
     @ResponseBody
