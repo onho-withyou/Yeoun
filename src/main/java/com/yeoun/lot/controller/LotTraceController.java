@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.yeoun.lot.dto.LotMaterialNodeDTO;
 import com.yeoun.lot.dto.LotProcessNodeDTO;
 import com.yeoun.lot.dto.LotRootDTO;
+import com.yeoun.lot.dto.LotRootDetailDTO;
 import com.yeoun.lot.entity.LotMaster;
 import com.yeoun.lot.service.LotTraceService;
 
@@ -45,8 +46,8 @@ public class LotTraceController {
 	                                   Model model) {
 
 	    // LOT 기본 정보
-	    LotMaster selected = lotTraceService.getLotDetail(lotNo);
-	    model.addAttribute("selectedLot", selected);
+		LotRootDetailDTO rootDetail = lotTraceService.getRootLotDetail(lotNo);
+	    model.addAttribute("rootDetail", rootDetail);
 
 	    // 공정 단계 목록
 	    List<LotProcessNodeDTO> processNodes = lotTraceService.getProcessNodesForLot(lotNo);

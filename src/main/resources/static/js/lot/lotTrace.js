@@ -68,15 +68,20 @@ document.addEventListener("DOMContentLoaded", () => {
       url += `&stepSeq=${encodeURIComponent(stepSeq)}`;
     }
 
-    fetch(url)
-      .then((res) => res.text())
-      .then((html) => {
-        detailEl.innerHTML = html;
-      })
-      .catch((err) => {
-        console.error(err);
-        detailEl.innerHTML =
-          "<div class='text-danger'>LOT 상세를 불러오는 중 오류가 발생했습니다.</div>";
-      });
+	fetch(url)
+	  .then(res => {
+	    if (!res.ok) {
+	      throw new Error("서버 오류: " + res.status);
+	    }
+	    return res.text();
+	  })
+	  .then(html => {
+	    detailEl.innerHTML = html;
+	  })
+	  .catch(err => {
+	    console.error(err);
+	    detailEl.innerHTML =
+	      "<div class='text-danger'>LOT 상세를 불러오는 중 오류가 발생했습니다.</div>";
+	  });
   }
 });

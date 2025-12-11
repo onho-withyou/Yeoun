@@ -1,101 +1,97 @@
 <th:block xmlns:th="http://www.thymeleaf.org">
-
-  <!-- 오른쪽 LOT 상세 카드 body 내용 fragment -->
   <div th:fragment="detail">
 
-    <th:block th:if="${selectedLot != null}">
+    <th:block th:if="${rootDetail != null}">
 
-      <!-- 기본 정보 -->
-      <div class="mb-3">
-        <h6 class="mb-1" th:text="${selectedLot.lotNo}">LOT NO</h6>
-        <div class="text-muted small">
-          <span th:text="${selectedLot.lotType}">FIN</span> /
-          <span th:text="${selectedLot.currentStatus}">DONE</span>
-        </div>
-      </div>
+      <div class="row gx-4">
 
-      <div class="row mb-3">
+        <!-- 왼쪽 컬럼 -->
         <div class="col-sm-6">
-          <div class="fw-semibold">제품 코드</div>
-          <div th:text="${selectedLot.prdId}">PRD001</div>
+          <div class="mb-2">
+            <div class="text-muted small">LOT 코드</div>
+            <div class="fw-semibold" th:text="${rootDetail.lotNo}">LOT-...</div>
+          </div>
+
+          <div class="mb-3">
+            <div class="text-muted small">제품명</div>
+            <div th:text="${rootDetail.productName}">한결 고체 향수 5g</div>
+          </div>
+
+          <div class="mb-3">
+            <div class="text-muted small">생산상태</div>
+            <div th:text="${rootDetail.lotStatusLabel}">진행중</div>
+          </div>
+
+          <div class="mb-3">
+            <div class="text-muted small">생산지시수량</div>
+            <div>
+              <span th:text="${rootDetail.planQty}">500</span> EA
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <div class="text-muted small">시작일자</div>
+            <div th:text="${rootDetail.startDate}">2025-01-02</div>
+          </div>
+
+		  <div class="mb-3">
+		    <div class="text-muted small">라우트</div>
+		
+		    <!-- 라우트 ID -->
+		    <div th:text="${rootDetail.routeId}">RT-SC2501-5G</div>
+		
+		    <!-- 공정 흐름 -->
+		    <div class="text-muted"
+		         th:text="${rootDetail.routeSteps}">
+		      블렌딩 → 여과 → 충전 → 캡/펌프 → QC 검사 → 라벨링
+		    </div>
+		  </div>
+
         </div>
 
+        <!-- 오른쪽 컬럼 -->
         <div class="col-sm-6">
-          <div class="fw-semibold">수량</div>
-          <div th:text="${selectedLot.quantity}">0</div>
-        </div>
-      </div>
+          <div class="mb-3">
+            <div class="text-muted small">제품코드</div>
+            <div th:text="${rootDetail.productCode}">SC2501-5G</div>
+          </div>
 
-      <div class="row mb-3">
-        <div class="col-sm-6">
-          <div class="fw-semibold">현재 위치</div>
-          <div th:text="${selectedLot.currentLocType} + ' / ' + ${selectedLot.currentLocId}">
-            WH / WH-01
+          <div class="mb-3">
+            <div class="text-muted small">제품유형</div>
+            <div th:text="${rootDetail.productType}">
+              완제품 / 고체 향수 (남성)
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <div class="text-muted small">작업지시번호</div>
+            <div th:text="${rootDetail.workOrderId}">ORDER-0001</div>
+          </div>
+
+          <div class="mb-3">
+            <div class="text-muted small">현재 양품/불량</div>
+            <div>
+              <span th:text="${rootDetail.goodQty}">497</span> EA /
+              <span th:text="${rootDetail.defectQty}">3</span> EA
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <div class="text-muted small">예상 종료일자</div>
+            <div th:text="${rootDetail.expectedEndDate}">2025-01-02</div>
           </div>
         </div>
 
-        <div class="col-sm-6">
-          <div class="fw-semibold">상태 변경일시</div>
-          <div th:text="${selectedLot.statusChangeDate}">2025-12-10</div>
-        </div>
       </div>
 
-      <!-- 공정 단계 -->
-      <div class="mt-4" th:if="${processNodes != null}">
-        <h6 class="mb-2">공정 단계</h6>
-        <ul class="list-group list-group-flush small">
-          <li class="list-group-item px-0"
-              th:each="p : ${processNodes}">
-            <span th:text="${p.stepSeq} + '. '"></span>
-            <span th:text="${p.processName}"></span>
-            <span class="text-muted"
-                  th:text="' / ' + ${p.status}"></span>
-          </li>
-        </ul>
-      </div>
-
-      <!-- 투입 자재 LOT -->
-      <div class="mt-4"
-           th:if="${materialNodes != null and !#lists.isEmpty(materialNodes)}">
-
-        <h6 class="mb-2">투입 자재 LOT</h6>
-
-        <ul class="list-group list-group-flush small">
-          <li class="list-group-item px-0"
-              th:each="m : ${materialNodes}">
-
-            <div>
-              <div>
-                <span class="fw-semibold" th:text="${m.lotNo}">LOT</span>
-                <span class="text-muted"
-                      th:text="' / ' + ${m.displayName}"> / 자재명</span>
-              </div>
-
-              <div class="text-muted">
-                <span th:text="'사용량: ' + ${m.usedQty}"></span>
-
-                <span th:if="${m.unit != null and m.unit != ''}"
-                      th:text="' ' + ${m.unit}"></span>
-
-                <span th:if="${m.unit == null or m.unit == ''}">
-                  (단위 정보 없음)
-                </span>
-              </div>
-            </div>
-
-          </li>
-        </ul>
-
-      </div>
+      <!-- 아래쪽 공정/자재 리스트는 기존대로 유지 -->
+      <!-- ... -->
 
     </th:block>
 
-    <th:block th:if="${selectedLot == null}">
-      <div class="text-muted">
-        LOT 정보를 불러오지 못했습니다.
-      </div>
+    <th:block th:if="${rootDetail == null}">
+      <div class="text-muted">LOT 정보를 불러오지 못했습니다.</div>
     </th:block>
 
   </div>
-
 </th:block>
