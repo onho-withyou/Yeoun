@@ -51,7 +51,6 @@ shipmentSelect.addEventListener("focus", async () => {
 		opt.textContent = el.shipmentId;
 		
 		shipmentId.value = el.shipmentId;
-		processByEmpId.value = el.createdId;
 		
 		shipmentSelect.appendChild(opt);
 	});
@@ -59,9 +58,17 @@ shipmentSelect.addEventListener("focus", async () => {
 });
 
 shipmentSelect.addEventListener("change", async () => {
+	console.log("change 실행")
 	const shipId = shipmentSelect.value;
 	
 	if (!shipId) return;
+	
+	const changedShipOrder = shipmentList.find(el => {
+		return el.shipmentId === shipId
+	})
+
+	// 체인지이벤트 발생시 선택된 shipId 의 createdId 입력
+	processByEmpId.value = changedShipOrder.createdId;
 	
 	// 선택한 출하지시서 리스트에서 찾기
 	const shipOrder = shipmentList.find(el => el.shipmentId === shipId);
@@ -72,10 +79,10 @@ shipmentSelect.addEventListener("change", async () => {
 	}
 	
 	// 선택한 출하지시서에 따른 담당자, 거래처명, 출고일 정보 입력
+	shipmentId.value = shipId;
 	processByName.value = shipOrder.createdName;
 	shopClientName.value = shipOrder.clientName;
 	expectDate.value = shipOrder.startDate?.split("T")[0] || "0";
-	
 	prdOutboundDate = shipOrder.startDate;
 	
 	// 선택한 출하지시서의 품목 리스트 렌더링
@@ -129,6 +136,8 @@ const submitPrdOutbound = async () => {
 		type: "FG",
 		items
 	};
+	
+	console.log(payload, "페이;로드 출력");
 	
 	const res = await fetch("/inventory/outbound/fg/regist", {
 		method: "POST",

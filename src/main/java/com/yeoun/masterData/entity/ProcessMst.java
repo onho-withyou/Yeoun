@@ -1,5 +1,6 @@
 package com.yeoun.masterData.entity;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -24,7 +25,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-public class ProcessMst {
+public class ProcessMst implements Serializable{
 	
 	// 공정ID 
 	@Id

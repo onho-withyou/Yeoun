@@ -27,8 +27,11 @@ import com.yeoun.production.entity.ProductionPlanItem;
 import com.yeoun.production.enums.ProductionStatus;
 import com.yeoun.order.dto.WorkOrderSearchDTO;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.masterData.entity.ProdLine;
 import com.yeoun.masterData.entity.ProductMst;
@@ -68,6 +71,9 @@ public class OrderService {
 	private final RouteStepRepository routeStepRepository;
 	private final RouteHeaderRepository routeHeaderRepository;
 	private final WorkOrderProcessRepository workOrderProcessRepository;
+	
+	@Autowired
+	private ObjectMapper objectMapper;
 
 
 	// =======================================================
@@ -242,6 +248,7 @@ public class OrderService {
 		return String.format("#%02X%02X%02X", R, G, B);
 	}
 	// =======================================================
+	// 공정별 작업자 할당
 	@Transactional
 	public void createWorkerProcessList(WorkOrderRequest dto, WorkSchedule schedule) {
 		Map<String, String> processWorkerMap = Map.of(
@@ -319,14 +326,23 @@ public class OrderService {
 		// ================= 작업자 목록 생성 ==================
 		List<WorkOrderDetailDTO.WorkInfo> infos = new ArrayList<>();
 		List<WorkerProcess> workers = workerProcessRepository.findAllBySchedule_Work_OrderId(id);
+		log.info("workers size = {}", workers.size());
+		try {
+			log.info("workers JSON = {}", objectMapper.writeValueAsString(workers));
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
 		List<WorkOrderProcess> processList = workOrderProcessRepository.findByWorkOrderOrderIdOrderByStepSeqAsc(id);
+		log.info("processList size = {}", processList.size());
+		processList.forEach(p -> log.info("process = {}", p));
 		
 		// 1) WorkerProcess를 processId 기준으로 빠르게 조회할 Map 만들기
 		Map<String, String> workerMap = workers.stream()
 		        .collect(Collectors.toMap(
 		                wp -> wp.getProcess().getProcessId(),     // key: 공정ID
-		                wp -> wp.getWorker().getEmpName(),        // value: 작업자명
-		                (a, b) -> a                                // 중복 발생 시 첫 값 유지
+		                wp -> wp.getWorker().getEmpId(),          // value: 작업자ID
+		                (a, b) -> a                               // 중복 발생 시 첫 값 유지
 		        ));
 		
 		// 2) 공정 리스트 순회하며 WorkInfo 생성
@@ -335,13 +351,22 @@ public class OrderService {
 		    String processId = proc.getProcess().getProcessId();
 		    String processName = proc.getProcess().getProcessName();
 		    String status = proc.getStatus();  // COMPLETED / IN_PROGRESS / PENDING
-		    String workerName = workerMap.get(processId); // 작업자 없으면 자동으로 null
+		    String workerId = workerMap.get(processId); // 작업자 없으면 자동으로 null
+		    String workerName = "";
+		    if (workerId != null && !workerId.isBlank()) {
+		    	workerName = empRepository.findByEmpId(workerId)
+		              .orElseThrow(() -> new RuntimeException("작업자 없음 : " + workerId))
+		              .getEmpName();
+		    } else {
+		    	workerName = null;
+		    }
 
 		    infos.add(
 		            WorkOrderDetailDTO.WorkInfo.builder()
 		                    .processId(processId)
 		                    .processName(processName)
 		                    .status(status)
+		                    .workerId(workerId)
 		                    .workerName(workerName)
 		                    .build()
 		    );
@@ -365,6 +390,7 @@ public class OrderService {
 				.lineName(order.getLine().getLineName())
 				.routeId(order.getRouteId())
 				.infos(infos)
+				.remark(order.getRemark())
 				.build();
 
 	}
@@ -372,11 +398,16 @@ public class OrderService {
 	// =======================================================
 	// 작업지시 확정
 	@Transactional
-	public void modifyOrderStatus(String id) {
+	public void modifyOrderStatus(String id, String status) {
 		WorkOrder order = workOrderRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("해당하는 작업 번호가 없습니다."));
-		order.setStatus("RELEASED");
+		order.setStatus(status);
 	}
+	
+	// =======================================================
+	// 작업지시 수정
+	
+	
   
 	// 작업지시서 전체 조회
 	public List<WorkOrderDTO> findAllWorkList() {
@@ -387,6 +418,11 @@ public class OrderService {
 		return workOrders.stream()
 				.map(WorkOrderDTO::fromEntity)
 				.collect(Collectors.toList());
+	}
+
+	public void selectAllWorkers() {
+		log.info("테스트.... ::: " + orderMapper.selectMaterials("BG030", 100));
+		
 	}
 	
 

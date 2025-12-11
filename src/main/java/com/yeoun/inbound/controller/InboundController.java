@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -58,6 +59,14 @@ public class InboundController {
 		return "inbound/inbound_list";
 	}
 	
+	// 입고상세정보 - 작업지시서 새창
+	@GetMapping("/detail/prodWin/{id}")
+	public String product(Model model, @PathVariable("id") String id) {
+		// 탭 활성화를 위한 정보
+		model.addAttribute("id", id);
+		return "inbound/workorder_window";
+	}
+	
 	// 원재료 목록 데이터(날짜 지정과 검색 기능 포함)
 	@GetMapping("/materialList/data")
 	@ResponseBody
@@ -81,7 +90,7 @@ public class InboundController {
 	public String materialDetail(@PathVariable("inboundId") String inboundId, Model model) {
 		
 		ReceiptDTO receiptDTO = inboundService.getMaterialInbound(inboundId);
-		
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>" + receiptDTO);
 		model.addAttribute("receiptDTO", receiptDTO);
 		
 		return "inbound/inbound_detail";

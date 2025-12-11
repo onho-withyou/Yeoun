@@ -12,11 +12,11 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class MaterialAvailabilityDTO {
-	private String prdId;
-	private String prdName;
-	private String matId;
-	private String matName;
-	private Double requiredQty;
-	private Double stockQty;
+	private String prdId;			// 제품Id
+	private String prdName;			// 제품명
+	private String matId;			// 자재Id
+	private String matName;			// 자재명
+	private Double requiredQty;		// 필요수량
+	private Double stockQty;		// 재고량
 
 }

@@ -1,6 +1,7 @@
 package com.yeoun.masterData.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -14,6 +15,6 @@ public interface BomMstRepository extends JpaRepository<BomMst, BomMstId>{
   // 특정 품목의 bom 찾기
 	List<BomMst> findByPrdId(String prdId);
 
-	java.util.Optional<BomMst> findByPrdIdAndMatId(String prdId, String matId);
+	Optional<BomMst> findByPrdIdAndMatId(String prdId, String matId);
 
 }
