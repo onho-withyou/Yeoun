@@ -1,20 +1,27 @@
 package com.yeoun.lot.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
+import com.yeoun.lot.constant.LotStatus;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.dto.LotMasterDTO;
 import com.yeoun.lot.dto.LotMaterialNodeDTO;
+import com.yeoun.lot.dto.LotProcessDetailDTO;
 import com.yeoun.lot.dto.LotProcessNodeDTO;
 import com.yeoun.lot.dto.LotRootDTO;
+import com.yeoun.lot.dto.LotRootDetailDTO;
 import com.yeoun.lot.entity.LotHistory;
 import com.yeoun.lot.entity.LotMaster;
 import com.yeoun.lot.entity.LotRelationship;
@@ -22,7 +29,14 @@ import com.yeoun.lot.repository.LotHistoryRepository;
 import com.yeoun.lot.repository.LotMasterRepository;
 import com.yeoun.lot.repository.LotRelationshipRepository;
 import com.yeoun.masterData.entity.ProcessMst;
+import com.yeoun.masterData.entity.ProdLine;
+import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.masterData.repository.ProcessMstRepository;
+import com.yeoun.order.entity.WorkOrder;
+import com.yeoun.order.entity.WorkerProcess;
+import com.yeoun.order.repository.WorkOrderRepository;
+import com.yeoun.order.repository.WorkerProcessRepository;
+import com.yeoun.process.constant.ProcessStepStatus;
 import com.yeoun.process.entity.WorkOrderProcess;
 import com.yeoun.process.repository.WorkOrderProcessRepository;
 
@@ -40,6 +54,8 @@ public class LotTraceService {
 	private final LotHistoryRepository lotHistoryRepository;
 	private final WorkOrderProcessRepository workOrderProcessRepository; 
 	private final LotRelationshipRepository lotRelationshipRepository;
+	private final WorkOrderRepository workOrderRepository;
+	private final WorkerProcessRepository workerProcessRepository;
 	
 	// ----------------------------------------------------------------------------
 	// LOT 생성
@@ -108,35 +124,135 @@ public class LotTraceService {
 			nextSeq
 		);
 	}
-	
+
 	// ================================================================================
-	// [LOT 추적 1단계]
-	// 완제품 LOT(FIN) 목록 조회
+	// [ROOT - 완제품 LOT]
+	// ================================================================================
+	// 완제품 ROOT 목록
 	@Transactional(readOnly = true)
 	public List<LotRootDTO> getFinishedLots() {
 		
+		// 완제품 공정에 속한 LOT 타입
+		List<String> lotTypes = List.of("WIP", "FIN");
+		
 		// 1) FIN LOT 목록 조회
 		List<LotMaster> lots = 
-				lotMasterRepository.findByLotTypeOrderByCreatedDateDesc("FIN");
+				lotMasterRepository.findByLotTypeInOrderByCreatedDateDesc(lotTypes);
 		
 		return lots.stream()
-	            .map(lm -> new LotRootDTO(
-	                    lm.getLotNo(),
-	                    lm.getDisplayName(),
-	                    lm.getCurrentStatus()
-	            ))
+	            .map(lm -> {
+	                // LOT 상태 코드
+	                LotStatus statusEnum = LotStatus.fromCode(lm.getCurrentStatus());
+	                String statusLabel = (statusEnum != null)
+	                        ? statusEnum.getLabel()
+	                        : lm.getCurrentStatus();   
+
+	                return new LotRootDTO(
+	                        lm.getLotNo(),
+	                        lm.getDisplayName(),
+	                        statusLabel                 
+	                );
+	            })
 	            .toList();
 	}
 	
-	// [LOT 추적] 오른쪽 상세 카드에 표시할 LOT 기본 정보 조회
+	// LOT ROOT 상세 정보 조회
 	@Transactional(readOnly = true)
-    public LotMaster getLotDetail(String lotNo) {
+	public LotRootDetailDTO getRootLotDetail(String lotNo) {
 
-        return lotMasterRepository.findByLotNo(lotNo)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("LOT_MASTER에 존재하지 않는 LOT : " + lotNo));
-    }
+	    LotMaster lot = lotMasterRepository.findByLotNo(lotNo)
+	            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 LOT : " + lotNo));
+
+	    WorkOrder wo = null;
+	    if (lot.getOrderId() != null) {
+	        wo = workOrderRepository.findById(lot.getOrderId()).orElse(null);
+	    }
+
+	    // 제품
+	    String productCode = null;
+	    String productName = null;
+	    String productType = null;
+	    if (wo != null && wo.getProduct() != null) {
+	        ProductMst p = wo.getProduct();
+	        productCode = p.getPrdId();
+	        productName = p.getPrdName();
+	        productType = p.getPrdCat(); 
+	    }
+
+	    // 상태 라벨
+	    LotStatus lotStatusEnum = LotStatus.fromCode(lot.getCurrentStatus());
+	    String statusLabel = (lotStatusEnum != null)
+	            ? lotStatusEnum.getLabel()
+	            : lot.getCurrentStatus();
+
+
+	    // 수량
+	    Integer planQty = (wo != null) ? wo.getPlanQty() : null;
+
+	    // 양품/불량 = work_order_process 에서 마지막 결과 가져오기 (앞에서 말한 방식)
+	    Integer goodQty = null;
+	    Integer defectQty = null;
+	    if (wo != null) {
+	        List<WorkOrderProcess> processes =
+	                workOrderProcessRepository
+	                        .findByWorkOrderOrderIdOrderByStepSeqAsc(wo.getOrderId());
+
+	        WorkOrderProcess lastWithResult = processes.stream()
+	                .filter(p -> p.getGoodQty() != null || p.getDefectQty() != null)
+	                .reduce((a, b) -> b)
+	                .orElse(null);
+
+	        if (lastWithResult != null) {
+	            goodQty   = lastWithResult.getGoodQty();
+	            defectQty = lastWithResult.getDefectQty();
+	        }
+	    }
+
+	    // 일정
+	    LocalDate startDate = null;
+	    LocalDate expectedEndDate = null;
+	    if (wo != null) {
+	        startDate       = (wo.getActStartDate() != null)
+	                ? wo.getActStartDate().toLocalDate()
+	                : wo.getPlanStartDate().toLocalDate();
+	        expectedEndDate = wo.getPlanEndDate().toLocalDate();
+	    }
+
+	    // 라우트 요약 : RT-SC2501-5G (블렌딩 → 여과 → )
+	    String routeId = null;
+	    String routeSteps = null;
+
+	    if (wo != null) {
+	        routeId = wo.getRouteId();   // 예: RT-LG030
+
+	        List<WorkOrderProcess> processes =
+	                workOrderProcessRepository
+	                        .findByWorkOrderOrderIdOrderByStepSeqAsc(wo.getOrderId());
+
+	        routeSteps = processes.stream()
+	                .map(p -> p.getProcess().getProcessName())    // 예: 블렌딩, 여과, 충전...
+	                .collect(Collectors.joining(" \u2192 "));     // "블렌딩 → 여과 → 충전 → ..."
+	    }
+
+	    return LotRootDetailDTO.builder()
+	            .lotNo(lot.getLotNo())
+	            .productCode(productCode)
+	            .productName(productName)
+	            .productType(productType)
+	            .lotStatusLabel(statusLabel)
+	            .workOrderId(wo != null ? wo.getOrderId() : null)
+	            .planQty(planQty)
+	            .goodQty(goodQty)
+	            .defectQty(defectQty)
+	            .startDate(startDate)
+	            .expectedEndDate(expectedEndDate)
+	            .routeId(routeId)
+	            .routeSteps(routeSteps)
+	            .build();
+	}
 	
+	// ================================================================================
+	// 공정 정보
 	// ================================================================================
 	// 선택 LOT 기준 1차 공정 LOT 트리용 노드
 	@Transactional(readOnly = true)
@@ -156,20 +272,87 @@ public class LotTraceService {
 	            .map(proc -> {
 	                String processId = proc.getProcess().getProcessId();
 	                String processName = proc.getProcess().getProcessName();
-
-	                String status = lotHistoryRepository
-	                        .findTopByLot_LotNoAndProcess_ProcessIdOrderByHistIdDesc(lotNo, processId)
-	                        .map(LotHistory::getStatus)
-	                        .orElse("NEW");
+	                // 공정 상태 코드 
+	                ProcessStepStatus stepStatus = ProcessStepStatus.fromCode(proc.getStatus());
+	                String statusLabel = (stepStatus != null)
+	                        ? stepStatus.getLabel()
+	                        : proc.getStatus();
 
 	                return new LotProcessNodeDTO(
 	                        proc.getStepSeq(),
 	                        processId,
 	                        processName,
-	                        status
+	                        statusLabel,
+	                        orderId
 	                );
 	            })
 	            .toList();
+	}
+
+	// 공정 상세 조회
+	@Transactional(readOnly = true)
+	public LotProcessDetailDTO getProcessDetail(String orderId, Integer stepSeq) {
+		
+		// 1) 공정 엔티티 조회 (작업지시 + 공정 단계)
+		WorkOrderProcess wop = workOrderProcessRepository.findByWorkOrderOrderIdAndStepSeq(orderId, stepSeq)
+				.orElseThrow(() -> new IllegalArgumentException("공정 정보를 찾을 수 없습니다. orderId = " + orderId + ", stepSeq = " + stepSeq));
+		
+		// 2) 공정 마스터 (ProcessMst) - 공정명 + 공정ID
+		ProcessMst process = wop.getProcess();
+		String processId = process != null ? process.getProcessId() : null;
+		String processName = process != null ? process.getProcessName()	: null;
+		
+		// 3) 작업지시 - 라인
+		WorkOrder workOrder = wop.getWorkOrder();
+		String lineId = null;
+		ProdLine line = null;
+		
+		if (workOrder != null) {
+		    line = workOrder.getLine();  
+		    if (line != null) {
+		        lineId = line.getLineId();   
+		    }
+		}
+		
+		// 4) 공정 담당자 조회 (WorkerProcess)
+		WorkerProcess workerProcess = 
+				workerProcessRepository.findFirstBySchedule_Work_OrderIdAndProcess_ProcessId(orderId, processId)
+						.orElse(null);
+		
+		Emp worker = workerProcess != null ? workerProcess.getWorker() : null;
+		String workerId = worker != null ? worker.getEmpId() : null;
+		String workerName = worker != null ? worker.getEmpName() : null;
+		
+		Dept dept = worker != null ? worker.getDept() : null;
+		String deptName = dept != null ? dept.getDeptName() : null;
+		
+		// 5) 설비 정보 조회
+		
+		// 6) 양품/불량 + 불량률 계산
+		Long goodQty   = (wop.getGoodQty()   == null) ? 0L : wop.getGoodQty().longValue();
+		Long defectQty = (wop.getDefectQty() == null) ? 0L : wop.getDefectQty().longValue();
+
+		double defectRate = 0.0;
+		long total = goodQty + defectQty;
+		if (total > 0) {
+		    defectRate = (double) defectQty * 100.0 / total;
+		}
+
+		// 7) DTO 생성 및 반환
+		return LotProcessDetailDTO.builder()
+		        .processId(processId)
+		        .processName(processName)
+		        .status(wop.getStatus())
+		        .deptName(deptName)
+		        .workerId(workerId)
+		        .workerName(workerName)
+		        .startTime(wop.getStartTime())
+		        .endTime(wop.getEndTime())
+		        .goodQty(goodQty)
+		        .defectQty(defectQty)
+		        .defectRate(defectRate)
+		        .lineId(lineId)
+		        .build();
 	}
 
 
@@ -210,6 +393,11 @@ public class LotTraceService {
 				})
 				.toList();
 	}
+
+	
+
+
+
 	
 	
 	
