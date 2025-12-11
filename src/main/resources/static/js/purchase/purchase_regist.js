@@ -142,7 +142,7 @@ itemSelect.addEventListener("change", () => {
 	let isDuplicate = false;
 	const existingRow = orderTableBody.querySelectorAll("tr");
 	const selectedItemId = option.value;
-	const orderUnit = parseInt(option.dataset.unit) || 1; // 주문단위
+	const orderUnit = parseInt(option.dataset.orderUnit) || 1; // 주문단위
 	
 	existingRow.forEach(row => {
 		 const itemIdInput = row.querySelector("input[name=itemId]");
@@ -194,6 +194,7 @@ itemSelect.addEventListener("change", () => {
 		<tr>
 			<td>${itemName}</td>
 			<td>${minOrder}</td>
+			<td>${option.dataset.unit}</td>
 			<td>
 				<input 
 					type="number" 
@@ -209,6 +210,7 @@ itemSelect.addEventListener("change", () => {
 				<input type="hidden" name="itemId" value="${option.value}">
 				<input type="hidden" name="vat" value="${tax}">
 				<input type="hidden" name="unitPrice" value="${unitPrice}">
+				<input type="hidden" name="unit" value="${option.dataset.unit}">
 			</td>
 			<td>${unitPrice.toLocaleString()}</td>
 			<td class="supplyPrice">${supplyPrice.toLocaleString()}</td>
@@ -235,7 +237,7 @@ orderTableBody.addEventListener("change", (e) => {
 	 const qtyInput = e.target;
 	 
 	 const minOrder = parseInt(qtyInput.dataset.min);
-	 const unit = parseInt(qtyInput.dataset.unit);
+	 const unit = parseInt(qtyInput.dataset.orderUnit);
 	 const price = parseInt(qtyInput.dataset.price);
 	 
 	 let qty = parseInt(qtyInput.value);
@@ -280,9 +282,14 @@ const submitOrder = async () => {
 	
 	// 선택된 품목들을 items에 추가
 	document.querySelectorAll("#orderTable tbody tr").forEach(tr => {
+		// 발주 단위
+		const unit = tr.querySelector("input[name=unit]").value;
+		// 단위 변환(발주 단위와 재고 단위를 비교해서 변환)
+		const convertOrderAmount = convertToBaseUnit(tr.querySelector("input[name=orderAmount]").value, unit)
+		
 		items.push({
 			itemId: tr.querySelector("input[name=itemId]").value,
-			orderAmount: tr.querySelector("input[name=orderAmount]").value,
+			orderAmount: convertOrderAmount,
 			unitPrice: tr.querySelector("input[name=unitPrice]").value,
 		});
 	});
