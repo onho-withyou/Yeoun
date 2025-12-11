@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
+import com.yeoun.masterData.dto.QcItemDTO;
 import com.yeoun.masterData.entity.QcItem;
 import com.yeoun.masterData.service.QcItemService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -30,6 +32,7 @@ public class QcItemController {
   	@GetMapping("/qc_item")
   	public String qcItem(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
 		//model.addAttribute("empList", approvalDocService.getEmp());//기안자 목록 불러오기
+  		
 		return "masterData/qc_item";
  	}
     
@@ -39,9 +42,11 @@ public class QcItemController {
   	public List<QcItem> qcItemLilist() {
   		return qcItemService.findAll();
   	}
+  	
   	//품질기준 저장
   	@PostMapping("/qcItem/save")
-  	public String saveItem(@AuthenticationPrincipal LoginDTO loginDTO,@ModelAttribute QcItem qcItem) {
+  	public String saveItem(Model model,@AuthenticationPrincipal LoginDTO loginDTO,@ModelAttribute @Valid QcItem qcItem) {
+  		//model.addAttribute("qcItem", qcItem);
   		
   		qcItemService.saveQcItem(loginDTO.getEmpId(),qcItem);
   		

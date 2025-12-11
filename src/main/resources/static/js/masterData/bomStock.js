@@ -216,7 +216,7 @@ grid1.on('beforeChange', (ev) => {
 	        // 기존 행일 경우 (isNewRow가 false, 즉 prdIdValue가 있는 경우)
 	        if (!isNewRow) {
 	            ev.stop(); // 편집 모드 진입 차단
-	            alert('기존 품번,원재료Id는 수정할 수 없습니다.'); 
+	            alert('기존 완제품 Id,원재료Id는 수정할 수 없습니다.  삭제후 새로추가(등록) 해주세요!'); 
 	        }
 	    }
 });
@@ -236,7 +236,7 @@ grid2.on('beforeChange', (ev) => {
 	        // 기존 행일 경우 (isNewRow가 false, 즉 itemIdValue가 있는 경우)
 	        if (!isNewRow) {
 	            ev.stop(); // 편집 모드 진입 차단
-	            alert('기존 품목코드는 수정할 수 없습니다.'); 
+	            alert('기존 품목코드는 수정할 수 없습니다.  삭제후 새로추가(등록) 해주세요!'); 
 	        }
 	    }
 });

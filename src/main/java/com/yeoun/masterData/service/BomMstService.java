@@ -10,8 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.masterData.entity.BomMst;
-import com.yeoun.masterData.entity.MaterialMst;
-import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.masterData.mapper.BomMstMapper;
 import com.yeoun.masterData.repository.BomMstRepository;
 import com.yeoun.outbound.dto.OutboundOrderItemDTO;
@@ -74,12 +72,12 @@ public class BomMstService {
 	
 					if (target != null) {
 						// 기존 레코드 업데이트
-						BomMst p = mapToBom(row);
-						p.setCreatedId(row.get("createdId").toString());
-						p.setCreatedDate(LocalDate.parse(row.get("createdDate").toString()));
-						p.setUpdatedId(empId);
-						p.setUpdatedDate(LocalDate.now());
-						bomMstRepository.save(p);
+						BomMst b = mapToBom(row);
+						b.setCreatedId(row.get("createdId").toString());
+						b.setCreatedDate(LocalDate.parse(row.get("createdDate").toString()));
+						b.setUpdatedId(empId);
+						b.setUpdatedDate(LocalDate.now());
+						bomMstRepository.save(b);
 					} else {
 						// 존재하지 않는 prdId,matId가 명시된 경우: PK 변경 시 의도치 않은 insert를 막기 위해 에러 처리
 						if (!prdId.isEmpty() || !matId.isEmpty()) {
@@ -87,9 +85,9 @@ public class BomMstService {
 							continue;
 						}
 						// prdId가 비어있고 매칭되는 기존 레코드가 없으면 새로 저장 (신규 추가 케이스)
-						BomMst p = mapToBom(row);
-						p.setCreatedId(empId);
-						bomMstRepository.save(p);
+						BomMst b = mapToBom(row);
+						b.setCreatedId(empId);
+						bomMstRepository.save(b);
 					}
 				}
 			 	
