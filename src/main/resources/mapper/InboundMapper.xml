@@ -13,6 +13,8 @@
 		<result property="orderEmpName"  column="ORDEREMPNAME"/>
 		<result property="materialEmpName"  column="MATERIALEMPNAME"/>
 		
+		<result property="workOrderEmpName" column="WORKORDEREMPNAME"/>
+		
 		<collection property="items" ofType="com.yeoun.inbound.dto.ReceiptItemDTO">
 			<id property="inboundItemId" column="INBOUND_ITEM_ID"/>
 			<result property="itemName" column="ITEMNAME"/>
@@ -141,6 +143,7 @@
 			, c.CLIENT_NAME
 			, e1.EMP_NAME AS orderEmpName
 			, e2.EMP_NAME AS materialEmpName
+			, E3.EMP_NAME AS workOrderEmpName
 			, it.INBOUND_ITEM_ID
 			, it.LOT_NO
 			, it.ITEM_TYPE
@@ -201,6 +204,16 @@
 		ON
 			it.ITEM_ID = prd.PRD_ID
 			AND it.ITEM_TYPE = 'FG'
+			
+		LEFT JOIN
+			WORK_ORDER wo
+		ON 
+			i.PROD_ID = wo.ORDER_ID
+		LEFT JOIN
+			EMP e3
+		ON
+			wo.CREATED_ID = e3.EMP_ID
+			
 		WHERE 
 			i.INBOUND_ID = #{inboundId}
 		ORDER BY

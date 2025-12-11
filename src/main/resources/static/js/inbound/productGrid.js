@@ -78,17 +78,17 @@ async function loadProductInbound(startDate, endDate, keyword, searchType) {
 			INSPECTED: "검수완료",
 			COMPLETED: "입고완료"
 		}
-		// 원재료정보만필터
-		data = data.filter(row => row.prodId != null && row.prodId !== '');
+		// 완제품 정보만필터
+		data = await data.filter(row => row.prodId != null && row.prodId !== '');
 
 		
 		// 상태값이 영어로 들어오는 것을 한글로 변환해서 기존 data에 덮어씌움
-		data = data.map(item => ({
+		data = await data.map(item => ({
 			...item,
 			inboundStatus: statusMap[item.inboundStatus] || item.inboundStatus
 		}));
-		console.log(data);
-		productGrid.resetData(data);
+//		console.log(data);
+		await productGrid.resetData(data);
 		
 	} catch (error) {
 		console.error(error);
@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	prdStartDateInput.value = startDate;
 	prdEndDateInput.value = endDate;
 	
-	await loadProductInbound(startDate, endDate, null);
+	await loadProductInbound(startDate, endDate, "", "");
 });
 
 // 검색

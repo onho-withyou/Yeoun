@@ -20,4 +20,7 @@ public class ReceiptDTO {
 	private String orderEmpName; // 발주 담당자(원재료)
 	private String materialEmpName; // 입고 담당자(완제품)
 	private List<ReceiptItemDTO> items; // 입고 품목들
+	
+	// 작업지시서 등록자이름
+	private String workOrderEmpName;
 }
