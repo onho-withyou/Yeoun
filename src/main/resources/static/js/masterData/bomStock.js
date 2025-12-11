@@ -30,7 +30,7 @@ const grid1 = new Grid({
 	  columns: [
 			{header: 'BOMID' ,name: 'bomId' ,align: 'center'}
 	  ]
-	  ,bodyHeight: 1100 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
+	  ,bodyHeight: 1200 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
 	  ,height:100
 	  ,columnOptions: {
     		resizable: true
