@@ -1,6 +1,11 @@
 const materialGrid = new tui.Grid({
 	el: document.getElementById("materialGrid"),
+	bodyHeight: 500,
 	rowHeaders: ['rowNum'],
+	pageOptions: {
+	    useClient: true,  // 클라이언트 사이드 페이징
+	    perPage: 10       // 페이지당 10개 행
+	},	
 	columns: [
 		{
 			header: "출고번호",
@@ -13,11 +18,13 @@ const materialGrid = new tui.Grid({
 		{
 			header: "출고예정일",
 			name: "startDate",
+			sortable: true,
 			formatter: ({value}) => formatDate(value)
 		},
 		{
 			header: "출고일",
 			name: "outboundDate",
+			sortable: true,
 			formatter: ({value}) => formatDate(value)
 		},
 		{
@@ -115,6 +122,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 	endDateInput.value = endDate;
 	
 	await loadMaterialOutbound(startDate, endDate, null);
+	
+	//스피너  off
+	hideSpinner();
 });
 
 // 검색

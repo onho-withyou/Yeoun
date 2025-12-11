@@ -1,6 +1,11 @@
 const productGrid = new tui.Grid({
 	el: document.getElementById("productGrid"),
+	bodyHeight: 500,
 	rowHeaders: ['rowNum'],
+	pageOptions: {
+	    useClient: true,  // 클라이언트 사이드 페이징
+	    perPage: 10       // 페이지당 10개 행
+	},	
 	columns: [
 		{
 			header: "출고번호",
@@ -13,11 +18,13 @@ const productGrid = new tui.Grid({
 		{
 			header: "출고예정일",
 			name: "startDate",
+			sortable: true,
 			formatter: ({value}) => formatDate(value)
 		},
 		{
 			header: "출고일",
 			name: "outboundDate",
+			sortable: true,
 			formatter: ({value}) => formatDate(value)
 		},
 		{
@@ -99,6 +106,9 @@ async function loadProductOutbound(startDate, endDate, keyword) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+	//스피너 on
+	showSpinner();
+	
 	// 오늘 날짜 구하기
 	const today = new Date();
 	const year = today.getFullYear();
@@ -114,6 +124,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 	prdEndDateInput.value = endDate;
 	
 	await loadProductOutbound(startDate, endDate, null);
+	
+	//스피너  off
+	hideSpinner();
 });
 
 // 검색
