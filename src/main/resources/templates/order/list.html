@@ -374,14 +374,6 @@
 	.process-line.done::before {
 	    background: #6c5ce7;
 	}
-	
-	.process-line.partial::before {
-	    background: linear-gradient(
-	        to right,
-	        #6c5ce7 0% var(--progress),
-	        #e5e2ff var(--progress) 100%
-	    );
-	}
 
 	/* 박스들을 가로로 균등 배치 */
 	.process-boxes {
@@ -962,7 +954,7 @@
 		              <label class="form-label">비고</label>
 		              <textarea id="detailRemark"
 		              			class="form-control" rows="3"
-		              			style="resize: none;" readonly
+		              			style="resize: none;"
 		              ></textarea>
 		            </div>
 				    
@@ -1394,7 +1386,6 @@
                   
                   const dataStatus = data.status;
                   const statusBtn = document.getElementById("btnReleased");
-                  const modifyBtn = document.getElementById("btnModify");
                   const cancelBtn = document.getElementById("btnCanceled");
                   const statusText = document.getElementById("detailStatus");
                   
@@ -1406,7 +1397,6 @@
                 	  }               	  
                 	  statusText.innerText = '준비';
                 	  statusBtn.disabled = false; // 확정버튼 활성화
-                	  modifyBtn.disabled = false; // 수정버튼 활성화
                 	  cancelBtn.disabled = false; // 취소버튼 활성화
                   } else {
                 	  statusBtn.innerText = '확정됨';
@@ -1431,7 +1421,6 @@
                 	  		statusText.innerText = '미정';
                 	  }
                 	  statusBtn.disabled = true; // 확정버튼 비활성화
-                	  modifyBtn.disabled = true; // 수정버튼 비활성화
                 	  cancelBtn.disabled = true; // 취소버튼 비활성화
                 	  
                   }
@@ -1452,10 +1441,8 @@
 				    
 				    if (dataStatus === "CREATED"){
 				    	select.disabled = false;
-				    	document.getElementById("detailRemark").readonly = false;
 				    } else {
 				    	select.disabled = true;
-				    	document.getElementById("detailRemark").readonly = true;
 				    }
 				});
 
@@ -1540,6 +1527,32 @@
      })
      .catch(err => console.error("오류 발생:", err));
   }
+
+  // 수정
+  document.getElementById("btnModify").addEventListener("click", async () => {
+
+	  const prcBld = document.getElementById("PRC-BLD").value;
+	  const prcFlt = document.getElementById("PRC-FLT").value;
+	  const prcFil = document.getElementById("PRC-FIL").value;
+	  const prcCap = document.getElementById("PRC-CAP").value;
+	  const prcLbl = document.getElementById("PRC-LBL").value;
+	  const remark = document.getElementById("detailRemark").value;
+
+	  fetch (`/order/modify/${orderId}`, {
+		  method: "PATCH",
+		  headers: {
+			  "Content-Type": "application/json",
+			  [csrfHeader]: csrfToken
+		  },
+		  body: JSON.stringify({
+			prcBld, prcFlt, prcFil, prcCap, prcLbl, remark
+		  })
+	  })
+		.then(() => {
+		  alert("수정 완료");
+	  })
+	    .catch(err => console.error ("오류 발생", err));
+  });
   
 </script>
 </th:block>
