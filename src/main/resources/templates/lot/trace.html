@@ -84,32 +84,22 @@
 		              th:data-root-lot-no="${lot.lotNo}">
 		
 		            <!-- 공정 그룹 -->
-		            <li class="mb-1">
-		              <a href="#"
-		                 class="lot-group-toggle text-decoration-none small"
-		                 data-group="process"
-		                 th:data-lot-no="${lot.lotNo}">
-		                ▶ 공정
-		              </a>
-		
-		              <!-- 공정 리스트 (선택된 LOT에 대해서만 채움) -->
-		              <ul class="list-unstyled ms-3 mt-1 group-children d-none"
-		                  data-group="process"
-		                  th:data-lot-no="${lot.lotNo}">
-		                <li th:each="p : ${processNodes}"
-		                    th:if="${selectedLot != null and selectedLot.lotNo == lot.lotNo}">
-		                  <a href="#"
-		                     class="text-decoration-none small process-item"
-		                     th:data-lot-no="${lot.lotNo}"
-		                     th:data-step-seq="${p.stepSeq}">
-		                    <span th:text="${p.stepSeq} + '. '">1. </span>
-		                    <span th:text="${p.processName}">공정명</span>
-		                    <span class="text-muted"
-		                          th:text="' (' + ${p.status} + ')'"> (STATUS)</span>
-		                  </a>
-		                </li>
-		              </ul>
-		            </li>
+					<li class="mb-1">
+					  <a href="#"
+					     class="lot-group-toggle text-decoration-none small"
+					     data-group="process"
+					     th:data-lot-no="${lot.lotNo}">
+					    ▶ 공정
+					  </a>
+					
+					  <!-- 공정 리스트: 이제 서버에서 안 채우고 JS로 채울 거라 비워둠 -->
+					  <ul class="list-unstyled ms-3 mt-1 group-children d-none"
+					      data-group="process"
+					      th:data-lot-no="${lot.lotNo}">
+					    <!-- JS에서 li.process-item 들이 동적으로 들어옴 -->
+					  </ul>
+					</li>
+
 		
 		            <!-- 자재 그룹 -->
 		            <li class="mb-1">

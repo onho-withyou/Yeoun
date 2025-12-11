@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.lot.dto.LotMaterialNodeDTO;
 import com.yeoun.lot.dto.LotProcessNodeDTO;
@@ -69,6 +70,15 @@ public class LotTraceController {
 	    return "/lot/trace_detail :: detail";
 	}
 	
+	// =====================================================================
+	// 공정 리스트 
+	@GetMapping("/trace/process-list")
+	@ResponseBody
+	public List<LotProcessNodeDTO> getProcessList(@RequestParam("lotNo") String lotNo) {
+		
+		// LOT 기준 공정 단계 목록 조회 (기존 서비스 그대로 재사용)
+	    return lotTraceService.getProcessNodesForLot(lotNo);
+	}
 	
 	
 	

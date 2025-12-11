@@ -50,6 +50,15 @@ document.addEventListener("DOMContentLoaded", () => {
       if (children) {
         children.classList.toggle("d-none");
       }
+	  
+	  // 공정 그룹
+	  if (group === "process") {
+		
+		if (!children.dataset.loaded) {
+		    loadProcessList(children, lotNo);
+		    children.dataset.loaded = "true"; // 플래그 저장
+		  }
+	  }
 
       return;
     }
@@ -93,3 +102,43 @@ document.addEventListener("DOMContentLoaded", () => {
 	  });
   }
 });
+
+// 공정 리스트
+function loadProcessList(container, lotNo) {
+
+  if (!container) return;
+
+  fetch(`/lot/trace/process-list?lotNo=${encodeURIComponent(lotNo)}`)
+    .then(res => res.json())
+    .then(list => {
+
+      container.innerHTML = ""; // 기존 내용 비우기
+
+      if (!list || list.length === 0) {
+        container.innerHTML = "<li class='small text-muted'>(공정 정보 없음)</li>";
+        return;
+      }
+
+      list.forEach(p => {
+        const li = document.createElement("li");
+
+        li.classList.add("process-item");
+        li.dataset.lotNo = lotNo;
+        li.dataset.stepSeq = p.stepSeq;
+
+        li.innerHTML = `
+          <a href="#" class="text-decoration-none small">
+            ${p.processName} / ${p.processId}
+            <span class="text-muted"> (${p.status})</span>
+          </a>
+        `;
+
+        container.appendChild(li);
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      container.innerHTML =
+        "<li class='small text-danger'>(공정 목록을 불러오는 중 오류가 발생했습니다)</li>";
+    });
+}

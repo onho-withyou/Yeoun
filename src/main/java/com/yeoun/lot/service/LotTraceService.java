@@ -166,11 +166,7 @@ public class LotTraceService {
 	            .map(proc -> {
 	                String processId = proc.getProcess().getProcessId();
 	                String processName = proc.getProcess().getProcessName();
-
-	                String status = lotHistoryRepository
-	                        .findTopByLot_LotNoAndProcess_ProcessIdOrderByHistIdDesc(lotNo, processId)
-	                        .map(LotHistory::getStatus)
-	                        .orElse("NEW");
+	                String status      = proc.getStatus();
 
 	                return new LotProcessNodeDTO(
 	                        proc.getStepSeq(),
