@@ -25,12 +25,39 @@ public class BomMstService {
 	private final BomMstRepository bomMstRepository;
 	private final BomMstMapper bomMstMapper;
 	
-	//1. 완제품 그리드 조회
+	//1. BOM 그리드 조회
 	@Transactional(readOnly = true)
 	public List<BomMst> findAll() {
 		log.info("bomMstRepository.findAll() 조회된개수 - {}",bomMstRepository.findAll());
 		return bomMstRepository.findAll();
 	}
+	//1-2. BOM 상세 그리드 조회
+	@Transactional(readOnly = true)
+	public List<Object[]> findAllDetail() {
+		log.info("bomMstRepository.findAllDetail() 조회된개수 - {}",bomMstRepository.findAllDetail());
+		return bomMstRepository.findAllDetail();
+	}
+	//1-3. BOM 상세 -완제품 그리드 조회 (bomId로 조회)
+	@Transactional(readOnly = true)
+	public List<Object[]> getBomPrdList(String bomId){
+		log.info("getBomPrdListByBomId bomId------------->{}", bomId);
+		return bomMstRepository.findAllDetailPrd(bomId);
+	}
+
+	//1-4. BOM 상세 -원재료 그리드 조회 (bomId로 조회)
+	@Transactional(readOnly = true)
+	public List<Object[]> getBomMatList(String bomId){
+		log.info("getBomMatListByBomId bomId------------->{}", bomId);
+		return bomMstRepository.findAllDetailMat(bomId);
+	}
+
+	//1-5. BOM 상세 -원재료(포장재) 그리드 조회 (bomId로 조회)
+	@Transactional(readOnly = true)
+	public List<Object[]> getBomMatTypeList(String bomId){
+		log.info("getBomMatTypeListByBomId bomId------------->{}", bomId);
+		return bomMstRepository.findAllDetailMatType(bomId);
+	}
+
 	//2. BOM 그리드 저장
 	public String saveBomMst(String empId,Map<String,Object> param) {
 		log.info("bomMstSaveList------------->{}",param);
@@ -73,8 +100,8 @@ public class BomMstService {
 					if (target != null) {
 						// 기존 레코드 업데이트
 						BomMst b = mapToBom(row);
-						b.setCreatedId(row.get("createdId").toString());
-						b.setCreatedDate(LocalDate.parse(row.get("createdDate").toString()));
+						b.setCreatedId(target.getCreatedId());
+						b.setCreatedDate(target.getCreatedDate());
 						b.setUpdatedId(empId);
 						b.setUpdatedDate(LocalDate.now());
 						bomMstRepository.save(b);
@@ -95,7 +122,7 @@ public class BomMstService {
 			
 			// Force flush so DB constraint errors occur inside try/catch and we can return meaningful message
 			bomMstRepository.flush();
-			return "Success: BOM 저장이 완료되었습니다. (created=" + createdCount + ")";
+			return "Success: BOM 저장이 완료되었습니다. (created=" + createdCount+")";
 	}
 
 	// Map을 BomMst 엔티티로 변환하는 헬퍼 메서드

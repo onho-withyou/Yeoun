@@ -23,7 +23,7 @@ const grid1 = new Grid({
 		,{header: '사용' ,name: 'useYn' ,align: 'center'}//,hidden: true  
 		,{header: '정렬순서' ,name: 'sortOrder' ,align: 'center'}
 		,{header: '생성자' ,name: 'createdId' ,align: 'center'}  
-		,{header: '생성자' ,name: 'createdDate' ,align: 'center'}  
+		,{header: '생성일시' ,name: 'createdDate' ,align: 'center'}  
 		,{header: '수정자' ,name: 'updatedId' ,align: 'center'}  
 		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}  
 	  ],

@@ -19,7 +19,7 @@ const CODE_MAP = {
     'SUB': '부자재',
     'PKG': '포장재',
     'WIP': '공정중', // 또는 '재공품' (Work-in-Process)
-    'FIN': '생산품', // 또는 '완제품' (Finished Goods)
+    'FIN': '완제품', // 또는 '생산품' (Finished Goods)
     'BOX': '박스',
 	
 	//향수 유형
