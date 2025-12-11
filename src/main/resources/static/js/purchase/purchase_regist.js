@@ -134,7 +134,6 @@ function selectClient(item, data) {
 // 품목 선택 후 테이블 추가 및 납기일 계산 
 itemSelect.addEventListener("change", () => {
 	const option = itemSelect.options[itemSelect.selectedIndex];
-	
 	// 값이 없으면 리턴
 	if (!option.value) return;
 	
@@ -203,7 +202,7 @@ itemSelect.addEventListener("change", () => {
 					min="${minOrder}" 
 					step="${option.dataset.orderUnit}"
 					data-min="${minOrder}"
-					data-unit="${option.dataset.orderUnit}"
+					data-order-unit="${option.dataset.orderUnit}"
 					data-price="${unitPrice}"
 					name="orderAmount"
 					/>
@@ -235,14 +234,13 @@ orderTableBody.addEventListener("change", (e) => {
 	 if (!e.target.classList.contains("orderQty")) return;
 	 
 	 const qtyInput = e.target;
-	 
 	 const minOrder = parseInt(qtyInput.dataset.min);
 	 const unit = parseInt(qtyInput.dataset.orderUnit);
 	 const price = parseInt(qtyInput.dataset.price);
 	 
 	 let qty = parseInt(qtyInput.value);
-	 
-	 // 최소 주문수량 체크
+
+	 	 // 최소 주문수량 체크
 	 if (qty < minOrder) {
 	     qty = minOrder;
 	     qtyInput.value = qty;
