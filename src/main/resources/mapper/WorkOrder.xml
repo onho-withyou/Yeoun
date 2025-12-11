@@ -92,6 +92,7 @@
 		    p.PRD_NAME,
 		    b.MAT_ID,
 		    m.MAT_NAME,
+		    m.MAT_TYPE,
 		    b.BASE_QTY * #{planQty} AS REQUIRED_QTY,
 		    i.STOCK_QTY
 		FROM BOM b
