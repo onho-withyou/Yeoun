@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 public enum ProcessStepStatus {
 	
 	READY("대기"),
-	IN_PROGRESS("진행중"),
+	IN_PROGRESS("진행 중"),
 	DONE("완료");
 	
 	private final String label;

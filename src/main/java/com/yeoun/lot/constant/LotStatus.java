@@ -12,7 +12,7 @@ public enum LotStatus {
 	
 	NEW("생성"),
 	IN_STOCK("창고 재고"),
-	IN_PROGRESS("진행중"),
+	IN_PROCESS("공정 진행 중"),
 	ISSUED("생산 투입"),
 	SCRAPPED("폐기"),
 	PROD_DONE("생산 완료"),

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
+import com.yeoun.lot.constant.LotStatus;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.dto.LotMasterDTO;
 import com.yeoun.lot.dto.LotMaterialNodeDTO;
@@ -29,6 +30,7 @@ import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.masterData.repository.ProcessMstRepository;
 import com.yeoun.order.entity.WorkOrder;
 import com.yeoun.order.repository.WorkOrderRepository;
+import com.yeoun.process.constant.ProcessStepStatus;
 import com.yeoun.process.entity.WorkOrderProcess;
 import com.yeoun.process.repository.WorkOrderProcessRepository;
 
@@ -115,7 +117,7 @@ public class LotTraceService {
 			nextSeq
 		);
 	}
-	
+
 	// ================================================================================
 	// [LOT 추적 1단계]
 	// 완제품 LOT(FIN) 목록 조회
@@ -130,11 +132,19 @@ public class LotTraceService {
 				lotMasterRepository.findByLotTypeInOrderByCreatedDateDesc(lotTypes);
 		
 		return lots.stream()
-	            .map(lm -> new LotRootDTO(
-	                    lm.getLotNo(),
-	                    lm.getDisplayName(),
-	                    lm.getCurrentStatus()
-	            ))
+	            .map(lm -> {
+	                // LOT 상태 코드
+	                LotStatus statusEnum = LotStatus.fromCode(lm.getCurrentStatus());
+	                String statusLabel = (statusEnum != null)
+	                        ? statusEnum.getLabel()
+	                        : lm.getCurrentStatus();   
+
+	                return new LotRootDTO(
+	                        lm.getLotNo(),
+	                        lm.getDisplayName(),
+	                        statusLabel                 
+	                );
+	            })
 	            .toList();
 	}
 	
@@ -166,13 +176,17 @@ public class LotTraceService {
 	            .map(proc -> {
 	                String processId = proc.getProcess().getProcessId();
 	                String processName = proc.getProcess().getProcessName();
-	                String status      = proc.getStatus();
+	                // 공정 상태 코드 
+	                ProcessStepStatus stepStatus = ProcessStepStatus.fromCode(proc.getStatus());
+	                String statusLabel = (stepStatus != null)
+	                        ? stepStatus.getLabel()
+	                        : proc.getStatus();
 
 	                return new LotProcessNodeDTO(
 	                        proc.getStepSeq(),
 	                        processId,
 	                        processName,
-	                        status
+	                        statusLabel
 	                );
 	            })
 	            .toList();
@@ -241,12 +255,11 @@ public class LotTraceService {
 	    }
 
 	    // 상태 라벨
-	    String statusLabel;
-	    switch (lot.getCurrentStatus()) {
-	        case "IN_PROCESS" -> statusLabel = "진행중";
-	        case "PROD_DONE"  -> statusLabel = "생산완료";
-	        default           -> statusLabel = lot.getCurrentStatus();
-	    }
+	    LotStatus lotStatusEnum = LotStatus.fromCode(lot.getCurrentStatus());
+	    String statusLabel = (lotStatusEnum != null)
+	            ? lotStatusEnum.getLabel()
+	            : lot.getCurrentStatus();
+
 
 	    // 수량
 	    Integer planQty = (wo != null) ? wo.getPlanQty() : null;
