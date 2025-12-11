@@ -171,12 +171,21 @@ itemSelect.addEventListener("change", () => {
 	
 	// 선택한 품목의 리드타임 적용(오늘 날짜 + 리드타임)
 	const leadDays = parseInt(option.dataset.leadDays, 10);
-	const today = new Date();
-	today.setDate(today.getDate() + leadDays);
 	
-	const yyyy = today.getFullYear();
-	const mm = String(today.getMonth() + 1).padStart(2, "0");
-	const dd = String(today.getDate()).padStart(2, "0");
+	const now = new Date();
+	const minDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000))
+	                .toISOString()
+	                .split("T")[0];
+	
+	// 오늘 날짜 이전 선택 불가
+	dueDateInput.min = minDate;
+	
+	const targetDate  = new Date();
+	targetDate .setDate(targetDate .getDate() + leadDays);
+	
+	const yyyy = targetDate .getFullYear();
+	const mm = String(targetDate .getMonth() + 1).padStart(2, "0");
+	const dd = String(targetDate .getDate()).padStart(2, "0");
 	
 	dueDateInput.value = `${yyyy}-${mm}-${dd}`;
 	

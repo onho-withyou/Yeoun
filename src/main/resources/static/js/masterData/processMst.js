@@ -1,7 +1,6 @@
 window.onload = function () {	
 	productRouteSearch();//제품별 공정라우트 그리드 조회
 	processCodeGridAllSearch();//공정코드 관리 그리드 조회
-	routeStepCodeSearch();//신규라우트 모달 그리드 - 공정단계 조회
 }
 
 //탭 전환시 그리드 레이아웃 갱신
@@ -28,59 +27,8 @@ processLookupModalElement.addEventListener('shown.bs.modal', function () {
 	grid4.refreshLayout();
 });
 
-class StatusModifiedRenderer {
-    constructor(props) {
-        const el = document.createElement('div');
-        el.className = 'tui-grid-cell-content-renderer'; 
-        this.el = el;
-        this.grid = props.grid; 
-        this.render(props);
-    }
-
-    getElement() {
-        return this.el;
-    }
-
-    render(props) {
-        const value = props.value;
-        const rowKey = props.rowKey; 
-        
-        this.el.textContent = value; 
-
-        // 💡 수정되거나 추가된 행 상태 확인 로직
-        let isUpdatedOrCreated = false;
-        
-        if (this.grid) {
-            const modifiedRows = this.grid.getModifiedRows();
-            
-            // 1. 수정된 행(updatedRows) 목록에서 현재 rowKey 확인
-            const isUpdated = modifiedRows.updatedRows.some(row => String(row.rowKey) === String(rowKey));
-            
-            // 2. 새로 추가된 행(createdRows) 목록에서 현재 rowKey 확인
-            const isCreated = modifiedRows.createdRows.some(row => String(row.rowKey) === String(rowKey));
-            
-            // 두 상태 중 하나라도 true이면 스타일 적용
-            isUpdatedOrCreated = isUpdated || isCreated;
-        }
-        
-        // 🎨 인라인 스타일 적용
-        if (isUpdatedOrCreated) {
-            // 수정되거나 추가된 행에 적용될 스타일
-            this.el.style.backgroundColor = '#c3f2ffff'; 
-            this.el.style.color = '#000000';         
-            this.el.style.fontWeight = 'bold';
-        } else {
-            // 조건 불충족 시 스타일 초기화
-            this.el.style.backgroundColor = '';
-            this.el.style.color = '';
-            this.el.style.fontWeight = '';
-        }
-    }
-}
-
-
 const Grid = tui.Grid;
-//g-grid1 공정그리드
+// g- grid1 공정그리드
 const grid1 = new Grid({
 	  el: document.getElementById('processGrid'), 
       rowHeaders: ['rowNum','checkbox'],
@@ -90,7 +38,7 @@ const grid1 = new Grid({
 		,{header: '제품코드' ,name: 'prdId' ,align: 'center'}
 		,{header: '라우트명' ,name: 'routeName' ,align: 'center',width: 150,filter: "select"}
 		,{header: '설명' ,name: 'description' ,align: 'center',width: 550}
-		,{header: '사용여부' ,name: 'useYn' ,align: 'center',width: 90}  
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center',width: 90,hidden: true}  
 		,{header: '생성자id' ,name: 'createdId' ,align: 'center',hidden: true}  
 		,{header: '생성일시' ,name: 'createdDate' ,align: 'center',hidden: true}  
 		,{header: '수정자id' ,name: 'updatedId' ,align: 'center',hidden: true}  
@@ -114,7 +62,7 @@ const grid1 = new Grid({
   	  }
 	});
 	
-//g-grid2 공정코드 관리(PROCESS_MASTER 조회)
+// g- grid2 공정코드 관리(PROCESS_MASTER 조회)
 const grid2 = new Grid({
 	    el: document.getElementById('processCodeGrid'),
         rowHeaders: ['rowNum','checkbox'],
@@ -122,29 +70,29 @@ const grid2 = new Grid({
 	    {header: '공정ID' ,name: 'processId' ,align: 'center',editor: 'text'
 			,renderer:{ type: StatusModifiedRenderer}
 		}
-	    ,{header: '공정명' ,name: 'processName' ,align: 'center',editor: 'text' ,width: 230
-			,renderer:{ type: StatusModifiedRenderer}
-		}
-	    ,{header: '공정유형' ,name: 'processType' ,align: 'center',editor: 'text' ,filter: "select"
+	    ,{header: '공정명' ,name: 'processName' ,align: 'center',editor: 'text' ,width: 230,filter: "select"
 			,renderer:{ type: StatusModifiedRenderer}
 			,editor: {
 				type: 'select', // 드롭다운 사용
 				options: {
 					listItems: [
-						{ text: 'MIX', value: 'MIX' },
-						{ text: 'FILTER', value: 'FILTER' },
-						{ text: 'FILL', value: 'FILL' },
-						{ text: 'CAPPING', value: 'CAPPING' },
-						{ text: 'QC', value: 'QC' },
-						{ text: 'PACK', value: 'PACK' }
+						{ text: '블렌딩', value: '블렌딩' },
+						{ text: '여과', value: '여과' },
+						{ text: '충전', value: '충전' },
+						{ text: '캡/펌프', value: '캡/펌프' },
+						{ text: 'QC 검사', value: 'QC 검사' },
+						{ text: '라벨링', value: '라벨링' }
 					]
 				}
 			}
 		}
-	    ,{header: '설명' ,name: 'description' ,align: 'center',editor: 'text' ,filter: "select"
+	    ,{header: '공정유형' ,name: 'processType' ,align: 'center',editor: 'text',hidden: true
 			,renderer:{ type: StatusModifiedRenderer}
 		}
-        ,{header: '사용여부' ,name: 'useYn' ,align: 'center'
+	    ,{header: '설명' ,name: 'description' ,align: 'center',editor: 'text' ,width: 370
+			,renderer:{ type: StatusModifiedRenderer}
+		}
+        ,{header: '사용여부' ,name: 'useYn' ,align: 'center',hidden: true
 			,renderer:{ type: StatusModifiedRenderer}
 			,editor: {
 				type: 'select', // 드롭다운 사용
@@ -247,6 +195,51 @@ const grid4 = new Grid({
         }
 });
 
+
+const PROCESS_CODE_TO_TYPE_MAP = {
+    '블렌딩': 'MIX',         
+    '여과': 'FILTER',   
+    '충전': 'FILL',       
+    '캡/펌프': 'CAPPING', 
+    'QC 검사': 'QC',         
+    '라벨링': 'PACK'        
+    
+};
+
+grid2.on('beforeChange', (ev) => {
+    const { rowKey, columnName, value } = ev.changes[0]; // 변경된 데이터 목록 (배열)
+	if (columnName === 'processId') {
+	        // 💡 핵심 수정: rowKey 대신, 현재 행의 'prdId' 값을 가져옵니다.
+	        const processIdValue = grid2.getValue(rowKey, 'processId');
+	        
+	        // processId 값이 비어있거나 null, undefined인 경우를 '새 행'으로 간주합니다.
+	        const isNewRow = !processIdValue; 
+
+	        console.log("processId 값:", processIdValue, " | isNewRow:", isNewRow);
+
+	        // 기존 행일 경우 (isNewRow가 false, 즉 processIdValue가 있는 경우)
+	        if (!isNewRow) {
+	            ev.stop(); // 편집 모드 진입 차단
+	            alert('기존 공정ID는 수정할 수 없습니다. 삭제후 새로추가(등록) 해주세요!'); 
+	        }
+	    }
+});
+
+grid2.on('afterChange', (ev) => {
+	const { rowKey, columnName, value } = ev.changes[0]; 
+	
+	if(columnName === 'processName'){
+		const processNameValue = value;
+		
+		const newProcessType = PROCESS_CODE_TO_TYPE_MAP[processNameValue];
+		if(newProcessType){
+			grid2.setValue(rowKey, 'processType', newProcessType, false); // 마지막 false는 이벤트 발생 방지
+		}
+		
+	}
+	
+});
+
 let processLookupModal; // 공정코드 조회 모달
 document.addEventListener("DOMContentLoaded", () => {
   processLookupModal = new bootstrap.Modal(document.getElementById("processLookup-modal"));
@@ -262,6 +255,7 @@ function openRouteModalForCreate(){
 function openProcessLookupModal() {
     processLookupModal.show();
 }
+
   
 //제품별 공정라우트 그리드 조회
 function productRouteSearch(){
@@ -507,6 +501,8 @@ saveProcessCodeRowBtn.addEventListener('click', function() {
 	        console.log('저장결과(텍스트):', text);
 	        if (text === 'success') {
 	            alert('저장 완료');
+				processCodeGridAllSearch();
+				
 	        } else if (text === 'no-data') {
 	            alert('서버: 전송한 데이터가 없습니다. 내용을 확인하세요.');
 	        } else if (text.startsWith('error')) {
@@ -802,6 +798,72 @@ modifyProcessCodeRowBtn.addEventListener('click', async function() {
 			try { alert('삭제 처리 중 오류가 발생했습니다. ' + (e && e.message ? e.message : '')); } catch (err) {}
 		}
 	
+});
+//라우트 조회 상세 - 공정단계 그리드에서 단계삭제  // 하다가잠
+const deleteRouteStepRowBtn = document.getElementById('deleteRouteStepRowBtn');
+deleteRouteStepRowBtn.addEventListener('click', async function() {
+	// 체크된 rowKey들 수집
+	let rowKeysToDelete = [];
+	try {
+		if (typeof grid3.getCheckedRowKeys === 'function') {
+			rowKeysToDelete = grid3.getCheckedRowKeys() || [];
+		} else if (typeof grid3.getCheckedRows === 'function') {
+			const checkedRows = grid3.getCheckedRows() || [];
+			rowKeysToDelete = checkedRows.map(r => r && (r.rowKey || r.routeStepId)).filter(Boolean);
+		}
+	} catch (e) {
+		console.warn('체크된 행 조회 실패', e);
+	}
+	if (rowKeysToDelete.length === 0) {
+		alert('삭제할 공정단계를 선택(체크)해주세요.');
+		return;
+	}
+	if (!confirm(`${rowKeysToDelete.length}개의 공정단계를 삭제하시겠습니까?`)) {
+		return;
+	}
+	// 간결한 방식으로 각 rowKey로부터 routeStepId(또는 식별 가능한 ID)를 수집
+	const getAllData = () => (typeof grid3.getData === 'function' ? grid3.getData() : (grid3.data || []));
+	const data = getAllData();
+	const routeStepIdsToDelete = [];
+	rowKeysToDelete.forEach(key => {
+		let row = null;
+		if (typeof grid3.getRow === 'function') row = grid3.getRow(key);
+		if (!row) row = data.find(d => d && (String(d.rowKey) === String(key) || String(d.routeStepId) === String(key)));
+		if (row && row.routeStepId) {
+			routeStepIdsToDelete.push(String(row.routeStepId));
+		}
+	});
+
+	if (routeStepIdsToDelete.length === 0) {
+		alert('삭제할 공정단계를 정확히 선택해주세요.');
+		return;
+	}
+	try {
+		const response = await fetch('/masterData/processStep/modify', {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: {
+				[csrfHeader]: csrfToken,
+				'Content-Type': 'application/json'
+
+			},
+			body: JSON.stringify({ routeStepIds: routeStepIdsToDelete })
+		});	
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+		const resultText = await response.text();
+		if (resultText === 'success') {
+			alert('삭제 완료');
+			const routeId = document.getElementById('modalRouteId').value;//라우트 ID
+			processStepSearch(routeId);//신규라우트 모달 그리드 - 공정단계 조회
+		} else {
+			alert('삭제 실패: ' + resultText);
+		}
+	} catch (error) {
+		console.error('삭제오류', error);
+		alert('삭제 중 오류가 발생했습니다. 콘솔 로그를 확인하세요.');
+	}
 });
 
 //모달 움직이게 하기

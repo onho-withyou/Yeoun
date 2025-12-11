@@ -1,13 +1,15 @@
 package com.yeoun.masterData.service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.masterData.entity.BomMst;
-import com.yeoun.masterData.entity.MaterialMst;
 import com.yeoun.masterData.mapper.BomMstMapper;
 import com.yeoun.masterData.repository.BomMstRepository;
 import com.yeoun.outbound.dto.OutboundOrderItemDTO;
@@ -23,12 +25,39 @@ public class BomMstService {
 	private final BomMstRepository bomMstRepository;
 	private final BomMstMapper bomMstMapper;
 	
-	//1. 완제품 그리드 조회
+	//1. BOM 그리드 조회
 	@Transactional(readOnly = true)
 	public List<BomMst> findAll() {
 		log.info("bomMstRepository.findAll() 조회된개수 - {}",bomMstRepository.findAll());
 		return bomMstRepository.findAll();
 	}
+	//1-2. BOM 상세 그리드 조회
+	@Transactional(readOnly = true)
+	public List<Object[]> findAllDetail() {
+		log.info("bomMstRepository.findAllDetail() 조회된개수 - {}",bomMstRepository.findAllDetail());
+		return bomMstRepository.findAllDetail();
+	}
+	//1-3. BOM 상세 -완제품 그리드 조회 (bomId로 조회)
+	@Transactional(readOnly = true)
+	public List<Object[]> getBomPrdList(String bomId){
+		log.info("getBomPrdListByBomId bomId------------->{}", bomId);
+		return bomMstRepository.findAllDetailPrd(bomId);
+	}
+
+	//1-4. BOM 상세 -원재료 그리드 조회 (bomId로 조회)
+	@Transactional(readOnly = true)
+	public List<Object[]> getBomMatList(String bomId){
+		log.info("getBomMatListByBomId bomId------------->{}", bomId);
+		return bomMstRepository.findAllDetailMat(bomId);
+	}
+
+	//1-5. BOM 상세 -원재료(포장재) 그리드 조회 (bomId로 조회)
+	@Transactional(readOnly = true)
+	public List<Object[]> getBomMatTypeList(String bomId){
+		log.info("getBomMatTypeListByBomId bomId------------->{}", bomId);
+		return bomMstRepository.findAllDetailMatType(bomId);
+	}
+
 	//2. BOM 그리드 저장
 	public String saveBomMst(String empId,Map<String,Object> param) {
 		log.info("bomMstSaveList------------->{}",param);
@@ -40,41 +69,60 @@ public class BomMstService {
 				List<Map<String,Object>> created = (List<Map<String,Object>>) createdObj;
 				for (Map<String,Object> row : created) {
 					BomMst b = mapToBom(row);
-					// server-side validation: matQty must not be null
 					if (b.getMatQty() == null) {
 						throw new IllegalArgumentException("matQty is required for BOM row (prdId=" + b.getPrdId() + ", matId=" + b.getMatId() + ")");
 					}
 					b.setCreatedId(empId);
+					b.setCreatedDate(LocalDate.now());
 					bomMstRepository.save(b);
 					createdCount++;
 				}
 			}
-			// // updatedRows handling if needed (kept simple)
-			// Object updatedObj = param.get("updatedRows");
-			// if (updatedObj instanceof List) {
-			// 	@SuppressWarnings("unchecked")
-			// 	List<Map<String,Object>> updated = (List<Map<String,Object>>) updatedObj;
-			// 	for (Map<String,Object> row : updated) {
-			// 		Object prdObj = row.get("prdId");
-			// 		Object matObj = row.get("matId");
-			// 		if (prdObj != null && matObj != null) {
-			// 			String prdId = String.valueOf(prdObj);
-			// 			String matId = String.valueOf(matObj);
-			// 			bomMstRepository.findByPrdIdAndMatId(prdId, matId).ifPresent(existing -> {
-			// 				BomMst b = mapToBom(row);
-			// 				if (b.getMatQty() == null) {
-			// 					throw new IllegalArgumentException("matQty is required for BOM row (prdId=" + b.getPrdId() + ", matId=" + b.getMatId() + ")");
-			// 				}
-			// 				b.setBomId(existing.getBomId());
-			// 				b.setCreatedId(existing.getCreatedId());
-			// 				bomMstRepository.save(b);
-			// 			});
-			// 		}
-			// 	}
-			// }
+			
+			// updatedRows
+			Object updatedObj = param.get("updatedRows");
+			if (updatedObj instanceof List) {
+				@SuppressWarnings("unchecked")
+				List<Map<String,Object>> updated = (List<Map<String,Object>>) updatedObj;
+				List<String> missingIds = new ArrayList<>();
+				for (Map<String,Object> row : updated) {
+					Object prdIdObj = row.get("prdId");
+					Object matIdObj = row.get("matId");
+					String prdId = (prdIdObj == null) ? "" : String.valueOf(prdIdObj).trim();
+					String matId = (matIdObj == null) ? "" : String.valueOf(matIdObj).trim();
+	
+					BomMst target = null;
+					if (!prdId.isEmpty()) {
+						Optional<BomMst> opt = bomMstRepository.findByPrdIdAndMatId(prdId,matId);
+						if (opt.isPresent()) target = opt.get();
+					}
+	
+					if (target != null) {
+						// 기존 레코드 업데이트
+						BomMst b = mapToBom(row);
+						b.setCreatedId(target.getCreatedId());
+						b.setCreatedDate(target.getCreatedDate());
+						b.setUpdatedId(empId);
+						b.setUpdatedDate(LocalDate.now());
+						bomMstRepository.save(b);
+					} else {
+						// 존재하지 않는 prdId,matId가 명시된 경우: PK 변경 시 의도치 않은 insert를 막기 위해 에러 처리
+						if (!prdId.isEmpty() || !matId.isEmpty()) {
+							missingIds.add(prdId);
+							continue;
+						}
+						// prdId가 비어있고 매칭되는 기존 레코드가 없으면 새로 저장 (신규 추가 케이스)
+						BomMst b = mapToBom(row);
+						b.setCreatedId(empId);
+						bomMstRepository.save(b);
+					}
+				}
+			 	
+			}
+			
 			// Force flush so DB constraint errors occur inside try/catch and we can return meaningful message
 			bomMstRepository.flush();
-			return "Success: BOM 저장이 완료되었습니다. (created=" + createdCount + ")";
+			return "Success: BOM 저장이 완료되었습니다. (created=" + createdCount+")";
 	}
 
 	// Map을 BomMst 엔티티로 변환하는 헬퍼 메서드
@@ -114,27 +162,6 @@ public class BomMstService {
 		}
 		return b;
 	}
-
-	//4. BOM 그리드 삭제(자세히 볼필요 있음)
-	// public String deleteBomMst(String empId,List<String> rowKeys) {
-	// 	log.info("bomMstDeleteList------------->{}",rowKeys);
-	// 	try {
-	// 		int deletedTotal = 0;
-	// 		for (String prdId : rowKeys) {
-	// 			if (prdId == null) continue;
-	// 			// prdId로 해당 prdId에 속한 모든 BOM 레코드를 찾아서 삭제
-	// 			java.util.List<BomMst> found = bomMstRepository.findByPrdId(prdId);
-	// 			if (found != null && !found.isEmpty()) {
-	// 				bomMstRepository.deleteAll(found);
-	// 				deletedTotal += found.size();
-	// 			}
-	// 		}
-	// 		return "Success: BOM 삭제가 완료되었습니다. (deleted=" + deletedTotal + ")";
-	// 	} catch (Exception e) {
-	// 		log.error("deleteBomMst error", e);
-	// 		return "error: " + e.getMessage();
-	// 	}
-	// }
 
 	//4-2. BOM 삭제 (prdId + matId 쌍으로 삭제 요청 처리)
 	public String deleteBomMstByPairs(String empId, List<java.util.Map<String, String>> rows) {

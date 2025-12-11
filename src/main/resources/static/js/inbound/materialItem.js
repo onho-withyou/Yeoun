@@ -90,7 +90,7 @@ function applyRackSelection(index) {
 	 fillSelect(col, cols);
 }
 
-// 페이지 로딩될 때 select 채우기
+// 페이지 로딩될 때 select 및 수량 정보 채우기
 document.addEventListener("DOMContentLoaded", async () => {
 	// 창고 데이터 가져오기
 	locationInfo = await getLocationInfo();
@@ -136,6 +136,59 @@ document.addEventListener("DOMContentLoaded", async () => {
 			applyRackSelection(index);
 		});
 	});
+	
+	// ========================
+	// 단위에 따른 수량 변환
+	// 변환 대상에 해당하는 요소를 찾기	
+	const tartgetElements = document.querySelectorAll(".convert-qty");
+	
+	tartgetElements.forEach(td => {
+		// 요청 수량 
+		const baseQty = parseFloat(td.dataset.qty);
+		// 단위
+		const targetUnit = td.dataset.unit;
+		// DB에 저장된 수량을 단위에 맞게 변환(util.js에서 함수 가져옴)
+		const convertedValue = convertFromBaseUnit(baseQty, targetUnit);
+		
+		// 변환한 값을 화면에 보여주기
+		td.innerText = convertedValue.toLocaleString();
+	});
+	
+	// -----------------------------------
+	const inboundInputs = document.querySelectorAll(".inboundAmount");
+	
+	if (inboundInputs.length > 0) {
+		inboundInputs.forEach(input => {
+			
+			input.addEventListener("input", function() {
+				const currentIndex = this.getAttribute('data-index');
+				const currentVal = Number(this.value);
+				
+				// 같은 index를 가진 요청 수량 찾기
+				const requestSpan = document.querySelector(`.requestAmount[data-index="${currentIndex}"]`);
+				
+				let maxAmount = 0;
+				// span 태그 안에 콤마가 있을 수 있기 때문에 제거 후 숫자로 변환
+				if (requestSpan) {
+					const textVal = requestSpan.innerText.replace(/,/g, '');
+					maxAmount = Number(textVal);
+				}
+				
+				// 음수 체크
+				if (currentVal < 0) {
+					alert("입고 수량은 0보다 작을 수 없습니다.")
+					this.value = 0;
+					return;
+				}
+				
+				// 요청 수량보다 초과하는지 체크
+				if (maxAmount > 0 && currentVal > maxAmount) {
+					alert(`입고 수량은 요청 수량(${maxAmount.toLocaleString()})을 초과할 수 없습니다.`);
+					this.value = maxAmount; 
+				}
+			});
+		})
+	}
 });
 
 // ------------------------------------------------------
@@ -205,28 +258,48 @@ document.querySelectorAll(".inboundAmount").forEach(input => {
 
 document.getElementById("completeInboundBtn").addEventListener("click", async () => {
 	const items = [];
-	
 	const rows = document.querySelectorAll("tbody tr");
 	
 	// 품목들의 데이터를 반복문을 통해서 items 배열 안에 담음
-	rows.forEach(row => {
+	for (const row of rows) {
 		const index = row.querySelector(".moveZone").dataset.index;
 		
+		// 입고수량
 		const inboundAmount = Number(row.querySelector(`.inboundAmount[data-index="${index}"]`).value);
+		// 폐기 수량
 		const disposeAmount = Number(row.querySelector(`.disposeAmount[data-index="${index}"]`).textContent);
+		// 발주 단위
+		const unit = row.querySelector(`.unit[data-index="${index}"]`).innerText;
+		
+		// 단위 변환된 입고 및 폐기 수량
+		const converedInboundAmount = parseInt(convertToBaseUnit(inboundAmount, unit));
+		const converedDisposeAmount = parseInt(convertToBaseUnit(disposeAmount, unit));
 		
 		const locationId = getLocationIdByPosition(index);
+		
+		// 창고위치 입력 확인
+		if (!locationId) {
+			alert("창고 위치를 지정하지 않은 품목이 있습니다.\n모든 품목의 위치를 지정해주세요.");
+			return;
+		}
+		
+		// 입고 수량 입력 확인
+		if (inboundAmount <= 0) {
+			alert("입고 수량을 입력해주세요.");
+			return;
+		}
 		
 		const itemName = row.querySelector("td").getAttribute("data-name");
 		const itemId = row.querySelector(".itemId").value;
 		const itemType = row.querySelector(".itemType").value;
 		const inboundItemId = row.querySelector(".inboundItemId").value;
+		
 		// 로트넘버 추가
 		const lotNo = row.querySelector(".prodLotNo").value;
 		
 		items.push({
-			inboundAmount,
-			disposeAmount,
+			inboundAmount: converedInboundAmount,
+			disposeAmount: converedDisposeAmount,
 			locationId,
 			inboundItemId,
 			itemId,
@@ -234,8 +307,8 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 			itemName,
 			lotNo
 		});
-	});
-	
+	}
+
 	const inboundId = document.querySelector("#inboundId").value;
 	
 	const res = await fetch("/inventory/inbound/mat/complete", {

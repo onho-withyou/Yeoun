@@ -1,7 +1,12 @@
 const Grid = tui.Grid;
 const productGrid = new Grid({
 	el: document.getElementById("productGrid"),
+	bodyHeight: 500,
 	rowHeaders: ['rowNum'],
+	pageOptions: {
+	    useClient: true,  // 클라이언트 사이드 페이징
+	    perPage: 10       // 페이지당 10개 행
+	},	
 	columns: [
 		{
 			header: "입고번호",
@@ -18,6 +23,7 @@ const productGrid = new Grid({
 		{
 			header: "입고예정일",
 			name: "expectArrivalDate",
+			sortable: true,
 			formatter: ({value}) => formatDate(value)
 		},
 		{
@@ -110,6 +116,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 	prdStartDateInput.value = startDate;
 	prdEndDateInput.value = endDate;
 	
+	await loadProductInbound(startDate, endDate, null);
+
+	//스피너  off
+	hideSpinner();
+
 	await loadProductInbound(startDate, endDate, "", "");
 });
 

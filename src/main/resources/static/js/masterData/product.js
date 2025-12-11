@@ -18,58 +18,6 @@ document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
 });
 
 
-class StatusModifiedRenderer {
-    constructor(props) {
-        const el = document.createElement('div');
-        el.className = 'tui-grid-cell-content-renderer'; 
-        this.el = el;
-        this.grid = props.grid; 
-        
-        this.render(props);
-    }
-
-    getElement() {
-        return this.el;
-    }
-	
-    render(props) {
-        const value = props.value;
-        const rowKey = props.rowKey; 
-        
-        this.el.textContent = value; 
-		
-        // 💡 수정되거나 추가된 행 상태 확인 로직
-        let isUpdatedOrCreated = false;
-        
-        if (this.grid) {
-            const modifiedRows = this.grid.getModifiedRows();
-            
-            // 1. 수정된 행(updatedRows) 목록에서 현재 rowKey 확인
-            const isUpdated = modifiedRows.updatedRows.some(row => String(row.rowKey) === String(rowKey));
-			
-            
-            // 2. 새로 추가된 행(createdRows) 목록에서 현재 rowKey 확인
-            const isCreated = modifiedRows.createdRows.some(row => String(row.rowKey) === String(rowKey));
-            
-            // 두 상태 중 하나라도 true이면 스타일 적용
-            isUpdatedOrCreated = isUpdated || isCreated;
-        }
-        
-        // 🎨 인라인 스타일 적용
-        if (isUpdatedOrCreated) {
-            // 수정되거나 추가된 행에 적용될 스타일
-            this.el.style.backgroundColor = '#c3f2ffff'; 
-            this.el.style.color = '#000000';         
-            this.el.style.fontWeight = 'bold';
-        } else {
-            // 조건 불충족 시 스타일 초기화
-            this.el.style.backgroundColor = '';
-            this.el.style.color = '';
-            this.el.style.fontWeight = '';
-        }
-    }
-}
-
 const Grid = tui.Grid;
 
 //g-grid1 완제품(상위품번)
@@ -81,11 +29,20 @@ const grid1 = new Grid({
 		],
 	  columns: [
 		{header: '품번' ,name: 'prdId' ,align: 'center',editor: 'text',width: 100
-		
 			,renderer:{ type: StatusModifiedRenderer}	
 		}
 		,{header: '품목명' ,name: 'itemName' ,align: 'center',editor: 'text',filter: "select",width: 100
 			,renderer:{ type: StatusModifiedRenderer}
+			,editor: {
+				type: 'select', // 드롭다운 사용
+				options: {
+					// value는 실제 데이터 값, text는 사용자에게 보이는 값
+					listItems: [
+						{ text: '고체향수', value: 'LIQUID' },
+						{ text: '액체향수', value: 'SOLID' }
+					]
+				}
+			}
 		}
 		,{header: '제품명' ,name: 'prdName' ,align: 'center',editor: 'text'
 			,renderer:{ type: StatusModifiedRenderer}
@@ -97,8 +54,8 @@ const grid1 = new Grid({
 				options: {
 					// value는 실제 데이터 값, text는 사용자에게 보이는 값
 					listItems: [
-						{ text: '완제품', value: '완제품' },
-						{ text: '반제품', value: '반제품' }
+						{ text: '완제품', value: 'FINISHED_GOODS' },
+						{ text: '반제품', value: 'SEMI_FINISHED_GOODS' }
 					]
 				}
 			}
@@ -127,11 +84,11 @@ const grid1 = new Grid({
 				options: {
 					// value는 실제 데이터 값, text는 사용자에게 보이는 값
 					listItems: [
-						{ text: 'ACTIVE', value: 'ACTIVE' },//활성
-						{ text: 'INACTIVE', value: 'INACTIVE' },//비활성
-						{ text: 'DISCONTINUED', value: 'DISCONTINUED' },//단종
-						{ text: 'SEASONAL', value: 'SEASONAL' },//시즌상품
-						{ text: 'OUT_OF_STOCK', value: 'OUT_OF_STOCK' }//단종
+						{ text: '활성', value: 'ACTIVE' },//활성
+						{ text: '비활성', value: 'INACTIVE' },//비활성
+						{ text: '단종', value: 'DISCONTINUED' },//단종
+						{ text: '시즌상품', value: 'SEASONAL' },//시즌상품
+						{ text: '재고없음', value: 'OUT_OF_STOCK' }//단종
 					]
 				}
 			}
@@ -207,7 +164,8 @@ const grid2 = new Grid({
 						listItems: [
 							{ text: 'g', value: 'g' },
 							{ text: 'ml', value: 'ml' },
-							{ text: 'EA', value: 'EA' }
+							{ text: 'EA', value: 'EA' },
+							{ text: 'BOX', value:'Box'}
 						]
 					}
 				}
@@ -250,7 +208,7 @@ grid1.on('beforeChange', (ev) => {
 	        // 기존 행일 경우 (isNewRow가 false, 즉 prdIdValue가 있는 경우)
 	        if (!isNewRow) {
 	            ev.stop(); // 편집 모드 진입 차단
-	            alert('기존 품번은 수정할 수 없습니다.'); 
+	            alert('기존 품번은 수정할 수 없습니다. 삭제후 새로추가(등록) 해주세요!'); 
 	        }
 	    }
 });
@@ -269,7 +227,7 @@ grid2.on('beforeChange', (ev) => {
 	        // 기존 행일 경우 (isNewRow가 false, 즉 prdIdValue가 있는 경우)
 	        if (!isNewRow) {
 	            ev.stop(); // 편집 모드 진입 차단
-	            alert('기존 원재료ID는 수정할 수 없습니다.'); 
+	            alert('기존 원재료ID는 수정할 수 없습니다. 삭제후 새로추가(등록) 해주세요!'); 
 	        }
 	    }
 });

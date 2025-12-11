@@ -23,6 +23,7 @@ public class WorkOrderDetailDTO {
 
     private String lineName;    // 1번 라인
     private String routeId;     // 라우트 코드
+    private String remark;		// 비고
 
     private List<WorkInfo> infos;     // 작업자 및 작업현황
 
@@ -35,6 +36,7 @@ public class WorkOrderDetailDTO {
         private String processId;
         private String processName;
         private String status;     // COMPLETED / IN_PROGRESS / PENDING
+        private String workerId;
         private String workerName;
     }
 

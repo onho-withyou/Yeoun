@@ -4,12 +4,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.yeoun.emp.entity.Dept;
-import com.yeoun.emp.entity.Position;
 import com.yeoun.masterData.entity.ProcessMst;
 import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.masterData.entity.RouteHeader;
@@ -48,8 +45,7 @@ public class ProcessMstService {
 	// 공정코드 그리드 조회
 	@Transactional(readOnly = true)
 	public List<ProcessMst> getProcessCodeList() {
-		log.info("getProcessCodeList 조회");
-		return processMstRepository.findAll();
+		return processMstRepository.findByprocessCode();
 	}
 	// 공정단계 그리드 조회
 	@Transactional(readOnly = true)
@@ -65,6 +61,7 @@ public class ProcessMstService {
 			// createdRows
 			Object createdObj = param.get("createdRows");
 			if (createdObj instanceof List) {
+				@SuppressWarnings("unchecked")
 				List<Map<String,Object>> created = (List<Map<String,Object>>) createdObj;
 				for (Map<String,Object> row : created) {
 					// 기본값 및 유효성 검사: null로 인한 NPE/DB 제약 위반을 방지
@@ -87,6 +84,36 @@ public class ProcessMstService {
 							.useYn(useYn)
 							.createdId(empId)
 							.createdDate(LocalDateTime.now())
+							.build();
+					processMstRepository.save(processMst);
+				}
+				
+			}
+			//updatedRows
+			Object updatedObj = param.get("updatedRows");
+			if (updatedObj instanceof List) {
+				@SuppressWarnings("unchecked")
+				List<Map<String,Object>> updated = (List<Map<String,Object>>) updatedObj;
+				for (Map<String,Object> row : updated) {
+					// 기본값 및 유효성 검사: null로 인한 NPE/DB 제약 위반을 방지
+					Object idObj = row.get("processId");
+					Object nameObj = row.get("processName");
+					if (idObj == null || nameObj == null || String.valueOf(idObj).trim().isEmpty() || String.valueOf(nameObj).trim().isEmpty()) {
+						throw new IllegalArgumentException("processId 및 processName은 필수입니다: " + row);
+					}
+					String processId = String.valueOf(idObj).trim();//Java에서 객체를 문자열로 변환하고, 그 문자열의 앞뒤 공백을 제거
+					String processName = String.valueOf(nameObj).trim();
+				
+					ProcessMst processMst = ProcessMst.builder()
+							.processId(processId)
+							.processName(processName)
+							.description(row.get("description").toString())
+							.processType(row.get("processType").toString())
+							.useYn(row.get("useYn").toString())
+							.createdId(row.get("createdId").toString())
+							.createdDate(LocalDateTime.parse(row.get("createdDate").toString()))
+							.updatedId(empId)
+							.updatedDate(LocalDateTime.now())
 							.build();
 					processMstRepository.save(processMst);
 				}

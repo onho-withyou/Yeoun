@@ -42,6 +42,9 @@ public class WorkOrderProcessStepDTO {
 	// 특이사항
 	private String memo;
 	
+	// 기준배합량
+	private Double standardQty;
+	
 	// =================================
 	// 화면용
 	private boolean canStart;

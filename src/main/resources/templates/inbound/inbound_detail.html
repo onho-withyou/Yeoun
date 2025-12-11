@@ -18,8 +18,8 @@
 						</div>
 
 						<div class="col" th:if="${receiptDTO.materialId != null}">
-						    <div class="text-secondary mb-1">담당자</div>
-						    <div class="fw-semibold" th:text="${receiptDTO.clientName}"></div>
+						    <div class="text-secondary mb-1">입고 담당자</div>
+						    <div class="fw-semibold" th:text="${receiptDTO.materialEmpName}"></div>
 						</div>
 						<div class="col">
 						    <div class="text-secondary mb-1">납기일자</div>
@@ -74,6 +74,7 @@
 									<tr class="text-center">
 										<th>입고 상품</th>
 										<th>요청 수량</th>
+										<th>단위</th>
 										<th style="width: 9em;">입고 수량</th>
 										<th style="width: 9em;">불량 수량</th>
 										<th>ZONE</th>
@@ -86,8 +87,12 @@
 									<tr th:each="item, iterStat  : ${receiptDTO.items}">
 										<td th:text="${item.itemName}" th:attr="data-name=${item.itemName}"></td>
 										<td>
-											<span class="requestAmount" th:text="${item.requestAmount}" th:attr="data-index=${iterStat.index}"></span>
+											<span class="requestAmount convert-qty" 
+												  th:attr="data-index=${iterStat.index}"
+												  th:data-unit="${item.unit}" 
+							            		  th:data-qty="${item.requestAmount}"></span>
 										</td>
+										<td th:text="${item.unit}" class="unit" th:attr="data-index=${iterStat.index}"></td>
 										<td>
 											<input type="number" min="0" step="1" class="form-control inboundAmount" th:attr="data-index=${iterStat.index}"/>
 										</td>
@@ -110,6 +115,7 @@
 									<tr class="text-center">
 										<th>입고 상품</th>
 										<th>요청 수량</th>
+										<th>단위</th>
 										<th style="width: 9em;">입고 수량</th>
 										<th style="width: 9em;">불량 수량</th>
 										<th>창고위치</th>
@@ -119,9 +125,17 @@
 							 	<tbody class="">
 									 <tr th:each="item, iterStat  : ${receiptDTO.items}">
 							            <td th:text="${item.itemName}"></td>
-							            <td th:text="${item.requestAmount}"></td>
-							            <td th:text="${item.inboundAmount}"></td>
-							            <td th:text="${item.disposeAmount}"></td>
+							            <td class="convert-qty" 
+							            	th:data-unit="${item.unit}" 
+							            	th:data-qty="${item.requestAmount}"></td>
+							            <td th:text="${item.unit}"></td>
+							            <td class="convert-qty"
+							            	th:data-unit="${item.unit}" 
+							            	th:data-qty="${item.inboundAmount}">
+							            </td>
+							            <td class="convert-qty" 
+							            	th:data-unit="${item.unit}"
+							            	th:data-qty="${item.disposeAmount}"></td>
 							            <td th:text="${item.locationId}" class="locationId" th:attr="data-index=${iterStat.index}"></td>
 							            <td th:text="${item.lotNo}"></td>
 							        </tr>
@@ -138,6 +152,7 @@
 			<script src="https://kit.fontawesome.com/a96e186b03.js" crossorigin="anonymous"></script>
 			<script type="text/javascript" src="https://uicdn.toast.com/tui.pagination/v3.4.0/tui-pagination.js"></script>
 			<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+			<script src="/js/inventory/util.js"></script>
 			<script src="/js/inbound/materialGrid.js"></script>
 			<script src="/js/inbound/materialItem.js"></script>
 		</th:block>

@@ -13,7 +13,9 @@ const grid1 = new Grid({
 
 		{header: 'QC항목ID' ,name: 'qcItemId' ,align: 'center'}
 		,{header: '항목명' ,name: 'itemName' ,align: 'center'}
-		,{header: '대상구분' ,name: 'targetType' ,align: 'center',width: 110,filter: "select"}
+		,{header: '대상구분' ,name: 'targetType' ,align: 'center',width: 110,filter: "select"
+			,renderer:{ type: StatusModifiedRenderer}
+		}
 		,{header: '단위' ,name: 'unit' ,align: 'center'}
 		,{header: '기준 텍스트' ,name: 'stdText' ,align: 'center',width: 230}
 		,{header: 'MIN' ,name: 'minValue' ,align: 'center'}
@@ -21,7 +23,7 @@ const grid1 = new Grid({
 		,{header: '사용' ,name: 'useYn' ,align: 'center'}//,hidden: true  
 		,{header: '정렬순서' ,name: 'sortOrder' ,align: 'center'}
 		,{header: '생성자' ,name: 'createdId' ,align: 'center'}  
-		,{header: '생성자' ,name: 'createdDate' ,align: 'center'}  
+		,{header: '생성일시' ,name: 'createdDate' ,align: 'center'}  
 		,{header: '수정자' ,name: 'updatedId' ,align: 'center'}  
 		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}  
 	  ],

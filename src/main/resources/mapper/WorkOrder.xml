@@ -91,7 +91,8 @@
 		    b.PRD_ID,
 		    p.PRD_NAME,
 		    b.MAT_ID,
-		    b.MAT_NAME,
+		    m.MAT_NAME,
+		    m.MAT_TYPE,
 		    b.BASE_QTY * #{planQty} AS REQUIRED_QTY,
 		    i.STOCK_QTY
 		FROM BOM b
@@ -100,8 +101,8 @@
 		LEFT JOIN PRODUCT_MST p
 			ON p.PRD_ID = b.PRD_ID
 		LEFT JOIN INV i
-		       ON b.MAT_ID = i.ITEM_ID;
-		ORDER BY b.MAT_ID;
+		       ON b.MAT_ID = i.ITEM_ID
+		ORDER BY b.MAT_ID
 	</select>
 	
 </mapper>

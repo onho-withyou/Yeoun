@@ -74,6 +74,8 @@
 	              <th>상태</th>
 	              <th>시작</th>
 	              <th>종료</th>
+	              <th>양품수량</th>
+	              <th>불량수량</th>
 	              <th>작업</th>
 	              <th>특이사항</th>
 	            </tr>
@@ -93,45 +95,54 @@
 
 
 
-	<!-- QC MODAL (QC 측정값 입력) -->
-	<div class="modal fade" id="qcModal" tabindex="-1">
-	  <div class="modal-dialog modal-lg">
+	<!-- 공정 종료 시 수량 입력 모달 -->
+	<div class="modal fade" id="finishModal" tabindex="-1">
+	  <div class="modal-dialog">
 	    <div class="modal-content">
+	      
 	      <div class="modal-header">
-	        <h5 class="modal-title">QC 검사 입력</h5>
-	        <button class="btn-close" data-bs-dismiss="modal"></button>
+	        <h5 class="modal-title">공정 종료 - 생산 수량 입력</h5>
+	        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 	      </div>
 	
 	      <div class="modal-body">
 	
+	        <!-- Hidden -->
+	        <input type="hidden" id="finish-orderId">
+	        <input type="hidden" id="finish-stepSeq">
+	
+	        <!-- 기준 배합량(표준값) 표시 -->
 	        <div class="mb-3">
-	          <label class="form-label fw-bold">작업지시번호</label>
-	          <input type="text" class="form-control" id="qcWorkOrder" readonly>
+	          <label class="form-label">기준 배합량 (표준)</label>
+	          <input type="text" id="finish-standardQty" class="form-control" readonly>
+	          <small class="text-muted">BOM 기반 계산된 표준 투입량입니다.</small>
 	        </div>
 	
-	        <div class="table-responsive small">
-	          <table class="table table-bordered align-middle">
-	            <thead class="table-light">
-	            <tr>
-	              <th>QC 항목</th>
-	              <th>기준(min~max)</th>
-	              <th>측정값</th>
-	            </tr>
-	            </thead>
-	            <tbody id="qcItemTbody">
-	            </tbody>
-	          </table>
+	        <hr>
+	
+	        <!-- 실제 수량 -->
+	        <div class="mb-3">
+	          <label class="form-label">양품 수량</label>
+	          <input type="number" id="finish-goodQty" class="form-control">
+	        </div>
+	
+	        <div class="mb-3">
+	          <label class="form-label">불량 수량</label>
+	          <input type="number" id="finish-defectQty" class="form-control">
 	        </div>
 	
 	      </div>
 	
 	      <div class="modal-footer">
-	        <button class="btn btn-primary" id="btnSaveQC">저장</button>
-	        <button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+	        <button class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+	        <button class="btn btn-success" id="btnFinishSubmit">저장하고 종료</button>
 	      </div>
+	
 	    </div>
 	  </div>
 	</div>
+
+
 	
 
 	<script src="/js/process/processStatus.js"></script>		

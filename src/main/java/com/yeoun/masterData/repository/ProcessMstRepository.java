@@ -17,5 +17,10 @@ public interface ProcessMstRepository extends JpaRepository<ProcessMst, String> 
 	Optional<ProcessMst> findByProcessId(String processId);
 
 	// 공정코드 그리드 조회
+	@Query(value="""
+			select * from process_mst
+				where use_yn = 'Y'
+			""",nativeQuery = true)
+	List<ProcessMst> findByprocessCode();
 	
 }
