@@ -83,6 +83,8 @@
 		        NVL(mat.MAT_NAME, '') LIKE '%' || #{keyword} || '%'
 		        OR NVL(prd.PRD_NAME, '') LIKE '%' || #{keyword} || '%'
 		        OR UPPER(NVL(oi.LOT_NO, ' '))  LIKE '%' || #{keyword} || '%'
+		        OR o.WORK_ORDER_ID LIKE '%' || #{keyword} || '%'
+		        OR o.SHIPMENT_ID LIKE '%' || #{keyword} || '%'
     		)
 		</if>
 		ORDER BY

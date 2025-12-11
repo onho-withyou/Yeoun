@@ -309,7 +309,6 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 		});
 	}
 
-	console.log(items);
 	const inboundId = document.querySelector("#inboundId").value;
 	
 	const res = await fetch("/inventory/inbound/mat/complete", {
