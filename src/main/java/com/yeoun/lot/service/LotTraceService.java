@@ -115,9 +115,12 @@ public class LotTraceService {
 	@Transactional(readOnly = true)
 	public List<LotRootDTO> getFinishedLots() {
 		
+		// 완제품 공정에 속한 LOT 타입
+		List<String> lotTypes = List.of("WIP", "FIN");
+		
 		// 1) FIN LOT 목록 조회
 		List<LotMaster> lots = 
-				lotMasterRepository.findByLotTypeOrderByCreatedDateDesc("FIN");
+				lotMasterRepository.findByLotTypeInOrderByCreatedDateDesc(lotTypes);
 		
 		return lots.stream()
 	            .map(lm -> new LotRootDTO(

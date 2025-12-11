@@ -34,8 +34,8 @@ public interface LotMasterRepository extends JpaRepository<LotMaster, String> {
     // LOT 조회
 	Optional<LotMaster> findByLotNo(String lotNo);
 	
-	// 완제품 LOT(FIN) 목록 조회 (LOT_TYPE = 'FIN' 인 LOT만 대상)
+	// 완제품 LOT 목록 조회 (LOT_TYPE = 'WIP', 'FIN' 인 LOT만 대상)
 	// - LOT 추적에서 왼쪽 목록에 출력될 ROOT
-	List<LotMaster> findByLotTypeOrderByCreatedDateDesc(String lotType);
+	List<LotMaster> findByLotTypeInOrderByCreatedDateDesc(List<String> lotTypes);
 
 }
