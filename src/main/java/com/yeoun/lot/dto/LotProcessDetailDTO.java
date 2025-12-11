@@ -27,7 +27,9 @@ public class LotProcessDetailDTO {
     private Long defectQty;					// 불량수량
     private Double defectRate;				// 불량률
     private String lineId;					// 라인ID
-    private String equipCode;    			// 설비 코드
-    private String equipName;   			// 설비 이름
+    
+    // 설비 관련은 나중에 필요해지면 그때 추가
+    // private String equipCode;
+    // private String equipName;
 
 }

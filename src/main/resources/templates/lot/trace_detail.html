@@ -84,8 +84,65 @@
 
       </div>
 
-      <!-- 아래쪽 공정/자재 리스트는 기존대로 유지 -->
-      <!-- ... -->
+      <!-- 공정 상세 패널 -->
+	<div id="processDetailPanel" class="mt-4 p-3 border rounded bg-light" style="display:none;">
+	
+	  <h6 class="fw-semibold mb-3">공정 상세 정보</h6>
+	
+	  <div class="row g-3">
+	
+	    <div class="col-sm-6">
+	      <div class="text-muted small">공정명</div>
+	      <div id="pd-processName" class="fw-semibold">-</div>
+	
+	      <div class="mt-2 text-muted small">공정코드</div>
+	      <div id="pd-processId">-</div>
+	
+	      <div class="mt-2 text-muted small">공정 상태</div>
+	      <div id="pd-status">-</div>
+	
+	      <div class="mt-2 text-muted small">담당 부서</div>
+	      <div id="pd-deptName">-</div>
+	    </div>
+	
+	    <div class="col-sm-6">
+	      <div class="text-muted small">담당자(사번)</div>
+	      <div id="pd-workerId">-</div>
+	
+	      <div class="mt-2 text-muted small">담당자명</div>
+	      <div id="pd-workerName">-</div>
+	
+	      <div class="mt-2 text-muted small">라인 ID</div>
+	      <div id="pd-lineId">-</div>
+	    </div>
+	
+	  </div>
+	
+	  <!-- 2행 -->
+	  <div class="row g-3 mt-3">
+	
+	    <div class="col-sm-6">
+	      <div class="text-muted small">작업 시작일시</div>
+	      <div id="pd-startTime">-</div>
+	
+	      <div class="mt-2 text-muted small">작업 종료일시</div>
+	      <div id="pd-endTime">-</div>
+	    </div>
+	
+	    <div class="col-sm-6">
+	      <div class="text-muted small">양품수량</div>
+	      <div id="pd-goodQty">-</div>
+	
+	      <div class="mt-2 text-muted small">불량수량</div>
+	      <div id="pd-defectQty">-</div>
+	
+	      <div class="mt-2 text-muted small">불량률</div>
+	      <div id="pd-defectRate">-</div>
+	    </div>
+	  </div>
+	
+	</div>
+
 
     </th:block>
 

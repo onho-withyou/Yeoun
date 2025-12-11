@@ -67,10 +67,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (processItem) {
       e.preventDefault();
 
-      const lotNo = processItem.dataset.lotNo;
+      const orderId = processItem.dataset.orderId;
       const stepSeq = processItem.dataset.stepSeq;
+	  
+	  if (!orderId || !stepSeq) {
+	     console.warn("orderId 또는 stepSeq가 없습니다.", processItem);
+	     return;
+	   }
 
-      loadLotDetail(lotNo, stepSeq);
+      loadProcessDetail(orderId, stepSeq);
       return;
     }
   });
@@ -125,6 +130,7 @@ function loadProcessList(container, lotNo) {
         li.classList.add("process-item");
         li.dataset.lotNo = lotNo;
         li.dataset.stepSeq = p.stepSeq;
+		li.dataset.orderId = p.orderId;
 
         li.innerHTML = `
           <a href="#" class="text-decoration-none small">
@@ -141,6 +147,54 @@ function loadProcessList(container, lotNo) {
       container.innerHTML =
         "<li class='small text-danger'>(공정 목록을 불러오는 중 오류가 발생했습니다)</li>";
     });
+}
+function loadProcessDetail(orderId, stepSeq) {
+  const url = `/lot/trace/process-detail?orderId=${encodeURIComponent(orderId)}&stepSeq=${encodeURIComponent(stepSeq)}`;
+
+  fetch(url)
+    .then(res => {
+      if (!res.ok) {
+        throw new Error("공정 상세 조회 실패: " + res.status);
+      }
+      return res.json();
+    })
+    .then(detail => {
+      renderProcessDetail(detail);
+    })
+    .catch(err => {
+      console.error(err);
+      const panel = document.getElementById("processDetailPanel");
+      if (panel) {
+        panel.style.display = "block";
+        panel.innerHTML = `
+          <div class="text-danger small">
+            공정 상세 정보를 불러오는 중 오류가 발생했습니다.
+          </div>`;
+      }
+    });
+}
+
+function renderProcessDetail(detail) {
+    const panel = document.getElementById("processDetailPanel");
+    panel.style.display = "block";
+
+    document.getElementById("pd-processName").innerText = detail.processName || "-";
+    document.getElementById("pd-processId").innerText = detail.processId || "-";
+    document.getElementById("pd-status").innerText = detail.status || "-";
+    document.getElementById("pd-deptName").innerText = detail.deptName || "-";
+
+    document.getElementById("pd-workerId").innerText = detail.workerId || "-";
+    document.getElementById("pd-workerName").innerText = detail.workerName || "-";
+    document.getElementById("pd-lineId").innerText = detail.lineId || "-";
+
+    document.getElementById("pd-startTime").innerText = detail.startTime || "-";
+    document.getElementById("pd-endTime").innerText = detail.endTime || "-";
+
+    document.getElementById("pd-goodQty").innerText = detail.goodQty ?? "-";
+    document.getElementById("pd-defectQty").innerText = detail.defectQty ?? "-";
+    document.getElementById("pd-defectRate").innerText = detail.defectRate != null
+        ? detail.defectRate.toFixed(1) + "%"
+        : "-";
 }
 
 // 자재 리스트
@@ -181,3 +235,4 @@ function loadMaterialList(container, lotNo) {
         "<li class='small text-danger'>(자재 목록을 불러오는 중 오류가 발생했습니다)</li>";
     });
 }
+
