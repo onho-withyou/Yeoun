@@ -83,7 +83,8 @@ public class WorkOrderProcessController {
     @ResponseBody
     public Map<String, Object> finishStep(@RequestBody StepRequest req) {
         try {
-        	workOrderProcessService.finishStep(req.getOrderId(), req.getStepSeq());
+        	workOrderProcessService.finishStep(req.getOrderId(), req.getStepSeq(), 
+        									   req.getGoodQty(), req.getDefectQty(), req.getMemo());
         	
         	// 공정 종료 처리 후, 최신 상세 다시 조회
         	WorkOrderProcessDetailDTO detail =
@@ -131,6 +132,9 @@ public class WorkOrderProcessController {
     public static class StepRequest {
         private String orderId;
         private Integer stepSeq;
+        private Integer goodQty;
+        private Integer defectQty;
+        private String memo;
     }
 
     @Getter @Setter

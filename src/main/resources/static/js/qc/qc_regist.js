@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
         openQcRegModal(row);
     });
 	
-	// ✅ 전체 판정에 따라 불합격 사유 활성/비활성 (readonly 버전)
+	// 전체 판정에 따라 불합격 사유 활성/비활성 (readonly 버전)
 	const overallResultSelect = document.getElementById("overallResult");
 	const failReasonTextarea = document.getElementById("failReason");
 
@@ -264,7 +264,7 @@ function collectDetailRowsFromTable() {
     });
   });
 
-  // ✅ 측정값이 비어 있는 행이 하나라도 있는지 체크
+  // 측정값이 비어 있는 행이 하나라도 있는지 체크
   const emptyIndex = detailRows.findIndex(row =>
     !row.measureValue || row.measureValue.trim() === ""
   );
@@ -276,7 +276,7 @@ function collectDetailRowsFromTable() {
     if (targetInput) {
       targetInput.focus();
     }
-    return null;  // → onClickSaveQcResult() 에서 알럿 뜸
+    return null;  // ->  onClickSaveQcResult() 에서 알럿 뜸
   }
 
   return detailRows;
@@ -312,14 +312,14 @@ function onClickSaveQcResult() {
 	const overallResult = overallResultEl ? overallResultEl.value : "";
 	const failReason    = failReasonEl ? failReasonEl.value.trim() : "";
 
-	// ✅ 전체 판정 필수
+	// 전체 판정 필수
 	if (!overallResult) {
 	  alert("전체 판정을 선택해주세요.");
 	  overallResultEl?.focus();
 	  return;
 	}
 
-	// ✅ FAIL인데 불합격 사유가 없으면 막기
+	// FAIL인데 불합격 사유가 없으면 막기
 	if (overallResult === "FAIL" && failReason === "") {
 	  alert("전체 판정이 FAIL인 경우, 불합격 사유를 입력해주세요.");
 	  failReasonEl?.removeAttribute("readonly");
