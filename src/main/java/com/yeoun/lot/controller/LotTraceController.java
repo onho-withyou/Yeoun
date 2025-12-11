@@ -80,6 +80,15 @@ public class LotTraceController {
 	    return lotTraceService.getProcessNodesForLot(lotNo);
 	}
 	
+	// =====================================================================
+	// 자재 리스트 
+	@GetMapping("/trace/material-list")
+	@ResponseBody
+	public List<LotMaterialNodeDTO> getMaterialList(@RequestParam("lotNo") String lotNo) {
+		
+		// LOT 기준 공정 단계 목록 조회 (기존 서비스 그대로 재사용)
+	    return lotTraceService.getMaterialNodesForLot(lotNo);
+	}
 	
 	
 	

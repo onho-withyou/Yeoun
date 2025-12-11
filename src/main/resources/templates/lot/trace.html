@@ -99,34 +99,23 @@
 					    <!-- JS에서 li.process-item 들이 동적으로 들어옴 -->
 					  </ul>
 					</li>
-
-		
+					
 		            <!-- 자재 그룹 -->
-		            <li class="mb-1">
-		              <a href="#"
-		                 class="lot-group-toggle text-decoration-none small text-success"
-		                 data-group="material"
-		                 th:data-lot-no="${lot.lotNo}">
-		                ▶ 자재
-		              </a>
-		
-		              <ul class="list-unstyled ms-3 mt-1 group-children d-none"
-		                  data-group="material"
-		                  th:data-lot-no="${lot.lotNo}">
-		                <li th:each="m : ${materialNodes}"
-		                    th:if="${selectedLot != null and selectedLot.lotNo == lot.lotNo}">
-		                  <span class="small">
-		                    <span class="fw-semibold" th:text="${m.lotNo}">LOT</span>
-		                    <span class="text-muted"
-		                          th:text="' / ' + ${m.displayName}"> / 자재명</span>
-		                    <span class="text-muted"
-		                          th:text="' / ' + ${m.usedQty} + (m.unit != null ? ' ' + m.unit : '')">
-		                      / 0 EA
-		                    </span>
-		                  </span>
-		                </li>
-		              </ul>
-		            </li>
+					<li class="mb-1">
+					  <a href="#"
+					     class="lot-group-toggle text-decoration-none small"
+					     data-group="material"
+					     th:data-lot-no="${lot.lotNo}">
+					    ▶ 자재
+					  </a>
+					
+					  <!-- 자재 리스트: 이제 서버에서 안 채우고 JS로 채울 거라 비워둠 -->
+					  <ul class="list-unstyled ms-3 mt-1 group-children d-none"
+					      data-group="material"
+					      th:data-lot-no="${lot.lotNo}">
+					    <!-- JS에서 li.process-item 들이 동적으로 들어옴 -->
+					  </ul>
+					</li>
 		
 		            <!-- 설비 그룹 (지금은 데이터 없으면 그냥 텍스트만) -->
 		            <li class="mb-1">
