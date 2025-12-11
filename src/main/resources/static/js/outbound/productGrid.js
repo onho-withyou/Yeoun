@@ -236,7 +236,18 @@ shipmentSelect.addEventListener("focus", async () => {
 		// 선택한 출하지시서에 따른 담당자, 거래처명, 출고일 정보 입력
 		processByName.value = shipOrder.createdName;
 		shopClientName.value = shipOrder.clientName;
-		expectDate.value = shipOrder.startDate?.split("T")[0] || "0";
+		
+		// 오늘 날짜 구하기(한국 시간)
+		const now = new Date();
+		const today = new Date(now.getTime() - (now.getTimezoneOffset() * 60000))
+				.toISOString()
+				.split("T")[0];
+				
+		// 오늘 이전 날자 선택 불가
+		dueDate.min = today;
+		
+		// startDate가 없으면 오늘 날짜를 기본값으로 하거나 0 처리
+		expectDate.value = shipOrder.startDate?.split("T")[0] || today;
 		
 		prdOutboundDate = shipOrder.startDate;
 		
@@ -244,6 +255,11 @@ shipmentSelect.addEventListener("focus", async () => {
 		renderProductList(shipOrder.items);
 		
 	});
+});
+
+// 출고 버튼 클릭(모달 초기화)
+document.querySelector("#prdRegistBtn").addEventListener("click", () => {
+	restPrdModal();
 });
 
 // 출하지시서에 해당하는 품목 렌더링
@@ -258,8 +274,8 @@ function renderProductList(items) {
 			<tr>
 				<td>${prd.prdId}</td>
 				<td>${prd.prdName}</td>
-				<td>${prd.shipmentQty}</td>
-				<td>${prd.orderqQty}</td>
+				<td data-qty="${prd.shipmentQty}" name="shipmentQty">${prd.shipmentQty}</td>
+				<td data-stock="${prd.orderqQty}" name="stock">${prd.orderqQty}</td>
 				<td>
 					<input type="number" class="form-control outboundQty" min="0">
 					<input type="hidden" name="prdId" value="${prd.prdId}"/>
@@ -275,12 +291,40 @@ function renderProductList(items) {
 const submitPrdOutbound = async () => {
 	// 출고 품목을 담을 변수
 	const items = [];
+	const rows = document.querySelectorAll("#shipTbody tr");
+	
+	for (const row of rows) {
+		items.push({
+			prdId: row.querySelector("input[name=prdId]").value,
+			outboundQty: row.querySelector(".outboundQty").value
+		});
+		
+	}
 	
 	// 출고 품목들 items 추가
 	document.querySelectorAll("#shipTbody tr").forEach(tr => {
+		// 납품 수량
+		const shipmentQty = Number(row.querySelector("td[name=shipmentQty]").dataset.qty);
+		// 출고 수량
+		const outboundQty = Number(row.querySelector(".outboundQty").value);
+		// 재고 수량
+		const stock = Number(row.querySelector("td[name=stock]").dataset.stock);
+		
+		// 출고 수량과 재고 수량 비교
+		if (outboundQty > stock) {
+			alert("출고 수량이 재고 수량보다 많습니다.");
+			return;
+		}
+		
+		// 출고 수량과 요청 수량 비교
+		if (shipmentQty > outboundQty) {
+			alert("출고 수량이 요청 수량보다 적습니다.");
+			return;
+		}
+		
 		items.push({
 			prdId: tr.querySelector("input[name=prdId]").value,
-			outboundQty: tr.querySelector(".outboundQty").value
+			outboundQty
 		});
 	});
 	
@@ -312,6 +356,15 @@ const submitPrdOutbound = async () => {
 	alert("출고 등록이 완료되었습니다." || result.message);
 	
 	setTimeout(() => {
-		location.reload();
+		location.href = "/inventory/outbound/productList";
 	}, 300);
+}
+
+// 모달 초기화
+function restPrdModal() {
+	shipmentSelect.innerHTML = '<option value="">출하지시서를 선택하세요</option>';
+	processByName.vlaeu = "";
+	shopClientName.value = "";
+	expectDate.value = "";
+	shipTbody.innerHTML = "";
 }
