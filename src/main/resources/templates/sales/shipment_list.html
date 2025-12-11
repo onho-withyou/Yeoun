@@ -60,6 +60,70 @@
 
 </div>
 
+<!-- ================================
+     출하 상세 모달
+================================ -->
+<div class="modal fade" id="shipmentDetailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          출하 상세
+          <small class="text-muted ms-2" id="detailOrderId"></small>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- 헤더 정보 -->
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label class="form-label">거래처</label>
+            <div id="detailClientName" class="fw-semibold"></div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">납기요청일</label>
+            <div id="detailDueDate"></div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">출하상태</label>
+            <div id="detailStatusBadge"></div>
+          </div>
+        </div>
+
+        <!-- 품목 리스트 -->
+        <h6 class="mb-2">품목 정보</h6>
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered align-middle mb-0" id="detailItemTable">
+            <thead class="table-light">
+              <tr>
+                <th>제품명</th>
+                <th class="text-end">수주수량</th>
+                <th class="text-end">현재재고</th>
+                <th class="text-center">예약가능</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- JS로 행 렌더링 -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 필요하면 여기 아래에 출하이력(LOT 등) 테이블도 추가 가능 -->
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
 </th:block>
 
 
@@ -70,6 +134,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
 <script th:src="@{/js/sales/shipment_list.js}"></script>
+<script src="/js/sales/shipment_detail.js"></script>
+
 
 </th:block>
 

@@ -229,6 +229,15 @@ public class ClientController {
 
 
     }
+    
+    //고객사 정보 수정
+    @PostMapping("/update")
+    @ResponseBody
+    public String update(@RequestBody Client client) {
+        clientService.update(client);
+        return "OK";
+    }
+
 
 
 }

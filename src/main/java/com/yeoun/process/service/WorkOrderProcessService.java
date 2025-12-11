@@ -667,22 +667,20 @@ public class WorkOrderProcessService {
             workOrder.setStatus("COMPLETED");
             workOrder.setActEndDate(LocalDateTime.now());
 
-            // 2) 같은 PLAN_ID 아래에 아직 완료 안 된 작업지시가 있는지 확인
             String planId = workOrder.getPlanId();
             if (planId != null) {
 
-                // 🔹 PlanItem 기준으로 아직 DONE 아닌 애가 있는지 확인
-                boolean existsNotDoneItem =
-                        productionPlanItemRepository.existsByPlanIdAndStatusNot(planId, ProductionStatus.DONE);
+                // 🔹 같은 PLAN_ID 아래에 아직 COMPLETED 아닌 작업지시가 있는지 확인
+                boolean existsNotCompletedWo =
+                        workOrderRepository.existsByPlanIdAndStatusNot(planId, "COMPLETED");
 
-                if (!existsNotDoneItem) {
-                    // (1) Plan DONE
+                if (!existsNotCompletedWo) {
+                    // (1) 생산계획 헤더 DONE
                     ProductionPlan plan = productionPlanRepository.findById(planId)
                             .orElseThrow(() -> new IllegalStateException("생산계획을 찾을 수 없습니다. planId=" + planId));
                     plan.setStatus(ProductionStatus.DONE);
 
-                    // (2) PlanItem 들은 이미 DONE이라고 가정할 수도 있고,
-                    //     혹시 모를 상태 꼬임 방지용으로 한 번 더 덮어써도 됨.
+                    // (2) 해당 계획의 PlanItem들도 전부 DONE으로 덮어쓰기
                     List<ProductionPlanItem> items =
                             productionPlanItemRepository.findByPlanId(planId);
                     for (ProductionPlanItem item : items) {
@@ -691,6 +689,7 @@ public class WorkOrderProcessService {
                 }
             }
         }
+
         
         // LOT 종료 공통 처리
         handleLotOnStepEnd(workOrder, proc, hasLaterStep);

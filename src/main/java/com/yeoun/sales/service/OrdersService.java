@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.yeoun.sales.dto.OrderDetailDTO;
 import com.yeoun.sales.dto.OrderItemDTO;
 import com.yeoun.sales.dto.OrderListDTO;
 import com.yeoun.sales.entity.Client;
@@ -217,6 +218,9 @@ public class OrdersService {
     public List<OrderItemDTO> getConfirmedOrderItems() {
         return orderItemRepository.findConfirmedOrderItems();
     }
+    
+    
+   
 
 
 }
