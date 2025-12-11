@@ -8,58 +8,6 @@ modalElement.addEventListener('shown.bs.modal', function () {
     grid2.refreshLayout();
 });
 
-class StatusModifiedRenderer {
-    constructor(props) {
-        const el = document.createElement('div');
-        el.className = 'tui-grid-cell-content-renderer'; 
-        this.el = el;
-        this.grid = props.grid; 
-        
-        this.render(props);
-    }
-
-    getElement() {
-        return this.el;
-    }
-
-    render(props) {
-        const value = props.value;
-        const rowKey = props.rowKey; 
-        
-        this.el.textContent = value; 
-
-        // 💡 수정되거나 추가된 행 상태 확인 로직
-        let isUpdatedOrCreated = false;
-        
-        if (this.grid) {
-            const modifiedRows = this.grid.getModifiedRows();
-            
-            // 1. 수정된 행(updatedRows) 목록에서 현재 rowKey 확인
-            const isUpdated = modifiedRows.updatedRows.some(row => String(row.rowKey) === String(rowKey));
-            
-            // 2. 새로 추가된 행(createdRows) 목록에서 현재 rowKey 확인
-            const isCreated = modifiedRows.createdRows.some(row => String(row.rowKey) === String(rowKey));
-            
-            // 두 상태 중 하나라도 true이면 스타일 적용
-            isUpdatedOrCreated = isUpdated || isCreated;
-        }
-        
-        // 🎨 인라인 스타일 적용
-        if (isUpdatedOrCreated) {
-            // 수정되거나 추가된 행에 적용될 스타일
-            this.el.style.backgroundColor = '#c3f2ffff'; 
-            this.el.style.color = '#000000';         
-            this.el.style.fontWeight = 'bold';
-        } else {
-            // 조건 불충족 시 스타일 초기화
-            this.el.style.backgroundColor = '';
-            this.el.style.color = '';
-            this.el.style.fontWeight = '';
-        }
-    }
-}
-
-
 const Grid = tui.Grid;
 //g-grid1 bom그리드
 const grid1 = new Grid({
@@ -124,8 +72,22 @@ const grid2 = new Grid({
 		    {header: '품목코드' ,name: 'itemId' ,align: 'center',editor: 'text'
 				,renderer:{ type: StatusModifiedRenderer}	
 			}
-			,{header: '품목종류' ,name: 'itemType' ,align: 'center',editor: 'text'
+			,{header: '품목종류' ,name: 'itemType' ,align: 'center'
 				,renderer:{ type: StatusModifiedRenderer}	
+				,editor: {
+					type: 'select', // 드롭다운 사용
+					options: {
+						// value는 실제 데이터 값, text는 사용자에게 보이는 값
+						listItems: [
+							{ text: '원재료', value: 'RAW' },
+							{ text: '부자재', value: 'SUB' },
+							{ text: '포장재', value: 'PKG' },
+							{ text: '공정중', value: 'WIP' },
+							{ text: '생산품', value: 'FIN' },
+							{ text: '박스', value: 'BOX' }
+						]
+					}
+				}
 
 			}
 			,{header: '품목명' ,name: 'itemName' ,align: 'center',editor: 'text',width: 230
