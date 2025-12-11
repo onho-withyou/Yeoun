@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const groupToggle = e.target.closest(".lot-group-toggle");
     const processItem = e.target.closest(".process-item");
 
-    // 1) ROOT 클릭 → ROOT 하위 그룹(공정/자재/설비) 열기 + 오른쪽 LOT 개요
+    // 1) ROOT 클릭 -> ROOT 하위 그룹(공정/자재/설비) 열기 + 오른쪽 LOT 개요
     if (rootLink) {
       e.preventDefault();
 
@@ -21,6 +21,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const li = rootLink.closest("li.list-group-item");
       const children = li.querySelector(".root-children");
       if (children) {
+		
+		// 1) 다른 LOT들의 children은 전부 접기
+	    treeEl.querySelectorAll(".root-children").forEach(box => {
+	      if (box !== children) {
+	        box.classList.add("d-none");
+	      }
+	    });
+
+	    // 2) 현재 클릭한 LOT만 토글 (같은 거 또 누르면 접어지게)
         children.classList.toggle("d-none");
       }
 
@@ -29,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // 2) 그룹(공정/자재/설비) 클릭 → 해당 그룹 children 토글
+    // 2) 그룹(공정/자재/설비) 클릭 -> 해당 그룹 children 토글
     if (groupToggle) {
       e.preventDefault();
 
@@ -42,11 +51,10 @@ document.addEventListener("DOMContentLoaded", () => {
         children.classList.toggle("d-none");
       }
 
-      // 필요하면 여기서 group 선택 시 오른쪽에 간단한 개요 띄우는 것도 가능
       return;
     }
 
-    // 3) 공정 아이템 클릭 → 오른쪽 공정 상세
+    // 3) 공정 아이템 클릭 -> 오른쪽 공정 상세
     if (processItem) {
       e.preventDefault();
 
