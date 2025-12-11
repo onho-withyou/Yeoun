@@ -38,7 +38,7 @@ const grid1 = new Grid({
 		,{header: '제품코드' ,name: 'prdId' ,align: 'center'}
 		,{header: '라우트명' ,name: 'routeName' ,align: 'center',width: 150,filter: "select"}
 		,{header: '설명' ,name: 'description' ,align: 'center',width: 550}
-		,{header: '사용여부' ,name: 'useYn' ,align: 'center',width: 90}  
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center',width: 90,hidden: true}  
 		,{header: '생성자id' ,name: 'createdId' ,align: 'center',hidden: true}  
 		,{header: '생성일시' ,name: 'createdDate' ,align: 'center',hidden: true}  
 		,{header: '수정자id' ,name: 'updatedId' ,align: 'center',hidden: true}  
@@ -798,6 +798,72 @@ modifyProcessCodeRowBtn.addEventListener('click', async function() {
 			try { alert('삭제 처리 중 오류가 발생했습니다. ' + (e && e.message ? e.message : '')); } catch (err) {}
 		}
 	
+});
+//라우트 조회 상세 - 공정단계 그리드에서 단계삭제  // 하다가잠
+const deleteRouteStepRowBtn = document.getElementById('deleteRouteStepRowBtn');
+deleteRouteStepRowBtn.addEventListener('click', async function() {
+	// 체크된 rowKey들 수집
+	let rowKeysToDelete = [];
+	try {
+		if (typeof grid3.getCheckedRowKeys === 'function') {
+			rowKeysToDelete = grid3.getCheckedRowKeys() || [];
+		} else if (typeof grid3.getCheckedRows === 'function') {
+			const checkedRows = grid3.getCheckedRows() || [];
+			rowKeysToDelete = checkedRows.map(r => r && (r.rowKey || r.routeStepId)).filter(Boolean);
+		}
+	} catch (e) {
+		console.warn('체크된 행 조회 실패', e);
+	}
+	if (rowKeysToDelete.length === 0) {
+		alert('삭제할 공정단계를 선택(체크)해주세요.');
+		return;
+	}
+	if (!confirm(`${rowKeysToDelete.length}개의 공정단계를 삭제하시겠습니까?`)) {
+		return;
+	}
+	// 간결한 방식으로 각 rowKey로부터 routeStepId(또는 식별 가능한 ID)를 수집
+	const getAllData = () => (typeof grid3.getData === 'function' ? grid3.getData() : (grid3.data || []));
+	const data = getAllData();
+	const routeStepIdsToDelete = [];
+	rowKeysToDelete.forEach(key => {
+		let row = null;
+		if (typeof grid3.getRow === 'function') row = grid3.getRow(key);
+		if (!row) row = data.find(d => d && (String(d.rowKey) === String(key) || String(d.routeStepId) === String(key)));
+		if (row && row.routeStepId) {
+			routeStepIdsToDelete.push(String(row.routeStepId));
+		}
+	});
+
+	if (routeStepIdsToDelete.length === 0) {
+		alert('삭제할 공정단계를 정확히 선택해주세요.');
+		return;
+	}
+	try {
+		const response = await fetch('/masterData/processStep/modify', {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: {
+				[csrfHeader]: csrfToken,
+				'Content-Type': 'application/json'
+
+			},
+			body: JSON.stringify({ routeStepIds: routeStepIdsToDelete })
+		});	
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+		const resultText = await response.text();
+		if (resultText === 'success') {
+			alert('삭제 완료');
+			const routeId = document.getElementById('modalRouteId').value;//라우트 ID
+			processStepSearch(routeId);//신규라우트 모달 그리드 - 공정단계 조회
+		} else {
+			alert('삭제 실패: ' + resultText);
+		}
+	} catch (error) {
+		console.error('삭제오류', error);
+		alert('삭제 중 오류가 발생했습니다. 콘솔 로그를 확인하세요.');
+	}
 });
 
 //모달 움직이게 하기
