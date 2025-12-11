@@ -1,6 +1,11 @@
 const grid = new tui.Grid({
 	el: document.getElementById("materialGrid"),
+	bodyHeight: 500,
 	rowHeaders: ['rowNum'],
+	pageOptions: {
+	    useClient: true,  // 클라이언트 사이드 페이징
+	    perPage: 10       // 페이지당 10개 행
+	},	
 	columns: [
 		{
 			header: "입고번호",
@@ -17,6 +22,7 @@ const grid = new tui.Grid({
 		{
 			header: "입고예정일",
 			name: "expectArrivalDate",
+			sortable: true,
 			formatter: ({value}) => formatDate(value)
 		},
 		{
@@ -101,6 +107,9 @@ async function loadMaterialInbound(startDate, endDate, searchType, keyword) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+	//스피너 on
+	showSpinner();
+	
 	// 오늘 날짜 구하기
 	const today = new Date();
 	const year = today.getFullYear();
@@ -116,6 +125,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 	endDateInput.value = endDate;
 	
 	await loadMaterialInbound(startDate, endDate, "all", "");
+	
+	//스피너  off
+	hideSpinner();
 });
 
 // 검색

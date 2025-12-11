@@ -28,6 +28,7 @@
 			<result property="unitPrice" column="UNIT_PRICE"/>
 			<result property="supplyAmount" column="SUPPLY_AMOUNT"/>
 			<result property="totalPrice" column="TOTAL_PRICE"/>
+			<result property="unit" column="UNIT"/>
 		</collection>
 	</resultMap>
 	
@@ -153,6 +154,7 @@
 			, mi.UNIT_PRICE
 			, mi.SUPPLY_AMOUNT
 			, mi.TOTAL_PRICE
+			, ci.UNIT
 			, CASE
 				WHEN
 					mat.MAT_NAME IS NOT NULL THEN mat.MAT_NAME
@@ -201,6 +203,10 @@
 		ON
 			it.ITEM_ID = prd.PRD_ID
 			AND it.ITEM_TYPE = 'FG'
+		LEFT JOIN
+			CLIENT_ITEM ci
+		ON
+			ci.CLIENT_ID = c.CLIENT_ID
 		WHERE 
 			i.INBOUND_ID = #{inboundId}
 		ORDER BY
