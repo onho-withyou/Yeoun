@@ -44,7 +44,7 @@ public class InventoryRestController {
 	// 재고리스트 조회
 	@PostMapping("")
 	public ResponseEntity<List<InventoryDTO>> inventories(@RequestBody(required = false) InventoryDTO inventoryDTO) {
-				
+//				System.out.println(inventoryDTO);
 		List<InventoryDTO> inventoryDTOList = 
 				inventoryService.getInventoryInfo(inventoryDTO != null ? inventoryDTO : new InventoryDTO());
 		
