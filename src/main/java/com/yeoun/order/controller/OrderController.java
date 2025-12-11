@@ -82,10 +82,8 @@ public class OrderController {
     // =====================================================
     // 작업지시 확정
     @PatchMapping("/status/{id}")
-    public ResponseEntity<?> released (@PathVariable("id") String id){
-    	
-    	orderService.modifyOrderStatus(id);
-
+    public ResponseEntity<?> released (@PathVariable("id") String id, @RequestParam("status") String status){
+    	orderService.modifyOrderStatus(id, status);
     	return ResponseEntity.ok("updated");
     }
     
@@ -93,6 +91,7 @@ public class OrderController {
     // 작업자스케줄 페이지
     @GetMapping("/schedule")
     public String schedule (){
+    	orderService.selectAllWorkers();
         return "/order/schedule";
     }
 

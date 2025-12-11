@@ -1,7 +1,7 @@
 window.onload = function () {	
 	productRouteSearch();//제품별 공정라우트 그리드 조회
 	processCodeGridAllSearch();//공정코드 관리 그리드 조회
-	routeStepCodeSearch();//신규라우트 모달 그리드 - 공정단계 조회
+	//routeStepCodeSearch();//신규라우트 모달 그리드 - 공정단계 조회
 }
 
 //탭 전환시 그리드 레이아웃 갱신
@@ -80,7 +80,7 @@ class StatusModifiedRenderer {
 
 
 const Grid = tui.Grid;
-//g-grid1 공정그리드
+// g- grid1 공정그리드
 const grid1 = new Grid({
 	  el: document.getElementById('processGrid'), 
       rowHeaders: ['rowNum','checkbox'],
@@ -114,7 +114,7 @@ const grid1 = new Grid({
   	  }
 	});
 	
-//g-grid2 공정코드 관리(PROCESS_MASTER 조회)
+// g- grid2 공정코드 관리(PROCESS_MASTER 조회)
 const grid2 = new Grid({
 	    el: document.getElementById('processCodeGrid'),
         rowHeaders: ['rowNum','checkbox'],
@@ -144,7 +144,7 @@ const grid2 = new Grid({
 	    ,{header: '설명' ,name: 'description' ,align: 'center',editor: 'text' ,filter: "select"
 			,renderer:{ type: StatusModifiedRenderer}
 		}
-        ,{header: '사용여부' ,name: 'useYn' ,align: 'center'
+        ,{header: '사용여부' ,name: 'useYn' ,align: 'center',hidden: true
 			,renderer:{ type: StatusModifiedRenderer}
 			,editor: {
 				type: 'select', // 드롭다운 사용
@@ -247,6 +247,26 @@ const grid4 = new Grid({
         }
 });
 
+grid2.on('beforeChange', (ev) => {
+	console.log("grid2,'beforeChange' 클릭",);
+    const { rowKey, columnName } = ev.changes[0]; // 변경된 데이터 목록 (배열)
+	if (columnName === 'processId') {
+	        // 💡 핵심 수정: rowKey 대신, 현재 행의 'prdId' 값을 가져옵니다.
+	        const processIdValue = grid2.getValue(rowKey, 'processId');
+	        
+	        // processId 값이 비어있거나 null, undefined인 경우를 '새 행'으로 간주합니다.
+	        const isNewRow = !processIdValue; 
+
+	        console.log("processId 값:", processIdValue, " | isNewRow:", isNewRow);
+
+	        // 기존 행일 경우 (isNewRow가 false, 즉 processIdValue가 있는 경우)
+	        if (!isNewRow) {
+	            ev.stop(); // 편집 모드 진입 차단
+	            alert('기존 공정ID는 수정할 수 없습니다. 삭제후 새로추가(등록) 해주세요!'); 
+	        }
+	    }
+});
+
 let processLookupModal; // 공정코드 조회 모달
 document.addEventListener("DOMContentLoaded", () => {
   processLookupModal = new bootstrap.Modal(document.getElementById("processLookup-modal"));
@@ -262,6 +282,7 @@ function openRouteModalForCreate(){
 function openProcessLookupModal() {
     processLookupModal.show();
 }
+
   
 //제품별 공정라우트 그리드 조회
 function productRouteSearch(){

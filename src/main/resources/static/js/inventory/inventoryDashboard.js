@@ -16,13 +16,15 @@ let trendChart; // 차트객체
 let safetyStockGrid; // 안전재고그리드객체
 let expireDisposalGrid; // 유통기한관리그리드객체
 
+let islistOn = false;
+
 const today = new Date();
 
 // 스피너 보이기 끄기
 function showSpinner() {
 	document.getElementById('loading-overlay').style.display = 'flex';
 }
-function hideSpinner() {
+ function hideSpinner() {
 	document.getElementById('loading-overlay').style.display = 'none';
 }
 
@@ -81,9 +83,20 @@ document.addEventListener('DOMContentLoaded', async function () {
 	todayOutboundCompleteEl.innerHTML = `<i class='bx bx-down-arrow-alt'></i> 처리 : ${ObCompleteCnt}`
 
 	// 출고등록 필요한 작업지시서 표시
-	renderOrderGrid();
+	await renderOrderGrid();
 	// 출고등록 필요한 출하지시서 표시\
-	renderShipmentGrid();
+	await renderShipmentGrid();
+	// 하나라도 있으면 div 표시
+	// 그리드 보이는 카드
+	const cardEl = document.getElementById('outboundNOrderCard');
+	if(islistOn) {
+		cardEl.style.display = 'block';
+		console.log(islistOn,"!!!!!!!!!!!!!!");
+	} else {
+		cardEl.style.display = 'none';
+		console.log(islistOn,"@@@@@@@@@@@");
+	}
+
 		
 	//발주 필요 수량 표시
 	let lowStockCnt = 0;
@@ -115,7 +128,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 	}
 	// 발주필요 목록 표시
 	// 안전재고 미달목록표시
-	renderNeedOrderStockGrid();
+	await renderNeedOrderStockGrid();
 	
 	//유통기한 임박 수량 표시
 	let expireCnt = 0;
@@ -131,7 +144,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 	disposalEl.innerHTML = `폐기 : ${disposalCnt}`
 	
 	// 유통기한관리 목록 표시
-	renderExpireDisposalGrid();
+	await renderExpireDisposalGrid();
 	
 // -------------------------------------------------------------------------------
 // 입출고 차트 데이터 입력
@@ -150,8 +163,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 	
 	
 	//스피너  off
-	hideSpinner();
-	
+	hideSpinner();	
 });
 
 // ------------------------------------
@@ -428,21 +440,20 @@ function onChartTypeClick(event) {
 
 // -----------------------------------------------------------------------
 // 출고지시 안된 작업지시서 그리드
-function renderOrderGrid() {
+async function renderOrderGrid() {
+	// 출고지시안된 작업지시서, 출하지시서 체크 함수 
+	islistOn = false;
 	// 출고등록안한 작업지시서데이터	
 	const outboundNList = orderData.filter(order => {
 		return order.outboundYn === 'N';
 	});
 	
 	// 그리드 보이는 카드
-	const cardEl = document.getElementById('outboundNOrderCard');
-	
 	if(outboundNList.length === 0) {
-		cardEl.style.display = 'none';
 		return;
 	}
 	
-	cardEl.style.display = 'block';
+	islistOn = true;	
 	
 	const gridEl = document.getElementById('outboundNOrderGrid');
 	const Grid = tui.Grid;
@@ -532,6 +543,7 @@ async function initOutboundModalByRow(rowData) {
 	// 그리드에서 선택한 작업지시서 선택상태로변경
 	matObWorkOrderSelect.value = rowData.orderId;
 	
+	
 	// change 이벤트 강제 발생
 	const changeEvent = new Event("change");
 	matObWorkOrderSelect.dispatchEvent(changeEvent);
@@ -542,11 +554,15 @@ async function initOutboundModalByRow(rowData) {
 // 출고지시 내려지지않은 출하지시서 그리드
 async function renderShipmentGrid() {
 	const shipmentData = await loadShipmentList();
-	
 //	const filteredData = shipmentData.filter(shipment => {
 //		shipment.
 //	})
-	if(!shipmentData) return;
+	// 그리드 보이는 카드
+	if(shipmentData.length === 0) {
+		return;
+	}
+	islistOn = true;
+
 	const gridEl = document.getElementById('outboundShipmentGrid');
 	const Grid = tui.Grid;
 
@@ -597,7 +613,7 @@ async function initShipmentModalByRow(rowData) {
 	const shipmentSelect  = document.querySelector("#shipmentSelect");
 	const shipmentIdInput = document.querySelector("#shipmentId");
 	const processByName   = document.querySelector("#processByName");
-	const processByEmpId  = document.querySelector("#processByEmpId");
+	const processByEmpId  = document.querySelector(".processByEmpId");
 	const shopClientName  = document.querySelector("#shopClientName");
 	const expectDate      = document.querySelector("#expectDate");
 	
@@ -642,7 +658,10 @@ async function initShipmentModalByRow(rowData) {
 
 	prdOutboundDate = shipOrder.startDate;
 
-	renderProductList(shipOrder.items);
+	// change 이벤트 강제 발생
+	const changeEvent = new Event("change");
+	shipmentSelect.dispatchEvent(changeEvent);
+//	renderProductList(shipOrder.items);
 }
 
 // ------------------------------------------------------------------
@@ -658,6 +677,7 @@ function getLowStockRows() {
 }
 
 function getNeedOrderStocks() {
+	console.log(ivOrderCheckData,"@!#!@#!@#@!#");
 	return ivOrderCheckData.filter(stock => {
 		// 출고 예정 수량 : 생산계획수량 - 작업지시(출고완)수량
 		const EXPECT_OBPLAN_QTY = stock.productPlanQty - stock.outboundPlanQty;
@@ -672,7 +692,7 @@ function getNeedOrderStocks() {
 }
 
 // 안전재고 미달목록 그리드 그리기
-function renderNeedOrderStockGrid() {
+async function renderNeedOrderStockGrid() {
 	// 안전재고 미달 데이터 
 //    const lowStocks = getLowStockRows();
 	// 발주필요 재고 데이터
@@ -724,7 +744,7 @@ function renderNeedOrderStockGrid() {
 			  formatter: ({value}) => value.toLocaleString() },
             { header: '안전재고수량', name: 'safetyQty', minWidth: 90, align: 'right', 
               formatter: ({value}) => value.toLocaleString() },
-            { header: '발주필요', name: '', minWidth: 90, align: 'right', 
+            { header: '필요 재고', name: '', minWidth: 90, align: 'right', 
 			  formatter: ({row}) => {
 				// 출고 예정 수량 : 생산계획수량 - 작업지시(출고완)수량
 				const EXPECT_OBPLAN_QTY = row.productPlanQty - row.outboundPlanQty;
@@ -737,6 +757,7 @@ function renderNeedOrderStockGrid() {
 				return SAFETY_QTY - FINAL_IV_QTY;
 				}
 		    },
+			{ header: '단위',   name: 'itemUnit', minWidth: 50 },
 			{ header: '발주',      name: "btn", width: 100, align: "center",
 			  formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary btn-sm' data-row='${cellInfo.rowKey}' >발주</button>"
 			}
@@ -751,7 +772,8 @@ function renderNeedOrderStockGrid() {
 			if (target && target.tagName === "BUTTON") {
 				
 				const rowData = safetyStockGrid.getRow(event.rowKey);
-//				console.log(rowData);
+				
+				console.log(rowData,"###################");
 
 				//모달 열기
 				const modalEl = document.getElementById("modalCenter");
@@ -777,6 +799,7 @@ async function initPurchaseModalByRow(rowData) {
 
     // 공급업체 전체 데이터 가져오기
     const data = await supplierList();
+	console.log("!@#!@#!@#!@#", data);
     if (!data) return;
 
     // 이 품목을 공급하는 거래처 찾기
@@ -792,6 +815,7 @@ async function initPurchaseModalByRow(rowData) {
 	        item => String(item.materialId) === String(targetMaterialId)
 	    );
 	    if (found) {
+			console.log("found", found);
 	        supplier = client;
 	        targetItem = found;
 	        break;
@@ -814,7 +838,7 @@ async function initPurchaseModalByRow(rowData) {
 	const optionToSelect = Array.from(itemSelect.options).find(
 		opt => Number(opt.value) === Number(targetItemId)
 	);
-
+	console.log("optionToSelect : ", optionToSelect);
 	if (!optionToSelect) {
 		alert("선택된 거래처에 이 품목이 없습니다.");
 		return;
@@ -828,10 +852,16 @@ async function initPurchaseModalByRow(rowData) {
 	
 	// 발주필요 수량주문수량에 입력
 	// 발주필요수량
-	const needOrderQty = Math.max(0, 
+	const inventoryNeedOrderQty = Math.max(0, 
+//	const needOrderQty = Math.max(0, 
 		rowData.safetyQty - 
 		(rowData.expectIvQty + rowData.expectIbQty - (rowData.productPlanQty - rowData.outboundPlanQty))
 	);
+	
+	// 발주수량으로 변환
+	needOrderQty = Math.ceil(convertFromBaseUnit(inventoryNeedOrderQty, targetItem.unit));
+	console.log(needOrderQty);
+	
 	
 	// orderTableBody(purchase_regist.js에선언되어있음)의 마지막추가된 row정보
 	const lastRow = orderTableBody.lastElementChild;
@@ -872,7 +902,7 @@ function getExpireAndDisposalRows() {
     return inventoryInfo.filter(iv =>  iv.ivStatus === 'DISPOSAL_WAIT' || iv.ivStatus === 'EXPIRED');
 }
 
-function renderExpireDisposalGrid() {
+async function renderExpireDisposalGrid() {
     // 임박 + 폐기 같이 필터
     const rows = getExpireAndDisposalRows();
 

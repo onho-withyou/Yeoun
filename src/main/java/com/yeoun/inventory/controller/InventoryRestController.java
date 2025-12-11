@@ -177,6 +177,7 @@ public class InventoryRestController {
 	@GetMapping("/inventoryOrderCheck")
 	public ResponseEntity<List<InventoryOrderCheckViewDTO>> getIv() {
 		List<InventoryOrderCheckViewDTO> inventoryOrderCheckDTOList = inventoryService.getIvOrderCheckData();
+		System.out.println(inventoryOrderCheckDTOList);
 		
 		return ResponseEntity.ok(inventoryOrderCheckDTOList);
 	}

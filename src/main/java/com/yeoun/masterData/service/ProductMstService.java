@@ -53,7 +53,6 @@ public class ProductMstService {
 				}
 			}
 
-			log.info("param.get(\"updatedRows\")------------------->{}",param.get("updatedRows"));
 			// updatedRows
 			Object updatedObj = param.get("updatedRows");
 			if (updatedObj instanceof List) {

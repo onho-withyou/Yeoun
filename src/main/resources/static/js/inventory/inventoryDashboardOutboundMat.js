@@ -37,8 +37,6 @@ matObWorkOrderSelect.addEventListener("focus", async () => {
 		return;
 	}
 	
-	console.log(workOrderList);
-	
 	matObWorkOrderSelect.innerHTML = `<option value="">작업지시서를 선택하세요</option>`;
 	
 	// 옵션 추가
@@ -47,7 +45,7 @@ matObWorkOrderSelect.addEventListener("focus", async () => {
 		opt.value = el.orderId;
 		opt.textContent = `${el.orderId} - ${el.productName}`;
 		opt.dataset.productId = el.productId;
-		matObManagerId.value = el.createdId;
+		opt.dataset.managerId = el.productId;
 		
 		matObWorkOrderSelect.appendChild(opt);
 	});
@@ -56,7 +54,11 @@ matObWorkOrderSelect.addEventListener("focus", async () => {
 // 작업지시 선택 시 상세 정보 입력
 matObWorkOrderSelect.addEventListener("change", async () => {
 	matObWorkId.value = matObWorkOrderSelect.value;
+	let createdData = workOrderList.find(el => {
+		return el.orderId === matObWorkId.value;
+	})
 	
+	matObManagerId.value = createdData.createdId;
 	const obWorkId = matObWorkId.value;
 	if (!obWorkId) return;
 	

@@ -28,16 +28,16 @@
 						<div class="col" th:if="${receiptDTO.prodId != null}">
 						    <div class="text-secondary mb-1">작업지시서</div>
 						    <div class="d-flex">
-						    	<div class="fw-semibold" th:text="${receiptDTO.prodId}"></div>
+						    	<div class="fw-semibold" style="margin-right:3px !important;" th:text="${receiptDTO.prodId}"></div>
 	   							<i class="fa-regular fa-window-restore"  style="cursor:pointer;"  
-									th:attr="data-material-id=${receiptDTO.materialId}"
-									onclick="openDetailWindow(this.dataset.materialId)"></i>
+									th:attr="data-prod-id=${receiptDTO.prodId}"
+									onclick="openDetailOrderWindow(this.dataset.prodId)"></i>
 						    </div>
 						</div>
 						<div class="col" th:if="${receiptDTO.materialId != null}">
 						    <div class="text-secondary mb-1">발주번호</div>
 						    <div class="d-flex">
-							    <div class="fw-semibold" th:text="${receiptDTO.materialId}"></div>
+							    <div class="fw-semibold" style="margin-right:3px !important;" th:text="${receiptDTO.materialId}"></div>
 	   							<i class="fa-regular fa-window-restore"  style="cursor:pointer;"  
 									th:attr="data-material-id=${receiptDTO.materialId}"
 									onclick="openDetailWindow(this.dataset.materialId)"></i>

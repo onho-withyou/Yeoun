@@ -511,6 +511,14 @@
 	    background: #f3fff5;
 	}
   
+  	.detail-select {
+	    background-color: #fff;
+	    border: 1px solid #d4caff;
+	    border-radius: 8px;
+	    padding: 5px;
+	    font-size: 14px;
+	    color: #444;
+  	}
 
 </style>
 </head>
@@ -815,7 +823,6 @@
         <!-- HEADER -->
         <div class="yeoun-modal-header">
           <div class="modal-title-wrap">
-            <i class="bi bi-eye-fill"></i>
             <h5 class="modal-title" id="detailModalTitle">작업지시 상세</h5>
           </div>
           <button class="btn-close" data-bs-dismiss="modal"></button>
@@ -882,60 +889,97 @@
 				        <div class="process-boxes">
 				            <div class="proc">
 				                <span class="proc-title">블렌딩</span>
-				                <span class="proc-value" id="workerBld"></span>
+				                <select class="proc-value detail-select" id="PRC-BLD" disabled>
+							      <option value="">선택</option>
+							      <th:block th:each="worker : ${workers}">
+				                  	<option th:value="${worker.empId}"
+				                  			th:text="${worker.empName}"
+				                  	></option>
+				                  </th:block>
+							    </select>
 				            </div>
 				            <div class="proc">
 				                <span class="proc-title">여과</span>
-				                <span class="proc-value" id="workerFlt"></span>
+				                <select class="proc-value detail-select" id="PRC-FLT" disabled>
+							      <option value="">선택</option>
+							      <th:block th:each="worker : ${workers}">
+				                  	<option th:value="${worker.empId}"
+				                  			th:text="${worker.empName}"
+				                  	></option>
+				                  </th:block>
+							    </select>
 				            </div>
 				            <div class="proc">
 				                <span class="proc-title">충전</span>
-				                <span class="proc-value" id="workerFil"></span>
+				                <select class="proc-value detail-select" id="PRC-FIL" disabled>
+							      <option value="">선택</option>
+							      <th:block th:each="worker : ${workers}">
+				                  	<option th:value="${worker.empId}"
+				                  			th:text="${worker.empName}"
+				                  	></option>
+				                  </th:block>
+							    </select>
 				            </div>
 				            <div class="proc">
 				                <span class="proc-title">조립 + 캠핑</span>
-				                <span class="proc-value" id="workerCap"></span>
+				                <select class="proc-value detail-select" id="PRC-CAP" disabled>
+							      <option value="">선택</option>
+							      <th:block th:each="worker : ${workers}">
+				                  	<option th:value="${worker.empId}"
+				                  			th:text="${worker.empName}"
+				                  	></option>
+				                  </th:block>
+							    </select>
 				            </div>
 				            <div class="proc">
 				            	<span class="proc-title">QC</span>
-				            	<span class="proc-value">품질 검사팀</span>
+				            	<select class="proc-value detail-select" disabled>
+				            		<option value="" selected>품질 검사팀</option>
+				            	</select>
 				            </div>
 				            <div class="proc">
 				                <span class="proc-title">라벨링 + 포장</span>
-				                <span class="proc-value" id="workerLbl"></span>
+				                <select class="proc-value detail-select" id="PRC-LBL" disabled>
+							      <option value="">선택</option>
+							      <th:block th:each="worker : ${workers}">
+				                  	<option th:value="${worker.empId}"
+				                  			th:text="${worker.empName}"
+				                  	></option>
+				                  </th:block>
+							    </select>
 				            </div>
 				        </div>
 				    </div>
 				    
 				    <!-- ===== 5. 상태 ===== -->
-				    <div class="wo-status">
-				        <label>상태</label>
+          			<div class="mb-3 wo-status">
+				        <label class="form-label">상태</label>
 				        <div class="value state" id="detailStatus"></div>
 				    </div>
+				    
+				    <!-- ===== 6. 비고 ===== -->
+				    <div class="mb-3">
+		              <label class="form-label">비고</label>
+		              <textarea id="detailRemark"
+		              			class="form-control" rows="3"
+		              			style="resize: none;" readonly
+		              ></textarea>
+		            </div>
 				    
 				    
 		        <!-- FOOTER -->
 		        <div class="yeoun-modal-footer">
-		          <button id="btnReleased" class="btn btn-success">확정</button>
-		          <button class="btn btn-warning">수정</button>
-		          <button class="btn btn-danger">삭제</button>
+		          <button id="btnReleased" class="btn">확정</button>
+		          <button id="btnModify"   class="btn btn-warning">수정</button>
+		          <button id="btnCanceled" class="btn btn-danger">취소</button>
 		          <button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
 		        </div>
 							
 			</div>
-
-            <!-- ======================== 기본 정보 ======================== -->
-
-               <!--   <div class="info-item">
-                  <label>담당 작업자</label>
-                  <div class="info-value" id="detailWorkers"></div>
-                </div>-->
-
-            </div>
+         </div>
 
       </div>
     </div>
-  </div>
 
 
 </th:block>
@@ -1341,23 +1385,81 @@
 
                   document.getElementById("detailOrderId").innerText = data.orderId;
                   document.getElementById("detailPrdName").innerText = data.prdName;
-                  document.getElementById("detailStatus").innerText = data.status;
                   document.getElementById("detailPlanQty").innerText = data.planQty;
                   document.getElementById("detailPlanDate").innerText = data.planDate;
                   document.getElementById("detailPlanTime").innerText = data.planTime;
                   document.getElementById("detailLineName").innerText = data.lineName;
                   document.getElementById("detailRouteId").innerText = data.routeId;
+                  document.getElementById("detailRemark").value = data.remark;
                   
-                  data.infos.forEach(i => {
-                	    switch (i.processId) {
-                	        case "PRC-BLD": document.getElementById('workerBld').innerText = i.workerName; break;
-                	        case "PRC-FLT": document.getElementById('workerFlt').innerText = i.workerName; break;
-                	        case "PRC-FIL": document.getElementById('workerFil').innerText = i.workerName; break;
-                	        case "PRC-CAP": document.getElementById('workerCap').innerText = i.workerName; break;
-                	        case "PRC-LBL": document.getElementById('workerLbl').innerText = i.workerName; break;
-                	    }
-                	});
+                  const dataStatus = data.status;
+                  const statusBtn = document.getElementById("btnReleased");
+                  const modifyBtn = document.getElementById("btnModify");
+                  const cancelBtn = document.getElementById("btnCanceled");
+                  const statusText = document.getElementById("detailStatus");
                   
+                  if (dataStatus === "CREATED"){
+                	  statusBtn.innerText = '확정';
+                	  statusBtn.classList.add('btn-success');
+                	  if (statusBtn.classList.contains('btn-info')){
+                		  statusBtn.classList.remove('btn-info');
+                	  }               	  
+                	  statusText.innerText = '준비';
+                	  statusBtn.disabled = false; // 확정버튼 활성화
+                	  modifyBtn.disabled = false; // 수정버튼 활성화
+                	  cancelBtn.disabled = false; // 취소버튼 활성화
+                  } else {
+                	  statusBtn.innerText = '확정됨';
+                	  statusBtn.classList.add('btn-info');
+                	  if (statusBtn.classList.contains('btn-success')){
+                		  statusBtn.classList.remove('btn-success');
+                	  }
+                	  switch (dataStatus){
+                	  	case "RELEASED":
+                	  		statusText.innerText = '확정';
+                	  		break;
+                	  	case "IN_PROGRESS":
+                	  		statusText.innerText = '진행중';
+                	  		break;
+                	  	case "COMPLETED":
+                	  		statusText.innerText = '완료';
+                	  		break;
+                	  	case "CANCELED":
+                	  		statusText.innerText = '취소';
+                	  		break;
+                	  	default:
+                	  		statusText.innerText = '미정';
+                	  }
+                	  statusBtn.disabled = true; // 확정버튼 비활성화
+                	  modifyBtn.disabled = true; // 수정버튼 비활성화
+                	  cancelBtn.disabled = true; // 취소버튼 비활성화
+                	  
+                  }
+                  
+
+                  // 작업자 렌더링
+                  data.infos.forEach(info => {
+				    const select = document.getElementById(info.processId);  
+				
+				    if (!select) return;
+				
+				    // workerId가 null이면 선택값 없음
+				    if (info.workerId) {
+				        select.value = info.workerId;
+				    } else {
+				        select.value = ""; // '선택'
+				    }
+				    
+				    if (dataStatus === "CREATED"){
+				    	select.disabled = false;
+				    	document.getElementById("detailRemark").readonly = false;
+				    } else {
+				    	select.disabled = true;
+				    	document.getElementById("detailRemark").readonly = true;
+				    }
+				});
+
+
                   // 진행률 처리
                   updateProcessUI(data.infos);
             });
@@ -1402,33 +1504,43 @@
 }
   
   // 확정
-
   document.getElementById("btnReleased").addEventListener("click", async () => {
-	  fetch(`/order/status/${orderId}`, {
+	  updateStatus(orderId, "RELEASED", "작업지시가 확정되었습니다.");
+  });
+  
+  // 취소
+  document.getElementById("btnCanceled").addEventListener("click", async() => {
+	  if (!confirm("정말 취소하시겠습니까?")) return;
+	  updateStatus(orderId, "CANCELED", "작업지시가 취소되었습니다.");
+  });
+  
+  // 작업지시서 상태변경 공통 함수
+  async function updateStatus (orderId, status, alertContent){
+	  return fetch (`/order/status/${orderId}`, {
 		  method: "PATCH",
-		    headers: {
+		  headers: {
 		      "Content-Type": "application/json",
 		      [csrfHeader]: csrfToken
-		    }
+		  },
+	      body: JSON.stringify({ status: status })
 	  })
-         .then(res => {
-        	    if (!res.ok) throw new Error("서버 오류: " + res.status);
-        	    return res.text();
-         	})
-         .then(() => {
-        	 console.log("확정되었습니다.");
-        	 alert("작업지시가 확정되었습니다.");
-        	 
-        		// 모달 닫기
-        	    const modal = bootstrap.Modal.getInstance(document.getElementById("workDetailModal"));
-        	    modal.hide();
-        	    
-        	    // 목록 새로고침
-        	    loadWorkOrderGrid(); 
-        	 })
-         .catch(err => console.error("오류 발생:", err));
-  });
-
+	  .then(res => {
+		  if (!res.ok) throw new Error ("서버 오류 : " + res.status);
+		  return res.text();
+	  })
+      .then(() => {
+    	 alert(alertContent);
+    	 
+   		// 모달 닫기
+   	    const modal = bootstrap.Modal.getInstance(document.getElementById("workDetailModal"));
+   	    modal.hide();
+   	    
+   	    // 목록 새로고침
+   	    loadWorkOrderGrid(); 
+     })
+     .catch(err => console.error("오류 발생:", err));
+  }
+  
 </script>
 </th:block>
 

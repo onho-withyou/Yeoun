@@ -377,3 +377,10 @@ function openDetailWindow(id) {
 	
 	window.open(url, '_blank', 'width=1200,height=900,scrollbars=yes');
 }
+
+function openDetailOrderWindow(id) {
+	console.log(id);
+	const url = `/inventory/inbound/detail/prodWin/${id}`;
+	
+	window.open(url, '_blank', 'width=1320,height=610,scrollbars=yes');
+}
