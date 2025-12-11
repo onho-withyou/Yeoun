@@ -43,28 +43,11 @@ public class LotTraceController {
 	// 오른쪽 카드(body) fragment 로만 렌더링
 	@GetMapping("/trace/detail")
 	public String getLotDetailFragment(@RequestParam("lotNo") String lotNo,
-	                                   @RequestParam(name = "stepSeq", required = false) Integer stepSeq,
 	                                   Model model) {
 
 	    // LOT 기본 정보
 		LotRootDetailDTO rootDetail = lotTraceService.getRootLotDetail(lotNo);
 	    model.addAttribute("rootDetail", rootDetail);
-
-	    // 공정 단계 목록
-	    List<LotProcessNodeDTO> processNodes = lotTraceService.getProcessNodesForLot(lotNo);
-	    model.addAttribute("processNodes", processNodes);
-
-	    // 선택된 공정 단계 (있으면)
-	    if (stepSeq != null) {
-	        processNodes.stream()
-	                .filter(p -> p.getStepSeq().equals(stepSeq))
-	                .findFirst()
-	                .ifPresent(p -> model.addAttribute("selectedProcess", p));
-	    }
-
-	    // 자재 LOT 목록
-	    List<LotMaterialNodeDTO> materialNodes = lotTraceService.getMaterialNodesForLot(lotNo);
-	    model.addAttribute("materialNodes", materialNodes);
 
 	    // 오른쪽 상세 카드용 fragment만 반환
 	    return "/lot/trace_detail :: detail";
