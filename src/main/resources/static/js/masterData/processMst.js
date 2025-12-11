@@ -1,7 +1,6 @@
 window.onload = function () {	
 	productRouteSearch();//제품별 공정라우트 그리드 조회
 	processCodeGridAllSearch();//공정코드 관리 그리드 조회
-	//routeStepCodeSearch();//신규라우트 모달 그리드 - 공정단계 조회
 }
 
 //탭 전환시 그리드 레이아웃 갱신
@@ -27,57 +26,6 @@ const processLookupModalElement = document.getElementById('processLookup-modal')
 processLookupModalElement.addEventListener('shown.bs.modal', function () {
 	grid4.refreshLayout();
 });
-
-class StatusModifiedRenderer {
-    constructor(props) {
-        const el = document.createElement('div');
-        el.className = 'tui-grid-cell-content-renderer'; 
-        this.el = el;
-        this.grid = props.grid; 
-        this.render(props);
-    }
-
-    getElement() {
-        return this.el;
-    }
-
-    render(props) {
-        const value = props.value;
-        const rowKey = props.rowKey; 
-        
-        this.el.textContent = value; 
-
-        // 💡 수정되거나 추가된 행 상태 확인 로직
-        let isUpdatedOrCreated = false;
-        
-        if (this.grid) {
-            const modifiedRows = this.grid.getModifiedRows();
-            
-            // 1. 수정된 행(updatedRows) 목록에서 현재 rowKey 확인
-            const isUpdated = modifiedRows.updatedRows.some(row => String(row.rowKey) === String(rowKey));
-            
-            // 2. 새로 추가된 행(createdRows) 목록에서 현재 rowKey 확인
-            const isCreated = modifiedRows.createdRows.some(row => String(row.rowKey) === String(rowKey));
-            
-            // 두 상태 중 하나라도 true이면 스타일 적용
-            isUpdatedOrCreated = isUpdated || isCreated;
-        }
-        
-        // 🎨 인라인 스타일 적용
-        if (isUpdatedOrCreated) {
-            // 수정되거나 추가된 행에 적용될 스타일
-            this.el.style.backgroundColor = '#c3f2ffff'; 
-            this.el.style.color = '#000000';         
-            this.el.style.fontWeight = 'bold';
-        } else {
-            // 조건 불충족 시 스타일 초기화
-            this.el.style.backgroundColor = '';
-            this.el.style.color = '';
-            this.el.style.fontWeight = '';
-        }
-    }
-}
-
 
 const Grid = tui.Grid;
 // g- grid1 공정그리드
@@ -122,26 +70,26 @@ const grid2 = new Grid({
 	    {header: '공정ID' ,name: 'processId' ,align: 'center',editor: 'text'
 			,renderer:{ type: StatusModifiedRenderer}
 		}
-	    ,{header: '공정명' ,name: 'processName' ,align: 'center',editor: 'text' ,width: 230
-			,renderer:{ type: StatusModifiedRenderer}
-		}
-	    ,{header: '공정유형' ,name: 'processType' ,align: 'center',editor: 'text' ,filter: "select"
+	    ,{header: '공정명' ,name: 'processName' ,align: 'center',editor: 'text' ,width: 230,filter: "select"
 			,renderer:{ type: StatusModifiedRenderer}
 			,editor: {
 				type: 'select', // 드롭다운 사용
 				options: {
 					listItems: [
-						{ text: 'MIX', value: 'MIX' },
-						{ text: 'FILTER', value: 'FILTER' },
-						{ text: 'FILL', value: 'FILL' },
-						{ text: 'CAPPING', value: 'CAPPING' },
-						{ text: 'QC', value: 'QC' },
-						{ text: 'PACK', value: 'PACK' }
+						{ text: '블렌딩', value: '블렌딩' },
+						{ text: '여과', value: '여과' },
+						{ text: '충전', value: '충전' },
+						{ text: '캡/펌프', value: '캡/펌프' },
+						{ text: 'QC 검사', value: 'QC 검사' },
+						{ text: '라벨링', value: '라벨링' }
 					]
 				}
 			}
 		}
-	    ,{header: '설명' ,name: 'description' ,align: 'center',editor: 'text' ,filter: "select"
+	    ,{header: '공정유형' ,name: 'processType' ,align: 'center',editor: 'text',hidden: true
+			,renderer:{ type: StatusModifiedRenderer}
+		}
+	    ,{header: '설명' ,name: 'description' ,align: 'center',editor: 'text' ,width: 370
 			,renderer:{ type: StatusModifiedRenderer}
 		}
         ,{header: '사용여부' ,name: 'useYn' ,align: 'center',hidden: true
@@ -247,9 +195,19 @@ const grid4 = new Grid({
         }
 });
 
+
+const PROCESS_CODE_TO_TYPE_MAP = {
+    '블렌딩': 'MIX',         
+    '여과': 'FILTER',   
+    '충전': 'FILL',       
+    '캡/펌프': 'CAPPING', 
+    'QC 검사': 'QC',         
+    '라벨링': 'PACK'        
+    
+};
+
 grid2.on('beforeChange', (ev) => {
-	console.log("grid2,'beforeChange' 클릭",);
-    const { rowKey, columnName } = ev.changes[0]; // 변경된 데이터 목록 (배열)
+    const { rowKey, columnName, value } = ev.changes[0]; // 변경된 데이터 목록 (배열)
 	if (columnName === 'processId') {
 	        // 💡 핵심 수정: rowKey 대신, 현재 행의 'prdId' 값을 가져옵니다.
 	        const processIdValue = grid2.getValue(rowKey, 'processId');
@@ -265,6 +223,21 @@ grid2.on('beforeChange', (ev) => {
 	            alert('기존 공정ID는 수정할 수 없습니다. 삭제후 새로추가(등록) 해주세요!'); 
 	        }
 	    }
+});
+
+grid2.on('afterChange', (ev) => {
+	const { rowKey, columnName, value } = ev.changes[0]; 
+	
+	if(columnName === 'processName'){
+		const processNameValue = value;
+		
+		const newProcessType = PROCESS_CODE_TO_TYPE_MAP[processNameValue];
+		if(newProcessType){
+			grid2.setValue(rowKey, 'processType', newProcessType, false); // 마지막 false는 이벤트 발생 방지
+		}
+		
+	}
+	
 });
 
 let processLookupModal; // 공정코드 조회 모달
@@ -528,6 +501,8 @@ saveProcessCodeRowBtn.addEventListener('click', function() {
 	        console.log('저장결과(텍스트):', text);
 	        if (text === 'success') {
 	            alert('저장 완료');
+				processCodeGridAllSearch();
+				
 	        } else if (text === 'no-data') {
 	            alert('서버: 전송한 데이터가 없습니다. 내용을 확인하세요.');
 	        } else if (text.startsWith('error')) {
