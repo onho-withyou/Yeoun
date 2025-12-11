@@ -12,6 +12,11 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.yeoun.common.dto.AlarmDTO;
+import com.yeoun.common.e_num.AlarmDestination;
+import com.yeoun.common.service.AlarmService;
+import com.yeoun.emp.entity.Emp;
+import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.inbound.service.InboundService;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.dto.LotMasterDTO;
@@ -58,6 +63,8 @@ public class WorkOrderProcessService {
     private final QcResultRepository qcResultRepository;
     private final QcResultService qcResultService;
     private final InboundService inboundService;
+    private final AlarmService alarmService;
+    private final EmpRepository empRepository;
     
     // LOT 관련
     private final LotTraceService lotTraceService;
@@ -655,6 +662,27 @@ public class WorkOrderProcessService {
         // 2) 캡/펌프 공정인 경우에만 QC_RESULT PENDING 생성
         if ("PRC-CAP".equals(processId)) {
             qcResultService.createPendingQcResultForOrder(orderId);
+            
+            // 해당 공정 종료 시 QC 알림
+            String msg = "작업지시 " + orderId + " 품질검사가 필요합니다.";
+            String link = "/qc/regist";
+            
+            // QC 섹션 공통 새로고침 뱃지
+            alarmService.sendAlarmMessage(AlarmDestination.QC, msg);
+            
+            // QC 부서원 개인 알림 및 알림 테이블 저장
+            List<Emp> qcMembers = empRepository.findByDept_DeptId("DEP102"); 
+            
+            for (Emp emp : qcMembers) {
+                AlarmDTO dto = AlarmDTO.builder()
+                        .empId(emp.getEmpId())
+                        .alarmMessage(msg)
+                        .alarmStatus("N")
+                        .alarmLink(link)
+                        .build();
+
+                alarmService.sendPersonalMessage(dto);
+            }
         }
 
         // 3) 마지막 단계인지 확인
@@ -670,7 +698,7 @@ public class WorkOrderProcessService {
             String planId = workOrder.getPlanId();
             if (planId != null) {
 
-                // 🔹 같은 PLAN_ID 아래에 아직 COMPLETED 아닌 작업지시가 있는지 확인
+                // 같은 PLAN_ID 아래에 아직 COMPLETED 아닌 작업지시가 있는지 확인
                 boolean existsNotCompletedWo =
                         workOrderRepository.existsByPlanIdAndStatusNot(planId, "COMPLETED");
 
