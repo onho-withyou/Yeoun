@@ -1,0 +1,101 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+  <!-- 오른쪽 LOT 상세 카드 body 내용 fragment -->
+  <div th:fragment="detail">
+
+    <th:block th:if="${selectedLot != null}">
+
+      <!-- 기본 정보 -->
+      <div class="mb-3">
+        <h6 class="mb-1" th:text="${selectedLot.lotNo}">LOT NO</h6>
+        <div class="text-muted small">
+          <span th:text="${selectedLot.lotType}">FIN</span> /
+          <span th:text="${selectedLot.currentStatus}">DONE</span>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-6">
+          <div class="fw-semibold">제품 코드</div>
+          <div th:text="${selectedLot.prdId}">PRD001</div>
+        </div>
+
+        <div class="col-sm-6">
+          <div class="fw-semibold">수량</div>
+          <div th:text="${selectedLot.quantity}">0</div>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-6">
+          <div class="fw-semibold">현재 위치</div>
+          <div th:text="${selectedLot.currentLocType} + ' / ' + ${selectedLot.currentLocId}">
+            WH / WH-01
+          </div>
+        </div>
+
+        <div class="col-sm-6">
+          <div class="fw-semibold">상태 변경일시</div>
+          <div th:text="${selectedLot.statusChangeDate}">2025-12-10</div>
+        </div>
+      </div>
+
+      <!-- 공정 단계 -->
+      <div class="mt-4" th:if="${processNodes != null}">
+        <h6 class="mb-2">공정 단계</h6>
+        <ul class="list-group list-group-flush small">
+          <li class="list-group-item px-0"
+              th:each="p : ${processNodes}">
+            <span th:text="${p.stepSeq} + '. '"></span>
+            <span th:text="${p.processName}"></span>
+            <span class="text-muted"
+                  th:text="' / ' + ${p.status}"></span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 투입 자재 LOT -->
+      <div class="mt-4"
+           th:if="${materialNodes != null and !#lists.isEmpty(materialNodes)}">
+
+        <h6 class="mb-2">투입 자재 LOT</h6>
+
+        <ul class="list-group list-group-flush small">
+          <li class="list-group-item px-0"
+              th:each="m : ${materialNodes}">
+
+            <div>
+              <div>
+                <span class="fw-semibold" th:text="${m.lotNo}">LOT</span>
+                <span class="text-muted"
+                      th:text="' / ' + ${m.displayName}"> / 자재명</span>
+              </div>
+
+              <div class="text-muted">
+                <span th:text="'사용량: ' + ${m.usedQty}"></span>
+
+                <span th:if="${m.unit != null and m.unit != ''}"
+                      th:text="' ' + ${m.unit}"></span>
+
+                <span th:if="${m.unit == null or m.unit == ''}">
+                  (단위 정보 없음)
+                </span>
+              </div>
+            </div>
+
+          </li>
+        </ul>
+
+      </div>
+
+    </th:block>
+
+    <th:block th:if="${selectedLot == null}">
+      <div class="text-muted">
+        LOT 정보를 불러오지 못했습니다.
+      </div>
+    </th:block>
+
+  </div>
+
+</th:block>

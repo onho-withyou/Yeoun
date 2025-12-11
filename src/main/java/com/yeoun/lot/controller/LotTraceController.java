@@ -30,59 +30,43 @@ public class LotTraceController {
 					   @RequestParam(name = "stepSeq", required = false) Integer stepSeq,
 					   Model model) {
 		
-		// 1. 왼쪽에 표시할 FIN LOT 목록
+		// 1) 왼쪽에 표시할 WIP + FIN LOT 목록
 		List<LotRootDTO> lotList = lotTraceService.getFinishedLots(); 
 		model.addAttribute("lotList", lotList);
 		
-		// 2) 기본 선택 LOT 처리
-        //    - lotNo 파라미터가 없고 목록이 비어있지 않으면 첫 LOT 자동 선택
-        if (lotNo == null && !lotList.isEmpty()) {
-            lotNo = lotList.get(0).getLotNo();
-        }
-
-        // 3) 선택된 LOT 상세 조회 후 오른쪽 카드에 바인딩
-        if (lotNo != null) {
-        	
-        	// LOT 상세
-            LotMaster selected = lotTraceService.getLotDetail(lotNo);
-            model.addAttribute("selectedLot", selected);
-            
-            // 1차: 공정 단계 리스트
-            List<LotProcessNodeDTO> processNodes =
-                    lotTraceService.getProcessNodesForLot(lotNo);
-            model.addAttribute("processNodes", processNodes);
-            
-            // 2차: 자재 LOT 
-            List<LotMaterialNodeDTO> materialNodes = 
-            		lotTraceService.getMaterialNodesForLot(lotNo);
-            model.addAttribute("materialNodes", materialNodes);
-            
-            if (stepSeq != null) {
-                processNodes.stream()
-                        .filter(p -> p.getStepSeq().equals(stepSeq))
-                        .findFirst()
-                        .ifPresent(p -> model.addAttribute("selectedProcess", p));
-            }
-        }
-        
 		return "/lot/trace";
 	}
 	
+	// LOT 상세 + 공정 + 자재 LOT를 한 번에 가져와서
+	// 오른쪽 카드(body) fragment 로만 렌더링
+	@GetMapping("/trace/detail")
+	public String getLotDetailFragment(@RequestParam("lotNo") String lotNo,
+	                                   @RequestParam(name = "stepSeq", required = false) Integer stepSeq,
+	                                   Model model) {
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	    // LOT 기본 정보
+	    LotMaster selected = lotTraceService.getLotDetail(lotNo);
+	    model.addAttribute("selectedLot", selected);
+
+	    // 공정 단계 목록
+	    List<LotProcessNodeDTO> processNodes = lotTraceService.getProcessNodesForLot(lotNo);
+	    model.addAttribute("processNodes", processNodes);
+
+	    // 선택된 공정 단계 (있으면)
+	    if (stepSeq != null) {
+	        processNodes.stream()
+	                .filter(p -> p.getStepSeq().equals(stepSeq))
+	                .findFirst()
+	                .ifPresent(p -> model.addAttribute("selectedProcess", p));
+	    }
+
+	    // 자재 LOT 목록
+	    List<LotMaterialNodeDTO> materialNodes = lotTraceService.getMaterialNodesForLot(lotNo);
+	    model.addAttribute("materialNodes", materialNodes);
+
+	    // 오른쪽 상세 카드용 fragment만 반환
+	    return "/lot/trace_detail :: detail";
+	}
 	
 	
 	
