@@ -723,7 +723,6 @@ public class WorkOrderProcessService {
         
         proc.setGoodQty(goodQty);
         proc.setDefectQty(defectQty);
-        proc.setMemo(memo);
         
         // 1) 공정 상태는 항상 DONE 으로
         proc.setStatus("DONE");
