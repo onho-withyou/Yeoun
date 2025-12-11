@@ -31,7 +31,7 @@ public class BomMst {
 	@Column(name="MAT_ID", length = 50, nullable = false)
 	private String matId; //원재료id
 	
-	@Column(name="MAT_QTY",nullable = false)
+	@Column(name="MAT_QTY", nullable = false, precision = 10, scale = 3)
 	private BigDecimal matQty; //원재료사용량
 
 	@Column(name="MAT_UNIT", length = 20)

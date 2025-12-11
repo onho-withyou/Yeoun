@@ -1,11 +1,16 @@
 package com.yeoun.masterData.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.masterData.entity.SafetyStock;
 import com.yeoun.masterData.repository.SafetyStockRepository;
 
@@ -30,19 +35,55 @@ public class SafetyStockService {
 	//2. 안전재고 그리드 저장
 	public String saveSafetyStock(String empId, Map<String,Object> param) {
 		log.info("safetyStockSaveList------------->{}",param);
-		
+		try {
 			Object createdObj = param.get("createdRows");
-			int createdCount = 0;
 			if (createdObj instanceof List) {
 				@SuppressWarnings("unchecked")
 				List<Map<String,Object>> created = (List<Map<String,Object>>) createdObj;
 				for (Map<String,Object> row : created) {
 					SafetyStock s = mapToSafetyStock(row);
 					safetyStockRepository.save(s);
-					createdCount++;
 				}
 			}
-			return "Created SafetyStock rows: " + createdCount;
+			
+			// updatedRows
+			Object updatedObj = param.get("updatedRows");
+			if (updatedObj instanceof List) {
+				@SuppressWarnings("unchecked")
+				List<Map<String,Object>> updated = (List<Map<String,Object>>) updatedObj;
+				List<String> missingIds = new ArrayList<>();
+				for (Map<String,Object> row : updated) {
+					Object idObj = row.get("itemId");
+					String itemId = (idObj == null) ? "" : String.valueOf(idObj).trim();
+	
+					SafetyStock target = null;
+					if (!itemId.isEmpty()) {
+						Optional<SafetyStock> opt = safetyStockRepository.findById(itemId);
+						if (opt.isPresent()) target = opt.get();
+					}
+	
+					if (target != null) {
+						// 기존 레코드 업데이트
+						SafetyStock s = mapToSafetyStock(row);
+						safetyStockRepository.save(s);
+					} else {
+						// 존재하지 않는 itemId가 명시된 경우: PK 변경 시 의도치 않은 insert를 막기 위해 에러 처리
+						if (!itemId.isEmpty()) {
+							missingIds.add(itemId);
+							continue;
+						}
+						// itemId가 비어있고 매칭되는 기존 레코드가 없으면 새로 저장 (신규 추가 케이스)
+						SafetyStock s = mapToSafetyStock(row);
+						safetyStockRepository.save(s);
+					}
+			}
+			 	
+			}
+			return "success";
+		} catch (Exception e) {
+			log.error("saveProductMst error", e);
+			return "error: " + e.getMessage();
+		}
 	}
 
 	//3. 안전재고 삭제 (itemId 목록으로 삭제)
@@ -112,7 +153,7 @@ public class SafetyStockService {
 		} catch (NumberFormatException e) {
 			try {
 				// 소수점이 있을 경우 소수 제거 후 파싱
-				java.math.BigDecimal bd = new java.math.BigDecimal(s);
+				BigDecimal bd = new BigDecimal(s);
 				return bd.longValue();
 			} catch (Exception ex) {
 				log.warn("Failed to parse long from value: {}", o);
