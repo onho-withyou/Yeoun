@@ -167,7 +167,7 @@ public class InboundService {
 		
 		InboundDTO inboundDTO = InboundDTO.builder()
 				.inboundId(inboundId)
-				.expectArrivalDate(workOrderProcess.getEndTime().plusDays(1))
+				.expectArrivalDate(workOrderProcess.getEndTime())
 				.inboundStatus("PENDING_ARRIVAL")
 				.materialId(null)
 				.prodId(orderId)
@@ -259,24 +259,13 @@ public class InboundService {
 			// ----------------------------------------------------------------
 			// LotMasterDTO 생성
 			
-			String prdId = itemDTO.getItemId();
 			String lotNo = "";
 			// 로트번호가 존재하지 않을때 만 실행
 			if(itemDTO.getLotNo() == null || itemDTO.getLotNo().isEmpty()) {
-				// 원재료Id가 6글자인 경우 5글자로 변환하기
-				if (prdId.length() >= 6) {
-					prdId = prdId.replace("-", ""); //CAP-003이면 CAP003으로 변환
-					
-					String prefix = prdId.substring(0,3); // 앞부분의 3글자
-					String lastTwo = prdId.substring(prdId.length() - 2); // 뒤에 2글자
-					
-					prdId = prefix + lastTwo;
-				}
-				
-				
+				// LOT 생성
 				LotMasterDTO lotMasterDTO = LotMasterDTO.builder()
 						.lotType(itemDTO.getItemType())
-						.prdId(prdId)
+						.prdId(itemDTO.getItemId())
 						.quantity(qty)
 						.currentStatus("NEW")
 						.currentLocType("WH")
