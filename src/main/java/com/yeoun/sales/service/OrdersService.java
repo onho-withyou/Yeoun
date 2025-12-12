@@ -295,17 +295,29 @@ public class OrdersService {
              .build();
  }
 
- // =========================
- // 수주 상태 변경
- // =========================
-	 @Transactional
-	 public void changeStatus(String orderId, OrderStatus status) {
-	
-	     Orders order = ordersRepository.findByOrderId(orderId)
-	             .orElseThrow(() -> new IllegalArgumentException("수주 내역이 없습니다."));
-	
-	     order.changeStatus(status);
-	 }
+	 // =========================
+	 // 수주 상태 변경
+	 // =========================
+ @Transactional
+ public void changeStatus(String orderId, OrderStatus status) {
+
+     System.out.println("🔥 입금확인 호출됨");
+     System.out.println("orderId = " + orderId);
+     System.out.println("status = " + status);
+
+     Orders order = ordersRepository.findByOrderId(orderId)
+             .orElseThrow(() -> new IllegalArgumentException("수주 내역 없음"));
+
+     order.changeStatus(status);
+
+     if (status == OrderStatus.CONFIRMED) {
+         int cnt =
+             orderItemRepository.updateItemStatusToConfirmedByOrderId(orderId);
+         System.out.println("🔥 ORDER_ITEM 업데이트 건수 = " + cnt);
+     }
+ }
+
+
 
 
 }
