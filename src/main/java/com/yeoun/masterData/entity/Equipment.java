@@ -3,6 +3,7 @@ package com.yeoun.masterData.entity;
 import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
@@ -29,11 +30,15 @@ public class Equipment {
 	@Column(nullable = false)
 	private String equipName;
 	
+	@Column(length = 500)
+	private String remark;
+	
 	@CreatedDate
-	@Column(nullable = false)
+	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdDate;
 	
-	@Column
+	@LastModifiedDate
+	@Column(nullable = false)
 	private LocalDateTime updatedDate;
 
 }

@@ -13,6 +13,7 @@ public class ProdLineDTO {
     private String lineId;
     private String lineName;
     private String status;
+    private String remark;
 
     private static ModelMapper modelMapper = new ModelMapper();
     public ProdLine toEntity(){

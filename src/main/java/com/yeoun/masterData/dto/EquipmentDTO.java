@@ -14,10 +14,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Builder
 public class EquipmentDTO {
     private String equipId;
     private String koName;
     private String equipName;
+    private String remark;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
 
