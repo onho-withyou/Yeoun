@@ -93,7 +93,7 @@ function applyRackSelection(index) {
 // 페이지 로딩될 때 select 및 수량 정보 채우기
 document.addEventListener("DOMContentLoaded", async () => {
 	//스피너  off
-	hideSpinner(); 
+	hideSpinner();
 	
 	// 창고 데이터 가져오기
 	locationInfo = await getLocationInfo();
@@ -229,8 +229,7 @@ document.querySelectorAll(".inboundAmount").forEach(input => {
 		const requestSpan = document.querySelector(`.requestAmount[data-index="${index}"]`); 
 		const disposeSpan = document.querySelector(`.disposeAmount[data-index="${index}"]`);
 		
-		
-		const requestAmount = Number(requestSpan.textContent || 0);
+		const requestAmount = Number(requestSpan.dataset.qty || 0);
 		const inboundAmount = Number(input.value || 0);
 		
 		// 요청수량보다 커지지 못하게 제한
@@ -272,7 +271,7 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 		// 폐기 수량
 		const disposeAmount = Number(row.querySelector(`.disposeAmount[data-index="${index}"]`).textContent);
 		// 입고 요청 수량
-		const requestAmount = Number(row.querySelector(`.requestAmount[data-index="${index}"]`).textContent);
+		const requestAmount = Number(row.querySelector(`.requestAmount[data-index="${index}"]`).dataset.qty);
 		// 발주 단위
 		const unit = row.querySelector(`.unit[data-index="${index}"]`).innerText;
 		

@@ -5,7 +5,7 @@ const productGrid = new Grid({
 	rowHeaders: ['rowNum'],
 	pageOptions: {
 	    useClient: true,  // 클라이언트 사이드 페이징
-	    perPage: 10       // 페이지당 10개 행
+	    perPage: 20       // 페이지당 10개 행
 	},	
 	columns: [
 		{
