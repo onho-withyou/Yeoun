@@ -248,17 +248,24 @@ public class InboundService {
 		// 반복문 통해서 입고 품목 LOT 생성 및 수량 정보 업데이트
 		for (ReceiptItemDTO itemDTO : receiptDTO.getItems()) {
 			
+			// 입고 수량(정상수량)
+			long inboundQty = itemDTO.getInboundAmount();
+			// 폐기 수량
+			long disposeQty = itemDTO.getDisposeAmount();
+			
+			// 입고 수량과 폐기 수량이 모두 0이면 입력하지 않음
+			if (inboundQty == 0 && disposeQty == 0) {
+				continue;
+			}
+			
 			InboundItem inboundItem = inboundItemMap.get(itemDTO.getInboundItemId());
 			
 			if (inboundItem == null) {
 				throw new NoSuchElementException("입고 품목을 찾을 수 없습니다.");
 			}
 			
-			Integer qty = itemDTO.getInboundAmount().intValue();
-			
 			// ----------------------------------------------------------------
 			// LotMasterDTO 생성
-			
 			String lotNo = "";
 			// 로트번호가 존재하지 않을때 만 실행
 			if(itemDTO.getLotNo() == null || itemDTO.getLotNo().isEmpty()) {
@@ -266,7 +273,7 @@ public class InboundService {
 				LotMasterDTO lotMasterDTO = LotMasterDTO.builder()
 						.lotType(itemDTO.getItemType())
 						.prdId(itemDTO.getItemId())
-						.quantity(qty)
+						.quantity((int) inboundQty)
 						.currentStatus("NEW")
 						.currentLocType("WH")
 						.currentLocId("WH" + itemDTO.getLocationId())
@@ -285,7 +292,7 @@ public class InboundService {
 						.status("NEW")
 						.locationType("WH")
 						.locationId("WH-" + itemDTO.getLocationId())
-						.quantity(qty)
+						.quantity((int) inboundQty)
 						.workedId(empId)
 						.build();
 				lotTraceService.registLotHistory(createLotHistoryDTO);
@@ -298,65 +305,66 @@ public class InboundService {
 			// InboundItem 업데이트
 			inboundItem.updateInfo(lotNo, itemDTO.getInboundAmount(), itemDTO.getDisposeAmount(), itemDTO.getLocationId());
 				
-			
 			// ------------------------------------------------------
-			// 재고 등록
-			InventoryDTO inventoryDTO = InventoryDTO.builder()
-					.lotNo(lotNo)
-					.locationId(itemDTO.getLocationId())
-					.itemId(itemDTO.getItemId())
-					.ivAmount(itemDTO.getInboundAmount())
-					.expirationDate(inboundItem.getExpirationDate())
-					.manufactureDate(inboundItem.getManufactureDate())
-					.ibDate(LocalDateTime.now())
-					.ivStatus("NORMAL")
-					.expectObAmount(0L)
-					.itemType(itemDTO.getItemType())
-					.build();
-			// 재고등록시 등록되는 itemType을 설정(원자재, 완제품이 동시에 입고되지않음)
-			inboundItemType = inventoryDTO.getItemType();
-			
-			inventoryService.registInventory(inventoryDTO);
-			
-			// 재고이력 등록
-			InventoryHistoryDTO inventoryHistoryDTO = InventoryHistoryDTO.builder()
-					.lotNo(lotNo)
-					.itemName(itemDTO.getItemName())
-					.empId(empId)
-					.workType("INBOUND")
-					.prevAmount(0L)
-					.currentAmount(itemDTO.getInboundAmount())
-					.reason(receiptDTO.getInboundId())
-					.currentLocationId(itemDTO.getLocationId())
-					.build();
-			
-			inventoryService.registInventoryHistory(inventoryHistoryDTO);
-			
-			// ---------------------------------------------
-			// 재고 등록 후 LOT HISTORY 업데이트
-			// lotHistory 생성
-			// eventType 설정 : RM_RECEIVE / FG_INBOUND
-			String eventType = "RM_RECEIVE";
-			if ("FG".equals(itemDTO.getItemType())) {
-				eventType = "FG_INBOUND";
+			// 정상 재고 등록(입고 수량이 있을 때만 재고에 등록)
+			if (inboundQty > 0) {
+				// 재고 등록
+				InventoryDTO inventoryDTO = InventoryDTO.builder()
+						.lotNo(lotNo)
+						.locationId(itemDTO.getLocationId())
+						.itemId(itemDTO.getItemId())
+						.ivAmount(itemDTO.getInboundAmount())
+						.expirationDate(inboundItem.getExpirationDate())
+						.manufactureDate(inboundItem.getManufactureDate())
+						.ibDate(LocalDateTime.now())
+						.ivStatus("NORMAL")
+						.expectObAmount(0L)
+						.itemType(itemDTO.getItemType())
+						.build();
+				// 재고등록시 등록되는 itemType을 설정(원자재, 완제품이 동시에 입고되지않음)
+				inboundItemType = inventoryDTO.getItemType();
+				
+				inventoryService.registInventory(inventoryDTO);
+				// 재고이력 등록
+				InventoryHistoryDTO inventoryHistoryDTO = InventoryHistoryDTO.builder()
+						.lotNo(lotNo)
+						.itemName(itemDTO.getItemName())
+						.empId(empId)
+						.workType("INBOUND")
+						.prevAmount(0L)
+						.currentAmount(itemDTO.getInboundAmount())
+						.reason(receiptDTO.getInboundId())
+						.currentLocationId(itemDTO.getLocationId())
+						.build();
+				
+				inventoryService.registInventoryHistory(inventoryHistoryDTO);
+				// ---------------------------------------------
+				// 재고 등록 후 LOT HISTORY 업데이트
+				// lotHistory 생성
+				// eventType 설정 : RM_RECEIVE / FG_INBOUND
+				String eventType = "RM_RECEIVE";
+				if ("FG".equals(itemDTO.getItemType())) {
+					eventType = "FG_INBOUND";
+				}
+				
+				LotHistoryDTO updateLotHistoryDTO = LotHistoryDTO.builder()
+						.lotNo(lotNo)
+						.orderId("")
+						.processId("")
+						.eventType(eventType)
+						.status("IN_STOCK")
+						.locationType("WH")
+						.locationId("WH-" + itemDTO.getLocationId())
+						.quantity((int) inboundQty)
+						.workedId(empId)
+						.build();
+				
+				lotTraceService.registLotHistory(updateLotHistoryDTO);
+				// ------------------------------------------------------
 			}
 			
-			LotHistoryDTO updateLotHistoryDTO = LotHistoryDTO.builder()
-					.lotNo(lotNo)
-					.orderId("")
-					.processId("")
-					.eventType(eventType)
-					.status("IN_STOCK")
-					.locationType("WH")
-					.locationId("WH-" + itemDTO.getLocationId())
-					.quantity(qty)
-					.workedId(empId)
-					.build();
-			
-			lotTraceService.registLotHistory(updateLotHistoryDTO);
-			// ------------------------------------------------------
-			
-			if (itemDTO.getDisposeAmount() > 0) {
+			// 폐기 수량이 있을 경우 
+			if (disposeQty > 0) {
 				DisposeDTO dispose = DisposeDTO.builder()
 						.lotNo(lotNo)
 						.itemId(itemDTO.getItemId())
@@ -368,8 +376,6 @@ public class InboundService {
 				
 				disposeService.registDispose(dispose);
 				
-				Integer disposeQty = itemDTO.getDisposeAmount().intValue();
-				
 				// 폐기한 원재료 LOT 이력에 업데이트
 				LotHistoryDTO disposeLotHistoryDTO = LotHistoryDTO.builder()
 						.lotNo(lotNo)
@@ -379,7 +385,7 @@ public class InboundService {
 						.status("SCRAPPED")
 						.locationType("WH")
 						.locationId("WH-" + itemDTO.getLocationId())
-						.quantity(disposeQty)
+						.quantity((int) disposeQty)
 						.workedId(empId)
 						.build();
 				

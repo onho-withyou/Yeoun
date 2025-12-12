@@ -92,6 +92,9 @@ function applyRackSelection(index) {
 
 // 페이지 로딩될 때 select 및 수량 정보 채우기
 document.addEventListener("DOMContentLoaded", async () => {
+	//스피너  off
+	hideSpinner();
+	
 	// 창고 데이터 가져오기
 	locationInfo = await getLocationInfo();
 	
@@ -226,8 +229,7 @@ document.querySelectorAll(".inboundAmount").forEach(input => {
 		const requestSpan = document.querySelector(`.requestAmount[data-index="${index}"]`); 
 		const disposeSpan = document.querySelector(`.disposeAmount[data-index="${index}"]`);
 		
-		
-		const requestAmount = Number(requestSpan.textContent || 0);
+		const requestAmount = Number(requestSpan.dataset.qty || 0);
 		const inboundAmount = Number(input.value || 0);
 		
 		// 요청수량보다 커지지 못하게 제한
@@ -268,6 +270,8 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 		const inboundAmount = Number(row.querySelector(`.inboundAmount[data-index="${index}"]`).value);
 		// 폐기 수량
 		const disposeAmount = Number(row.querySelector(`.disposeAmount[data-index="${index}"]`).textContent);
+		// 입고 요청 수량
+		const requestAmount = Number(row.querySelector(`.requestAmount[data-index="${index}"]`).dataset.qty);
 		// 발주 단위
 		const unit = row.querySelector(`.unit[data-index="${index}"]`).innerText;
 		
@@ -284,8 +288,13 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 		}
 		
 		// 입고 수량 입력 확인
-		if (inboundAmount <= 0) {
+		if (inboundAmount < 0) {
 			alert("입고 수량을 입력해주세요.");
+			return;
+		}
+		
+		if (requestAmount !== (inboundAmount + disposeAmount)) {
+			alert("입고 수량 또는 폐기 수량을 입력해주세요.");
 			return;
 		}
 		
@@ -311,31 +320,42 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 
 	const inboundId = document.querySelector("#inboundId").value;
 	
-	const res = await fetch("/inventory/inbound/mat/complete", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-			[csrfHeader]: csrfToken
-		},
-		body: JSON.stringify({
-			inboundId,
-			type: "MAT",
-			items
-		})
-	});
+	// 스피너 시작
+	showSpinner();
 	
-	if (!res.ok) {
-		alert("입고 등록을 실패했습니다.");
-		return;
-	}
-	
-	const data = await res.json();
-	
-	if (data.success) {
-		alert("입고가 완료되었습니다.");
-		setTimeout(() => {
-			window.location.href = "/inventory/inbound";
-		}, 10); 
+	try {
+		const res = await fetch("/inventory/inbound/mat/complete", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				[csrfHeader]: csrfToken
+			},
+			body: JSON.stringify({
+				inboundId,
+				type: "MAT",
+				items
+			})
+		});
+		
+		if (!res.ok) {
+			alert("입고 등록을 실패했습니다.");
+			return;
+		}
+		
+		const data = await res.json();
+		
+		if (data.success) {
+			alert("입고가 완료되었습니다.");
+			setTimeout(() => {
+				window.location.href = "/inventory/inbound";
+			}, 10); 
+		}
+	} catch (error) {
+		console.error(error);
+		alert("요청 처리 중 오류가 발생했습니다." || error.message);
+	} finally {
+		//스피너  off
+		hideSpinner(); 
 	}
 	
 });

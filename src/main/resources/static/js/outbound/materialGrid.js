@@ -4,7 +4,7 @@ const materialGrid = new tui.Grid({
 	rowHeaders: ['rowNum'],
 	pageOptions: {
 	    useClient: true,  // 클라이언트 사이드 페이징
-	    perPage: 10       // 페이지당 10개 행
+	    perPage: 20       // 페이지당 20개 행
 	},	
 	columns: [
 		{
@@ -345,19 +345,19 @@ const submitOutbound = async () => {
 		return;
 	}
 	
+	// body에 담아서 보낼 내용
+	const payload = {
+		workOrderId: workOrderId.value,
+		createdId: managerId.value,
+		startDate: outboundDate,
+		type: "MAT",
+		items
+	};
+	
 	// 스피너 시작
 	showSpinner();
 	
 	try {
-		// body에 담아서 보낼 내용
-		const payload = {
-			workOrderId: workOrderId.value,
-			createdId: managerId.value,
-			startDate: outboundDate,
-			type: "MAT",
-			items
-		};
-		
 		const res = await fetch("/inventory/outbound/mat/regist", {
 			method: "POST",
 			headers: {
