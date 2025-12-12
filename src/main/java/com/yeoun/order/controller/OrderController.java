@@ -83,7 +83,9 @@ public class OrderController {
     // 작업지시 수정
     @PatchMapping("/modify/{id}")
     public ResponseEntity<?> modifyOrder (@PathVariable("id")String id,
-                                          @RequestPart("details"))
+                                          @RequestPart("details")){
+    	
+    }
     
     // =====================================================
     // 작업지시 확정
