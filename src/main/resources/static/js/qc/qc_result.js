@@ -209,10 +209,19 @@ function openQcViewModal(qcResultId) {
               <td>${row.measureValue || ""}</td>
               <td>${badgeHtml}</td>
               <td>${row.remark || ""}</td>
-              <td>${attachCell}</td>
+			  <td>
+		          <div class="qc-attach-list small text-start"
+		               data-dtl-id="${row.qcResultDtlId}">
+		            <span class="text-muted">첨부된 파일 없음</span>
+		          </div>
+		      </td>
             </tr>
           `;
           tbody.insertAdjacentHTML("beforeend", tr);
+		  
+		  if (row.qcResultDtlId) {
+		      loadQcDetailFileList(row.qcResultDtlId);
+		  }
         });
       }
 
@@ -222,4 +231,58 @@ function openQcViewModal(qcResultId) {
       console.error("QC 결과 조회 오류:", err);
       alert("QC 결과 조회 중 오류가 발생했습니다.");
     });
+}
+
+// 특정 QC 상세(qcResultDtlId)의 첨부파일 목록 조회
+function loadQcDetailFileList(qcResultDtlId) {
+  if (!qcResultDtlId) return;
+
+  fetch(`/qc/detail/${qcResultDtlId}/files`)
+    .then(res => {
+      if (!res.ok) {
+        throw new Error("HTTP " + res.status);
+      }
+      return res.json();
+    })
+    .then(fileList => {
+      renderQcDetailFileList(qcResultDtlId, fileList);
+    })
+    .catch(err => {
+      console.error("QC 첨부파일 목록 조회 오류:", err);
+    });
+}
+
+// 조회된 파일 목록을 결과 모달 테이블 안에 뿌려주기
+function renderQcDetailFileList(qcResultDtlId, fileList) {
+  const container = document.querySelector(
+    `.qc-attach-list[data-dtl-id="${qcResultDtlId}"]`
+  );
+  if (!container) return;
+
+  if (!fileList || fileList.length === 0) {
+    container.innerHTML = `<span class="text-muted small">첨부된 파일 없음</span>`;
+    return;
+  }
+
+  container.innerHTML = `<div class="small fw-semibold mb-1">첨부된 파일</div>`;
+
+  fileList.forEach(file => {
+    const fileName = file.originFileName || file.fileName || "파일";
+	const iconUrl = "/img/download-icon.png";
+    const downloadUrl = `/files/download/${file.fileId}`;
+
+    const row = document.createElement("div");
+    row.className = "small d-flex align-items-center gap-1";
+
+    row.innerHTML = `
+      <span class="text small">
+        ${fileName}
+      </span>
+      <a href="${downloadUrl}" class="ms-1" title="다운로드" download>
+        <img src="${iconUrl}" alt="다운로드" style="width:18px;height:18px;">
+      </a>
+    `;
+
+    container.appendChild(row);
+  });
 }
