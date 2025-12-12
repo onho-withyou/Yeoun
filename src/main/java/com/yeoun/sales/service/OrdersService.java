@@ -301,22 +301,32 @@ public class OrdersService {
  @Transactional
  public void changeStatus(String orderId, OrderStatus status) {
 
-     System.out.println("🔥 입금확인 호출됨");
+     System.out.println("🔥 상태 변경 요청");
      System.out.println("orderId = " + orderId);
      System.out.println("status = " + status);
 
      Orders order = ordersRepository.findByOrderId(orderId)
              .orElseThrow(() -> new IllegalArgumentException("수주 내역 없음"));
 
+     // 1️⃣ 주문 상태 변경 (Dirty Checking)
      order.changeStatus(status);
 
+     // 2️⃣ 주문상세 상태 동기화
      if (status == OrderStatus.CONFIRMED) {
-         int cnt =
-             orderItemRepository.updateItemStatusToConfirmedByOrderId(orderId);
-         System.out.println("🔥 ORDER_ITEM 업데이트 건수 = " + cnt);
+
+         int cnt = orderItemRepository
+                 .updateItemStatusToConfirmedByOrderId(orderId);
+
+         System.out.println("🔥 ORDER_ITEM → CONFIRMED : " + cnt);
+
+     } else if (status == OrderStatus.CANCEL) {
+
+         int cnt = orderItemRepository
+                 .updateItemStatusToCancelByOrderId(orderId);
+
+         System.out.println("🔥 ORDER_ITEM → CANCEL : " + cnt);
      }
  }
-
 
 
 
