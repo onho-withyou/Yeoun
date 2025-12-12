@@ -23,8 +23,8 @@
 
     <li class="nav-item">
         <a class="nav-link"
-           th:classappend="${status == 'RECEIVED'} ? 'active' : ''"
-           th:href="@{/sales/orders(status='RECEIVED')}">
+           th:classappend="${status == 'REQUEST'} ? 'active' : ''"
+           th:href="@{/sales/orders(status='REQUEST')}">
             접수
         </a>
     </li>
@@ -72,6 +72,8 @@
             신규 수주 등록
         </a>
     </div>
+
+
 
 
     <!-- AG Grid -->

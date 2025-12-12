@@ -299,7 +299,7 @@ public class OutboundService {
 					.orElseThrow(() -> new NoSuchElementException("수주 내역을 찾을 수 없습니다."));
 			
 			// 수주 상태값 변경(출하)
-			orders.changeStatus(OrderStatus.SHIPPED.toString());			
+			orders.changeStatus(OrderStatus.SHIPPED);		
 		}
 		// 출고 상태 업데이트
 		outbound.updateStatus("COMPLETED");

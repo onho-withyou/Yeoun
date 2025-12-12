@@ -47,22 +47,22 @@ public class ProductionPlanService {
              .orElse("미지정");
 
      return new OrderItemDTO(
-             oi.getOrderItemId(),
-             oi.getOrderId(),
-             oi.getPrdId(),
-             oi.getProduct().getPrdName(),
-             oi.getOrderQty().intValue(),
+    		    oi.getOrderItemId(),
+    		    oi.getOrderId(),
+    		    oi.getPrdId(),
+    		    oi.getProduct().getPrdName(),
+    		    oi.getOrderQty(),   // ✅ BigDecimal 그대로
 
-             oi.getOrder().getClient().getClientName(),     // 거래처명
-             oi.getOrder().getClient().getManagerName(),    // 담당자명
-             oi.getOrder().getClient().getManagerTel(),     // 연락처
-             oi.getOrder().getClient().getManagerEmail(),   // 이메일
+    		    oi.getOrder().getClient().getClientName(),
+    		    oi.getOrder().getClient().getManagerName(),
+    		    oi.getOrder().getClient().getManagerTel(),
+    		    oi.getOrder().getClient().getManagerEmail(),
 
-             oi.getOrder().getOrderDate(),                  // 수주일자
-             oi.getOrder().getDeliveryDate(),               // 납기일
+    		    oi.getOrder().getOrderDate(),
+    		    oi.getOrder().getDeliveryDate(),
 
-             empName                                        // ⭐ 내부 담당자명
-     );
+    		    empName
+    		);
  }
 
 
