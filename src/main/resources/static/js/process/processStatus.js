@@ -267,7 +267,8 @@ function renderProcessDetail(detail) {
                   class="btn btn-success btn-sm btn-step-finish ms-1"
                   data-order-id="${summary.orderId}"
                   data-step-seq="${step.stepSeq}"
-				  data-standard-qty="${step.standardQty ?? ''}">
+				  data-standard-qty="${step.standardQty ?? ''}"
+				  data-plan-qty="${step.planQty}">
             종료
           </button>
         `;
@@ -357,26 +358,56 @@ document.addEventListener("click", (e) => {
   }
 
   if (e.target.classList.contains("btn-step-finish")) {
-    const btn     = e.target;
-    const orderId = btn.dataset.orderId;
-    const stepSeq = btn.dataset.stepSeq;
-	const standard  = btn.dataset.standardQty || "";
-	
-	// 기준 배합량 세팅 (표시용)
-    const stdInput = document.getElementById("finish-standardQty");
-    if (standard) {
-      stdInput.value = standard;   // 필요하면 + " mL" 같은 문구도 가능
-    } else {
-      stdInput.value = "-";
-    }
-	
-	// hidden input 에 값 세팅
-    document.getElementById("finish-orderId").value = orderId;
-    document.getElementById("finish-stepSeq").value = stepSeq;
-    document.getElementById("finish-goodQty").value = "";
+    const btn      = e.target;
+    const orderId  = btn.dataset.orderId;
+    const stepSeq  = btn.dataset.stepSeq;
+    const planQty  = btn.dataset.planQty || "";
+    const standard = btn.dataset.standardQty || "";
+
+    // hidden input 세팅
+    document.getElementById("finish-orderId").value  = orderId;
+    document.getElementById("finish-stepSeq").value  = stepSeq;
+    document.getElementById("finish-goodQty").value  = "";
     document.getElementById("finish-defectQty").value = "";
 
-	const modal = new bootstrap.Modal(document.getElementById("finishModal"));
+    // 계획 수량 표시 (있으면)
+    const planInput = document.getElementById("finish-planQty");
+    if (planInput) {
+      planInput.value = planQty ? planQty + " EA" : "-";
+    }
+
+    // 기준값 라벨/도움말/값 세팅
+    const labelEl = document.getElementById("finish-standardLabel");
+    const helpEl  = document.getElementById("finish-standardHelp");
+    const stdInput = document.getElementById("finish-standardQty");
+
+    const stepNum = parseInt(stepSeq, 10);
+
+    if (!isNaN(stepNum) && stepNum <= 2) {
+      // 1~2단계: 기준 배합량 
+      if (labelEl) labelEl.textContent = "기준 배합량 (표준)";
+      if (helpEl)  helpEl.textContent  = "BOM과 계획수량을 기준으로 계산된 이론 배합량입니다.";
+
+      if (standard) {
+        stdInput.value = standard + " ml";   
+      } else {
+        stdInput.value = "-";
+      }
+
+    } else {
+      // 3단계 이후: 기준 완제품 수량 (이론)
+      if (labelEl) labelEl.textContent = "기준 완제품 수량 (이론)";
+      if (helpEl)  helpEl.textContent  = "현재 배합량으로 이론상 생산 가능한 완제품 개수입니다.";
+
+      if (standard) {
+        stdInput.value = standard + " EA";
+      } else {
+        stdInput.value = "-";
+      }
+    }
+
+    // 모달 오픈
+    const modal = new bootstrap.Modal(document.getElementById("finishModal"));
     modal.show();
   }
 
@@ -592,7 +623,8 @@ function updateStepRowInModal(updatedStep) {
                 class="btn btn-success btn-sm btn-step-finish ms-1"
                 data-order-id="${updatedStep.orderId}"
                 data-step-seq="${updatedStep.stepSeq}"
-				data-standard-qty="${updatedStep.standardQty ?? ''}">
+				data-standard-qty="${updatedStep.standardQty ?? ''}"
+				data-plan-qty="${updatedStep.planQty}">
           종료
         </button>
       `;
