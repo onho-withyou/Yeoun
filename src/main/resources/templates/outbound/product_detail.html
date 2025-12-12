@@ -37,6 +37,7 @@
 							<div>
 							    <span th:if="${outboundOrderDTO.status == 'WAITING'}" class="badge bg-warning text-dark">출고대기</span>
 							    <span th:if="${outboundOrderDTO.status == 'COMPLETED'}" class="badge bg-success">출고완료</span>
+							    <span th:if="${outboundOrderDTO.status == 'CANCELED'}" class="badge bg-warning ">출고취소</span>
 							</div>
 						</div>
 					 </div>
