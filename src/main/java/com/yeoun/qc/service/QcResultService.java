@@ -1,4 +1,5 @@
 package com.yeoun.qc.service;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,7 +10,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.yeoun.common.dto.FileAttachDTO;
+import com.yeoun.common.entity.FileAttach;
+import com.yeoun.common.repository.FileAttachRepository;
+import com.yeoun.common.util.FileUtil;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.entity.LotMaster;
@@ -31,6 +37,7 @@ import com.yeoun.qc.entity.QcResultDetail;
 import com.yeoun.qc.repository.QcResultDetailRepository;
 import com.yeoun.qc.repository.QcResultRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -47,6 +54,10 @@ public class QcResultService {
     // LOT 연동용
     private final LotTraceService lotTraceService;
     private final LotMasterRepository lotMasterRepository;
+    
+    // 파일
+    private final FileUtil fileUtil;
+    private final FileAttachRepository fileAttachRepository;
     
     // --------------------------------------------------------------
     // 캡/펌프 공정 종료 시 호출되는 QC 결과 생성 메서드
@@ -560,6 +571,44 @@ public class QcResultService {
 
 	    return view;
 	}
+
+	// -----------------------------------------------------------------------------------------------
+	// QC 상세 항목별 첨부파일 저장
+    @Transactional
+    public void saveQcDetailFiles(String qcResultDtlId, List<MultipartFile> files) throws IOException {
+
+        if (files == null || files.isEmpty()) {
+            return;
+        }
+
+        // 1) 상세 엔티티 조회
+        QcResultDetail detail = qcResultDetailRepository.findById(qcResultDtlId)
+                .orElseThrow(() -> new EntityNotFoundException("QC 상세가 존재하지 않습니다. ID=" + qcResultDtlId));
+
+        // 2) FileUtil로 실제 파일 업로드 (공지와 동일)
+        List<FileAttach> fileList = fileUtil.uploadFile(detail, files)
+                .stream()
+                .map(FileAttachDTO::toEntity)
+                .toList();
+
+        // 3) FILE_ATTACH DB 저장
+        fileAttachRepository.saveAll(fileList);
+    }
+
+    // --------------------------------------------------
+    // QC 상세 항목별 첨부파일 조회
+    @Transactional
+    public List<FileAttachDTO> getQcDetailFiles(Long qcResultDtlId) {
+
+        // REF_TABLE, REF_ID 기준으로 FILE_ATTACH 조회
+        List<FileAttach> fileList =
+                fileAttachRepository.findByRefTableAndRefId("QC_RESULT_DETAIL", qcResultDtlId);
+
+        return fileList.stream()
+                .map(FileAttachDTO::fromEntity)
+                .toList();
+    }
+
 
 
     

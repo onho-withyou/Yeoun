@@ -235,6 +235,12 @@ function renderQcDetailTable(detailList) {
 	           name="details[${idx}].remark"
 	           value="${row.remark ?? ""}">
 	  </td>
+	  <td class="text-center">
+      	<input type="file"
+               class="form-control form-control-sm qc-file-input"
+               data-dtl-id="${row.qcResultDtlId}"
+               multiple>
+      </td>
 	`;
 
     tbody.appendChild(tr);

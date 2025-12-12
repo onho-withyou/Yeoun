@@ -1,8 +1,12 @@
 package com.yeoun.qc.controller;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,14 +15,20 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.yeoun.auth.dto.LoginDTO;
+import com.yeoun.common.dto.FileAttachDTO;
+import com.yeoun.common.service.FileAttachService;
 import com.yeoun.qc.dto.QcDetailRowDTO;
 import com.yeoun.qc.dto.QcRegistDTO;
 import com.yeoun.qc.dto.QcResultListDTO;
 import com.yeoun.qc.dto.QcResultViewDTO;
 import com.yeoun.qc.dto.QcSaveRequestDTO;
+import com.yeoun.qc.entity.QcResultDetail;
+import com.yeoun.qc.repository.QcResultDetailRepository;
 import com.yeoun.qc.service.QcResultService;
 
 import lombok.RequiredArgsConstructor;
@@ -87,6 +97,40 @@ public class QcController {
 	public QcResultViewDTO getQcResultView(@PathVariable("qcResultId") Long qcResultId) {
 	    return qcResultService.getQcResultView(qcResultId);
 	}
+
+	// -----------------------------------------------------------------------------------
+	// QC 상세 항목별 첨부파일
+    // 1) QC 상세별 파일 업로드
+    @PostMapping("/detail/{qcResultDtlId}/files")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> uploadQcDetailFiles(@PathVariable("qcResultDtlId") String qcResultDtlId,
+            													   @RequestParam("qcDetailFiles") List<MultipartFile> qcDetailFiles) {
+
+        Map<String, String> msg = new HashMap<>();
+
+        try {
+            qcResultService.saveQcDetailFiles(qcResultDtlId, qcDetailFiles);
+            msg.put("msg", "QC 첨부파일이 등록되었습니다.");
+            return ResponseEntity.ok(msg);
+
+        } catch (Exception e) {
+            msg.put("msg", "QC 첨부파일 등록에 실패했습니다: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
+        }
+    }
+
+    // --------------------------------------------------
+    // 2) QC 상세별 파일 목록 조회
+    @GetMapping("/detail/{qcResultDtlId}/files")
+    @ResponseBody
+    public ResponseEntity<List<FileAttachDTO>> getQcDetailFiles(
+            @PathVariable("qcResultDtlId") Long qcResultDtlId) {
+
+        List<FileAttachDTO> files = qcResultService.getQcDetailFiles(qcResultDtlId);
+        return ResponseEntity.ok(files);
+    }
+
+
 
 	
 	
