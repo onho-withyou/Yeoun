@@ -91,7 +91,7 @@ async function loadMaterialInbound(startDate, endDate, searchType, keyword) {
 		}
 		
 		// 원재료정보만필터
-		data = data.filter(row => row.inboundType === "MAT_IB");
+		data = data.filter(row => row.inboundType === "RE_IB");
 		
 		// 상태값이 영어로 들어오는 것을 한글로 변환해서 기존 data에 덮어씌움
 		data = data.map(item => ({

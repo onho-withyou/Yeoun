@@ -51,11 +51,19 @@ public class InboundController {
 		return "inbound/inbound_list";
 	}
 	
+	// 재입고 페이지
+	@GetMapping("/reInboundList")
+	public String reMaterial(Model model) {
+		// 탭 활성화를 위한 정보
+		model.addAttribute("activeTab", "re");
+		return "inbound/inbound_list";
+	}
+	
 	// 완제품 페이지
 	@GetMapping("/productList")
 	public String product(Model model) {
 		// 탭 활성화를 위한 정보
-		model.addAttribute("activeTab", "pro");
+		model.addAttribute("activeTab", "prd");
 		return "inbound/inbound_list";
 	}
 	

@@ -299,7 +299,7 @@ public class InboundService {
 			} else {
 				// 완제품은 lotNo가 정해져있음
 				lotNo = itemDTO.getLotNo();
-				// 완제품은 LotMst, LotHistory 생성 등록 필요없음
+				// 완제품은 LotMst 생성 등록 필요없음
 			}
 				
 			// InboundItem 업데이트

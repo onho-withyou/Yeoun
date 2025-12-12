@@ -35,7 +35,7 @@ public class OutboundController {
 	private final OutboundService outboundService;
 	
 	// 출고관리 페이지
-	@GetMapping("/list")
+	@GetMapping("")
 	public String outboundList(Model model) {
 		// 탭 활성화를 위한 정보
 		model.addAttribute("activeTab", "mat");
