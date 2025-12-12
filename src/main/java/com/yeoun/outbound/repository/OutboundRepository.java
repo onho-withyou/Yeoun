@@ -21,4 +21,10 @@ public interface OutboundRepository extends JpaRepository<Outbound, String> {
 	// 출고 내역 조회
 	Optional<Outbound> findByOutboundId(String outboundId);
 
+	// 작업지시서 ID로 출고 내역 조회
+	Optional<Outbound> findByWorkOrderId(String orderId);
+
+	// 출하지시서 ID로 출고 내역 조회
+	Optional<Outbound> findByShipmentId(String shipmentId);
+
 }

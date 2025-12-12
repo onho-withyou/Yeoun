@@ -244,7 +244,7 @@ shipmentSelect.addEventListener("focus", async () => {
 				.split("T")[0];
 				
 		// 오늘 이전 날자 선택 불가
-		dueDate.min = today;
+		expectDate.min = today;
 		
 		// startDate가 없으면 오늘 날짜를 기본값으로 하거나 0 처리
 		expectDate.value = shipOrder.startDate?.split("T")[0] || today;
