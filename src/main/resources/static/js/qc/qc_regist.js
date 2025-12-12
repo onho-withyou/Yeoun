@@ -128,13 +128,15 @@ function loadQcRegistGrid() {
         });
 }
 
-// 모달을 열면서 데이터 넣는 함수
+// QC 등록 모달을 열면서 데이터 넣는 함수
 function openQcRegModal(rowData) {
 
+	// 모달 제목
 	document.getElementById("qcModalTitleOrder").innerText = rowData.orderId;
 	document.getElementById("qcModalTitleProductName").innerText = rowData.prdName;
 	document.getElementById("qcModalTitleProductCode").innerText = `(${rowData.prdId})`;
 
+	// 모달 상단
     document.getElementById("qcOrderIdText").innerText = rowData.orderId;
     document.getElementById("qcProductText").innerText = rowData.prdName;
     document.getElementById("qcPlanQtyText").innerText = rowData.planQty + " EA";
@@ -159,10 +161,8 @@ function openQcRegModal(rowData) {
 	  failReasonTextarea.value = "";
 	  failReasonTextarea.setAttribute("readonly", "readonly"); // ✅ readonly
 	}
-
-
 	
-	// 추가: 수량/비고 초기화
+	// 수량/비고 초기화
 	const goodInput = document.getElementById("qcGoodQty");
 	const defectInput = document.getElementById("qcDefectQty");
 	const remarkInput = document.getElementById("qcRemark");
@@ -171,7 +171,6 @@ function openQcRegModal(rowData) {
 	if (defectInput) defectInput.value = "";
 	if (remarkInput) remarkInput.value = "";
 
-
 	// 상세행 조회해서 tbody 채우기
 	loadQcDetailRows(rowData.qcResultId);
 
@@ -179,6 +178,7 @@ function openQcRegModal(rowData) {
 	qcRegModal.show();
 }
 
+// QC 항목 상세 리스트 가져오기
 function loadQcDetailRows(qcResultId) {
 
   fetch(`/qc/${qcResultId}/details`)
@@ -198,6 +198,7 @@ function loadQcDetailRows(qcResultId) {
     });
 }
 
+// QC 항목별 입력 라인 생성
 function renderQcDetailTable(detailList) {
   const tbody = document.getElementById("qcDetailTbody");
   tbody.innerHTML = "";
@@ -217,7 +218,9 @@ function renderQcDetailTable(detailList) {
 	    <input type="text"
 	           class="form-control form-control-sm"
 	           name="details[${idx}].measureValue"
-	           value="${row.measureValue ?? ""}">
+			   value="${row.measureValue ?? ""}"
+               data-min="${row.minValue ?? ""}"
+               data-max="${row.maxValue ?? ""}">
 	  </td>
 	  <td>
 	    <select class="form-select form-select-sm"
@@ -238,6 +241,7 @@ function renderQcDetailTable(detailList) {
   });
 }
 
+// 상세 테이블 값
 function collectDetailRowsFromTable() {
   const trs = document.querySelectorAll("#qcDetailTbody tr");
   const detailRows = [];
@@ -282,26 +286,26 @@ function collectDetailRowsFromTable() {
   return detailRows;
 }
 
-
+// 저장 버튼
 function onClickSaveQcResult() {
-  const qcResultId = document.getElementById("qcResultId").value;
-  if (!qcResultId) {
-    alert("QC 결과 ID가 없습니다.");
-    return;
-  }
+    const qcResultId = document.getElementById("qcResultId").value;
+    if (!qcResultId) {
+      alert("QC 결과 ID가 없습니다.");
+      return;
+    }
 
-  // 1) 디테일 행 수집
-  const detailRows = collectDetailRowsFromTable();
-  if (!detailRows) {
-    alert("모든 QC 항목의 측정값을 입력해주세요.");
-    return;
-  }
-  if (detailRows.length === 0) {
-    alert("저장할 QC 항목이 없습니다.");
-    return;
-  }
+    // 1) 디테일 행 수집
+    const detailRows = collectDetailRowsFromTable();
+    if (!detailRows) {
+      alert("모든 QC 항목의 측정값을 입력해주세요.");
+      return;
+    }
+    if (detailRows.length === 0) {
+      alert("저장할 QC 항목이 없습니다.");
+      return;
+    }
   
-  // 2) 헤더 영역 값 읽기
+  	// 2) 헤더 영역 값 읽기
     const goodQtyVal   = document.getElementById("qcGoodQty")?.value;
     const defectQtyVal = document.getElementById("qcDefectQty")?.value;
     const remark       = document.getElementById("qcRemark")?.value || "";
@@ -361,8 +365,7 @@ function onClickSaveQcResult() {
 	    return;
 	  }
 	}
-
-
+	
     // 3) 서버로 보낼 payload
     const payload = {
       qcResultId: Number(qcResultId),
@@ -429,3 +432,54 @@ function onClickSaveQcResult() {
         alert("QC 저장 중 오류가 발생했습니다.");
       });
   }
+  
+  // 측정값 입력 시 자동 PASS/FAIL 판정
+  const qcDetailTbody = document.getElementById("qcDetailTbody");
+
+  if (qcDetailTbody) {
+    qcDetailTbody.addEventListener("input", (e) => {
+      // 측정값 input이 아닐 경우 무시
+      const input = e.target;
+      if (!input.matches('input[name$=".measureValue"]')) return;
+
+      const row = input.closest("tr");
+      if (!row) return;
+
+      const select = row.querySelector('select[name$=".result"]');
+      if (!select) return;
+
+      const raw = input.value;
+      const minAttr = input.dataset.min;
+      const maxAttr = input.dataset.max;
+
+      // min/max 둘 다 없으면 자동판정 대상 아님
+      if (!minAttr && !maxAttr) {
+        return;
+      }
+
+      if (!raw) {
+        // 값 비었으면 결과 비우기 (원하면 그대로 두게 바꿀 수 있음)
+        select.value = "";
+        return;
+      }
+
+      const v = Number(raw);
+      if (Number.isNaN(v)) {
+        // 숫자 아니면 FAIL으로
+        select.value = "FAIL";
+        return;
+      }
+
+      let pass = true;
+
+      if (minAttr && !Number.isNaN(Number(minAttr)) && v < Number(minAttr)) {
+        pass = false;
+      }
+      if (maxAttr && !Number.isNaN(Number(maxAttr)) && v > Number(maxAttr)) {
+        pass = false;
+      }
+
+      select.value = pass ? "PASS" : "FAIL";
+    });
+  }
+

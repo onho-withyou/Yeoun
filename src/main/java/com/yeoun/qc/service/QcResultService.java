@@ -190,6 +190,9 @@ public class QcResultService {
 				qdrDTO.setItemName(item.getItemName());
 				qdrDTO.setUnit(item.getUnit());
 				qdrDTO.setStdText(buildStdText(item));
+				
+				qdrDTO.setMinValue(item.getMinValue());
+			    qdrDTO.setMaxValue(item.getMaxValue());
 			}
 			
 			qdrDTO.setMeasureValue(d.getMeasureValue());
@@ -266,17 +269,53 @@ public class QcResultService {
 	        QcResultDetail detail = qcResultDetailRepository.findById(row.getQcResultDtlId())
 	                .orElseThrow(() -> new IllegalArgumentException(
 	                        "QC 상세가 존재하지 않습니다. ID = " + row.getQcResultDtlId()));
+	        
+	        // 해당 QC 항목 조회 (min/max 기준 확인용)
+	        QcItem item = qcItemRepository.findById(detail.getQcItemId())
+	                .orElse(null);
 
 	        // 2-2) 모달에서 입력한 값 반영
 	        detail.setMeasureValue(row.getMeasureValue()); // 측정값
-	        detail.setResult(row.getResult());             // PASS / FAIL
-	        detail.setRemark(row.getRemark());             // 비고
+	        
+	        // 기본은 사용자가 선택한 결과
+	        String result = row.getResult();
+	        
+	        // min/max 기준 있는 항목이면 자동판정
+	        if (item != null && (item.getMinValue() != null || item.getMaxValue() != null)) {
 
-	        // 2-3) 수정자 
+	            String mv = row.getMeasureValue();
+
+	            if (mv != null && !mv.isBlank()) {
+	                try {
+	                    BigDecimal value = new BigDecimal(mv);
+
+	                    boolean pass = true;
+
+	                    if (item.getMinValue() != null &&
+	                            value.compareTo(item.getMinValue()) < 0) {
+	                        pass = false;
+	                    }
+	                    if (item.getMaxValue() != null &&
+	                            value.compareTo(item.getMaxValue()) > 0) {
+	                        pass = false;
+	                    }
+
+	                    result = pass ? "PASS" : "FAIL";
+
+	                } catch (NumberFormatException e) {
+	                    result = "FAIL";
+	                }
+	            } else {
+	                result = "FAIL";
+	            }
+	        }
+	        
+	        detail.setResult(result);
+	        detail.setRemark(row.getRemark());             // 비고
 	        detail.setUpdatedUser(loginEmpId);
 
 	        // 2-3) 전체 판정 계산용 체크
-	        if (row.getResult() != null && row.getResult().equalsIgnoreCase("FAIL")) {
+	        if ("FAIL".equalsIgnoreCase(result)) {
 	            allPass = false;
 	        }
 
@@ -421,13 +460,13 @@ public class QcResultService {
 	            // HOLD: LOT은 물리적으로 그대로지만, 작업지시는 QC_HOLD 상태로 묶어두기
 	            lot.setCurrentStatus("IN_PROCESS");
 	            lot.setStatusChangeDate(LocalDateTime.now());
-	            workOrder.setStatus("QC_HOLD");  // ⚠️ 새 코드이니 코드테이블 쓰면 같이 추가 필요
+	            workOrder.setStatus("QC_HOLD");
 	        }
 	        case "FAIL" -> {
 	            // FAIL: 불량/폐기 처리
 	            lot.setCurrentStatus("SCRAPPED");    // LOT_STATUS
 	            lot.setStatusChangeDate(LocalDateTime.now());
-	            workOrder.setStatus("QC_FAIL");      // ⚠️ 마찬가지로 새 상태코드
+	            workOrder.setStatus("QC_FAIL");
 	        }
 	        default -> {
 	            // PENDING 등은 상태 변경 없음
