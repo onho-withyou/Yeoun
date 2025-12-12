@@ -181,7 +181,7 @@ const grid4 = new Grid({
 	    ,{header: '공정명' ,name: 'processName' ,align: 'center'}
 	    ,{header: '공정유형' ,name: 'processType' ,align: 'center'}
 	    ,{header: '설명' ,name: 'description' ,align: 'center',width: 315}
-        ,{header: '사용여부' ,name: 'useYn' ,align: 'center'}
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center',hidden: true}
 		,{header: '생성자id' ,name: 'createdId' ,align: 'center',hidden: true}
 		,{header: '생성일시' ,name: 'createdDate' ,align: 'center',hidden: true}
 		,{header: '수정자id' ,name: 'updatedId' ,align: 'center',hidden: true}
