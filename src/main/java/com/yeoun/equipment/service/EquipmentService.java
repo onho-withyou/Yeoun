@@ -65,6 +65,8 @@ public class EquipmentService {
 		return list;
 	}
 
+    // ===================================================
+    // 설비 마스터 등록
 	public void createEquipmentType(EquipmentTypeCreateRequest req) {
 		
 		EquipmentDTO dto = EquipmentDTO.builder()

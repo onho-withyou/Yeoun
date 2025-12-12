@@ -13,8 +13,10 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,7 +37,8 @@ public class EquipmentController {
     // ===================================================
     // 설비, 라인 기준정보 페이지
     @GetMapping("/master")
-    public String master() {
+    public String master(EquipmentTypeCreateRequest req, Model model) {
+    	model.addAttribute("equipmentTypeCreateRequest", req);
         return "masterData/equipment_line";
     }
 
@@ -52,10 +55,18 @@ public class EquipmentController {
     // ===================================================
     // 설비 마스터 등록하기
     @PostMapping("/equipType")
-    public ResponseEntity<?> createEquipType(
-    		@Valid @RequestBody EquipmentTypeCreateRequest req) {
+    public String createEquipType(
+    		@Valid @ModelAttribute EquipmentTypeCreateRequest req,
+    		BindingResult bindingResult,
+    		Model model) {
+    	
+    	if (bindingResult.hasErrors()) {
+    		model.addAttribute("openEquipmentModal", true);
+    		return "masterData/equipment_line";
+    	}
+    	
     	equipmentService.createEquipmentType(req);
-    	return ResponseEntity.ok().build();
+    	return "redirect:/equipment/master";
     }
     
     // ===================================================
