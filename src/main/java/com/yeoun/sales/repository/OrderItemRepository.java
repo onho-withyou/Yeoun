@@ -51,8 +51,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 		    FROM OrderItem oi
 		    JOIN oi.order o
 		    JOIN oi.product p
-		    WHERE oi.itemStatus = 'CONFIRMED'
-		      AND o.orderStatus = 'CONFIRMED'
+		    WHERE oi.itemStatus = 'CONFIRMED'		     
 		      AND (:group IS NULL OR p.itemName = :group)
 		    GROUP BY p.prdId, p.prdName
 		""")
@@ -96,8 +95,8 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
     void updateStatusToPlanned(@Param("orderItemId") Long orderItemId);
 
 
-    //주문상세 상태 변경
-    @Modifying
+    //주문상세 상태 변경-입금확인
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
     @Query("""
         UPDATE OrderItem oi
@@ -105,6 +104,16 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
         WHERE oi.orderId = :orderId
     """)
     int updateItemStatusToConfirmedByOrderId(@Param("orderId") String orderId);
+
+  //주문상세 상태 변경-취소
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Transactional
+    @Query("""
+        UPDATE OrderItem oi
+        SET oi.itemStatus = 'CANCEL'
+        WHERE oi.orderId = :orderId
+    """)
+    int updateItemStatusToCancelByOrderId(@Param("orderId") String orderId);
 
 
 
