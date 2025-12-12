@@ -89,7 +89,8 @@ async function loadProductOutbound(startDate, endDate, keyword) {
 		
 		const statusMap = {
 			WAITING : "출고대기",
-			COMPLETED: "출고완료"
+			COMPLETED: "출고완료",
+			CANCELED: "출고취소"
 		}
 		
 		// 상태값이 영어로 들어오는 것을 한글로 변환해서 기존 data에 덮어씌움

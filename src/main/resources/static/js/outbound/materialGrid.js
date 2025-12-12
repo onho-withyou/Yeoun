@@ -48,7 +48,6 @@ materialGrid.on("click", (ev) => {
 	
 	if (columnName === "btn") {
 		const row = materialGrid.getRow(rowKey);
-		console.log(row);
 		// 입고 상세 페이지로 이동
 		location.href = `/inventory/outbound/mat/${row.outboundId}`
 	}
@@ -90,7 +89,8 @@ async function loadMaterialOutbound(startDate, endDate, keyword) {
 		
 		const statusMap = {
 			WAITING : "출고대기",
-			COMPLETED: "출고완료"
+			COMPLETED: "출고완료",
+			CANCELED: "출고취소"
 		}
 		
 		// 상태값이 영어로 들어오는 것을 한글로 변환해서 기존 data에 덮어씌움
