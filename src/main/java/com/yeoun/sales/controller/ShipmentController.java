@@ -36,10 +36,22 @@ public class ShipmentController {
         String startDate = (String) param.get("startDate");
         String endDate   = (String) param.get("endDate");
         String keyword   = (String) param.get("keyword");
-        String status    = (String) param.get("status");
 
-        return shipmentService.search(startDate, endDate, keyword, status);
+        Object statusObj = param.get("status");
+
+        List<String> statusList = null;
+
+        if (statusObj instanceof String) {
+            statusList = List.of((String) statusObj);
+        } else if (statusObj instanceof List<?>) {
+            statusList = ((List<?>) statusObj).stream()
+                    .map(String::valueOf)
+                    .toList();
+        }
+
+        return shipmentService.search(startDate, endDate, keyword, statusList);
     }
+
 
 
     /** 3) 출하 예약 (POST) */

@@ -1,3 +1,11 @@
+/* =========================================================
+   상태 그룹 정의
+========================================================= */
+const STATUS_GROUP_MAP = {
+    RESERVED_GROUP: ["RESERVED", "PENDING"]
+};
+
+
 let gridApi = null;
 
 /* =========================================================
@@ -31,8 +39,13 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelector("#shipmentTabs .active")?.classList.remove("active");
             target.classList.add("active");
 
-            const status = target.dataset.status;
-            loadShipmentList(status);
+			const statusKey = target.dataset.status;
+
+			// 그룹이면 배열, 아니면 단일값
+			const statusList = STATUS_GROUP_MAP[statusKey] ?? statusKey;
+
+			loadShipmentList(statusList);
+
         });
     });
 
@@ -170,8 +183,10 @@ function renderStatusBadge(status) {
             return `<span class="badge bg-danger">부족</span>`;
         case "SHIPPED":
             return `<span class="badge bg-success">출하완료</span>`;
+		case "PENDING":
+			return `<span class="badge bg-secondary">출고준비</span>`;
         default:
-            return `<span class="badge bg-secondary">대기</span>`;
+            return `<span class="badge bg-primary">대기</span>`;
     }
 }
 

@@ -43,9 +43,9 @@ public class ShipmentService {
             String startDate,
             String endDate,
             String keyword,
-            String status
+            List<String> statusList
     ) {
-        return shipmentQueryRepository.search(startDate, endDate, keyword, status);
+        return shipmentQueryRepository.search(startDate, endDate, keyword, statusList);
     }
 
 

@@ -17,7 +17,7 @@ public class ShipmentQueryRepository {
             String startDate,
             String endDate,
             String keyword,
-            String status
+            List<String> statusList
     ) {
 
         StringBuilder sql = new StringBuilder("""
@@ -42,6 +42,12 @@ public class ShipmentQueryRepository {
                         WHERE s.ORDER_ID = oi.ORDER_ID
                           AND s.SHIPMENT_STATUS = 'SHIPPED'
                     ) THEN 'SHIPPED'
+                    
+                     WHEN EXISTS (
+                        SELECT 1 FROM SHIPMENT s
+                        WHERE s.ORDER_ID = oi.ORDER_ID
+                          AND s.SHIPMENT_STATUS = 'PENDING'
+                    ) THEN 'PENDING'
 
                     WHEN EXISTS (
                         SELECT 1 FROM SHIPMENT s
@@ -115,7 +121,7 @@ public class ShipmentQueryRepository {
             """);
         }
 
-        if (status != null && !status.equals("ALL")) {
+        if (statusList != null && !statusList.isEmpty() && !statusList.contains("ALL")) {
             sql.append("""
                 AND (
                     CASE 
@@ -128,7 +134,7 @@ public class ShipmentQueryRepository {
                         WHEN EXISTS (
                             SELECT 1 FROM SHIPMENT s 
                             WHERE s.ORDER_ID = oi.ORDER_ID
-                              AND s.SHIPMENT_STATUS = 'RESERVED'
+                              AND s.SHIPMENT_STATUS IN ('RESERVED', 'PENDING')
                         ) THEN 'RESERVED'
 
                         WHEN NVL((
@@ -139,9 +145,10 @@ public class ShipmentQueryRepository {
 
                         ELSE 'WAITING'
                     END
-                ) = :status
+                ) IN (:statusList)
             """);
         }
+
 
         sql.append(" ORDER BY o.DELIVERY_DATE ");
 
@@ -150,7 +157,10 @@ public class ShipmentQueryRepository {
         if (startDate != null && !startDate.isEmpty()) query.setParameter("startDate", startDate);
         if (endDate != null && !endDate.isEmpty()) query.setParameter("endDate", endDate);
         if (keyword != null && !keyword.isEmpty()) query.setParameter("keyword", keyword);
-        if (status != null && !status.equals("ALL")) query.setParameter("status", status);
+        if (statusList != null && !statusList.isEmpty() && !statusList.contains("ALL")) {
+            query.setParameter("statusList", statusList);
+        }
+
 
         return query.getResultList();
     }
