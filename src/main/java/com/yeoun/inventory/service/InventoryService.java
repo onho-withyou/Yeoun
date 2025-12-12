@@ -61,8 +61,10 @@ public class InventoryService {
 		        InventorySpecs.zoneEq(inventoryDTO.getZone()),
 		        InventorySpecs.rackEq(inventoryDTO.getRack()),
 		        InventorySpecs.statusEq(inventoryDTO.getStatus()),
-		        InventorySpecs.ibDateGoe(inventoryDTO.getIbDate()),
-		        InventorySpecs.expirationDateGoe(inventoryDTO.getExpirationDate())
+		        InventorySpecs.ibDateGoe(inventoryDTO.getIbDateFrom()),
+		        InventorySpecs.ibDateLoe(inventoryDTO.getIbDateTo()),
+		        InventorySpecs.expirationDateGoe(inventoryDTO.getExpDateFrom()),
+		        InventorySpecs.expirationDateLoe(inventoryDTO.getExpDateTo())
 		);
 		
 	    List<Inventory> list = inventoryRepository.findAll(spec);
