@@ -92,9 +92,7 @@ public class ProductionPlanService {
         return prefix + String.format("%03d", seq);
     }
 
-    /* ================================
-        생산계획 생성 (수동)
-    ================================ */
+
     /* ================================
     생산계획 생성 (수동, 모달 선택 기반)
  ================================ */
@@ -419,7 +417,7 @@ public String createPlan(List<PlanCreateItemDTO> items, String createdBy, String
     ============================ */
     public List<OrderItemDTO> getOrderItemsByProduct(String prdId) {
 
-//        List<OrderItem> list = orderItemRepository.findByPrdId(prdId);
+      //  List<OrderItem> list = orderItemRepository.findByPrdId(prdId);
         List<OrderItem> list = orderItemRepository.findByPrdIdAndItemStatus(prdId, "CONFIRMED");
 
         List<OrderItemDTO> dtoList = new ArrayList<>();

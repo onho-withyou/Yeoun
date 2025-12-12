@@ -17,6 +17,7 @@ import org.springframework.data.repository.query.Param;
 public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 
 	List<OrderItem> findByOrderId(String orderId);	
+	
 	//  제품ID로 주문 상세 찾기
     List<OrderItem> findByPrdId(String prdId);
     
@@ -50,11 +51,13 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 		    FROM OrderItem oi
 		    JOIN oi.order o
 		    JOIN oi.product p
-		   WHERE oi.itemStatus = 'CONFIRMED'
+		    WHERE oi.itemStatus = 'CONFIRMED'
+		      AND o.orderStatus = 'CONFIRMED'
 		      AND (:group IS NULL OR p.itemName = :group)
 		    GROUP BY p.prdId, p.prdName
 		""")
 		List<Map<String, Object>> findConfirmedGrouped(@Param("group") String group);
+
 
 
     // 2) 특정 제품에 대한 확정된 수주 상세 조회
@@ -91,6 +94,17 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
         WHERE oi.orderItemId = :orderItemId
     """)
     void updateStatusToPlanned(@Param("orderItemId") Long orderItemId);
+
+
+    //주문상세 상태 변경
+    @Modifying
+    @Transactional
+    @Query("""
+        UPDATE OrderItem oi
+        SET oi.itemStatus = 'CONFIRMED'
+        WHERE oi.orderId = :orderId
+    """)
+    int updateItemStatusToConfirmedByOrderId(@Param("orderId") String orderId);
 
 
 
