@@ -8,7 +8,7 @@
 
         <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
         <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-
+        <script th:src="@{/js/common/formatTimeJS.js}"></script>
         <style>
             .status-active {
                 background-color: #e8f5e9 !important;
@@ -90,6 +90,7 @@
     </th:block>
     </body>
 
+
     <th:block layout:fragment="myScript">
 		<script>
 	      let equipmentGrid = null;
@@ -119,7 +120,7 @@
 		        useClient: true,
 		        perPage: 10
 		      },
-		      columnOptions: {resizable: true},
+		      columnOptions: {resizable: true, editor: null},
 		      columns: [
 		        {header: "ID", name: "equipId", width: 160, align: "center"},
 		        {header: "이름(한)", name: "koName", align: "left"},
@@ -128,7 +129,7 @@
 		          header: "등록일자",
 		          name: "createdDate",
 		          align: "center",
-		          formatter: ({ value }) => formatDate(value)
+		          formatter: ({ value }) => formatTimeFull(value)
 		        },
 		        {
 		          header: "상세",
@@ -151,17 +152,11 @@
 		        useClient: true,
 		        perPage: 10
 		      },
-		      columnOptions: {resizable: true},
+		      columnOptions: {resizable: true, editor: null},
 		      columns: [
 		        {header: "ID", name: "lineId", width: 160, align: "center"},
 		        {header: "라인명", name: "lineName", align: "left"},
 		        {header: "상태", name: "status", align: "center"},
-		        {
-		          header: "등록일자",
-		          name: "createdDate",
-		          align: "center",
-		          formatter: ({ value }) => formatDate(value)
-		        },
 		        {
 		          header: "상세",
 		          name: "btn",
@@ -171,8 +166,10 @@
 		        }
 		      ]
 		    });
+
+              loadGridData('/equipment/equip/data', equipmentGrid);
 		  });
-		  
+
 		  document
 			  .querySelectorAll('button[data-bs-toggle="tab"]')
 			  .forEach(tab => {
@@ -180,14 +177,34 @@
 			      const targetId = e.target.getAttribute('data-bs-target');
 	
 			      if (targetId === '#navs-equipment-tab') {
-			        if (equipmentGrid) equipmentGrid.refreshLayout();
+			        equipmentGrid.refreshLayout();
+                    loadGridData('/equipment/equip/data', equipmentGrid);
 			      } else if (targetId === '#navs-line-tab') {
-			        if (lineGrid) lineGrid.refreshLayout();
+			        lineGrid.refreshLayout();
+                    loadGridData('/equipment/line/data', lineGrid);
 			      }
 			    });
 			});
-	
-		</script>
+
+          // 로딩함수 공통
+          async function loadGridData(url, grid) {
+              try {
+                  const res = await fetch(url);
+                  if (!res.ok) throw new Error("서버 오류");
+                  const data = await res.json();
+
+                  console.log("서버응답 확인.... " , data);
+
+                  grid.resetData(data); // 기존 데이터 지우고 새로 로드
+                  grid.refreshLayout(); // 화면 갱신
+
+              } catch (err) {
+                  console.error("데이터 로딩 실패:", err);
+              }
+          }
+
+
+        </script>
     </th:block>
 
 </th:block>
