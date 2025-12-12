@@ -68,15 +68,15 @@
 	          <table class="table table-bordered table-sm" id="stepTable">
 	            <thead class="table-light">
 	            <tr>
-	              <th>단계</th>
-	              <th>공정코드</th>
-	              <th>공정명</th>
-	              <th>상태</th>
-	              <th>시작</th>
-	              <th>종료</th>
-	              <th>양품수량</th>
-	              <th>불량수량</th>
-	              <th>작업</th>
+	              <th style="width: 50px;">단계</th>
+	              <th style="width: 80px;">공정코드</th>
+	              <th style="width: 60px;">공정명</th>
+	              <th style="width: 50px;">상태</th>
+	              <th style="width: 140px;">시작</th>
+	              <th style="width: 140px;">종료</th>
+	              <th style="width: 70px;">양품수량</th>
+	              <th style="width: 70px;">불량수량</th>
+	              <th style="width: 90px;">작업</th>
 	              <th>특이사항</th>
 	            </tr>
 	            </thead>
@@ -94,7 +94,7 @@
 	</div>
 
 
-
+	
 	<!-- 공정 종료 시 수량 입력 모달 -->
 	<div class="modal fade" id="finishModal" tabindex="-1">
 	  <div class="modal-dialog">
@@ -111,24 +111,34 @@
 	        <input type="hidden" id="finish-orderId">
 	        <input type="hidden" id="finish-stepSeq">
 	
-	        <!-- 기준 배합량(표준값) 표시 -->
+	        <!-- (선택) 계획 수량 표시 -->
 	        <div class="mb-3">
-	          <label class="form-label">기준 배합량 (표준)</label>
+	          <label class="form-label">계획 수량</label>
+	          <input type="text" id="finish-planQty" class="form-control" readonly>
+	        </div>
+	
+	        <!-- 기준값 표시 (1~2단계: 기준 배합량, 3단계~: 기준 완제품 수량 등) -->
+	        <div class="mb-3">
+	          <label class="form-label" id="finish-standardLabel">
+	            기준값
+	          </label>
 	          <input type="text" id="finish-standardQty" class="form-control" readonly>
-	          <small class="text-muted">BOM 기반 계산된 표준 투입량입니다.</small>
+	          <small class="text-muted" id="finish-standardHelp">
+	            공정 단계에 따라 계산된 기준값입니다.
+	          </small>
 	        </div>
 	
 	        <hr>
 	
-	        <!-- 실제 수량 -->
+	        <!-- 실제 수량 입력 -->
 	        <div class="mb-3">
 	          <label class="form-label">양품 수량</label>
-	          <input type="number" id="finish-goodQty" class="form-control">
+	          <input type="number" id="finish-goodQty" class="form-control" min="0">
 	        </div>
 	
 	        <div class="mb-3">
 	          <label class="form-label">불량 수량</label>
-	          <input type="number" id="finish-defectQty" class="form-control">
+	          <input type="number" id="finish-defectQty" class="form-control" min="0">
 	        </div>
 	
 	      </div>
@@ -141,6 +151,7 @@
 	    </div>
 	  </div>
 	</div>
+
 
 
 	

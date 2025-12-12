@@ -187,8 +187,8 @@ function renderProcessDetail(detail) {
     document.getElementById("pd-workerName").innerText = detail.workerName || "-";
     document.getElementById("pd-lineId").innerText = detail.lineId || "-";
 
-    document.getElementById("pd-startTime").innerText = detail.startTime || "-";
-    document.getElementById("pd-endTime").innerText = detail.endTime || "-";
+	document.getElementById("pd-startTime").innerText = formatDateTime(detail.startTime);
+	document.getElementById("pd-endTime").innerText = formatDateTime(detail.endTime);
 
     document.getElementById("pd-goodQty").innerText = detail.goodQty ?? "-";
     document.getElementById("pd-defectQty").innerText = detail.defectQty ?? "-";
@@ -236,3 +236,10 @@ function loadMaterialList(container, lotNo) {
     });
 }
 
+// -------------------------------
+// 날짜 포맷
+// -------------------------------
+function formatDateTime(dt) {
+  if (!dt) return "-";
+  return dt.replace("T", " ").split(".")[0];
+}
