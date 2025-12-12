@@ -25,16 +25,16 @@ document.addEventListener("DOMContentLoaded", () => {
 function initPlanGrid() {
 
     const columnDefs = [
-        { headerName: "계획ID", field: "planId", width: 200, sortable: true, filter: true },
-        { headerName: "작성일", field: "createdAt", width: 200, sortable: true, filter: true },
-        { headerName: "제품명", field: "itemName", width: 180, sortable: true, filter: true },
-        { headerName: "총수량", field: "totalQty", width: 160, sortable: true, filter: true },
+        { headerName: "계획ID", field: "planId", width: 200, sortable: true },
+        { headerName: "작성일", field: "createdAt", width: 200, sortable: true},
+        { headerName: "제품명", field: "itemName", width: 180, sortable: true},
+        { headerName: "총수량", field: "totalQty", width: 160, sortable: true },
 
         {
             headerName: "상태",
             field: "status",
             sortable: true,
-            filter: true,
+            filter: false,
             cellRenderer: params => {
                 const map = {
                     PLANNING:         { text: "검토대기",     color: "secondary" },
@@ -97,7 +97,7 @@ function initPlanGrid() {
         // AG Grid 최신 v31 방식
         defaultColDef: {
             sortable: true,
-            filter: true,
+            filter: false,
             resizable: true,
         }
     };

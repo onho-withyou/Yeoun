@@ -47,11 +47,12 @@ document.addEventListener("DOMContentLoaded", () => {
 			    width: 100,
 			    cellRenderer: params => `
 			        <button class="btn btn-outline-primary btn-sm"
-			                onclick="openOrderDetail('${params.data.orderId}')">
+			                onclick="location.href='/sales/orders/${params.data.orderId}'">
 			            상세
 			        </button>
 			    `
 			}
+
 
         ],
         rowHeight: 42,
@@ -106,3 +107,4 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 });
+
