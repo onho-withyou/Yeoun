@@ -82,10 +82,9 @@ public class WorkOrderProcessService {
     private final ProductionPlanItemRepository productionPlanItemRepository;
 
     // =========================================================================
+    // 검색 조건 없는 공정현황 목록
     @Transactional(readOnly = true)
     public List<WorkOrderProcessDTO> getWorkOrderListForStatus() {
-        // 기존에 쓰이던 기본 버전
-        // => "검색조건 없음"으로 호출
         return getWorkOrderListForStatus(null, null, null, null);
     }
     
@@ -204,7 +203,7 @@ public class WorkOrderProcessService {
 
         // 양품수량: 작업지시당 QC_RESULT 1건 기준
         int goodQty = 0;
-        if (qcResult != null && qcResult.getGoodQty() != null) { // 필드명 맞게 수정
+        if (qcResult != null && qcResult.getGoodQty() != null) { 
             goodQty = qcResult.getGoodQty();
         }
         
@@ -470,7 +469,6 @@ public class WorkOrderProcessService {
                 .mapToDouble(MaterialAvailabilityDTO::getRequiredQty)
                 .sum();
 
-        // 그대로 넘겨도 되고, 소수점 정리하고 싶으면 Math.round 등 사용
         return totalRequiredQty;
     }
 
@@ -566,7 +564,7 @@ public class WorkOrderProcessService {
         lotTraceService.registLotHistory(hist);
 
         // ★ 여과/충전 시작 시 LOC만 바뀌는 경우가 있으면 processId로 분기해서 처리
-        // if ("PRC-FLTR".equals(processId)) { ... }
+        // if ("PRC-FLT".equals(processId)) { ... }
     }
 
 
@@ -587,7 +585,7 @@ public class WorkOrderProcessService {
         String prdId = workOrder.getProduct().getPrdId();
         Integer planQty = workOrder.getPlanQty();
 
-        // Mapper에서 BOM + 재고까지 계산해온다
+        // Mapper에서 BOM + 재고까지 계산
         List<MaterialAvailabilityDTO> materials =
                 orderMapper.selectMaterials(prdId, planQty);
 
@@ -596,8 +594,7 @@ public class WorkOrderProcessService {
         		.mapToDouble(MaterialAvailabilityDTO::getRequiredQty)
                 .sum();
 
-        // 필요하면 proc에 메모로 남기거나, 별도 필드에 저장
-        // 예: 메모에 "필요 총 부피: 12345ml" 이런 식으로 남김
+        // 필요 원자재 부피 메모
         String formatted = String.format("%,.0f", totalRequiredQty);
         String memo = "필요 원자재 부피 합계: " + formatted + " (단위: BOM 기준)";
         String originMemo = proc.getMemo();
@@ -733,25 +730,11 @@ public class WorkOrderProcessService {
             qcResultService.createPendingQcResultForOrder(orderId);
             
             // 해당 공정 종료 시 QC 알림
-            String msg = "작업지시 " + orderId + " 품질검사가 필요합니다.";
-            String link = "/qc/regist";
+            String message = "새로 등록된 QC 검사가 있습니다.";
             
-            // QC 섹션 공통 새로고침 뱃지
-            alarmService.sendAlarmMessage(AlarmDestination.QC, msg);
+            // QC 섹션 공통 새로고침
+            alarmService.sendAlarmMessage(AlarmDestination.QC, message);
             
-            // QC 부서원 개인 알림 및 알림 테이블 저장
-            List<Emp> qcMembers = empRepository.findByDept_DeptId("DEP102"); 
-            
-            for (Emp emp : qcMembers) {
-                AlarmDTO dto = AlarmDTO.builder()
-                        .empId(emp.getEmpId())
-                        .alarmMessage(msg)
-                        .alarmStatus("N")
-                        .alarmLink(link)
-                        .build();
-
-                alarmService.sendPersonalMessage(dto);
-            }
         }
 
         // 3) 마지막 단계인지 확인
