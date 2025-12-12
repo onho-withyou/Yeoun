@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			 	width: 90,
 			  	align: "center",
 			  	formatter: () =>
-			    	"<button type='button' class='btn btn-info btn-sm'>검사등록</button>"
+			    	"<button type='button' class='btn btn-info btn-sm'>검사 시작</button>"
 			}
 		]
 	});
@@ -375,6 +375,7 @@ function onClickSaveQcResult() {
     // 3) 서버로 보낼 payload
     const payload = {
       qcResultId: Number(qcResultId),
+	  overallResult: overallResult,
       goodQty: goodQty,
       defectQty: defectQty,
       failReason: failReason,
@@ -488,4 +489,56 @@ function onClickSaveQcResult() {
       select.value = pass ? "PASS" : "FAIL";
     });
   }
+
+  // 파일첨부
+  function uploadQcDetailFiles(qcResultDtlId, files) {
+
+    const formData = new FormData();
+    // 백엔드에서 @RequestParam("qcDetailFiles") 로 받을 값
+    for (let i = 0; i < files.length; i++) {
+      formData.append("qcDetailFiles", files[i]);
+    }
+	
+	const csrfTokenMeta  = document.querySelector('meta[name="_csrf_token"]');
+	const csrfHeaderMeta = document.querySelector('meta[name="_csrf_headerName"]');
+
+	const csrfToken      = csrfTokenMeta ? csrfTokenMeta.content : null;
+	const csrfHeaderName = csrfHeaderMeta ? csrfHeaderMeta.content : null;
+
+    fetch(`/qc/detail/${qcResultDtlId}/files`, {
+      method: "POST",
+	  headers: {
+	      ...(csrfToken && csrfHeaderName ? { [csrfHeaderName]: csrfToken } : {})
+    	},
+      body: formData
+    })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error("HTTP " + res.status);
+        }
+        return res.json();
+      })
+//      .then(data => {
+//        alert(data.msg || "첨부파일이 업로드되었습니다.");
+//      })
+      .catch(err => {
+        console.error("파일 업로드 오류:", err);
+        alert("첨부파일 업로드 중 오류가 발생했습니다.");
+      });
+  }
+  
+  // 파일 선택 시 자동 업로드
+  document.addEventListener("change", (e) => {
+    const input = e.target;
+    if (!input.matches(".qc-file-input")) return;   
+
+    const qcResultDtlId = input.dataset.dtlId;
+    const files = input.files;
+
+    if (!qcResultDtlId || !files || files.length === 0) {
+      return;
+    }
+
+    uploadQcDetailFiles(qcResultDtlId, files);  
+  });
 

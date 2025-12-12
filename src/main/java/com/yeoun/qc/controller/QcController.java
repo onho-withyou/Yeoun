@@ -123,8 +123,7 @@ public class QcController {
     // 2) QC 상세별 파일 목록 조회
     @GetMapping("/detail/{qcResultDtlId}/files")
     @ResponseBody
-    public ResponseEntity<List<FileAttachDTO>> getQcDetailFiles(
-            @PathVariable("qcResultDtlId") Long qcResultDtlId) {
+    public ResponseEntity<List<FileAttachDTO>> getQcDetailFiles(@PathVariable("qcResultDtlId") String qcResultDtlId) {
 
         List<FileAttachDTO> files = qcResultService.getQcDetailFiles(qcResultDtlId);
         return ResponseEntity.ok(files);

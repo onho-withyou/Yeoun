@@ -7,6 +7,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.yeoun.common.util.FileUtil.FileUploadHelpper;
+import com.yeoun.qc.service.QcResultService.QcFileKeyUtil;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -71,13 +72,14 @@ public class QcResultDetail implements FileUploadHelpper {
 	// ---------------------------------------------------------------
 	@Override
 	public String getTargetTable() {
-		return "QC_RESULT_DETAIL";
+	    return "QC_RESULT_DETAIL";
 	}
 
 	@Override
 	public Long getTargetTableId() {
-		return Long.valueOf(qcResultDtlId);
+	    return QcFileKeyUtil.toFileRefId(this.qcResultDtlId);
 	}
+
 	
 
 }

@@ -404,13 +404,12 @@ public class QcResultService {
 	// QC 결과에 따라 LOT_MASTER + LOT_HISTORY + WORK_ORDER 상태 반영
 	// - LOT_HISTORY.EVENT_TYPE = QC_RESULT
 	// - LOT_HISTORY.STATUS     = LOT_STATUS(IN_PROCESS / SCRAPPED 등)
-	// - 필요 시 WORK_ORDER.STATUS = QC_HOLD / QC_FAIL 등으로 변경
 	// ----------------------------------------------------------
 	@Transactional
 	private void applyQcResultToLotAndWorkOrder(QcResult header) {
 
 	    String orderId = header.getOrderId();
-	    String result  = header.getOverallResult();   // PASS / FAIL / PENDING / HOLD 등
+	    String result  = header.getOverallResult();   // PASS / FAIL
 
 	    // 1) 작업지시 조회
 	    WorkOrder workOrder = workOrderRepository.findById(orderId)
@@ -467,17 +466,11 @@ public class QcResultService {
 	            lot.setStatusChangeDate(LocalDateTime.now());
 	            // 작업지시 상태는 기존 공정 로직에서 마지막 공정 완료 시 COMPLETED 처리
 	        }
-	        case "HOLD" -> {
-	            // HOLD: LOT은 물리적으로 그대로지만, 작업지시는 QC_HOLD 상태로 묶어두기
-	            lot.setCurrentStatus("IN_PROCESS");
-	            lot.setStatusChangeDate(LocalDateTime.now());
-	            workOrder.setStatus("QC_HOLD");
-	        }
 	        case "FAIL" -> {
 	            // FAIL: 불량/폐기 처리
 	            lot.setCurrentStatus("SCRAPPED");    // LOT_STATUS
 	            lot.setStatusChangeDate(LocalDateTime.now());
-	            workOrder.setStatus("QC_FAIL");
+	            workOrder.setStatus("SCRAPPED");
 	        }
 	        default -> {
 	            // PENDING 등은 상태 변경 없음
@@ -489,7 +482,6 @@ public class QcResultService {
 	private String mapQcResultToLotStatus(String result) {
 	    return switch (result) {
 	        case "PASS" -> "IN_PROCESS";  // 계속 공정 진행
-	        case "HOLD" -> "IN_PROCESS";  // 대기지만 LOT 입장에서는 생산중 상태로 유지
 	        case "FAIL" -> "SCRAPPED";    // 폐기
 	        default -> "IN_PROCESS";
 	    };
@@ -595,19 +587,44 @@ public class QcResultService {
         fileAttachRepository.saveAll(fileList);
     }
 
-    // --------------------------------------------------
     // QC 상세 항목별 첨부파일 조회
     @Transactional
-    public List<FileAttachDTO> getQcDetailFiles(Long qcResultDtlId) {
+    public List<FileAttachDTO> getQcDetailFiles(String qcResultDtlId) {
+    	
+    	Long fileRefId = QcFileKeyUtil.toFileRefId(qcResultDtlId);
 
         // REF_TABLE, REF_ID 기준으로 FILE_ATTACH 조회
         List<FileAttach> fileList =
-                fileAttachRepository.findByRefTableAndRefId("QC_RESULT_DETAIL", qcResultDtlId);
+                fileAttachRepository.findByRefTableAndRefId("QC_RESULT_DETAIL", fileRefId);
 
         return fileList.stream()
                 .map(FileAttachDTO::fromEntity)
                 .toList();
     }
+    
+    // String -> Long
+    public class QcFileKeyUtil {
+
+        // "QCD-0012-003" -> 12003 이런 식으로 변환
+        public static Long toFileRefId(String qcResultDtlId) {
+            if (qcResultDtlId == null || qcResultDtlId.isBlank()) {
+                return null;
+            }
+
+            // "QCD-0012-003" 기준
+            String[] parts = qcResultDtlId.split("-");
+            if (parts.length != 3) {
+                throw new IllegalArgumentException("QC_RESULT_DTL_ID 형식 오류: " + qcResultDtlId);
+            }
+
+            long header = Long.parseLong(parts[1]); // 0012 -> 12
+            long seq    = Long.parseLong(parts[2]); // 003  -> 3
+
+            // 헤더당 최대 999개 항목까지 커버 
+            return header * 1000L + seq;
+        }
+    }
+
 
 
 
