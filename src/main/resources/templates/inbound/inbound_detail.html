@@ -128,7 +128,7 @@
 							            <td class="convert-qty" 
 							            	th:data-unit="${item.unit}" 
 							            	th:data-qty="${item.requestAmount}"></td>
-							            <td th:text="${item.unit}"></td>
+							            <td th:text="${item.unit} ?: 'EA'"></td>
 							            <td class="convert-qty"
 							            	th:data-unit="${item.unit}" 
 							            	th:data-qty="${item.inboundAmount}">
