@@ -95,14 +95,16 @@ function renderShipmentDetail(detail) {
 // 4) 상태 뱃지 렌더링
 // -------------------------------
 function renderShipmentStatusBadge(status) {
-    switch (status) {
-        case "SHIPPED":
-            return '<span class="badge bg-success">출하완료</span>';
-        case "RESERVED":
-            return '<span class="badge bg-primary">예약</span>';
-        case "LACK":
-            return '<span class="badge bg-danger">부족</span>';
-        default:
-            return '<span class="badge bg-secondary">대기</span>';
+	switch (status) {
+		case "RESERVED":
+		            return `<span class="badge bg-primary">예약</span>`;
+		        case "LACK":
+		            return `<span class="badge bg-danger">부족</span>`;
+		        case "SHIPPED":
+		            return `<span class="badge bg-success">출하완료</span>`;
+				case "PENDING":
+					return `<span class="badge bg-secondary">출고준비</span>`;
+		        default:
+		            return `<span class="badge bg-primary">대기</span>`;
     }
 }

@@ -19,6 +19,9 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 	List<OrderItem> findByOrderId(String orderId);	
 	//  제품ID로 주문 상세 찾기
     List<OrderItem> findByPrdId(String prdId);
+    
+    //제품 ID와 상태로 주문상세 조회
+    List<OrderItem> findByPrdIdAndItemStatus(String prdId, String itemStatus);
 	
 	@Query(value = """
 		    SELECT 

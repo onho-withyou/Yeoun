@@ -419,7 +419,8 @@ public String createPlan(List<PlanCreateItemDTO> items, String createdBy, String
     ============================ */
     public List<OrderItemDTO> getOrderItemsByProduct(String prdId) {
 
-        List<OrderItem> list = orderItemRepository.findByPrdId(prdId);
+//        List<OrderItem> list = orderItemRepository.findByPrdId(prdId);
+        List<OrderItem> list = orderItemRepository.findByPrdIdAndItemStatus(prdId, "CONFIRMED");
 
         List<OrderItemDTO> dtoList = new ArrayList<>();
 

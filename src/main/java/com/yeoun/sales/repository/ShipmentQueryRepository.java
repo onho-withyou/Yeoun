@@ -87,10 +87,13 @@ public class ShipmentQueryRepository {
                                 SELECT SUM(iv2.IV_AMOUNT - iv2.EXPECT_OB_AMOUNT)
                                 FROM INVENTORY iv2 WHERE iv2.ITEM_ID = oi2.PRD_ID
                             ), 0) < oi2.ORDER_QTY
-
                             
-                            OR EXISTS (SELECT 1 FROM SHIPMENT s2 
-                                       WHERE s2.ORDER_ID = oi2.ORDER_ID)
+                             OR EXISTS (
+				                SELECT 1
+				                FROM SHIPMENT s2
+				                WHERE s2.ORDER_ID = oi2.ORDER_ID
+				                AND s2.SHIPMENT_STATUS IN ('RESERVED', 'PENDING', 'SHIPPED')
+				          )				                
                         )
                     ) THEN 0  
                     ELSE 1     
@@ -134,7 +137,7 @@ public class ShipmentQueryRepository {
                         WHEN EXISTS (
                             SELECT 1 FROM SHIPMENT s 
                             WHERE s.ORDER_ID = oi.ORDER_ID
-                              AND s.SHIPMENT_STATUS IN ('RESERVED', 'PENDING')
+                              AND s.SHIPMENT_STATUS IN ('RESERVED', 'PENDING','SHIPPED')
                         ) THEN 'RESERVED'
 
                         WHEN NVL((
@@ -164,4 +167,6 @@ public class ShipmentQueryRepository {
 
         return query.getResultList();
     }
+    
+    
 }

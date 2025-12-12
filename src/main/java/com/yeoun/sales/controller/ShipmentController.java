@@ -75,6 +75,16 @@ public class ShipmentController {
     public ShipmentDetailDTO getShipmentDetail(@RequestParam("orderId") String orderId) {
         return shipmentDetailService.getDetail(orderId);
     }
+    
+    //예약 취소
+    
+    @PostMapping("/cancel")
+    @ResponseBody
+    public Map<String, Object> cancel(@RequestParam("orderId") String orderId) {
+        shipmentService.cancelShipment(orderId);
+        return Map.of("success", true);
+    }
+
 
 
 
