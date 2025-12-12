@@ -1,5 +1,6 @@
 package com.yeoun.sales.service;
 
+import com.yeoun.outbound.service.OutboundService;
 import com.yeoun.sales.dto.ShipmentListDTO;
 import com.yeoun.sales.entity.OrderItem;
 import com.yeoun.sales.entity.Orders;
@@ -34,6 +35,7 @@ public class ShipmentService {
     private final OrdersRepository ordersRepository;
     private final OrderItemRepository orderItemRepository;
     private final ShipmentQueryRepository shipmentQueryRepository;
+    private final OutboundService outboundService;
 
 
     // ================================
@@ -144,25 +146,28 @@ public class ShipmentService {
         return prefix + String.format("%04d", seq);
     }
     
-
  // ================================
- // 출하 예약 취소 (RESERVED / PENDING → WAITING)
- // ================================
- @Transactional
- public void cancelShipment(String orderId) {
+    // 출하 예약 취소
+    // (RESERVED / PENDING → WAITING)
+    // ================================
+    @Transactional
+    public void cancelShipment(String orderId) {
 
-     Shipment shipment = shipmentRepository
-         .findByOrderIdAndShipmentStatusIn(
-             orderId,
-             List.of(
-                 ShipmentStatus.RESERVED,
-                 ShipmentStatus.PENDING
-             )
-         )
-         .orElseThrow(() -> new IllegalStateException("취소 가능한 출하 예약이 없습니다."));
+        // 1️⃣ 출하지시서 조회
+        Shipment shipment = shipmentRepository
+            .findByOrderIdAndShipmentStatusIn(
+                orderId,
+                List.of(
+                    ShipmentStatus.RESERVED,
+                    ShipmentStatus.PENDING
+                )
+            )
+            .orElseThrow(() -> new IllegalStateException("취소 가능한 출하 예약이 없습니다."));
 
-     shipment.setShipmentStatus(ShipmentStatus.CANCEL);
- }
+        // 2️⃣ 완제품 출고 취소 (재고 예정수량 복구 + OUTBOUND → CANCELED)
+        outboundService.canceledProductOutbound(shipment.getShipmentId());
 
-
+        // 3️⃣ 출하지시 상태 → WAITING (재예약 가능)
+        shipment.changeStatus(ShipmentStatus.WAITING);
+    }
 }
