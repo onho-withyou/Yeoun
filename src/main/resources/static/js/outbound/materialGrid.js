@@ -4,7 +4,7 @@ const materialGrid = new tui.Grid({
 	rowHeaders: ['rowNum'],
 	pageOptions: {
 	    useClient: true,  // 클라이언트 사이드 페이징
-	    perPage: 10       // 페이지당 10개 행
+	    perPage: 20       // 페이지당 20개 행
 	},	
 	columns: [
 		{
@@ -48,7 +48,6 @@ materialGrid.on("click", (ev) => {
 	
 	if (columnName === "btn") {
 		const row = materialGrid.getRow(rowKey);
-		console.log(row);
 		// 입고 상세 페이지로 이동
 		location.href = `/inventory/outbound/mat/${row.outboundId}`
 	}
@@ -90,7 +89,8 @@ async function loadMaterialOutbound(startDate, endDate, keyword) {
 		
 		const statusMap = {
 			WAITING : "출고대기",
-			COMPLETED: "출고완료"
+			COMPLETED: "출고완료",
+			CANCELED: "출고취소"
 		}
 		
 		// 상태값이 영어로 들어오는 것을 한글로 변환해서 기존 data에 덮어씌움
@@ -345,19 +345,19 @@ const submitOutbound = async () => {
 		return;
 	}
 	
+	// body에 담아서 보낼 내용
+	const payload = {
+		workOrderId: workOrderId.value,
+		createdId: managerId.value,
+		startDate: outboundDate,
+		type: "MAT",
+		items
+	};
+	
 	// 스피너 시작
 	showSpinner();
 	
 	try {
-		// body에 담아서 보낼 내용
-		const payload = {
-			workOrderId: workOrderId.value,
-			createdId: managerId.value,
-			startDate: outboundDate,
-			type: "MAT",
-			items
-		};
-		
 		const res = await fetch("/inventory/outbound/mat/regist", {
 			method: "POST",
 			headers: {

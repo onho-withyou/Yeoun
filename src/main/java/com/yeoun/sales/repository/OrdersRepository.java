@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import com.yeoun.sales.dto.OrderListDTO;
 import com.yeoun.sales.entity.Orders;
+import com.yeoun.sales.enums.OrderStatus;
 
 @Repository
 public interface OrdersRepository extends JpaRepository<Orders, String> {
@@ -39,7 +40,7 @@ public interface OrdersRepository extends JpaRepository<Orders, String> {
 		    ORDER BY o.orderDate DESC
 		""")
 		List<OrderListDTO> searchOrders(
-		    @Param("status") String status,
+			@Param("status") OrderStatus status, 
 		    @Param("startDate") LocalDate startDate,
 		    @Param("endDate") LocalDate endDate,
 		    @Param("keyword") String keyword
@@ -74,7 +75,7 @@ public interface OrdersRepository extends JpaRepository<Orders, String> {
 		    JOIN ORDERS o
 		        ON o.ORDER_ID = oi.ORDER_ID
 		    WHERE (:group = '' OR :group IS NULL OR pr.ITEM_NAME = :group)
-		      AND o.STATUS = 'RECEIVED'
+		      AND o.ORDER_STATUS = 'RECEIVED'
 		    ORDER BY oi.ORDER_ITEM_ID DESC
 		    """,
 		    nativeQuery = true)

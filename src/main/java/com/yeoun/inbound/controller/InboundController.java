@@ -90,7 +90,6 @@ public class InboundController {
 	public String materialDetail(@PathVariable("inboundId") String inboundId, Model model) {
 		
 		ReceiptDTO receiptDTO = inboundService.getMaterialInbound(inboundId);
-		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>" + receiptDTO);
 		model.addAttribute("receiptDTO", receiptDTO);
 		
 		return "inbound/inbound_detail";
@@ -101,7 +100,6 @@ public class InboundController {
 	@ResponseBody
 	public Map<String, Object> materialComplete(@RequestBody ReceiptDTO receiptDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
 		inboundService.updateInbound(receiptDTO, loginDTO.getEmpId());
-//		System.out.println(receiptDTO);
 		Map<String, Object> result = new HashMap<>();
 		
 		result.put("success", true);

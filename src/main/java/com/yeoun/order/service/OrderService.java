@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yeoun.emp.dto.EmpListDTO;
+import com.yeoun.emp.entity.Emp;
 import com.yeoun.masterData.entity.ProdLine;
 import com.yeoun.masterData.entity.ProductMst;
 
@@ -390,6 +391,7 @@ public class OrderService {
 				.lineName(order.getLine().getLineName())
 				.routeId(order.getRouteId())
 				.infos(infos)
+				.outboundYn(order.getOutboundYn())
 				.remark(order.getRemark())
 				.build();
 
@@ -406,7 +408,26 @@ public class OrderService {
 	
 	// =======================================================
 	// 작업지시 수정
-	
+	@Transactional
+	public void updateOrder(String id, Map<String, String> map) {
+		
+		WorkOrder order = workOrderRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("작업지시가 없음"));
+		order.setRemark(map.get("remark"));
+
+		map.forEach((code, worker) -> {
+			if ("remark".equals(code)) return;
+			
+			WorkerProcess wp = workerProcessRepository
+					.findFirstBySchedule_Work_OrderIdAndProcess_ProcessId(id, code)
+					.orElseThrow();
+			
+			Emp emp = empRepository.findByEmpId(worker)
+					.orElseThrow(() -> new RuntimeException("일치하는 작업자가 없음"));
+			
+			wp.setWorker(emp);
+		});
+	}
 	
   
 	// 작업지시서 전체 조회
@@ -424,6 +445,7 @@ public class OrderService {
 		log.info("테스트.... ::: " + orderMapper.selectMaterials("BG030", 100));
 		
 	}
+
 	
 
 

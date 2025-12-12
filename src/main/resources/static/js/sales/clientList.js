@@ -93,7 +93,7 @@ function initClientGrid() {
         defaultColDef: { 
             resizable: true, 
             sortable: true, 
-            filter: true 
+            filter: false 
         },
         pagination: true,
         paginationPageSize: 20,

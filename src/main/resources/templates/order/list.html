@@ -1363,6 +1363,7 @@
   // ======================================================
   
 	let orderId;
+  	let outboundYn;
 	  
   function openDetailModal(workId) {
     console.log("Detail:", workId);
@@ -1374,6 +1375,7 @@
             .then(data => {
                 console.log("정보:::: " , data);
                 orderId = data.orderId;
+                outboundYn = data.outboundYn;
 
                   document.getElementById("detailOrderId").innerText = data.orderId;
                   document.getElementById("detailPrdName").innerText = data.prdName;
@@ -1492,24 +1494,29 @@
   
   // 확정
   document.getElementById("btnReleased").addEventListener("click", async () => {
+	  console.log("orderid...............", orderId);
 	  updateStatus(orderId, "RELEASED", "작업지시가 확정되었습니다.");
   });
   
   // 취소
   document.getElementById("btnCanceled").addEventListener("click", async() => {
+	  
+	  if (outboundYn?.trim() === 'Y') {
+		  alert("출고가 완료된 작업지시는 취소가 불가능합니다.");
+	  	  return;
+	  }
 	  if (!confirm("정말 취소하시겠습니까?")) return;
 	  updateStatus(orderId, "CANCELED", "작업지시가 취소되었습니다.");
   });
   
   // 작업지시서 상태변경 공통 함수
   async function updateStatus (orderId, status, alertContent){
-	  return fetch (`/order/status/${orderId}`, {
+	  return fetch (`/order/status/${orderId}?status=${status}`, {
 		  method: "PATCH",
 		  headers: {
 		      "Content-Type": "application/json",
 		      [csrfHeader]: csrfToken
-		  },
-	      body: JSON.stringify({ status: status })
+		  }
 	  })
 	  .then(res => {
 		  if (!res.ok) throw new Error ("서버 오류 : " + res.status);
@@ -1537,6 +1544,15 @@
 	  const prcCap = document.getElementById("PRC-CAP").value;
 	  const prcLbl = document.getElementById("PRC-LBL").value;
 	  const remark = document.getElementById("detailRemark").value;
+	  
+	  const payload = {
+		"PRC-BLD": prcBld,
+		"PRC-FLT": prcFlt,
+		"PRC-FIL": prcFil,
+		"PRC-CAP": prcCap,
+		"PRC-LBL": prcLbl,
+		"remark": remark
+	  };
 
 	  fetch (`/order/modify/${orderId}`, {
 		  method: "PATCH",
@@ -1544,9 +1560,7 @@
 			  "Content-Type": "application/json",
 			  [csrfHeader]: csrfToken
 		  },
-		  body: JSON.stringify({
-			prcBld, prcFlt, prcFil, prcCap, prcLbl, remark
-		  })
+		  body: JSON.stringify(payload)
 	  })
 		.then(() => {
 		  alert("수정 완료");

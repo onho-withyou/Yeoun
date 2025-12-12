@@ -61,9 +61,7 @@
                         <h5 class="card-title mb-0">설비 목록</h5>
 
                         <div class="d-flex justify-content-end" style="margin:10px;">
-                            <button id="addEquipmentRowBtn" class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>
-                            <button id="saveEquipmentRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
-                            <button id="deleteEquipmentRowBtn" class="btn btn-danger" type="button">삭제</button>
+                            <button id="addEquipmentBtn" class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>
                         </div>
 
                         <div id="equipmentGrid" style="display: grid; margin-right:5px;"></div>
@@ -76,9 +74,7 @@
                         <h5 class="card-title mb-0">라인 목록</h5>
 
                         <div class="d-flex justify-content-end" style="margin:10px;">
-                            <button id="addLineRowBtn" class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>
-                            <button id="saveLineRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
-                            <button id="deleteLineRowBtn" class="btn btn-danger" type="button">삭제</button>
+                            <button id="addLineBtn" class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>
                         </div>
 
                         <div id="lineGrid" style="display: grid; margin-right:5px;"></div>
@@ -87,6 +83,96 @@
                 </div>
             </div>
         </div>
+        
+        <!-- =========== 등록 및 상세 모달 =========== -->
+        
+        <!-- =========== 설비 등록 =========== -->
+        <div class="modal fade" id="equipmentModal" tabindex="-1">
+		  <div class="modal-dialog modal-lg modal-dialog-centered">
+		    <div class="modal-content">
+		
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="equipmentModalTitle">설비 등록</h5>
+		        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+		      </div>
+		
+		      <div class="modal-body">
+		        <form id="equipmentForm">
+		          <div class="mb-3">
+		            <label class="form-label">설비 ID</label>
+		            <input type="text" class="form-control" id="equipId">
+		          </div>
+		
+		          <div class="mb-3">
+		            <label class="form-label">이름(한)</label>
+		            <input type="text" class="form-control" id="koName">
+		          </div>
+		
+		          <div class="mb-3">
+		            <label class="form-label">이름(영)</label>
+		            <input type="text" class="form-control" id="equipName">
+		          </div>
+		          <div class="mb-3">
+					<label class="form-label">설명</label>
+					<textarea class="form-control" id="equipRemark" rows="4"
+					    placeholder="설비 용도, 주의사항 등을 입력하세요"></textarea>
+				  </div>
+		        </form>
+		      </div>
+		
+		      <div class="modal-footer">
+		        <button class="btn btn-danger d-none" id="btnDeleteEquip">삭제</button>
+		        <button type="submit" class="btn btn-primary" id="btnSaveEquip">저장</button>
+		      </div>
+		
+		    </div>
+		  </div>
+		</div>
+        
+        <!-- =========== 라인 등록 =========== -->
+        <div class="modal fade" id="lineModal" tabindex="-1">
+		  <div class="modal-dialog modal-lg modal-dialog-centered">
+		    <div class="modal-content">
+		
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="lineModalTitle">라인 등록</h5>
+		        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+		      </div>
+		
+		      <div class="modal-body">
+		        <form id="lineForm">
+		          <div class="mb-3">
+		            <label class="form-label">라인 ID</label>
+		            <input type="text" class="form-control" id="lineId">
+		          </div>
+		
+		          <div class="mb-3">
+		            <label class="form-label">라인명</label>
+		            <input type="text" class="form-control" id="lineName">
+		          </div>
+		
+		          <div class="mb-3">
+		            <label class="form-label">상태</label>
+		            <input type="text" class="form-control" id="status">
+		          </div>
+		          
+		          <div class="mb-3">
+					<label class="form-label">설명</label>
+					<textarea class="form-control" id="lineRemark" rows="4"
+					    placeholder="라인에 대한 설명을 입력하세요"></textarea>
+				  </div>
+		        </form>
+		      </div>
+		
+		      <div class="modal-footer">
+		        <button class="btn btn-danger d-none" id="btnDeleteLine">삭제</button>
+		        <button type="submit" class="btn btn-primary" id="btnSaveLine">저장</button>
+		      </div>
+		
+		    </div>
+		  </div>
+		</div>
+        
     </th:block>
     </body>
 
@@ -129,7 +215,7 @@
 		          header: "등록일자",
 		          name: "createdDate",
 		          align: "center",
-		          formatter: ({ value }) => formatTimeFull(value)
+		          formatter: ({ value }) => formatTimeFull(value ? new Date(value) : undefined)
 		        },
 		        {
 		          header: "상세",
@@ -140,6 +226,14 @@
 		        }
 		      ]
 		    });
+		  
+	          equipmentGrid.on("click", event => {
+	        	  if (event.columnName === "btn"){
+	        		  const row = equipmentGrid.getRow(event.rowKey);
+	        		  openEquipmentModal("DETAIL");
+	        	  }
+	          });
+	          
 		
 		    // 2) lineGrid 생성
 		    lineGrid = new tui.Grid ({
@@ -166,10 +260,18 @@
 		        }
 		      ]
 		    });
+		    
+	          lineGrid.on("click", event => {
+	        	  if (event.columnName === "btn"){
+	        		  const row = lineGrid.getRow(event.rowKey);
+	        		  openLineModal("DETAIL");
+	        	  }
+	          });
 
               loadGridData('/equipment/equip/data', equipmentGrid);
 		  });
 
+		  // 탭 변경
 		  document
 			  .querySelectorAll('button[data-bs-toggle="tab"]')
 			  .forEach(tab => {
@@ -202,6 +304,83 @@
                   console.error("데이터 로딩 실패:", err);
               }
           }
+          
+          // 모달 열기
+          
+          // 1) 등록
+		  document.getElementById("addEquipmentBtn").addEventListener("click", () => {
+		    openEquipmentModal("CREATE");
+		  });
+          
+		  document.getElementById("addLineBtn").addEventListener("click", () => {
+		    openLineModal("CREATE");
+		  });
+                    
+          
+        // 모달 제어 함수
+        
+        // 1) 설비
+        function openEquipmentModal(mode, data = null) {
+		    const modal = new bootstrap.Modal(document.getElementById("equipmentModal"));
+		
+		    if (mode === "CREATE") {
+		        document.getElementById("equipmentModalTitle").innerText = "설비 등록";
+		        document.getElementById("btnDeleteEquip").classList.add("d-none");
+		        document.getElementById("equipmentForm").reset();
+		        document.getElementById("equipId").disabled = false;
+		    }
+		
+		    if (mode === "DETAIL") {
+		    	
+		        if (!data) {
+		            console.error("DETAIL 모드인데 data가 없습니다.");
+		            return;
+		        }
+		    	
+		        document.getElementById("equipmentModalTitle").innerText = "설비 상세";
+		        document.getElementById("btnDeleteEquip").classList.remove("d-none");
+		
+		        document.getElementById("equipId").value = data.equipId ?? "";
+		        document.getElementById("koName").value = data.koName ?? "";
+		        document.getElementById("equipName").value = data.equipName ?? "";
+		        document.getElementById("equipRemark").value = data.remark ?? "";
+		
+		        document.getElementById("equipId").disabled = true;
+		    }
+		
+		    modal.show();
+		}
+        
+        // 2) 라인
+        function openLineModal(mode, data = null) {
+		    const modal = new bootstrap.Modal(document.getElementById("lineModal"));
+		
+		    if (mode === "CREATE") {
+		        document.getElementById("lineModalTitle").innerText = "라인 등록";
+		        document.getElementById("btnDeleteLine").classList.add("d-none");
+		        document.getElementById("lineForm").reset();
+		    }
+		
+		    if (mode === "DETAIL") {
+		        
+		    	if (!data) {
+		            console.error("DETAIL 모드인데 data가 없습니다.");
+		            return;
+		        }
+		        
+		        document.getElementById("lineModalTitle").innerText = "라인 상세";
+		        document.getElementById("btnDeleteLine").classList.remove("d-none");
+		        
+		        document.getElementById("lineId").value = data.lineId ?? "";
+		        document.getElementById("lineName").value = data.lineName ?? "";
+		        document.getElementById("lineRemark").value = data.remark ?? "";
+		        
+		        document.getElementById("lineId").disabled = true;
+		    }
+		
+		    modal.show();
+		}
+
 
 
         </script>

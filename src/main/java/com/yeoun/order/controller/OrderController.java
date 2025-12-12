@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.yeoun.order.dto.WorkOrderDTO;
 import com.yeoun.order.dto.WorkOrderListDTO;
+import com.yeoun.order.entity.WorkOrder;
 import com.yeoun.order.service.OrderService;
 
 @Controller
@@ -81,16 +82,18 @@ public class OrderController {
 
     // =====================================================
     // 작업지시 수정
-//    @PatchMapping("/modify/{id}")
-//    public ResponseEntity<?> modifyOrder (@PathVariable("id")String id,
-//                                          @RequestPart("details")){
-//    	
-//    }
+    @PatchMapping("/modify/{id}")
+    public ResponseEntity<?> modifyOrder (@PathVariable("id")String id,
+                                          @RequestBody Map<String, String> map){
+    	orderService.updateOrder(id, map);
+    	return ResponseEntity.ok("updated");
+    }
     
     // =====================================================
-    // 작업지시 확정
+    // 작업지시 확정 및 취소
     @PatchMapping("/status/{id}")
-    public ResponseEntity<?> released (@PathVariable("id") String id, @RequestParam("status") String status){
+    public ResponseEntity<?> released (@PathVariable("id") String id, 
+    								   @RequestParam("status") String status){
     	orderService.modifyOrderStatus(id, status);
     	return ResponseEntity.ok("updated");
     }
@@ -108,9 +111,7 @@ public class OrderController {
     @GetMapping("/orderList/data")
     @ResponseBody
     public ResponseEntity<List<WorkOrderDTO>> workList() {
-    	
 		List<WorkOrderDTO> orderDTOList = orderService.findAllWorkList();
-		
 		return ResponseEntity.ok(orderDTOList);
     }
 }

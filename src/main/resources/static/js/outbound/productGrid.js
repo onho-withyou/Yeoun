@@ -4,7 +4,7 @@ const productGrid = new tui.Grid({
 	rowHeaders: ['rowNum'],
 	pageOptions: {
 	    useClient: true,  // 클라이언트 사이드 페이징
-	    perPage: 10       // 페이지당 10개 행
+	    perPage: 20       // 페이지당 20개 행
 	},	
 	columns: [
 		{
@@ -89,7 +89,8 @@ async function loadProductOutbound(startDate, endDate, keyword) {
 		
 		const statusMap = {
 			WAITING : "출고대기",
-			COMPLETED: "출고완료"
+			COMPLETED: "출고완료",
+			CANCELED: "출고취소"
 		}
 		
 		// 상태값이 영어로 들어오는 것을 한글로 변환해서 기존 data에 덮어씌움
@@ -244,7 +245,7 @@ shipmentSelect.addEventListener("focus", async () => {
 				.split("T")[0];
 				
 		// 오늘 이전 날자 선택 불가
-		dueDate.min = today;
+		expectDate.min = today;
 		
 		// startDate가 없으면 오늘 날짜를 기본값으로 하거나 0 처리
 		expectDate.value = shipOrder.startDate?.split("T")[0] || today;
