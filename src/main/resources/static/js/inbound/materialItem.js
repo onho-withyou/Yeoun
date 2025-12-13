@@ -98,14 +98,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 	// 창고 데이터 가져오기
 	locationInfo = await getLocationInfo();
 	
-	const inboundStatus = document.getElementById("inboundStatus").value;
-	
-	// 입고 완료의 경우 수량입력, 창고선택 및 입고완료 버튼 숨김 처리
-	if (inboundStatus === "COMPLETED") {
-		disableAllInputs();
-		hideCompleteButton();
-	}
-	
 	document.querySelectorAll(".locationId").forEach(td => {
 		const rawId = td.textContent.trim();
 		const loc = locationInfo.find(l => String(l.locationId) === rawId);
@@ -195,28 +187,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // ------------------------------------------------------
-// 입고완료 처리 
-// 상태가 입고완료면 input과 select 비활성화
-function disableAllInputs() {
-	// 입고수량 input 비활성화
-	document.querySelectorAll(".inboundAmount").forEach(input => {
-		input.disabled = true;
-	});
-	
-	// select 박스 비활성화
-	document.querySelectorAll(".moveZone, .moveRack, .moveRow, .moveColumn").forEach(select => {
-		select.disabled = true;
-	});
-}
-
-function hideCompleteButton() {
-	const btn = document.getElementById("completeInboundBtn");
-	
-	if (btn) {
-		btn.style.display = "none";
-	}
-}
-
 document.querySelectorAll(".inboundAmount").forEach(input => {
 	input.addEventListener("input", () => {
 		const inboundStatus  = document.getElementById("inboundStatus").value;
@@ -396,7 +366,6 @@ function getLocationIdByPosition(index) {
 // ---------------------------------------
 // 발주 상세 모달 열기
 function openDetailWindow(id) {
-	console.log(id);
 	const url = `/purchase/detail/${id}`;
 	
 	window.open(url, '_blank', 'width=1200,height=900,scrollbars=yes');
@@ -404,7 +373,6 @@ function openDetailWindow(id) {
 
 // 작업직시서 상세 모달 열기
 function openDetailOrderWindow(id) {
-	console.log(id);
 	const url = `/inventory/inbound/detail/prodWin/${id}`;
 	
 	window.open(url, '_blank', 'width=1320,height=610,scrollbars=yes');
