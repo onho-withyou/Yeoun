@@ -48,6 +48,12 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, String> {
 	// ==========================
 	// 생산관리 대시보드
 	// ==========================
+	// 진행 중 공정 단계
+    long countByStatus(String status);
+    
+    // 지연 작업지시 수 (예정완료시간 초과)
+    long countByStatusAndPlanEndDateBefore(String status, LocalDateTime now);
+    
 	// 오늘 작업지시(작성일 기준)
     @Query("""
         select count(w)

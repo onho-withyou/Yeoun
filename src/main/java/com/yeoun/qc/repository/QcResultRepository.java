@@ -1,5 +1,6 @@
 package com.yeoun.qc.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,7 +45,7 @@ public interface QcResultRepository extends JpaRepository<QcResult, Long> {
         """)
     List<QcRegistDTO> findRegistListByStatus(@Param("status") String status);
     
-    //
+    // QC 결과 조회
     @Query("""
             select new com.yeoun.qc.dto.QcResultListDTO(
                 r.qcResultId,
@@ -62,5 +63,17 @@ public interface QcResultRepository extends JpaRepository<QcResult, Long> {
             order by r.inspectionDate desc nulls last
             """)
 	List<QcResultListDTO> findResultListForView();
+    
+    // =========================
+    // 생산관리 대시보드
+    // =========================
+    // QC FAIL 집계
+    long countByOverallResultAndInspectionDateGreaterThanEqualAndInspectionDateLessThan(
+            String overallResult,
+            LocalDate start,
+            LocalDate end
+    );
+
+
     
 }

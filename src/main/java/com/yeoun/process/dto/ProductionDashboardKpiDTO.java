@@ -14,8 +14,8 @@ import lombok.Setter;
 public class ProductionDashboardKpiDTO {
 	
 	private long todayOrders;		// 오늘 작업지시 (생성)
-	private long inProgressSteps;	// 진행 중 공정 (단계)
-	private long delayedSteps;		// 지연 공정 (단계)
+	private long inProgressOrders;	// 진행 중 작업지시 수
+	private long delayedOrders;		// 지연 작업지시 수 (예정완료시간 초과)
 	private long qcPendingOrders;	// QC 대기
 	private long qcFailSteps;		// QC 불합격
 	
