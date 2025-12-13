@@ -23,4 +23,16 @@ public interface ProdEquipRepository extends JpaRepository<ProdEquip, Long> {
             @Param("line") String line,
             @Param("status") String status
     );
+    
+    // PROD_EQUIP 기준으로 라인 + 설비코드들 조회
+    @Query("""
+    	    select pe
+    	    from ProdEquip pe
+    	    join fetch pe.equipment e
+    	    where pe.line.lineId = :lineId
+    	      and e.equipId in :equipCodes
+    	""")
+    	List<ProdEquip> findForLineAndCodes(@Param("lineId") String lineId,
+    										@Param("equipCodes") List<String> equipCodes);
+
 }
