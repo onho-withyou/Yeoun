@@ -80,7 +80,7 @@
       .nowrap{ white-space:nowrap; }
     </style>
 
-    <!-- 1) KPI 카드 4개 (재고 대시보드 느낌) -->
+    <!-- 1) KPI 카드 4개 -->
     <div class="row g-3 mb-3">
       <div class="col-12 col-md-6 col-xl-3">
         <div class="card card-soft">
@@ -88,9 +88,16 @@
             <div class="kpi-title">오늘 작업지시</div>
             <div class="d-flex align-items-end justify-content-between">
               <div class="kpi-value" th:text="${kpi.todayOrders}">8</div>
-              <div class="kpi-sub trend-up">↑ 처리: 5</div>
+              <div class="kpi-sub text-muted small">
+				  <span class="text-success">
+				    ↑ 처리 <span th:text="${kpi.completedDelta}">0</span>
+				  </span>
+				  &nbsp;
+				  <span class="text-danger">
+				    ↓ 대기 <span th:text="${kpi.waitingDelta}">0</span>
+				  </span>
+				</div>
             </div>
-            <div class="text-muted small mt-1">지시/진행/완료 포함</div>
           </div>
         </div>
       </div>
@@ -98,12 +105,10 @@
       <div class="col-12 col-md-6 col-xl-3">
         <div class="card card-soft">
           <div class="card-body">
-            <div class="kpi-title">진행 중 공정</div>
+            <div class="kpi-title">진행 중 작업</div>
             <div class="d-flex align-items-end justify-content-between">
               <div class="kpi-value" th:text="${kpi.inProgressOrders}">3</div>
-              <div class="kpi-sub trend-down">↓ 대기: 4</div>
             </div>
-            <div class="text-muted small mt-1">IN_PROGRESS 기준</div>
           </div>
         </div>
       </div>
@@ -116,7 +121,6 @@
               <div class="kpi-value" th:text="${kpi.delayedOrders}">1</div>
               <div class="kpi-sub trend-warn">주의 필요</div>
             </div>
-            <div class="text-muted small mt-1">예정 종료시간 초과</div>
           </div>
         </div>
       </div>
@@ -135,20 +139,10 @@
 		          <span th:text="${kpi.qcFailSteps}">0</span>
 		        </div>
 		
-		        <!-- 보조 설명 -->
-		        <div class="kpi-sub text-muted">
-		          대기: <span th:text="${kpi.qcPendingOrders}">0</span>
-		        </div>
 		      </div>
-		
-		      <div class="text-muted small mt-1">
-		        QC_PENDING / FAIL
-		      </div>
-		
 		    </div>
 		  </div>
 		</div>
-
     </div>
 
     <!-- 2) 라인 현황 (3라인 × 6단계) -->

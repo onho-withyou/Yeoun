@@ -19,5 +19,8 @@ public class ProductionDashboardKpiDTO {
 	private long qcPendingOrders;	// QC 대기
 	private long qcFailSteps;		// QC 불합격
 	
+	private long completedDelta; 	// ↑ 처리 +N
+	private long waitingDelta;   	// ↓ 대기 N
+	
 
 }
