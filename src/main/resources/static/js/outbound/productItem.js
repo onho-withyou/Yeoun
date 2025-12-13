@@ -82,7 +82,7 @@ document.getElementById("completePrdOutboundBtn").addEventListener("click", asyn
 	if (data.success) {
 		alert("출고가 완료되었습니다.");
 		setTimeout(() => {
-			window.location.href = "/inventory/outbound/list";
+			window.location.href = "/inventory/outbound/productList";
 		}, 10); 
 	}
 	
