@@ -20,13 +20,21 @@
 			<button class="btn btn-outline-primary mb-3" onclick="history.back()">← 목록으로</button>
 			<div class="d-flex justify-content-between align-items-center mb-4">
 				<h2>입고 상세 정보</h2>
-				<button class="btn btn-primary" id="completeInboundBtn">입고 완료</button>
+				<button th:if="${receiptDTO.inboundStatus == 'PENDING_ARRIVAL'}" class="btn btn-primary" id="completeInboundBtn">입고 완료</button>
 			</div>
 			<div class="card p-4 mb-5">
 				<div class="card-body">
 					 <div class="row row-cols-3 g-4">
 						<div class="col">
-						    <div class="text-secondary mb-1">납기일자</div>
+						    <div class="text-secondary mb-1">입고번호</div>
+						    <div class="fw-semibold" th:text="${receiptDTO.inboundId}"></div>
+						</div>
+						<div class="col">
+						    <div class="text-secondary mb-1">입고담당자</div>
+						    <div class="fw-semibold" th:text="${receiptDTO.materialEmpName}"></div>
+						</div>
+						<div class="col">
+						    <div class="text-secondary mb-1">입고일자</div>
 						    <div class="fw-semibold" th:text="${#temporals.format(receiptDTO.expectArrivalDate, 'yyyy-MM-dd')}"></div>
 						</div>
 						<div class="col">
