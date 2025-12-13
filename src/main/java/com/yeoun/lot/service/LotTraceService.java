@@ -3,6 +3,7 @@ package com.yeoun.lot.service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
+import com.yeoun.equipment.entity.ProdEquip;
+import com.yeoun.equipment.repository.ProdEquipRepository;
 import com.yeoun.inbound.entity.InboundItem;
 import com.yeoun.inbound.repository.InboundItemRepository;
 import com.yeoun.inventory.entity.Inventory;
@@ -19,6 +22,7 @@ import com.yeoun.inventory.entity.MaterialOrder;
 import com.yeoun.inventory.repository.InventoryRepository;
 import com.yeoun.inventory.repository.MaterialOrderRepository;
 import com.yeoun.lot.constant.LotStatus;
+import com.yeoun.lot.dto.LotEquipInfoDTO;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.dto.LotMasterDTO;
 import com.yeoun.lot.dto.LotMaterialDetailDTO;
@@ -33,6 +37,7 @@ import com.yeoun.lot.entity.LotRelationship;
 import com.yeoun.lot.repository.LotHistoryRepository;
 import com.yeoun.lot.repository.LotMasterRepository;
 import com.yeoun.lot.repository.LotRelationshipRepository;
+import com.yeoun.masterData.entity.Equipment;
 import com.yeoun.masterData.entity.MaterialMst;
 import com.yeoun.masterData.entity.ProcessMst;
 import com.yeoun.masterData.entity.ProdLine;
@@ -67,7 +72,8 @@ public class LotTraceService {
 	private final InventoryRepository inventoryRepository;
 	private final MaterialOrderRepository materialOrderRepository;
 	private final ClientRepository clientRepository;
-	
+	private final ProdEquipRepository prodEquipRepository;
+
 	// ----------------------------------------------------------------------------
 	// LOT 생성
 	@Transactional
@@ -338,6 +344,37 @@ public class LotTraceService {
 		String deptName = dept != null ? dept.getDeptName() : null;
 		
 		// 5) 설비 정보 조회
+		List<LotEquipInfoDTO> equipments = List.of();
+
+		if (lineId != null && processId != null) {
+
+		    // QC면 설비 없음
+		    if (!"PRC-QC".equals(processId)) {
+
+		        List<String> equipCodes = PROCESS_EQUIP_CODES.getOrDefault(processId, List.of());
+
+		        if (!equipCodes.isEmpty()) {
+		            List<ProdEquip> prodEquips =
+		                    prodEquipRepository.findForLineAndCodes(lineId, equipCodes);
+
+		            equipments = prodEquips.stream()
+	            	    .map(pe -> {
+	            	        Equipment mst = pe.getEquipment();
+	            	        return LotEquipInfoDTO.builder()
+	            	            .prodEquipId(pe.getEquipId())
+	            	            .equipCode(mst != null ? mst.getEquipId() : null)
+	            	            .equipName(pe.getEquipName())
+	            	            .status(pe.getStatus())
+	            	            .stdName(mst != null ? mst.getEquipName() : null)
+	            	            .koName(mst != null ? mst.getKoName() : null)
+	            	            .build();
+	            	    })
+	            	    .toList();
+
+		        }
+		    }
+		}
+
 		
 		// 6) 양품/불량 + 불량률 계산
 		Long goodQty   = (wop.getGoodQty()   == null) ? 0L : wop.getGoodQty().longValue();
@@ -363,8 +400,18 @@ public class LotTraceService {
 		        .defectQty(defectQty)
 		        .defectRate(defectRate)
 		        .lineId(lineId)
+		        .equipments(equipments)
 		        .build();
 	}
+	
+    private static final Map<String, List<String>> PROCESS_EQUIP_CODES = Map.of(
+	    "PRC-BLD", List.of("BLENDING_TANK", "MIXER_AGITATOR"),
+	    "PRC-FLT", List.of("FILTER_HOUSING"),
+	    "PRC-FIL", List.of("FILLING_SEMI"),      
+	    "PRC-CAP", List.of("CAPPING_SEMI"),
+	    "PRC-LBL", List.of("LABELING_AUTO", "PACKING_SEMI")
+	    // QC는 제외
+	);
 
 
 	// ================================================================================

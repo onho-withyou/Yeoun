@@ -1,6 +1,7 @@
 package com.yeoun.lot.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,8 +29,8 @@ public class LotProcessDetailDTO {
     private Double defectRate;				// 불량률
     private String lineId;					// 라인ID
     
-    // 설비 관련은 나중에 필요해지면 그때 추가
-    // private String equipCode;
-    // private String equipName;
+    // 설비 정보
+    private List<LotEquipInfoDTO> equipments;
+
 
 }
