@@ -1,5 +1,6 @@
 package com.yeoun.equipment.controller;
 
+import com.yeoun.equipment.dto.EquipmentSearchDTO;
 import com.yeoun.equipment.dto.EquipmentTypeCreateRequest;
 import com.yeoun.equipment.dto.ProdEquipDTO;
 import com.yeoun.equipment.service.EquipmentService;
@@ -113,10 +114,17 @@ public class EquipmentController {
     // ===================================================
     // 설비 목록
     @GetMapping("/list")
-    public String list(Model model) {
-    	List<ProdEquipDTO> list = equipmentService.loadAllEquipments();
-    	model.addAttribute("list", list);
+    public String list() {
     	return "equipment/list";
+    }
+
+    // ===================================================
+    // 설비 목록
+    @GetMapping("/list/data")
+    @ResponseBody
+    public List<ProdEquipDTO> equipmentListData(EquipmentSearchDTO dto) {
+        List<ProdEquipDTO> list = equipmentService.loadAllEquipments(dto);
+        return list;
     }
     
     // ===================================================
