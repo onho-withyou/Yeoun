@@ -87,8 +87,8 @@ public class LotTraceController {
 	// 자재 상세 조회 (LOT 트리에서 자재 클릭 시 호출)
 	@GetMapping("/trace/material-detail")
 	@ResponseBody
-	public List<LotMaterialDetailDTO> getMaterialDetail(@RequestParam("outputLotNo") String outputLotNo,
-													    @RequestParam("inputLotNo") String inputLotNo) {
+	public LotMaterialDetailDTO getMaterialDetail(@RequestParam("outputLotNo") String outputLotNo,
+												  @RequestParam("inputLotNo") String inputLotNo) {
 		return lotTraceService.getMaterialDetail(outputLotNo, inputLotNo);
 	}
 	

@@ -142,5 +142,7 @@ public interface InventoryRepository
 		    nativeQuery = true)
 		Map<String, Object> findMaterialStock(@Param("matId") String matId);
 
+	Optional<Inventory> findTopByLotNoOrderByIvIdDesc(String inputLotNo);
+
 
 }

@@ -31,7 +31,7 @@ public class LotMaterialDetailDTO {
 	private Integer usedQty;				// 사용 수량
 	
 	// 입고 정보
-	private String InboundId;				// 입고 ID
+	private String inboundId;				// 입고 ID
 	private Long inboundAmount;				// 입고수량
 	private LocalDateTime manufactureDate;	// 제조일
 	private LocalDateTime expirationDate; 	// 유통기한

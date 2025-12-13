@@ -14,9 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
+import com.yeoun.inbound.entity.InboundItem;
+import com.yeoun.inbound.repository.InboundItemRepository;
+import com.yeoun.inventory.entity.Inventory;
+import com.yeoun.inventory.repository.InventoryRepository;
 import com.yeoun.lot.constant.LotStatus;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.dto.LotMasterDTO;
+import com.yeoun.lot.dto.LotMaterialDetailDTO;
 import com.yeoun.lot.dto.LotMaterialNodeDTO;
 import com.yeoun.lot.dto.LotProcessDetailDTO;
 import com.yeoun.lot.dto.LotProcessNodeDTO;
@@ -28,6 +33,7 @@ import com.yeoun.lot.entity.LotRelationship;
 import com.yeoun.lot.repository.LotHistoryRepository;
 import com.yeoun.lot.repository.LotMasterRepository;
 import com.yeoun.lot.repository.LotRelationshipRepository;
+import com.yeoun.masterData.entity.MaterialMst;
 import com.yeoun.masterData.entity.ProcessMst;
 import com.yeoun.masterData.entity.ProdLine;
 import com.yeoun.masterData.entity.ProductMst;
@@ -49,13 +55,14 @@ import lombok.extern.log4j.Log4j2;
 public class LotTraceService {
 	private final LotMasterRepository lotMasterRepository;
 	private final LotHistoryRepository historyRepository;
+	private final LotRelationshipRepository lotRelationshipRepository;
 	private final ProcessMstRepository processMstRepository;
 	private final EmpRepository empRepository;
-	private final LotHistoryRepository lotHistoryRepository;
 	private final WorkOrderProcessRepository workOrderProcessRepository; 
-	private final LotRelationshipRepository lotRelationshipRepository;
 	private final WorkOrderRepository workOrderRepository;
 	private final WorkerProcessRepository workerProcessRepository;
+	private final InboundItemRepository inboundItemRepository;
+	private final InventoryRepository inventoryRepository;
 	
 	// ----------------------------------------------------------------------------
 	// LOT 생성
@@ -357,11 +364,12 @@ public class LotTraceService {
 
 
 	// ================================================================================
+	// 자재 정보
+	// ================================================================================
 	// 선택 LOT 기준 2차 자재 LOT 트리용 노드
 	public List<LotMaterialNodeDTO> getMaterialNodesForLot(String lotNo) {
 		
-		List<LotRelationship> rels = 
-				lotRelationshipRepository.findByOutputLot_LotNo(lotNo);
+		List<LotRelationship> rels = lotRelationshipRepository.findByOutputLot_LotNo(lotNo);
 		
 		if (rels.isEmpty()) {
 			return List.of();
@@ -392,6 +400,47 @@ public class LotTraceService {
 					);
 				})
 				.toList();
+	}
+
+	// 자재 상세 정보
+	public LotMaterialDetailDTO getMaterialDetail(String outputLotNo, String inputLotNo) {
+		
+		// 1) 자재 엔티티 조회 (부모 LOT + 자식 LOT)
+		LotRelationship lr = lotRelationshipRepository.findByOutputLot_LotNoAndInputLot_LotNo(outputLotNo, inputLotNo)
+			        .orElseThrow(() -> new IllegalArgumentException("관계 없음: output=" + outputLotNo + ", input=" + inputLotNo));
+		
+		// 2) 원자재 LOT 꺼내기
+	    LotMaster lot = lr.getInputLot();          // inputLot == 원자재 LOT
+	    MaterialMst m = (lot != null) ? lot.getMaterial() : null;
+	    String lotNo = (lot != null) ? lot.getLotNo() : null;
+
+	    // 3) lotNo로 입고/재고
+	    InboundItem ii = inboundItemRepository.findLatestByLotNo(lotNo)
+	    		.orElse(null);
+	    
+	    Inventory inv = inventoryRepository.findTopByLotNoOrderByIvIdDesc(inputLotNo)
+	    		.orElse(null);
+
+	    return LotMaterialDetailDTO.builder()
+	        .usedQty(lr.getUsedQty())
+	        .lotNo(lot.getLotNo())
+	        .lotType(lot.getLotType())
+	        .lotStatus(lot.getCurrentStatus())
+	        .lotCreatedDate(lot.getCreatedDate())
+	        .matId(m != null ? m.getMatId() : null)
+	        .matName(m != null ? m.getMatName() : lot.getDisplayName())
+	        .matType(m != null ? m.getMatType() : null)
+	        .matUnit(m != null ? m.getMatUnit() : null)
+	        .inboundId(ii != null && ii.getInbound() != null ? ii.getInbound().getInboundId() : null)
+	        .inboundAmount(ii != null ? ii.getInboundAmount() : null)
+	        .manufactureDate(ii != null ? ii.getManufactureDate() : null)
+	        .expirationDate(ii != null ? ii.getExpirationDate() : null)
+	        .inboundLocationId(ii != null ? ii.getLocationId() : null)
+	        .ivAmount(inv != null ? inv.getIvAmount() : null)
+	        .ivStatus(inv != null ? inv.getIvStatus() : null)
+	        .inventoryLocationId(inv != null && inv.getWarehouseLocation() != null ? inv.getWarehouseLocation().getLocationId() : null)
+	        .ibDate(inv != null ? inv.getIbDate() : null)
+	        .build();
 	}
 
 	
