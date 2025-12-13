@@ -402,6 +402,7 @@ function openDetailWindow(id) {
 	window.open(url, '_blank', 'width=1200,height=900,scrollbars=yes');
 }
 
+// 작업직시서 상세 모달 열기
 function openDetailOrderWindow(id) {
 	console.log(id);
 	const url = `/inventory/inbound/detail/prodWin/${id}`;
