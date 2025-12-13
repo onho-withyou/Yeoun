@@ -2,6 +2,7 @@ package com.yeoun.masterData.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.ibatis.annotations.Delete;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.masterData.entity.ProductMst;
+import com.yeoun.masterData.repository.ProductMstRepository;
+import com.yeoun.masterData.service.MaterialMstService;
 import com.yeoun.masterData.service.ProductMstService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,19 +33,24 @@ import lombok.extern.log4j.Log4j2;
 public class ProductMstController {
 
 	private final ProductMstService productMstService;
+	private final MaterialMstService materialMstService;
+	
     //기준정보관리(완제품/원재료) 연결페이지
   	@GetMapping("/product")
   	public String product(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
-		//model.addAttribute("empList", approvalDocService.getEmp());//기안자 목록 불러오기
+		model.addAttribute("prdMstList", productMstService.findAll());
+		model.addAttribute("mstMstList", materialMstService.findAll());
 		return "masterData/product";
  	}
   	
-  	@ResponseBody
-  	@GetMapping("/product/list")
-  	public List<ProductMst> productList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
-  		log.info("productMstService.getProductAll()------------->{}",productMstService.findAll());
-		return productMstService.findAll();
-  	}
+	@ResponseBody
+	@GetMapping("/product/list")
+	public List<ProductMst> productList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,
+										@RequestParam(value = "prdId", required = false) String prdId,
+										@RequestParam(value = "prdName", required = false) String prdName) {
+		// 서비스에서 null/빈값 처리를 수행하므로 그대로 전달
+		return productMstService.findByPrdIdList(prdId, prdName);
+	}
 
 	@ResponseBody
   	@PostMapping("/product/save")

@@ -28,8 +28,16 @@
 	         </ul>
 	         <div class="tab-content" >
 	           <div class="tab-pane fade show active"  id="navs-product-tab" role="tabpanel">
-	             <h5 class="card-title mb-0">완제품</h5>
-	             <div class="d-flex justify-content-end" style="margin:10px;">
+				<div class="d-flex justify-content-start">
+			    	<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
+				    	<input type="text" id="prdId" name="prdId" class="form-control"  placeholder="품번">
+				    </div>
+					<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
+				    	<input type="text" id="prdName" name="prdName" class="form-control"  placeholder="제품명">
+				    </div>
+			       	<button type="button" class="btn btn-primary" onclick="productGridAllSearch()" style="margin-left:5px;">조회</button>
+				</div>
+	            <div class="d-flex justify-content-end" style="margin:10px;">
 			  		<button id="addProductRowBtn" class="btn btn-primary" type="button" style="margin-right:5px;">추가</button>
 					<button id="saveProductRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
 			  		<button id="deleteProductRowBtn" class="btn btn-danger" type="button">삭제</button>
@@ -37,7 +45,16 @@
 				 <div id="productGrid" style="display: grid;margin-right:5px;"></div>
 				</div>
 	           <div class="tab-pane fade" id="navs-material-tab" role="tabpanel">
-	             <h5 class="card-title mb-0">원재료</h5>
+				 <div class="d-flex justify-content-start">
+			        	<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
+				    		<input type="text" id="matId" name="matId" class="form-control"  placeholder="원재료id">
+						</div>
+						<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
+							<input type="text" id="matName" name="matName" class="form-control"  placeholder="원재료명">
+						</div>
+			           	<button type="button" class="btn btn-primary" onclick="materialGridAllSearch()" style="margin-left:5px;">조회</button>
+					</div>
+
 	             <div class="d-flex justify-content-end" style="margin:10px;">
 			  		<button id="addMaterialRowBtn" class="btn btn-primary" type="button" data-preset="striped" style="margin-right:5px;">추가</button>
 					<button id="saveMaterialRowBtn" class="btn btn-success" type="button" style="margin-right:5px;">저장</button>
