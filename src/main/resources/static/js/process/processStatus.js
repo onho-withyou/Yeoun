@@ -222,14 +222,16 @@ function renderProcessDetail(detail) {
     const tr = document.createElement("tr");
 
     // 상태 뱃지
-    let statusBadge = "-";
-    if (step.status === "READY") {
-      statusBadge = `<span class="badge bg-label-secondary">대기</span>`;
-    } else if (step.status === "IN_PROGRESS") {
-      statusBadge = `<span class="badge bg-label-warning text-dark">진행중</span>`;
-    } else if (step.status === "DONE") {
-      statusBadge = `<span class="badge bg-label-success">완료</span>`;
-    }
+	let statusBadge = "-";
+	if (step.status === "READY") {
+	  statusBadge = `<span class="badge bg-label-secondary">대기</span>`;
+	} else if (step.status === "IN_PROGRESS") {
+	  statusBadge = `<span class="badge bg-label-warning text-dark">진행중</span>`;
+	} else if (step.status === "DONE") {
+	  statusBadge = `<span class="badge bg-label-success">완료</span>`;
+	} else if (step.status === "QC_PENDING") {
+	  statusBadge = `<span class="badge bg-label-info text-dark">QC 대기</span>`;
+	}
 
     // 버튼
     let workBtnHtml = "";
@@ -238,7 +240,7 @@ function renderProcessDetail(detail) {
       // QC 공정
       if (step.status === "DONE") {
         workBtnHtml = '<span class="text-muted">완료</span>';
-      } else if (step.canStart) {
+      } else if (step.status === "QC_PENDING") {
         workBtnHtml = `
           <button type="button"
                   class="btn btn-outline-info btn-sm btn-qc-regist"
@@ -600,9 +602,8 @@ function updateStepRowInModal(updatedStep) {
           QC 등록
         </button>
       `;
-
     } else {
-      workBtnHtml = '<span class="text-muted">대기</span>';
+      workBtnHtml = '<span class="text-muted">등록 전</span>';
     }
 
   } else {
