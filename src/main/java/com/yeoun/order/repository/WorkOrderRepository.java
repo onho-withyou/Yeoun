@@ -44,31 +44,5 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, String> {
 	// 같은 PLAN_ID 아래 아직 완료 안 된 작업지시가 있는지 확인
 	boolean existsByPlanIdAndStatusNot(String planId, String status);
 	
-	
-	// ===================================================
-	// 대시보드 KPI 전용
-	// ===================================================
-	// 1) 오늘 생성된 작업지시 수
-	@Query("""
-        SELECT COUNT(w)
-        FROM WorkOrder w
-        WHERE w.createdDate >= :start
-          AND w.createdDate < :end
-    """)
-	long countCreatedBetween(@Param("start") LocalDateTime start,
-	                         @Param("end") LocalDateTime end);
-
-	// 2) 상태별 작업지시 수 (예: IN_PROGRESS, DONE 등)
-	long countByStatus(String status);
-
-	// 3) 지연 작업지시 수
-	@Query("""
-        SELECT COUNT(w)
-        FROM WorkOrder w
-        WHERE w.planEndDate < :now
-          AND w.status <> 'DONE'
-    """)
-	long countDelayedOrders(@Param("now") LocalDateTime now);
-
 
 }

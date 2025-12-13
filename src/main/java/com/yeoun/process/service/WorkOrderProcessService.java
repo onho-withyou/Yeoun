@@ -82,7 +82,7 @@ public class WorkOrderProcessService {
     private final ProductionPlanItemRepository productionPlanItemRepository;
 
     // =========================================================================
-    // 검색 조건 없는 공정현황 목록
+    // 검색 조건 없는 공정현황 목록 (안 쓰면 삭제)
     @Transactional(readOnly = true)
     public List<WorkOrderProcessDTO> getWorkOrderListForStatus() {
         return getWorkOrderListForStatus(null, null, null, null);
