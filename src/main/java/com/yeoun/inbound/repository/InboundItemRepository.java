@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import com.yeoun.inbound.entity.InboundItem;
 
@@ -17,6 +15,6 @@ public interface InboundItemRepository extends JpaRepository<InboundItem, Long> 
 
 	Optional<InboundItem> findTopByLotNoOrderByInboundItemIdDesc(String lotNo);
 
-
+	InboundItem findByLotNo(String lotNo);
 	
 }

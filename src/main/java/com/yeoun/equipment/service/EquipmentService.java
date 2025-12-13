@@ -1,5 +1,6 @@
 package com.yeoun.equipment.service;
 
+import com.yeoun.equipment.dto.EquipmentSearchDTO;
 import com.yeoun.equipment.dto.EquipmentTypeCreateRequest;
 import com.yeoun.equipment.dto.ProdEquipDTO;
 import com.yeoun.equipment.entity.ProdEquip;
@@ -45,11 +46,14 @@ public class EquipmentService {
     
     // ===================================================
     // 보유 설비 목록
-	public List<ProdEquipDTO> loadAllEquipments() {
-		List<ProdEquip> equips = prodEquipRepository.findAll();
+	public List<ProdEquipDTO> loadAllEquipments(EquipmentSearchDTO dto) {
+		List<ProdEquip> equips = prodEquipRepository.loadProdEquip(
+				dto.getEquipment(),
+				dto.getLine(),
+				dto.getStatus());
 		List<ProdEquipDTO> list = new ArrayList<>();
 		for (ProdEquip equip : equips) {
-			ProdEquipDTO dto = ProdEquipDTO.builder()
+			ProdEquipDTO equipDTO = ProdEquipDTO.builder()
 							.equipId(equip.getEquipId())
 							.equipTypeId(equip.getEquipment().getEquipId())
 							.equipName(equip.getEquipName())
@@ -60,7 +64,7 @@ public class EquipmentService {
 							.remark(equip.getRemark())
 							.build();
 			
-			list.add(dto);
+			list.add(equipDTO);
 		}
 		return list;
 	}
