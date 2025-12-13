@@ -294,26 +294,15 @@ const submitPrdOutbound = async () => {
 	const items = [];
 	const rows = document.querySelectorAll("#shipTbody tr");
 	
-	for (const row of rows) {
-		items.push({
-			prdId: row.querySelector("input[name=prdId]").value,
-			outboundQty: row.querySelector(".outboundQty").value
-		});
-		
-	}
-	
 	// 출고 품목들 items 추가
-	document.querySelectorAll("#shipTbody tr").forEach(tr => {
-		// 납품 수량
+	for (const row of rows) {
 		const shipmentQty = Number(row.querySelector("td[name=shipmentQty]").dataset.qty);
 		// 출고 수량
 		const outboundQty = Number(row.querySelector(".outboundQty").value);
-		// 재고 수량
-		const stock = Number(row.querySelector("td[name=stock]").dataset.stock);
 		
-		// 출고 수량과 재고 수량 비교
-		if (outboundQty > stock) {
-			alert("출고 수량이 재고 수량보다 많습니다.");
+		// 출고 수량과 요청 수량 비교
+		if (outboundQty > shipmentQty) {
+			alert("출고 수량이 요청 수량보다 많습니다.");
 			return;
 		}
 		
@@ -324,10 +313,11 @@ const submitPrdOutbound = async () => {
 		}
 		
 		items.push({
-			prdId: tr.querySelector("input[name=prdId]").value,
-			outboundQty
+			prdId: row.querySelector("input[name=prdId]").value,
+			outboundQty: row.querySelector(".outboundQty").value
 		});
-	});
+		
+	}
 	
 	// body에 담아서 보낼 내용
 	const payload = {
