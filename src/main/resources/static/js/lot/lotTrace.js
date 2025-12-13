@@ -53,9 +53,9 @@ document.addEventListener("DOMContentLoaded", () => {
 	  
 	  if (!children.dataset.loaded) {
          if (group === "process") {
-           loadProcessList(children, lotNo);     // ✅ 공정
+           loadProcessList(children, lotNo);     // 공정
          } else if (group === "material") {
-           loadMaterialList(children, lotNo);    // ✅ 자재
+           loadMaterialList(children, lotNo);    // 자재
          }
          children.dataset.loaded = "true";
        }

@@ -1,11 +1,9 @@
 package com.yeoun.lot.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -17,7 +15,9 @@ import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.inbound.entity.InboundItem;
 import com.yeoun.inbound.repository.InboundItemRepository;
 import com.yeoun.inventory.entity.Inventory;
+import com.yeoun.inventory.entity.MaterialOrder;
 import com.yeoun.inventory.repository.InventoryRepository;
+import com.yeoun.inventory.repository.MaterialOrderRepository;
 import com.yeoun.lot.constant.LotStatus;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.dto.LotMasterDTO;
@@ -45,6 +45,8 @@ import com.yeoun.order.repository.WorkerProcessRepository;
 import com.yeoun.process.constant.ProcessStepStatus;
 import com.yeoun.process.entity.WorkOrderProcess;
 import com.yeoun.process.repository.WorkOrderProcessRepository;
+import com.yeoun.sales.entity.Client;
+import com.yeoun.sales.repository.ClientRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -63,6 +65,8 @@ public class LotTraceService {
 	private final WorkerProcessRepository workerProcessRepository;
 	private final InboundItemRepository inboundItemRepository;
 	private final InventoryRepository inventoryRepository;
+	private final MaterialOrderRepository materialOrderRepository;
+	private final ClientRepository clientRepository;
 	
 	// ----------------------------------------------------------------------------
 	// LOT 생성
@@ -420,6 +424,24 @@ public class LotTraceService {
 	    
 	    Inventory inv = inventoryRepository.findTopByLotNoOrderByIvIdDesc(inputLotNo)
 	    		.orElse(null);
+	    
+	    // 4) 거래처 정보
+	    Client client = null;
+
+	    if (ii != null && ii.getInbound() != null) {
+	        String materialOrderId = ii.getInbound().getMaterialId(); // 발주 ID
+
+	        if (materialOrderId != null) {
+	            MaterialOrder mo = materialOrderRepository.findById(materialOrderId)
+	                    .orElse(null);
+
+	            if (mo != null) {
+	                client = clientRepository.findById(mo.getClientId())
+	                        .orElse(null);
+	            }
+	        }
+	    }
+
 
 	    return LotMaterialDetailDTO.builder()
 	        .usedQty(lr.getUsedQty())
@@ -440,6 +462,10 @@ public class LotTraceService {
 	        .ivStatus(inv != null ? inv.getIvStatus() : null)
 	        .inventoryLocationId(inv != null && inv.getWarehouseLocation() != null ? inv.getWarehouseLocation().getLocationId() : null)
 	        .ibDate(inv != null ? inv.getIbDate() : null)
+	        .clientId(client != null ? client.getClientId() : null)
+	        .clientName(client != null ? client.getClientName() : null)
+	        .businessNo(client != null ? client.getBusinessNo() : null)
+	        .managerTel(client != null ? client.getManagerTel() : null)
 	        .build();
 	}
 
