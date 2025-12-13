@@ -36,10 +36,22 @@ public class ShipmentController {
         String startDate = (String) param.get("startDate");
         String endDate   = (String) param.get("endDate");
         String keyword   = (String) param.get("keyword");
-        String status    = (String) param.get("status");
 
-        return shipmentService.search(startDate, endDate, keyword, status);
+        Object statusObj = param.get("status");
+
+        List<String> statusList = null;
+
+        if (statusObj instanceof String) {
+            statusList = List.of((String) statusObj);
+        } else if (statusObj instanceof List<?>) {
+            statusList = ((List<?>) statusObj).stream()
+                    .map(String::valueOf)
+                    .toList();
+        }
+
+        return shipmentService.search(startDate, endDate, keyword, statusList);
     }
+
 
 
     /** 3) 출하 예약 (POST) */
@@ -63,6 +75,16 @@ public class ShipmentController {
     public ShipmentDetailDTO getShipmentDetail(@RequestParam("orderId") String orderId) {
         return shipmentDetailService.getDetail(orderId);
     }
+    
+    //예약 취소
+    
+    @PostMapping("/cancel")
+    @ResponseBody
+    public Map<String, Object> cancel(@RequestParam("orderId") String orderId) {
+        shipmentService.cancelShipment(orderId);
+        return Map.of("success", true);
+    }
+
 
 
 

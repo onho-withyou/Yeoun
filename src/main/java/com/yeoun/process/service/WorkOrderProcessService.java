@@ -12,6 +12,11 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.yeoun.common.dto.AlarmDTO;
+import com.yeoun.common.e_num.AlarmDestination;
+import com.yeoun.common.service.AlarmService;
+import com.yeoun.emp.entity.Emp;
+import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.inbound.service.InboundService;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.dto.LotMasterDTO;
@@ -24,7 +29,9 @@ import com.yeoun.masterData.entity.RouteHeader;
 import com.yeoun.masterData.entity.RouteStep;
 import com.yeoun.masterData.repository.RouteHeaderRepository;
 import com.yeoun.masterData.repository.RouteStepRepository;
+import com.yeoun.order.dto.MaterialAvailabilityDTO;
 import com.yeoun.order.entity.WorkOrder;
+import com.yeoun.order.mapper.OrderMapper;
 import com.yeoun.order.repository.WorkOrderRepository;
 import com.yeoun.outbound.entity.OutboundItem;
 import com.yeoun.outbound.repository.OutboundItemRepository;
@@ -58,6 +65,9 @@ public class WorkOrderProcessService {
     private final QcResultRepository qcResultRepository;
     private final QcResultService qcResultService;
     private final InboundService inboundService;
+    private final AlarmService alarmService;
+    private final EmpRepository empRepository;
+    private final OrderMapper orderMapper;
     
     // LOT 관련
     private final LotTraceService lotTraceService;
@@ -72,10 +82,9 @@ public class WorkOrderProcessService {
     private final ProductionPlanItemRepository productionPlanItemRepository;
 
     // =========================================================================
+    // 검색 조건 없는 공정현황 목록
     @Transactional(readOnly = true)
     public List<WorkOrderProcessDTO> getWorkOrderListForStatus() {
-        // 기존에 쓰이던 기본 버전
-        // => "검색조건 없음"으로 호출
         return getWorkOrderListForStatus(null, null, null, null);
     }
     
@@ -194,7 +203,7 @@ public class WorkOrderProcessService {
 
         // 양품수량: 작업지시당 QC_RESULT 1건 기준
         int goodQty = 0;
-        if (qcResult != null && qcResult.getGoodQty() != null) { // 필드명 맞게 수정
+        if (qcResult != null && qcResult.getGoodQty() != null) { 
             goodQty = qcResult.getGoodQty();
         }
         
@@ -372,34 +381,49 @@ public class WorkOrderProcessService {
         boolean isQcPassed = qcResultRepository.existsByOrderIdAndOverallResult(orderId, "PASS");
 
         // 6) 공정 단계 DTO 리스트 + 버튼 플래그 세팅
-        List<WorkOrderProcessStepDTO> stepDTOs = buildStepDtos(steps, processMap, isQcPassed);
-
+        List<WorkOrderProcessStepDTO> stepDTOs = buildStepDtos(steps, processMap, workOrder, isQcPassed);
+        
         return new WorkOrderProcessDetailDTO(headerDto, stepDTOs);
     }
 
-    private List<WorkOrderProcessStepDTO> buildStepDtos(
-            List<RouteStep> steps,
-            Map<String, WorkOrderProcess> processMap,
-            boolean isQcPassed
-    ) {
+    /**
+     * 공정 목록/상세 모달에서 사용하는 DTO 리스트를 반환
+     * 공정 설계(RouteStep) + 공정 실행 상태(WorkOrderProcess)를 결합
+     */
+    private List<WorkOrderProcessStepDTO> buildStepDtos(List<RouteStep> steps,
+											            Map<String, WorkOrderProcess> processMap,
+											            WorkOrder workOrder,
+											            boolean isQcPassed) {
 
+        // 작업지시 계획수량 (1EA 기준값 및 3단계 이후 기준값 계산용)
+        Integer planQty = workOrder.getPlanQty();
+
+        // 1) RouteStep 기준으로 공정 단계 DTO를 하나씩 생성
         List<WorkOrderProcessStepDTO> stepDTOs = steps.stream()
                 .map(step -> {
-                    WorkOrderProcessStepDTO dto = new WorkOrderProcessStepDTO();
-                    dto.setStepSeq(step.getStepSeq());
-                    dto.setProcessId(step.getProcess().getProcessId());
-                    dto.setProcessName(step.getProcess().getProcessName());
 
+                    WorkOrderProcessStepDTO dto = new WorkOrderProcessStepDTO();
+
+                    // 기본 공정 정보
+                    dto.setStepSeq(step.getStepSeq());                       // 공정 순번
+                    dto.setProcessId(step.getProcess().getProcessId());      // 공정 코드 
+                    dto.setProcessName(step.getProcess().getProcessName());  // 공정명
+                    dto.setPlanQty(planQty);								 // 계획수량
+
+                    // RouteStep -> WorkOrderProcess 매핑
                     WorkOrderProcess proc = processMap.get(step.getRouteStepId());
 
+                    // 이미 진행된 공정이라면 상태값/수량/시간 정보 복사
                     if (proc != null) {
-                        dto.setStatus(proc.getStatus());
-                        dto.setStartTime(proc.getStartTime());
-                        dto.setEndTime(proc.getEndTime());
-                        dto.setGoodQty(proc.getGoodQty());
-                        dto.setDefectQty(proc.getDefectQty());
-                        dto.setMemo(proc.getMemo());
+                        dto.setStatus(proc.getStatus());         // READY / IN_PROGRESS / DONE
+                        dto.setStartTime(proc.getStartTime());   // 시작시간
+                        dto.setEndTime(proc.getEndTime());       // 종료시간
+                        dto.setGoodQty(proc.getGoodQty());       // 양품 수량
+                        dto.setDefectQty(proc.getDefectQty());   // 불량 수량
+                        dto.setMemo(proc.getMemo());             // 메모
+
                     } else {
+                        // 아직 진행되지 않은 공정
                         dto.setStatus("READY");
                         dto.setStartTime(null);
                         dto.setEndTime(null);
@@ -408,30 +432,91 @@ public class WorkOrderProcessService {
                         dto.setMemo(null);
                     }
 
+                    // 2) 기준값(standardQty) 계산
+                    Double standardQty = null;
+                    String processId = dto.getProcessId();
+
+                    if ("PRC-BLD".equals(processId)) {
+                        // 1단계 블렌딩: 기준 배합량(총량) 계산
+                        standardQty = calculateBlendStandardQty(workOrder);
+
+                    } else if ("PRC-FLT".equals(processId)) {
+                        // 2단계 여과: 기준 배합량 유지 (현재는 손실 고려 X)
+                        standardQty = calculateFilterStandardQty(workOrder);
+
+                    } else {
+                        // 3단계 이후 공정: 기준 완제품 수량(이론) = 계획 수량
+                        //  - 이유: 이 단계에서는 배합량이 아니라 개수 기준으로 판단
+                        if (planQty != null) {
+                            standardQty = planQty.doubleValue();
+                        }
+                    }
+
+                    dto.setStandardQty(standardQty);
+
                     return dto;
                 })
                 .collect(Collectors.toList());
 
-        // 버튼 활성화 플래그 계산
+        // 3) 공정 시작/종료 버튼 활성화 여부 계산
         for (int i = 0; i < stepDTOs.size(); i++) {
+
             WorkOrderProcessStepDTO dto = stepDTOs.get(i);
             WorkOrderProcessStepDTO prevDto = (i > 0) ? stepDTOs.get(i - 1) : null;
 
+            // 이전 단계가 DONE이어야 다음 단계 시작 가능
             boolean prevDone = (i == 0) || "DONE".equals(prevDto.getStatus());
+
+            // 이전 단계가 QC_PENDING이면 이후 진행 불가
             boolean isPrevBlocking = (prevDto != null) && "QC_PENDING".equals(prevDto.getStatus());
 
-            // 포장 공정은 QC PASS 필요
+            // 포장 단계(PRC-PACK)는 반드시 QC PASS 이후 시작 가능
             if ("PRC-PACK".equals(dto.getProcessId())) {
                 dto.setCanStart("READY".equals(dto.getStatus()) && isQcPassed);
+
             } else {
+                // 일반 공정 시작 조건
                 dto.setCanStart("READY".equals(dto.getStatus()) && prevDone && !isPrevBlocking);
             }
 
+            // 진행중(IN_PROGRESS) 상태일 때만 "종료" 버튼 활성화
             dto.setCanFinish("IN_PROGRESS".equals(dto.getStatus()));
         }
 
         return stepDTOs;
     }
+    
+    /**
+     * 블렌딩 공정 기준 배합량 (이론값) 계산
+     * - BOM_MST + 작업지시 계획수량(planQty) 기준
+     * - 원자재(RAW)만 합산
+     */
+    private Double calculateBlendStandardQty(WorkOrder workOrder) {
+
+        String prdId  = workOrder.getProduct().getPrdId();
+        Integer planQty = workOrder.getPlanQty();
+
+        // BOM + 필요수량 조회 (지금 handleLotOnFirstStepStart 에서 쓰는 쿼리 그대로 사용)
+        List<MaterialAvailabilityDTO> materials =
+                orderMapper.selectMaterials(prdId, planQty);
+
+        double totalRequiredQty = materials.stream()
+                .filter(m -> "RAW".equals(m.getMatType()))        // 원자재만
+                .mapToDouble(MaterialAvailabilityDTO::getRequiredQty)
+                .sum();
+
+        return totalRequiredQty;
+    }
+
+    /**
+     * 여과 공정 기준 배합량
+     * - 일단 블렌딩 기준 배합량과 동일하게 사용 (이론상 손실 없다고 가정)
+     * - 나중에 여과 손실률 반영하고 싶으면 여기서만 수정하면 됨
+     */
+    private Double calculateFilterStandardQty(WorkOrder workOrder) {
+        return calculateBlendStandardQty(workOrder);
+    }
+
 
     // =========================================================================
     // 3. 공정 단계 시작
@@ -514,8 +599,8 @@ public class WorkOrderProcessService {
 
         lotTraceService.registLotHistory(hist);
 
-        // ★ 여과/충전 시작 시 LOC만 바뀌는 경우가 있으면 processId로 분기해서 처리
-        // if ("PRC-FLTR".equals(processId)) { ... }
+        // 여과/충전 시작 시 LOC만 바뀌는 경우가 있으면 processId로 분기해서 처리
+        // if ("PRC-FLT".equals(processId)) { ... }
     }
 
 
@@ -529,6 +614,28 @@ public class WorkOrderProcessService {
 
         String orderId  = workOrder.getOrderId();
         String lineCode = workOrder.getLine().getLineId();
+        
+        // ==========================
+        // BOM 기반 원자재 필요량 계산
+        // ==========================
+        String prdId = workOrder.getProduct().getPrdId();
+        Integer planQty = workOrder.getPlanQty();
+
+        // Mapper에서 BOM + 재고까지 계산
+        List<MaterialAvailabilityDTO> materials =
+                orderMapper.selectMaterials(prdId, planQty);
+
+        double totalRequiredQty = materials.stream()
+        		.filter(m -> "RAW".equals(m.getMatType()))
+        		.mapToDouble(MaterialAvailabilityDTO::getRequiredQty)
+                .sum();
+
+        // 필요 원자재 부피 메모
+        String formatted = String.format("%,.0f", totalRequiredQty);
+        String memo = "필요 원자재 부피 합계: " + formatted + "ml (단위: BOM 기준)";
+        String originMemo = proc.getMemo();
+        proc.setMemo((originMemo == null ? "" : originMemo + "\n") + memo);
+
 
         // -----------------------------
         // 1) LOT_MASTER : WIP LOT 생성
@@ -546,8 +653,6 @@ public class WorkOrderProcessService {
 
         // LOT_MASTER INSERT + LOT_NO 생성
         String lotNo = lotTraceService.registLotMaster(lotMasterDTO, lineCode);
-
-        // (옵션) WOP에 lotNo 저장하고 싶으면
         proc.setLotNo(lotNo);
 
         // -----------------------------
@@ -636,7 +741,8 @@ public class WorkOrderProcessService {
      * - 마지막 단계 완료 시 WORK_ORDER 상태 COMPLETED + ACT_END_DATE 설정
      */
     @Transactional
-    public WorkOrderProcessStepDTO finishStep(String orderId, Integer stepSeq) {
+    public WorkOrderProcessStepDTO finishStep(String orderId, Integer stepSeq,
+    										  Integer goodQty, Integer defectQty, String memo) {
 
         WorkOrderProcess proc = workOrderProcessRepository
                 .findByWorkOrderOrderIdAndStepSeq(orderId, stepSeq)
@@ -648,6 +754,9 @@ public class WorkOrderProcessService {
 
         String processId = proc.getProcess().getProcessId();
         
+        proc.setGoodQty(goodQty);
+        proc.setDefectQty(defectQty);
+        
         // 1) 공정 상태는 항상 DONE 으로
         proc.setStatus("DONE");
         proc.setEndTime(LocalDateTime.now());
@@ -655,6 +764,13 @@ public class WorkOrderProcessService {
         // 2) 캡/펌프 공정인 경우에만 QC_RESULT PENDING 생성
         if ("PRC-CAP".equals(processId)) {
             qcResultService.createPendingQcResultForOrder(orderId);
+            
+            // 해당 공정 종료 시 QC 알림
+            String message = "새로 등록된 QC 검사가 있습니다.";
+            
+            // QC 섹션 공통 새로고침
+            alarmService.sendAlarmMessage(AlarmDestination.QC, message);
+            
         }
 
         // 3) 마지막 단계인지 확인
@@ -670,7 +786,7 @@ public class WorkOrderProcessService {
             String planId = workOrder.getPlanId();
             if (planId != null) {
 
-                // 🔹 같은 PLAN_ID 아래에 아직 COMPLETED 아닌 작업지시가 있는지 확인
+                // 같은 PLAN_ID 아래에 아직 COMPLETED 아닌 작업지시가 있는지 확인
                 boolean existsNotCompletedWo =
                         workOrderRepository.existsByPlanIdAndStatusNot(planId, "COMPLETED");
 

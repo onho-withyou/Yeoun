@@ -1,6 +1,7 @@
 package com.yeoun.lot.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -12,5 +13,7 @@ public interface LotRelationshipRepository extends JpaRepository<LotRelationship
 
 	// 부모 LOT 기준으로 자재 관계 조회
 	List<LotRelationship> findByOutputLot_LotNo(String lotNo);
+
+	Optional<LotRelationship> findByOutputLot_LotNoAndInputLot_LotNo(String outputLotNo, String inputLotNo);
 	
 }

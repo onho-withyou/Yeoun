@@ -374,14 +374,6 @@
 	.process-line.done::before {
 	    background: #6c5ce7;
 	}
-	
-	.process-line.partial::before {
-	    background: linear-gradient(
-	        to right,
-	        #6c5ce7 0% var(--progress),
-	        #e5e2ff var(--progress) 100%
-	    );
-	}
 
 	/* 박스들을 가로로 균등 배치 */
 	.process-boxes {
@@ -677,6 +669,10 @@
 	              <div class="col-3">
 	                <label class="form-label">계획 일자</label>
 	                <input type="date" class="form-control" id="planDate">
+	                <div class="invalid-feedback"
+	                     data-error-for="planStartDate" style="display:none;">
+	                     계획 일자는 필수 입력값입니다.
+	                </div>
 	              </div>
 	              <div class="col-3">
 	                <label class="form-label">시작 시간</label>
@@ -962,7 +958,7 @@
 		              <label class="form-label">비고</label>
 		              <textarea id="detailRemark"
 		              			class="form-control" rows="3"
-		              			style="resize: none;" readonly
+		              			style="resize: none;"
 		              ></textarea>
 		            </div>
 				    
@@ -981,7 +977,7 @@
       </div>
     </div>
 
-
+</div>
 </th:block>
 
 <th:block layout:fragment="myScript">
@@ -1221,8 +1217,8 @@
 
 	    document.getElementById("planDetail").innerText = `${product} (${remain} / ${total}개)`;
 	    document.getElementById("referTime").innerText = referTime;
-	    if (total < 336) {
-	    	document.getElementById("planQty").value = total;
+	    if (remain < 336) {
+	    	document.getElementById("planQty").value = remain;
 	    }
 	    
 	    const matchedOption = selectOptionByText("prdName", product);
@@ -1371,6 +1367,7 @@
   // ======================================================
   
 	let orderId;
+  	let outboundYn;
 	  
   function openDetailModal(workId) {
     console.log("Detail:", workId);
@@ -1382,6 +1379,7 @@
             .then(data => {
                 console.log("정보:::: " , data);
                 orderId = data.orderId;
+                outboundYn = data.outboundYn;
 
                   document.getElementById("detailOrderId").innerText = data.orderId;
                   document.getElementById("detailPrdName").innerText = data.prdName;
@@ -1394,7 +1392,6 @@
                   
                   const dataStatus = data.status;
                   const statusBtn = document.getElementById("btnReleased");
-                  const modifyBtn = document.getElementById("btnModify");
                   const cancelBtn = document.getElementById("btnCanceled");
                   const statusText = document.getElementById("detailStatus");
                   
@@ -1406,7 +1403,6 @@
                 	  }               	  
                 	  statusText.innerText = '준비';
                 	  statusBtn.disabled = false; // 확정버튼 활성화
-                	  modifyBtn.disabled = false; // 수정버튼 활성화
                 	  cancelBtn.disabled = false; // 취소버튼 활성화
                   } else {
                 	  statusBtn.innerText = '확정됨';
@@ -1431,7 +1427,6 @@
                 	  		statusText.innerText = '미정';
                 	  }
                 	  statusBtn.disabled = true; // 확정버튼 비활성화
-                	  modifyBtn.disabled = true; // 수정버튼 비활성화
                 	  cancelBtn.disabled = true; // 취소버튼 비활성화
                 	  
                   }
@@ -1452,10 +1447,8 @@
 				    
 				    if (dataStatus === "CREATED"){
 				    	select.disabled = false;
-				    	document.getElementById("detailRemark").readonly = false;
 				    } else {
 				    	select.disabled = true;
-				    	document.getElementById("detailRemark").readonly = true;
 				    }
 				});
 
@@ -1505,24 +1498,29 @@
   
   // 확정
   document.getElementById("btnReleased").addEventListener("click", async () => {
+	  console.log("orderid...............", orderId);
 	  updateStatus(orderId, "RELEASED", "작업지시가 확정되었습니다.");
   });
   
   // 취소
   document.getElementById("btnCanceled").addEventListener("click", async() => {
+	  
+	  if (outboundYn?.trim() === 'Y') {
+		  alert("출고가 완료된 작업지시는 취소가 불가능합니다.");
+	  	  return;
+	  }
 	  if (!confirm("정말 취소하시겠습니까?")) return;
 	  updateStatus(orderId, "CANCELED", "작업지시가 취소되었습니다.");
   });
   
   // 작업지시서 상태변경 공통 함수
   async function updateStatus (orderId, status, alertContent){
-	  return fetch (`/order/status/${orderId}`, {
+	  return fetch (`/order/status/${orderId}?status=${status}`, {
 		  method: "PATCH",
 		  headers: {
 		      "Content-Type": "application/json",
 		      [csrfHeader]: csrfToken
-		  },
-	      body: JSON.stringify({ status: status })
+		  }
 	  })
 	  .then(res => {
 		  if (!res.ok) throw new Error ("서버 오류 : " + res.status);
@@ -1540,6 +1538,39 @@
      })
      .catch(err => console.error("오류 발생:", err));
   }
+
+  // 수정
+  document.getElementById("btnModify").addEventListener("click", async () => {
+
+	  const prcBld = document.getElementById("PRC-BLD").value;
+	  const prcFlt = document.getElementById("PRC-FLT").value;
+	  const prcFil = document.getElementById("PRC-FIL").value;
+	  const prcCap = document.getElementById("PRC-CAP").value;
+	  const prcLbl = document.getElementById("PRC-LBL").value;
+	  const remark = document.getElementById("detailRemark").value;
+	  
+	  const payload = {
+		"PRC-BLD": prcBld,
+		"PRC-FLT": prcFlt,
+		"PRC-FIL": prcFil,
+		"PRC-CAP": prcCap,
+		"PRC-LBL": prcLbl,
+		"remark": remark
+	  };
+
+	  fetch (`/order/modify/${orderId}`, {
+		  method: "PATCH",
+		  headers: {
+			  "Content-Type": "application/json",
+			  [csrfHeader]: csrfToken
+		  },
+		  body: JSON.stringify(payload)
+	  })
+		.then(() => {
+		  alert("수정 완료");
+	  })
+	    .catch(err => console.error ("오류 발생", err));
+  });
   
 </script>
 </th:block>

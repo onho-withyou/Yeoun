@@ -25,5 +25,8 @@ public class ProdLine {
 	
 	@Column(nullable = false)
 	private String status;
+	
+	@Column(length = 500)
+	private String remark;
 
 }

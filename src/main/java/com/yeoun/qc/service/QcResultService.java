@@ -1,4 +1,5 @@
 package com.yeoun.qc.service;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,7 +10,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.yeoun.common.dto.FileAttachDTO;
+import com.yeoun.common.entity.FileAttach;
+import com.yeoun.common.repository.FileAttachRepository;
+import com.yeoun.common.util.FileUtil;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.entity.LotMaster;
@@ -31,6 +37,7 @@ import com.yeoun.qc.entity.QcResultDetail;
 import com.yeoun.qc.repository.QcResultDetailRepository;
 import com.yeoun.qc.repository.QcResultRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -47,6 +54,10 @@ public class QcResultService {
     // LOT 연동용
     private final LotTraceService lotTraceService;
     private final LotMasterRepository lotMasterRepository;
+    
+    // 파일
+    private final FileUtil fileUtil;
+    private final FileAttachRepository fileAttachRepository;
     
     // --------------------------------------------------------------
     // 캡/펌프 공정 종료 시 호출되는 QC 결과 생성 메서드
@@ -190,6 +201,9 @@ public class QcResultService {
 				qdrDTO.setItemName(item.getItemName());
 				qdrDTO.setUnit(item.getUnit());
 				qdrDTO.setStdText(buildStdText(item));
+				
+				qdrDTO.setMinValue(item.getMinValue());
+			    qdrDTO.setMaxValue(item.getMaxValue());
 			}
 			
 			qdrDTO.setMeasureValue(d.getMeasureValue());
@@ -266,17 +280,53 @@ public class QcResultService {
 	        QcResultDetail detail = qcResultDetailRepository.findById(row.getQcResultDtlId())
 	                .orElseThrow(() -> new IllegalArgumentException(
 	                        "QC 상세가 존재하지 않습니다. ID = " + row.getQcResultDtlId()));
+	        
+	        // 해당 QC 항목 조회 (min/max 기준 확인용)
+	        QcItem item = qcItemRepository.findById(detail.getQcItemId())
+	                .orElse(null);
 
 	        // 2-2) 모달에서 입력한 값 반영
 	        detail.setMeasureValue(row.getMeasureValue()); // 측정값
-	        detail.setResult(row.getResult());             // PASS / FAIL
-	        detail.setRemark(row.getRemark());             // 비고
+	        
+	        // 기본은 사용자가 선택한 결과
+	        String result = row.getResult();
+	        
+	        // min/max 기준 있는 항목이면 자동판정
+	        if (item != null && (item.getMinValue() != null || item.getMaxValue() != null)) {
 
-	        // 2-3) 수정자 
+	            String mv = row.getMeasureValue();
+
+	            if (mv != null && !mv.isBlank()) {
+	                try {
+	                    BigDecimal value = new BigDecimal(mv);
+
+	                    boolean pass = true;
+
+	                    if (item.getMinValue() != null &&
+	                            value.compareTo(item.getMinValue()) < 0) {
+	                        pass = false;
+	                    }
+	                    if (item.getMaxValue() != null &&
+	                            value.compareTo(item.getMaxValue()) > 0) {
+	                        pass = false;
+	                    }
+
+	                    result = pass ? "PASS" : "FAIL";
+
+	                } catch (NumberFormatException e) {
+	                    result = "FAIL";
+	                }
+	            } else {
+	                result = "FAIL";
+	            }
+	        }
+	        
+	        detail.setResult(result);
+	        detail.setRemark(row.getRemark());             // 비고
 	        detail.setUpdatedUser(loginEmpId);
 
 	        // 2-3) 전체 판정 계산용 체크
-	        if (row.getResult() != null && row.getResult().equalsIgnoreCase("FAIL")) {
+	        if ("FAIL".equalsIgnoreCase(result)) {
 	            allPass = false;
 	        }
 
@@ -354,13 +404,12 @@ public class QcResultService {
 	// QC 결과에 따라 LOT_MASTER + LOT_HISTORY + WORK_ORDER 상태 반영
 	// - LOT_HISTORY.EVENT_TYPE = QC_RESULT
 	// - LOT_HISTORY.STATUS     = LOT_STATUS(IN_PROCESS / SCRAPPED 등)
-	// - 필요 시 WORK_ORDER.STATUS = QC_HOLD / QC_FAIL 등으로 변경
 	// ----------------------------------------------------------
 	@Transactional
 	private void applyQcResultToLotAndWorkOrder(QcResult header) {
 
 	    String orderId = header.getOrderId();
-	    String result  = header.getOverallResult();   // PASS / FAIL / PENDING / HOLD 등
+	    String result  = header.getOverallResult();   // PASS / FAIL
 
 	    // 1) 작업지시 조회
 	    WorkOrder workOrder = workOrderRepository.findById(orderId)
@@ -417,17 +466,11 @@ public class QcResultService {
 	            lot.setStatusChangeDate(LocalDateTime.now());
 	            // 작업지시 상태는 기존 공정 로직에서 마지막 공정 완료 시 COMPLETED 처리
 	        }
-	        case "HOLD" -> {
-	            // HOLD: LOT은 물리적으로 그대로지만, 작업지시는 QC_HOLD 상태로 묶어두기
-	            lot.setCurrentStatus("IN_PROCESS");
-	            lot.setStatusChangeDate(LocalDateTime.now());
-	            workOrder.setStatus("QC_HOLD");  // ⚠️ 새 코드이니 코드테이블 쓰면 같이 추가 필요
-	        }
 	        case "FAIL" -> {
 	            // FAIL: 불량/폐기 처리
 	            lot.setCurrentStatus("SCRAPPED");    // LOT_STATUS
 	            lot.setStatusChangeDate(LocalDateTime.now());
-	            workOrder.setStatus("QC_FAIL");      // ⚠️ 마찬가지로 새 상태코드
+	            workOrder.setStatus("SCRAPPED");
 	        }
 	        default -> {
 	            // PENDING 등은 상태 변경 없음
@@ -439,7 +482,6 @@ public class QcResultService {
 	private String mapQcResultToLotStatus(String result) {
 	    return switch (result) {
 	        case "PASS" -> "IN_PROCESS";  // 계속 공정 진행
-	        case "HOLD" -> "IN_PROCESS";  // 대기지만 LOT 입장에서는 생산중 상태로 유지
 	        case "FAIL" -> "SCRAPPED";    // 폐기
 	        default -> "IN_PROCESS";
 	    };
@@ -521,6 +563,69 @@ public class QcResultService {
 
 	    return view;
 	}
+
+	// -----------------------------------------------------------------------------------------------
+	// QC 상세 항목별 첨부파일 저장
+    @Transactional
+    public void saveQcDetailFiles(String qcResultDtlId, List<MultipartFile> files) throws IOException {
+
+        if (files == null || files.isEmpty()) {
+            return;
+        }
+
+        // 1) 상세 엔티티 조회
+        QcResultDetail detail = qcResultDetailRepository.findById(qcResultDtlId)
+                .orElseThrow(() -> new EntityNotFoundException("QC 상세가 존재하지 않습니다. ID=" + qcResultDtlId));
+
+        // 2) FileUtil로 실제 파일 업로드 (공지와 동일)
+        List<FileAttach> fileList = fileUtil.uploadFile(detail, files)
+                .stream()
+                .map(FileAttachDTO::toEntity)
+                .toList();
+
+        // 3) FILE_ATTACH DB 저장
+        fileAttachRepository.saveAll(fileList);
+    }
+
+    // QC 상세 항목별 첨부파일 조회
+    @Transactional
+    public List<FileAttachDTO> getQcDetailFiles(String qcResultDtlId) {
+    	
+    	Long fileRefId = QcFileKeyUtil.toFileRefId(qcResultDtlId);
+
+        // REF_TABLE, REF_ID 기준으로 FILE_ATTACH 조회
+        List<FileAttach> fileList =
+                fileAttachRepository.findByRefTableAndRefId("QC_RESULT_DETAIL", fileRefId);
+
+        return fileList.stream()
+                .map(FileAttachDTO::fromEntity)
+                .toList();
+    }
+    
+    // String -> Long
+    public class QcFileKeyUtil {
+
+        // "QCD-0012-003" -> 12003 이런 식으로 변환
+        public static Long toFileRefId(String qcResultDtlId) {
+            if (qcResultDtlId == null || qcResultDtlId.isBlank()) {
+                return null;
+            }
+
+            // "QCD-0012-003" 기준
+            String[] parts = qcResultDtlId.split("-");
+            if (parts.length != 3) {
+                throw new IllegalArgumentException("QC_RESULT_DTL_ID 형식 오류: " + qcResultDtlId);
+            }
+
+            long header = Long.parseLong(parts[1]); // 0012 -> 12
+            long seq    = Long.parseLong(parts[2]); // 003  -> 3
+
+            // 헤더당 최대 999개 항목까지 커버 
+            return header * 1000L + seq;
+        }
+    }
+
+
 
 
     

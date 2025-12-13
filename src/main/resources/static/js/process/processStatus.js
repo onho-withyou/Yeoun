@@ -266,7 +266,9 @@ function renderProcessDetail(detail) {
           <button type="button"
                   class="btn btn-success btn-sm btn-step-finish ms-1"
                   data-order-id="${summary.orderId}"
-                  data-step-seq="${step.stepSeq}">
+                  data-step-seq="${step.stepSeq}"
+				  data-standard-qty="${step.standardQty ?? ''}"
+				  data-plan-qty="${step.planQty}">
             종료
           </button>
         `;
@@ -289,6 +291,9 @@ function renderProcessDetail(detail) {
              data-step-seq="${step.stepSeq}"
              value="${step.memo ? step.memo : ""}">
     `;
+	
+	const goodQtyText   = (step.goodQty   ?? "") === "" ? "-" : step.goodQty;
+	const defectQtyText = (step.defectQty ?? "") === "" ? "-" : step.defectQty;
 
     tr.innerHTML = `
       <td>${step.stepSeq}</td>
@@ -301,6 +306,8 @@ function renderProcessDetail(detail) {
       <td>${statusBadge}</td>
       <td>${formatDateTime(step.startTime)}</td>
       <td>${formatDateTime(step.endTime)}</td>
+	  <td class="text-end">${goodQtyText}</td>
+	  <td class="text-end">${defectQtyText}</td>
       <td>${workBtnHtml}</td>
       <td>${memoInputHtml}</td>
     `;
@@ -351,11 +358,57 @@ document.addEventListener("click", (e) => {
   }
 
   if (e.target.classList.contains("btn-step-finish")) {
-    const btn     = e.target;
-    const orderId = btn.dataset.orderId;
-    const stepSeq = btn.dataset.stepSeq;
+    const btn      = e.target;
+    const orderId  = btn.dataset.orderId;
+    const stepSeq  = btn.dataset.stepSeq;
+    const planQty  = btn.dataset.planQty || "";
+    const standard = btn.dataset.standardQty || "";
 
-    handleFinishStep(orderId, stepSeq);
+    // hidden input 세팅
+    document.getElementById("finish-orderId").value  = orderId;
+    document.getElementById("finish-stepSeq").value  = stepSeq;
+    document.getElementById("finish-goodQty").value  = "";
+    document.getElementById("finish-defectQty").value = "";
+
+    // 계획 수량 표시 (있으면)
+    const planInput = document.getElementById("finish-planQty");
+    if (planInput) {
+      planInput.value = planQty ? planQty + " EA" : "-";
+    }
+
+    // 기준값 라벨/도움말/값 세팅
+    const labelEl = document.getElementById("finish-standardLabel");
+    const helpEl  = document.getElementById("finish-standardHelp");
+    const stdInput = document.getElementById("finish-standardQty");
+
+    const stepNum = parseInt(stepSeq, 10);
+
+    if (!isNaN(stepNum) && stepNum <= 2) {
+      // 1~2단계: 기준 배합량 
+      if (labelEl) labelEl.textContent = "기준 배합량 (표준)";
+      if (helpEl)  helpEl.textContent  = "BOM과 계획수량을 기준으로 계산된 이론 배합량입니다.";
+
+      if (standard) {
+        stdInput.value = standard + " ml";   
+      } else {
+        stdInput.value = "-";
+      }
+
+    } else {
+      // 3단계 이후: 기준 완제품 수량 (이론)
+      if (labelEl) labelEl.textContent = "기준 완제품 수량 (이론)";
+      if (helpEl)  helpEl.textContent  = "현재 배합량으로 이론상 생산 가능한 완제품 개수입니다.";
+
+      if (standard) {
+        stdInput.value = standard + " EA";
+      } else {
+        stdInput.value = "-";
+      }
+    }
+
+    // 모달 오픈
+    const modal = new bootstrap.Modal(document.getElementById("finishModal"));
+    modal.show();
   }
 
   // QC 등록 버튼
@@ -422,38 +475,56 @@ function handleStartStep(orderId, stepSeq) {
 // -------------------------------
 // 공정 종료
 // -------------------------------
-function handleFinishStep(orderId, stepSeq) {
-  if (!confirm('해당 공정을 종료 처리하시겠습니까?')) {
-    return;
-  }
+document.getElementById("btnFinishSubmit").addEventListener("click", () => {
 
+    const orderId  = document.getElementById("finish-orderId").value;
+    const stepSeq  = document.getElementById("finish-stepSeq").value;
+    const goodQty  = document.getElementById("finish-goodQty").value;
+    const defectQty = document.getElementById("finish-defectQty").value;
+
+    if (goodQty === "" || defectQty === "") {
+        alert("양품/불량 수량을 모두 입력해주세요.");
+        return;
+    }
+
+    // API 호출
+    finishStepWithQty(orderId, stepSeq, goodQty, defectQty);
+});
+
+function finishStepWithQty(orderId, stepSeq, goodQty, defectQty) {
+  
   const headers = { 'Content-Type': 'application/json' };
-  if (typeof csrfHeader !== 'undefined' && typeof csrfToken !== 'undefined') {
-    headers[csrfHeader] = csrfToken;
-  }
+  if (typeof csrfHeader !== 'undefined') headers[csrfHeader] = csrfToken;
 
   fetch('/process/status/step/finish', {
     method: 'POST',
     headers: headers,
-    body: JSON.stringify({ orderId, stepSeq })
+    body: JSON.stringify({
+      orderId,
+      stepSeq,
+      goodQty,
+      defectQty
+    })
   })
     .then(res => res.json())
     .then(result => {
       if (!result.success) {
-        alert(result.message || '공정 종료 처리 중 오류가 발생했습니다.');
+        alert(result.message || '공정 종료 처리 중 오류');
         return;
       }
 
-      alert(result.message || '공정을 종료 처리했습니다.');
+      alert("공정이 종료되었습니다.");
+      
+      // 모달 닫기
+      const modal = bootstrap.Modal.getInstance(document.getElementById("finishModal"));
+      modal.hide();
 
       const detail = result.detail;
-      if (detail) {
-        renderProcessDetail(detail);
-      }
+      if (detail) renderProcessDetail(detail);
     })
     .catch(err => {
-      console.error('공정 종료 처리 오류', err);
-      alert('공정 종료 처리 중 오류가 발생했습니다.');
+      console.error(err);
+      alert("공정 종료 처리 중 오류가 발생했습니다.");
     });
 }
 
@@ -551,7 +622,9 @@ function updateStepRowInModal(updatedStep) {
         <button type="button"
                 class="btn btn-success btn-sm btn-step-finish ms-1"
                 data-order-id="${updatedStep.orderId}"
-                data-step-seq="${updatedStep.stepSeq}">
+                data-step-seq="${updatedStep.stepSeq}"
+				data-standard-qty="${updatedStep.standardQty ?? ''}"
+				data-plan-qty="${updatedStep.planQty}">
           종료
         </button>
       `;
@@ -575,6 +648,9 @@ function updateStepRowInModal(updatedStep) {
            value="${updatedStep.memo ? updatedStep.memo : ""}">
   `;
 
+  const goodQtyText   = (updatedStep.goodQty   ?? "") === "" ? "-" : updatedStep.goodQty;
+  const defectQtyText = (updatedStep.defectQty ?? "") === "" ? "-" : updatedStep.defectQty;
+
   targetRow.innerHTML = `
     <td>${updatedStep.stepSeq}</td>
     <td>${updatedStep.processId}</td>
@@ -586,6 +662,8 @@ function updateStepRowInModal(updatedStep) {
     <td>${statusBadge}</td>
     <td>${formatDateTime(updatedStep.startTime)}</td>
     <td>${formatDateTime(updatedStep.endTime)}</td>
+	<td class="text-end">${goodQtyText}</td>
+    <td class="text-end">${defectQtyText}</td>
     <td>${workBtnHtml}</td>
     <td>${memoInputHtml}</td>
   `;

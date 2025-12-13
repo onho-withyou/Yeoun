@@ -33,6 +33,9 @@ public class WorkOrderProcessStepDTO {
 	// 종료시간
 	private LocalDateTime endTime;
 	
+	// 계획수량
+	private Integer planQty;
+
 	// 양품
 	private Integer goodQty;
 	
@@ -41,6 +44,10 @@ public class WorkOrderProcessStepDTO {
 	
 	// 특이사항
 	private String memo;
+	
+	// 기준배합량
+	private Double standardQty;
+	
 	
 	// =================================
 	// 화면용

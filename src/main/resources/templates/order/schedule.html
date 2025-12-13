@@ -8,7 +8,7 @@
 
     <link rel="stylesheet"
           href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
-
+	<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.min.css" />
     <style>
         body {
             background: #f4f3fb;
@@ -33,7 +33,7 @@
 
         /* 왼쪽: 캘린더 */
         .calendar-panel {
-            flex: 8;
+            flex: 7;
             background: white;
             border-radius: 12px;
             padding: 10px;
@@ -42,7 +42,7 @@
 
         /* 오른쪽: 작업자 테이블 */
         .worker-panel {
-            flex: 2;
+            flex: 3;
             background: white;
             border-radius: 12px;
             padding: 10px;
@@ -110,7 +110,8 @@
 </th:block>
 
 <th:block layout:fragment="myScript">
-<script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
+	<script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
+    <script src="https://uicdn.toast.com/grid/latest/tui-grid.min.js"></script>
     <script>
         // v2에서는 전역에 tui.Calendar로 올라옴
         const Calendar = tui.Calendar;
@@ -151,6 +152,57 @@
                 isReadOnly: true
             }
         ]);
+        
+     // Toast UI Grid 생성
+        const workerGrid = new tui.Grid({
+            el: document.getElementById('workerList'),
+            bodyHeight: 'fitToParent',
+            rowHeaders: ['checkbox'],   // 체크박스
+            scrollX: false,
+            scrollY: true,
+
+            columns: [
+                {
+                    header: '사번',
+                    name: 'empId',
+                    width: 90,
+                    align: 'center'
+                },
+                {
+                    header: '이름',
+                    name: 'empName',
+                    width: 60
+                },
+                {
+                    header: '담당설비',
+                    name: 'defaultEquip',
+                    width: 90,
+                    align: 'center'
+                },
+                {
+                    header: '상태',
+                    name: 'status',
+                    width: 60,
+                    align: 'center',
+                    formatter({ value }) {
+                        let color = '#4b5563'; // gray
+                        if (value === '작업가능') color = '#10b981'; // green
+                        if (value === '작업중') color = '#6366f1'; // indigo
+                        if (value === '자리비움') color = '#f43f5e'; // red
+
+                        return `<span style="
+                            padding: 4px 8px;
+                            border-radius: 6px;
+                            font-weight: 600;
+                            color: white;
+                            background: ${color};
+                            font-size: 0.85rem;
+                        ">${value}</span>`;
+                    }
+                }
+            ]
+        });
+
     </script>
 </th:block>
 </body>

@@ -21,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -151,13 +152,13 @@ public class ClientController {
     
     
     /* ======================================================
-    8. 협력사 취급제품
- ====================================================== */
+        8. 협력사 취급제품
+    ====================================================== */
     
     @PostMapping("/{clientId}/items")
     @ResponseBody
     public String saveItems(
-    		 @PathVariable("clientId") String clientId,
+            @PathVariable("clientId") String clientId,
             @RequestBody List<ClientItemDTO> items,
             @AuthenticationPrincipal LoginDTO login
     ) {
@@ -174,8 +175,8 @@ public class ClientController {
     
     
     /* ======================================================
-    	9. 협력사 취급제품 등록
- 	====================================================== */
+        9. 협력사 취급제품 등록
+    ====================================================== */
   
     
     @GetMapping("/{clientId}/items/create")
@@ -226,18 +227,185 @@ public class ClientController {
         return "redirect:/sales/client/" 
         + clientId 
         + "?tab=item";
-
-
     }
     
-    //고객사 정보 수정
+    
+    /* ======================================================
+        10. 🔥 협력사 취급제품 수정 페이지
+    ====================================================== */
+    @GetMapping("/{clientId}/items/{itemId}/edit")
+    public String itemEditPage(
+            @PathVariable("clientId") String clientId,
+            @PathVariable("itemId") Long itemId,
+            Model model,
+            RedirectAttributes rttr
+    ) {
+        ClientItem item = itemRepository.findById(itemId)
+                .orElse(null);
+        
+        if (item == null) {
+            rttr.addFlashAttribute("msg", "존재하지 않는 품목입니다.");
+            return "redirect:/sales/client/" + clientId + "?tab=item";
+        }
+
+        MaterialMst material = materialRepository.findById(item.getMaterialId())
+                .orElse(null);
+
+        model.addAttribute("clientId", clientId);
+        model.addAttribute("item", item);
+        model.addAttribute("material", material);
+
+        return "sales/supplier_item_edit";
+    }
+
+
+    /* ======================================================
+        11. 🔥 협력사 취급제품 수정 프로세스
+    ====================================================== */
+    @PostMapping("/{clientId}/items/{itemId}/edit")
+    public String itemEditProcess(
+            @PathVariable("clientId") String clientId,
+            @PathVariable("itemId") Long itemId,
+            @RequestParam("unitPrice") BigDecimal unitPrice,
+            @RequestParam("moq") BigDecimal moq,
+            @RequestParam("supplyAvailable") String supplyAvailable,
+            @RequestParam("unit") String unit,
+            @RequestParam("orderUnit") BigDecimal orderUnit,
+            @RequestParam("leadDays") BigDecimal leadDays,
+            @AuthenticationPrincipal LoginDTO login,
+            RedirectAttributes rttr
+    ) {
+        ClientItem item = itemRepository.findById(itemId)
+                .orElse(null);
+
+        if (item == null) {
+            rttr.addFlashAttribute("msg", "존재하지 않는 품목입니다.");
+            return "redirect:/sales/client/" + clientId + "?tab=item";
+        }
+
+        // 수정
+        item.setUnitPrice(unitPrice);
+        item.setMinOrderQty(moq);
+        item.setSupplyAvailable(supplyAvailable);
+        item.setUnit(unit);
+        item.setOrderUnit(orderUnit);
+        item.setLeadDays(leadDays);
+        item.setUpdatedBy(login.getEmpId());
+        item.setUpdatedAt(LocalDateTime.now());
+
+        itemRepository.save(item);
+
+        rttr.addFlashAttribute("msg", "품목이 수정되었습니다.");
+        return "redirect:/sales/client/" + clientId + "?tab=item";
+    }
+
+
+    /* ======================================================
+        12. 🔥 협력사 취급제품 인라인 수정 (AG Grid용)
+    ====================================================== */
+    @PutMapping("/{clientId}/items/{itemId}/update")
+    @ResponseBody
+    public String updateItemInline(
+            @PathVariable("clientId") String clientId,
+            @PathVariable("itemId") Long itemId,
+            @RequestBody Map<String, Object> payload,
+            @AuthenticationPrincipal LoginDTO login
+    ) {
+        ClientItem item = itemRepository.findById(itemId)
+                .orElse(null);
+
+        if (item == null) {
+            throw new RuntimeException("존재하지 않는 품목입니다.");
+        }
+
+        // 값 업데이트
+        if (payload.containsKey("unitPrice")) {
+            item.setUnitPrice(new BigDecimal(payload.get("unitPrice").toString()));
+        }
+        if (payload.containsKey("moq")) {
+            item.setMinOrderQty(new BigDecimal(payload.get("moq").toString()));
+        }
+        if (payload.containsKey("unit")) {
+            item.setUnit(payload.get("unit").toString());
+        }
+        if (payload.containsKey("orderUnit")) {
+            item.setOrderUnit(new BigDecimal(payload.get("orderUnit").toString()));
+        }
+        if (payload.containsKey("leadDays")) {
+            item.setLeadDays(new BigDecimal(payload.get("leadDays").toString()));
+        }
+        if (payload.containsKey("supplyAvailable")) {
+            item.setSupplyAvailable(payload.get("supplyAvailable").toString());
+        }
+
+        item.setUpdatedBy(login.getEmpId());
+        item.setUpdatedAt(LocalDateTime.now());
+
+        itemRepository.save(item);
+
+        return "OK";
+    }
+
+
+    /* ======================================================
+        13. 🔥 협력사 취급제품 상태 변경 (활성/비활성)
+    ====================================================== */
+    @PutMapping("/{clientId}/items/{itemId}/status")
+    @ResponseBody
+    public String updateItemStatus(
+            @PathVariable("clientId") String clientId,
+            @PathVariable("itemId") Long itemId,
+            @RequestBody Map<String, String> payload,
+            @AuthenticationPrincipal LoginDTO login
+    ) {
+        ClientItem item = itemRepository.findById(itemId)
+                .orElse(null);
+
+        if (item == null) {
+            throw new RuntimeException("존재하지 않는 품목입니다.");
+        }
+
+        String newStatus = payload.get("supplyAvailable");
+        item.setSupplyAvailable(newStatus);
+        item.setUpdatedBy(login.getEmpId());
+        item.setUpdatedAt(LocalDateTime.now());
+
+        itemRepository.save(item);
+
+        return "OK";
+    }
+
+
+    /* ======================================================
+        13. 🔥 협력사 취급제품 삭제 (선택 사항)
+    ====================================================== */
+    @DeleteMapping("/{clientId}/items/{itemId}")
+    @ResponseBody
+    public String deleteItem(
+            @PathVariable("clientId") String clientId,
+            @PathVariable("itemId") Long itemId,
+            @AuthenticationPrincipal LoginDTO login
+    ) {
+        ClientItem item = itemRepository.findById(itemId)
+                .orElse(null);
+
+        if (item == null) {
+            throw new RuntimeException("존재하지 않는 품목입니다.");
+        }
+
+        itemRepository.delete(item);
+
+        return "OK";
+    }
+    
+    
+    /* ======================================================
+        14. 고객사 정보 수정
+    ====================================================== */
     @PostMapping("/update")
     @ResponseBody
     public String update(@RequestBody Client client) {
         clientService.update(client);
         return "OK";
     }
-
-
-
 }

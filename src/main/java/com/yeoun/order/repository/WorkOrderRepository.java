@@ -25,11 +25,18 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, String> {
         SELECT COALESCE(SUM(w.PLAN_QTY), 0) 
             FROM WORK_ORDER w
             WHERE w.PLAN_ID = :planId
+            AND w.STATUS != 'CANCELED'
     """, nativeQuery = true)
 	Integer sumWorkOrderQty(@Param("planId")String planId);
 
 	// 출고 상태가 'N'인 작업지시서 조회
-	List<WorkOrder> findByOutboundYn(String outboundYn);
+	@Query("""
+		    SELECT w
+		    FROM WorkOrder w
+		    WHERE w.outboundYn = :outboundYn
+		    AND w.status != 'CANCELED'
+		""")
+	List<WorkOrder> findByOutboundYn(@Param("outboundYn") String outboundYn);
 
 	// 작업지시서 조회
 	Optional<WorkOrder> findByOrderId(String workOrderId);
