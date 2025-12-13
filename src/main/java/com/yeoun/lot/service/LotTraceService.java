@@ -255,7 +255,7 @@ public class LotTraceService {
 	            .lotNo(lot.getLotNo())
 	            .productCode(productCode)
 	            .productName(productName)
-	            .productType(productType)
+	            .productType(labelOf(productType))
 	            .lotStatusLabel(statusLabel)
 	            .workOrderId(wo != null ? wo.getOrderId() : null)
 	            .planQty(planQty)
@@ -364,7 +364,7 @@ public class LotTraceService {
 	            	            .prodEquipId(pe.getEquipId())
 	            	            .equipCode(mst != null ? mst.getEquipId() : null)
 	            	            .equipName(pe.getEquipName())
-	            	            .status(pe.getStatus())
+	            	            .status(labelOf(pe.getStatus()))
 	            	            .stdName(mst != null ? mst.getEquipName() : null)
 	            	            .koName(mst != null ? mst.getKoName() : null)
 	            	            .build();
@@ -390,7 +390,7 @@ public class LotTraceService {
 		return LotProcessDetailDTO.builder()
 		        .processId(processId)
 		        .processName(processName)
-		        .status(wop.getStatus())
+		        .status(labelOf(wop.getStatus()))
 		        .deptName(deptName)
 		        .workerId(workerId)
 		        .workerName(workerName)
@@ -492,12 +492,12 @@ public class LotTraceService {
 	    return LotMaterialDetailDTO.builder()
 	        .usedQty(lr.getUsedQty())
 	        .lotNo(lot.getLotNo())
-	        .lotType(lot.getLotType())
-	        .lotStatus(lot.getCurrentStatus())
+	        .lotType(labelOf(lot.getLotType()))
+	        .lotStatus(labelOf(lot.getCurrentStatus()))
 	        .lotCreatedDate(lot.getCreatedDate())
 	        .matId(m != null ? m.getMatId() : null)
 	        .matName(m != null ? m.getMatName() : lot.getDisplayName())
-	        .matType(m != null ? m.getMatType() : null)
+	        .matType(labelOf(m != null ? m.getMatType() : null))
 	        .matUnit(m != null ? m.getMatUnit() : null)
 	        .inboundId(ii != null && ii.getInbound() != null ? ii.getInbound().getInboundId() : null)
 	        .inboundAmount(ii != null ? ii.getInboundAmount() : null)
@@ -505,7 +505,7 @@ public class LotTraceService {
 	        .expirationDate(ii != null ? ii.getExpirationDate() : null)
 	        .inboundLocationId(ii != null ? ii.getLocationId() : null)
 	        .ivAmount(inv != null ? inv.getIvAmount() : null)
-	        .ivStatus(inv != null ? inv.getIvStatus() : null)
+	        .ivStatus(labelOf(inv != null ? inv.getIvStatus() : null))
 	        .inventoryLocationId(inv != null && inv.getWarehouseLocation() != null ? inv.getWarehouseLocation().getLocationId() : null)
 	        .ibDate(inv != null ? inv.getIbDate() : null)
 	        .clientId(client != null ? client.getClientId() : null)
@@ -517,7 +517,45 @@ public class LotTraceService {
 
 	
 
+	private static final Map<String, String> STATUS_LABEL = Map.ofEntries(
+		// LOT 상태
+	    Map.entry("NEW", "신규"),
+	    Map.entry("IN_PROCESS", "진행 중"),
+	    Map.entry("PROD_DONE", "생산 완료"),
+	    
+	    Map.entry("IN_PROGRESS", "진행 중"),
+	    Map.entry("READY", "대기"),
+	    Map.entry("DONE", "완료"),
+	    
+	    // 재고 상태
+	    Map.entry("NORMAL", "정상"),
+	    Map.entry("HOLD", "보류"),
+	    Map.entry("SCRAPPED", "폐기"),
+	    Map.entry("EXPIRED", "유통기한 경과"),
+	    
+	    // LOT/자재 유형
+	    Map.entry("RAW", "원재료"),
+	    Map.entry("SUB", "부자재"),
+	    Map.entry("PKG", "포장재"),
+	    Map.entry("FIN", "완제품"),
 
+	    // 설비 상태
+	    Map.entry("RUN", "가동"),
+	    Map.entry("STOP", "정지"),
+	    Map.entry("BREAKDOWN", "고장"),
+	    Map.entry("MAINTENANCE", "점검")
+	);
+
+	private String labelOf(String code) {
+	    if (code == null) return "-";
+	    String key = code.trim();          // 공백 제거
+	    if (key.isEmpty()) return "-";
+
+	    // 영어 코드들은 대문자로 통일해서 매칭 (한글은 영향 없음)
+	    String upper = key.toUpperCase();
+
+	    return STATUS_LABEL.getOrDefault(upper, key);
+	}
 
 	
 	

@@ -216,10 +216,10 @@ function renderProcessDetail(detail) {
 	      // 상태 뱃지
 	      const status = eq.status || "-";
 	      const badgeClass =
-	        status === "RUN" ? "bg-success" :
-	        status === "STOP" ? "bg-secondary" :
-	        status === "BREAKDOWN" ? "bg-danger" :
-	        status === "MAINTENANCE" ? "bg-warning text-dark" :
+	        status === "가동" ? "bg-success" :
+	        status === "정지" ? "bg-secondary" :
+	        status === "고장" ? "bg-danger" :
+	        status === "점검" ? "bg-warning text-dark" :
 	        "bg-light text-dark";
 
 	      row.innerHTML = `
