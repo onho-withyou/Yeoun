@@ -416,10 +416,9 @@ public class LotTraceService {
 		// 2) 원자재 LOT 꺼내기
 	    LotMaster lot = lr.getInputLot();          // inputLot == 원자재 LOT
 	    MaterialMst m = (lot != null) ? lot.getMaterial() : null;
-	    String lotNo = (lot != null) ? lot.getLotNo() : null;
 
 	    // 3) lotNo로 입고/재고
-	    InboundItem ii = inboundItemRepository.findLatestByLotNo(lotNo)
+	    InboundItem ii = inboundItemRepository.findTopByLotNoOrderByInboundItemIdDesc(inputLotNo)
 	    		.orElse(null);
 	    
 	    Inventory inv = inventoryRepository.findTopByLotNoOrderByIvIdDesc(inputLotNo)
