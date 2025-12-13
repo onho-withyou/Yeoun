@@ -78,12 +78,18 @@
         white-space:nowrap;
       }
       .nowrap{ white-space:nowrap; }
+      
+      .kpi-card { cursor: pointer; transition: transform .12s ease, box-shadow .12s ease; }
+	  .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,.08); }
+	  .kpi-link { cursor: pointer; text-decoration: none; }
+	  .kpi-link:hover { text-decoration: underline; }
     </style>
 
     <!-- 1) KPI 카드 4개 -->
     <div class="row g-3 mb-3">
       <div class="col-12 col-md-6 col-xl-3">
-        <div class="card card-soft">
+        <div class="card card-soft kpi-card" data-link="/order/list" role="button" tabindex="0"
+             aria-label="오늘 작업지시 목록으로 이동">
           <div class="card-body">
             <div class="kpi-title">오늘 작업지시</div>
             <div class="d-flex align-items-end justify-content-between">
@@ -103,7 +109,8 @@
       </div>
 
       <div class="col-12 col-md-6 col-xl-3">
-        <div class="card card-soft">
+        <div class="card card-soft kpi-card" data-link="/process/status" role="button" tabindex="0"
+         	 aria-label="진행 중 공정 현황으로 이동">
           <div class="card-body">
             <div class="kpi-title">진행 중 작업</div>
             <div class="d-flex align-items-end justify-content-between">
@@ -114,7 +121,8 @@
       </div>
 
       <div class="col-12 col-md-6 col-xl-3">
-        <div class="card card-soft">
+        <div class="card card-soft kpi-card" data-link="/process/status" role="button" tabindex="0"
+        	 aria-label="지연 작업 현황으로 이동">
           <div class="card-body">
             <div class="kpi-title">지연 작업</div>
             <div class="d-flex align-items-end justify-content-between">
@@ -126,19 +134,22 @@
       </div>
 
 		<div class="col-12 col-md-6 col-xl-3">
-		  <div class="card card-soft">
+		  <div class="card card-soft kpi-card" data-link="/qc/regist" role="button" tabindex="0"
+         	   aria-label="QC 화면으로 이동">
 		    <div class="card-body">
-		
 		      <div class="kpi-title">QC 대기 / 불합격</div>
-		
 		      <div class="d-flex align-items-end justify-content-between">
-		        <!-- 큰 숫자 -->
 		        <div class="kpi-value">
-		          <span th:text="${kpi.qcPendingOrders}">0</span>
+		          <a class="kpi-link" href="/qc/regist?status=PENDING" onclick="event.stopPropagation();"
+	                 aria-label="QC 대기 목록으로 이동">
+	              	<span th:text="${kpi.qcPendingOrders}">0</span>
+	              </a>
 		          <span class="text-muted fs-5"> / </span>
-		          <span th:text="${kpi.qcFailSteps}">0</span>
+		          <a class="kpi-link" href="/qc/result?status=FAIL" onclick="event.stopPropagation();"
+               		 aria-label="QC 불합격 목록으로 이동">
+              	    <span th:text="${kpi.qcFailSteps}">0</span>
+            	  </a>
 		        </div>
-		
 		      </div>
 		    </div>
 		  </div>
@@ -368,6 +379,24 @@
       });
     });
   </script>
+  
+  <script>
+	  // 카드 클릭 이동 + 키보드(Enter) 이동
+	  document.addEventListener("click", (e) => {
+	    const card = e.target.closest(".kpi-card");
+	    if (!card) return;
+	    const link = card.dataset.link;
+	    if (link) window.location.href = link;
+	  });
+	
+	  document.addEventListener("keydown", (e) => {
+	    if (e.key !== "Enter") return;
+	    const card = e.target.closest(".kpi-card");
+	    if (!card) return;
+	    const link = card.dataset.link;
+	    if (link) window.location.href = link;
+	  });
+	</script>
 
 </th:block>
 </th:block>
