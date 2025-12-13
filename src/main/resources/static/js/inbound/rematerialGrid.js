@@ -1,5 +1,5 @@
-const grid = new tui.Grid({
-	el: document.getElementById("materialGrid"),
+const reMaterialGrid = new tui.Grid({
+	el: document.getElementById("reMaterialGrid"),
 	bodyHeight: 500,
 	rowHeaders: ['rowNum'],
 	pageOptions: {
@@ -12,8 +12,8 @@ const grid = new tui.Grid({
 			name: "inboundId",
 		},
 		{
-			header: "회사명",
-			name: "clientName",
+			header: "작업지시서",
+			name: "prodId",
 		},
 		{
 			header: "담당자",
@@ -41,18 +41,18 @@ const grid = new tui.Grid({
 });
 
 // 상세 버튼 클릭 동작
-grid.on("click", (ev) => {
+reMaterialGrid.on("click", (ev) => {
 	const { columnName, rowKey } = ev;
 	
 	if (columnName === "btn") {
-		const row = grid.getRow(rowKey);
+		const row = reMaterialGrid.getRow(rowKey);
 		// 입고 상세 페이지로 이동
-		location.href = `/inventory/inbound/mat/${row.inboundId}`
+		location.href = `/inventory/inbound/re/${row.inboundId}`
 	}
 });
 
-const startDateInput = document.querySelector("#startDate");
-const endDateInput = document.querySelector("#endDate");
+const reStartDateInput = document.querySelector("#reStartDate");
+const reEndDateInput = document.querySelector("#reEndDate");
 
 // 날짜 포맷 함수
 function formatDate(isoDate) {
@@ -62,7 +62,7 @@ function formatDate(isoDate) {
 }
 
 // 원재료 정보 불러오기
-async function loadMaterialInbound(startDate, endDate, searchType, keyword) {
+async function loadReMaterialInbound(startDate, endDate, searchType, keyword) {
 	const MATERIAL_INBOUND_LIST = 
 		`/inventory/inbound/materialList/data` +
 		`?startDate=${startDate}` +
@@ -90,8 +90,10 @@ async function loadMaterialInbound(startDate, endDate, searchType, keyword) {
 			COMPLETED: "입고완료"
 		}
 		
-		// 원재료정보만필터
-		data = data.filter(row => row.inboundType === "MAT_IB");
+		// 재입고 정보만 필터
+		data = data.filter(row => row.inboundType == "RE_IB");
+		
+		console.log(data);
 		
 		// 상태값이 영어로 들어오는 것을 한글로 변환해서 기존 data에 덮어씌움
 		data = data.map(item => ({
@@ -99,7 +101,7 @@ async function loadMaterialInbound(startDate, endDate, searchType, keyword) {
 			inboundStatus: statusMap[item.inboundStatus] || item.inboundStatus
 		}));
 		
-		grid.resetData(data);
+		reMaterialGrid.resetData(data);
 		
 	} catch (error) {
 		console.error(error);
@@ -121,10 +123,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 	const endDate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 	
 	// 날짜 input 기본값 설정
-	startDateInput.value = startDate;
-	endDateInput.value = endDate;
+	reStartDateInput.value = startDate;
+	reEndDateInput.value = endDate;
 	
-	await loadMaterialInbound(startDate, endDate, "all", "");
+	await loadReMaterialInbound(startDate, endDate, "all", "");
 	
 	// -----------------------------------------------
 	// 화면 페이지 로딩 css 추가
@@ -141,10 +143,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // 검색
-document.querySelector("#searchbtn").addEventListener("click", async () => {
-	const startDate = startDateInput.value;
-	const endDate = endDateInput.value;
-	const keyword = document.querySelector("#materialKeyword").value;
+document.querySelector("#reSearchbtn").addEventListener("click", async () => {
+	const startDate = reStartDateInput.value;
+	const endDate = reEndDateInput.value;
+	const keyword = document.querySelector("#reMaterialKeyword").value;
 	const searchType = document.querySelector("select[name='searchType']").value;
 	
 	if (!startDate || !endDate) {
@@ -152,25 +154,25 @@ document.querySelector("#searchbtn").addEventListener("click", async () => {
 		return;
 	}
 	
-	await loadMaterialInbound(startDate, endDate, searchType, keyword);
+	await loadReMaterialInbound(startDate, endDate, searchType, keyword);
 });
 
 // 시작날짜 클릭 시 데이터 조회
-document.querySelector("#startDate").addEventListener("input", async () => {
-	const startDate = startDateInput.value;
-	const endDate = endDateInput.value;
-	const keyword = document.querySelector("#materialKeyword").value;
+document.querySelector("#reStartDate").addEventListener("input", async () => {
+	const startDate = reStartDateInput.value;
+	const endDate = reEndDateInput.value;
+	const keyword = document.querySelector("#reMaterialKeyword").value;
 	const searchType = document.querySelector("select[name='searchType']").value;
 	
-	await loadMaterialInbound(startDate, endDate, searchType, keyword);
+	await loadReMaterialInbound(startDate, endDate, searchType, keyword);
 });
 
 // 종료날짜 클릭 시 데이터 조회
-document.querySelector("#endDate").addEventListener("input", async () => {
-	const startDate = startDateInput.value;
-	const endDate = endDateInput.value;
-	const keyword = document.querySelector("#materialKeyword").value;
+document.querySelector("#reEndDate").addEventListener("input", async () => {
+	const startDate = reStartDateInput.value;
+	const endDate = reEndDateInput.value;
+	const keyword = document.querySelector("#reMaterialKeyword").value;
 	const searchType = document.querySelector("select[name='searchType']").value;
 	
-	await loadMaterialInbound(startDate, endDate, searchType, keyword);
+	await loadReMaterialInbound(startDate, endDate, searchType, keyword);
 });

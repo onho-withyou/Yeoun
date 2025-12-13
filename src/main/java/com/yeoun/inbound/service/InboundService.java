@@ -1,11 +1,13 @@
 package com.yeoun.inbound.service;
 
+import java.awt.ItemSelectable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -26,8 +28,10 @@ import com.yeoun.inbound.repository.InboundItemRepository;
 import com.yeoun.inbound.repository.InboundRepository;
 import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryDTO;
+import com.yeoun.inventory.entity.Inventory;
 import com.yeoun.inventory.entity.MaterialOrder;
 import com.yeoun.inventory.entity.MaterialOrderItem;
+import com.yeoun.inventory.repository.InventoryRepository;
 import com.yeoun.inventory.repository.MaterialOrderRepository;
 import com.yeoun.inventory.service.InventoryService;
 import com.yeoun.inventory.util.InventoryIdUtil;
@@ -68,6 +72,7 @@ public class InboundService {
 	private final MaterialMstRepository materialMstRepository;
 	private final MaterialOrderRepository materialOrderRepository;
 	private final WorkOrderProcessRepository workOrderProcessRepository;
+	private final InventoryRepository inventoryRepository;
 	private final WorkOrderRepository workOrderRepository;
 	private final ProductMstRepository productMstRepository;
 	private final InboundMapper inboundMapper;
@@ -127,6 +132,7 @@ public class InboundService {
 				.materialId(materialOrder.getOrderId())
 				.prodId(null)
 				.items(items)
+				.inboundType("MAT_IB")
 				.build();
 		
 		// 입고 DTO를 엔터티로 변환
@@ -178,6 +184,7 @@ public class InboundService {
 				.inboundStatus("PENDING_ARRIVAL")
 				.materialId(null)
 				.prodId(orderId)
+				.inboundType("PRD_IB")
 				.build();
 		
 		// DTO -> Entity 변환
@@ -306,7 +313,7 @@ public class InboundService {
 			} else {
 				// 완제품은 lotNo가 정해져있음
 				lotNo = itemDTO.getLotNo();
-				// 완제품은 LotMst, LotHistory 생성 등록 필요없음
+				// 완제품은 LotMst 생성 등록 필요없음
 			}
 				
 			// InboundItem 업데이트
@@ -424,7 +431,7 @@ public class InboundService {
 		Outbound ob = outboundRepository.findByWorkOrderId(workOrderId)
 				.orElseThrow(() -> new EntityNotFoundException("해당 작업지시서에 대한 출고는 존재하지 않습니다."));
 		
-		log.info(">>>>>>>>>>>>>>>>>>>>>ob : " + ob);
+//		log.info(">>>>>>>>>>>>>>>>>>>>>ob : " + ob);
 		// 조회된 출고의 출고아이템 조회
 		List<OutboundItem> outBoundItemList = ob.getItems();
 		
@@ -500,6 +507,147 @@ public class InboundService {
 		
 		String message = "새로운 입고 대기목록이 등록되었습니다. 확인하십시오";
 		alarmService.sendAlarmMessage(AlarmDestination.INVENTORY, message);
+	}
+
+	// 재입고 등록
+	@Transactional
+	public void updateReInbound(ReceiptDTO receiptDTO, String empId) {
+		// 입고 조회
+		Inbound inbound = inboundRepository.findByinboundId(receiptDTO.getInboundId())
+				.orElseThrow(() -> new NoSuchElementException("입고 내역을 찾을 수 없습니다."));
+		
+		// 입고담당자 등록
+		inbound.registEmpId(empId);
+		
+		// 입고 상태를 완료로 변경
+		inbound.changeStatus("COMPLETED");
+		
+		Map<Long, InboundItem> inboundItemMap = inboundItemRepository
+				.findAllByInbound_InboundId(receiptDTO.getInboundId())
+				.stream()
+				.collect(Collectors.toMap(InboundItem::getInboundItemId, item -> item));
+		
+		// 반복문 통해서 입고 품목 LOT 생성 및 수량 정보 업데이트
+		for (ReceiptItemDTO itemDTO : receiptDTO.getItems()) {
+			
+			// 입고 수량(정상수량)
+			long inboundQty = itemDTO.getInboundAmount();
+			// 폐기 수량
+			long disposeQty = itemDTO.getDisposeAmount();
+			// Lot번호
+			String lotNo = itemDTO.getLotNo();
+			// 창고 위치
+			String locationId = itemDTO.getLocationId();
+			
+			// 입고 수량과 폐기 수량이 모두 0이면 입력하지 않음
+			if (inboundQty == 0 && disposeQty == 0) {
+				continue;
+			}
+			
+			InboundItem inboundItem = inboundItemMap.get(itemDTO.getInboundItemId());
+			
+			if (inboundItem == null) {
+				throw new NoSuchElementException("입고 품목을 찾을 수 없습니다.");
+			}
+			
+			// ----------------------------------------------------------------
+			// InboundItem 업데이트
+			inboundItem.updateInfo(itemDTO.getLotNo(), itemDTO.getInboundAmount(), itemDTO.getDisposeAmount(), itemDTO.getLocationId());
+				
+			// ------------------------------------------------------
+			// 정상 재고 등록(입고 수량이 있을 때만 재고에 등록)
+			if (inboundQty > 0) {
+				// lot번호와 창고 위치로 재고 찾기
+				Optional<Inventory> optionInventory = inventoryRepository.findByLotNoAndWarehouseLocation_LocationId(lotNo, locationId);
+				
+				if (optionInventory.isPresent()) {
+					// 값이 있으면 수량 증가
+					Inventory inventory = optionInventory.get();
+					inventory.increaseAmount(inboundQty);
+				} else {
+					// 재고 등록
+					InventoryDTO inventoryDTO = InventoryDTO.builder()
+							.lotNo(lotNo)
+							.locationId(locationId)
+							.itemId(itemDTO.getItemId())
+							.ivAmount(inboundQty)
+							.expirationDate(inboundItem.getExpirationDate())
+							.manufactureDate(inboundItem.getManufactureDate())
+							.ibDate(LocalDateTime.now())
+							.ivStatus("NORMAL")
+							.expectObAmount(0L)
+							.itemType(itemDTO.getItemType())
+							.build();
+					
+					inventoryService.registInventory(inventoryDTO);
+				}
+				
+				// 재고이력 등록
+				InventoryHistoryDTO inventoryHistoryDTO = InventoryHistoryDTO.builder()
+						.lotNo(lotNo)
+						.itemName(itemDTO.getItemName())
+						.empId(empId)
+						.workType("INBOUND")
+						.prevAmount(0L)
+						.currentAmount(itemDTO.getInboundAmount())
+						.reason(receiptDTO.getInboundId())
+						.currentLocationId(itemDTO.getLocationId())
+						.build();
+				
+				inventoryService.registInventoryHistory(inventoryHistoryDTO);
+				// ---------------------------------------------
+				// 재고 등록 후 LOT HISTORY 업데이트
+				// lotHistory 생성
+				LotHistoryDTO updateLotHistoryDTO = LotHistoryDTO.builder()
+						.lotNo(lotNo)
+						.orderId(inbound.getProdId())
+						.processId("")
+						.eventType("RM_RECEIVE")
+						.status("IN_STOCK")
+						.locationType("WH")
+						.locationId("WH-" + locationId)
+						.quantity((int) inboundQty)
+						.workedId(empId)
+						.build();
+				
+				lotTraceService.registLotHistory(updateLotHistoryDTO);
+				// ------------------------------------------------------
+			}
+			
+			// 폐기 수량이 있을 경우 
+			if (disposeQty > 0) {
+				DisposeDTO dispose = DisposeDTO.builder()
+						.lotNo(lotNo)
+						.itemId(itemDTO.getItemId())
+						.workType("INBOUND")
+						.empId(empId)
+						.disposeAmount(itemDTO.getDisposeAmount())
+						.disposeReason("입고폐기")
+						.build();
+				
+				disposeService.registDispose(dispose);
+				
+				// 폐기한 원재료 LOT 이력에 업데이트
+				LotHistoryDTO disposeLotHistoryDTO = LotHistoryDTO.builder()
+						.lotNo(lotNo)
+						.orderId(inbound.getProdId())
+						.processId("")
+						.eventType("SCRAPPED")
+						.status("SCRAPPED")
+						.locationType("WH")
+						.locationId("WH-" + itemDTO.getLocationId())
+						.quantity((int) disposeQty)
+						.workedId(empId)
+						.build();
+				
+				lotTraceService.registLotHistory(disposeLotHistoryDTO);
+			}
+		}
+		// 모든 입고완료 처리 완료 후 각 페이지로 메세지 보내기
+		// 완제품이 아닌 입고일 경우
+		String message = "새로 등록된 원자재 입고가 있습니다.";
+		alarmService.sendAlarmMessage(AlarmDestination.INVENTORY, message);
+		alarmService.sendAlarmMessage(AlarmDestination.ORDER, message);
 	}
 }
 

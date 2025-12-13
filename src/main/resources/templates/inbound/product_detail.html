@@ -25,35 +25,17 @@
 			<div class="card p-4 mb-5">
 				<div class="card-body">
 					 <div class="row row-cols-3 g-4">
-						<div class="col" th:if="${receiptDTO.materialId != null}">
-						    <div class="text-secondary mb-1">거래처명</div>
-						    <div class="fw-semibold" th:text="${receiptDTO.clientName}"></div>
-						</div>
-
-						<div class="col" th:if="${receiptDTO.materialId != null}">
-						    <div class="text-secondary mb-1">입고 담당자</div>
-						    <div class="fw-semibold" th:text="${receiptDTO.materialEmpName}"></div>
-						</div>
 						<div class="col">
 						    <div class="text-secondary mb-1">납기일자</div>
 						    <div class="fw-semibold" th:text="${#temporals.format(receiptDTO.expectArrivalDate, 'yyyy-MM-dd')}"></div>
 						</div>
-						<div class="col" th:if="${receiptDTO.prodId != null}">
+						<div class="col">
 						    <div class="text-secondary mb-1">작업지시서</div>
 						    <div class="d-flex">
 						    	<div class="fw-semibold" style="margin-right:3px !important;" th:text="${receiptDTO.prodId}"></div>
 	   							<i class="fa-regular fa-window-restore"  style="cursor:pointer;"  
 									th:attr="data-prod-id=${receiptDTO.prodId}"
 									onclick="openDetailOrderWindow(this.dataset.prodId)"></i>
-						    </div>
-						</div>
-						<div class="col" th:if="${receiptDTO.materialId != null}">
-						    <div class="text-secondary mb-1">발주번호</div>
-						    <div class="d-flex">
-							    <div class="fw-semibold" style="margin-right:3px !important;" th:text="${receiptDTO.materialId}"></div>
-	   							<i class="fa-regular fa-window-restore"  style="cursor:pointer;"  
-									th:attr="data-material-id=${receiptDTO.materialId}"
-									onclick="openDetailWindow(this.dataset.materialId)"></i>
 						    </div>
 						</div>
 						<div class="col">
@@ -63,12 +45,6 @@
 							    <span th:if="${receiptDTO.inboundStatus == 'COMPLETED'}" class="badge bg-success">입고완료</span>
 							</div>
 						</div>
-<!-- 						<div class="col" th:if="${receiptDTO.materialId != null}"> -->
-<!-- 							<div class="text-secondary mb-1">발주내역</div> -->
-<!-- 							<i class="fa-regular fa-window-restore"  style="cursor:pointer;"   -->
-<!-- 								th:attr="data-material-id=${receiptDTO.materialId}" -->
-<!-- 								onclick="openDetailWindow(this.dataset.materialId)"></i> -->
-<!-- 						</div> -->
 					 </div>
 				</div>
 			</div>
@@ -106,7 +82,7 @@
 							            		  th:data-qty="${item.requestAmount}"
 							            		  th:text="${item.requestAmount}"></span>
 										</td>
-										<td th:text="${item.unit} ?: 'EA'" class="unit" th:attr="data-index=${iterStat.index}" style="width: 9em;"></td>
+										<td class="unit" th:attr="data-index=${iterStat.index}" style="width: 9em;">EA</td>
 										<td style="width: 13em;">
 											<input type="number" min="0" step="1" class="form-control inboundAmount" th:attr="data-index=${iterStat.index}"/>
 										</td>
@@ -150,7 +126,7 @@
 							            <td class="convert-qty" 
 							            	th:data-unit="${item.unit}" 
 							            	th:data-qty="${item.requestAmount}"></td>
-							            <td th:text="${item.unit} ?: 'EA'"></td>
+							            <td>EA</td>
 							            <td class="convert-qty"
 							            	th:data-unit="${item.unit}" 
 							            	th:data-qty="${item.inboundAmount}">

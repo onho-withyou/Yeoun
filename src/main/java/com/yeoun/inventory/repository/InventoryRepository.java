@@ -111,7 +111,7 @@ public interface InventoryRepository
 	void updateAllStatusByExpirationDate(@Param("today") LocalDateTime today, 
 		    @Param("disposalWaitDate") LocalDateTime disposalWaitDate);
 
-	// itemId로 재고 조회
+	// itemId로 재고 조회(선입선출)
 	@Query("""
 		    SELECT i
 		    FROM Inventory i
@@ -143,6 +143,9 @@ public interface InventoryRepository
 		Map<String, Object> findMaterialStock(@Param("matId") String matId);
 
 	Optional<Inventory> findTopByLotNoOrderByIvIdDesc(String inputLotNo);
+
+	// lot번호와 창고위치로 재고 조회
+	Optional<Inventory> findByLotNoAndWarehouseLocation_LocationId(String lotNo, String locationId);
 
 
 }

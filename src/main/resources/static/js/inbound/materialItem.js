@@ -229,8 +229,12 @@ document.querySelectorAll(".inboundAmount").forEach(input => {
 		const requestSpan = document.querySelector(`.requestAmount[data-index="${index}"]`); 
 		const disposeSpan = document.querySelector(`.disposeAmount[data-index="${index}"]`);
 		
-		const requestAmount = Number(requestSpan.dataset.qty || 0);
+		// 발주 단위
+		const unit = document.querySelector(`.unit[data-index="${index}"]`).innerText;
+		
+		const requestAmount = Number(convertFromBaseUnit(requestSpan.dataset.qty, unit) || 0);
 		const inboundAmount = Number(input.value || 0);
+		
 		
 		// 요청수량보다 커지지 못하게 제한
 		if (inboundAmount > requestAmount) {
@@ -276,6 +280,7 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 		const unit = row.querySelector(`.unit[data-index="${index}"]`).innerText;
 		
 		// 단위 변환된 입고 및 폐기 수량
+		const converedrequestAmount = parseInt(convertFromBaseUnit(requestAmount, unit));
 		const converedInboundAmount = parseInt(convertToBaseUnit(inboundAmount, unit));
 		const converedDisposeAmount = parseInt(convertToBaseUnit(disposeAmount, unit));
 		
@@ -293,7 +298,7 @@ document.getElementById("completeInboundBtn").addEventListener("click", async ()
 			return;
 		}
 		
-		if (requestAmount !== (inboundAmount + disposeAmount)) {
+		if (converedrequestAmount !== (inboundAmount + disposeAmount)) {
 			alert("입고 수량 또는 폐기 수량을 입력해주세요.");
 			return;
 		}
@@ -397,6 +402,7 @@ function openDetailWindow(id) {
 	window.open(url, '_blank', 'width=1200,height=900,scrollbars=yes');
 }
 
+// 작업직시서 상세 모달 열기
 function openDetailOrderWindow(id) {
 	console.log(id);
 	const url = `/inventory/inbound/detail/prodWin/${id}`;

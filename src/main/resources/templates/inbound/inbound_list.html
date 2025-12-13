@@ -65,6 +65,17 @@
 		    border-color: #6ea8fe;
 		    box-shadow: 0 0 6px rgba(110, 168, 254, 0.5);
 		}
+		
+		/* 초기 상태: 투명하게 숨김 */
+		.fade-in-content {
+		    opacity: 0;
+		    transition: opacity 0.2s ease-in-out; 
+		}
+		
+		/* 로딩 완료 시 붙일 클래스 */
+		.fade-in-content.loaded {
+		    opacity: 1;
+		}
 		</style>
 	</head>
 	<body>
@@ -91,9 +102,11 @@
 			</div>
 		  	<ul class="nav pay-tabs">
 		  		<li class="nav-item"><a class="nav-link" th:href="@{/inventory/inbound/materialList}" th:classappend="${activeTab}=='mat' ? 'active'">원재료 입고</a></li>
-		    	<li class="nav-item"><a class="nav-link" th:href="@{/inventory/inbound/productList}" th:classappend="${activeTab}=='pro' ? 'active'">완제품 입고</a></li>
+		    	<li class="nav-item"><a class="nav-link" th:href="@{/inventory/inbound/reInboundList}" th:classappend="${activeTab}=='re' ? 'active'">재입고</a></li>
+		    	<li class="nav-item"><a class="nav-link" th:href="@{/inventory/inbound/productList}" th:classappend="${activeTab}=='prd' ? 'active'">완제품 입고</a></li>
 		  	</ul>
-			<div th:replace="${activeTab == 'mat'} ? ~{inbound/material_list :: material} : ~{inbound/product_list :: product}"></div>
+<!-- 			<div th:replace="${activeTab == 'mat'} ? ~{inbound/material_list :: material} : ~{inbound/product_list :: product}"></div> -->
+				<div th:replace="${activeTab == 'mat'} ? ~{inbound/material_list :: material} : (${activeTab == 're'} ? ~{inbound/re_material_list :: reMaterial} : ~{inbound/product_list :: product})"></div>
 			<br>
 			<div class="modal fade" id="modalCenter" tabindex="-1" style="display: none;" aria-hidden="true">
 				<div class="modal-dialog modal-xl modal-dialog-centered" role="document">
@@ -161,6 +174,7 @@
 			<script src="/js/inventory/util.js"></script>
 			<script src="/js/purchase/purchase_regist.js"></script>
 			<script src="/js/inbound/materialGrid.js"></script>
+			<script src="/js/inbound/rematerialGrid.js"></script>
 			<script src="/js/inbound/productGrid.js"></script>
 		</th:block>
 	</body>

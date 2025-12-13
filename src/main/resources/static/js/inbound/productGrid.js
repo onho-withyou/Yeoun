@@ -48,7 +48,7 @@ productGrid.on("click", (ev) => {
 	if (columnName === "btn") {
 		const row = productGrid.getRow(rowKey);
 		// 입고 상세 페이지로 이동
-		location.href = `/inventory/inbound/mat/${row.inboundId}`
+		location.href = `/inventory/inbound/prd/${row.inboundId}`
 	}
 });
 
@@ -85,7 +85,7 @@ async function loadProductInbound(startDate, endDate, keyword, searchType) {
 			COMPLETED: "입고완료"
 		}
 		// 완제품 정보만필터
-		data = await data.filter(row => row.prodId != null && row.prodId !== '');
+		data = await data.filter(row => row.inboundType === "PRD_IB");
 
 		
 		// 상태값이 영어로 들어오는 것을 한글로 변환해서 기존 data에 덮어씌움

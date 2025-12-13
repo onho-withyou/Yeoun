@@ -12,7 +12,7 @@
 		<result property="prodId"  column="PROD_ID"/>
 		<result property="orderEmpName"  column="ORDEREMPNAME"/>
 		<result property="materialEmpName"  column="MATERIALEMPNAME"/>
-		
+		<result property="inboundType"  column="INBOUND_TYPE"/>
 		<result property="workOrderEmpName" column="WORKORDEREMPNAME"/>
 		
 		<collection property="items" ofType="com.yeoun.inbound.dto.ReceiptItemDTO">
@@ -41,6 +41,7 @@
 			, i.INBOUND_STATUS
 			, i.MATERIAL_ID
 			, i.PROD_ID
+			, i.INBOUND_TYPE
 			, c.CLIENT_NAME
 			, e1.EMP_NAME AS orderEmpName
 			, e2.EMP_NAME AS materialEmpName
