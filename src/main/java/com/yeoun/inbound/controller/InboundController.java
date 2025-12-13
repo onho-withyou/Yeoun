@@ -40,7 +40,6 @@ public class InboundController {
 	public String inboundList(Model model) {
 		// 탭 활성화를 위한 정보
 		model.addAttribute("activeTab", "mat");
-		inboundService.reInboundTest();
 		return "inbound/inbound_list";
 	}
 	

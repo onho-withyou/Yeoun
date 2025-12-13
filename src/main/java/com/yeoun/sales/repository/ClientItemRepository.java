@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 public interface ClientItemRepository extends JpaRepository<ClientItem, Long> {
 
 	// itemId로 ClientItem 조회
-	Optional<ClientItem> findByItemId(String itemId);
+	Optional<ClientItem> findByItemId(Long itemId);
 	
 	//협력사 제품 목록 
 	 List<ClientItem> findByClientId(String clientId);

@@ -410,13 +410,14 @@ public class InboundService {
 	
 	
 	@Transactional
-	public void reInboundTest() {
+	public void saveReInbound(String workOrderId) {
 		// 작업지시서 ID 파라미터로 받아옴
-		String workOrderId = "WO-20251210-0004";
+//		String workOrderId = "WO-20251210-0004";
 		
 		// 작업지시서로 출고조회
 		Outbound ob = outboundRepository.findByWorkOrderId(workOrderId)
 				.orElseThrow(() -> new EntityNotFoundException("해당 작업지시서에 대한 출고는 존재하지 않습니다."));
+		
 		log.info(">>>>>>>>>>>>>>>>>>>>>ob : " + ob);
 		// 조회된 출고의 출고아이템 조회
 		List<OutboundItem> outBoundItemList = ob.getItems();
@@ -441,31 +442,28 @@ public class InboundService {
 		// 입고 품목 저장할 변수
 		List<InboundItemDTO> items = new ArrayList<>();
 		
-		
 		// 재입고 필요 상품을 입고대기 목록으로 변환
 		for(OutboundItemDTO obItemDTO : reInboundItemDTOList) {
 			log.info("재입고 필요 제품 : " + obItemDTO.getItemType() + " " + obItemDTO.getLotNo());
 			
 			// LOT번호로 이전 입고완료한 입고대기 데이터 조회
-			InboundItem ibItem = inboundItemRepository.findByLotNum(obItemDTO.getLotNo());
-			// 조회한 입고대기 데이터의 pk 초기화
-			ibItem.setInboundItemId(null);
-			// 조회한 입고대기 데이터의 입고엔티티 초기화
-			ibItem.setInbound(null);
-			// 출고된 수량을 입고대기 요청 수량에 입력
-			ibItem.setRequestAmount(obItemDTO.getOutboundAmount());
+			InboundItem ibItem = inboundItemRepository.findByLotNo(obItemDTO.getLotNo());
 			
 			// 입고대기 품목 생성
 			InboundItemDTO inboundItemDTO = InboundItemDTO.builder()
-					.inboundId(inboundId)
-					.itemId(clientItem.getMaterialId())
-					.requestAmount(item.getOrderAmount())
-					.inboundAmount(0L)
-					.disposeAmount(0L)
-					.itemType(materialMst.getMatType())
-					.locationId(null)
-					.manufactureDate(LocalDate.parse(materialOrder.getDueDate()).atStartOfDay())
-					.expirationDate(datePlus.atStartOfDay())
+					.inboundId(inboundId) // 생성한 입고id
+					// 이전 입고완료할때 생성한 로트번호
+					.lotNo(ibItem.getLotNo())
+					//재입고할 원자재id
+					.itemId(ibItem.getItemId()) 
+					// 재입고요청수량 = 출고나간수량 전량
+					.requestAmount(obItemDTO.getOutboundAmount()) 
+					.inboundAmount(0L) // 입고수량0 설정
+					.disposeAmount(0L) // 폐기수량0 설정 
+					.itemType(ibItem.getItemType()) 
+					.locationId(null) // 재고위치 미정
+					.manufactureDate(ibItem.getManufactureDate()) // 생산일
+					.expirationDate(ibItem.getExpirationDate()) // 유통기한
 					.build();
 
 			items.add(inboundItemDTO);
@@ -473,12 +471,13 @@ public class InboundService {
 		
 		// 입고 DTO 생성
 		InboundDTO inboundDTO = InboundDTO.builder()
-				.inboundId(inboundId)
-				.expectArrivalDate(LocalDate.parse(materialOrder.getDueDate()).atStartOfDay())
-				.inboundStatus("PENDING_ARRIVAL")
-				.materialId(materialOrder.getOrderId())
-				.prodId(null)
-				.items(items)
+				.inboundId(inboundId) // 생서한 입고 아이디
+				.expectArrivalDate(LocalDateTime.now().plusHours(1)) //1시간후
+				.inboundStatus("PENDING_ARRIVAL") // 입고대기
+				.materialId(null) //발주서id
+				.prodId(workOrderId)// 작업지시서id
+				.items(items) // 재입고 아이템엔티티
+				.inboundType("RE_IB") // 입고타입설정
 				.build();
 		
 		// 입고 DTO를 엔터티로 변환
@@ -491,10 +490,10 @@ public class InboundService {
 			inbound.addItem(inboundItem);
 		}
 		
-//		inboundRepository.save(inbound);
+		inboundRepository.save(inbound);
 		
-		
-		
+		String message = "새로운 입고 대기목록이 등록되었습니다. 확인하십시오";
+		alarmService.sendAlarmMessage(AlarmDestination.INVENTORY, message);
 	}
 }
 
