@@ -1,0 +1,402 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
+<th:block layout:fragment="content">
+
+  <div class="custom-body container-xxl flex-grow-1 container-p-y">
+
+    <!-- 제목 -->
+    <div class="d-flex align-items-end justify-content-between flex-wrap gap-2 mb-3">
+      <div>
+        <h4 class="mb-0"><b>생산관리 대시보드</b></h4>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary btn-sm rounded-pill">오늘</button>
+        <button class="btn btn-outline-secondary btn-sm rounded-pill">이번주</button>
+        <button class="btn btn-primary btn-sm rounded-pill">작업지시 관리</button>
+      </div>
+    </div>
+
+    <style>
+      .card-soft {
+        border: 0;
+        border-radius: 14px;
+        box-shadow: 0 4px 18px rgba(30,41,59,.06);
+      }
+      .kpi-title { font-size: .95rem; color: #6b7280; }
+      .kpi-value { font-size: 2rem; font-weight: 800; letter-spacing: -.5px; }
+      .kpi-sub   { font-size: .9rem; font-weight: 700; }
+      .trend-up { color: #16a34a; }
+      .trend-down { color: #ef4444; }
+      .trend-warn { color: #f59e0b; }
+
+      .section-title { font-weight: 800; margin:0; }
+      .section-sub { font-size: .9rem; color:#6b7280; }
+
+      /* 재고 대시보드 ZONE 느낌 */
+      .zone-header {
+        background:#263238;
+        color:#fff;
+        border-radius: 12px 12px 0 0;
+        padding: 12px 14px;
+        font-weight: 800;
+        text-align:center;
+        letter-spacing: .5px;
+      }
+      .rack {
+        border:1px solid #e5e7eb;
+        border-radius: 10px;
+        background:#fff;
+        padding: 10px 8px;
+        text-align:center;
+        height: 82px;
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+        gap: 4px;
+      }
+      .rack .small-top { font-size:.78rem; color:#9ca3af; }
+      .rack .big-mid { font-weight: 800; color:#111827; }
+      .rack .small-bot { font-size:.8rem; color:#6b7280; }
+
+      .mini-chip{
+        display:inline-flex; align-items:center; gap:6px;
+        padding:.25rem .55rem; border-radius:999px;
+        background:#f1f5f9; color:#334155; font-weight:700; font-size:.85rem;
+      }
+      .dot{ width:8px; height:8px; border-radius:99px; background:#64748b; display:inline-block; }
+      .dot.blue{ background:#3b82f6; }
+      .dot.green{ background:#22c55e; }
+      .dot.amber{ background:#f59e0b; }
+      .dot.red{ background:#ef4444; }
+
+      .table thead th{
+        background:#f8fafc;
+        color:#374151;
+        font-weight:800;
+        border-bottom:1px solid #e5e7eb;
+        white-space:nowrap;
+      }
+      .nowrap{ white-space:nowrap; }
+      
+      .kpi-card { cursor: pointer; transition: transform .12s ease, box-shadow .12s ease; }
+	  .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,.08); }
+	  .kpi-link { cursor: pointer; text-decoration: none; }
+	  .kpi-link:hover { text-decoration: underline; }
+    </style>
+
+    <!-- 1) KPI 카드 4개 -->
+    <div class="row g-3 mb-3">
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="card card-soft kpi-card" data-link="/order/list" role="button" tabindex="0"
+             aria-label="오늘 작업지시 목록으로 이동">
+          <div class="card-body">
+            <div class="kpi-title">오늘 작업지시</div>
+            <div class="d-flex align-items-end justify-content-between">
+              <div class="kpi-value" th:text="${kpi.todayOrders}">8</div>
+              <div class="kpi-sub text-muted small">
+				  <span class="text-success">
+				    ↑ 처리 <span th:text="${kpi.completedDelta}">0</span>
+				  </span>
+				  &nbsp;
+				  <span class="text-danger">
+				    ↓ 대기 <span th:text="${kpi.waitingDelta}">0</span>
+				  </span>
+				</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="card card-soft kpi-card" data-link="/process/status" role="button" tabindex="0"
+         	 aria-label="진행 중 공정 현황으로 이동">
+          <div class="card-body">
+            <div class="kpi-title">진행 중 작업</div>
+            <div class="d-flex align-items-end justify-content-between">
+              <div class="kpi-value" th:text="${kpi.inProgressOrders}">3</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="card card-soft kpi-card" data-link="/process/status" role="button" tabindex="0"
+        	 aria-label="지연 작업 현황으로 이동">
+          <div class="card-body">
+            <div class="kpi-title">지연 작업</div>
+            <div class="d-flex align-items-end justify-content-between">
+              <div class="kpi-value" th:text="${kpi.delayedOrders}">1</div>
+              <div class="kpi-sub trend-warn">주의 필요</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+		<div class="col-12 col-md-6 col-xl-3">
+		  <div class="card card-soft kpi-card" data-link="/qc/regist" role="button" tabindex="0"
+         	   aria-label="QC 화면으로 이동">
+		    <div class="card-body">
+		      <div class="kpi-title">QC 대기 / 불합격</div>
+		      <div class="d-flex align-items-end justify-content-between">
+		        <div class="kpi-value">
+		          <a class="kpi-link" href="/qc/regist?status=PENDING" onclick="event.stopPropagation();"
+	                 aria-label="QC 대기 목록으로 이동">
+	              	<span th:text="${kpi.qcPendingOrders}">0</span>
+	              </a>
+		          <span class="text-muted fs-5"> / </span>
+		          <a class="kpi-link" href="/qc/result?status=FAIL" onclick="event.stopPropagation();"
+               		 aria-label="QC 불합격 목록으로 이동">
+              	    <span th:text="${kpi.qcFailSteps}">0</span>
+            	  </a>
+		        </div>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+    </div>
+
+    <!-- 2) 라인 현황 (3라인 × 6단계) -->
+    <div class="card card-soft mb-3">
+      <div class="card-body">
+        <div class="d-flex align-items-end justify-content-between mb-3 flex-wrap gap-2">
+          <div>
+            <h6 class="section-title">라인 현황</h6>
+            <div class="section-sub">라인별 공정 6단계 체류 현황 (더미)</div>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <span class="mini-chip"><span class="dot blue"></span>대기</span>
+            <span class="mini-chip"><span class="dot green"></span>진행</span>
+            <span class="mini-chip"><span class="dot amber"></span>QC대기</span>
+            <span class="mini-chip"><span class="dot red"></span>지연</span>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <!-- LINE 1 고체 -->
+          <div class="col-12 col-lg-4">
+            <div class="zone-header">LINE 1 (고체)</div>
+            <div class="bg-white border border-top-0 rounded-bottom-4 p-3">
+              <div class="row g-2">
+                <div class="col-4"><div class="rack"><div class="small-top">블렌딩</div><div class="big-mid">2</div><div class="small-bot text-primary fw-semibold">대기</div></div></div>
+                <div class="col-4"><div class="rack"><div class="small-top">여과</div><div class="big-mid">1</div><div class="small-bot text-success fw-semibold">진행</div></div></div>
+                <div class="col-4"><div class="rack"><div class="small-top">충전</div><div class="big-mid">0</div><div class="small-bot text-muted">-</div></div></div>
+
+                <div class="col-4"><div class="rack"><div class="small-top">캡/펌프</div><div class="big-mid">1</div><div class="small-bot text-danger fw-semibold">지연</div></div></div>
+                <div class="col-4"><div class="rack"><div class="small-top">품질검사</div><div class="big-mid">1</div><div class="small-bot text-warning fw-semibold">QC대기</div></div></div>
+                <div class="col-4"><div class="rack"><div class="small-top">포장</div><div class="big-mid">3</div><div class="small-bot text-success fw-semibold">진행</div></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LINE 2 액체 -->
+          <div class="col-12 col-lg-4">
+            <div class="zone-header">LINE 2 (액체)</div>
+            <div class="bg-white border border-top-0 rounded-bottom-4 p-3">
+              <div class="row g-2">
+                <div class="col-4"><div class="rack"><div class="small-top">블렌딩</div><div class="big-mid">1</div><div class="small-bot text-success fw-semibold">진행</div></div></div>
+                <div class="col-4"><div class="rack"><div class="small-top">여과</div><div class="big-mid">2</div><div class="small-bot text-primary fw-semibold">대기</div></div></div>
+                <div class="col-4"><div class="rack"><div class="small-top">충전</div><div class="big-mid">1</div><div class="small-bot text-success fw-semibold">진행</div></div></div>
+
+                <div class="col-4"><div class="rack"><div class="small-top">캡/펌프</div><div class="big-mid">0</div><div class="small-bot text-muted">-</div></div></div>
+                <div class="col-4"><div class="rack"><div class="small-top">품질검사</div><div class="big-mid">0</div><div class="small-bot text-muted">-</div></div></div>
+                <div class="col-4"><div class="rack"><div class="small-top">포장</div><div class="big-mid">2</div><div class="small-bot text-primary fw-semibold">대기</div></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LINE 3 여분 -->
+          <div class="col-12 col-lg-4">
+            <div class="zone-header">LINE 3 (여분)</div>
+            <div class="bg-white border border-top-0 rounded-bottom-4 p-3">
+              <div class="row g-2">
+                <div class="col-4"><div class="rack"><div class="small-top">블렌딩</div><div class="big-mid">0</div><div class="small-bot text-muted">-</div></div></div>
+                <div class="col-4"><div class="rack"><div class="small-top">여과</div><div class="big-mid">0</div><div class="small-bot text-muted">-</div></div></div>
+                <div class="col-4"><div class="rack"><div class="small-top">충전</div><div class="big-mid">1</div><div class="small-bot text-primary fw-semibold">대기</div></div></div>
+
+                <div class="col-4"><div class="rack"><div class="small-top">캡/펌프</div><div class="big-mid">1</div><div class="small-bot text-success fw-semibold">진행</div></div></div>
+                <div class="col-4"><div class="rack"><div class="small-top">품질검사</div><div class="big-mid">0</div><div class="small-bot text-muted">-</div></div></div>
+                <div class="col-4"><div class="rack"><div class="small-top">포장</div><div class="big-mid">0</div><div class="small-bot text-muted">-</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 3) 생산 현황 추적 차트 (큰 차트 1개: 재고 대시보드 스타일) -->
+    <div class="card card-soft mb-3">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+          <div>
+            <h6 class="section-title">생산 현황 추적</h6>
+            <div class="section-sub">기간별 계획 대비 완료 추이 (더미)</div>
+          </div>
+          <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-primary btn-sm" data-range="month">월</button>
+            <button type="button" class="btn btn-outline-primary btn-sm" data-range="week">주</button>
+            <button type="button" class="btn btn-primary btn-sm" data-range="day">일</button>
+          </div>
+        </div>
+
+        <div id="prodChart" style="height: 320px;"></div>
+        <div class="text-muted small mt-2">※ 데이터 연동 전 더미 차트</div>
+      </div>
+    </div>
+
+    <!-- 4) 즉시 조치 리스트 (재고의 발주필요 리스트 느낌) -->
+    <div class="card card-soft">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+          <div>
+            <h6 class="section-title">즉시 조치 작업 리스트</h6>
+            <div class="section-sub">지연 / QC대기 작업 우선 노출 (더미)</div>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary btn-sm rounded-pill">필터</button>
+            <button class="btn btn-primary btn-sm rounded-pill">전체 보기</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover text-center align-middle mb-0">
+            <thead>
+              <tr>
+                <th class="nowrap">No.</th>
+                <th class="nowrap">작업지시번호</th>
+                <th class="nowrap">제품</th>
+                <th class="nowrap">현재 공정</th>
+                <th class="nowrap">상태</th>
+                <th class="nowrap">예정 종료</th>
+                <th class="nowrap">경과시간</th>
+                <th class="nowrap">상세</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td class="fw-semibold">WO-20251213-0002</td>
+                <td>봄결 100ml (BG100)</td>
+                <td>여과</td>
+                <td><span class="mini-chip"><span class="dot red"></span>지연</span></td>
+                <td class="nowrap">2025-12-13 16:30</td>
+                <td class="nowrap">+ 00:35</td>
+                <td><button class="btn btn-outline-primary btn-sm">상세</button></td>
+              </tr>
+
+              <tr>
+                <td>2</td>
+                <td class="fw-semibold">WO-20251213-0001</td>
+                <td>빛결 100ml (LG100)</td>
+                <td>품질검사</td>
+                <td><span class="mini-chip"><span class="dot amber"></span>QC대기</span></td>
+                <td class="nowrap">2025-12-13 18:00</td>
+                <td class="nowrap">-</td>
+                <td><button class="btn btn-outline-primary btn-sm">상세</button></td>
+              </tr>
+
+              <tr>
+                <td>3</td>
+                <td class="fw-semibold">WO-20251212-0004</td>
+                <td>빛결 100ml (LG100)</td>
+                <td>포장</td>
+                <td><span class="mini-chip"><span class="dot green"></span>진행</span></td>
+                <td class="nowrap">2025-12-13 19:00</td>
+                <td class="nowrap">01:12</td>
+                <td><button class="btn btn-outline-primary btn-sm">상세</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="text-center small text-muted mt-3">
+      © 2025 yeoun ♥ by
+    </div>
+
+  </div><!-- /container -->
+
+  <!-- ApexCharts CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+  <script>
+    // 더미 차트 데이터
+    const seriesDay = [
+      { name: "계획", data: [10, 12, 8, 9, 11, 7, 10] },
+      { name: "완료", data: [8, 9, 6, 7, 10, 6, 8] }
+    ];
+    const seriesWeek = [
+      { name: "계획", data: [52, 48, 60, 55] },
+      { name: "완료", data: [44, 41, 53, 49] }
+    ];
+    const seriesMonth = [
+      { name: "계획", data: [210, 180, 240, 260, 220, 200, 190, 230, 250, 270, 260, 280] },
+      { name: "완료", data: [180, 160, 210, 230, 200, 170, 175, 205, 220, 245, 240, 265] }
+    ];
+
+    let chart;
+
+    function renderChart(range) {
+      const options = {
+        chart: { type: "bar", height: 320, toolbar: { show: true } },
+        plotOptions: { bar: { borderRadius: 6, columnWidth: "45%" } },
+        dataLabels: { enabled: false },
+        grid: { strokeDashArray: 4 },
+        xaxis: {
+          categories:
+            range === "day" ? ["09시","10시","11시","12시","13시","14시","15시"]
+            : range === "week" ? ["1주","2주","3주","4주"]
+            : ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"]
+        },
+        yaxis: { title: { text: "수량" } },
+        legend: { position: "bottom" },
+        series: range === "day" ? seriesDay : range === "week" ? seriesWeek : seriesMonth
+      };
+
+      if (chart) chart.destroy();
+      chart = new ApexCharts(document.querySelector("#prodChart"), options);
+      chart.render();
+    }
+
+    // 초기: 일
+    document.addEventListener("DOMContentLoaded", () => {
+      renderChart("day");
+
+      // 토글 버튼 active 처리
+      document.querySelectorAll("[data-range]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("[data-range]").forEach(b => {
+            b.classList.remove("btn-primary");
+            b.classList.add("btn-outline-primary");
+          });
+          btn.classList.remove("btn-outline-primary");
+          btn.classList.add("btn-primary");
+          renderChart(btn.getAttribute("data-range"));
+        });
+      });
+    });
+  </script>
+  
+  <script>
+	  // 카드 클릭 이동 + 키보드(Enter) 이동
+	  document.addEventListener("click", (e) => {
+	    const card = e.target.closest(".kpi-card");
+	    if (!card) return;
+	    const link = card.dataset.link;
+	    if (link) window.location.href = link;
+	  });
+	
+	  document.addEventListener("keydown", (e) => {
+	    if (e.key !== "Enter") return;
+	    const card = e.target.closest(".kpi-card");
+	    if (!card) return;
+	    const link = card.dataset.link;
+	    if (link) window.location.href = link;
+	  });
+	</script>
+
+</th:block>
+</th:block>

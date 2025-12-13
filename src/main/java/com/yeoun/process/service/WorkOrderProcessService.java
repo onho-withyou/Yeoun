@@ -82,7 +82,7 @@ public class WorkOrderProcessService {
     private final ProductionPlanItemRepository productionPlanItemRepository;
 
     // =========================================================================
-    // 검색 조건 없는 공정현황 목록
+    // 검색 조건 없는 공정현황 목록 (안 쓰면 삭제)
     @Transactional(readOnly = true)
     public List<WorkOrderProcessDTO> getWorkOrderListForStatus() {
         return getWorkOrderListForStatus(null, null, null, null);
@@ -256,13 +256,11 @@ public class WorkOrderProcessService {
      * 진행률 계산 (DONE + QC_PENDING 단계 수 / 전체 단계 수 * 100)
      */
     private int calculateProgressRate(List<WorkOrderProcess> processes) {
-        int totalSteps = processes.size();
-        if (totalSteps == 0) {
-            return 0;
-        }
+    	int totalSteps = processes.size();
+        if (totalSteps == 0) return 0;
 
         long doneCount = processes.stream()
-                .filter(p -> "DONE".equals(p.getStatus()) || "QC_PENDING".equals(p.getStatus()))
+                .filter(p -> "DONE".equals(p.getStatus()))
                 .count();
 
         return (int) Math.round(doneCount * 100.0 / totalSteps);
@@ -279,6 +277,16 @@ public class WorkOrderProcessService {
         if (processes.isEmpty()) {
             return "대기";
         }
+        
+        // 0) QC_PENDING(조치 필요) 우선
+        WorkOrderProcess qcPending = processes.stream()
+                .filter(p -> "QC_PENDING".equals(p.getStatus()))
+                .findFirst()
+                .orElse(null);
+        
+        if (qcPending != null) {
+            return qcPending.getProcess().getProcessName(); // "QC 검사"
+        }
 
         // IN_PROGRESS 공정 우선
         WorkOrderProcess inProgress = processes.stream()
@@ -290,7 +298,7 @@ public class WorkOrderProcessService {
             return inProgress.getProcess().getProcessName();
         }
 
-        // READY 중 가장 stepSeq가 작은 공정
+        // 2) READY 중 가장 앞 단계
         WorkOrderProcess nextReady = processes.stream()
                 .filter(p -> "READY".equals(p.getStatus()))
                 .sorted((a, b) -> Integer.compare(
@@ -763,14 +771,24 @@ public class WorkOrderProcessService {
 
         // 2) 캡/펌프 공정인 경우에만 QC_RESULT PENDING 생성
         if ("PRC-CAP".equals(processId)) {
+        	
+        	// 1) QC_RESULT PENDING 생성
             qcResultService.createPendingQcResultForOrder(orderId);
+            
+            // 2) QC 공정 WOP 상태를 QC_PENDING으로 전환
+            WorkOrderProcess qcProc = workOrderProcessRepository
+                    .findByWorkOrderOrderIdAndProcessProcessId(orderId, "PRC-QC")
+                    .orElseThrow(() -> new IllegalStateException("QC 공정 단계가 없습니다. orderId=" + orderId));
+            
+            // QC 공정이 READY일 때만 QC_PENDING으로 바꿔줌
+            if ("READY".equals(qcProc.getStatus())) {
+                qcProc.setStatus("QC_PENDING");
+                workOrderProcessRepository.save(qcProc);
+            }
             
             // 해당 공정 종료 시 QC 알림
             String message = "새로 등록된 QC 검사가 있습니다.";
-            
-            // QC 섹션 공통 새로고침
             alarmService.sendAlarmMessage(AlarmDestination.QC, message);
-            
         }
 
         // 3) 마지막 단계인지 확인
