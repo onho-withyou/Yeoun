@@ -36,11 +36,6 @@ public class QcItemService {
 	public List<QcItem> qcItemList(String qcItemId) {
 		return qcItemRepository.findByQcItemList(qcItemId);
 	}
-	// 전체 목록 조회 (passthrough for controller compatibility)
-	@Transactional(readOnly = true)
-	public List<QcItem> findAll() {
-		return qcItemRepository.findAll();
-	}
 	//품질 항목 기준 저장
 	@Transactional
 	public QcItem saveQcItem(String empId,QcItem qcItem) {

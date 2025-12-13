@@ -56,19 +56,19 @@
 	             	<h2>공정 코드 관리</h2>
 					<div class="d-flex justify-content-start">
 			        	<div class="mb-6 mb-0" style="width: 260px;">
-				        	<select  id="processprdId" class="form-select">
-				        	    <option value="" selected>제품명(제품코드)</option>
-			        	    	<option th:each="item, iterStat : ${prdMstList}" 
-										th:value="${item.prdId}" 
-										th:text="${item.prdName} +' (' + ${item.prdId} + ')'"
+				        	<select  id="processId" class="form-select">
+				        	    <option value="" selected>공정ID</option>
+			        	    	<option th:each="item, iterStat : ${processIdList}" 
+										th:value="${item}" 
+										th:text="${item}"
 										name="prdId">
 								</option>
 				        	</select>
 				        </div>
 				        <div class="mb-6 mb-0" style="width: 280px;margin-left:5px;">
-			             	<input type="text" id="routeName" name="routeName" class="form-control"  placeholder="라우트명">
+			             	<input type="text" id="processName" name="processName" class="form-control"  placeholder="공정명">
 			           	</div>
-			           		<button type="button" class="btn btn-primary" onclick="productRouteSearch()" style="margin-left:5px;">조회</button>
+			           		<button type="button" class="btn btn-primary" onclick="processCodeGridAllSearch()" style="margin-left:5px;">조회</button>
 					</div>
 				 	<div class="d-flex justify-content-end" style="margin:10px;">
 			            <button id="addProcessCodeRowBtn" class="btn btn-primary" type="button" data-preset="striped" style="margin-right:5px;">추가</button>
