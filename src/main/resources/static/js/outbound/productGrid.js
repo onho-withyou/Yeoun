@@ -300,7 +300,7 @@ const submitPrdOutbound = async () => {
 		// 출고 수량
 		const outboundQty = Number(row.querySelector(".outboundQty").value);
 		
-		// 출고 수량과 재고 수량 비교
+		// 출고 수량과 요청 수량 비교
 		if (outboundQty > shipmentQty) {
 			alert("출고 수량이 요청 수량보다 많습니다.");
 			return;
