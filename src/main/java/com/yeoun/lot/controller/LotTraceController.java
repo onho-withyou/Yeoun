@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.yeoun.lot.dto.LotMaterialDetailDTO;
 import com.yeoun.lot.dto.LotMaterialNodeDTO;
 import com.yeoun.lot.dto.LotProcessDetailDTO;
 import com.yeoun.lot.dto.LotProcessNodeDTO;
@@ -81,6 +82,14 @@ public class LotTraceController {
 		
 		// LOT 기준 공정 단계 목록 조회 (기존 서비스 그대로 재사용)
 	    return lotTraceService.getMaterialNodesForLot(lotNo);
+	}
+	
+	// 자재 상세 조회 (LOT 트리에서 자재 클릭 시 호출)
+	@GetMapping("/trace/material-detail")
+	@ResponseBody
+	public LotMaterialDetailDTO getMaterialDetail(@RequestParam("outputLotNo") String outputLotNo,
+												  @RequestParam("inputLotNo") String inputLotNo) {
+		return lotTraceService.getMaterialDetail(outputLotNo, inputLotNo);
 	}
 	
 	
