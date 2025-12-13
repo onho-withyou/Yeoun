@@ -669,6 +669,10 @@
 	              <div class="col-3">
 	                <label class="form-label">계획 일자</label>
 	                <input type="date" class="form-control" id="planDate">
+	                <div class="invalid-feedback"
+	                     data-error-for="planStartDate" style="display:none;">
+	                     계획 일자는 필수 입력값입니다.
+	                </div>
 	              </div>
 	              <div class="col-3">
 	                <label class="form-label">시작 시간</label>
@@ -973,7 +977,7 @@
       </div>
     </div>
 
-
+</div>
 </th:block>
 
 <th:block layout:fragment="myScript">
@@ -1213,8 +1217,8 @@
 
 	    document.getElementById("planDetail").innerText = `${product} (${remain} / ${total}개)`;
 	    document.getElementById("referTime").innerText = referTime;
-	    if (total < 336) {
-	    	document.getElementById("planQty").value = total;
+	    if (remain < 336) {
+	    	document.getElementById("planQty").value = remain;
 	    }
 	    
 	    const matchedOption = selectOptionByText("prdName", product);

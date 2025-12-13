@@ -13,9 +13,9 @@
 <body>
 <th:block layout:fragment="content">
 	<div class="custom-body container-xxl flex-grow-1 container-p-y">
-	<h2>품질항목관리</h2>
+	<h2>품질항목기준</h2>
 	 <div class="d-flex justify-content-end align-items-center mb-3">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#qcItemModal">
+        <button id="qcItemRegistBtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#qcItem-modal">
           + 항목 등록
         </button>
         <button id="deleteQcRowBtn" class="btn btn-danger" style="margin:5px;" type="button">삭제</button>
@@ -23,11 +23,11 @@
       </div>
 		<div id="qcItemGrid" style="display: grid;"></div>
 		<!-- QC 항목 등록 모달 -->
-		<div class="modal fade" id="qcItemModal" tabindex="-1">
+		<div class="modal fade" id="qcItem-modal" tabindex="-1">
 		  <div class="modal-dialog modal-lg modal-dialog-centered">
 		    <div class="modal-content">
 		      <div class="modal-header">
-		        <h5 class="modal-title">QC 항목 등록</h5>
+		        <h5 id="qcmodalTilte" class="modal-title">QC 항목 등록</h5>
 		        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 		      </div>
 			  <form class="row g-2 align-items-center" th:action="@{/masterData/qcItem/save}" method="post" role="search">
@@ -35,17 +35,17 @@
 		        <div class="row g-3">
 		          <div class="col-md-4">
 		            <label class="form-label required">QC 항목ID</label>
-		            <input type="text"  name="qcItemId" class="form-control form-control-sm"/>
+		            <input type="text" id="qcItemId" name="qcItemId" class="form-control form-control-sm" required/>
 		          </div>
 		
 		          <div class="col-md-4">
 		            <label class="form-label required">항목명</label>
-		            <input type="text" name="itemName" class="form-control form-control-sm"/>
+		            <input type="text" id="itemName" name="itemName" class="form-control form-control-sm" required/>
 		          </div>
 		
 		          <div class="col-md-4">
 		            <label class="form-label required">대상구분</label>
-		            <select name="targetType" class="form-select form-select-sm">
+		            <select id="targetType" name="targetType" class="form-select form-select-sm">
 		              <option value="FINISHED_QC">완제품</option>
 		              <option value="RAW">원재료</option>
 		              <option value="PKG">포장재</option>
@@ -55,39 +55,60 @@
 		
 		          <div class="col-md-3">
 		            <label class="form-label">단위</label>
-		            <input type="text" name="unit" class="form-control form-control-sm"/>
+		            <select id="unit" name="unit" class="form-select form-select-sm">
+		              <option value="pH">pH</option>
+		              <option value="cps">cps</option>
+		              <option value="ml">ml</option>
+		            </select>
 		          </div>
 		
 		          <div class="col-md-9">
 		            <label class="form-label">기준 텍스트</label>
-		            <input type="text" name="stdText" class="form-control form-control-sm"/>
+		            <input type="text" id="stdText" name="stdText" class="form-control form-control-sm"/>
 		          </div>
 		
 		          <div class="col-md-3">
 		            <label class="form-label">최소값</label>
-		            <input type="number" name="minValue" class="form-control form-control-sm"/>
+		            <input type="number" id="minValue"  name="minValue" class="form-control form-control-sm" />
 		          </div>
 		
 		          <div class="col-md-3">
 		            <label class="form-label">최대값</label>
-		            <input type="number" name="maxValue" class="form-control form-control-sm"/>
+		            <input type="number" id="maxValue" name="maxValue" class="form-control form-control-sm" />
 		          </div>
 		
 		          <div class="col-md-3">
 		            <label class="form-label">정렬순서</label>
-		            <input type="number" name="sortOrder" class="form-control form-control-sm"/>
+		            <input type="number" id="sortOrder" name="sortOrder" class="form-control form-control-sm"/>
 		          </div>
 		
 		          <div class="col-md-3">
-		            <label class="form-label">사용여부</label>
-		            <select name="useYn" class="form-select form-select-sm">
-		              <option>Y</option>
-		              <option>N</option>
+		            <label class="form-label required">사용여부</label>
+		            <select id="useYn" name="useYn" class="form-select form-select-sm" required>
+		              <option value="Y">Y</option>
+		              <option value="N">N</option>
 		            </select>
 		          </div>
-		        </div>
-		
-		      </div>
+		         <div id="userAndDate" style="margin-right:5px;">
+			          <div class="col-md-3 me-1">
+			            <label class="form-label">생성자</label>
+			            <input type="text" id="createdId" name="createdId" class="form-control form-control-sm"  readonly/>
+			          </div>
+			          <div class="col-md-3 me-1">
+			            <label class="form-label">생성일시</label>
+			            <input type="text" id="createdDate" name="createdDate" class="form-control form-control-sm" readonly/>
+			          </div>
+			          <div class="col-md-3 me-1">
+			            <label class="form-label">수정자</label>
+			            <input type="text" id="updatedId" name="updatedId" class="form-control form-control-sm" readonly/>
+			          </div>
+			          <div class="col-md-3 me-1">
+			            <label class="form-label">수정일시</label>
+			            <input type="text" id="updatedDate" name="updatedDate" class="form-control form-control-sm" readonly/>
+			          </div>
+					</div>
+		          </div> 
+		       </div>
 		      <div class="modal-footer">
 		      	<button type="submit" class="btn btn-primary btn-sm">저장</button>
 		        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">닫기</button>

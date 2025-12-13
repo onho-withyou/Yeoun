@@ -53,9 +53,9 @@ document.addEventListener("DOMContentLoaded", () => {
 	  
 	  if (!children.dataset.loaded) {
          if (group === "process") {
-           loadProcessList(children, lotNo);     // ✅ 공정
+           loadProcessList(children, lotNo);     // 공정
          } else if (group === "material") {
-           loadMaterialList(children, lotNo);    // ✅ 자재
+           loadMaterialList(children, lotNo);    // 자재
          }
          children.dataset.loaded = "true";
        }
@@ -220,7 +220,10 @@ function loadMaterialList(container, lotNo) {
         li.dataset.lotNo = lotNo;
 
         li.innerHTML = `
-          <a href="#" class="text-decoration-none small">
+          <a href="#" 
+		     class="text-decoration-none small material-item"
+		  	 data-output-lot-no="${lotNo}"
+			 data-input-lot-no="${m.lotNo}">
             ${m.displayName}
             <span class="text-muted"> (${m.usedQty}${m.unit ? " " + m.unit : ""})</span>
           </a>
@@ -234,6 +237,73 @@ function loadMaterialList(container, lotNo) {
       container.innerHTML =
         "<li class='small text-danger'>(자재 목록을 불러오는 중 오류가 발생했습니다)</li>";
     });
+}
+
+// 자재 클릭 -> 상세 조회
+document.addEventListener("click", async (e) => {
+  const matLink = e.target.closest(".material-item");
+  if (!matLink) return;
+
+  e.preventDefault();
+
+  const outputLotNo = matLink.dataset.outputLotNo;
+  const inputLotNo  = matLink.dataset.inputLotNo;
+
+  if (!outputLotNo || !inputLotNo) return;
+
+  try {
+    const res = await fetch(`/lot/trace/material-detail?outputLotNo=${encodeURIComponent(outputLotNo)}&inputLotNo=${encodeURIComponent(inputLotNo)}`);
+    if (!res.ok) throw new Error("자재 상세 조회 실패");
+
+    const detail = await res.json();
+    renderMaterialDetail(detail);
+
+  } catch (err) {
+    console.error(err);
+    alert("자재 상세 조회 중 오류가 발생했습니다.");
+  }
+});
+
+function renderMaterialDetail(d) {
+  const panel = document.getElementById("materialDetailPanel");
+  if (!panel) return;
+
+  // 공정 패널 있으면 숨김(선택)
+  const procPanel = document.getElementById("processDetailPanel");
+  if (procPanel) procPanel.style.display = "none";
+
+  // 값 채우기
+  document.getElementById("md-matName").innerText = d.matName || "-";
+  document.getElementById("md-matId").innerText = d.matId || "-";
+  document.getElementById("md-matType").innerText = d.matType || "-";
+  document.getElementById("md-matUnit").innerText = d.matUnit || "-";
+
+  document.getElementById("md-lotNo").innerText = d.lotNo || "-";
+  document.getElementById("md-lotType").innerText = d.lotType || "-";
+  document.getElementById("md-lotStatus").innerText = d.lotStatus || "-";
+  document.getElementById("md-lotCreatedDate").innerText = formatDateTime(d.lotCreatedDate);
+
+  document.getElementById("md-usedQty").innerText = (d.usedQty ?? "-");
+
+  document.getElementById("md-inboundId").innerText = d.inboundId || "-";
+  document.getElementById("md-inboundAmount").innerText = (d.inboundAmount ?? "-");
+  document.getElementById("md-inboundLocationId").innerText = d.inboundLocationId || "-";
+
+  document.getElementById("md-ivAmount").innerText = (d.ivAmount ?? "-");
+  document.getElementById("md-ivStatus").innerText = d.ivStatus || "-";
+  document.getElementById("md-inventoryLocationId").innerText = d.inventoryLocationId || "-";
+  document.getElementById("md-ibDate").innerText = formatDateTime(d.ibDate);
+
+  document.getElementById("md-manufactureDate").innerText = formatDateTime(d.manufactureDate);
+  document.getElementById("md-expirationDate").innerText = formatDateTime(d.expirationDate);
+
+  document.getElementById("md-clientName").innerText = d.clientName || "-";
+  document.getElementById("md-clientId").innerText = d.clientId || "-";
+  document.getElementById("md-businessNo").innerText = d.businessNo || "-";
+  document.getElementById("md-managerTel").innerText = d.managerTel || "-";
+
+  // 패널 표시
+  panel.style.display = "block";
 }
 
 // -------------------------------

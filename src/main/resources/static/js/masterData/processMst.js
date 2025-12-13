@@ -181,7 +181,7 @@ const grid4 = new Grid({
 	    ,{header: '공정명' ,name: 'processName' ,align: 'center'}
 	    ,{header: '공정유형' ,name: 'processType' ,align: 'center'}
 	    ,{header: '설명' ,name: 'description' ,align: 'center',width: 315}
-        ,{header: '사용여부' ,name: 'useYn' ,align: 'center'}
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center',hidden: true}
 		,{header: '생성자id' ,name: 'createdId' ,align: 'center',hidden: true}
 		,{header: '생성일시' ,name: 'createdDate' ,align: 'center',hidden: true}
 		,{header: '수정자id' ,name: 'updatedId' ,align: 'center',hidden: true}
@@ -249,6 +249,8 @@ document.addEventListener("DOMContentLoaded", () => {
 function openRouteModalForCreate(){
 	routeModalreset();
 	document.getElementById('userAndDate').style.display = 'none';
+	document.getElementById('routeModalTitle').innerText ='신규 라우트 등록';
+	document.getElementById('modalProcessprdId').disabled = false;
 }
 
 // 신규라우트 -->  공정코드 조회 2번째 모달
@@ -376,6 +378,7 @@ grid1.on("click", async (ev) => {
 		
 		// 예: 모달 열기, 상세 정보 표시 등		
 		$('#route-modal').modal('show');
+		document.getElementById('routeModalTitle').innerText = '라우트 상세';
 		document.getElementById('modalRouteId').value = rowData.routeId;//라우트 ID
 		document.getElementById('modalProcessprdId').value = rowData.prdId;//제품코드
 		document.getElementById('modalRouteName').value = rowData.routeName;//라우트명
@@ -385,7 +388,9 @@ grid1.on("click", async (ev) => {
 		document.getElementById('modalRouteCreatedDate').value = rowData.createdDate;//생성일시
 		document.getElementById('modalRouteUpdatedId').value = rowData.updatedId;//수정자
 		document.getElementById('modalRouteUpdatedDate').value = rowData.updatedDate;//수정일시
+		
 		document.getElementById('userAndDate').style.display = 'flex';
+		document.getElementById('modalProcessprdId').disabled = true;
 		processStepSearch(rowData.routeId);//신규라우트 모달 그리드 - 공정단계 조회
 	}
 
@@ -423,10 +428,69 @@ addProcessCodeRowBtn.addEventListener('click', function() {
 	grid2.prependRow();
 });
 
+//공정코드를 fatch로 불러와서 붙이면좋을듯
+const processDataList = [
+    { stepNo: "01", processId: "PRC-BLD", processName: "블렌딩" },
+    { stepNo: "02", processId: "PRC-FLT", processName: "여과" },
+    { stepNo: "03", processId: "PRC-FIL", processName: "충전" },
+    { stepNo: "04", processId: "PRC-CAP", processName: "캡/펌프 조립" },
+    { stepNo: "05", processId: "PRC-QC", processName: "QC 검사" },
+    { stepNo: "06", processId: "PRC-LBL", processName: "라벨링/포장" }
+];
+
 //라우트모달 공정단계 단계추가
 function addRouteStepRow(){
 	grid3.appendRow();
+	//공정단계를 추가 하면 자동으로 생성되는 routestpeId
+	// 새로 생성된 행 목록
+	const newRows = grid3.getModifiedRows().createdRows; 
+	
+	if (newRows.length > 0) {
+	    const prdId = document.getElementById('modalProcessprdId').value;
+		const routeId = document.getElementById('modalRouteId').value;
+		
+	    newRows.forEach((item) =>{
+			if(!item.routeId && prdId){
+				grid3.setValue(item.rowKey,'routeId',routeId);
+			}
+			
+		});
+	} else {
+	    console.log("새로운 행이 없습니다.");
+	}
 }
+//공정단계 - 공정 id 가 추가되면 라우트 단계id가 자동으로들어간다.
+grid3.on('afterChange', (ev) => {
+    const { rowKey, columnName,value } = ev.changes[0]; // 변경된 데이터 목록 (배열)
+	if (columnName === 'processId') {
+	        // 💡 핵심 수정: rowKey 대신, 현재 행의 'processId' 값을 가져옵니다.
+			const prdId = document.getElementById('modalProcessprdId').value;
+	        const processIdValue = grid3.getValue(rowKey, 'processId');
+			
+			// 제품 ID (prdId)가 없으면 RouteStepId를 만들 수 없으므로 중단
+            if (!prdId) {
+                console.error("제품 ID(prdId)가 설정되지 않았습니다.");
+                return;
+            }
+			
+			// 변경된 processId (value)를 사용하여 processDataList에서 해당 StepNo/Name 찾기
+			const selectedProcess = processDataList.find(item => item.processId === value);
+			
+			if(selectedProcess){
+				const stepNo = selectedProcess.stepNo;
+				const generatedRouteStepId = `RS-${prdId}-${stepNo}`;
+				grid3.setValue(rowKey,'routeStepId',generatedRouteStepId);
+				console.log(`RowKey: ${rowKey} | RouteStepId 생성 완료: ${generatedRouteStepId}`);
+
+			}else{
+				console.warn(`일치하는 processId (${value})를 processDataList에서 찾을 수 없습니다.`);
+			}
+			
+
+	    }
+});
+
+
 //공정코드 관리 그리드 저장
 const saveProcessCodeRowBtn = document.getElementById('saveProcessCodeRowBtn');
 saveProcessCodeRowBtn.addEventListener('click', function() {
@@ -583,11 +647,22 @@ saveRouteBtn.addEventListener('click', function() {
 		try { modifiedData.createdRows = createdRows; } catch (e) {}
 	}
 
+	console.log("updatedRows ---=-=->",updatedRows);
+	console.log("createdRows-------->",createdRows);
+		
 	if (updatedRows.length === 0 && createdRows.length === 0) {
 		if(confirm('공정단계 그리드 내용이 없습니다. 계속 진행하시겠습니까?') === false) {
 			return;
 		}
 	}
+	
+	createdRows.forEach(row => {
+	    if (row.routeStepId === null || row.routeStepId === undefined || row.routeStepId.trim() === '') {
+	        // routeStepId가 없는 신규 행에 대해 생성 로직 재실행 (안전망)
+			alert("라우트단계ID를 생성할 수 없습니다.직접 지정해주세요 예시) RS-제품코드-번호");
+			return; // 저장 취소
+	    }
+	});
 
 	console.log('수정된 데이터:', modifiedData);
 	fetch('/masterData/process/save', {
@@ -618,11 +693,16 @@ saveRouteBtn.addEventListener('click', function() {
 	        console.log('저장결과(JSON):', resp.data);
 	        // 서버에서 JSON 형태로 상태를 보내는 경우 추가 처리 가능
 	        alert('저장 완료');
+			//공정단계그리드조회
+			
+			processStepSearch(document.getElementById('modalRouteId').value);
 	    } else {
 	        const text = String(resp.data || '').trim();
 	        console.log('저장결과(텍스트):', text);
 	        if (text === 'success') {
 	            alert('저장 완료');
+				//공정단계그리드조회
+				processStepSearch(document.getElementById('modalRouteId').value);
 	        } else if (text === 'no-data') {
 	            alert('서버: 전송한 데이터가 없습니다. 내용을 확인하세요.');
 	        } else if (text.startsWith('error')) {
@@ -799,6 +879,7 @@ modifyProcessCodeRowBtn.addEventListener('click', async function() {
 		}
 	
 });
+
 //라우트 조회 상세 - 공정단계 그리드에서 단계삭제  // 하다가잠
 const deleteRouteStepRowBtn = document.getElementById('deleteRouteStepRowBtn');
 deleteRouteStepRowBtn.addEventListener('click', async function() {
@@ -839,7 +920,7 @@ deleteRouteStepRowBtn.addEventListener('click', async function() {
 		return;
 	}
 	try {
-		const response = await fetch('/masterData/processStep/modify', {
+		const response = await fetch('/masterData/processStep/delete', {
 			method: 'POST',
 			credentials: 'same-origin',
 			headers: {
@@ -847,7 +928,7 @@ deleteRouteStepRowBtn.addEventListener('click', async function() {
 				'Content-Type': 'application/json'
 
 			},
-			body: JSON.stringify({ routeStepIds: routeStepIdsToDelete })
+			body: JSON.stringify(routeStepIdsToDelete)
 		});	
 		if (!response.ok) {
 			throw new Error(`HTTP error! status: ${response.status}`);

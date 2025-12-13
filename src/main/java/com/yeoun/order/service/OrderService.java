@@ -45,6 +45,7 @@ import com.yeoun.order.dto.WorkOrderListDTO;
 import com.yeoun.order.mapper.OrderMapper;
 import com.yeoun.order.repository.WorkOrderRepository;
 import com.yeoun.outbound.dto.OutboundOrderDTO;
+import com.yeoun.outbound.service.OutboundService;
 import com.yeoun.production.dto.ProductionPlanListDTO;
 import com.yeoun.production.repository.ProductionPlanItemRepository;
 import com.yeoun.production.repository.ProductionPlanRepository;
@@ -66,6 +67,7 @@ public class OrderService {
 	private final WorkOrderRepository workOrderRepository;
 
 	private final EmpRepository empRepository;
+	private final OutboundService outboundService;
 	private final WorkScheduleRepository workScheduleRepository;
 	private final ProcessMstRepository processMstRepository;
 	private final WorkerProcessRepository workerProcessRepository;
@@ -398,12 +400,16 @@ public class OrderService {
 	}
 	
 	// =======================================================
-	// 작업지시 확정
+	// 작업지시 확정 및 삭제
 	@Transactional
 	public void modifyOrderStatus(String id, String status) {
 		WorkOrder order = workOrderRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("해당하는 작업 번호가 없습니다."));
 		order.setStatus(status);
+		
+		if (status.equals("CANCELED"))
+			outboundService.canceledMaterialOutbound(id);
+			
 	}
 	
 	// =======================================================

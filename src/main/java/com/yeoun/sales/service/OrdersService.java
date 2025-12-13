@@ -15,6 +15,8 @@ import com.yeoun.sales.entity.Client;
 import com.yeoun.sales.entity.OrderItem;
 import com.yeoun.sales.entity.Orders;
 import com.yeoun.sales.enums.OrderItemStatus;
+import com.yeoun.sales.enums.OrderStatus;
+import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.sales.repository.OrderItemRepository;
 import com.yeoun.sales.repository.OrdersRepository;
@@ -31,6 +33,7 @@ public class OrdersService {
 
     private final OrdersRepository ordersRepository;
     private final OrderItemRepository orderItemRepository;
+    private final EmpRepository empRepository;
 
     @PersistenceContext
     private EntityManager em;
@@ -39,14 +42,24 @@ public class OrdersService {
        1) 수주 목록 조회
     ============================================================ */
     public List<OrderListDTO> search(
-            String status,
-            LocalDate startDate,
-            LocalDate endDate,
-            String keyword
-    ) {
-        return ordersRepository.searchOrders(status, startDate, endDate, keyword);
-    }
+    	    String status,
+    	    LocalDate startDate,
+    	    LocalDate endDate,
+    	    String keyword
+    	) {
+    	    OrderStatus statusEnum = null;
 
+    	    if (status != null && !status.isBlank()) {
+    	        statusEnum = OrderStatus.valueOf(status);
+    	    }
+
+    	    return ordersRepository.searchOrders(
+    	        statusEnum,
+    	        startDate,
+    	        endDate,
+    	        keyword
+    	    );
+    	}
 
     /* ============================================================
        2) 거래처 자동완성
@@ -138,7 +151,7 @@ public class OrdersService {
                 .addr(nvl(addr))
                 .addrDetail(nvl(addrDetail))
                 .orderMemo(nvl(orderMemo))
-                .orderStatus("REQUEST")  // 기본 상태
+                .orderStatus(OrderStatus.REQUEST)
                 .build();
 
         ordersRepository.save(order);
@@ -218,9 +231,103 @@ public class OrdersService {
     public List<OrderItemDTO> getConfirmedOrderItems() {
         return orderItemRepository.findConfirmedOrderItems();
     }
-    
-    
-   
+
+
+    /* ============================================================
+    7) 수주 상세 조회
+ ============================================================ */
+  
+ public OrderDetailDTO getOrderDetail(String orderId) {
+
+     // 1) 수주 마스터 조회
+     Orders order = ordersRepository.findById(orderId)
+             .orElseThrow(() ->
+                     new IllegalArgumentException("수주 정보가 없습니다. orderId=" + orderId)
+             );
+
+     // 2) 수주 아이템 조회
+     List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
+
+     // 3) 아이템 DTO 변환
+     List<OrderItemDTO> itemDTOs = items.stream()
+             .map(item -> OrderItemDTO.builder()
+                     .orderItemId(item.getOrderItemId())
+                     .prdId(item.getPrdId())
+                     .prdName(item.getProduct().getPrdName())
+                     .orderQty(item.getOrderQty())
+                     .unitPrice(item.getUnitPrice())
+                     .totalPrice(item.getTotalPrice())
+                     .itemMemo(item.getItemMemo())
+                     .itemStatus(item.getItemStatus())
+                     .build()
+             )
+             .toList();
+     
+  //  3-0) 총 합계 계산 
+     BigDecimal totalAmount = itemDTOs.stream()
+             .map(OrderItemDTO::getTotalPrice)
+             .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+     // ✅ 3-1) 내부 담당자(empId → empName) 조회 
+     String empName = empRepository.findById(order.getEmpId())
+             .map(emp -> emp.getEmpName())
+             .orElse("미지정");
+
+     // 4) 상세 DTO 생성
+     return OrderDetailDTO.builder()
+             .orderId(order.getOrderId())
+             .clientId(order.getClient().getClientId())
+             .clientName(order.getClient().getClientName())
+             .orderDate(order.getOrderDate())
+             .deliveryDate(order.getDeliveryDate())
+             .orderStatus(order.getOrderStatus().name())
+             .managerName(order.getManagerName())
+             .managerTel(order.getManagerTel())
+             .managerEmail(order.getManagerEmail())
+             .postcode(order.getPostcode())
+             .addr(order.getAddr())
+             .addrDetail(order.getAddrDetail())
+             .empId(order.getEmpId())
+             .empName(empName)          // ⭐ 이제 정상
+             .orderMemo(order.getOrderMemo())
+             .items(itemDTOs)
+             .totalAmount(totalAmount)
+             .build();
+ }
+
+	 // =========================
+	 // 수주 상태 변경
+	 // =========================
+ @Transactional
+ public void changeStatus(String orderId, OrderStatus status) {
+
+     System.out.println("🔥 상태 변경 요청");
+     System.out.println("orderId = " + orderId);
+     System.out.println("status = " + status);
+
+     Orders order = ordersRepository.findByOrderId(orderId)
+             .orElseThrow(() -> new IllegalArgumentException("수주 내역 없음"));
+
+     // 1️⃣ 주문 상태 변경 (Dirty Checking)
+     order.changeStatus(status);
+
+     // 2️⃣ 주문상세 상태 동기화
+     if (status == OrderStatus.CONFIRMED) {
+
+         int cnt = orderItemRepository
+                 .updateItemStatusToConfirmedByOrderId(orderId);
+
+         System.out.println("🔥 ORDER_ITEM → CONFIRMED : " + cnt);
+
+     } else if (status == OrderStatus.CANCEL) {
+
+         int cnt = orderItemRepository
+                 .updateItemStatusToCancelByOrderId(orderId);
+
+         System.out.println("🔥 ORDER_ITEM → CANCEL : " + cnt);
+     }
+ }
+
 
 
 }

@@ -58,6 +58,8 @@ public class ProcessMstController {
         log.info("processStepList controller - {}", routeId);
         return processMstService.getProcessStepList(routeId);
     }
+ 
+    
     //공정코드 저장
     @ResponseBody
     @PostMapping("/processCode/save")
@@ -78,7 +80,8 @@ public class ProcessMstController {
         return processMstService.saveProcess(empId,param);
     }
     
-    // 공정단계 삭제 yn='N' 처리
+    
+    // 공정코드 삭제 yn='N' 처리
     @ResponseBody
     @PostMapping("/process/modify")
     public String modifyProcess(Model model, @AuthenticationPrincipal LoginDTO loginDTO, @RequestBody Map<String, Object> param) {
@@ -96,5 +99,13 @@ public class ProcessMstController {
           log.info("processCodeDelete------------->{}", param);
           return processMstService.modifyProcessCode(empId, param);
      }
+    
+    // 공정단계 삭제
+    @ResponseBody
+    @PostMapping("/processStep/delete")
+    public String deleteProcessStepList(Model model,@AuthenticationPrincipal LoginDTO loginDTO,@RequestBody List<String> param) {
+        log.info("processStepList controller - {}", param);
+        return processMstService.deleteRouteStep(loginDTO.getEmpId(),param);
+    }
 
 }

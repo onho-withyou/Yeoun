@@ -25,6 +25,7 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, String> {
         SELECT COALESCE(SUM(w.PLAN_QTY), 0) 
             FROM WORK_ORDER w
             WHERE w.PLAN_ID = :planId
+            AND w.STATUS != 'CANCELED'
     """, nativeQuery = true)
 	Integer sumWorkOrderQty(@Param("planId")String planId);
 

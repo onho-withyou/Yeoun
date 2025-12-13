@@ -90,41 +90,69 @@
         <div class="modal fade" id="equipmentModal" tabindex="-1">
 		  <div class="modal-dialog modal-lg modal-dialog-centered">
 		    <div class="modal-content">
-		
+			<form id="equipmentForm"
+				  th:object="${equipmentTypeCreateRequest}"
+				  th:action="@{/equipment/equipType}"
+				  method="post">
 		      <div class="modal-header">
 		        <h5 class="modal-title" id="equipmentModalTitle">설비 등록</h5>
 		        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 		      </div>
 		
 		      <div class="modal-body">
-		        <form id="equipmentForm">
+		        
+		        <input type="hidden" th:name="${_csrf.headerName}" th:value="${_csrf.token}">
+
 		          <div class="mb-3">
 		            <label class="form-label">설비 ID</label>
-		            <input type="text" class="form-control" id="equipId">
+		            <input th:field="*{equipId}"
+		            	   type="text"
+		            	   class="form-control"
+		            	   th:classappend="${#fields.hasErrors('equipId')} ? 'is-invalid'">
+		          	<div class="invalid-feedback"
+		          		 th:if="${#fields.hasErrors('equipId')}"
+		          		 th:errors="*{equipId}"></div>
 		          </div>
 		
 		          <div class="mb-3">
 		            <label class="form-label">이름(한)</label>
-		            <input type="text" class="form-control" id="koName">
+		            <input th:field="*{koName}"
+		            	   type="text"
+		            	   class="form-control"
+		            	   th:classappend="${#fields.hasErrors('koName')} ? 'is-invalid'">
+		          	<div class="invalid-feedback"
+		          		 th:if="${#fields.hasErrors('koName')}"
+		          		 th:errors="*{koName}"></div>
 		          </div>
 		
 		          <div class="mb-3">
 		            <label class="form-label">이름(영)</label>
-		            <input type="text" class="form-control" id="equipName">
+		            <input th:field="*{equipName}"
+		            	   type="text"
+		            	   class="form-control"
+		            	   th:classappend="${#fields.hasErrors('equipName')} ? 'is-invalid'">
+		          	<div class="invalid-feedback"
+		          		 th:if="${#fields.hasErrors('equipName')}"
+		          		 th:errors="*{equipName}"></div>
 		          </div>
+		          
 		          <div class="mb-3">
 					<label class="form-label">설명</label>
-					<textarea class="form-control" id="equipRemark" rows="4"
-					    placeholder="설비 용도, 주의사항 등을 입력하세요"></textarea>
+					<textarea th:field="*{remark}" class="form-control" id="equipRemark" rows="4"
+							  th:classappend="${#fields.hasErrors('remark')} ? 'is-valid'"
+	  					      placeholder="설비 용도, 주의사항 등을 입력하세요"></textarea>
+				  	<div class="invalid-feedback"
+		          		 th:if="${#fields.hasErrors('remark')}"
+		          		 th:errors="*{remark}"></div>
 				  </div>
-		        </form>
+		        
 		      </div>
 		
 		      <div class="modal-footer">
 		        <button class="btn btn-danger d-none" id="btnDeleteEquip">삭제</button>
 		        <button type="submit" class="btn btn-primary" id="btnSaveEquip">저장</button>
 		      </div>
-		
+			</form>
 		    </div>
 		  </div>
 		</div>
@@ -133,14 +161,14 @@
         <div class="modal fade" id="lineModal" tabindex="-1">
 		  <div class="modal-dialog modal-lg modal-dialog-centered">
 		    <div class="modal-content">
-		
+			<form id="lineForm">
 		      <div class="modal-header">
 		        <h5 class="modal-title" id="lineModalTitle">라인 등록</h5>
 		        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 		      </div>
 		
 		      <div class="modal-body">
-		        <form id="lineForm">
+		        
 		          <div class="mb-3">
 		            <label class="form-label">라인 ID</label>
 		            <input type="text" class="form-control" id="lineId">
@@ -161,14 +189,14 @@
 					<textarea class="form-control" id="lineRemark" rows="4"
 					    placeholder="라인에 대한 설명을 입력하세요"></textarea>
 				  </div>
-		        </form>
+		        
 		      </div>
 		
 		      <div class="modal-footer">
 		        <button class="btn btn-danger d-none" id="btnDeleteLine">삭제</button>
 		        <button type="submit" class="btn btn-primary" id="btnSaveLine">저장</button>
 		      </div>
-		
+			</form>
 		    </div>
 		  </div>
 		</div>
@@ -176,6 +204,15 @@
     </th:block>
     </body>
 
+
+	<script th:if="${openEquipmentModal}">
+	    document.addEventListener("DOMContentLoaded", () => {
+	        const modal = new bootstrap.Modal(
+	            document.getElementById("equipmentModal")
+	        );
+	        modal.show();
+	    });
+	</script>
 
     <th:block layout:fragment="myScript">
 		<script>
@@ -380,6 +417,63 @@
 		
 		    modal.show();
 		}
+        
+        // 설비 등록
+        document.getElementById("equipmentForm").addEventListener("submit", async (event) => {
+        	event.preventDefault();
+        	
+        	console.log("들어오긴합니다");
+        	
+        	// create / update 파악
+        	const mode = document.getElementById("equipId").disabled
+        		? "UPDATE" : "CREATE";
+        	
+        	// request
+        	const payload = {
+        		equipId	 : document.getElementById("equipId").value,
+        		koName	 : document.getElementById("koName").value,
+        		equipName: document.getElementById("equipName").value,
+        		remark	 : document.getElementById("equipRemark").value
+        	};
+        	
+        	// create / update 보내는 url 및 method 분기
+        	const url 	 = mode === "CREATE"
+        		? "/equipType"
+        		: `/equipType/${payload.equipId}` ;
+        	
+        	const method = mode	=== "CREATE" ? "POST" : "PATCH";
+        	
+        	
+        	try {
+        		const response = await fetch(url, {
+        			method,
+        			headers: {
+        				"Content-Type" : "application/json",
+        				[csrfHeader] : csrfToken
+        			},
+        			body: JSON.stringify(payload)
+        		});
+        		
+        		if (!response.ok) {
+        			const err = await response.json();
+        			alert(err.message || "저장 실패");
+        			return;
+        		}
+        		
+        		alert ("성공적으로 저장되었습니다.");
+        		bootstrap.Modal.getInstance(
+        			document.getElementById("equipmentModal")
+        		).hide();
+        		
+        		loadEquipmentGrid();	// 목록 재조회
+        		
+        	} catch (err) {
+        		console.error(err);
+        		alert("오류가 발생했습니다.");
+        	}
+        
+        });
+        
 
 
 

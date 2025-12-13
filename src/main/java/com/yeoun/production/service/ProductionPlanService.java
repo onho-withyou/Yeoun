@@ -47,22 +47,22 @@ public class ProductionPlanService {
              .orElse("미지정");
 
      return new OrderItemDTO(
-             oi.getOrderItemId(),
-             oi.getOrderId(),
-             oi.getPrdId(),
-             oi.getProduct().getPrdName(),
-             oi.getOrderQty().intValue(),
+    		    oi.getOrderItemId(),
+    		    oi.getOrderId(),
+    		    oi.getPrdId(),
+    		    oi.getProduct().getPrdName(),
+    		    oi.getOrderQty(),   // ✅ BigDecimal 그대로
 
-             oi.getOrder().getClient().getClientName(),     // 거래처명
-             oi.getOrder().getClient().getManagerName(),    // 담당자명
-             oi.getOrder().getClient().getManagerTel(),     // 연락처
-             oi.getOrder().getClient().getManagerEmail(),   // 이메일
+    		    oi.getOrder().getClient().getClientName(),
+    		    oi.getOrder().getClient().getManagerName(),
+    		    oi.getOrder().getClient().getManagerTel(),
+    		    oi.getOrder().getClient().getManagerEmail(),
 
-             oi.getOrder().getOrderDate(),                  // 수주일자
-             oi.getOrder().getDeliveryDate(),               // 납기일
+    		    oi.getOrder().getOrderDate(),
+    		    oi.getOrder().getDeliveryDate(),
 
-             empName                                        // ⭐ 내부 담당자명
-     );
+    		    empName
+    		);
  }
 
 
@@ -92,9 +92,7 @@ public class ProductionPlanService {
         return prefix + String.format("%03d", seq);
     }
 
-    /* ================================
-        생산계획 생성 (수동)
-    ================================ */
+
     /* ================================
     생산계획 생성 (수동, 모달 선택 기반)
  ================================ */
@@ -419,7 +417,8 @@ public String createPlan(List<PlanCreateItemDTO> items, String createdBy, String
     ============================ */
     public List<OrderItemDTO> getOrderItemsByProduct(String prdId) {
 
-        List<OrderItem> list = orderItemRepository.findByPrdId(prdId);
+      //  List<OrderItem> list = orderItemRepository.findByPrdId(prdId);
+        List<OrderItem> list = orderItemRepository.findByPrdIdAndItemStatus(prdId, "CONFIRMED");
 
         List<OrderItemDTO> dtoList = new ArrayList<>();
 
