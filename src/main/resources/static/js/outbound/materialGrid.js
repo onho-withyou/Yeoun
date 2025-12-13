@@ -320,9 +320,9 @@ const submitOutbound = async () => {
 		const stock = Number(row.querySelector("td[name=stock]").dataset.stock);
 		
 		// 출고 수량과 재고 수량 비교
-		if (outboundQty > stock) {
+		if (outboundQty > needQty) {
 			isValid = false;
-			errorMessage = "출고 수량이 재고 수량보다 많습니다.";
+			errorMessage = "출고 수량이 요청 수량보다 많습니다.";
 			break;
 		} 
 		
