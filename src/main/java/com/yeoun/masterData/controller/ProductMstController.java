@@ -21,6 +21,7 @@ import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.masterData.repository.ProductMstRepository;
 import com.yeoun.masterData.service.MaterialMstService;
+import com.yeoun.masterData.service.BomMstService;
 import com.yeoun.masterData.service.ProductMstService;
 
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class ProductMstController {
 
 	private final ProductMstService productMstService;
 	private final MaterialMstService materialMstService;
+	private final BomMstService bomMstService;
 	
     //기준정보관리(완제품/원재료) 연결페이지
   	@GetMapping("/product")
@@ -73,10 +75,11 @@ public class ProductMstController {
 	}
 
   	//BOM 연결페이지
-  	@GetMapping("/bom_stock")
-  	public String bomStock(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
-		//model.addAttribute("empList", approvalDocService.getEmp());//기안자 목록 불러오기
+	@GetMapping("/bom_stock")
+	public String bomStock(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+		// BOM 페이지에서 사용하는 bomIdList를 서비스에서 조회하여 모델에 추가
+		model.addAttribute("bomIdList", bomMstService.findAllDetail());
 		return "masterData/bom_stock";
- 	}
+	}
     
 }
