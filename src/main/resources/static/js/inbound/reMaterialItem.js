@@ -58,8 +58,6 @@ document.getElementById("completeReInboundBtn").addEventListener("click", async 
 			lotNo
 		});
 	}
-	
-	console.log(items);
 
 	const inboundId = document.querySelector("#inboundId").value;
 	
