@@ -20,6 +20,16 @@ public interface BomMstRepository extends JpaRepository<BomMst, BomMstId>{
 	// prdId + matId 쌍으로 bom 찾기
 	Optional<BomMst> findByPrdIdAndMatId(String prdId, String matId);
 
+	// BOM 그리드 조회
+		@Query(value="""
+				SELECT *
+				FROM bom_mst b
+				-- bomId, prdId, matId가 비어있거나 NULL이면 전체조회, 그렇지 않으면 포함(부분일치) 검색
+				WHERE (:bomId IS NULL OR :bomId = '' OR b.BOM_ID LIKE '%' || :bomId || '%')
+				AND (:matId IS NULL OR :matId = '' OR b.MAT_ID LIKE '%' || :matId || '%')
+				""", nativeQuery = true)
+		List<BomMst> findBybomList(@Param("bomId") String bomId, @Param("matId") String matId);
+
 	// BOM 상세 정보 조회
 	@Query(value="""
 				SELECT DISTINCT bom_id 

@@ -31,8 +31,13 @@ public class ProductMstService {
 	//1. 완제품 그리드 조회
 	@Transactional(readOnly = true)
 	public List<ProductMst> findAll() {
-		log.info("productMstRepository.findAll() 조회된개수 - {}",productMstRepository.findAll());
 		return productMstRepository.findAll();
+	}
+	// 전체조회와 특정 prdId/prdName 조회(부분검색)를 모두 처리
+	@Transactional(readOnly = true)
+	public List<ProductMst> findByPrdIdList(String prdId, String prdName) {
+		// repository 쿼리에서 null/빈값은 전체조회로 처리하도록 되어 있음
+		return productMstRepository.findByPrdIdList(prdId, prdName);
 	}
 
 	//2. 완제품 그리드 저장

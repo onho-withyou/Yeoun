@@ -44,10 +44,15 @@ public class ProcessMstService {
 		
 		return routeHeaderRepository.findByPrdIdAndRouteName(prdId, routeName);
 	}
+	//공정코드 드롭다운
+	@Transactional(readOnly = true)
+	public List<String> processIdList() {
+		return processMstRepository.processIdList();
+	}
 	// 공정코드 그리드 조회
 	@Transactional(readOnly = true)
-	public List<ProcessMst> getProcessCodeList() {
-		return processMstRepository.findByprocessCode();
+	public List<ProcessMst> findByprocesslList(String processId, String processName) {
+		return processMstRepository.findByprocesslList(processId, processName);
 	}
 	// 공정단계 그리드 조회
 	@Transactional(readOnly = true)

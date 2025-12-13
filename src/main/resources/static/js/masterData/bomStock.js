@@ -491,7 +491,12 @@ function bomDetailMatTypeGridAllSearch(bomId) {
 //bom그리드 전체조회
 function bomGridAllSearch() {
 
-	fetch('/bom/list', {
+	const params = {
+		bomId: document.getElementById("bomId").value ?? "",
+		matId: document.getElementById("matId").value ?? ""
+	};
+	const queryString = new URLSearchParams(params).toString();
+	fetch(`/bom/list?${queryString}`, {
 		method: 'GET',
 		headers: {
 			[csrfHeader]: csrfToken,
@@ -533,8 +538,12 @@ function bomGridAllSearch() {
 }
 //안전재고 그리드 전체조회
 function safetyStockGridAllSearch() {
-
-	fetch('/safetyStock/list', {
+	const params = {
+		itemId: document.getElementById("itemId").value ?? "",
+		itemName: document.getElementById("itemName").value ?? ""
+	};
+	const queryString = new URLSearchParams(params).toString();
+	fetch(`/safetyStock/list?${queryString}`, {
 		method: 'GET',
 		headers: {
 			[csrfHeader]: csrfToken,

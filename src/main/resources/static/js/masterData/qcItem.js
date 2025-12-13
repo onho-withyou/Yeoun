@@ -47,7 +47,12 @@ const grid1 = new Grid({
 	
 //qcitem  품질항목관리 조회
 function qcItemGridAllSearch(){
-	fetch('/masterData/qc_item/list', {
+
+	const params = {
+		qcItemId: document.getElementById("qcItemId").value ?? "",
+	};
+	const queryString = new URLSearchParams(params).toString();
+	fetch(`/masterData/qc_item/list?${queryString}`, {
 			method: 'GET',
 			headers: {
 				[csrfHeader]: csrfToken,

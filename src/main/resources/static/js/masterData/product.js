@@ -237,7 +237,13 @@ grid2.on('beforeChange', (ev) => {
 
 function productGridAllSearch() {
 
-	fetch('/masterData/product/list', {
+	const params = {
+		prdId: document.getElementById("prdId").value ?? "",
+		prdName: document.getElementById("prdName").value ?? ""	
+	};
+	
+	const queryString = new URLSearchParams(params).toString();
+	fetch(`/masterData/product/list?${queryString}`, {
 		method: 'GET',
 		headers: {
 			[csrfHeader]: csrfToken,
@@ -280,7 +286,13 @@ function productGridAllSearch() {
 
 function materialGridAllSearch() {
 
-	fetch('/material/list', {
+	const params = {
+		matId: document.getElementById("matId").value ?? "",
+		matName: document.getElementById("matName").value ?? ""
+	};
+	
+	const queryString = new URLSearchParams(params).toString();
+	fetch(`/material/list?${queryString}`, {
 		method: 'GET',
 		headers: {
 			[csrfHeader]: csrfToken,

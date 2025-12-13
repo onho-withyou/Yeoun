@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
@@ -27,11 +28,16 @@ public class MaterialMstController {
 	private final MaterialMstService materialMstService;
 	
 	//원재료 조회
-	@ResponseBody
+    @ResponseBody
   	@GetMapping("/list")
-  	public List<MaterialMst> materialList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
-		return materialMstService.findAll();
+  	public List<MaterialMst> materialList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,
+  					@RequestParam(value = "matId", required = false) String matId,
+  					@RequestParam(value = "matName", required = false) String matName) {
+  		// 서비스에서 null/빈값 처리를 수행하므로 그대로 전달
+  		return materialMstService.findByMatIdList(matId, matName);
+
   	}
+
 	//원재료 저장
     @ResponseBody
    	@PostMapping("/save")
