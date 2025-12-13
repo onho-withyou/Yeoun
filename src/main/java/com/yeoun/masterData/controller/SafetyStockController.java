@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
@@ -30,8 +31,10 @@ public class SafetyStockController {
 	//안전재고 조회
 	@ResponseBody
   	@GetMapping("/list")
-  	public List<SafetyStock> safetyStockList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
-		return safetyStockService.findAll();
+  	public List<SafetyStock> safetyStockList(Model model, @AuthenticationPrincipal LoginDTO loginDTO
+			  			,@RequestParam(value = "itemId", required = false) String itemId,
+  						@RequestParam(value = "itemName", required = false) String itemName) {
+		return safetyStockService.findByItemlList(itemId, itemName);
   	}
 	//안전재고 저장
 	@ResponseBody
