@@ -156,74 +156,92 @@
 		</div>
     </div>
 
-    <!-- 2) 라인 현황 (3라인 × 6단계) -->
-    <div class="card card-soft mb-3">
-      <div class="card-body">
-        <div class="d-flex align-items-end justify-content-between mb-3 flex-wrap gap-2">
-          <div>
-            <h6 class="section-title">라인 현황</h6>
-            <div class="section-sub">라인별 공정 6단계 체류 현황 (더미)</div>
-          </div>
-          <div class="d-flex gap-2 flex-wrap">
-            <span class="mini-chip"><span class="dot blue"></span>대기</span>
-            <span class="mini-chip"><span class="dot green"></span>진행</span>
-            <span class="mini-chip"><span class="dot amber"></span>QC대기</span>
-            <span class="mini-chip"><span class="dot red"></span>지연</span>
-          </div>
-        </div>
+	<!-- 2) 라인 현황 (체류 히트맵) -->
+	<div class="card card-soft mb-3">
+	  <div class="card-body">
+	
+	    <div class="d-flex align-items-end justify-content-between mb-3 flex-wrap gap-2">
+	      <div>
+	        <h6 class="section-title">라인 현황</h6>
+	        <div class="section-sub">
+	          라인별 공정 6단계 체류 현황 (진행중 기준)
+	        </div>
+	      </div>
+	
+	      <div class="d-flex gap-2 flex-wrap">
+	        <span class="mini-chip">OK</span>
+	        <span class="mini-chip" style="background:#fff7ed;color:#9a3412;">주의</span>
+	        <span class="mini-chip" style="background:#fee2e2;color:#991b1b;">지연</span>
+	      </div>
+	    </div>
+	    
+	    <!-- 진행중/대기 데이터 없음 안내 -->
+		<div th:if="${heatmapTotal == 0}"
+		     class="alert alert-light border text-center text-muted mb-3">
+		  현재 <b>진행중 / QC대기</b> 공정이 없습니다.
+		</div>
+	    
+	
+	    <div class="table-responsive">
+	      <table class="table align-middle text-center mb-0">
+	        <thead>
+	          <tr>
+	            <th class="nowrap">라인</th>
+	            <th class="nowrap">블렌딩</th>
+	            <th class="nowrap">여과</th>
+	            <th class="nowrap">충진</th>
+	            <th class="nowrap">캡·펌프</th>
+	            <th class="nowrap">품질검사</th>
+	            <th class="nowrap">포장</th>
+	          </tr>
+	        </thead>
+	
+	        <tbody>
+	          <!-- 라인 반복 -->
+	          <tr th:each="row : ${heatmapRows}">
+	            <!-- 라인명 -->
+	            <th class="fw-bold nowrap" th:text="${row.lineName}">
+	              LINE 1
+	            </th>
+	
+	            <!-- 공정 6단계 반복 -->
+	            <td th:each="cell : ${row.steps}">
+	              <div class="rack kpi-card"
+	                   th:data-line="${row.lineId}"
+	                   th:data-step="${cell.stepSeq}"
+	                   th:classappend="
+	                      ${cell.level} == 'DELAY' ? ' border border-danger bg-danger-subtle' :
+	                      (${cell.level} == 'WARN' ? ' border border-warning bg-warning-subtle' : '')
+	                   ">
+	
+	                <!-- 체류 시간 -->
+	                <div class="big-mid"
+					     th:text="${cell.inProgressCnt > 0 
+					                ? cell.stayMin + '분'
+					                : (cell.startableCnt > 0 ? '시작대기'
+					                : (cell.hasReady ? '대기' : '-'))}">
+	                  45분
+	                </div>
+	
+	                <!-- 진행중 건수 -->
+	                <div class="small-bot text-muted"
+					     th:text="${cell.inProgressCnt > 0
+					                ? '진행중 ' + cell.inProgressCnt + '건'
+					                : (cell.startableCnt > 0 ? '시작대기 ' + cell.startableCnt + '건'
+					                : (cell.hasReady ? '대기 ' + cell.readyCnt + '건'
+					                : '진행중 0건'))}">
+	                  진행중 1건
+	                </div>
+	              </div>
+	            </td>
+	          </tr>
+	        </tbody>
+	      </table>
+	    </div>
+	
+	  </div>
+	</div>
 
-        <div class="row g-3">
-          <!-- LINE 1 고체 -->
-          <div class="col-12 col-lg-4">
-            <div class="zone-header">LINE 1 (고체)</div>
-            <div class="bg-white border border-top-0 rounded-bottom-4 p-3">
-              <div class="row g-2">
-                <div class="col-4"><div class="rack"><div class="small-top">블렌딩</div><div class="big-mid">2</div><div class="small-bot text-primary fw-semibold">대기</div></div></div>
-                <div class="col-4"><div class="rack"><div class="small-top">여과</div><div class="big-mid">1</div><div class="small-bot text-success fw-semibold">진행</div></div></div>
-                <div class="col-4"><div class="rack"><div class="small-top">충전</div><div class="big-mid">0</div><div class="small-bot text-muted">-</div></div></div>
-
-                <div class="col-4"><div class="rack"><div class="small-top">캡/펌프</div><div class="big-mid">1</div><div class="small-bot text-danger fw-semibold">지연</div></div></div>
-                <div class="col-4"><div class="rack"><div class="small-top">품질검사</div><div class="big-mid">1</div><div class="small-bot text-warning fw-semibold">QC대기</div></div></div>
-                <div class="col-4"><div class="rack"><div class="small-top">포장</div><div class="big-mid">3</div><div class="small-bot text-success fw-semibold">진행</div></div></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- LINE 2 액체 -->
-          <div class="col-12 col-lg-4">
-            <div class="zone-header">LINE 2 (액체)</div>
-            <div class="bg-white border border-top-0 rounded-bottom-4 p-3">
-              <div class="row g-2">
-                <div class="col-4"><div class="rack"><div class="small-top">블렌딩</div><div class="big-mid">1</div><div class="small-bot text-success fw-semibold">진행</div></div></div>
-                <div class="col-4"><div class="rack"><div class="small-top">여과</div><div class="big-mid">2</div><div class="small-bot text-primary fw-semibold">대기</div></div></div>
-                <div class="col-4"><div class="rack"><div class="small-top">충전</div><div class="big-mid">1</div><div class="small-bot text-success fw-semibold">진행</div></div></div>
-
-                <div class="col-4"><div class="rack"><div class="small-top">캡/펌프</div><div class="big-mid">0</div><div class="small-bot text-muted">-</div></div></div>
-                <div class="col-4"><div class="rack"><div class="small-top">품질검사</div><div class="big-mid">0</div><div class="small-bot text-muted">-</div></div></div>
-                <div class="col-4"><div class="rack"><div class="small-top">포장</div><div class="big-mid">2</div><div class="small-bot text-primary fw-semibold">대기</div></div></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- LINE 3 여분 -->
-          <div class="col-12 col-lg-4">
-            <div class="zone-header">LINE 3 (여분)</div>
-            <div class="bg-white border border-top-0 rounded-bottom-4 p-3">
-              <div class="row g-2">
-                <div class="col-4"><div class="rack"><div class="small-top">블렌딩</div><div class="big-mid">0</div><div class="small-bot text-muted">-</div></div></div>
-                <div class="col-4"><div class="rack"><div class="small-top">여과</div><div class="big-mid">0</div><div class="small-bot text-muted">-</div></div></div>
-                <div class="col-4"><div class="rack"><div class="small-top">충전</div><div class="big-mid">1</div><div class="small-bot text-primary fw-semibold">대기</div></div></div>
-
-                <div class="col-4"><div class="rack"><div class="small-top">캡/펌프</div><div class="big-mid">1</div><div class="small-bot text-success fw-semibold">진행</div></div></div>
-                <div class="col-4"><div class="rack"><div class="small-top">품질검사</div><div class="big-mid">0</div><div class="small-bot text-muted">-</div></div></div>
-                <div class="col-4"><div class="rack"><div class="small-top">포장</div><div class="big-mid">0</div><div class="small-bot text-muted">-</div></div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
 
     <!-- 3) 생산 현황 추적 차트 (큰 차트 1개: 재고 대시보드 스타일) -->
     <div class="card card-soft mb-3">

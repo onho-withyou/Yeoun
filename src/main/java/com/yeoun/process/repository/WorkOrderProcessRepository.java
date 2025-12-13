@@ -47,7 +47,7 @@ public interface WorkOrderProcessRepository extends JpaRepository<WorkOrderProce
         """)
     long countQcPendingOnly(@Param("qcProcessId") String qcProcessId);
     
-    // QC 불합격(임시): QC 공정에서 defectQty > 0 인 건
+    // QC 불합격: QC 공정에서 defectQty > 0 인 건
     @Query("""
         select count(p)
         from WorkOrderProcess p
@@ -59,5 +59,20 @@ public interface WorkOrderProcessRepository extends JpaRepository<WorkOrderProce
     long countQcFailToday(@Param("qcProcessId") String qcProcessId,
                           @Param("start") LocalDateTime start,
                           @Param("end") LocalDateTime end);
+    
+    // 진행중 공정만 + 라인/공정마스터까지 한 번에 가져오기(N+1 방지)
+    @Query("""
+    	    select wop
+    	    from WorkOrderProcess wop
+    	      join fetch wop.workOrder wo
+    	      join fetch wo.line ln
+    	      join fetch wop.process pm
+    	    where wop.status in :statuses
+    	      and wop.stepSeq between 1 and 6
+    	      and wo.status in :orderStatuses
+    	""")
+	List<WorkOrderProcess> findForHeatmap(@Param("statuses") List<String> statuses,
+    	    							  @Param("orderStatuses") List<String> orderStatuses);
+
 
 }
