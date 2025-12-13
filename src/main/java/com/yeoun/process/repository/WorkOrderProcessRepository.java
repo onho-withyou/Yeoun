@@ -1,9 +1,12 @@
 package com.yeoun.process.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.yeoun.process.entity.WorkOrderProcess;
@@ -31,6 +34,44 @@ public interface WorkOrderProcessRepository extends JpaRepository<WorkOrderProce
 
     // 공정 Id로 정보 조회
 	Optional<WorkOrderProcess> findByWopId(String wopId);
+	
+	// ==========================
+	// 생산관리 대시보드
+	// ==========================
+	// 진행 중 공정 단계
+    long countByStatus(String status);
     
+    // QC 대기 상태
+    @Query("""
+            select count(p)
+            from WorkOrderProcess p
+            where p.status = 'QC_PENDING'
+              and p.process.processId = :qcProcessId
+        """)
+    long countQcPendingOnly(@Param("qcProcessId") String qcProcessId);
+    
+    // 지연 공정(단계): 진행중이거나 QC대기인데, 작업지시 예정완료일이 지나버림
+    @Query("""
+        select count(p)
+        from WorkOrderProcess p
+        join p.workOrder w
+        where p.status in :statuses
+          and w.planEndDate < :now
+    """)
+    long countDelayedSteps(@Param("statuses") List<String> statuses,
+                           @Param("now") LocalDateTime now);
+
+    // QC 불합격(임시): QC 공정에서 defectQty > 0 인 건
+    @Query("""
+        select count(p)
+        from WorkOrderProcess p
+        where p.process.processId = :qcProcessId
+          and coalesce(p.defectQty, 0) > 0
+          and p.endTime >= :start
+          and p.endTime <  :end
+    """)
+    long countQcFailToday(@Param("qcProcessId") String qcProcessId,
+                          @Param("start") LocalDateTime start,
+                          @Param("end") LocalDateTime end);
 
 }
