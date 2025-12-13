@@ -13,6 +13,7 @@
 		<Property name="LAYOUT_PATTERN">
 			%d{yyyy-MM-dd HH:mm:ss} %highlight{{%-5p}}: %style{[%c]}{CYAN} %m%n
 		</Property>
+		<Property name="LOG_DIR">/usr/local/tomcat/logs/mylog</Property>
 	</Properties>
 	
 	<!-- 로그 설정 - Appenders, Loggers 설정 -->
@@ -29,7 +30,45 @@
 <!-- 			<PatternLayout pattern="${LAYOUT_PATTERN}" disableAnsi="false" noConsoleNoAnsi="false"/> -->
 			<PatternLayout pattern="${LAYOUT_PATTERN}" disableAnsi="false" noConsoleNoAnsi="false"/>
 		</Console>
-		<!-- 2) <RollingFile> : 로그 파일 출력 설정 -->
+		
+		<!-- 2) <RollingFile> : 순환 로그 파일 출력 설정(로그 파일을 일정 갯수만큼 지정해놓고 순환식으로 관리) -->
+		<!-- => 순환 규칙 : 날짜별로 분리, 동일한 날짜 내에서는 로그 파일 1개당 100KB 제한 -->
+		<!--                순환 파일명은 mylog-연-월-일-순서번호.log 형태로 패턴 지정-->
+		<RollingFile name="rollingFile"
+					fileName="${LOG_DIR}/mylog.log"
+					filePattern="${LOG_DIR}/mylog-%d{yyyy-MM-dd}-%i.log">
+			<!-- 로그 메세지 레이아웃 설정 -->
+			<PatternLayout pattern="${LAYOUT_PATTERN}" />
+			<!-- 로그 메세지가 저장되는 순환 파일의 순환 정책(규칙) 설정 -->
+			<Policies>
+				<SizeBasedTriggeringPolicy size="10MB" />
+				<TimeBasedTriggeringPolicy />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
+			<!-- 특정 로그 레벨에 대한 필터링 설정 -->
+			<!-- ERROR 레벨 이상의 로그만 허용, 나머지는 제외 -->
+			<Filters>
+				<ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="ACCEPT" />
+			</Filters>
+		</RollingFile>
+		
+		<RollingFile name="rollingFileError"
+					fileName="${LOG_DIR}/mylog_error.log"
+					filePattern="${LOG_DIR}/mylog_error-%d{yyyy-MM-dd}-%i.log">
+			<!-- 로그 메세지 레이아웃 설정 -->
+			<PatternLayout pattern="${LAYOUT_PATTERN}" />
+			<!-- 로그 메세지가 저장되는 순환 파일의 순환 정책(규칙) 설정 -->
+			<Policies>
+				<SizeBasedTriggeringPolicy size="10MB" />
+				<TimeBasedTriggeringPolicy />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
+			<!-- 특정 로그 레벨에 대한 필터링 설정 -->
+			<!-- ERROR 레벨 이상의 로그만 허용, 나머지는 제외 -->
+			<Filters>
+				<ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY" />
+			</Filters>
+		</RollingFile>
 	</Appenders>
 	
 	<!-- 2. Loggers : 로그 출력할 대상 설정 -->
