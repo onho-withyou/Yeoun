@@ -99,3 +99,11 @@ document.getElementById("completeOutboundBtn").addEventListener("click", async (
 		hideSpinner(); 
 	}
 });
+
+// 작업직시서 상세 모달 열기
+function openDetailOrderWindow(id) {
+	console.log(id);
+	const url = `/inventory/outbound/detail/prodWin/${id}`;
+	
+	window.open(url, '_blank', 'width=1320,height=610,scrollbars=yes');
+}

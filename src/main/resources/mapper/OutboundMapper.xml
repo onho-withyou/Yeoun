@@ -245,6 +245,8 @@
 	    <result property="shipmentId" column="SHIPMENT_ID"/>
 	    <result property="status" column="STATUS"/>
 	    <result property="processEmpName" column="PROCESS_BY"/>
+	    <result property="createdName" column="CREATED_NAME"/>
+	    <result property="startDate" column="EXPECT_OUTBOUND_DATE"/>
     
     	<collection property="items" ofType="com.yeoun.outbound.dto.OutboundOrderItemDTO">
 	        <!-- DB의 실제 PK인 OUTBOUND_ITEM_ID -->
@@ -263,6 +265,7 @@
 		SELECT
 		    o.OUTBOUND_ID
 		    , o.STATUS
+		    , o.EXPECT_OUTBOUND_DATE
 		    , s.SHIPMENT_ID
 		    , s.SHIPMENT_DATE
 		    , s.EMP_ID AS CREATED_ID
@@ -308,6 +311,63 @@
 		    o.OUTBOUND_ID = #{outboundId}
 		ORDER BY
 		    oi.OUTBOUND_ITEM_ID
+	</select>
+	
+	<!-- 출하지시서 상세 조회 -->
+	<resultMap type="com.yeoun.sales.dto.OrderDetailDTO" id="shipmentDetailMap">
+		<id property="orderId" column="SHIPMENT_ID"/>
+		<result property="clientName" column="CLIENT_NAME" />
+		<result property="deliveryDate" column="SHIPMENT_DATE" />
+		<result property="orderStatus" column="SHIPMENT_STATUS" />
+		<result property="empName" column="ENP_NAME" />
+		<result property="postcode" column="POST_CODE" />
+		<result property="addr" column="ADDR" />
+		<result property="addrDetail" column="ADDR_DETAIL" />
+	
+		<collection property="items" ofType="com.yeoun.sales.dto.OrderItemDTO">
+			<id property="orderItemId" column="SHIPMENT_ITEM_ID"/>
+			<result property="prdName" column="PRD_NAME"/>
+			<result property="prdId" column="PRD_ID"/>
+			<result property="orderQty" column="LOT_QTY"/>
+		</collection>
+	</resultMap>
+	
+	<select id="findShipment" resultMap="shipmentDetailMap">
+		SELECT 
+			s.SHIPMENT_ID
+			, s.CLIENT_NAME
+			, s.SHIPMENT_STATUS
+			, s.SHIPMENT_DATE
+			, e.EMP_NAME
+			, c.ADDR
+			, c.ADDR_DETAIL
+			, c.POST_CODE
+			, si.SHIPMENT_ITEM_ID
+			, si.PRD_ID
+			, si.LOT_QTY
+			, prd.PRD_NAME
+		FROM
+			SHIPMENT s
+		LEFT JOIN 
+			SHIPMENT_ITEM si
+		ON
+			s.SHIPMENT_ID = si.SHIPMENT_ID
+		LEFT JOIN
+			EMP e
+		ON
+			s.EMP_ID = e.EMP_ID
+		LEFT JOIN
+			CLIENT c
+		ON
+			s.CLIENT_ID = c.CLIENT_ID
+		LEFT JOIN
+			PRODUCT_MST prd
+		ON
+			si.PRD_ID = prd.PRD_ID
+		WHERE
+			s.SHIPMENT_ID = #{shipmentId}
+		ORDER BY
+			prd.PRD_ID
 	</select>
 </mapper>
 

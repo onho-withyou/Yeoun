@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import com.yeoun.common.e_num.AlarmDestination;
 import com.yeoun.common.service.AlarmService;
-import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryDTO;
 import com.yeoun.inventory.entity.Inventory;
 import com.yeoun.inventory.repository.InventoryRepository;
@@ -32,6 +31,7 @@ import com.yeoun.outbound.entity.OutboundItem;
 import com.yeoun.outbound.mapper.OutboundMapper;
 import com.yeoun.outbound.repository.OutboundItemRepository;
 import com.yeoun.outbound.repository.OutboundRepository;
+import com.yeoun.sales.dto.OrderDetailDTO;
 import com.yeoun.sales.entity.Orders;
 import com.yeoun.sales.entity.Shipment;
 import com.yeoun.sales.enums.OrderStatus;
@@ -367,6 +367,11 @@ public class OutboundService {
 	// 출하지시서 목록 조회 (추후 출하지시 관련된 작업으로 옮길 예정)
 	public List<OutboundOrderDTO> getShipmentList() {
 		return outboundMapper.findAllShipment();
+	}
+
+	// 출하지지서 상세 조회
+	public OrderDetailDTO getShipmentDetail(String shipmentId) {
+		return outboundMapper.findShipment(shipmentId);
 	}
 
 }
