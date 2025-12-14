@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yeoun.process.mapper.ProductionTrendMapper">
+	
+	<!-- =========================================================
+		 DAY (일) : label = YYYY-MM-DD
+		 계획 = WORK_ORDER.PLAN_QTY 합
+		 완료 = 최종공정(6) WORK_ORDER_PROCESS.GOOD_QTY 합
+	 	 ========================================================= -->
+	<select id="plannedByDay" resultType="com.yeoun.process.dto.TrendRowDTO">
+		SELECT TO_CHAR(TRUNC(w.PLAN_START_DATE), 'YYYY-MM-DD') AS label,
+			   NVL(SUM(NVL(w.PLAN_QTY, 0)), 0) AS cnt
+	    FROM WORK_ORDER w
+	    WHERE w.PLAN_START_DATE <![CDATA[>=]]> #{fromDt}
+	    	AND w.PLAN_START_DATE <![CDATA[<]]>  #{toDt}
+	    GROUP BY TRUNC(w.PLAN_START_DATE)
+	    ORDER BY TRUNC(w.PLAN_START_DATE)
+	</select>
+	
+	<select id="completedByDay" resultType="com.yeoun.process.dto.TrendRowDTO">
+		SELECT TO_CHAR(TRUNC(p.END_TIME), 'YYYY-MM-DD') AS label,
+			   NVL(SUM(NVL(p.GOOD_QTY, 0)), 0) AS cnt
+	    FROM WORK_ORDER_PROCESS p
+	    JOIN WORK_ORDER w
+	    	ON w.ORDER_ID = p.ORDER_ID
+	    WHERE p.STEP_SEQ = 6
+		    AND p.STATUS = 'DONE'
+		    AND p.END_TIME <![CDATA[>=]]> #{fromDt}
+			AND p.END_TIME <![CDATA[<]]>  #{toDt}
+		GROUP BY TRUNC(p.END_TIME)
+		ORDER BY TRUNC(p.END_TIME)
+	</select>
+
+	<!-- =========================================================
+		 WEEK (주) : 월 기준 주차: "MM월 W주차"
+	 	 ========================================================= -->
+	<select id="plannedByWeek" resultType="com.yeoun.process.dto.TrendRowDTO">
+		SELECT TO_CHAR(w.PLAN_START_DATE, 'MM') || '월 ' ||
+			   TO_CHAR(w.PLAN_START_DATE, 'W') || '주차' AS label,
+			   NVL(SUM(w.PLAN_QTY), 0) AS cnt
+	    FROM WORK_ORDER w
+	    WHERE w.PLAN_START_DATE <![CDATA[>=]]> #{fromDt}
+	    	AND w.PLAN_START_DATE <![CDATA[<]]>  #{toDt}
+	    GROUP BY TO_CHAR(w.PLAN_START_DATE, 'MM'), TO_CHAR(w.PLAN_START_DATE, 'W')
+	    ORDER BY TO_CHAR(w.PLAN_START_DATE, 'MM'), TO_CHAR(w.PLAN_START_DATE, 'W')
+	</select>
+
+  	<select id="completedByWeek" resultType="com.yeoun.process.dto.TrendRowDTO">
+  		SELECT TO_CHAR(p.END_TIME, 'MM') || '월 ' ||
+  			   TO_CHAR(p.END_TIME, 'W') || '주차' AS label,
+  			   NVL(SUM(p.GOOD_QTY), 0) AS cnt
+	    FROM WORK_ORDER_PROCESS p
+  		JOIN WORK_ORDER w
+  			ON w.ORDER_ID = p.ORDER_ID
+  		WHERE p.STEP_SEQ = 6
+  			AND p.STATUS = 'DONE'
+	    	AND p.END_TIME <![CDATA[>=]]> #{fromDt}
+	    	AND p.END_TIME <![CDATA[<]]>  #{toDt}
+  		GROUP BY TO_CHAR(p.END_TIME, 'MM'), TO_CHAR(p.END_TIME, 'W')
+  		ORDER BY TO_CHAR(p.END_TIME, 'MM'), TO_CHAR(p.END_TIME, 'W')
+  	</select>
+
+  	<!-- =========================================================
+         MONTH (월) : label = YYYY-MM
+         ========================================================= -->
+
+ 	<select id="plannedByMonth" resultType="com.yeoun.process.dto.TrendRowDTO">
+  		SELECT TO_CHAR(TRUNC(w.PLAN_START_DATE, 'MM'), 'YYYY-MM') AS label,
+  			   NVL(SUM(NVL(w.PLAN_QTY, 0)), 0) AS cnt
+	    FROM WORK_ORDER w
+	    WHERE w.PLAN_START_DATE <![CDATA[>=]]> #{fromDt}
+	    	AND w.PLAN_START_DATE <![CDATA[<]]>  #{toDt}
+    	GROUP BY TRUNC(w.PLAN_START_DATE, 'MM')
+     	ORDER BY TRUNC(w.PLAN_START_DATE, 'MM')
+  	</select>
+
+  	<select id="completedByMonth" resultType="com.yeoun.process.dto.TrendRowDTO">
+  		SELECT TO_CHAR(TRUNC(p.END_TIME, 'MM'), 'YYYY-MM') AS label,
+  			   NVL(SUM(NVL(p.GOOD_QTY, 0)), 0) AS cnt
+	    FROM WORK_ORDER_PROCESS p
+	    JOIN WORK_ORDER w
+	    	ON w.ORDER_ID = p.ORDER_ID
+	    WHERE p.STEP_SEQ = 6
+		    AND p.STATUS = 'DONE'
+	        AND p.END_TIME <![CDATA[>=]]> #{fromDt}
+	        AND p.END_TIME <![CDATA[<]]>  #{toDt}
+        GROUP BY TRUNC(p.END_TIME, 'MM')
+        ORDER BY TRUNC(p.END_TIME, 'MM')
+  	</select>
+
+</mapper>
