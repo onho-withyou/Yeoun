@@ -54,6 +54,8 @@ public class ProductMstService {
 				for (Map<String,Object> row : created) {
 					ProductMst p = mapToProduct(row);
 					p.setCreatedId(empId);
+					// default useYn to 'Y' when not provided
+					if (p.getUseYn() == null) p.setUseYn("Y");
 					productMstRepository.save(p);
 				}
 			}
@@ -77,8 +79,17 @@ public class ProductMstService {
 					if (target != null) {
 						// 기존 레코드 업데이트
 						ProductMst p = mapToProduct(row);
-						p.setCreatedId(row.get("createdId").toString());
-						p.setCreatedDate(LocalDate.parse(row.get("createdDate").toString()));
+						// preserve created metadata from existing record unless explicitly provided
+						if (row.get("createdId") == null) {
+							p.setCreatedId(target.getCreatedId());
+						}
+						if (row.get("createdDate") == null) {
+							p.setCreatedDate(target.getCreatedDate());
+						} else {
+							try { p.setCreatedDate(LocalDate.parse(row.get("createdDate").toString())); } catch(Exception ignore) {}
+						}
+						// preserve USE_YN when not provided in update
+						if (p.getUseYn() == null) p.setUseYn(target.getUseYn() == null ? "Y" : target.getUseYn());
 						p.setUpdatedId(empId);
 						p.setUpdatedDate(LocalDate.now());
 						productMstRepository.save(p);
@@ -91,6 +102,7 @@ public class ProductMstService {
 						// prdId가 비어있고 매칭되는 기존 레코드가 없으면 새로 저장 (신규 추가 케이스)
 						ProductMst p = mapToProduct(row);
 						p.setCreatedId(empId);
+						if (p.getUseYn() == null) p.setUseYn("Y");
 						productMstRepository.save(p);
 					}
 			}
@@ -121,6 +133,10 @@ public class ProductMstService {
 		}
 		if (row.get("effectiveDate") != null) {
 			try { p.setEffectiveDate(Integer.valueOf(String.valueOf(row.get("effectiveDate")))); } catch(Exception e) {}
+		}
+		// useYn 처리: 전달된 값이 있으면 사용
+		if (row.get("useYn") != null) {
+			p.setUseYn(String.valueOf(row.get("useYn")).trim());
 		}
 		return p;
 	}

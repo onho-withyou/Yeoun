@@ -106,7 +106,7 @@ grid1.on("click", async (ev) => {
 		// 예: 모달 열기, 상세 정보 표시 등		
 		$('#qcItem-modal').modal('show');
 		document.getElementById('qcmodalTilte').innerText= 'QC 항목 상세';
-		document.getElementById('qcItemId').value = rowData.qcItemId;//QC 항목 ID
+		document.getElementById('modalQcItemId').value = rowData.qcItemId;//QC 항목 ID
 		document.getElementById('itemName').value = rowData.itemName;//항목명
 		document.getElementById('targetType').value = rowData.targetType;//대상구분
 		document.getElementById('unit').value = rowData.unit;//단위

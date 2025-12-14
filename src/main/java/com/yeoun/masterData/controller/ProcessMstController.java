@@ -111,7 +111,8 @@ public class ProcessMstController {
     @PostMapping("/processStep/delete")
     public String deleteProcessStepList(Model model,@AuthenticationPrincipal LoginDTO loginDTO,@RequestBody List<String> param) {
         log.info("processStepList controller - {}", param);
-        return processMstService.deleteRouteStep(loginDTO.getEmpId(),param);
+        String empId = (loginDTO != null && loginDTO.getEmpId() != null) ? loginDTO.getEmpId() : "SYSTEM";
+        return processMstService.deleteRouteStep(empId, param);
     }
 
 }
