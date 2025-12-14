@@ -498,5 +498,46 @@ public String createPlan(List<PlanCreateItemDTO> items, String createdBy, String
         log.info("✅ prdId={} : 모든 원자재 충분 → BOM 정상", prdId);
         return false;
     }
+    
+    /* ============================
+    		생산계획 취소
+  		============================ */    
+    
+    @Transactional
+    public void cancelProductionPlan(String planId, String empId) {
+
+        // 1️⃣ 생산계획 조회
+        ProductionPlan plan = planRepo.findById(planId)
+            .orElseThrow(() -> new IllegalArgumentException("생산계획이 존재하지 않습니다."));
+
+        // 2️⃣ 상태 체크 (검토대기만 가능)
+        if (plan.getStatus() != ProductionStatus.PLANNING) {
+            throw new IllegalStateException(
+                "검토대기 상태의 생산계획만 취소할 수 있습니다."
+            );
+        }
+
+        // 3️⃣ 생산계획 상태 취소
+        plan.setStatus(ProductionStatus.CANCELLED);
+        plan.setUpdatedBy(empId);
+
+        // 4️⃣ 생산계획 상세 조회
+        List<ProductionPlanItem> planItems =
+            itemRepo.findByPlanId(planId);
+
+        for (ProductionPlanItem item : planItems) {
+
+            // 4-1️⃣ 생산계획 ITEM 상태 취소
+            item.setStatus(ProductionStatus.CANCELLED);            
+
+            // 4-2️⃣ 연결된 주문상세 상태 복구
+            Long orderItemId = item.getOrderItemId();
+            if (orderItemId != null) {
+                orderItemRepository
+                    .updateItemStatusToConfirmedByOrderItemId(orderItemId);
+            
+            }
+        }
+    }
 
 }

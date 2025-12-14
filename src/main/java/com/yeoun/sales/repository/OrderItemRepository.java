@@ -116,5 +116,18 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
     int updateItemStatusToCancelByOrderId(@Param("orderId") String orderId);
 
 
+    
+    //생산계획 취소시 상태변경
+    @Modifying
+    @Transactional
+    @Query("""
+        UPDATE OrderItem oi
+        SET oi.itemStatus = 'CONFIRMED'
+        WHERE oi.orderItemId = :orderItemId
+    """)
+    void updateItemStatusToConfirmedByOrderItemId(
+        @Param("orderItemId") Long orderItemId
+    );
+
 
 }
