@@ -50,6 +50,8 @@ import com.yeoun.order.repository.WorkerProcessRepository;
 import com.yeoun.process.constant.ProcessStepStatus;
 import com.yeoun.process.entity.WorkOrderProcess;
 import com.yeoun.process.repository.WorkOrderProcessRepository;
+import com.yeoun.qc.entity.QcResult;
+import com.yeoun.qc.repository.QcResultRepository;
 import com.yeoun.sales.entity.Client;
 import com.yeoun.sales.repository.ClientRepository;
 
@@ -73,6 +75,7 @@ public class LotTraceService {
 	private final MaterialOrderRepository materialOrderRepository;
 	private final ClientRepository clientRepository;
 	private final ProdEquipRepository prodEquipRepository;
+	private final QcResultRepository qcResultRepository;
 
 	// ----------------------------------------------------------------------------
 	// LOT 생성
@@ -206,7 +209,7 @@ public class LotTraceService {
 	    // 수량
 	    Integer planQty = (wo != null) ? wo.getPlanQty() : null;
 
-	    // 양품/불량 = work_order_process 에서 마지막 결과 가져오기 (앞에서 말한 방식)
+	    // 양품/불량 = work_order_process 에서 마지막 결과 가져오기 
 	    Integer goodQty = null;
 	    Integer defectQty = null;
 	    if (wo != null) {
@@ -332,16 +335,37 @@ public class LotTraceService {
 		}
 		
 		// 4) 공정 담당자 조회 (WorkerProcess)
-		WorkerProcess workerProcess = 
-				workerProcessRepository.findFirstBySchedule_Work_OrderIdAndProcess_ProcessId(orderId, processId)
-						.orElse(null);
-		
-		Emp worker = workerProcess != null ? workerProcess.getWorker() : null;
-		String workerId = worker != null ? worker.getEmpId() : null;
-		String workerName = worker != null ? worker.getEmpName() : null;
-		
-		Dept dept = worker != null ? worker.getDept() : null;
-		String deptName = dept != null ? dept.getDeptName() : null;
+		Emp worker = null;
+		String workerId = null;
+		String workerName = null;
+		String deptName = null;
+
+		if ("PRC-QC".equals(processId)) {
+		    // QC는 qc_result의 inspectorId로 담당자 표시
+		    String inspectorId = qcResultRepository
+		            .findFirstByOrderIdOrderByQcResultIdDesc(orderId)
+		            .map(QcResult::getInspectorId)
+		            .orElse(null);
+
+		    if (inspectorId != null) {
+		        worker = empRepository.findById(inspectorId).orElse(null);
+		    }
+
+		} else {
+		    WorkerProcess workerProcess =
+		            workerProcessRepository
+		                    .findFirstBySchedule_Work_OrderIdAndProcess_ProcessId(orderId, processId)
+		                    .orElse(null);
+
+		    worker = (workerProcess != null) ? workerProcess.getWorker() : null;
+		}
+
+		if (worker != null) {
+		    workerId = worker.getEmpId();
+		    workerName = worker.getEmpName();
+		    Dept dept = worker.getDept();
+		    deptName = (dept != null) ? dept.getDeptName() : null;
+		}
 		
 		// 5) 설비 정보 조회
 		List<LotEquipInfoDTO> equipments = List.of();

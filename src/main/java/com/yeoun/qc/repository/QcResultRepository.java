@@ -64,6 +64,10 @@ public interface QcResultRepository extends JpaRepository<QcResult, Long> {
             """)
 	List<QcResultListDTO> findResultListForView();
     
+    // 작업지시 기준으로 가장 최근에 생성된 QC 결과 1건 조회
+    // (QC 결과가 여러 건 존재할 수 있으므로 최신 데이터 기준)
+    Optional<QcResult> findFirstByOrderIdOrderByQcResultIdDesc(String orderId);
+
     // =========================
     // 생산관리 대시보드
     // =========================
