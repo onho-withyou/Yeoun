@@ -28,7 +28,7 @@ const CODE_MAP = {
 	
 	//안전재고 - 정책방식
 	'FIXED_QTY':'고정 계산방식',
-	'COVER': '일수기반',
+	'DAYS_COVER': '일수기반',
 	
 	//품질항목기준 - 대상구분
 	'FINISHED_QC':'완제품'
@@ -54,43 +54,60 @@ class StatusModifiedRenderer {
     }
 	
     render(props) {
-        const value = props.value;
-        const rowKey = props.rowKey; 
-        
-		const koreanText = StatusModifiedRenderer.getKoreanText(value);
-        this.el.textContent = koreanText; 
-		
-		
-        // 💡 수정되거나 추가된 행 상태 확인 로직
-        let isUpdatedOrCreated = false;
-        
-        if (this.grid) {
-            const modifiedRows = this.grid.getModifiedRows();
-            
-            // 1. 수정된 행(updatedRows) 목록에서 현재 rowKey 확인
-            const isUpdated = modifiedRows.updatedRows.some(row => String(row.rowKey) === String(rowKey));
-			
-            
-            // 2. 새로 추가된 행(createdRows) 목록에서 현재 rowKey 확인
-            const isCreated = modifiedRows.createdRows.some(row => String(row.rowKey) === String(rowKey));
-            
-            // 두 상태 중 하나라도 true이면 스타일 적용
-            isUpdatedOrCreated = isUpdated || isCreated;
-        }
-        
-        // 🎨 인라인 스타일 적용
-        if (isUpdatedOrCreated) {
-            // 수정되거나 추가된 행에 적용될 스타일
-            this.el.style.backgroundColor = '#c3f2ffff'; 
-            this.el.style.color = '#000000';         
-            this.el.style.fontWeight = 'bold';
-        } else {
-            // 조건 불충족 시 스타일 초기화
-            this.el.style.backgroundColor = '';
-            this.el.style.color = '';
-            this.el.style.fontWeight = '';
-        }
+    const value = props.value;
+    const rowKey = props.rowKey;
+    const isSelect = props.columnInfo.renderer?.options?.isSelect;
+
+    const koreanText = StatusModifiedRenderer.getKoreanText(value);
+
+    // 신규 행 여부
+    let isCreated = false;
+    let isUpdated = false;
+
+    if (this.grid) {
+        const { createdRows, updatedRows } = this.grid.getModifiedRows();
+        isCreated = createdRows.some(r => String(r.rowKey) === String(rowKey));
+        isUpdated = updatedRows.some(r => String(r.rowKey) === String(rowKey));
     }
+
+    const hasValue = value !== null && value !== undefined && value !== '';
+    const displayText = (!hasValue && isCreated) ? '' : koreanText;
+
+    // UI
+    if (isSelect) {
+        this.el.innerHTML = `
+          <div style="
+            width:100%;
+            height:100%;
+            padding:0px 10px;
+            box-sizing:border-box;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            background:transparent;
+            cursor:pointer;
+          ">
+            <span>${displayText}</span>
+            <span style="font-size:10px;opacity:0.6;">▼</span>
+          </div>
+        `;
+    } else {
+        this.el.textContent = koreanText;
+    }
+
+    // 🎨 색상 조건 수정
+    const shouldHighlight = isUpdated || (isCreated && hasValue);
+
+    if (shouldHighlight) {
+        this.el.style.backgroundColor = '#c3f2ffff';
+        this.el.style.color = '#007aff';
+    } else {
+        this.el.style.backgroundColor = '';
+        this.el.style.color = '';
+    }
+ 
+}
+
 }
 
 

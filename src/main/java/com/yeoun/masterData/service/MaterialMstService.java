@@ -73,8 +73,12 @@ public class MaterialMstService {
 					if (target != null) {
 						// 기존 레코드 업데이트
 						MaterialMst m = mapToMaterial(row);
-						m.setCreatedId(row.get("createdId").toString());
-						m.setCreatedDate(LocalDate.parse(row.get("createdDate").toString()));
+						Object createdIdObj = row.get("createdId");
+						if (createdIdObj != null) m.setCreatedId(createdIdObj.toString());
+						Object createdDateObj = row.get("createdDate");
+						if (createdDateObj != null) {
+							try { m.setCreatedDate(LocalDate.parse(createdDateObj.toString())); } catch(Exception ignore) {}
+						}
 						m.setUpdatedId(empId);
 						m.setUpdatedDate(LocalDate.now());
 						materialMstRepository.save(m);
@@ -111,6 +115,12 @@ public class MaterialMstService {
 		if (row.get("matUnit") != null) m.setMatUnit(String.valueOf(row.get("matUnit")));
 		if (row.get("effectiveDate") != null) m.setEffectiveDate(String.valueOf(row.get("effectiveDate")));
 		if (row.get("matDesc") != null) m.setMatDesc(String.valueOf(row.get("matDesc")));
+		// useYn 기본값을 'Y'로 설정 (DB의 NOT NULL 제약 대비)
+		if (row.get("useYn") != null) {
+			m.setUseYn(String.valueOf(row.get("useYn")));
+		} else {
+			m.setUseYn("Y");
+		}
 		return m;
 	}
 	
@@ -119,11 +129,24 @@ public class MaterialMstService {
 	public String deleteMaterialMst(String empId, List<String> param) {
 		log.info("materialMstDeleteList------------->{}",param);
 		try {
-			for (String matId : param) {
-				if (materialMstRepository.existsById(matId)) {
-					materialMstRepository.deleteById(matId);
+			int updated = 0;
+			if (param != null) {
+				for (String key : param) {
+					if (key == null) continue;
+					String matId = key.trim();
+					if (matId.isEmpty()) continue;
+					Optional<MaterialMst> opt = materialMstRepository.findById(matId);
+					if (opt.isPresent()) {
+						MaterialMst m = opt.get();
+						m.setUseYn("N");
+						m.setUpdatedDate(LocalDate.now());
+						m.setUpdatedId(empId);
+						materialMstRepository.save(m);
+						updated++;
+					}
 				}
 			}
+			log.info("materialMstDeleteList updated count: {}", updated);
 			return "success";
 		} catch (Exception e) {
 			log.error("deleteMaterialMst error", e);
