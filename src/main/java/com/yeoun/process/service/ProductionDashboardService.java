@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import com.yeoun.masterData.entity.ProdLine;
 import com.yeoun.masterData.repository.ProdLineRepository;
 import com.yeoun.order.repository.WorkOrderRepository;
+import com.yeoun.process.dto.ImmediateActionRowDTO;
 import com.yeoun.process.dto.LineStayRowDTO;
 import com.yeoun.process.dto.ProductionDashboardKpiDTO;
 import com.yeoun.process.dto.ProductionTrendResponseDTO;
@@ -369,8 +370,13 @@ public class ProductionDashboardService {
         return labels;
     }
 
-
-
+    // ===================================================
+    // 4. 즉시 조치 리스트
+    public List<ImmediateActionRowDTO> getImmediateActions(int limit) {
+        // limit 방어 (0/음수 방지)
+        int safeLimit = (limit <= 0) ? 10 : limit;
+        return productionTrendMapper.selectImmediateActions(safeLimit);
+    }
 
 
 }

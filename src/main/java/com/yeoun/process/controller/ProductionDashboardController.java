@@ -47,6 +47,9 @@ public class ProductionDashboardController {
         ProductionTrendResponseDTO trend = productionDashboardService.getProductionTrend("day");
         model.addAttribute("trend", trend);
         
+        // 4. 즉시 조치 리스트
+        model.addAttribute("actions", productionDashboardService.getImmediateActions(10));
+        
 		return "/process/dashboard";
 	}
 	

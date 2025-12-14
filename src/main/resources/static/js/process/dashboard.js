@@ -176,3 +176,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 		});
 	});
 });
+
+// 4. 즉시 조치 리스트 (경과시간)
+document.addEventListener("DOMContentLoaded", function() {
+	const tooltipTriggerList = [].slice.call (
+		document.querySelectorAll('[data-bs-toggle="tooltip"]')
+	);
+	tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+		new bootstrap.Tooltip(tooltipTriggerEl);
+	});
+});

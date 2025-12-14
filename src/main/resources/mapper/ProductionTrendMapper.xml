@@ -100,5 +100,115 @@
 	    GROUP BY TO_CHAR(p.PLAN_END_DATE, 'YYYY-MM')
 	    ORDER BY label
   	</select>
+  	
+    <!-- ***************************************************************************** -->
+    <!--
+    [즉시 조치 리스트]
+    - 1) 지연(DELAY): work_order 기준
+    	 - 작업지시가 진행 중인데 예정종료시간(plan_end_date)을 이미 초과한 건
+         - elapsedMin = (현재 - 예정종료) 분  => 지연 분
+    - 2) QC 대기(QC_PENDING): work_order_process 기준
+    	 - 공정이 끝났는데 QC 대기 상태로 머무는 단계
+         - elapsedMin = (현재 - 공정종료시간(end_time)) 분  => QC 대기 분
+    - 3) 장기 진행(LONG): work_order_process 기준
+         - 공정이 진행중(IN_PROGRESS)인데 오래 걸리는 건
+         - elapsedMin = (현재 - 공정시작시간(start_time)) 분  => 진행 경과 분
+    - priority ASC(지연 먼저) + elapsedMin DESC(더 급한 것 먼저)
+    - FETCH FIRST #{limit} ROWS ONLY : TopN
+  -->
+
+<select id="selectImmediateActions" resultType="com.yeoun.process.dto.ImmediateActionRowDTO">
+WITH base AS (
+  SELECT
+    1 AS priority,
+    'DELAY' AS actionType,
+    wo.order_id AS orderId,
+    p.prd_name AS itemName,
+    p.prd_id   AS itemCode,
+    '-' AS processName,
+    '지연' AS statusLabel,
+    wo.plan_end_date AS planEndTime,
+    (
+      EXTRACT(DAY    FROM (SYSTIMESTAMP - CAST(wo.plan_end_date AS TIMESTAMP))) * 24 * 60 +
+      EXTRACT(HOUR   FROM (SYSTIMESTAMP - CAST(wo.plan_end_date AS TIMESTAMP))) * 60 +
+      EXTRACT(MINUTE FROM (SYSTIMESTAMP - CAST(wo.plan_end_date AS TIMESTAMP)))
+    ) AS elapsedMin,
+    NULL AS stepSeq
+  FROM work_order wo
+  JOIN product_mst p ON p.prd_id = wo.prd_id
+  WHERE wo.status = 'IN_PROGRESS'
+    AND wo.plan_end_date IS NOT NULL
+    AND wo.plan_end_date &lt; SYSDATE
+
+  UNION ALL
+
+  SELECT
+    2 AS priority,
+    'QC_PENDING' AS actionType,
+    wop.order_id AS orderId,
+    p.prd_name AS itemName,
+    p.prd_id   AS itemCode,
+    pm.process_name AS processName,
+    'QC대기' AS statusLabel,
+    wo.plan_end_date AS planEndTime,
+    (
+      EXTRACT(DAY    FROM (SYSTIMESTAMP - CAST(wop.end_time AS TIMESTAMP))) * 24 * 60 +
+      EXTRACT(HOUR   FROM (SYSTIMESTAMP - CAST(wop.end_time AS TIMESTAMP))) * 60 +
+      EXTRACT(MINUTE FROM (SYSTIMESTAMP - CAST(wop.end_time AS TIMESTAMP)))
+    ) AS elapsedMin,
+    wop.step_seq AS stepSeq
+  FROM work_order_process wop
+  JOIN work_order wo ON wo.order_id = wop.order_id
+  JOIN product_mst p ON p.prd_id = wo.prd_id
+  JOIN process_mst pm ON pm.process_id = wop.process_id
+  WHERE wo.status = 'IN_PROGRESS'
+    AND wop.status = 'QC_PENDING'
+    AND wop.end_time IS NOT NULL
+
+  UNION ALL
+
+  SELECT
+    3 AS priority,
+    'LONG' AS actionType,
+    wop.order_id AS orderId,
+    p.prd_name AS itemName,
+    p.prd_id   AS itemCode,
+    pm.process_name AS processName,
+    '진행' AS statusLabel,
+    wo.plan_end_date AS planEndTime,
+    (
+      EXTRACT(DAY    FROM (SYSTIMESTAMP - CAST(wop.start_time AS TIMESTAMP))) * 24 * 60 +
+      EXTRACT(HOUR   FROM (SYSTIMESTAMP - CAST(wop.start_time AS TIMESTAMP))) * 60 +
+      EXTRACT(MINUTE FROM (SYSTIMESTAMP - CAST(wop.start_time AS TIMESTAMP)))
+    ) AS elapsedMin,
+    wop.step_seq AS stepSeq
+  FROM work_order_process wop
+  JOIN work_order wo ON wo.order_id = wop.order_id
+  JOIN product_mst p ON p.prd_id = wo.prd_id
+  JOIN process_mst pm ON pm.process_id = wop.process_id
+  WHERE wo.status = 'IN_PROGRESS'
+    AND wop.status = 'IN_PROGRESS'
+    AND wop.start_time IS NOT NULL
+),
+ranked AS (
+  SELECT
+    b.*,
+    ROW_NUMBER() OVER (
+      PARTITION BY b.orderId
+      ORDER BY b.priority ASC, b.elapsedMin DESC
+    ) AS rn
+  FROM base b
+)
+SELECT
+  priority, actionType, orderId, itemName, itemCode,
+  processName, statusLabel, planEndTime, elapsedMin, stepSeq
+FROM ranked
+WHERE rn = 1
+ORDER BY priority ASC, elapsedMin DESC
+FETCH FIRST #{limit} ROWS ONLY
+</select>
+
+    
+    
 
 </mapper>

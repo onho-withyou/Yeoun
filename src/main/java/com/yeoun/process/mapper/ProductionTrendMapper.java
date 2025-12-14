@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.yeoun.process.dto.ImmediateActionRowDTO;
 import com.yeoun.process.dto.TrendRowDTO;
 
 // 생산 현황 추적 차트 전용 Mapper
@@ -27,4 +28,8 @@ public interface ProductionTrendMapper {
 
     List<TrendRowDTO> completedByMonth(@Param("fromDt") LocalDateTime fromDt, @Param("toDt") LocalDateTime toDt);
 
+    // ===========================
+    // 즉시 조치 리스트 함께 사용
+    List<ImmediateActionRowDTO> selectImmediateActions(@Param("limit") int limit);
+    
 }
