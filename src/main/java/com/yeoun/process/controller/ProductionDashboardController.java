@@ -6,9 +6,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.process.dto.LineStayRowDTO;
 import com.yeoun.process.dto.ProductionDashboardKpiDTO;
+import com.yeoun.process.dto.ProductionTrendResponseDTO;
 import com.yeoun.process.dto.StayCellDTO;
 import com.yeoun.process.service.ProductionDashboardService;
 
@@ -24,11 +27,11 @@ public class ProductionDashboardController {
 	@GetMapping("/dashboard")
 	public String dashboard(Model model) {
 		
-		// 상단 KPI
+		// 1. 상단 KPI
 		ProductionDashboardKpiDTO kpi = productionDashboardService.getKpis();
         model.addAttribute("kpi", kpi);
         
-        // 라인
+        // 2. 라인
         List<LineStayRowDTO> rows = productionDashboardService.getLineStayHeatmap();
         model.addAttribute("heatmapRows", rows);
 
@@ -40,8 +43,18 @@ public class ProductionDashboardController {
 
         model.addAttribute("heatmapTotal", heatmapTotal);
         
+        // 3. 차트
+        ProductionTrendResponseDTO trend = productionDashboardService.getProductionTrend("day");
+        model.addAttribute("trend", trend);
+        
 		return "/process/dashboard";
 	}
 	
+	// 차트 range(월/주/일) 변경 시 호출하는 API
+    @GetMapping("/dashboard/trend")
+    @ResponseBody
+    public ProductionTrendResponseDTO trend(@RequestParam(name = "range", defaultValue = "day") String range) {
+        return productionDashboardService.getProductionTrend(range);
+    }
 
 }
