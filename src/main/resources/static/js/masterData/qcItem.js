@@ -20,8 +20,8 @@ const grid1 = new Grid({
 		,{header: '기준 텍스트' ,name: 'stdText' ,align: 'center',width: 230}
 		,{header: 'MIN' ,name: 'minValue' ,align: 'center'}
         ,{header: 'MAX' ,name: 'maxValue' ,align: 'center'}
-		,{header: '사용' ,name: 'useYn' ,align: 'center',hidden: true}//,hidden: true  
-		,{header: '정렬순서' ,name: 'sortOrder' ,align: 'center'}
+		,{header: '사용' ,name: 'useYn' ,align: 'center'}  
+		,{header: '정렬순서' ,name: 'sortOrder' ,align: 'center',hidden: true}
 		,{header: '생성자' ,name: 'createdId' ,align: 'center',hidden: true}  
 		,{header: '생성일시' ,name: 'createdDate' ,align: 'center',hidden: true}  
 		,{header: '수정자' ,name: 'updatedId' ,align: 'center',hidden: true}  

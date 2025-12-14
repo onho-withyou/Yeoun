@@ -200,7 +200,8 @@ const grid2 = new Grid({
 		,{header: '생성자ID' ,name: 'createdId' ,align: 'center'}
 		,{header: '생성일자' ,name: 'createdDate' ,align: 'center'}
 		,{header: '수정자ID' ,name: 'updatedId' ,align: 'center'}
-		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}           
+		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}   
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center'}        
 	  ]
 	  ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
 	  ,height:100

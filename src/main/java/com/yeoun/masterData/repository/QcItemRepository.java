@@ -23,7 +23,8 @@ public interface QcItemRepository extends JpaRepository<QcItem, String> {
         SELECT *
         FROM QC_ITEM
         WHERE (?1 IS NULL OR ?1 = '' OR QC_ITEM_ID LIKE '%' || ?1 || '%')
-        ORDER BY QC_ITEM_ID ASC
+        AND (USE_YN = 'Y')
+        ORDER BY SORT_ORDER ASC, QC_ITEM_ID ASC
         """, nativeQuery = true)
     List<QcItem> findByQcItemList(String qcItemId);
 	// 대상구분 + 사용여부 기준으로 항목 조회
