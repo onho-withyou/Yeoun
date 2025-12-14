@@ -143,6 +143,31 @@ function setActiveRangeBtn(activeBtn) {
 }
 
 // -------------------------------
+// KPI 카드 클릭
+// -------------------------------
+document.addEventListener("DOMContentLoaded", () => {
+	document.querySelectorAll(".kpi-card[data-link]").forEach(card => {
+		// 마우스 클릭
+		card.addEventListener("click", (e) => {
+			// 카드 안에 있는 a 태그 클릭이면 a가 이동하게 두기
+	        if (e.target.closest("a")) return;
+
+	        const url = card.getAttribute("data-link");
+	        if (url) window.location.href = url;
+		});
+		
+		// 키보드 Enter/Space (role=button, tabindex=0 쓰는 경우 필수)
+	    card.addEventListener("keydown", (e) => {
+			if (e.key === "Enter" || e.key === " ") {
+				e.preventDefault();
+		        const url = card.getAttribute("data-link");
+		        if (url) window.location.href = url;
+			}
+		});
+	});
+});
+
+// -------------------------------
 // 초기화
 // -------------------------------
 document.addEventListener("DOMContentLoaded", async () => {

@@ -21,37 +21,42 @@
       .kpi-title { font-size: .95rem; color: #6b7280; }
       .kpi-value { font-size: 2rem; font-weight: 800; letter-spacing: -.5px; }
       .kpi-sub   { font-size: .9rem; font-weight: 700; }
-      .trend-up { color: #16a34a; }
-      .trend-down { color: #ef4444; }
       .trend-warn { color: #f59e0b; }
 
       .section-title { font-weight: 800; margin:0; }
       .section-sub { font-size: .9rem; color:#6b7280; }
 
-      .zone-header {
-        background:#263238;
-        color:#fff;
-        border-radius: 12px 12px 0 0;
-        padding: 12px 14px;
-        font-weight: 800;
-        text-align:center;
-        letter-spacing: .5px;
-      }
-      .rack {
-        border:1px solid #e5e7eb;
-        border-radius: 10px;
-        background:#fff;
-        padding: 10px 8px;
-        text-align:center;
-        height: 82px;
-        display:flex;
-        flex-direction:column;
-        justify-content:center;
-        gap: 4px;
-      }
+      /* 라인 현황 카드 */
+	  .rack {
+	    border:1px solid #e5e7eb;
+	    border-radius: 10px;
+	    background:#fff;
+	    padding: 10px 8px;
+	    text-align:center;
+	    height: 82px;
+	    display:flex;
+	    flex-direction:column;
+	    justify-content:center;
+	    gap: 4px;
+	    overflow: hidden;          
+	    min-width: 0;       
+	  }
+
       .rack .small-top { font-size:.78rem; color:#9ca3af; }
-      .rack .big-mid { font-weight: 800; color:#111827; }
-      .rack .small-bot { font-size:.8rem; color:#6b7280; }
+      .rack .big-mid {
+		font-weight: 800;
+		color:#111827;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	  }
+      .rack .small-bot {
+	    font-size:.8rem;
+	    color:#6b7280;
+	    white-space: nowrap;
+	    overflow: hidden;
+	    text-overflow: ellipsis;
+	  }
 
       .mini-chip{
         display:inline-flex; align-items:center; gap:6px;
