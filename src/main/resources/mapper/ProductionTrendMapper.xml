@@ -11,56 +11,62 @@
 		 완료 = 최종공정(6) WORK_ORDER_PROCESS.GOOD_QTY 합
 	 	 ========================================================= -->
 	<select id="plannedByDay" resultType="com.yeoun.process.dto.TrendRowDTO">
-		SELECT TO_CHAR(TRUNC(w.PLAN_START_DATE), 'YYYY-MM-DD') AS label,
-			   NVL(SUM(NVL(w.PLAN_QTY, 0)), 0) AS cnt
+		SELECT TO_CHAR(w.PLAN_END_DATE, 'YYYY-MM-DD') AS label,
+			   NVL(SUM(w.PLAN_QTY), 0) AS cnt
 	    FROM WORK_ORDER w
-	    WHERE w.PLAN_START_DATE <![CDATA[>=]]> #{fromDt}
-	    	AND w.PLAN_START_DATE <![CDATA[<]]>  #{toDt}
-	    GROUP BY TRUNC(w.PLAN_START_DATE)
-	    ORDER BY TRUNC(w.PLAN_START_DATE)
+	    WHERE <![CDATA[ w.PLAN_END_DATE >= #{fromDt} ]]>
+	    	AND <![CDATA[ w.PLAN_END_DATE <  #{toDt} ]]>
+	    GROUP BY TO_CHAR(w.PLAN_END_DATE, 'YYYY-MM-DD')
+	    ORDER BY label
 	</select>
 	
 	<select id="completedByDay" resultType="com.yeoun.process.dto.TrendRowDTO">
-		SELECT TO_CHAR(TRUNC(p.END_TIME), 'YYYY-MM-DD') AS label,
-			   NVL(SUM(NVL(p.GOOD_QTY, 0)), 0) AS cnt
-	    FROM WORK_ORDER_PROCESS p
-	    JOIN WORK_ORDER w
-	    	ON w.ORDER_ID = p.ORDER_ID
-	    WHERE p.STEP_SEQ = 6
-		    AND p.STATUS = 'DONE'
-		    AND p.END_TIME <![CDATA[>=]]> #{fromDt}
-			AND p.END_TIME <![CDATA[<]]>  #{toDt}
-		GROUP BY TRUNC(p.END_TIME)
-		ORDER BY TRUNC(p.END_TIME)
+		WITH planned_orders AS (
+			SELECT w.ORDER_ID, w.PLAN_END_DATE
+			FROM WORK_ORDER w
+			WHERE <![CDATA[ w.PLAN_END_DATE >= #{fromDt} ]]>
+				AND <![CDATA[ w.PLAN_END_DATE <  #{toDt} ]]>
+		)
+		SELECT TO_CHAR(p.PLAN_END_DATE, 'YYYY-MM-DD') AS label,
+			   NVL(SUM(wop.GOOD_QTY), 0) AS cnt
+	    FROM planned_orders p
+	    JOIN WORK_ORDER_PROCESS wop
+    		ON wop.ORDER_ID = p.ORDER_ID
+	    WHERE wop.STEP_SEQ = 6
+	   	 	AND wop.STATUS = 'DONE'
+	  	GROUP BY TO_CHAR(p.PLAN_END_DATE, 'YYYY-MM-DD')
+	  	ORDER BY label
 	</select>
 
 	<!-- =========================================================
 		 WEEK (주) : 월 기준 주차: "MM월 W주차"
 	 	 ========================================================= -->
 	<select id="plannedByWeek" resultType="com.yeoun.process.dto.TrendRowDTO">
-		SELECT TO_CHAR(w.PLAN_START_DATE, 'MM') || '월 ' ||
-			   TO_CHAR(w.PLAN_START_DATE, 'W') || '주차' AS label,
+		SELECT TO_CHAR(w.PLAN_END_DATE, 'MM') || '월 ' || TO_CHAR(w.PLAN_END_DATE, 'W') || '주차' AS label,
 			   NVL(SUM(w.PLAN_QTY), 0) AS cnt
 	    FROM WORK_ORDER w
-	    WHERE w.PLAN_START_DATE <![CDATA[>=]]> #{fromDt}
-	    	AND w.PLAN_START_DATE <![CDATA[<]]>  #{toDt}
-	    GROUP BY TO_CHAR(w.PLAN_START_DATE, 'MM'), TO_CHAR(w.PLAN_START_DATE, 'W')
-	    ORDER BY TO_CHAR(w.PLAN_START_DATE, 'MM'), TO_CHAR(w.PLAN_START_DATE, 'W')
+	    WHERE <![CDATA[ w.PLAN_END_DATE >= #{fromDt} ]]>
+	    	AND <![CDATA[ w.PLAN_END_DATE <  #{toDt} ]]>
+	    GROUP BY TO_CHAR(w.PLAN_END_DATE, 'MM'), TO_CHAR(w.PLAN_END_DATE, 'W')
+ 		ORDER BY TO_CHAR(w.PLAN_END_DATE, 'MM'), TO_CHAR(w.PLAN_END_DATE, 'W')
 	</select>
 
   	<select id="completedByWeek" resultType="com.yeoun.process.dto.TrendRowDTO">
-  		SELECT TO_CHAR(p.END_TIME, 'MM') || '월 ' ||
-  			   TO_CHAR(p.END_TIME, 'W') || '주차' AS label,
-  			   NVL(SUM(p.GOOD_QTY), 0) AS cnt
-	    FROM WORK_ORDER_PROCESS p
-  		JOIN WORK_ORDER w
-  			ON w.ORDER_ID = p.ORDER_ID
-  		WHERE p.STEP_SEQ = 6
-  			AND p.STATUS = 'DONE'
-	    	AND p.END_TIME <![CDATA[>=]]> #{fromDt}
-	    	AND p.END_TIME <![CDATA[<]]>  #{toDt}
-  		GROUP BY TO_CHAR(p.END_TIME, 'MM'), TO_CHAR(p.END_TIME, 'W')
-  		ORDER BY TO_CHAR(p.END_TIME, 'MM'), TO_CHAR(p.END_TIME, 'W')
+ 		WITH planned_orders AS (
+		    SELECT w.ORDER_ID, w.PLAN_END_DATE
+		    FROM WORK_ORDER w
+		    WHERE <![CDATA[ w.PLAN_END_DATE >= #{fromDt} ]]>
+		    	AND <![CDATA[ w.PLAN_END_DATE <  #{toDt} ]]>
+ 		)
+  		SELECT TO_CHAR(p.PLAN_END_DATE, 'MM') || '월 ' || TO_CHAR(p.PLAN_END_DATE, 'W') || '주차' AS label,
+  			   NVL(SUM(wop.GOOD_QTY), 0) AS cnt
+		FROM planned_orders p
+  		JOIN WORK_ORDER_PROCESS wop
+		    ON wop.ORDER_ID = p.ORDER_ID
+	  	WHERE wop.STEP_SEQ = 6
+	    	AND wop.STATUS = 'DONE'
+	  	GROUP BY TO_CHAR(p.PLAN_END_DATE, 'MM'), TO_CHAR(p.PLAN_END_DATE, 'W')
+	  	ORDER BY TO_CHAR(p.PLAN_END_DATE, 'MM'), TO_CHAR(p.PLAN_END_DATE, 'W')
   	</select>
 
   	<!-- =========================================================
@@ -68,27 +74,31 @@
          ========================================================= -->
 
  	<select id="plannedByMonth" resultType="com.yeoun.process.dto.TrendRowDTO">
-  		SELECT TO_CHAR(TRUNC(w.PLAN_START_DATE, 'MM'), 'YYYY-MM') AS label,
-  			   NVL(SUM(NVL(w.PLAN_QTY, 0)), 0) AS cnt
-	    FROM WORK_ORDER w
-	    WHERE w.PLAN_START_DATE <![CDATA[>=]]> #{fromDt}
-	    	AND w.PLAN_START_DATE <![CDATA[<]]>  #{toDt}
-    	GROUP BY TRUNC(w.PLAN_START_DATE, 'MM')
-     	ORDER BY TRUNC(w.PLAN_START_DATE, 'MM')
+		SELECT TO_CHAR(w.PLAN_END_DATE, 'YYYY-MM') AS label,
+			   NVL(SUM(w.PLAN_QTY), 0) AS cnt
+		FROM WORK_ORDER w
+		WHERE <![CDATA[ w.PLAN_END_DATE >= #{fromDt} ]]>
+			AND <![CDATA[ w.PLAN_END_DATE <  #{toDt} ]]>
+		GROUP BY TO_CHAR(w.PLAN_END_DATE, 'YYYY-MM')
+		ORDER BY label
   	</select>
 
   	<select id="completedByMonth" resultType="com.yeoun.process.dto.TrendRowDTO">
-  		SELECT TO_CHAR(TRUNC(p.END_TIME, 'MM'), 'YYYY-MM') AS label,
-  			   NVL(SUM(NVL(p.GOOD_QTY, 0)), 0) AS cnt
-	    FROM WORK_ORDER_PROCESS p
-	    JOIN WORK_ORDER w
-	    	ON w.ORDER_ID = p.ORDER_ID
-	    WHERE p.STEP_SEQ = 6
-		    AND p.STATUS = 'DONE'
-	        AND p.END_TIME <![CDATA[>=]]> #{fromDt}
-	        AND p.END_TIME <![CDATA[<]]>  #{toDt}
-        GROUP BY TRUNC(p.END_TIME, 'MM')
-        ORDER BY TRUNC(p.END_TIME, 'MM')
+	    WITH planned_orders AS (
+	    	SELECT w.ORDER_ID, w.PLAN_END_DATE
+	    	FROM WORK_ORDER w
+	    	WHERE <![CDATA[ w.PLAN_END_DATE >= #{fromDt} ]]>
+	     		AND <![CDATA[ w.PLAN_END_DATE <  #{toDt} ]]>
+	    )
+	    SELECT TO_CHAR(p.PLAN_END_DATE, 'YYYY-MM') AS label,
+	    	   NVL(SUM(wop.GOOD_QTY), 0) AS cnt
+	    FROM planned_orders p
+	    JOIN WORK_ORDER_PROCESS wop
+	    	ON wop.ORDER_ID = p.ORDER_ID
+	    WHERE wop.STEP_SEQ = 6
+	    	AND wop.STATUS = 'DONE'
+	    GROUP BY TO_CHAR(p.PLAN_END_DATE, 'YYYY-MM')
+	    ORDER BY label
   	</select>
 
 </mapper>
