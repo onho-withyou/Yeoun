@@ -77,6 +77,24 @@
 	  .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,.08); }
 	  .kpi-link { cursor: pointer; text-decoration: none; }
 	  .kpi-link:hover { text-decoration: underline; }
+	  
+	  /* 지연시간 툴팁 전용 */
+	  .tooltip .tooltip-inner {
+	    max-width: 360px;   /* 폭 넉넉하게 */
+	    text-align: left;   /* 왼쪽 정렬 */
+	    white-space: nowrap;/* 줄바꿈 방지 -> 한 줄 유지 */
+	    padding: 10px 12px;
+	    line-height: 1.5;
+	  }
+	  
+	  /* 툴팁 제목만 가운데 */
+	  .tooltip .tooltip-inner .tt-title {
+	    display: block;
+	    text-align: center;
+	    margin-bottom: 0;
+	    line-height: 1.5;
+	  }
+	  
     </style>
     
     <!-- ******************************************************* -->
@@ -258,108 +276,88 @@
     <!-- ******************************************************* -->
 	<!-- 4. 즉시 조치 리스트 -->
     <div class="card card-soft">
-      <div class="card-body">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
-          <div>
-            <h6 class="section-title">즉시 조치 작업 리스트</h6>
-            <div class="section-sub">지연 / QC대기 / 장기 진행 작업을 우선 표시합니다.</div>
-          </div>
-        </div>
+    	<div class="card-body">
+        	<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+          		<div>
+		            <h6 class="section-title">즉시 조치 작업 리스트</h6>
+		            <div class="section-sub">지연 / QC대기 / 장기 진행 작업을 우선 표시합니다.</div>
+          		</div>
+        	</div>
 
         <div class="table-responsive">
-          <table class="table table-hover text-center align-middle mb-0">
-            <thead>
-              <tr>
-                <th class="nowrap">No.</th>
-                <th class="nowrap">작업지시번호</th>
-                <th class="nowrap">제품</th>
-                <th class="nowrap">현재 공정</th>
-                <th class="nowrap">상태</th>
-                <th class="nowrap">예정 종료</th>
-				<th class="nowrap">
-				  지연시간
-				  <i class="bi bi-info-circle ms-1 text-muted"
-				     data-bs-toggle="tooltip"
-				     data-bs-placement="top"
-				     data-bs-html="true"
-				     title="
-				       <div style='text-align:left; white-space:nowrap;'>
-				         <b>시간 계산 기준</b><br>
-				         • 지연 : 예정 종료시간 ~ 현재<br>
-				         • QC대기 : 공정 종료시간 ~ 현재<br>
-				         • 진행 : 공정 시작시간 ~ 현재
-				       </div>
-				     ">
-				  </i>
-				</th>
-                <th class="nowrap">상세</th>
-              </tr>
-            </thead>
-            <tbody>
-  <!-- 데이터 없을 때 -->
-  <tr th:if="${#lists.isEmpty(actions)}">
-    <td colspan="8" class="text-muted py-4">즉시 조치가 필요한 작업이 없습니다.</td>
-  </tr>
+        	<table class="table table-hover text-center align-middle mb-0">
+            	<thead>
+              		<tr>
+		                <th class="nowrap">No.</th>
+		                <th class="nowrap">작업지시번호</th>
+		                <th class="nowrap">제품</th>
+		                <th class="nowrap">현재 공정</th>
+		                <th class="nowrap">상태</th>
+		                <th class="nowrap">예정 종료</th>
+						<th class="nowrap">
+				  			지연시간
+					  		<i class="bi bi-info-circle ms-1 text-muted tt-delay-rule"
+					     		data-bs-toggle="tooltip"
+					     		data-bs-placement="top"
+					     		data-bs-html="true"
+					     		title="
+							       <div>
+							         <b class='tt-title'>[ 시간 계산 기준 ]</b>
+							         • 지연 : 예정 종료시간 ~ 현재<br>
+							         • QC대기 : 공정 종료시간 ~ 현재<br>
+							         • 진행 : 공정 시작시간 ~ 현재
+							       </div>
+					     		">
+					  		</i>
+						</th>
+                		<th class="nowrap">상세</th>
+              		</tr>
+            	</thead>
+            	<tbody>
+					<!-- 데이터 없을 때 -->
+					<tr th:if="${#lists.isEmpty(actions)}">
+						<td colspan="8" class="text-muted py-4">즉시 조치가 필요한 작업이 없습니다.</td>
+					</tr>
 
-  <!-- 데이터 있을 때 -->
-  <tr th:each="a, stat : ${actions}">
-    <td th:text="${stat.count}">1</td>
-
-    <td class="fw-semibold" th:text="${a.orderId}">WO-20251213-0002</td>
-
-    <td th:text="${a.itemName + ' (' + a.itemCode + ')'}">봄결 100ml (BG100)</td>
-
-    <td th:text="${a.processName != null and a.processName != '-' ? a.processName : '진행 공정 확인 필요'}">
-	  진행 공정 확인 필요
-	</td>
-
-    <!-- 상태 배지 -->
-    <td>
-      <span class="mini-chip">
-        <span class="dot"
-              th:classappend="${a.actionType=='DELAY'} ? ' red' :
-                              (${a.actionType=='QC_PENDING'} ? ' amber' : ' green')"></span>
-        <span th:text="${a.statusLabel}">지연</span>
-        
-      </span>
-    </td>
-
-    <!-- 예정 종료 -->
-    <td class="nowrap"
-        th:text="${a.planEndTime != null ? #temporals.format(a.planEndTime,'yyyy-MM-dd HH:mm') : '-'}">
-      2025-12-13 16:30
-    </td>
-
-    <!-- 지연시간(기준별 계산) -->
-    <td class="nowrap">
-      <span th:text="${T(java.lang.String).format('%02d:%02d', a.elapsedMin/60, a.elapsedMin%60)}">00:35</span>
-    </td>
-
-    <!-- 상세 -->
-    <td>
-      <!--
-		상세 링크 규칙:
-    		- stepSeq 있으면: /process/status?orderId=...&stepSeq=...
-    		- stepSeq 없으면: /process/status?orderId=...
-      -->
-      <a class="btn btn-outline-primary btn-sm"
-         th:href="@{/process/status(orderId=${a.orderId}, stepSeq=${a.stepSeq})}">
-        상세
-      </a>
-    </td>
-  </tr>
-</tbody>
-
-          </table>
+		  			<!-- 데이터 있을 때 -->
+		  			<tr th:each="a, stat : ${actions}">
+		    			<td th:text="${stat.count}">1</td>
+		    			<td class="fw-semibold" th:text="${a.orderId}">WO-20251213-0002</td>
+		    			<td th:text="${a.itemName + ' (' + a.itemCode + ')'}">봄결 100ml (BG100)</td>
+					    <td th:text="${a.processName != null and a.processName != '-' ? a.processName : '진행 공정 확인 필요'}">
+						  진행 공정 확인 필요
+						</td>
+		    			<!-- 상태 배지 -->
+					    <td>
+					    	<span class="mini-chip">
+						        <span class="dot"
+						              th:classappend="${a.actionType=='DELAY'} ? ' red' :
+						                              (${a.actionType=='QC_PENDING'} ? ' amber' : ' green')"></span>
+					       		<span th:text="${a.statusLabel}">지연</span>
+					     	 </span>
+					    </td>
+					    <!-- 예정 종료 -->
+					    <td class="nowrap"
+					        th:text="${a.planEndTime != null ? #temporals.format(a.planEndTime,'yyyy-MM-dd HH:mm') : '-'}">
+					      	2025-12-13 16:30
+					    </td>
+					    <!-- 지연시간(기준별 계산) -->
+					    <td class="nowrap">
+					    	<span th:text="${T(java.lang.String).format('%02d:%02d', a.elapsedMin/60, a.elapsedMin%60)}">00:35</span>
+					    </td>
+		    			<!-- 상세 -->
+					    <td>
+					    	<a class="btn btn-outline-primary btn-sm"
+					         	th:href="@{/process/status(orderId=${a.orderId}, stepSeq=${a.stepSeq})}">
+					        	상세
+					      	</a>
+					    </td>
+		  			</tr>
+				</tbody>
+          	</table>
         </div>
-
       </div>
-    </div>
-
-
-
-
-
+    </div> <!-- 즉시 조치 끝 -->
   </div> <!-- /container -->
 
   <!-- ApexCharts CDN -->
