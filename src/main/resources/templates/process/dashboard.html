@@ -33,7 +33,6 @@
       .section-title { font-weight: 800; margin:0; }
       .section-sub { font-size: .9rem; color:#6b7280; }
 
-      /* 재고 대시보드 ZONE 느낌 */
       .zone-header {
         background:#263238;
         color:#fff;
@@ -84,186 +83,185 @@
 	  .kpi-link { cursor: pointer; text-decoration: none; }
 	  .kpi-link:hover { text-decoration: underline; }
     </style>
-
-    <!-- 1) KPI 카드 4개 -->
+    
+    <!-- ******************************************************* -->
+    <!-- 1. KPI 카드 4개 -->
     <div class="row g-3 mb-3">
-      <div class="col-12 col-md-6 col-xl-3">
-        <div class="card card-soft kpi-card" data-link="/order/list" role="button" tabindex="0"
-             aria-label="오늘 작업지시 목록으로 이동">
-          <div class="card-body">
-            <div class="kpi-title">오늘 작업지시</div>
-            <div class="d-flex align-items-end justify-content-between">
-              <div class="kpi-value" th:text="${kpi.todayOrders}">8</div>
-              <div class="kpi-sub text-muted small">
-				  <span class="text-success">
-				    ↑ 처리 <span th:text="${kpi.completedDelta}">0</span>
-				  </span>
-				  &nbsp;
-				  <span class="text-danger">
-				    ↓ 대기 <span th:text="${kpi.waitingDelta}">0</span>
-				  </span>
-				</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-md-6 col-xl-3">
-        <div class="card card-soft kpi-card" data-link="/process/status" role="button" tabindex="0"
-         	 aria-label="진행 중 공정 현황으로 이동">
-          <div class="card-body">
-            <div class="kpi-title">진행 중 작업</div>
-            <div class="d-flex align-items-end justify-content-between">
-              <div class="kpi-value" th:text="${kpi.inProgressOrders}">3</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-md-6 col-xl-3">
-        <div class="card card-soft kpi-card" data-link="/process/status" role="button" tabindex="0"
-        	 aria-label="지연 작업 현황으로 이동">
-          <div class="card-body">
-            <div class="kpi-title">지연 작업</div>
-            <div class="d-flex align-items-end justify-content-between">
-              <div class="kpi-value" th:text="${kpi.delayedOrders}">1</div>
-              <div class="kpi-sub trend-warn">주의 필요</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-		<div class="col-12 col-md-6 col-xl-3">
-		  <div class="card card-soft kpi-card" data-link="/qc/regist" role="button" tabindex="0"
-         	   aria-label="QC 화면으로 이동">
-		    <div class="card-body">
-		      <div class="kpi-title">QC 대기 / 불합격</div>
-		      <div class="d-flex align-items-end justify-content-between">
-		        <div class="kpi-value">
-		          <a class="kpi-link" href="/qc/regist?status=PENDING" onclick="event.stopPropagation();"
-	                 aria-label="QC 대기 목록으로 이동">
-	              	<span th:text="${kpi.qcPendingOrders}">0</span>
-	              </a>
-		          <span class="text-muted fs-5"> / </span>
-		          <a class="kpi-link" href="/qc/result?status=FAIL" onclick="event.stopPropagation();"
-               		 aria-label="QC 불합격 목록으로 이동">
-              	    <span th:text="${kpi.qcFailSteps}">0</span>
-            	  </a>
-		        </div>
-		      </div>
-		    </div>
-		  </div>
-		</div>
-    </div>
-
-	<!-- 2) 라인 현황 (체류 히트맵) -->
+    
+    	<!-- 1) 오늘 작업지시 카드 -->
+    	<div class="col-12 col-md-6 col-xl-3">
+    		<div class="card card-soft kpi-card" data-link="/order/list" role="button" tabindex="0"
+    			 aria-label="오늘 작업지시 목록으로 이동">
+    			<div class="card-body">
+    			 	<div class="kpi-title">오늘 작업지시</div>
+    			 	<div class="d-flex align-items-end justify-content-between">
+    			 		<div class="kpi-value" th:text="${kpi.todayOrders}">8</div>
+    			 		<div class="kpi-sub text-muted small">
+    			 			<span class="text-success">
+    			 				↑ 처리 <span th:text="${kpi.completedDelta}">0</span>
+    			 			</span>
+    			 			&nbsp;
+    			 			<span class="text-danger">
+    			 				↓ 대기 <span th:text="${kpi.waitingDelta}">0</span>
+    			 			</span>
+    			 		</div>
+    			 	</div>
+    			</div>
+    		</div>
+    	</div>
+    	
+    	<!-- 2) 진행 중 작업 -->
+    	<div class="col-12 col-md-6 col-xl-3">
+    		<div class="card card-soft kpi-card" data-link="/process/status" role="button" tabindex="0"
+    			 aria-label="진행 중 작업으로 이동">
+    			<div class="card-body">
+    			 	<div class="kpi-title">진행 중 작업</div>
+    			 	<div class="d-flex align-items-end justify-content-between">
+    			 		<div class="kpi-value" th:text="${kpi.inProgressOrders}">3</div>
+    			 	</div>
+    			</div>
+    		</div>
+    	</div>
+    	
+    	<!-- 3) 지연 작업 현황 -->
+    	<div class="col-12 col-md-6 col-xl-3">
+    		<div class="card card-soft kpi-card" data-link="/process/status" role="button" tabindex="0"
+    			 aria-label="지연 작업 현황으로 이동">
+    			<div class="card-body">
+    			 	<div class="kpi-title">지연 작업</div>
+    			 	<div class="d-flex align-items-end justify-content-between">
+    			 		<div class="kpi-value" th:text="${kpi.delayedOrders}">1</div>
+              			<div class="kpi-sub trend-warn">주의 필요</div>
+    			 	</div>
+    			</div>
+    		</div>
+    	</div>
+    	
+    	<!-- 4) QC 대기 / 불합격 -->
+    	<div class="col-12 col-md-6 col-xl-3">
+    		<div class="card card-soft kpi-card" data-link="/qc/regist" role="button" tabindex="0"
+    			 aria-label="QC 화면으로 이동">
+    			<div class="card-body">
+    			 	<div class="kpi-title">QC 대기 / 불합격</div>
+    			 	<div class="d-flex align-items-end justify-content-between">
+						<div class="kpi-value">
+							<a class="kpi-link" href="/qc/regist?status=PENDING" onclick="event.stopPropagation();"
+							   aria-label="QC 대기 목록으로 이동">
+							   <span th:text="${kpi.qcPendingOrders}">0</span>
+							</a>
+							<span class="text-muted fs-5"> / </span>
+							<a class="kpi-link" href="/qc/result?status=FAIL" onclick="event.stopPropagation();"
+							   aria-label="QC 불합격 목록으로 이동">
+							   <span th:text="${kpi.qcFailSteps}">0</span>
+							</a>
+						</div>
+    			 	</div>
+    			</div>
+    		</div>
+    	</div>
+    </div> <!-- KPI 카드 끝 -->
+    
+    
+    <!-- ******************************************************* -->
+    <!-- 2. 라인 현황 (체류 히트맵) -->
 	<div class="card card-soft mb-3">
-	  <div class="card-body">
-	
-	    <div class="d-flex align-items-end justify-content-between mb-3 flex-wrap gap-2">
-	      <div>
-	        <h6 class="section-title">라인 현황</h6>
-	        <div class="section-sub">
-	          라인별 공정 6단계 체류 현황 (진행중 기준)
-	        </div>
-	      </div>
-	
-	      <div class="d-flex gap-2 flex-wrap">
-	        <span class="mini-chip">OK</span>
-	        <span class="mini-chip" style="background:#fff7ed;color:#9a3412;">주의</span>
-	        <span class="mini-chip" style="background:#fee2e2;color:#991b1b;">지연</span>
-	      </div>
-	    </div>
-	    
-	    <!-- 진행중/대기 데이터 없음 안내 -->
-		<div th:if="${heatmapTotal == 0}"
-		     class="alert alert-light border text-center text-muted mb-3">
-		  현재 <b>진행중 / QC대기</b> 공정이 없습니다.
+		<div class="card-body">
+			<!-- 상단 -->
+			<div class="d-flex align-items-end justify-content-between mb-3 flex-wrap gap-2">
+				<div>
+					<h6 class="section-title">라인 현황</h6>
+					<div class="section-sub">
+						라인별 공정 6단계 체류 현황 (진행중 기준)
+					</div>
+				</div>
+				
+				<div class="d-flex gap-2 flex-wrap">
+					<span class="mini-chip">OK</span>
+					<span class="mini-chip" style="background:#fff7ed;color:#9a3412;">주의</span>
+			        <span class="mini-chip" style="background:#fee2e2;color:#991b1b;">지연</span>
+				</div>
+			</div>
+			
+			<!-- 진행중/대기 데이터 없음 안내 -->
+			<div th:if="${heatmapTotal == 0}" class="alert alert-light border text-center text-muted mb-3">
+				현재 <b>진행중 / QC대기</b> 공정이 없습니다.
+			</div>
+			
+			<!-- 테이블 -->
+			<div class="table-responsive">
+				<table class="table align-middle text-center mb-0">
+					<thead>
+						<tr>
+							<th class="nowrap">라인</th>
+							<th class="nowrap">블렌딩</th>
+				            <th class="nowrap">여과</th>
+				            <th class="nowrap">충진</th>
+				            <th class="nowrap">캡·펌프</th>
+				            <th class="nowrap">품질검사</th>
+				            <th class="nowrap">포장</th>
+						</tr>
+					</thead>
+					
+					<tbody>
+						<!-- 라인 반복 -->
+						<tr th:each="row : ${heatmapRows}">
+							<!-- 라인명 -->
+							<th class="fw-bold nowrap" th:text="${row.lineName}">
+								LINE 1
+							</th>
+							
+							<!-- 공정 6단계 반복 -->
+							<td th:each="cell : ${row.steps}">
+								<div class="rack kpi-card" th:data-line="${row.lineId}" th:data-step="${cell.stepSeq}"
+									 th:classappend="${cell.level} == 'DELAY' ? ' border border-danger bg-danger-subtle' :
+									 				 (${cell.level} == 'WARN' ? ' border border-warning bg-warning-subtle' : '')">
+									 				 
+				 					<!-- 체류 시간 -->
+				 					<div class="big-mid" th:text="${cell.inProgressCnt > 0 ? cell.stayMin + '분'
+				 												  : (cell.startableCnt > 0 ? '시작대기' : (cell.hasReady ? '대기' : '-'))}">
+				 						45분
+				 					</div>		
+				 					
+				 					<!-- 진행 중 건수 -->	
+				 					<div class="small-bot text-muted" th:text="${cell.inProgressCnt > 0	? '진행중 ' + cell.inProgressCnt + '건'
+				 						 : (cell.startableCnt > 0 ? '시작대기 ' + cell.startableCnt + '건'	
+				 						 : (cell.hasReady ? '대기 ' + cell.readyCnt + '건' : '진행중 0건'))}">
+			 							진행중 1건
+			 						</div>												  
+				 				</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
-	    
-	
-	    <div class="table-responsive">
-	      <table class="table align-middle text-center mb-0">
-	        <thead>
-	          <tr>
-	            <th class="nowrap">라인</th>
-	            <th class="nowrap">블렌딩</th>
-	            <th class="nowrap">여과</th>
-	            <th class="nowrap">충진</th>
-	            <th class="nowrap">캡·펌프</th>
-	            <th class="nowrap">품질검사</th>
-	            <th class="nowrap">포장</th>
-	          </tr>
-	        </thead>
-	
-	        <tbody>
-	          <!-- 라인 반복 -->
-	          <tr th:each="row : ${heatmapRows}">
-	            <!-- 라인명 -->
-	            <th class="fw-bold nowrap" th:text="${row.lineName}">
-	              LINE 1
-	            </th>
-	
-	            <!-- 공정 6단계 반복 -->
-	            <td th:each="cell : ${row.steps}">
-	              <div class="rack kpi-card"
-	                   th:data-line="${row.lineId}"
-	                   th:data-step="${cell.stepSeq}"
-	                   th:classappend="
-	                      ${cell.level} == 'DELAY' ? ' border border-danger bg-danger-subtle' :
-	                      (${cell.level} == 'WARN' ? ' border border-warning bg-warning-subtle' : '')
-	                   ">
-	
-	                <!-- 체류 시간 -->
-	                <div class="big-mid"
-					     th:text="${cell.inProgressCnt > 0 
-					                ? cell.stayMin + '분'
-					                : (cell.startableCnt > 0 ? '시작대기'
-					                : (cell.hasReady ? '대기' : '-'))}">
-	                  45분
-	                </div>
-	
-	                <!-- 진행중 건수 -->
-	                <div class="small-bot text-muted"
-					     th:text="${cell.inProgressCnt > 0
-					                ? '진행중 ' + cell.inProgressCnt + '건'
-					                : (cell.startableCnt > 0 ? '시작대기 ' + cell.startableCnt + '건'
-					                : (cell.hasReady ? '대기 ' + cell.readyCnt + '건'
-					                : '진행중 0건'))}">
-	                  진행중 1건
-	                </div>
-	              </div>
-	            </td>
-	          </tr>
-	        </tbody>
-	      </table>
-	    </div>
-	
-	  </div>
+	</div> <!-- 라인 끝 -->
+
+
+    <!-- ******************************************************* -->
+	<!-- 3) 생산 현황 추적 차트 -->
+	<div class="card card-soft mb-3">
+		<div class="card-body">
+			<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+				<div>
+					<h6 class="section-title">생산 현황 추적</h6>
+					<div class="section-sub">기간별 계획 대비 완료 추이</div>
+				</div>
+				<div class="btn-group" role="group">
+					<button type="button" class="btn btn-outline-primary btn-sm" data-range="month">월</button>
+					<button type="button" class="btn btn-outline-primary btn-sm" data-range="week">주</button>
+            		<button type="button" class="btn btn-primary btn-sm" data-range="day">일</button>
+				</div>
+			</div>
+			
+			<div id="prodChart" style="height: 320px;"></div>
+			<div class="text-muted small mt-2">※ 일/주/월 기준 집계</div>
+		</div>
 	</div>
 
 
-    <!-- 3) 생산 현황 추적 차트 (큰 차트 1개: 재고 대시보드 스타일) -->
-    <div class="card card-soft mb-3">
-      <div class="card-body">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
-          <div>
-            <h6 class="section-title">생산 현황 추적</h6>
-            <div class="section-sub">기간별 계획 대비 완료 추이 (더미)</div>
-          </div>
-          <div class="btn-group" role="group">
-            <button type="button" class="btn btn-outline-primary btn-sm" data-range="month">월</button>
-            <button type="button" class="btn btn-outline-primary btn-sm" data-range="week">주</button>
-            <button type="button" class="btn btn-primary btn-sm" data-range="day">일</button>
-          </div>
-        </div>
-
-        <div id="prodChart" style="height: 320px;"></div>
-        <div class="text-muted small mt-2">※ 데이터 연동 전 더미 차트</div>
-      </div>
-    </div>
-
-    <!-- 4) 즉시 조치 리스트 (재고의 발주필요 리스트 느낌) -->
+    <!-- ******************************************************* -->
+	<!-- 4) 즉시 조치 리스트 (아직 더미임) -->
     <div class="card card-soft">
       <div class="card-body">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
@@ -331,90 +329,22 @@
       </div>
     </div>
 
-    <div class="text-center small text-muted mt-3">
-      © 2025 yeoun ♥ by
-    </div>
 
-  </div><!-- /container -->
+
+
+
+  </div> <!-- /container -->
 
   <!-- ApexCharts CDN -->
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-
-  <script>
-    // 더미 차트 데이터
-    const seriesDay = [
-      { name: "계획", data: [10, 12, 8, 9, 11, 7, 10] },
-      { name: "완료", data: [8, 9, 6, 7, 10, 6, 8] }
-    ];
-    const seriesWeek = [
-      { name: "계획", data: [52, 48, 60, 55] },
-      { name: "완료", data: [44, 41, 53, 49] }
-    ];
-    const seriesMonth = [
-      { name: "계획", data: [210, 180, 240, 260, 220, 200, 190, 230, 250, 270, 260, 280] },
-      { name: "완료", data: [180, 160, 210, 230, 200, 170, 175, 205, 220, 245, 240, 265] }
-    ];
-
-    let chart;
-
-    function renderChart(range) {
-      const options = {
-        chart: { type: "bar", height: 320, toolbar: { show: true } },
-        plotOptions: { bar: { borderRadius: 6, columnWidth: "45%" } },
-        dataLabels: { enabled: false },
-        grid: { strokeDashArray: 4 },
-        xaxis: {
-          categories:
-            range === "day" ? ["09시","10시","11시","12시","13시","14시","15시"]
-            : range === "week" ? ["1주","2주","3주","4주"]
-            : ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"]
-        },
-        yaxis: { title: { text: "수량" } },
-        legend: { position: "bottom" },
-        series: range === "day" ? seriesDay : range === "week" ? seriesWeek : seriesMonth
-      };
-
-      if (chart) chart.destroy();
-      chart = new ApexCharts(document.querySelector("#prodChart"), options);
-      chart.render();
-    }
-
-    // 초기: 일
-    document.addEventListener("DOMContentLoaded", () => {
-      renderChart("day");
-
-      // 토글 버튼 active 처리
-      document.querySelectorAll("[data-range]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          document.querySelectorAll("[data-range]").forEach(b => {
-            b.classList.remove("btn-primary");
-            b.classList.add("btn-outline-primary");
-          });
-          btn.classList.remove("btn-outline-primary");
-          btn.classList.add("btn-primary");
-          renderChart(btn.getAttribute("data-range"));
-        });
-      });
-    });
-  </script>
   
-  <script>
-	  // 카드 클릭 이동 + 키보드(Enter) 이동
-	  document.addEventListener("click", (e) => {
-	    const card = e.target.closest(".kpi-card");
-	    if (!card) return;
-	    const link = card.dataset.link;
-	    if (link) window.location.href = link;
-	  });
-	
-	  document.addEventListener("keydown", (e) => {
-	    if (e.key !== "Enter") return;
-	    const card = e.target.closest(".kpi-card");
-	    if (!card) return;
-	    const link = card.dataset.link;
-	    if (link) window.location.href = link;
-	  });
-	</script>
+  <!-- 서버 주입 데이터 -->
+  <script th:inline="javascript">
+    window.ctx = /*[[@{/}]]*/ '';
+    window.initialTrend = /*[[${trend}]]*/ null;
+  </script>
+
+  <script src="/js/process/dashboard.js"></script>
 
 </th:block>
 </th:block>
