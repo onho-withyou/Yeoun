@@ -265,8 +265,30 @@
                         <th></th>
                     </tr>
                     </thead>
-                    <tbody>
-                    <!-- 라인 1: 정상 가동 -->
+                    <tbody th:each="line : ${list}">
+                    <tr th:data-line="${line.lineId}" data-bs-toggle="modal" data-bs-target="#lineDetailModal">
+                        <td th:text="${line.lineName}"></td>
+                        <td>
+                            <span class="status-pill status-run">
+                                <span class="dot"></span> 가동중
+                            </span>
+                        </td>
+                        <td>-</td>
+                        <td class="text-end">-</td>
+                        <td>
+                            <span class="badge-kpi badge-kpi-good">-</span>
+                        </td>
+                        <td>5명</td>
+                        <td class="text-end">
+                            <button type="button"
+                                    class="btn-yeoun-outline btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#lineDetailModal">
+                            상세보기
+                            </button>
+                        </td>
+                    </tr>
+                   <!--  라인 1: 정상 가동
                     <tr data-line="1라인" data-bs-toggle="modal" data-bs-target="#lineDetailModal">
                         <td>1라인</td>
                         <td>
@@ -290,7 +312,7 @@
                         </td>
                     </tr>
 
-                    <!-- 라인 2: 부분 가동 / 품목 변경 -->
+                     라인 2: 부분 가동 / 품목 변경
                     <tr data-line="2라인" data-bs-toggle="modal" data-bs-target="#lineDetailModal">
                         <td>2라인</td>
                         <td>
@@ -314,7 +336,7 @@
                         </td>
                     </tr>
 
-                    <!-- 라인 3: 점검/비가동 -->
+                     라인 3: 점검/비가동
                     <tr data-line="예비라인" data-bs-toggle="modal" data-bs-target="#lineDetailModal">
                         <td>예비라인</td>
                         <td>
@@ -336,7 +358,7 @@
                                 상세보기
                             </button>
                         </td>
-                    </tr>
+                    </tr>&ndash;&gt;-->
 
                     </tbody>
                 </table>
