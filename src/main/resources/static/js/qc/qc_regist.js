@@ -4,6 +4,7 @@ let qcRegistGrid = null;
 let qcRegModal = null;
 let qcSaved = false;        // 저장 성공 여부
 let currentOrderId = null;  // 모달이 열려있는 orderId (cancel 때 필요)
+let qcDirty = false;		// 입력 변경 여부
 
 document.addEventListener("DOMContentLoaded", () => {
 	
@@ -22,7 +23,24 @@ document.addEventListener("DOMContentLoaded", () => {
 	    currentOrderId = null;
 	  }
 	});
+	
+	// 닫히기 직전: 입력이 있을 때만 confirm으로 닫힘을 막음
+	modalEl.addEventListener("hide.bs.modal", (e) => {
+	  if (qcSaved) return;        // 저장으로 닫히는 경우는 경고 X
+	  if (!qcDirty) return;       // 입력 변경 없으면 경고 X
 
+	  const ok = confirm("입력한 내용이 저장되지 않았습니다.\n정말 닫을까요?");
+	  if (!ok) {
+	    e.preventDefault();       // 여기서 닫힘 취소
+	  }
+	});
+
+	document.getElementById("qcRegForm")?.addEventListener("input", () => {
+	  qcDirty = true;
+	});
+	document.getElementById("qcRegForm")?.addEventListener("change", () => {
+	  qcDirty = true;
+	});
 	
 	// 그리드 초기화
 	const gridEl = document.getElementById("qcRegistGrid");
@@ -129,6 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	    }
 		
 		qcSaved = false; 
+		qcDirty = false; 
 		currentOrderId = rowData.orderId;
 		
 	    openQcRegModal(rowData);
@@ -230,6 +249,7 @@ function openQcRegModal(rowData) {
 
 	// 모달 열기
 	qcRegModal.show();
+	qcDirty = false; 
 	
 	// 모달 열릴 때 FAIL 사유 상태 동기화
 	updateFailReasonState();
@@ -493,7 +513,7 @@ function onClickSaveQcResult() {
           alert(data.message || "QC 검사 결과가 저장되었습니다.");
 		  
 		  qcSaved = true;
-
+		  qcDirty = false;
           // 모달 닫고 목록 새로고침
           qcRegModal.hide();
           loadQcRegistGrid();
