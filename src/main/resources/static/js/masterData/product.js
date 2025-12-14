@@ -127,6 +127,8 @@ const grid1 = new Grid({
         ,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'
 			,renderer:{ type: StatusModifiedRenderer}
 		}           
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center'}          
+
 	  ]
 	  ,data: []
 	  ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
@@ -203,7 +205,8 @@ const grid2 = new Grid({
 	        ,{header: '생성자ID' ,name: 'createdId' ,align: 'center'}
 	        ,{header: '생성일자' ,name: 'createdDate' ,align: 'center'}
 	        ,{header: '수정자ID' ,name: 'updatedId' ,align: 'center'}
-	        ,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}           
+	        ,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}
+			,{header: '사용여부' ,name: 'useYn' ,align: 'center'}          
 	    ],
 	    data: []
 	    ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
@@ -639,21 +642,6 @@ deleteProductRowBtn.addEventListener('click', async function() {
 				})
 				.then(parsed => {
 					
-					// 1. HTTP 500 에러 본문인 경우 (parsed.status가 500인 경우)
-				    if (parsed && parsed.status === 500) {
-				        
-				        // ORA-02292 오류가 포함된 500 에러인지 확인 (message 필드에서 직접 확인)
-				        const errorMessage = parsed.message || parsed.trace;
-				        
-				        if (errorMessage && errorMessage.includes("ORA-02292")) {
-				            // ✅ 요청하신 메시지를 사용자에게 표시
-				            alert("⚠️ 삭제 실패: 연관된 데이터가 존재합니다. 먼저 관련(자식) 데이터를 삭제하세요.");
-				            return; // 여기서 로직 종료
-				        }
-				        
-				        // ORA-02292가 아닌 다른 500 에러인 경우
-				        throw new Error(`서버 내부 오류: ${parsed.error} (${parsed.message ? parsed.message.substring(0, 50) + '...' : ''})`);
-				    }
 					// 3. 성공 상태 확인
 				    if (parsed && parsed.status === 'success') {
 				        alert('✅ 삭제가 성공적으로 완료되었습니다.');

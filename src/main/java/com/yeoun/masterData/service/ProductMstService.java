@@ -135,56 +135,37 @@ public class ProductMstService {
 		log.info("deleteProduct------------->{}",param);
 		Map<String, Object> result = new HashMap<>();
 		try {
-			Object rowKeysObj = param.get("rowKeys");
-			if (!(rowKeysObj instanceof List)) {
-				result.put("status", "no_data");
-				result.put("deletedCount", 0);
-				return result;
-			}
-			@SuppressWarnings("unchecked")
-			List<Object> rowKeys = (List<Object>) rowKeysObj;
-			List<String> prdIds = rowKeys.stream()
-				.map(key -> {
-					if (key instanceof Number) {
-						return String.valueOf(((Number) key).longValue());
-					} else {
-						return String.valueOf(key);
+			Object keysObj = param.get("rowKeys");
+			int updated = 0;
+			if (keysObj instanceof List) {
+				@SuppressWarnings("unchecked")
+				List<String> rowKeys = (List<String>) keysObj;
+				for (String key : rowKeys) {
+					if (key == null) continue;
+					String prdId = key.trim();
+					if (prdId.isEmpty()) continue;
+					Optional<ProductMst> opt = productMstRepository.findById(prdId);
+					if (opt.isPresent()) {
+						ProductMst p = opt.get();
+						p.setUseYn("N");
+						p.setUpdatedDate(java.time.LocalDate.now());
+						productMstRepository.save(p);
+						updated++;
 					}
-				})
-				.filter(s -> s != null && !s.trim().isEmpty())
-				.collect(Collectors.toList());
-
-			if (prdIds.isEmpty()) {
-				result.put("status", "no_data");
-				result.put("deletedCount", 0);
-				return result;
+				}
 			}
-
-			List<ProductMst> existing = productMstRepository.findAllById(prdIds);
-			if (existing == null || existing.isEmpty()) {
-				result.put("status", "no_exist");
-				result.put("deletedCount", 0);
-				return result;
-			}
-
-			try {
-				productMstRepository.deleteAll(existing);
-			} catch (DataIntegrityViolationException dive) {
-				log.error("deleteProduct DataIntegrityViolation (FK constraint?)", dive);
-				result.put("status", "constraint_violation");
-				result.put("message", "삭제 실패: 연관된 데이터가 존재합니다. 먼저 관련 데이터를 삭제하세요.");
-				result.put("deletedCount", 0);
-				return result;
-			}
-
 			result.put("status", "success");
-			result.put("deletedCount", existing.size());
+			result.put("updatedCount", updated);
+			return result;
+		} catch (DataIntegrityViolationException dive) {
+			log.error("deleteProduct data integrity error", dive);
+			result.put("status", "error");
+			result.put("message", dive.getMessage());
 			return result;
 		} catch (Exception e) {
 			log.error("deleteProduct error", e);
 			result.put("status", "error");
 			result.put("message", e.getMessage());
-			result.put("deletedCount", 0);
 			return result;
 		}
 	}

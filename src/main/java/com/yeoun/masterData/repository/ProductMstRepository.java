@@ -29,7 +29,8 @@ public interface ProductMstRepository extends JpaRepository<ProductMst, String> 
 			FROM PRODUCT_MST p
 			-- prdId가 비어있거나 NULL이면 전체조회, 그렇지 않으면 포함(부분일치) 검색
 			WHERE (:prdId IS NULL OR :prdId = '' OR p.PRD_ID LIKE '%' || :prdId || '%')
-			AND (:prdName IS NULL OR :prdName = '' OR p.PRD_NAME LIKE '%' || :prdName || '%')
+		AND (:prdName IS NULL OR :prdName = '' OR p.PRD_NAME LIKE '%' || :prdName || '%')
+		AND (p.USE_YN = 'Y')
 			""", nativeQuery = true)
 	List<ProductMst> findByPrdIdList(@Param("prdId") String prdId, @Param("prdName") String prdName);
 
