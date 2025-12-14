@@ -26,6 +26,7 @@ import com.yeoun.inventory.dto.InventoryHistoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryGroupDTO;
 import com.yeoun.inventory.dto.WarehouseLocationDTO;
 import com.yeoun.inventory.dto.InventorySafetyCheckDTO;
+import com.yeoun.inventory.dto.WarehouseLocationCreateRequest;
 import com.yeoun.inventory.entity.WarehouseLocation;
 import com.yeoun.inventory.service.InventoryService;
 import com.yeoun.order.dto.WorkOrderDTO;
@@ -182,6 +183,14 @@ public class InventoryRestController {
 		return ResponseEntity.ok(inventoryOrderCheckDTOList);
 	}
 	
+	// =========================================
+	// 창고 등록
+	@PostMapping("/locations/add")
+	public ResponseEntity<String> createLocations(@RequestBody WarehouseLocationCreateRequest req) {
+		inventoryService.createLocations(req);
+		
+		 return ResponseEntity.ok().build();
+	}
 }
 
 

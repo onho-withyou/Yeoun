@@ -2,9 +2,13 @@ package com.yeoun.inventory.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -13,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.yeoun.inventory.dto.InventoryModalRequestDTO;
 import com.yeoun.inventory.dto.InventoryOrderCheckViewDTO;
 import com.yeoun.inventory.dto.InventorySafetyCheckDTO;
+import com.yeoun.inventory.dto.WarehouseLocationCreateRequest;
 import com.yeoun.common.e_num.AlarmDestination;
 import com.yeoun.common.entity.Dispose;
 import com.yeoun.common.repository.DisposeRepository;
@@ -357,6 +362,51 @@ public class InventoryService {
 		
 		return ivOrderCheckViewRepository.findAll().stream()
 				.map(InventoryOrderCheckViewDTO::fromEntity).toList();
+	}
+
+	// ==================================
+	// 창고 등록
+	@Transactional
+	public void createLocations(WarehouseLocationCreateRequest req) {
+		// 기존 창고 조회
+		List<WarehouseLocation> existing = warehouseLocationRepository.findByZoneAndRack(req.getZone(), req.getRack());
+		
+		// 기존 위치 Set 생성
+		Set<String> existingSet = existing.stream()
+				.map(d -> d.getRackRow() + "-" + d.getRackCol())
+				.collect(Collectors.toSet());
+		
+		List<WarehouseLocation> toInsert = new ArrayList<>();
+		
+		for (int r = req.getRowStart(); r <= req.getRowEnd(); r++) {
+			// r은 숫자로 들어오고 이걸 문자로 변환
+			String rowChar = String.valueOf((char) ('A' + r - 1));
+			
+			for (int c = req.getColStart(); c <= req.getColEnd(); c++) {
+				String colStr  = String.format("%02d", c);
+				String key = rowChar + "-" + colStr;
+				
+				if (existingSet.contains(key)) {
+					continue;
+				}
+				
+				WarehouseLocationDTO locationDTO = new WarehouseLocationDTO();
+				locationDTO.setLocationId(UUID.randomUUID().toString());
+				locationDTO.setZone(req.getZone());
+				locationDTO.setRack(normalizeRack(req.getRack()));
+				locationDTO.setRackRow(rowChar);
+				locationDTO.setRackCol(colStr);
+				
+				WarehouseLocation location = locationDTO.toEntity();
+				
+				toInsert.add(location);
+			}
+		}
+		warehouseLocationRepository.saveAll(toInsert);
+	}
+	
+	private String normalizeRack(String rack) {
+	    return String.format("%02d", Integer.parseInt(rack));
 	}
 
 }

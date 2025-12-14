@@ -10,12 +10,18 @@ const CONFIG = {
     cardBg: "#ffffff",
     cardStroke: "#dee2e6",
     cardShadow: { color: 'black', blur: 10, offset: { x: 2, y: 4 }, opacity: 0.05 },
+	
+	// zone 헤더 스타일
     headerBg: "#343a40",
     headerText: "#ffffff",
+	
+	// rack 버튼 스타일
     rackBtnFill: "#f8f9fa",
     rackBtnStroke: "#ced4da",
     rackBtnHover: "#e9ecef",
     rackBtnText: "#495057",
+	
+	// 레이아웃 설정
     padding: 20,
     headerHeight: 40,
     rackBtnSize: 70,
@@ -45,13 +51,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     await initDashboard();
 });
 
+let locationInfo = [];
+
 // Konva 대시보드 로직
 // 대시보드 초기화 및 렌더링 함수
 async function initDashboard() {
 	// 컨테이너 크기 측정
     const containerBlock = document.getElementById('container');
     const stageWidth = containerBlock.offsetWidth || 200;
-    const stageHeight = 600;
+    const stageHeight = 200;
    
 	// Konva Stage 생성(캔버스)
     const stage = new Konva.Stage({
@@ -67,6 +75,7 @@ async function initDashboard() {
 
 	// 창고 위치 데이터 가져오익
     const rawData = await getLocationData();
+	locationInfo = rawData;
 
 	// 데이터가 없을 경우 처리
     if (!rawData || rawData.length === 0) {
@@ -108,6 +117,39 @@ async function initDashboard() {
     });
 
     layer.draw();
+	
+	// 초기 로딩 시 화면 크기 설정
+	fitStageIntoParentContainer(stage, layer);
+	
+	// 화면 크기 감지해서 실시간으로 크기 변함
+	window.addEventListener('resize', () => fitStageIntoParentContainer(stage, layer));
+}
+
+function fitStageIntoParentContainer(stage, layer) {
+    const container = document.getElementById('container');
+	
+    if (!container) return;
+
+    // 현재 컨테이너(화면) 너비
+    const containerWidth = container.offsetWidth;
+
+    // 실제 그림(콘텐츠)의 전체 너비 측정
+    // getClientRect: 현재 레이어에 그려진 모든 도형을 감싸는 사각형
+    const contentRect = layer.getClientRect({ relativeTo: layer });
+    const contentWidth = contentRect.width + 40; // 여백 40px 추가
+
+    // 배율(Scale) 계산
+    // 화면이 그림보다 작으면 축소, 크면 1배율(원본)
+    let scale = containerWidth / contentWidth;
+    if (scale > 1) scale = 1; // 너무 커지는 것 방지 (최대 1배)
+
+    // Stage 크기 및 배율 적용
+    stage.width(containerWidth);
+    // 높이도 배율에 맞춰 줄여줌 (비율 유지)
+    stage.height(200 * scale); 
+    
+    stage.scale({ x: scale, y: scale });
+    stage.batchDraw(); // 다시 그리기
 }
 
 // 개별 zone 카드와 내부 rack 버튼을 그리는 함수
@@ -248,7 +290,8 @@ async function openRackDetailModal(zone, rack, cells) {
         div.innerText = `${cell.rackRow}-${cell.rackCol}`;
 		
 		// grid 위치 지정 (Y축은 아래에서 위로 쌓이도록 계산)
-        div.style.gridRow = (maxRow - cell.rowIdx) + 1;
+//        div.style.gridRow = (maxRow - cell.rowIdx) + 1;
+		div.style.gridRow = cell.rowIdx;
         div.style.gridColumn = cell.colIdx;
 
 		// 클릭 시 재고 목록 열기 
@@ -333,22 +376,12 @@ async function openStockModal(cellData) {
 	                const index = this.getAttribute('data-index');
 	                const item = stockList[index]; 
 	                
-					// 전역 변수 업데이트
-                    if (typeof currentIvid !== 'undefined') {
-						currentIvid = item.ivId;
-					}
-                    if (typeof currentIvQty !== 'undefined') {
-						currentIvQty = item.ivAmount;
-					}
-                    if (typeof expectOutboundQty !== 'undefined') {
-						expectOutboundQty = item.expectObAmount;
-					}
-                    if (typeof currentLoc !== 'undefined') {
-						currentLoc = item.locationId;
-					}
-                    if (typeof canUseQty !== 'undefined') {
-						canUseQty = item.ivAmount - item.expectObAmount;
-					}
+					// 클릭하는 순간에 전역 변수 업데이트
+					currentIvid = item.ivId;
+					currentIvQty = item.ivAmount;
+					expectOutboundQty = item.expectObAmount;
+					currentLoc = item.locationId; 
+					canUseQty = item.ivAmount - item.expectObAmount;
 	                
 					// 재고이동 모달
 	                openMoveModal(item);
