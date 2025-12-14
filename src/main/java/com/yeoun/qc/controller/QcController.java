@@ -77,6 +77,23 @@ public class QcController {
 		return qcResultService.getQcResultListForView();
 	}
 	
+	// --------------------------------------------------------------
+	// QC 검사 시작
+	@PostMapping("/start")
+	@ResponseBody
+	public Map<String, Object> startQc(@RequestParam("orderId") String orderId) {
+	    qcResultService.startQc(orderId);
+	    return Map.of("success", true, "message", "QC 검사를 시작했습니다.");
+	}
+
+	// QC 검사 중단(저장 없이 닫기)
+	@PostMapping("/cancel")
+	@ResponseBody
+	public Map<String, Object> cancelQc(@RequestParam("orderId") String orderId) {
+	    qcResultService.cancelQc(orderId);
+	    return Map.of("success", true, "message", "QC 검사가 중단되었습니다.");
+	}
+	
 	// QC 결과 저장 (등록 모달에서 입력값 저장)
 	@PostMapping("/{qcResultId}/save")
 	@ResponseBody

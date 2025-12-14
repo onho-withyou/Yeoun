@@ -13,6 +13,7 @@ public class QcSaveRequestDTO {
     private Integer defectQty;   // QC 불량 수량(EA)
     private String failReason;   // 불량 사유(전량 FAIL 등)
     private String remark;       // 비고(검사 메모 등)
+    private String overallResult;
 
     // QC 항목 상세 행들 (지금 쓰고 있는 DTO 재사용)
     private List<QcDetailRowDTO> detailRows;
