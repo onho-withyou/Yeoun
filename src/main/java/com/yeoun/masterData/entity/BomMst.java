@@ -53,5 +53,8 @@ public class BomMst {
 	@Column(name="UPDATED_DATE")
 	private LocalDate updatedDate; //수정일시
 
+	@Column(name="USE_YN", length = 1)
+	private String useYn; //사용여부
+
 
 }
