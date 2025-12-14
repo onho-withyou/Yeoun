@@ -398,6 +398,9 @@ function onClickSaveQcResult() {
 
 	const overallResult = overallResultEl ? overallResultEl.value : "";
 	const failReason    = failReasonEl ? failReasonEl.value.trim() : "";
+	
+	const inspectionDate = document.getElementById("inspectionDate")?.value; // "2025-12-14"
+	const inspectorId    = document.getElementById("inspectorId")?.value;   // 사번
 
 	// 전체 판정 필수
 	if (!overallResult) {
@@ -460,6 +463,8 @@ function onClickSaveQcResult() {
     // 3) 서버로 보낼 payload
     const payload = {
       qcResultId: Number(qcResultId),
+	  inspectionDate: inspectionDate,
+	  inspectorId: inspectorId,
 	  overallResult: overallResult,
       goodQty: goodQty,
       defectQty: defectQty,

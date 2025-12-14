@@ -1,5 +1,6 @@
 package com.yeoun.qc.dto;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import lombok.Data;
@@ -7,6 +8,9 @@ import lombok.Data;
 // QC 결과 저장 요청 DTO
 @Data
 public class QcSaveRequestDTO {
+	
+	private LocalDate inspectionDate; 
+    private String inspectorId;
 	
 	// QC 헤더 영역에서 입력하는 값들
     private Integer goodQty;     // QC 통과 수량(EA)

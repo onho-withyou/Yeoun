@@ -381,6 +381,15 @@ public class QcResultService {
 	        qcResultDetailRepository.save(detail);
 	    }
 		
+		// 검사자 / 검사일자 확정
+		if (loginEmpId != null && (header.getInspectorId() == null || header.getInspectorId().isBlank())) {
+		    header.setInspectorId(loginEmpId);
+		}
+
+		if (header.getInspectionDate() == null) {
+		    header.setInspectionDate(LocalDate.now());
+		}
+		
 		// 3) 수동 전체판정
 		// 디테일 FAIL 존재 여부(참고용)
 		boolean hasFail = !allPass;
