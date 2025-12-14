@@ -85,7 +85,11 @@ const grid5 = new Grid({
 					,renderer:{ type: StatusModifiedRenderer}
 				}
 				,{header: '단위' ,name: 'matUnit' ,align: 'center',editor: 'text',width: 65
-					,renderer:{ type: StatusModifiedRenderer}
+					,renderer:{ type: StatusModifiedRenderer
+						,options: {
+						isSelect: true 
+					}
+					}
 					,editor: {
 						type: 'select', // 드롭다운 사용
 						options: {
@@ -124,7 +128,11 @@ const grid6 = new Grid({
 					,renderer:{ type: StatusModifiedRenderer}
 				}
 				,{header: '단위' ,name: 'matUnit' ,align: 'center',editor: 'text',width: 65
-					,renderer:{ type: StatusModifiedRenderer}
+					,renderer:{ type: StatusModifiedRenderer
+						,options: {
+							isSelect: true 
+						}
+					}
 					,editor: {
 						type: 'select', // 드롭다운 사용
 						options: {
@@ -168,8 +176,12 @@ const grid2 = new Grid({
 		,{header: '원재료 사용량' ,name: 'matQty' ,align: 'center',editor: 'text'
 			,renderer:{ type: StatusModifiedRenderer}	
 		}
-		,{header: '단위' ,name: 'matUnit' ,align: 'center',filter: "select"
-			,renderer:{ type: StatusModifiedRenderer}
+		,{header: '단위' ,name: 'matUnit' ,align: 'center',filter: "select",width:60
+			,renderer:{ type: StatusModifiedRenderer
+				,options: {
+					isSelect: true 
+				}
+			}
 			,editor: {
 				type: 'select', // 드롭다운 사용
 				options: {
@@ -213,7 +225,11 @@ const grid3 = new Grid({
 				,renderer:{ type: StatusModifiedRenderer}	
 			}
 			,{header: '품목종류' ,name: 'itemType' ,align: 'center'
-				,renderer:{ type: StatusModifiedRenderer}	
+				,renderer:{ type: StatusModifiedRenderer
+					,options: {
+					isSelect: true 
+				}
+				}	
 				,editor: {
 					type: 'select', // 드롭다운 사용
 					options: {
@@ -236,8 +252,12 @@ const grid3 = new Grid({
 			,{header: '용량' ,name: 'volume' ,align: 'center',editor: 'text',filter: "select"
 				,renderer:{ type: StatusModifiedRenderer}
 			}
-			,{header: '단위' ,name: 'itemUnit' ,align: 'center'
-				,renderer:{ type: StatusModifiedRenderer}
+			,{header: '단위' ,name: 'itemUnit' ,align: 'center',width:60
+				,renderer:{ type: StatusModifiedRenderer
+					,options: {
+						isSelect: true 
+					}
+				}
 				,editor: {
 					type: 'select', // 드롭다운 사용
 					options: {
@@ -251,13 +271,17 @@ const grid3 = new Grid({
 
 			}
 			,{header: '정책방식' ,name: 'policyType' ,align: 'center'
-				,renderer:{ type: StatusModifiedRenderer}
+				,renderer:{ type: StatusModifiedRenderer
+					,options: {
+						isSelect: true 
+					}
+				}
 				,editor: {
 					type: 'select', // 드롭다운 사용
 					options: {
 						listItems: [
 							{ text: '고정 계산방식', value: 'FIXED_QTY' },
-							{ text: '일수기반', value: 'DAYS COVER' },
+							{ text: '일수기반', value: 'DAYS_COVER' },
 						]
 					}
 				}
@@ -272,7 +296,11 @@ const grid3 = new Grid({
 				,renderer:{ type: StatusModifiedRenderer}
 			}
 			,{header: '상태' ,name: 'status' ,align: 'center',editor: 'text'
-				,renderer:{ type: StatusModifiedRenderer}
+				,renderer:{ type: StatusModifiedRenderer
+					,options: {
+						isSelect: true 
+					}
+				}
 				,editor: {
 					type: 'select', // 드롭다운 사용
 					options: {

@@ -32,7 +32,11 @@ const grid1 = new Grid({
 			,renderer:{ type: StatusModifiedRenderer}	
 		}
 		,{header: '품목명' ,name: 'itemName' ,align: 'center',editor: 'text',filter: "select",width: 100
-			,renderer:{ type: StatusModifiedRenderer}
+			,renderer:{ type: StatusModifiedRenderer
+				,options: {
+					isSelect: true   // ⭐ 이걸로 구분
+				}
+			}
 			,editor: {
 				type: 'select', // 드롭다운 사용
 				options: {
@@ -48,7 +52,11 @@ const grid1 = new Grid({
 			,renderer:{ type: StatusModifiedRenderer}
 		}
 		,{header: '제품유형' ,name: 'prdCat' ,align: 'center',filter: "select",width: 100
-			,renderer:{ type: StatusModifiedRenderer}
+			,renderer:{ type: StatusModifiedRenderer
+				,options: {
+					isSelect: true   // ⭐ 이걸로 구분
+				}
+			}
 			,editor: {
 				type: 'select', // 드롭다운 사용
 				options: {
@@ -61,7 +69,11 @@ const grid1 = new Grid({
 			}
 		}
 		,{header: '단위' ,name: 'prdUnit' ,align: 'center'
-			,renderer:{ type: StatusModifiedRenderer}
+			,renderer:{ type: StatusModifiedRenderer
+				,options: {
+					isSelect: true   // ⭐ 이걸로 구분
+				}
+			}
 			,editor: {
 				type: 'select', // 드롭다운 사용
 				options: {
@@ -78,7 +90,11 @@ const grid1 = new Grid({
 			,renderer:{ type: StatusModifiedRenderer}
 		}
         ,{header: '상태' ,name: 'prdStatus' ,align: 'center'
-			,renderer:{ type: StatusModifiedRenderer}
+			,renderer:{ type: StatusModifiedRenderer
+				,options: {
+					isSelect: true   // ⭐ 이걸로 구분
+				}
+			}
 			,editor: {
 				type: 'select', // 드롭다운 사용
 				options: {
@@ -139,7 +155,11 @@ const grid2 = new Grid({
 				,renderer:{ type: StatusModifiedRenderer}	
 			}
 		    ,{header: '원재료 유형' ,name: 'matType' ,align: 'center',editor: 'text',filter: "select"
-				,renderer:{ type: StatusModifiedRenderer}	
+				,renderer:{ type: StatusModifiedRenderer
+					,options: {
+					isSelect: true   
+					}
+				}	
 				,editor: {
 					type: 'select', // 드롭다운 사용
 					options: {
@@ -155,8 +175,12 @@ const grid2 = new Grid({
 					}
 				}
 			}
-		    ,{header: '단위' ,name: 'matUnit' ,align: 'center',editor: 'text',filter: "select"
-				,renderer:{ type: StatusModifiedRenderer}	
+		    ,{header: '단위' ,name: 'matUnit' ,align: 'center',editor: 'text',filter: "select",width:60
+				,renderer:{ type: StatusModifiedRenderer
+					,options: {
+					isSelect: true 
+					}
+				}	
 				,editor: {
 					type: 'select', // 드롭다운 사용
 					options: {
