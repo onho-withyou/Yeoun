@@ -365,7 +365,7 @@
 					    </td>
 					    <!-- 지연시간(기준별 계산) -->
 					    <td class="nowrap">
-					    	<span th:text="${T(java.lang.String).format('%02d:%02d', a.elapsedMin/60, a.elapsedMin%60)}">00:35</span>
+					    	<span th:text="${T(java.lang.String).format('%02d시간 %02d분', a.elapsedMin/60, a.elapsedMin%60)}"></span>
 					    </td>
 		    			<!-- 상세 -->
 					    <td>
