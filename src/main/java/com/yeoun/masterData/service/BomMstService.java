@@ -27,9 +27,9 @@ public class BomMstService {
 	
 	//1. BOM 그리드 조회
 	@Transactional(readOnly = true)
-	public List<BomMst> findAll() {
-		log.info("bomMstRepository.findAll() 조회된개수 - {}",bomMstRepository.findAll());
-		return bomMstRepository.findAll();
+	public List<BomMst> findBybomList(String bomId, String matId) {
+		log.info("bomMstRepository.findBybomList() 조회된개수 - {}",bomMstRepository.findBybomList(bomId, matId));
+		return bomMstRepository.findBybomList(bomId, matId);
 	}
 	//1-2. BOM 상세 그리드 조회
 	@Transactional(readOnly = true)
@@ -74,6 +74,8 @@ public class BomMstService {
 					}
 					b.setCreatedId(empId);
 					b.setCreatedDate(LocalDate.now());
+					// ensure USE_YN defaults to 'Y' when not provided
+					if (b.getUseYn() == null) b.setUseYn("Y");
 					bomMstRepository.save(b);
 					createdCount++;
 				}
@@ -102,6 +104,8 @@ public class BomMstService {
 						BomMst b = mapToBom(row);
 						b.setCreatedId(target.getCreatedId());
 						b.setCreatedDate(target.getCreatedDate());
+						// preserve existing USE_YN when row doesn't provide it
+						if (b.getUseYn() == null) b.setUseYn(target.getUseYn() == null ? "Y" : target.getUseYn());
 						b.setUpdatedId(empId);
 						b.setUpdatedDate(LocalDate.now());
 						bomMstRepository.save(b);
@@ -160,6 +164,10 @@ public class BomMstService {
 			}
 			if (seqNo != null) b.setBomSeqNo(seqNo);
 		}
+		// useYn 처리: 전달된 값이 있으면 사용, 없으면 null으로 두어 호출부에서 기본 처리
+		if (row.get("useYn") != null) {
+			b.setUseYn(String.valueOf(row.get("useYn")).trim());
+		}
 		return b;
 	}
 
@@ -178,14 +186,18 @@ public class BomMstService {
 				log.warn("Skipping delete pair because prdId or matId is missing: {}", row);
 				continue;
 			}
-			bomMstRepository.findByPrdIdAndMatId(prdId, matId).ifPresent(entity -> {
-				bomMstRepository.delete(entity);
-			});
-			// Note: we cannot increment deletedTotal inside lambda easily; re-check existence/size
-			// For simplicity, check again
-			if (!bomMstRepository.findByPrdIdAndMatId(prdId, matId).isPresent()) {
-				// assume deletion succeeded or record did not exist
+			// Mark as unused (soft delete) instead of physical delete
+			Optional<BomMst> opt = bomMstRepository.findByPrdIdAndMatId(prdId, matId);
+			if (opt.isPresent()) {
+				BomMst entity = opt.get();
+				entity.setUseYn("N");
+				entity.setUpdatedId(empId);
+				entity.setUpdatedDate(LocalDate.now());
+				bomMstRepository.save(entity);
 				deletedTotal++;
+			} else {
+				// record did not exist — count as not deleted, but continue
+				log.warn("No BOM record found for delete pair: prdId={}, matId={}", prdId, matId);
 			}
 		}
 		return "Success: BOM 삭제가 완료되었습니다. (deleted=" + deletedTotal + ")";

@@ -1,4 +1,4 @@
-package com.yeoun.masterData.entity;
+package com.yeoun.equipment.entity;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -25,6 +25,9 @@ public class ProdLine {
 	
 	@Column(nullable = false)
 	private String status;
+
+	@Column(nullable = false,  columnDefinition = "CHAR(1) DEFAULT 'Y'")
+	private String useYn = "Y";
 	
 	@Column(length = 500)
 	private String remark;

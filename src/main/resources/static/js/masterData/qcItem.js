@@ -20,8 +20,8 @@ const grid1 = new Grid({
 		,{header: '기준 텍스트' ,name: 'stdText' ,align: 'center',width: 230}
 		,{header: 'MIN' ,name: 'minValue' ,align: 'center'}
         ,{header: 'MAX' ,name: 'maxValue' ,align: 'center'}
-		,{header: '사용' ,name: 'useYn' ,align: 'center',hidden: true}//,hidden: true  
-		,{header: '정렬순서' ,name: 'sortOrder' ,align: 'center'}
+		,{header: '사용' ,name: 'useYn' ,align: 'center'}  
+		,{header: '정렬순서' ,name: 'sortOrder' ,align: 'center',hidden: true}
 		,{header: '생성자' ,name: 'createdId' ,align: 'center',hidden: true}  
 		,{header: '생성일시' ,name: 'createdDate' ,align: 'center',hidden: true}  
 		,{header: '수정자' ,name: 'updatedId' ,align: 'center',hidden: true}  
@@ -47,7 +47,12 @@ const grid1 = new Grid({
 	
 //qcitem  품질항목관리 조회
 function qcItemGridAllSearch(){
-	fetch('/masterData/qc_item/list', {
+
+	const params = {
+		qcItemId: document.getElementById("qcItemId").value ?? "",
+	};
+	const queryString = new URLSearchParams(params).toString();
+	fetch(`/masterData/qc_item/list?${queryString}`, {
 			method: 'GET',
 			headers: {
 				[csrfHeader]: csrfToken,
@@ -101,7 +106,7 @@ grid1.on("click", async (ev) => {
 		// 예: 모달 열기, 상세 정보 표시 등		
 		$('#qcItem-modal').modal('show');
 		document.getElementById('qcmodalTilte').innerText= 'QC 항목 상세';
-		document.getElementById('qcItemId').value = rowData.qcItemId;//QC 항목 ID
+		document.getElementById('modalQcItemId').value = rowData.qcItemId;//QC 항목 ID
 		document.getElementById('itemName').value = rowData.itemName;//항목명
 		document.getElementById('targetType').value = rowData.targetType;//대상구분
 		document.getElementById('unit').value = rowData.unit;//단위

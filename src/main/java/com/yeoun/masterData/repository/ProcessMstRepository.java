@@ -16,11 +16,21 @@ public interface ProcessMstRepository extends JpaRepository<ProcessMst, String> 
 	// 공정 기준정보 조회
 	Optional<ProcessMst> findByProcessId(String processId);
 
+	// 공정코드 드롭다운 조회
+	@Query(value = """
+			SELECT DISTINCT process_id
+			FROM PROCESS_MST WHERE use_yn = 'Y'
+			""", nativeQuery = true)
+	List<String> processIdList();
+
 	// 공정코드 그리드 조회
 	@Query(value="""
-			select * from process_mst
-				where use_yn = 'Y'
-			""",nativeQuery = true)
-	List<ProcessMst> findByprocessCode();
+			SELECT * FROM PROCESS_MST
+			WHERE ( ?1 IS NULL OR ?1 = '' OR PROCESS_ID LIKE '%' || ?1 || '%')
+			  AND ( ?2 IS NULL OR ?2 = '' OR PROCESS_NAME LIKE '%' || ?2 || '%')
+			  AND USE_YN = 'Y'
+			ORDER BY PROCESS_ID ASC
+			""", nativeQuery = true)
+	List<ProcessMst> findByprocesslList(String processId, String processName);
 	
 }

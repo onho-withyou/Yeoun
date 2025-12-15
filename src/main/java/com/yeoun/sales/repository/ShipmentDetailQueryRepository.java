@@ -1,5 +1,6 @@
 package com.yeoun.sales.repository;
 
+import com.yeoun.sales.dto.ShipmentDetailDTO;
 import com.yeoun.sales.dto.ShipmentDetailItemDTO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

@@ -185,7 +185,9 @@ public class ClientController {
             @RequestParam(value="cat", defaultValue="RAW") String category,
             Model model
     ){
-        List<MaterialMst> list = materialRepository.findByMatType(category);
+        // 🔥 이미 등록된 품목 제외된 자재만 조회
+        List<MaterialMst> list =
+                itemService.getAvailableMaterials(clientId, category);
 
         model.addAttribute("clientId", clientId);
         model.addAttribute("materials", list);
@@ -194,6 +196,8 @@ public class ClientController {
         return "sales/supplier_item_create";
     }
 
+
+    
 
     @PostMapping("/{clientId}/items/create")
     public String itemCreateProcess(

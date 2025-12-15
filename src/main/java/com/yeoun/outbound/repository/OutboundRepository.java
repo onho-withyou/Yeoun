@@ -24,9 +24,6 @@ public interface OutboundRepository extends JpaRepository<Outbound, String> {
 	// 작업지시서로 출고기록조회
 	Optional<Outbound> findByWorkOrderId(String workOrderId);
 
-	// 작업지시서 ID로 출고 내역 조회
-	Optional<Outbound> findByWorkOrderId(String orderId);
-
 	// 출하지시서 ID로 출고 내역 조회
 	Optional<Outbound> findByShipmentId(String shipmentId);
 

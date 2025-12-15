@@ -26,10 +26,15 @@ import lombok.extern.log4j.Log4j2;
 public class QcItemService {
 	private final QcItemRepository qcItemRepository;
 	
+	//품질 항목 기준 qcId 목록 조회 (distinct)
+	@Transactional(readOnly = true)
+	public List<String> qcIdList() {
+		return qcItemRepository.qcIdList();
+	}
 	//품질 항목 기준 조회
 	@Transactional(readOnly = true)
-	public List<QcItem> findAll() {
-		return qcItemRepository.findAll();
+	public List<QcItem> qcItemList(String qcItemId) {
+		return qcItemRepository.findByQcItemList(qcItemId);
 	}
 	//품질 항목 기준 저장
 	@Transactional

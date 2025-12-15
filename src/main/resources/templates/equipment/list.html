@@ -5,6 +5,7 @@
 <head>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <script th:src="@{/js/common/formatTimeJS.js}"></script>
     <style>
         body {
             background: #f4f3fb;
@@ -295,7 +296,7 @@
         .wo-col {
             flex: 1;
         }
-        
+
         /* 설비 상세 모달 */
         #equipDetailModal .modal-dialog {
             max-width: 1200px;
@@ -335,19 +336,17 @@
                 <div class="mb-2 search-row">
                     <select id="searchEquipment" class="form-select" style="max-width: 150px;">
                         <option value="ALL">전체 설비</option>
-                        <option value="BLENDING_TANK">BLENDING_TANK</option>
-                        <option value="MIXER_AGITATOR">MIXER_AGITATOR</option>
-                        <option value="FILTER_HOUSING">FILTER_HOUSING</option>
-                        <option value="FILLING_SEMI">FILLING_SEMI</option>
-                        <option value="CAPPING_SEMI">CAPPING_SEMI</option>
-                        <option value="LABELING_AUTO">LABELING_AUTO</option>
-                        <option value="PACKING_SEMI">PACKING_SEMI</option>
+                        <option th:each="type : ${equipTypes}"
+                                th:value="${type.equipId}"
+                                th:text="|${type.equipId} (${type.koName})|">
+                        </option>
                     </select>
                     <select id="searchLine" class="form-select" style="max-width: 150px;">
                         <option value="ALL">전체 라인</option>
-                        <option value="PL-01">1번 라인</option>
-                        <option value="PL-02">2번 라인</option>
-                        <option value="PL-03">3번 라인</option>
+                        <option th:each="line : ${lines}"
+                                th:value="${line.lineId}"
+                                th:text="|${line.lineId} (${line.lineName})|">
+                        </option>
                     </select>
                     <select id="searchStatus" class="form-select" style="max-width: 150px;">
                         <option value="ALL">전체 상태</option>
@@ -362,6 +361,64 @@
             </div>
         </div>
     </div>
+
+    <!-- 설비 등록 모달 -->
+    <div class="modal fade" id="equipRegisterModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">설비 등록</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="equipForm" th:object="${req}" method="post">
+                    <div class="modal-body">
+
+                            <!-- 설비 종류 -->
+                            <div class="mb-3">
+                                <label class="form-label">설비 종류</label>
+                                <select class="form-select" th:field="*{equipType}" required>
+                                    <option value="">선택</option>
+                                    <option th:each="type : ${useEquipTypes}"
+                                            th:value="${type.equipId}"
+                                            th:text="|${type.equipId} (${type.koName})|">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- 라인 -->
+                            <div class="mb-3">
+                                <label class="form-label">라인</label>
+                                <select class="form-select" th:field="*{lineId}" required>
+                                    <option value="">선택</option>
+                                    <option th:each="line : ${useLines}"
+                                            th:value="${line.lineId}"
+                                            th:text="|${line.lineId} (${line.lineName})|">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- 설비명 -->
+                            <div class="mb-3">
+                                <label class="form-label">설비명</label>
+                                <input type="text" class="form-control"
+                                       th:field="*{equipName}"
+                                       placeholder="예) 충전기3"
+                                       required>
+                            </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        <button type="submit" class="btn btn-primary" id="btnSaveEquip">저장</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
 
     <!-- 설비 상세 모달 -->
     <div class="modal fade" id="equipDetailModal" tabindex="-1">
@@ -418,8 +475,8 @@
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <label class="mb-0">최근 작업 이력</label>
                             <span class="form-text">
-              ※ 최근 작업 기준 정렬
-            </span>
+                              ※ 최근 작업 기준 정렬
+                            </span>
                         </div>
 
                         <!-- Toast Grid 영역 -->
@@ -461,7 +518,8 @@
                     { header: "설비코드", name: "equipTypeId", align: "left" },
                     { header: "라인", name: "lineId", align: "center" },
                     { header: "상태", name: "status", align: "center" },
-                    { header: "등록일자", name: "createdDate", align: "center" },
+                    { header: "등록일자", name: "createdDate", align: "center",
+                        formatter: ({ value }) => formatTimeFull(value ? new Date(value) : undefined)},
                     {
                         header: "상세",
                         name: "btn",
@@ -477,7 +535,7 @@
             equipGrid.on("click", (event) => {
                 if (event.columnName !== "btn") return;
                 const row = equipGrid.getRow(event.rowKey);
-                openEquipDetailModal(row.equipId);
+                openEquipDetailModal(row);
             });
 
             ["searchEquipment", "searchLine", "searchStatus"].forEach(id => {
@@ -532,67 +590,135 @@
                     {
                         header: '작업지시',
                         name: 'orderId',
-                        align: 'center',
-                        width: 160
+                        align: 'center'
                     },
                     {
                         header: '제품',
                         name: 'productName',
-                        align: 'left'
+                        align: 'left',
+                        width: 100
                     },
                     {
                         header: '상태',
-                        name: 'orderStatus',
+                        name: 'status',
                         align: 'center',
                         width: 100
                     },
                     {
-                        header: '작업시간',
-                        name: 'workTime',
+                        header: '시작시간',
+                        name: 'startTime',
                         align: 'center',
-                        width: 180
-                    }
+                        width: 200,
+                        formatter: ({ value }) => formatTimeFull(value ? new Date(value) : undefined)
+                    },
+                    {
+                        header: '종료시간',
+                        name: 'endTime',
+                        align: 'center',
+                        width: 200,
+                        formatter: ({ value }) => formatTimeFull(value ? new Date(value) : undefined)
+                    },
                 ]
             });
         }
 
-        function openEquipDetailModal(row) {
+        async function openEquipDetailModal(data) {
 
             // 기본 정보 바인딩
-            document.getElementById("dEquipName").textContent = row.equipName;
-            document.getElementById("dEquipType").textContent = row.equipment?.equipCode || "-";
-            document.getElementById("dLineName").textContent = row.line?.lineName || "-";
-            document.getElementById("dCreatedDate").textContent = row.createdDate;
-            const status = row.status ?? "UNKNOWN";
+            document.getElementById("dEquipName").textContent = data.equipName;
+            document.getElementById("dEquipType").textContent = data.equipTypeId || "-";
+            document.getElementById("dLineName").textContent = data.lineId || "-";
+            document.getElementById("dCreatedDate").textContent = formatTimeFull(new Date(data.createdDate));
+
+            const status = data.status ?? "UNKNOWN";
             const statusEl = document.getElementById("dEquipStatus");
             statusEl.textContent = status;
             statusEl.className = "status-badge status-" + status.toLowerCase();
-            statusEl.className = "status-badge status-" + status.toLowerCase();
 
-            // Grid 초기화
-            initEquipHistoryGrid();
+            document.getElementById("equipDetailModal").addEventListener('shown.bs.modal', async () => {
 
-            // 🔹 더미 작업 이력
-            equipHistoryGrid.resetData([
-                {
-                    orderId: "WO-20251210-003",
-                    productName: "향수 A",
-                    orderStatus: "완료",
-                    workTime: "09:00 ~ 11:30"
-                },
-                {
-                    orderId: "WO-20251209-001",
-                    productName: "향수 B",
-                    orderStatus: "중단",
-                    workTime: "14:00 ~ 15:10"
+                initEquipHistoryGrid();
+                equipHistoryGrid.refreshLayout();
+
+                try {
+                    const history = await loadEquipHistory(data.equipId);
+                    console.log(history);
+                    equipHistoryGrid.resetData(history);
+                } catch (err) {
+                    console.error(err);
+                    equipHistoryGrid.resetData([]);
                 }
-            ]);
+            }, {once: true});
 
             // 모달 오픈
             const modal = new bootstrap.Modal(document.getElementById("equipDetailModal"));
             modal.show();
         }
 
+        // 히스토리 로드 함수
+        async function loadEquipHistory(equipId) {
+            console.log("here 1");
+            console.log("data... equipId :: ", equipId);
+            const res = await fetch(`/equipment/equip/${equipId}/history`, {
+                headers: {
+                    "Content-Type" : "application/json",
+                    [csrfHeader] : csrfToken
+                }
+            });
+            if (!res.ok) throw new Error("이력 조회 실패");
+            return await res.json();
+        }
+
+        // 설비 등록 모달
+        document.getElementById("btnCreate").addEventListener("click", (event) => {
+            const modal = new bootstrap.Modal(document.getElementById("equipRegisterModal"));
+            document.getElementById("equipForm").reset();
+            // select 강제 초기화
+            // document.getElementById("equipType").value = "";
+            // document.getElementById("lineId").value = "";
+            // document.getElementById("equipName").value = "";
+            modal.show();
+        });
+
+        // 설비 등록하기
+        document.getElementById("equipForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const payload = {
+                equipType: document.getElementById("equipType").value,
+                lineId   : document.getElementById("lineId").value,
+                equipName: document.getElementById("equipName").value
+            };
+
+            try {
+                const response = await fetch("/equipment/equip", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type" : "application/json",
+                        [csrfHeader] : csrfToken
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    alert("저장 실패");
+                    return;
+                }
+
+                alert ("성공적으로 저장되었습니다.");
+                bootstrap.Modal.getInstance(
+                    document.getElementById("equipRegisterModal")
+                ).hide();
+
+                loadEquip();
+
+            } catch (err) {
+                console.log(err);
+                alert("오류가 발생했습니다.");
+            }
+
+        });
 
 
     </script>

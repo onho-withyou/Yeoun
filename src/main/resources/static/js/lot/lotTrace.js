@@ -195,6 +195,52 @@ function renderProcessDetail(detail) {
     document.getElementById("pd-defectRate").innerText = detail.defectRate != null
         ? detail.defectRate.toFixed(1) + "%"
         : "-";
+		
+	// =========================
+	// 설비 목록 렌더링
+	// =========================
+	const eqBox = document.getElementById("pd-equipments");
+	if (eqBox) {
+	  eqBox.innerHTML = "";
+
+	  const eqList = detail.equipments || [];
+
+	  // QC 같이 설비 없는 공정
+	  if (!eqList || eqList.length === 0) {
+	    eqBox.innerHTML = `<div class="text-muted small">설비 정보 없음 (수기 검사)</div>`;
+	  } else {
+	    eqList.forEach(eq => {
+	      const row = document.createElement("div");
+	      row.className = "p-2 border rounded bg-white";
+
+	      // 상태 뱃지
+	      const status = eq.status || "-";
+	      const badgeClass =
+	        status === "가동" ? "bg-success" :
+	        status === "정지" ? "bg-secondary" :
+	        status === "고장" ? "bg-danger" :
+	        status === "점검" ? "bg-warning text-dark" :
+	        "bg-light text-dark";
+
+	      row.innerHTML = `
+	        <div class="d-flex justify-content-between align-items-center">
+	          <div class="fw-semibold fs-6">${eq.equipName || "-"}</div>
+	          <span class="badge ${badgeClass}">${status}</span>
+	        </div>
+	        <div class="small text-muted mt-1">
+	          <span class="me-2">${eq.equipCode || "-"}</span>
+	          <span>${eq.koName || "-"}</span>
+	        </div>
+	        <div class="small text-muted">
+	          ${eq.stdName || ""}
+	        </div>
+	      `;
+
+	      eqBox.appendChild(row);
+	    });
+	  }
+	}
+
 }
 
 // 자재 리스트

@@ -244,6 +244,53 @@ public class QcResultService {
 		// 정말 아무것도 없을 경우
 		return "";
 	}
+	
+	// ----------------------------------------------------------
+	/**
+	 * QC 검사 시작 처리
+	 * - QC는 별도 화면에서 진행되므로, '검사 시작' 클릭 시점을 QC 공정 시작으로 기록한다.
+	 * - QC_PENDING/READY 상태일 때만 IN_PROGRESS로 전환하고 start_time을 세팅한다.
+	 */
+	@Transactional
+	public void startQc(String orderId) {
+
+	    WorkOrderProcess qcProc = workOrderProcessRepository
+	            .findByWorkOrderOrderIdAndProcessProcessId(orderId, "PRC-QC")
+	            .orElseThrow(() -> new IllegalStateException("QC 공정 단계가 없습니다. orderId=" + orderId));
+
+	    // 이미 완료된 QC는 재시작 불가(필요하면 정책 변경)
+	    if ("DONE".equals(qcProc.getStatus())) {
+	        throw new IllegalStateException("이미 완료된 QC입니다.");
+	    }
+
+	    // QC_PENDING(대기) 또는 READY에서만 시작 가능
+	    if (!"QC_PENDING".equals(qcProc.getStatus()) && !"READY".equals(qcProc.getStatus())) {
+	        return; // 이미 IN_PROGRESS면 그냥 무시(중복 클릭 방지)
+	    }
+
+	    qcProc.setStatus("IN_PROGRESS");
+	    qcProc.setStartTime(LocalDateTime.now());
+	    workOrderProcessRepository.save(qcProc);
+	}
+
+	/**
+	 * QC 검사 중단 처리(저장 없이 닫기)
+	 * - IN_PROGRESS 상태에서만 QC_PENDING으로 되돌리고 start_time을 초기화한다.
+	 * - 다음에 다시 검사 시작 시 새로운 start_time이 찍히도록 하기 위함.
+	 */
+	@Transactional
+	public void cancelQc(String orderId) {
+
+	    WorkOrderProcess qcProc = workOrderProcessRepository
+	            .findByWorkOrderOrderIdAndProcessProcessId(orderId, "PRC-QC")
+	            .orElseThrow(() -> new IllegalStateException("QC 공정 단계가 없습니다. orderId=" + orderId));
+
+	    if ("IN_PROGRESS".equals(qcProc.getStatus())) {
+	        qcProc.setStatus("QC_PENDING");  // 또는 READY (너희 정책대로)
+	        qcProc.setStartTime(null);
+	        workOrderProcessRepository.save(qcProc);
+	    }
+	}
 
 	// ----------------------------------------------------------
 	// QC 결과 목록 조회
@@ -334,11 +381,28 @@ public class QcResultService {
 	        qcResultDetailRepository.save(detail);
 	    }
 		
-		// 3) 전체 판정 계산
-		header.setOverallResult(allPass ? "PASS" : "FAIL");
-	    header.setInspectionDate(LocalDate.now());
-	    header.setInspectorId(loginEmpId);  // 실제 검사한 사람
-	    header.setUpdatedId(loginEmpId);    // 수정자(최종 저장한 사람)
+		// 검사자 / 검사일자 확정
+		if (loginEmpId != null && (header.getInspectorId() == null || header.getInspectorId().isBlank())) {
+		    header.setInspectorId(loginEmpId);
+		}
+
+		if (header.getInspectionDate() == null) {
+		    header.setInspectionDate(LocalDate.now());
+		}
+		
+		// 3) 수동 전체판정
+		// 디테일 FAIL 존재 여부(참고용)
+		boolean hasFail = !allPass;
+
+		// 사용자가 선택한 전체 판정 우선 적용
+		String overall = qcSaveRequestDTO.getOverallResult();
+
+		// 유효성 방어 (PASS/FAIL만 허용)
+		if (!"PASS".equalsIgnoreCase(overall) && !"FAIL".equalsIgnoreCase(overall)) {
+		    throw new IllegalArgumentException("전체 판정이 올바르지 않습니다.");
+		}
+
+		header.setOverallResult(overall.toUpperCase());
 	    
 	    // 수량/사유/비고는 요청 DTO에서 그대로 사용
 	    if (qcSaveRequestDTO.getGoodQty() != null) {
@@ -371,11 +435,15 @@ public class QcResultService {
 	                // 양품/불량 수량 반영
 	                qcProc.setGoodQty(header.getGoodQty());
 	                qcProc.setDefectQty(header.getDefectQty());
-
-	                // 상태/종료시간도 같이 정리 (기존 4) 로직 통합)
-	                if (!"DONE".equals(qcProc.getStatus())) {
-	                    qcProc.setStatus("DONE");
+	                
+	                // 시작시간 방어 처리
+	                if (qcProc.getStartTime() == null) {
+	                    qcProc.setStartTime(LocalDateTime.now());
 	                }
+
+	                // QC 종료시간 + 상태 확정
+	                qcProc.setStatus("DONE");
+
 	                if (qcProc.getEndTime() == null) {
 	                    qcProc.setEndTime(LocalDateTime.now());
 	                }

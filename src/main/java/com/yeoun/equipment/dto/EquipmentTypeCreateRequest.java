@@ -20,4 +20,6 @@ public class EquipmentTypeCreateRequest {
 	
 	@Size(max = 500, message = "설명은 500자 이내입니다.")
 	private String remark;
+
+	private String useYn;
 }

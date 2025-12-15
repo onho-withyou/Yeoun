@@ -26,11 +26,11 @@ public class SafetyStockService {
 	private final SafetyStockRepository safetyStockRepository;
 	
 	//1. 안전재고 그리드 조회
-		@Transactional(readOnly = true)
-		public List<SafetyStock> findAll() {
-			log.info("safetyStockRepository.findAll() 조회된개수 - {}",safetyStockRepository.findAll());
-			return safetyStockRepository.findAll();
-		}
+	@Transactional(readOnly = true)
+	public List<SafetyStock> findByItemlList(String itemId, String itemName) {
+		log.info("safetyStockRepository.findByItemlList() 조회된개수 - {}",safetyStockRepository.findByItemlList(itemId, itemName));
+		return safetyStockRepository.findByItemlList(itemId, itemName);
+	}
 
 	//2. 안전재고 그리드 저장
 	public String saveSafetyStock(String empId, Map<String,Object> param) {

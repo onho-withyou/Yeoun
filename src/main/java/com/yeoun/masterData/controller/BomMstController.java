@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
@@ -33,10 +34,14 @@ public class BomMstController {
 	//BOM 정보조회
  	@ResponseBody
   	@GetMapping("/list")
-  	public List<BomMst> bomList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
- 	    List<BomMst> bomList = bomMstService.findAll();
- 	    return bomList;
-  	}
+  	public List<BomMst> bomList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,
+  				@RequestParam(value = "bomId", required = false) String bomId,
+  				@RequestParam(value = "matId", required = false) String matId) {
+		// 보조 데이터: 페이지에서 사용할 bomId 목록
+		model.addAttribute("bomIdList", bomMstService.findAllDetail());
+	    List<BomMst> bomList = bomMstService.findBybomList(bomId, matId);
+	    return bomList;
+	}
 
 	//BOM 상세조회
  	@ResponseBody

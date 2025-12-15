@@ -3,6 +3,7 @@ package com.yeoun.lot.service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.yeoun.emp.entity.Dept;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.emp.repository.EmpRepository;
+import com.yeoun.equipment.entity.ProdEquip;
+import com.yeoun.equipment.repository.ProdEquipRepository;
 import com.yeoun.inbound.entity.InboundItem;
 import com.yeoun.inbound.repository.InboundItemRepository;
 import com.yeoun.inventory.entity.Inventory;
@@ -19,6 +22,7 @@ import com.yeoun.inventory.entity.MaterialOrder;
 import com.yeoun.inventory.repository.InventoryRepository;
 import com.yeoun.inventory.repository.MaterialOrderRepository;
 import com.yeoun.lot.constant.LotStatus;
+import com.yeoun.lot.dto.LotEquipInfoDTO;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.dto.LotMasterDTO;
 import com.yeoun.lot.dto.LotMaterialDetailDTO;
@@ -33,9 +37,10 @@ import com.yeoun.lot.entity.LotRelationship;
 import com.yeoun.lot.repository.LotHistoryRepository;
 import com.yeoun.lot.repository.LotMasterRepository;
 import com.yeoun.lot.repository.LotRelationshipRepository;
+import com.yeoun.equipment.entity.Equipment;
 import com.yeoun.masterData.entity.MaterialMst;
 import com.yeoun.masterData.entity.ProcessMst;
-import com.yeoun.masterData.entity.ProdLine;
+import com.yeoun.equipment.entity.ProdLine;
 import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.masterData.repository.ProcessMstRepository;
 import com.yeoun.order.entity.WorkOrder;
@@ -45,6 +50,8 @@ import com.yeoun.order.repository.WorkerProcessRepository;
 import com.yeoun.process.constant.ProcessStepStatus;
 import com.yeoun.process.entity.WorkOrderProcess;
 import com.yeoun.process.repository.WorkOrderProcessRepository;
+import com.yeoun.qc.entity.QcResult;
+import com.yeoun.qc.repository.QcResultRepository;
 import com.yeoun.sales.entity.Client;
 import com.yeoun.sales.repository.ClientRepository;
 
@@ -67,7 +74,9 @@ public class LotTraceService {
 	private final InventoryRepository inventoryRepository;
 	private final MaterialOrderRepository materialOrderRepository;
 	private final ClientRepository clientRepository;
-	
+	private final ProdEquipRepository prodEquipRepository;
+	private final QcResultRepository qcResultRepository;
+
 	// ----------------------------------------------------------------------------
 	// LOT 생성
 	@Transactional
@@ -200,7 +209,7 @@ public class LotTraceService {
 	    // 수량
 	    Integer planQty = (wo != null) ? wo.getPlanQty() : null;
 
-	    // 양품/불량 = work_order_process 에서 마지막 결과 가져오기 (앞에서 말한 방식)
+	    // 양품/불량 = work_order_process 에서 마지막 결과 가져오기 
 	    Integer goodQty = null;
 	    Integer defectQty = null;
 	    if (wo != null) {
@@ -249,7 +258,7 @@ public class LotTraceService {
 	            .lotNo(lot.getLotNo())
 	            .productCode(productCode)
 	            .productName(productName)
-	            .productType(productType)
+	            .productType(labelOf(productType))
 	            .lotStatusLabel(statusLabel)
 	            .workOrderId(wo != null ? wo.getOrderId() : null)
 	            .planQty(planQty)
@@ -326,18 +335,70 @@ public class LotTraceService {
 		}
 		
 		// 4) 공정 담당자 조회 (WorkerProcess)
-		WorkerProcess workerProcess = 
-				workerProcessRepository.findFirstBySchedule_Work_OrderIdAndProcess_ProcessId(orderId, processId)
-						.orElse(null);
-		
-		Emp worker = workerProcess != null ? workerProcess.getWorker() : null;
-		String workerId = worker != null ? worker.getEmpId() : null;
-		String workerName = worker != null ? worker.getEmpName() : null;
-		
-		Dept dept = worker != null ? worker.getDept() : null;
-		String deptName = dept != null ? dept.getDeptName() : null;
+		Emp worker = null;
+		String workerId = null;
+		String workerName = null;
+		String deptName = null;
+
+		if ("PRC-QC".equals(processId)) {
+		    // QC는 qc_result의 inspectorId로 담당자 표시
+		    String inspectorId = qcResultRepository
+		            .findFirstByOrderIdOrderByQcResultIdDesc(orderId)
+		            .map(QcResult::getInspectorId)
+		            .orElse(null);
+
+		    if (inspectorId != null) {
+		        worker = empRepository.findById(inspectorId).orElse(null);
+		    }
+
+		} else {
+		    WorkerProcess workerProcess =
+		            workerProcessRepository
+		                    .findFirstBySchedule_Work_OrderIdAndProcess_ProcessId(orderId, processId)
+		                    .orElse(null);
+
+		    worker = (workerProcess != null) ? workerProcess.getWorker() : null;
+		}
+
+		if (worker != null) {
+		    workerId = worker.getEmpId();
+		    workerName = worker.getEmpName();
+		    Dept dept = worker.getDept();
+		    deptName = (dept != null) ? dept.getDeptName() : null;
+		}
 		
 		// 5) 설비 정보 조회
+		List<LotEquipInfoDTO> equipments = List.of();
+
+		if (lineId != null && processId != null) {
+
+		    // QC면 설비 없음
+		    if (!"PRC-QC".equals(processId)) {
+
+		        List<String> equipCodes = PROCESS_EQUIP_CODES.getOrDefault(processId, List.of());
+
+		        if (!equipCodes.isEmpty()) {
+		            List<ProdEquip> prodEquips =
+		                    prodEquipRepository.findForLineAndCodes(lineId, equipCodes);
+
+		            equipments = prodEquips.stream()
+	            	    .map(pe -> {
+	            	        Equipment mst = pe.getEquipment();
+	            	        return LotEquipInfoDTO.builder()
+	            	            .prodEquipId(pe.getEquipId())
+	            	            .equipCode(mst != null ? mst.getEquipId() : null)
+	            	            .equipName(pe.getEquipName())
+	            	            .status(labelOf(pe.getStatus()))
+	            	            .stdName(mst != null ? mst.getEquipName() : null)
+	            	            .koName(mst != null ? mst.getKoName() : null)
+	            	            .build();
+	            	    })
+	            	    .toList();
+
+		        }
+		    }
+		}
+
 		
 		// 6) 양품/불량 + 불량률 계산
 		Long goodQty   = (wop.getGoodQty()   == null) ? 0L : wop.getGoodQty().longValue();
@@ -353,7 +414,7 @@ public class LotTraceService {
 		return LotProcessDetailDTO.builder()
 		        .processId(processId)
 		        .processName(processName)
-		        .status(wop.getStatus())
+		        .status(labelOf(wop.getStatus()))
 		        .deptName(deptName)
 		        .workerId(workerId)
 		        .workerName(workerName)
@@ -363,8 +424,18 @@ public class LotTraceService {
 		        .defectQty(defectQty)
 		        .defectRate(defectRate)
 		        .lineId(lineId)
+		        .equipments(equipments)
 		        .build();
 	}
+	
+    private static final Map<String, List<String>> PROCESS_EQUIP_CODES = Map.of(
+	    "PRC-BLD", List.of("BLENDING_TANK", "MIXER_AGITATOR"),
+	    "PRC-FLT", List.of("FILTER_HOUSING"),
+	    "PRC-FIL", List.of("FILLING_SEMI"),      
+	    "PRC-CAP", List.of("CAPPING_SEMI"),
+	    "PRC-LBL", List.of("LABELING_AUTO", "PACKING_SEMI")
+	    // QC는 제외
+	);
 
 
 	// ================================================================================
@@ -445,12 +516,12 @@ public class LotTraceService {
 	    return LotMaterialDetailDTO.builder()
 	        .usedQty(lr.getUsedQty())
 	        .lotNo(lot.getLotNo())
-	        .lotType(lot.getLotType())
-	        .lotStatus(lot.getCurrentStatus())
+	        .lotType(labelOf(lot.getLotType()))
+	        .lotStatus(labelOf(lot.getCurrentStatus()))
 	        .lotCreatedDate(lot.getCreatedDate())
 	        .matId(m != null ? m.getMatId() : null)
 	        .matName(m != null ? m.getMatName() : lot.getDisplayName())
-	        .matType(m != null ? m.getMatType() : null)
+	        .matType(labelOf(m != null ? m.getMatType() : null))
 	        .matUnit(m != null ? m.getMatUnit() : null)
 	        .inboundId(ii != null && ii.getInbound() != null ? ii.getInbound().getInboundId() : null)
 	        .inboundAmount(ii != null ? ii.getInboundAmount() : null)
@@ -458,7 +529,7 @@ public class LotTraceService {
 	        .expirationDate(ii != null ? ii.getExpirationDate() : null)
 	        .inboundLocationId(ii != null ? ii.getLocationId() : null)
 	        .ivAmount(inv != null ? inv.getIvAmount() : null)
-	        .ivStatus(inv != null ? inv.getIvStatus() : null)
+	        .ivStatus(labelOf(inv != null ? inv.getIvStatus() : null))
 	        .inventoryLocationId(inv != null && inv.getWarehouseLocation() != null ? inv.getWarehouseLocation().getLocationId() : null)
 	        .ibDate(inv != null ? inv.getIbDate() : null)
 	        .clientId(client != null ? client.getClientId() : null)
@@ -470,7 +541,45 @@ public class LotTraceService {
 
 	
 
+	private static final Map<String, String> STATUS_LABEL = Map.ofEntries(
+		// LOT 상태
+	    Map.entry("NEW", "신규"),
+	    Map.entry("IN_PROCESS", "진행 중"),
+	    Map.entry("PROD_DONE", "생산 완료"),
+	    
+	    Map.entry("IN_PROGRESS", "진행 중"),
+	    Map.entry("READY", "대기"),
+	    Map.entry("DONE", "완료"),
+	    
+	    // 재고 상태
+	    Map.entry("NORMAL", "정상"),
+	    Map.entry("HOLD", "보류"),
+	    Map.entry("SCRAPPED", "폐기"),
+	    Map.entry("EXPIRED", "유통기한 경과"),
+	    
+	    // LOT/자재 유형
+	    Map.entry("RAW", "원재료"),
+	    Map.entry("SUB", "부자재"),
+	    Map.entry("PKG", "포장재"),
+	    Map.entry("FIN", "완제품"),
 
+	    // 설비 상태
+	    Map.entry("RUN", "가동"),
+	    Map.entry("STOP", "정지"),
+	    Map.entry("BREAKDOWN", "고장"),
+	    Map.entry("MAINTENANCE", "점검")
+	);
+
+	private String labelOf(String code) {
+	    if (code == null) return "-";
+	    String key = code.trim();          // 공백 제거
+	    if (key.isEmpty()) return "-";
+
+	    // 영어 코드들은 대문자로 통일해서 매칭 (한글은 영향 없음)
+	    String upper = key.toUpperCase();
+
+	    return STATUS_LABEL.getOrDefault(upper, key);
+	}
 
 	
 	

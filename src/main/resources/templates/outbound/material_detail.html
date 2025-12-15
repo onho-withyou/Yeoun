@@ -30,8 +30,8 @@
 					 	<input type="hidden" id="outboundId" th:value="${outboundOrderDTO.outboundId}"/>
 					 	<input type="hidden" id="workOrderId" th:value="${outboundOrderDTO.workOrderId}"/>
 						<div class="col">
-						    <div class="text-secondary mb-1">작업지시서</div>
-						    <div class="fw-semibold" th:text="${outboundOrderDTO.workOrderId}"></div>
+						    <div class="text-secondary mb-1">출고번호</div>
+						    <div class="fw-semibold" th:text="${outboundOrderDTO.outboundId}"></div>
 						</div>
 						<div class="col">
 						    <div class="text-secondary mb-1">요청자</div>
@@ -40,6 +40,15 @@
 						<div class="col">
 						    <div class="text-secondary mb-1">담당자</div>
 						    <div class="fw-semibold" th:text="${outboundOrderDTO.processEmpName}"></div>
+						</div>
+						<div class="col">
+						    <div class="text-secondary mb-1">작업지시서</div>
+						    <div class="d-flex">
+						    	<div class="fw-semibold" style="margin-right:3px !important;" th:text="${outboundOrderDTO.workOrderId}"></div>
+	   							<i class="fa-regular fa-window-restore"  style="cursor:pointer;"  
+									th:attr="data-prod-id=${outboundOrderDTO.workOrderId}"
+									onclick="openDetailOrderWindow(this.dataset.prodId)"></i>
+						    </div>
 						</div>
 						<div class="col">
 						    <div class="text-secondary mb-1">출고예정일</div>

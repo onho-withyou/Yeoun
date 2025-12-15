@@ -28,7 +28,7 @@ const grid1 = new Grid({
 	  data: [],
 	  rowHeaders: ['rowNum'],
 	  columns: [
-			{header: 'BOMID' ,name: 'bomId' ,align: 'center'}
+			{header: 'BOMID' ,name: 'bomId' ,align: 'center',filter: "select"}
 	  ]
 	  ,bodyHeight: 1200 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
 	  ,height:100
@@ -85,7 +85,11 @@ const grid5 = new Grid({
 					,renderer:{ type: StatusModifiedRenderer}
 				}
 				,{header: '단위' ,name: 'matUnit' ,align: 'center',editor: 'text',width: 65
-					,renderer:{ type: StatusModifiedRenderer}
+					,renderer:{ type: StatusModifiedRenderer
+						,options: {
+						isSelect: true 
+					}
+					}
 					,editor: {
 						type: 'select', // 드롭다운 사용
 						options: {
@@ -124,7 +128,11 @@ const grid6 = new Grid({
 					,renderer:{ type: StatusModifiedRenderer}
 				}
 				,{header: '단위' ,name: 'matUnit' ,align: 'center',editor: 'text',width: 65
-					,renderer:{ type: StatusModifiedRenderer}
+					,renderer:{ type: StatusModifiedRenderer
+						,options: {
+							isSelect: true 
+						}
+					}
 					,editor: {
 						type: 'select', // 드롭다운 사용
 						options: {
@@ -168,8 +176,12 @@ const grid2 = new Grid({
 		,{header: '원재료 사용량' ,name: 'matQty' ,align: 'center',editor: 'text'
 			,renderer:{ type: StatusModifiedRenderer}	
 		}
-		,{header: '단위' ,name: 'matUnit' ,align: 'center',filter: "select"
-			,renderer:{ type: StatusModifiedRenderer}
+		,{header: '단위' ,name: 'matUnit' ,align: 'center',filter: "select",width:60
+			,renderer:{ type: StatusModifiedRenderer
+				,options: {
+					isSelect: true 
+				}
+			}
 			,editor: {
 				type: 'select', // 드롭다운 사용
 				options: {
@@ -188,7 +200,8 @@ const grid2 = new Grid({
 		,{header: '생성자ID' ,name: 'createdId' ,align: 'center'}
 		,{header: '생성일자' ,name: 'createdDate' ,align: 'center'}
 		,{header: '수정자ID' ,name: 'updatedId' ,align: 'center'}
-		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}           
+		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}   
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center'}        
 	  ]
 	  ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
 	  ,height:100
@@ -213,7 +226,11 @@ const grid3 = new Grid({
 				,renderer:{ type: StatusModifiedRenderer}	
 			}
 			,{header: '품목종류' ,name: 'itemType' ,align: 'center'
-				,renderer:{ type: StatusModifiedRenderer}	
+				,renderer:{ type: StatusModifiedRenderer
+					,options: {
+					isSelect: true 
+				}
+				}	
 				,editor: {
 					type: 'select', // 드롭다운 사용
 					options: {
@@ -236,8 +253,12 @@ const grid3 = new Grid({
 			,{header: '용량' ,name: 'volume' ,align: 'center',editor: 'text',filter: "select"
 				,renderer:{ type: StatusModifiedRenderer}
 			}
-			,{header: '단위' ,name: 'itemUnit' ,align: 'center'
-				,renderer:{ type: StatusModifiedRenderer}
+			,{header: '단위' ,name: 'itemUnit' ,align: 'center',width:60
+				,renderer:{ type: StatusModifiedRenderer
+					,options: {
+						isSelect: true 
+					}
+				}
 				,editor: {
 					type: 'select', // 드롭다운 사용
 					options: {
@@ -251,13 +272,17 @@ const grid3 = new Grid({
 
 			}
 			,{header: '정책방식' ,name: 'policyType' ,align: 'center'
-				,renderer:{ type: StatusModifiedRenderer}
+				,renderer:{ type: StatusModifiedRenderer
+					,options: {
+						isSelect: true 
+					}
+				}
 				,editor: {
 					type: 'select', // 드롭다운 사용
 					options: {
 						listItems: [
 							{ text: '고정 계산방식', value: 'FIXED_QTY' },
-							{ text: '일수기반', value: 'DAYS COVER' },
+							{ text: '일수기반', value: 'DAYS_COVER' },
 						]
 					}
 				}
@@ -272,7 +297,11 @@ const grid3 = new Grid({
 				,renderer:{ type: StatusModifiedRenderer}
 			}
 			,{header: '상태' ,name: 'status' ,align: 'center',editor: 'text'
-				,renderer:{ type: StatusModifiedRenderer}
+				,renderer:{ type: StatusModifiedRenderer
+					,options: {
+						isSelect: true 
+					}
+				}
 				,editor: {
 					type: 'select', // 드롭다운 사용
 					options: {
@@ -491,7 +520,12 @@ function bomDetailMatTypeGridAllSearch(bomId) {
 //bom그리드 전체조회
 function bomGridAllSearch() {
 
-	fetch('/bom/list', {
+	const params = {
+		bomId: document.getElementById("bomId").value ?? "",
+		matId: document.getElementById("matId").value ?? ""
+	};
+	const queryString = new URLSearchParams(params).toString();
+	fetch(`/bom/list?${queryString}`, {
 		method: 'GET',
 		headers: {
 			[csrfHeader]: csrfToken,
@@ -533,8 +567,12 @@ function bomGridAllSearch() {
 }
 //안전재고 그리드 전체조회
 function safetyStockGridAllSearch() {
-
-	fetch('/safetyStock/list', {
+	const params = {
+		itemId: document.getElementById("itemId").value ?? "",
+		itemName: document.getElementById("itemName").value ?? ""
+	};
+	const queryString = new URLSearchParams(params).toString();
+	fetch(`/safetyStock/list?${queryString}`, {
 		method: 'GET',
 		headers: {
 			[csrfHeader]: csrfToken,

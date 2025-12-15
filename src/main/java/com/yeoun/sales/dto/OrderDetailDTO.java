@@ -13,6 +13,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class OrderDetailDTO {
 
     private String orderId;

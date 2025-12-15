@@ -2,12 +2,45 @@
 
 let qcRegistGrid = null;
 let qcRegModal = null;
+let qcSaved = false;        // 저장 성공 여부
+let currentOrderId = null;  // 모달이 열려있는 orderId (cancel 때 필요)
+let qcDirty = false;		// 입력 변경 여부
 
 document.addEventListener("DOMContentLoaded", () => {
 	
 	// 모달 초기화
     const modalEl = document.getElementById("qcRegModal");
     qcRegModal = new bootstrap.Modal(modalEl);
+	
+	// 모달이 '저장 없이' 닫히면 QC 취소 처리
+	modalEl.addEventListener("hidden.bs.modal", () => {
+	  if (qcSaved) {           // 저장한 뒤 닫힌 거면 cancel 안 함
+	    currentOrderId = null;
+	    return;
+	  }
+	  if (currentOrderId) {   // 저장 없이 닫힘 -> cancel 호출
+	    cancelQc(currentOrderId);
+	    currentOrderId = null;
+	  }
+	});
+	
+	// 닫히기 직전: 입력이 있을 때만 confirm으로 닫힘을 막음
+	modalEl.addEventListener("hide.bs.modal", (e) => {
+	  if (qcSaved) return;        // 저장으로 닫히는 경우는 경고 X
+	  if (!qcDirty) return;       // 입력 변경 없으면 경고 X
+
+	  const ok = confirm("입력한 내용이 저장되지 않았습니다.\n정말 닫을까요?");
+	  if (!ok) {
+	    e.preventDefault();       // 여기서 닫힘 취소
+	  }
+	});
+
+	document.getElementById("qcRegForm")?.addEventListener("input", () => {
+	  qcDirty = true;
+	});
+	document.getElementById("qcRegForm")?.addEventListener("change", () => {
+	  qcDirty = true;
+	});
 	
 	// 그리드 초기화
 	const gridEl = document.getElementById("qcRegistGrid");
@@ -84,32 +117,54 @@ document.addEventListener("DOMContentLoaded", () => {
 		const row = qcRegistGrid.getRow(ev.rowKey);
 	    if (!row || !row.orderId) return;
 		
-        openQcRegModal(row);
+        startQcAndOpenModal(row); 
     });
 	
-	// 전체 판정에 따라 불합격 사유 활성/비활성 (readonly 버전)
-	const overallResultSelect = document.getElementById("overallResult");
-	const failReasonTextarea = document.getElementById("failReason");
+	function startQcAndOpenModal(rowData) {
 
-	function updateFailReasonState() {
-	  if (!overallResultSelect || !failReasonTextarea) return;
+	  const orderId = rowData.orderId;
 
-	  const val = overallResultSelect.value;
+	  // CSRF
+	  const csrfTokenMeta  = document.querySelector('meta[name="_csrf_token"]');
+	  const csrfHeaderMeta = document.querySelector('meta[name="_csrf_headerName"]');
+	  const csrfToken      = csrfTokenMeta ? csrfTokenMeta.content : null;
+	  const csrfHeaderName = csrfHeaderMeta ? csrfHeaderMeta.content : null;
 
-	  if (val === "FAIL") {
-	    // FAIL일 때: 입력 가능
-	    failReasonTextarea.removeAttribute("readonly");
-	  } else {
-	    // PASS 또는 미선택: 값 지우고 읽기 전용 + 회색
-	    failReasonTextarea.value = "";
-	    failReasonTextarea.setAttribute("readonly", "readonly");
-	  }
+	  fetch(`/qc/start?orderId=${encodeURIComponent(orderId)}`, {
+	    method: "POST",
+	    headers: {
+	      ...(csrfToken && csrfHeaderName ? { [csrfHeaderName]: csrfToken } : {})
+	    }
+	  })
+	  .then(res => {
+	    if (!res.ok) throw new Error("HTTP " + res.status);
+	    return res.json();
+	  })
+	  .then(data => {
+	    if (!data.success) {
+	      alert(data.message || "QC 시작 처리 실패");
+	      return;
+	    }
+		
+		qcSaved = false; 
+		qcDirty = false; 
+		currentOrderId = rowData.orderId;
+		
+	    openQcRegModal(rowData);
+
+	    loadQcRegistGrid();
+	  })
+	  .catch(err => {
+	    console.error(err);
+	    alert("QC 시작 처리 중 오류가 발생했습니다.");
+	  });
 	}
-
+	
+	// 전체 판정 변경 시 FAIL 사유 활성/비활성
+	const overallResultSelect = document.getElementById("overallResult");
 	if (overallResultSelect) {
 	  overallResultSelect.addEventListener("change", updateFailReasonState);
-	  // 초기 상태도 한 번 세팅
-	  updateFailReasonState();
+	  updateFailReasonState(); // 초기 1회
 	}
 	
 	// qc 등록 저장 버튼 클릭 이벤트
@@ -118,6 +173,24 @@ document.addEventListener("DOMContentLoaded", () => {
 		btnSave.addEventListener("click", onClickSaveQcResult);
 	}
 });
+
+//FAIL 사유 활성/비활성 제어 함수
+function updateFailReasonState() {
+  const overallResultSelect = document.getElementById("overallResult");
+  const failReasonTextarea  = document.getElementById("failReason");
+
+  if (!overallResultSelect || !failReasonTextarea) return;
+
+  const val = overallResultSelect.value;
+
+  if (val === "FAIL") {
+    failReasonTextarea.removeAttribute("readonly");
+  } else {
+    // PASS 또는 미선택: 값 지우고 읽기 전용
+    failReasonTextarea.value = "";
+    failReasonTextarea.setAttribute("readonly", "readonly");
+  }
+}
 
 // 목록 조회
 function loadQcRegistGrid() {
@@ -176,6 +249,10 @@ function openQcRegModal(rowData) {
 
 	// 모달 열기
 	qcRegModal.show();
+	qcDirty = false; 
+	
+	// 모달 열릴 때 FAIL 사유 상태 동기화
+	updateFailReasonState();
 }
 
 // QC 항목 상세 리스트 가져오기
@@ -321,6 +398,9 @@ function onClickSaveQcResult() {
 
 	const overallResult = overallResultEl ? overallResultEl.value : "";
 	const failReason    = failReasonEl ? failReasonEl.value.trim() : "";
+	
+	const inspectionDate = document.getElementById("inspectionDate")?.value; // "2025-12-14"
+	const inspectorId    = document.getElementById("inspectorId")?.value;   // 사번
 
 	// 전체 판정 필수
 	if (!overallResult) {
@@ -372,9 +452,19 @@ function onClickSaveQcResult() {
 	  }
 	}
 	
+	const hasDetailFail = detailRows.some(r => (r.result || "").toUpperCase() === "FAIL");
+
+	if (overallResult === "PASS" && hasDetailFail) {
+	  if (!confirm("상세 항목에 FAIL이 포함되어 있습니다.\n그래도 전체 판정을 PASS로 저장할까요?")) {
+	    return;
+	  }
+	}
+	
     // 3) 서버로 보낼 payload
     const payload = {
       qcResultId: Number(qcResultId),
+	  inspectionDate: inspectionDate,
+	  inspectorId: inspectorId,
 	  overallResult: overallResult,
       goodQty: goodQty,
       defectQty: defectQty,
@@ -426,7 +516,9 @@ function onClickSaveQcResult() {
 
         if (data.success) {
           alert(data.message || "QC 검사 결과가 저장되었습니다.");
-
+		  
+		  qcSaved = true;
+		  qcDirty = false;
           // 모달 닫고 목록 새로고침
           qcRegModal.hide();
           loadQcRegistGrid();
@@ -465,8 +557,6 @@ function onClickSaveQcResult() {
       }
 
       if (!raw) {
-        // 값 비었으면 결과 비우기 (원하면 그대로 두게 바꿀 수 있음)
-        select.value = "";
         return;
       }
 
@@ -542,3 +632,31 @@ function onClickSaveQcResult() {
     uploadQcDetailFiles(qcResultDtlId, files);  
   });
 
+  // 검사 시작 후 저장 아닌 취소 눌렀을 경우
+  function cancelQc(orderId) {
+    // CSRF
+    const csrfTokenMeta  = document.querySelector('meta[name="_csrf_token"]');
+    const csrfHeaderMeta = document.querySelector('meta[name="_csrf_headerName"]');
+    const csrfToken      = csrfTokenMeta ? csrfTokenMeta.content : null;
+    const csrfHeaderName = csrfHeaderMeta ? csrfHeaderMeta.content : null;
+
+    fetch(`/qc/cancel?orderId=${encodeURIComponent(orderId)}`, {
+      method: "POST",
+      headers: {
+        ...(csrfToken && csrfHeaderName ? { [csrfHeaderName]: csrfToken } : {})
+      }
+    })
+    .then(res => {
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    })
+    .then(data => {
+      if (!data.success) {
+        console.warn("QC cancel 실패:", data.message);
+      }
+      loadQcRegistGrid();
+    })
+    .catch(err => {
+      console.error("QC cancel 오류:", err);
+    });
+  }

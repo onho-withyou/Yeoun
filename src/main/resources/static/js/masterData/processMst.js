@@ -312,7 +312,14 @@ function productRouteSearch(){
 
 //공정코드 관리 그리드 조회
 function processCodeGridAllSearch() {
-	fetch('/masterData/processCode/list', {
+	
+	const params = {
+		processId: document.getElementById("processId").value ?? "",
+		processName: document.getElementById("processName").value ?? "",		
+	};
+	const queryString = new URLSearchParams(params).toString();
+	
+	fetch(`/masterData/processCode/list?${queryString}`, {
 			method: 'GET',
 			headers: {
 				[csrfHeader]: csrfToken,
