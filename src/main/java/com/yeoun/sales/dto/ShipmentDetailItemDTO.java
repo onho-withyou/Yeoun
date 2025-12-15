@@ -16,13 +16,13 @@ public class ShipmentDetailItemDTO {
 
     public ShipmentDetailItemDTO(
             String prdName,
-            BigDecimal orderQty,
-            BigDecimal stockQty,
+            Number orderQty,
+            Number stockQty,
             Object reservable
     ) {
         this.prdName = prdName;
-        this.orderQty = orderQty;
-        this.stockQty = stockQty;
+        this.orderQty = orderQty == null ? BigDecimal.ZERO : BigDecimal.valueOf(orderQty.doubleValue());
+        this.stockQty = stockQty == null ? BigDecimal.ZERO : BigDecimal.valueOf(stockQty.doubleValue());
 
         if (reservable instanceof Number n) {
             this.reservable = n.intValue() == 1;

@@ -12,6 +12,29 @@ let gridApi = null;
    1) 페이지 로드 후 GRID 초기화 + 목록 조회
 ========================================================= */
 document.addEventListener("DOMContentLoaded", () => {
+	
+	/* ================================
+	     📅 날짜 조건 제어 (추가)
+	  ================================ */
+	  const startDateInput = document.getElementById("startDate");
+	  const endDateInput   = document.getElementById("endDate");
+
+	  if (startDateInput && endDateInput) {
+	      startDateInput.addEventListener("change", () => {
+	          const startDate = startDateInput.value;
+
+	          if (startDate) {
+	              // 종료일은 시작일 이후만 선택 가능
+	              endDateInput.min = startDate;
+
+	              // 이미 선택된 종료일이 시작일보다 빠르면 초기화
+	              if (endDateInput.value && endDateInput.value < startDate) {
+	                  endDateInput.value = "";
+	              }
+	          }
+	      });
+	  }
+
 
     initGrid();
     loadShipmentList("ALL");
@@ -21,13 +44,14 @@ document.addEventListener("DOMContentLoaded", () => {
         loadShipmentList(getSelectedStatus());
     });
 
-    // 초기화 버튼
-    document.getElementById("btnReset")?.addEventListener("click", () => {
-        document.getElementById("startDate").value = "";
-        document.getElementById("endDate").value = "";
-        document.getElementById("keyword").value = "";
-        loadShipmentList("ALL");
-    });
+	// 초기화 버튼
+	   document.getElementById("btnReset")?.addEventListener("click", () => {
+	       startDateInput.value = "";
+	       endDateInput.value = "";
+	       endDateInput.min = ""; // ⭐ 중요
+	       document.getElementById("keyword").value = "";
+	       loadShipmentList("ALL");
+	   });
 
     // 탭 클릭 이벤트
     document.querySelectorAll("#shipmentTabs .nav-link")?.forEach(tab => {

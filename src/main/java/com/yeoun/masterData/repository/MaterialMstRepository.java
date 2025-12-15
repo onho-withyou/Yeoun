@@ -15,6 +15,8 @@ public interface MaterialMstRepository extends JpaRepository<MaterialMst, String
 	Optional<MaterialMst> findByMatId(String materialOrder);
 
 	List<MaterialMst> findByMatType(String matType);
+	
+	List<MaterialMst> findByMatTypeAndUseYn(String matType, String useYn);
 
 	@Query(value = """
 			SELECT *

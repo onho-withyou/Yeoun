@@ -21,40 +21,48 @@ import jakarta.transaction.Transactional;
 public interface OrdersRepository extends JpaRepository<Orders, String> {
 
     /* ============================================================
-       1) 수주 목록 조회 (변경 없음)
+       1) 수주 목록 조회 
     ============================================================ */
-    @Query("""
-        SELECT new com.yeoun.sales.dto.OrderListDTO(
-            o.orderId,
-            c.clientName,
-            o.orderDate,
-            o.deliveryDate,
-            o.orderStatus,
-            e.empName,
-            o.orderMemo
-        )
-        FROM Orders o
-        LEFT JOIN o.client c
-        LEFT JOIN Emp e ON e.empId = o.empId
-        WHERE (:status IS NULL OR o.orderStatus = :status)
-          AND (:startDate IS NULL OR o.orderDate >= :startDate)
-          AND (:endDate IS NULL OR o.deliveryDate <= :endDate)
-          AND (:keyword IS NULL OR 
-                 c.clientName LIKE CONCAT('%', :keyword, '%') 
-              OR o.orderId LIKE CONCAT('%', :keyword, '%')
-          )
-        ORDER BY o.orderDate DESC
-    """)
-    List<OrderListDTO> searchOrders(
-        @Param("status") OrderStatus status,
-        @Param("startDate") LocalDate startDate,
-        @Param("endDate") LocalDate endDate,
-        @Param("keyword") String keyword
-    );
+	@Query("""
+		    SELECT DISTINCT new com.yeoun.sales.dto.OrderListDTO(
+		        o.orderId,
+		        c.clientName,
+		        o.orderDate,
+		        o.deliveryDate,
+		        o.orderStatus,
+		        e.empName,
+		        o.orderMemo
+		    )
+		    FROM Orders o
+		    LEFT JOIN o.client c
+		    LEFT JOIN Emp e 
+		           ON e.empId = o.empId
+		    LEFT JOIN OrderItem oi
+		           ON oi.orderId = o.orderId
+		    LEFT JOIN ProductMst p
+		           ON p.prdId = oi.prdId
+		    WHERE (:status IS NULL OR o.orderStatus = :status)
+		      AND (:startDate IS NULL OR o.orderDate >= :startDate)
+		      AND (:endDate IS NULL OR o.deliveryDate <= :endDate)
+		      AND (
+		            :keyword IS NULL OR
+		            c.clientName LIKE CONCAT('%', :keyword, '%')
+		         OR o.orderId LIKE CONCAT('%', :keyword, '%')
+		         OR e.empName LIKE CONCAT('%', :keyword, '%')
+		         OR p.prdName LIKE CONCAT('%', :keyword, '%')
+		      )
+		    ORDER BY o.orderDate DESC
+		""")
+		List<OrderListDTO> searchOrders(
+		    @Param("status") OrderStatus status,
+		    @Param("startDate") LocalDate startDate,
+		    @Param("endDate") LocalDate endDate,
+		    @Param("keyword") String keyword
+		);
 
 
     /* ============================================================
-       2) 주문번호 생성 (변경 없음)
+       2) 주문번호 생성
     ============================================================ */
     @Query(value = """
         SELECT ORDER_ID
@@ -67,7 +75,7 @@ public interface OrdersRepository extends JpaRepository<Orders, String> {
 
 
     /* ============================================================
-       3) ⭐ 생산계획 대상 조회 (이게 핵심)
+       3) ⭐ 생산계획 대상 조회 
        - 입금 완료된 주문
        - 아직 계획 안 된 제품만
     ============================================================ */
@@ -92,7 +100,7 @@ public interface OrdersRepository extends JpaRepository<Orders, String> {
 
 
     /* ============================================================
-       4) 단건 조회 (변경 없음)
+       4) 단건 조회 
     ============================================================ */
     Optional<Orders> findByOrderId(String orderId);
 
