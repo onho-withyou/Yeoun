@@ -131,6 +131,9 @@ public class ProductionDashboardService {
 
             String lineId = line.getLineId();
             List<StayCellDTO> steps = new ArrayList<>();
+            
+            // 라인 단위 진행중/QC대기 합
+            long lineActiveTotal = 0;
 
             for (int step = 1; step <= 6; step++) {
 
@@ -148,6 +151,9 @@ public class ProductionDashboardService {
             	long qcPendingCnt = list.stream()
             	    .filter(w -> "QC_PENDING".equals(w.getStatus()))
             	    .count();
+            	
+            	// 빈 라인 숨기기
+            	lineActiveTotal += (inProgressCnt + qcPendingCnt);
 
                 // READY 카운트(표시용)
                 long readyCnt = list.stream()
@@ -203,7 +209,8 @@ public class ProductionDashboardService {
                             .filter(p -> p.getWorkOrder() != null && w.getWorkOrder() != null)
                             .filter(p -> Objects.equals(p.getWorkOrder().getOrderId(), w.getWorkOrder().getOrderId()))
                             .filter(p -> "DONE".equals(p.getStatus()))
-                            .findFirst()
+                            .filter(p -> p.getEndTime() != null)
+                            .max(Comparator.comparing(WorkOrderProcess::getEndTime)) // 가장 최근 종료
                             .orElse(null);
 
                         if (prev == null || prev.getEndTime() == null) continue;
@@ -269,6 +276,9 @@ public class ProductionDashboardService {
 
                 steps.add(cell);
             }
+            
+            // “진행중/QC대기 0건인 라인”은 화면에서 제외
+            if (lineActiveTotal == 0) continue;
 
             // 라인 1개 row 완성
             rows.add(LineStayRowDTO.builder()
