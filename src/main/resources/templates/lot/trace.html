@@ -3,6 +3,14 @@
           layout:decorate="~{/layouts/layout.html}">
 
   <th:block layout:fragment="content">
+  
+    <style>
+    /* 왼쪽 LOT 목록만 스크롤 */
+    #lotTree {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    </style>
 
     <div class="custom-body container-xxl flex-grow-1 container-p-y">
 
