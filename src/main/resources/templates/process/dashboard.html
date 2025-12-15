@@ -194,7 +194,7 @@
 				</div>
 				
 				<div class="d-flex gap-2 flex-wrap">
-					<span class="mini-chip">OK</span>
+					<span class="mini-chip" style="background:#ecfdf5;color:#065f46;">정상</span>
 					<span class="mini-chip" style="background:#fff7ed;color:#9a3412;">주의</span>
 			        <span class="mini-chip" style="background:#fee2e2;color:#991b1b;">지연</span>
 				</div>
@@ -224,8 +224,14 @@
 						<!-- 라인 반복 -->
 						<tr th:each="row : ${heatmapRows}">
 							<!-- 라인명 -->
-							<th class="fw-bold nowrap" th:text="${row.lineName}">
-								LINE 1
+							<th class="fw-bold nowrap">
+							  <div th:text="${row.lineName}">라인1</div>
+							
+							  <div class="text-muted small"
+							       th:if="${row.activeOrderId != null}"
+							       th:text="${row.activeOrderId}">
+							       WO-20251215-0001
+							  </div>
 							</th>
 							
 							<!-- 공정 6단계 반복 -->
@@ -245,7 +251,7 @@
 								       th:data-active="${activeCnt}"
 								       th:text="${activeCnt > 0 ? cell.stayMin + '분'
 								              : (cell.startableCnt > 0 ? '시작대기'
-								              : (cell.hasReady ? '대기' : '-'))}">
+								              : (cell.hasReady ? '대기' : ''))}">
 								  </div>
 								
 								  <!-- 상태 문구 -->

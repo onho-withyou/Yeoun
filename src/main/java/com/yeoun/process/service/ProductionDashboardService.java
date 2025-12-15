@@ -132,6 +132,10 @@ public class ProductionDashboardService {
             String lineId = line.getLineId();
             List<StayCellDTO> steps = new ArrayList<>();
             
+            // 이 라인에서 가장 오래 체류 중인 공정 (대표 작업지시 추출용)
+            WorkOrderProcess lineMaxWop = null;
+            long lineMaxStay = -1;
+
             // 라인 단위 진행중/QC대기 합
             long lineActiveTotal = 0;
 
@@ -223,6 +227,12 @@ public class ProductionDashboardService {
                         maxWop = w;
                     }
                 }
+                
+                // 이 step의 maxWop가 라인 전체 기준으로도 가장 오래면 갱신
+                if (maxWop != null && stayMax > lineMaxStay) {
+                	lineMaxStay = stayMax;
+                	lineMaxWop = maxWop;
+                }
 
                 // ------------------------------------------------------------
                 // D) expectedMin(기준 예상시간) 계산
@@ -279,11 +289,18 @@ public class ProductionDashboardService {
             
             // “진행중/QC대기 0건인 라인”은 화면에서 제외
             if (lineActiveTotal == 0) continue;
+            
+            String activeOrderId = null;
+
+            if (lineMaxWop != null && lineMaxWop.getWorkOrder() != null) {
+                activeOrderId = lineMaxWop.getWorkOrder().getOrderId();
+            }
 
             // 라인 1개 row 완성
             rows.add(LineStayRowDTO.builder()
                 .lineId(lineId)
                 .lineName(line.getLineName())
+                .activeOrderId(activeOrderId)
                 .steps(steps)
                 .build());
         }

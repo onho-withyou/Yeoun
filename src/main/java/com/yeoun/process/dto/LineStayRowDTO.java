@@ -15,6 +15,8 @@ import lombok.Setter;
 @Builder
 public class LineStayRowDTO {
 	
+	private String activeOrderId;   // 라인 대표 작업지시번호
+	
 	private String lineId;
     private String lineName;            // 고체/액체/여분 등
     private List<StayCellDTO> steps;    // size = 6
