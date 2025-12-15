@@ -66,7 +66,6 @@ public class WorkOrderProcessService {
     private final QcResultService qcResultService;
     private final InboundService inboundService;
     private final AlarmService alarmService;
-    private final EmpRepository empRepository;
     private final OrderMapper orderMapper;
     
     // LOT 관련
@@ -80,7 +79,7 @@ public class WorkOrderProcessService {
     // 생산계획 관련 - 공정 종료 시 상태값 변경
     private final ProductionPlanRepository productionPlanRepository;
     private final ProductionPlanItemRepository productionPlanItemRepository;
-
+    
     // =========================================================================
     // 검색 조건 없는 공정현황 목록 (안 쓰면 삭제)
     @Transactional(readOnly = true)
@@ -405,6 +404,12 @@ public class WorkOrderProcessService {
 
         // 작업지시 계획수량 (1EA 기준값 및 3단계 이후 기준값 계산용)
         Integer planQty = workOrder.getPlanQty();
+        
+        // 작업지시 기준 총 작업량(EU) 계산
+        // - PRD_SPEC에서 30ml/50ml/100ml/5g/10g 파싱
+        // - ITEM_NAME(LIQUID/SOLID) 참고
+        // - planQty(EA) × EU 환산값 = totalEU
+        double totalEU = ProcessTimeCalculator.calcTotalEU(workOrder);
 
         // 1) RouteStep 기준으로 공정 단계 DTO를 하나씩 생성
         List<WorkOrderProcessStepDTO> stepDTOs = steps.stream()
@@ -412,7 +417,9 @@ public class WorkOrderProcessService {
 
                     WorkOrderProcessStepDTO dto = new WorkOrderProcessStepDTO();
 
-                    // 기본 공정 정보
+                    // ----------------------------
+                    // (1) 기본 공정 정보 세팅
+                    // ----------------------------
                     dto.setStepSeq(step.getStepSeq());                       // 공정 순번
                     dto.setProcessId(step.getProcess().getProcessId());      // 공정 코드 
                     dto.setProcessName(step.getProcess().getProcessName());  // 공정명
@@ -421,7 +428,9 @@ public class WorkOrderProcessService {
                     // RouteStep -> WorkOrderProcess 매핑
                     WorkOrderProcess proc = processMap.get(step.getRouteStepId());
 
-                    // 이미 진행된 공정이라면 상태값/수량/시간 정보 복사
+                    // ----------------------------
+                    // (2) 실행 데이터 복사 (상태/시간/수량/메모)
+                    // ----------------------------
                     if (proc != null) {
                         dto.setStatus(proc.getStatus());         // READY / IN_PROGRESS / DONE
                         dto.setStartTime(proc.getStartTime());   // 시작시간
@@ -440,7 +449,9 @@ public class WorkOrderProcessService {
                         dto.setMemo(null);
                     }
 
-                    // 2) 기준값(standardQty) 계산
+                    // ----------------------------
+                    // (3) 기준값(standardQty) 계산
+                    // ----------------------------
                     Double standardQty = null;
                     String processId = dto.getProcessId();
 
@@ -461,12 +472,24 @@ public class WorkOrderProcessService {
                     }
 
                     dto.setStandardQty(standardQty);
+                    
+                    // ----------------------------
+                    // (4) 예상 소요시간/지연 여부 계산
+                    // ----------------------------
+                    // 공정별 예상시간(분)
+                    long expectedMin = ProcessTimeCalculator.calcExpectedMinutes(processId, totalEU);
+                    dto.setExpectedMinutes(expectedMin);
+
+                    // 지연 여부: 시작된 공정만 판단
+                    // - proc/startTime 없으면 false
+                    boolean delayed = (proc != null) && ProcessTimeCalculator.isDelayed(proc, totalEU);
+                    dto.setDelayed(delayed);
 
                     return dto;
                 })
                 .collect(Collectors.toList());
 
-        // 3) 공정 시작/종료 버튼 활성화 여부 계산
+        // 2) 공정 시작/종료 버튼 활성화 여부 계산
         for (int i = 0; i < stepDTOs.size(); i++) {
 
             WorkOrderProcessStepDTO dto = stepDTOs.get(i);
@@ -478,15 +501,14 @@ public class WorkOrderProcessService {
             // 이전 단계가 QC_PENDING이면 이후 진행 불가
             boolean isPrevBlocking = (prevDto != null) && "QC_PENDING".equals(prevDto.getStatus());
 
-            // 포장 단계(PRC-PACK)는 반드시 QC PASS 이후 시작 가능
-            if ("PRC-PACK".equals(dto.getProcessId())) {
+            // 라벨링 단계(PRC-LBL)는 반드시 QC PASS 이후 시작 가능
+            if ("PRC-LBL".equals(dto.getProcessId())) {
                 dto.setCanStart("READY".equals(dto.getStatus()) && isQcPassed);
 
             } else {
                 // 일반 공정 시작 조건
                 dto.setCanStart("READY".equals(dto.getStatus()) && prevDone && !isPrevBlocking);
             }
-
             // 진행중(IN_PROGRESS) 상태일 때만 "종료" 버튼 활성화
             dto.setCanFinish("IN_PROGRESS".equals(dto.getStatus()));
         }
