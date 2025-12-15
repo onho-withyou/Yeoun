@@ -1,21 +1,21 @@
 package com.yeoun.equipment.service;
 
-import com.yeoun.equipment.dto.EquipmentSearchDTO;
-import com.yeoun.equipment.dto.EquipmentTypeCreateRequest;
-import com.yeoun.equipment.dto.ProdEquipDTO;
+import com.yeoun.equipment.dto.*;
 import com.yeoun.equipment.entity.ProdEquip;
+import com.yeoun.equipment.entity.ProdLine;
+import com.yeoun.equipment.mapper.EquipmentMapper;
 import com.yeoun.equipment.repository.ProdEquipRepository;
-import com.yeoun.masterData.dto.EquipmentDTO;
-import com.yeoun.masterData.dto.ProdLineDTO;
-import com.yeoun.masterData.entity.Equipment;
-import com.yeoun.masterData.repository.EquipmentRepository;
-import com.yeoun.masterData.repository.ProdLineRepository;
+import com.yeoun.equipment.entity.Equipment;
+import com.yeoun.equipment.repository.EquipmentRepository;
+import com.yeoun.equipment.repository.ProdLineRepository;
 
-import jakarta.validation.Valid;
+import com.yeoun.process.dto.WorkOrderProcessDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,8 +27,9 @@ public class EquipmentService {
     private final EquipmentRepository equipmentRepository;
     private final ProdLineRepository prodLineRepository;
     private final ProdEquipRepository prodEquipRepository;
+	private final EquipmentMapper equipmentMapper;
 
-    // ===================================================
+	// ===================================================
     // 설비 마스터 목록
     public List<EquipmentDTO> loadAllEquipmentTypes() {
         return equipmentRepository.findAll().stream()
@@ -85,4 +86,113 @@ public class EquipmentService {
 		
 	}
 
+	// ===================================================
+	// 설비 마스터 수정
+	@Transactional
+	public void modifyEquipmentType(EquipmentTypeCreateRequest req){
+		Equipment equipment = equipmentRepository.findById(req.getEquipId())
+				.orElseThrow(() -> new RuntimeException("해당하는 설비가 없습니다."));
+
+		equipment.setKoName(req.getKoName());
+		equipment.setEquipName(req.getEquipName());
+		equipment.setRemark(req.getRemark());
+		equipment.setUpdatedDate(LocalDateTime.now());
+	}
+
+	// ===================================================
+	// 설비 마스터 활성화&비활성화
+	@Transactional
+	public void modifyYnEquipmentType(String id, String useYn) {
+		Equipment equipment = equipmentRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("해당하는 설비가 없습니다."));
+		equipment.setUseYn(useYn);
+	}
+	
+	// ===================================================
+	// 라인 마스터 등록
+	public void createLine(LineCreateRequest req) {
+		ProdLineDTO dto = ProdLineDTO.builder()
+				.lineId(generateNextLineId())
+				.lineName(req.getLineName())
+				.status("STOP")
+				.remark(req.getRemark())
+				.useYn("Y")
+				.build();
+
+		ProdLine prodLine = dto.toEntity();
+		prodLineRepository.save(prodLine);
+	}
+
+	// ===================================================
+	// 라인 ID 생성
+	public String generateNextLineId() {
+		Integer max = prodLineRepository.findMaxLineNumber();
+		int next = (max == null) ? 1 : max + 1;
+		return String.format("PL-%02d", next);
+	}
+
+
+	// ===================================================
+	// 라인 마스터 수정
+	@Transactional
+	public void modifyLine(LineCreateRequest req) {
+		ProdLine line = prodLineRepository.findById(req.getLineId())
+				.orElseThrow(() -> new RuntimeException("해당하는 라인이 없습니다."));
+
+		line.setLineName(req.getLineName());
+		line.setRemark(req.getRemark());
+	}
+
+	// ===================================================
+	// 라인 마스터 활성화&비활성화
+	@Transactional
+	public void modifyYnLine(String id, String useYn) {
+		ProdLine line = prodLineRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("해당하는 라인이 없습니다."));
+		line.setUseYn(useYn);
+	}
+
+	// ===================================================
+	// 설비 등록
+	public void createEquipment(EquipmentCreateRequest req) {
+
+		ProdEquip equipment = new ProdEquip();
+
+		equipment.setEquipment(equipmentRepository.findById(req.getEquipType())
+				.orElseThrow(() -> new RuntimeException("해당하는 설비 타입이 없습니다.")));
+		equipment.setLine(prodLineRepository.findById(req.getLineId())
+				.orElseThrow(() -> new RuntimeException("해당하는 라인이 없습니다.")));
+		equipment.setStatus("STOP");
+		equipment.setEquipName(req.getEquipName());
+
+		prodEquipRepository.save(equipment);
+	}
+
+
+	public List<WorkOrderProcessDTO> loadAllEquipmentHistory(Long id) {
+
+		ProdEquip equipment = prodEquipRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("해당 설비가 없습니다."));
+
+		String line = equipment.getLine().getLineId();
+		int step = switch (equipment.getEquipment().getEquipId())
+		{
+			case "BLENDING_TANK", "MIXER_AGITATOR" -> 1;
+			case "FILTER_HOUSING" 				   -> 2;
+			case "FILLING_SEMI"					   -> 3;
+			case "CAPPING_SEMI"					   -> 4;
+			case "LABELING_AUTO", "PACKING_SEMI"   -> 6;
+			default -> throw new IllegalArgumentException("설비 타입 오류");
+		};
+
+		return equipmentMapper.selectProcessByLineAndStep(line, step);
+	}
 }
+
+
+
+
+
+
+
+

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeoun.equipment.mapper.EquipmentMapper">
+
+    <select id="selectProcessByLineAndStep" resultType="com.yeoun.equipment.dto.EquipProcessHistoryDTO">
+        SELECT
+            o.ORDER_ID,
+            m.PRD_NAME AS PRODUCT_NAME,
+            o.LINE_ID,
+            p.WOP_ID,
+            p.START_TIME,
+            p.END_TIME,
+            p.STATUS
+        FROM WORK_ORDER_PROCESS p
+            JOIN WORK_ORDER o ON p.ORDER_ID = o.ORDER_ID
+            JOIN PRODUCT_MST m ON o.PRD_ID = m.PRD_ID
+        WHERE o.LINE_ID = #{line}
+        AND p.STEP_SEQ = #{step}
+        AND p.STATUS != 'READY'
+    </select>
+
+</mapper>

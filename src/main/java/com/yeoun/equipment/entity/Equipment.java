@@ -1,4 +1,4 @@
-package com.yeoun.masterData.entity;
+package com.yeoun.equipment.entity;
 
 import java.time.LocalDateTime;
 
@@ -29,6 +29,9 @@ public class Equipment {
 	
 	@Column(nullable = false)
 	private String equipName;
+
+	@Column(nullable = false,  columnDefinition = "CHAR(1) DEFAULT 'Y'")
+	private String useYn = "Y";
 	
 	@Column(length = 500)
 	private String remark;
