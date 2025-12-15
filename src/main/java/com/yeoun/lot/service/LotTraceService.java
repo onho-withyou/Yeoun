@@ -391,33 +391,23 @@ public class LotTraceService {
 		// 5) 설비 정보 조회
 		List<LotEquipInfoDTO> equipments = List.of();
 
-		if (lineId != null && processId != null) {
+		if (lineId != null && processId != null && !"PRC-QC".equals(processId)) {
 
-		    // QC면 설비 없음
-		    if (!"PRC-QC".equals(processId)) {
+		    List<ProdEquip> prodEquips = prodEquipRepository.findForLineAndProcess(lineId, processId);
 
-		        List<String> equipCodes = PROCESS_EQUIP_CODES.getOrDefault(processId, List.of());
-
-		        if (!equipCodes.isEmpty()) {
-		            List<ProdEquip> prodEquips =
-		                    prodEquipRepository.findForLineAndCodes(lineId, equipCodes);
-
-		            equipments = prodEquips.stream()
-	            	    .map(pe -> {
-	            	        Equipment mst = pe.getEquipment();
-	            	        return LotEquipInfoDTO.builder()
-	            	            .prodEquipId(pe.getEquipId())
-	            	            .equipCode(mst != null ? mst.getEquipId() : null)
-	            	            .equipName(pe.getEquipName())
-	            	            .status(labelOf(pe.getStatus()))
-	            	            .stdName(mst != null ? mst.getEquipName() : null)
-	            	            .koName(mst != null ? mst.getKoName() : null)
-	            	            .build();
-	            	    })
-	            	    .toList();
-
-		        }
-		    }
+		    equipments = prodEquips.stream()
+		        .map(pe -> {
+		            Equipment mst = pe.getEquipment();
+		            return LotEquipInfoDTO.builder()
+		                .prodEquipId(pe.getEquipId()) 
+		                .equipCode(mst != null ? mst.getEquipId() : null)
+		                .equipName(pe.getEquipName())
+		                .status(labelOf(pe.getStatus()))
+		                .stdName(mst != null ? mst.getEquipName() : null)
+		                .koName(mst != null ? mst.getKoName() : null)
+		                .build();
+		        })
+		        .toList();
 		}
 
 		
@@ -449,16 +439,6 @@ public class LotTraceService {
 		        .qcResultId(qcResultId)
 		        .build();
 	}
-	
-    private static final Map<String, List<String>> PROCESS_EQUIP_CODES = Map.of(
-	    "PRC-BLD", List.of("BLENDING_TANK", "MIXER_AGITATOR"),
-	    "PRC-FLT", List.of("FILTER_HOUSING"),
-	    "PRC-FIL", List.of("FILLING_SEMI"),      
-	    "PRC-CAP", List.of("CAPPING_SEMI"),
-	    "PRC-LBL", List.of("LABELING_AUTO", "PACKING_SEMI")
-	    // QC는 제외
-	);
-
 
 	// ================================================================================
 	// 자재 정보
