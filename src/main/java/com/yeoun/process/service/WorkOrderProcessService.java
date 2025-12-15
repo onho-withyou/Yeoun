@@ -389,7 +389,7 @@ public class WorkOrderProcessService {
                         p -> p,
                         (p1, p2) -> p1
                 ));
-
+        
         // 5) 상단 요약 DTO
         WorkOrderProcessDTO headerDto = new WorkOrderProcessDTO();
         headerDto.setOrderId(workOrder.getOrderId());
@@ -397,7 +397,9 @@ public class WorkOrderProcessService {
         headerDto.setPrdName(workOrder.getProduct().getPrdName());
         headerDto.setPlanQty(workOrder.getPlanQty());
         headerDto.setStatus(workOrder.getStatus());
-
+        headerDto.setLineId(workOrder.getLine().getLineId());
+        headerDto.setLineName(workOrder.getLine().getLineName());
+        
         // QC 결과 PASS 여부 (포장 공정 시작 조건)
         boolean isQcPassed = qcResultRepository.existsByOrderIdAndOverallResult(orderId, "PASS");
 

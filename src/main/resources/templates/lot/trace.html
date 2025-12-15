@@ -3,6 +3,53 @@
           layout:decorate="~{/layouts/layout.html}">
 
   <th:block layout:fragment="content">
+  
+    <style>
+    /* 왼쪽 LOT 목록만 스크롤 */
+    #lotTree {
+      max-height: 1000px;
+      overflow-y: auto;
+    }
+    
+    .lot-root-link:hover {
+	  background: rgba(0,0,0,.03);
+	  border-radius: 8px;
+	}
+    
+    /* 상태 텍스트 색 */
+	.lot-status-in    { color: #0d6efd; }  /* 진행중: 파랑 */
+	.lot-status-done  { color: #198754; }  /* 완료: 초록 */
+	.lot-status-scrap { color: #6c757d; }  /* 폐기: 회색 */
+	.lot-status-etc   { color: #212529; }  /* 기타 */
+	
+	/* 안쪽 링크 기본색 강제 */
+	.process-item a,
+	.material-item a {
+	  color: var(--bs-body-color);
+	  text-decoration: none;
+	}
+	
+	/* hover 스타일 통일 */
+	.process-item a:hover,
+	.material-item a:hover {
+	  color: #0d6efd;
+	  text-decoration: underline;
+	}
+	
+	.tree-item-active {
+	  background: rgba(13,110,253,.08);
+	  border-radius: 6px;
+	}
+	
+	/* 공정/자재 클릭된 항목 표시 */
+	.tree-child-link.tree-item-active{
+	  background: rgba(13,110,253,.10);
+	  color: #0d6efd;
+	  border-radius: 6px;
+	  padding: 2px 6px;
+	  display: inline-block;
+	}
+    </style>
 
     <div class="custom-body container-xxl flex-grow-1 container-p-y">
 
@@ -29,16 +76,21 @@
 
               <div class="col-md-3">
                 <label class="form-label" for="searchProductStatus">생산 상태</label>
-                <select class="form-select" id="searchProductStatus">
-                  <option value="">전체</option>
-                </select>
+				<select class="form-select" id="searchProductStatus" name="status">
+				  <option value="" th:selected="${status == null || status == ''}">전체</option>
+				  <option value="IN_PROCESS" th:selected="${status == 'IN_PROCESS'}">공정 진행 중</option>
+				  <option value="PROD_DONE"  th:selected="${status == 'PROD_DONE'}">생산 완료</option>
+				  <option value="SCRAPPED"   th:selected="${status == 'SCRAPPED'}">폐기</option>
+				</select>
               </div>
 
               <div class="col-md-3">
                 <label class="form-label" for="searchProductType">제품 유형</label>
-                <select class="form-select" id="searchProductType">
-                  <option value="">전체</option>
-                </select>
+                <select class="form-select" id="searchProductType" name="type">
+				  <option value="" th:selected="${type == null || type == ''}">전체</option>
+				  <option value="WIP" th:selected="${type == 'WIP'}">재공</option>
+				  <option value="FIN" th:selected="${type == 'FIN'}">완제품</option>
+				</select>
               </div>
 
               <div class="col-md-1">
@@ -80,12 +132,23 @@
 		
 		          <!-- ROOT LOT 한 줄 -->
 		          <a href="#"
-		             class="d-block text-decoration-none mb-1 lot-root-link"
-		             th:data-lot-no="${lot.lotNo}">
-		            <span th:text="${lot.lotNo}">LOT-0001</span>
-		            <span th:text="' / ' + ${lot.displayName}"> / 제품명</span>
-		            <span th:text="' / ' + ${lot.status}"> / 상태</span>
-		          </a>
+				     class="d-block mb-1 lot-root-link text-body text-decoration-none"
+				     th:data-lot-no="${lot.lotNo}">
+				
+				    <span th:text="${lot.lotNo}">LOT-0001</span>
+				    <span th:text="' / ' + ${lot.displayName}"> / 제품명</span>
+				
+				    <!-- 상태만 색상 -->
+				    <span class="ms-1 fw-semibold"
+				          th:text="' / ' + ${lot.status}"
+				          th:classappend="
+				            ${lot.status}=='공정 진행 중' ? ' lot-status-in' :
+				            (${lot.status}=='생산 완료' ? ' lot-status-done' :
+				            (${lot.status}=='폐기' ? ' lot-status-scrap' : ' lot-status-etc'))">
+				      / 상태
+				    </span>
+				  </a>
+
 		
 		          <!-- ROOT 하위: 공정 / 자재 / 설비 그룹 (기본은 숨김) -->
 		          <ul class="list-unstyled ms-3 mt-1 root-children d-none"
@@ -94,7 +157,7 @@
 		            <!-- 공정 그룹 -->
 					<li class="mb-1">
 					  <a href="#"
-					     class="lot-group-toggle text-decoration-none small"
+					     class="lot-group-toggle text-body text-decoration-none small"
 					     data-group="process"
 					     th:data-lot-no="${lot.lotNo}">
 					    ▶ 공정
@@ -111,7 +174,7 @@
 		            <!-- 자재 그룹 -->
 					<li class="mb-1">
 					  <a href="#"
-					     class="lot-group-toggle text-decoration-none small"
+					     class="lot-group-toggle text-body text-decoration-none small"
 					     data-group="material"
 					     th:data-lot-no="${lot.lotNo}">
 					    ▶ 자재
@@ -134,6 +197,8 @@
 		      </div>
 		
 		    </div>
+		    
+		    <th:block th:replace="qc/qc_view_modal :: qcViewModal"></th:block>
 		  </div>
 		</div>
 
@@ -161,5 +226,5 @@
 
   </th:block>
 </th:block>
-
+<script th:src="@{/js/qc/qc_view_modal.js}"></script>
 <script th:src="@{/js/lot/lotTrace.js}"></script>

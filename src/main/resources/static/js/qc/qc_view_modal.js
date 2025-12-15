@@ -1,8 +1,13 @@
 // qc_result.js
 
 let qcResultGrid = null;
+let qcViewModal = null;
 
 document.addEventListener("DOMContentLoaded", () => {
+	
+	// 모달 초기화
+	const modalEl = document.getElementById("qcViewModal");
+	qcViewModal = new bootstrap.Modal(modalEl);
 	
 	// 그리드 초기화
 	const gridEl = document.getElementById("qcResultGrid");
@@ -143,15 +148,15 @@ function openQcViewModal(qcResultId) {
 
       // ===== 전체 판정 / 사유 / 비고 =====
       const overall       = data.overallResult || "-";
+      const overallBadge  = document.getElementById("qcViewOverallResultBadge");
+      const failReasonEl  = document.getElementById("qcViewFailReason");
+      const remarkEl      = document.getElementById("qcViewRemark");
+	  
 	  const overallLabel =
 	    overall === "PASS" ? "합격" :
 	    overall === "FAIL" ? "불합격" :
 	    overall === "PENDING" ? "검사대기" :
 	    overall;
-		
-      const overallBadge  = document.getElementById("qcViewOverallResultBadge");
-      const failReasonEl  = document.getElementById("qcViewFailReason");
-      const remarkEl      = document.getElementById("qcViewRemark");
 
       if (overallBadge) {
         overallBadge.textContent = overallLabel;

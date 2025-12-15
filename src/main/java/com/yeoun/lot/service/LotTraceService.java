@@ -151,26 +151,36 @@ public class LotTraceService {
 	// 완제품 ROOT 목록
 	@Transactional(readOnly = true)
 	public List<LotRootDTO> getFinishedLots() {
-	    return getFinishedLots(null);
+	    return getFinishedLots(null, null, null);
 	}
 	
 	@Transactional(readOnly = true)
-	public List<LotRootDTO> getFinishedLots(String keyword) {
+	public List<LotRootDTO> getFinishedLots(String keyword, String status, String type) {
 		
 		// 완제품 공정에 속한 LOT 타입
 		List<String> lotTypes = List.of("WIP", "FIN");
 		
 		// 1) FIN WIP LOT 목록 조회
 		List<LotMaster> lots = 
-				lotMasterRepository.findByLotTypeInOrderByCreatedDateDesc(lotTypes);
+				lotMasterRepository.findRootLotsOrdered(lotTypes);
 		
 		final String kw = (keyword == null) ? "" : keyword.trim();
+		final String st = (status == null) ? "" : status.trim();
+		final String tp = (type == null) ? "" : type.trim();
 		
 		return lots.stream()
 		        .filter(lm -> {
 		            if (kw.isEmpty()) return true;
 		            return (lm.getLotNo() != null && lm.getLotNo().contains(kw))
 		                || (lm.getDisplayName() != null && lm.getDisplayName().contains(kw));
+		        })
+		        .filter(lm -> {
+		            if (st.isEmpty()) return true;
+		            return st.equals(lm.getCurrentStatus());
+		        })
+		        .filter(lm -> {
+		            if (tp.isEmpty()) return true;
+		            return tp.equals(lm.getLotType());
 		        })
 		        .map(lm -> {
 		            LotStatus statusEnum = LotStatus.fromCode(lm.getCurrentStatus());
@@ -344,16 +354,22 @@ public class LotTraceService {
 		String workerId = null;
 		String workerName = null;
 		String deptName = null;
+		
+		Long qcResultId = null;
 
 		if ("PRC-QC".equals(processId)) {
-		    // QC는 qc_result의 inspectorId로 담당자 표시
-		    String inspectorId = qcResultRepository
+
+		    QcResult latest = qcResultRepository
 		            .findFirstByOrderIdOrderByQcResultIdDesc(orderId)
-		            .map(QcResult::getInspectorId)
 		            .orElse(null);
 
-		    if (inspectorId != null) {
-		        worker = empRepository.findById(inspectorId).orElse(null);
+		    if (latest != null) {
+		        qcResultId = latest.getQcResultId();
+
+		        String inspectorId = latest.getInspectorId();
+		        if (inspectorId != null) {
+		            worker = empRepository.findByEmpId(inspectorId).orElse(null);
+		        }
 		    }
 
 		} else {
@@ -375,33 +391,23 @@ public class LotTraceService {
 		// 5) 설비 정보 조회
 		List<LotEquipInfoDTO> equipments = List.of();
 
-		if (lineId != null && processId != null) {
+		if (lineId != null && processId != null && !"PRC-QC".equals(processId)) {
 
-		    // QC면 설비 없음
-		    if (!"PRC-QC".equals(processId)) {
+		    List<ProdEquip> prodEquips = prodEquipRepository.findForLineAndProcess(lineId, processId);
 
-		        List<String> equipCodes = PROCESS_EQUIP_CODES.getOrDefault(processId, List.of());
-
-		        if (!equipCodes.isEmpty()) {
-		            List<ProdEquip> prodEquips =
-		                    prodEquipRepository.findForLineAndCodes(lineId, equipCodes);
-
-		            equipments = prodEquips.stream()
-	            	    .map(pe -> {
-	            	        Equipment mst = pe.getEquipment();
-	            	        return LotEquipInfoDTO.builder()
-	            	            .prodEquipId(pe.getEquipId())
-	            	            .equipCode(mst != null ? mst.getEquipId() : null)
-	            	            .equipName(pe.getEquipName())
-	            	            .status(labelOf(pe.getStatus()))
-	            	            .stdName(mst != null ? mst.getEquipName() : null)
-	            	            .koName(mst != null ? mst.getKoName() : null)
-	            	            .build();
-	            	    })
-	            	    .toList();
-
-		        }
-		    }
+		    equipments = prodEquips.stream()
+		        .map(pe -> {
+		            Equipment mst = pe.getEquipment();
+		            return LotEquipInfoDTO.builder()
+		                .prodEquipId(pe.getEquipId()) 
+		                .equipCode(mst != null ? mst.getEquipId() : null)
+		                .equipName(pe.getEquipName())
+		                .status(labelOf(pe.getStatus()))
+		                .stdName(mst != null ? mst.getEquipName() : null)
+		                .koName(mst != null ? mst.getKoName() : null)
+		                .build();
+		        })
+		        .toList();
 		}
 
 		
@@ -430,18 +436,9 @@ public class LotTraceService {
 		        .defectRate(defectRate)
 		        .lineId(lineId)
 		        .equipments(equipments)
+		        .qcResultId(qcResultId)
 		        .build();
 	}
-	
-    private static final Map<String, List<String>> PROCESS_EQUIP_CODES = Map.of(
-	    "PRC-BLD", List.of("BLENDING_TANK", "MIXER_AGITATOR"),
-	    "PRC-FLT", List.of("FILTER_HOUSING"),
-	    "PRC-FIL", List.of("FILLING_SEMI"),      
-	    "PRC-CAP", List.of("CAPPING_SEMI"),
-	    "PRC-LBL", List.of("LABELING_AUTO", "PACKING_SEMI")
-	    // QC는 제외
-	);
-
 
 	// ================================================================================
 	// 자재 정보
@@ -473,7 +470,7 @@ public class LotTraceService {
 	                }
 					
 					return new LotMaterialNodeDTO(
-							child.getLotNo(), 
+							lotNoChild,
 							name, 
 							rel.getUsedQty(), 
 							unit
@@ -567,6 +564,7 @@ public class LotTraceService {
 	    Map.entry("SUB", "부자재"),
 	    Map.entry("PKG", "포장재"),
 	    Map.entry("FIN", "완제품"),
+	    Map.entry("FINISHED_GOODS", "완제품"),
 
 	    // 설비 상태
 	    Map.entry("RUN", "가동"),
