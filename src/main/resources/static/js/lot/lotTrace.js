@@ -187,8 +187,8 @@ function renderProcessDetail(detail) {
     document.getElementById("pd-workerName").innerText = detail.workerName || "-";
     document.getElementById("pd-lineId").innerText = detail.lineId || "-";
 
-	document.getElementById("pd-startTime").innerText = formatDateTime(detail.startTime);
-	document.getElementById("pd-endTime").innerText = formatDateTime(detail.endTime);
+	document.getElementById("pd-startTime").innerText = formatDateTimeMin(detail.startTime);
+	document.getElementById("pd-endTime").innerText = formatDateTimeMin(detail.endTime);
 
     document.getElementById("pd-goodQty").innerText = detail.goodQty ?? "-";
     document.getElementById("pd-defectQty").innerText = detail.defectQty ?? "-";
@@ -327,7 +327,7 @@ function renderMaterialDetail(d) {
   document.getElementById("md-lotNo").innerText = d.lotNo || "-";
   document.getElementById("md-lotType").innerText = d.lotType || "-";
   document.getElementById("md-lotStatus").innerText = d.lotStatus || "-";
-  document.getElementById("md-lotCreatedDate").innerText = formatDateTime(d.lotCreatedDate);
+  document.getElementById("md-lotCreatedDate").innerText = formatDateTimeSec(d.lotCreatedDate);
 
   document.getElementById("md-usedQty").innerText = (d.usedQty ?? "-");
 
@@ -338,10 +338,10 @@ function renderMaterialDetail(d) {
   document.getElementById("md-ivAmount").innerText = (d.ivAmount ?? "-");
   document.getElementById("md-ivStatus").innerText = d.ivStatus || "-";
   document.getElementById("md-inventoryLocationId").innerText = d.inventoryLocationId || "-";
-  document.getElementById("md-ibDate").innerText = formatDateTime(d.ibDate);
+  document.getElementById("md-ibDate").innerText = formatDateTimeSec(d.ibDate);
 
-  document.getElementById("md-manufactureDate").innerText = formatDateTime(d.manufactureDate);
-  document.getElementById("md-expirationDate").innerText = formatDateTime(d.expirationDate);
+  document.getElementById("md-manufactureDate").innerText = formatDate(d.manufactureDate);
+  document.getElementById("md-expirationDate").innerText = formatDate(d.expirationDate);
 
   document.getElementById("md-clientName").innerText = d.clientName || "-";
   document.getElementById("md-clientId").innerText = d.clientId || "-";
@@ -355,7 +355,18 @@ function renderMaterialDetail(d) {
 // -------------------------------
 // 날짜 포맷
 // -------------------------------
-function formatDateTime(dt) {
+function formatDateTimeSec(dt) {
   if (!dt) return "-";
-  return dt.replace("T", " ").split(".")[0];
+  return dt.replace("T", " ").split(".")[0]; // YYYY-MM-DD HH:mm:ss
+}
+
+function formatDateTimeMin(dt) {
+  if (!dt) return "-";
+  const s = dt.replace("T", " ").split(".")[0];
+  return s.substring(0, 16); // YYYY-MM-DD HH:mm
+}
+
+function formatDate(dt) {
+  if (!dt) return "-";
+  return dt.split("T")[0].split(" ")[0]; // YYYY-MM-DD
 }
