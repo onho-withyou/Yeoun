@@ -154,7 +154,11 @@ function fitStageIntoParentContainer(stage, layer) {
 
 // 개별 zone 카드와 내부 rack 버튼을 그리는 함수
 function drawZoneCard(startX, startY, zoneName, zoneData) {
-    const group = new Konva.Group({ x: startX, y: startY });
+    const group = new Konva.Group({ 
+		x: startX, 
+		y: startY 
+	});
+	
 	// 해당 zone 내부의 rack 데이터 그룹핑
     const racks = {};
 	
@@ -172,6 +176,43 @@ function drawZoneCard(startX, startY, zoneName, zoneData) {
     const contentWidth = (rackKeys.length * CONFIG.rackBtnSize) + ((rackKeys.length - 1) * CONFIG.rackGap);
     const cardWidth = Math.max(contentWidth + (CONFIG.padding * 2), 160); 
     const cardHeight = CONFIG.headerHeight + CONFIG.padding + CONFIG.rackBtnSize + CONFIG.padding;
+	
+	// zone 삭제 버튼
+//	const delBtnGroup = new Konva.Group({
+//		x: cardWidth - 30,
+//		y: 5
+//	});
+	
+	// 버튼 배경
+//	const delBg = new Konva.Rect({
+//	    width: 25, height: 25, fill: 'transparent' 
+//	});
+//	
+	// 삭제 텍스트(X)
+//	const delText = new Konva.Text({
+//	    text: '✕', fontSize: 18, fill: '#adb5bd', // 평소엔 연한 회색
+//	    align: 'center', verticalAlign: 'middle', padding: 3
+//	});
+	
+//	delBtnGroup.add(delBg);
+//	delBtnGroup.add(delText);
+	
+	// 호버 효과
+//	delBtnGroup.on('mouseenter', () => {
+//	    document.body.style.cursor = 'pointer';
+//	    delText.fill('#ff6b6b'); // 빨간색 강조
+//	});
+//	
+//	delBtnGroup.on('mouseleave', () => {
+//	    document.body.style.cursor = 'default';
+//	    delText.fill('#adb5bd');
+//	});
+//	
+	// 구역 삭제 시도
+//	delBtnGroup.on('click', (e) => {
+//	    e.cancelBubble = true; // 버블링 방지
+//	    deleteZone(zoneName); // 삭제 함수 호출
+//	});
 
 	// 카드 배경
     const cardBg = new Konva.Rect({
@@ -198,7 +239,8 @@ function drawZoneCard(startX, startY, zoneName, zoneData) {
     group.add(cardBg);
     group.add(headerBg);
     group.add(headerText);
-
+//	group.add(delBtnGroup); // 버튼 추가
+	
 	// rack 버튼 배치
     const startBtnX = (cardWidth - contentWidth) / 2;
 
@@ -206,6 +248,12 @@ function drawZoneCard(startX, startY, zoneName, zoneData) {
         const btnX = startBtnX + (index * (CONFIG.rackBtnSize + CONFIG.rackGap));
         const btnY = CONFIG.headerHeight + CONFIG.padding;
         const btnGroup = new Konva.Group({ x: btnX, y: btnY });
+		
+//		const rackDelBtn = new Konva.Text({
+//			x: CONFIG.rackBtnSize - 15, y: 2,
+//			text: '×', fontSize: 14, fill: '#fa5252',
+//			visible: false
+//		});
 		
 		// 버튼 배경
         const rect = new Konva.Rect({
@@ -225,24 +273,33 @@ function drawZoneCard(startX, startY, zoneName, zoneData) {
 
         btnGroup.add(rect);
         btnGroup.add(text);
+//        btnGroup.add(rackDelBtn);
 
 		// 마우스 오버 시 효과
         btnGroup.on('mouseenter', () => {
             document.body.style.cursor = 'pointer';
             rect.fill(CONFIG.rackBtnHover);
             rect.stroke('#0d6efd');
+//			rackDelBtn.show();
         });
 		
         btnGroup.on('mouseleave', () => {
             document.body.style.cursor = 'default';
             rect.fill(CONFIG.rackBtnFill);
             rect.stroke(CONFIG.rackBtnStroke);
+//			rackDelBtn.hide();
         });
         
 		// 클릭 시 상세 모달 열기
         btnGroup.on('click', () => {
             openRackDetailModal(zoneName, rackName, racks[rackName]);
         });
+		
+		// 삭제버튼 클릭 이벤트
+//		rackDelBtn.on("click", (e) => {
+//			e.cancelBubble = true;
+//			deleteRack(zoneName, rackName);
+//		});
 
         group.add(btnGroup);
     });
@@ -327,7 +384,7 @@ async function openStockModal(cellData) {
 	
 	// 모달 내부 정보 입력
     document.getElementById('modalLocationId').value = locationId;
-    document.getElementById('modalZoneRack').value = `${cellData.zone}구역 / Rack ${cellData.rack} / ${cellData.rackRow}-${cellData.rackCol}`;
+    document.getElementById('stockModalTitle').innerText = `선택위치 : ${cellData.zone}-${cellData.rack}-${cellData.rackRow}-${cellData.rackCol}`;
 
     const tbody = document.getElementById('modalTableBody');
     

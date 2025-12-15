@@ -4,10 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.data.jpa.domain.Specification;
@@ -40,9 +38,11 @@ import com.yeoun.order.repository.WorkOrderRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class InventoryService {
 	private final InventoryRepository inventoryRepository;
 	private final InventoryHistoryRepository inventoryHistoryRepository;
@@ -369,7 +369,7 @@ public class InventoryService {
 	@Transactional
 	public void createLocations(WarehouseLocationCreateRequest req) {
 		// 기존 창고 조회
-		List<WarehouseLocation> existing = warehouseLocationRepository.findByZoneAndRack(req.getZone(), req.getRack());
+		List<WarehouseLocation> existing = warehouseLocationRepository.findAllByZoneAndRack(req.getZone(), req.getRack());
 		
 		// 기존 위치 Set 생성
 		Set<String> existingSet = existing.stream()
@@ -390,8 +390,10 @@ public class InventoryService {
 					continue;
 				}
 				
+				Long seq = warehouseLocationRepository.getNextLocationSeq();
+				
 				WarehouseLocationDTO locationDTO = new WarehouseLocationDTO();
-				locationDTO.setLocationId(UUID.randomUUID().toString());
+				locationDTO.setLocationId(String.valueOf(seq));
 				locationDTO.setZone(req.getZone());
 				locationDTO.setRack(normalizeRack(req.getRack()));
 				locationDTO.setRackRow(rowChar);
@@ -407,6 +409,46 @@ public class InventoryService {
 	
 	private String normalizeRack(String rack) {
 	    return String.format("%02d", Integer.parseInt(rack));
+	}
+
+	// zone 삭제
+	@Transactional
+	public void deleteLocationZone(String zoneName) {
+		// zone으로 창고 조회
+		List<WarehouseLocation> warehouseLocations = warehouseLocationRepository.findAllByZone(zoneName);
+		
+		if (warehouseLocations.isEmpty()) {
+			 throw new IllegalStateException("존재하지 않는 Zone입니다.");
+		}
+		
+		for (WarehouseLocation loc : warehouseLocations) {
+			if (inventoryRepository.existsByWarehouseLocation_LocationId(loc.getLocationId())) {
+				throw new IllegalStateException("재고가 존재하는 위치가 있어 삭제할 수 없습니다.");
+			}
+		}
+		
+		warehouseLocationRepository.deleteAllByZone(zoneName);
+	}
+
+	// rack 삭제
+	@Transactional
+	public void deleteLocationRack(String zone, String rack) {
+		List<WarehouseLocation> warehouseLocations = warehouseLocationRepository.findAllByZoneAndRack(zone, rack);
+		
+		if (warehouseLocations.isEmpty()) {
+			 throw new IllegalStateException("존재하지 않는 Rack 입니다.");
+		}
+		
+		// 재고가 존재하는 location 이면 true가 반환
+		boolean hasInventory = warehouseLocations.stream()
+				.anyMatch(loc -> 
+					inventoryRepository.existsByWarehouseLocation_LocationId(loc.getLocationId()));
+		
+		if (hasInventory) {
+			throw new IllegalStateException("재고가 존재하는 위치가 있어 삭제할 수 없습니다.");
+		}
+		
+		warehouseLocationRepository.deleteAllByZoneAndRack(zone, rack);
 	}
 
 }

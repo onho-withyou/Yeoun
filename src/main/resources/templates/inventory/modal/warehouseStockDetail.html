@@ -7,21 +7,11 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="stockModalTitle">위치 상세 정보</h5>
+                <h5 class="modal-title" id="stockModalTitle"></h5>
                 <button type="button" class="btn-close m-0" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="row mb-3">
-                    <div class="col">
-                        <label class="form-label text-muted">위치 ID</label>
-                        <input type="text" class="form-control" id="modalLocationId" readonly>
-                    </div>
-                    <div class="col">
-                        <label class="form-label text-muted">구역 정보</label>
-                        <input type="text" class="form-control" id="modalZoneRack" readonly>
-                    </div>
-                </div>
-                <hr class="my-3">
+                <input type="hidden" class="form-control" id="modalLocationId" readonly>
                 <div class="table-responsive">
                     <table class="table table-hover text-center align-middle" id="stockTable">
                         <thead class="table-light">
