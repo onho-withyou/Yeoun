@@ -302,8 +302,8 @@ function renderQcDetailTable(detailList) {
 	  <td>
 	    <select class="form-select form-select-sm"
 	            name="details[${idx}].result">
-	      <option value="PASS" ${row.result === "PASS" ? "selected" : ""}>PASS</option>
-	      <option value="FAIL" ${row.result === "FAIL" ? "selected" : ""}>FAIL</option>
+	      <option value="PASS" ${row.result === "PASS" ? "selected" : ""}>합격</option>
+	      <option value="FAIL" ${row.result === "FAIL" ? "selected" : ""}>불합격</option>
 	    </select>
 	  </td>
 	  <td>
@@ -473,9 +473,13 @@ function onClickSaveQcResult() {
       detailRows: detailRows
     };
 	
+	const overallLabel = overallResult === "PASS" ? "합격"
+	                   : overallResult === "FAIL" ? "불합격"
+	                   : overallResult === "PENDING" ? "검사대기" : overallResult;
+	
 	// 저장 전 최종 확인
     let confirmMsg = `다음 내용으로 QC 결과를 저장하시겠습니까?\n\n`
-                   + `ㆍ전체 판정 : ${overallResult}\n`
+                   + `ㆍ전체 판정 : ${overallLabel}\n`
                    + `ㆍ양품 수량 : ${goodQty}\n`
                    + `ㆍ불량 수량 : ${defectQty}\n`;
 

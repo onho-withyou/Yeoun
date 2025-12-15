@@ -143,12 +143,18 @@ function openQcViewModal(qcResultId) {
 
       // ===== 전체 판정 / 사유 / 비고 =====
       const overall       = data.overallResult || "-";
+	  const overallLabel =
+	    overall === "PASS" ? "합격" :
+	    overall === "FAIL" ? "불합격" :
+	    overall === "PENDING" ? "검사대기" :
+	    overall;
+		
       const overallBadge  = document.getElementById("qcViewOverallResultBadge");
       const failReasonEl  = document.getElementById("qcViewFailReason");
       const remarkEl      = document.getElementById("qcViewRemark");
 
       if (overallBadge) {
-        overallBadge.textContent = overall;
+        overallBadge.textContent = overallLabel;
         overallBadge.className = "badge w-100 py-2 fs-6 text-center";
 
         if (overall === "PASS") {
@@ -189,9 +195,9 @@ function openQcViewModal(qcResultId) {
         (data.details || []).forEach(row => {
           const badgeHtml =
             row.result === "PASS"
-              ? "<span class='badge bg-success'>PASS</span>"
+              ? "<span class='badge bg-success'>합격</span>"
               : row.result === "FAIL"
-                ? "<span class='badge bg-danger'>FAIL</span>"
+                ? "<span class='badge bg-danger'>불합격</span>"
                 : "";
 
           const attachCell = "";  // 나중에 첨부파일 목록 붙일 자리
