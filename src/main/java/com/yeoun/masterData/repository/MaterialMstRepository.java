@@ -19,6 +19,38 @@ public interface MaterialMstRepository extends JpaRepository<MaterialMst, String
 	
 	List<MaterialMst> findByMatTypeAndUseYn(String matType, String useYn);
 
+	// 원자재 품목명(원자재유형) 드롭다운
+	@Query(value = """
+			SELECT
+				CODE_ID AS value,       -- DB에 저장할 실제 데이터 값 ('RAW', 'SUB' 등)
+				CODE_NAME AS text       -- 사용자에게 보여줄 이름 ('원재료', '부자재' 등)
+			FROM
+				COMMON_CODE
+			WHERE
+				PARENT_CODE_ID = 'MAT_TYPE'  -- '원재료 유형 구분' 그룹에 속한 하위 코드만 선택
+				AND USE_YN = 'Y'             -- 사용 중인 코드만 선택
+			ORDER BY
+				CODE_SEQ 
+			""", nativeQuery = true)
+	Map<String, Object> findByMatTypeList();
+
+	// 원자재 단위 드롭다운
+	@Query(value = """
+		SELECT
+			CODE_ID AS value,       -- DB에 저장할 실제 코드 값 ('g', 'ml', 'EA', 'UNIT_BOX')
+			CODE_NAME AS text       -- 사용자에게 보여줄 이름 ('g', 'ml', 'EA', '박스')
+		FROM
+			COMMON_CODE
+		WHERE
+			PARENT_CODE_ID = 'UNIT_TYPE'  -- '단위 구분' 그룹에 속한 하위 코드만 선택
+			AND USE_YN = 'Y'              -- 사용 여부가 'Y'인 활성 코드만 선택
+		ORDER BY
+			CODE_SEQ
+			""", nativeQuery = true)
+	Map<String, Object> findByMatUnitList();
+	
+
+	// 원자재 조회(검색)
 	@Query(value = """
 			SELECT
 				    m.*,

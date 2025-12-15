@@ -40,7 +40,14 @@ public class ProductMstController {
 		model.addAttribute("mstMstList", materialMstService.findAll());
 		return "masterData/product";
  	}
-  	
+	//완제품 품목명(향수타입) 드롭다운
+	@ResponseBody
+	@GetMapping("/product/prdItemNameList")
+	public List<Map<String, Object>> prdItemNameList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+		return productMstService.findByPrdItemNameList();
+	}
+
+	// 완제품 그리드 조회
 	@ResponseBody
 	@GetMapping("/product/list")
 	public List<Map<String, Object>> productList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,

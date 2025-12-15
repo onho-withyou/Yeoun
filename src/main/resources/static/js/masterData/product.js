@@ -2,6 +2,7 @@
 window.onload = function () {	
 	productGridAllSearch();//완제품 그리드 조회
 	materialGridAllSearch();//원재료 그리드 조회
+	prdItemNameList();//완제품 품목명(향수타입) 드롭다운
 
 }
 
@@ -20,6 +21,7 @@ document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
 });
 
 
+let perfumeListItems = [];
 const Grid = tui.Grid;
 
 //g-grid1 완제품(상위품번)
@@ -42,11 +44,7 @@ const grid1 = new Grid({
 			,editor: {
 				type: 'select', // 드롭다운 사용
 				options: {
-					// value는 실제 데이터 값, text는 사용자에게 보이는 값
-					listItems: [
-						{ text: '고체향수', value: 'LIQUID' },
-						{ text: '액체향수', value: 'SOLID' }
-					]
+					listItems: perfumeListItems
 				}
 			}
 		}
@@ -389,6 +387,38 @@ const transformKeys = (data) => {
   // 객체나 배열이 아니면 값 그대로 반환 (문자열, 숫자, null 등)
   return data;
 };
+
+//완제품 품목명(향수타입) 드롭다운
+function prdItemNameList() {
+	fetch('/masterData/product/prdItemNameList', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		return res.json();
+	})
+	.then(data => {
+		console.log("품목명(향수타입) 드롭다운 데이터:", data);
+	
+		data.forEach(item => {
+			perfumeListItems.push({
+				value: item.VALUE, 
+				text: item.TEXT   
+			});
+		});
+		console.log("perfumeListItems:", perfumeListItems);
+		// Dropdown editor의 listItems 업데이트
+		
+	})
+	.catch(err => {
+		console.error('품목명(향수타입) 드롭다운 조회 오류', err);
+	});
+
+}
 
 //완제품 row 추가
 const addProductRowBtn = document.getElementById('addProductRowBtn');

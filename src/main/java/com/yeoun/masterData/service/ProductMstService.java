@@ -27,6 +27,13 @@ import lombok.extern.log4j.Log4j2;
 public class ProductMstService {
 	
 	private final ProductMstRepository productMstRepository;
+
+	//완제품 품목명(향수타입) 드롭다운
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> findByPrdItemNameList() {
+		return productMstRepository.findByPrdItemNameList();
+	}
+ 
 	//1. 완제품 그리드 조회
 	@Transactional(readOnly = true)
 	public List<ProductMst> findAll() {
