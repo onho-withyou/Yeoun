@@ -1,6 +1,6 @@
-package com.yeoun.masterData.dto;
+package com.yeoun.equipment.dto;
 
-import com.yeoun.masterData.entity.ProdLine;
+import com.yeoun.equipment.entity.ProdLine;
 import lombok.*;
 import org.modelmapper.ModelMapper;
 
@@ -9,11 +9,13 @@ import org.modelmapper.ModelMapper;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Builder
 public class ProdLineDTO {
     private String lineId;
     private String lineName;
     private String status;
     private String remark;
+    private String useYn;
 
     private static ModelMapper modelMapper = new ModelMapper();
     public ProdLine toEntity(){

@@ -1,11 +1,8 @@
-package com.yeoun.masterData.dto;
+package com.yeoun.equipment.dto;
 
-import com.yeoun.masterData.entity.Equipment;
-import jakarta.persistence.Column;
-import jakarta.persistence.Id;
+import com.yeoun.equipment.entity.Equipment;
 import lombok.*;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -20,6 +17,7 @@ public class EquipmentDTO {
     private String koName;
     private String equipName;
     private String remark;
+    private String useYn;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
 
