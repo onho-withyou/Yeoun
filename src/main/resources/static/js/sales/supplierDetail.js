@@ -1,5 +1,16 @@
 // supplierDetail.js (AG Grid - 인라인 편집 + step 설정)
 
+// BOM 단위 → 허용 공급단위 매핑
+const unitMap = {
+    "KG": ["KG", "G"],
+    "G":  ["kg", "g"],
+    "ML": ["ml", "L"],
+    "L":  ["L", "ML"],
+    "BOX": ["BOX"],
+    "EA": ["EA"]
+};
+
+
 let itemGridApi = null;
 const clientId = window.clientId ?? null;
 
@@ -50,7 +61,7 @@ function initItemGrid() {
         {
             headerName: "품명",
             flex: 1,
-            minWidth: 140,
+            minWidth: 120,
             editable: false,
             valueGetter: p => p.data.materialName || p.data.matName || ""
         },
@@ -63,16 +74,41 @@ function initItemGrid() {
         },
 
         // 🔥 편집 가능: 공급단위
-        {
-            headerName: "공급단위",
-            field: "unit",
-            width: 100,
-            editable: true,
-            cellEditor: 'agSelectCellEditor',
-            cellEditorParams: {
-                values: ['KG', 'EA', 'L', 'M', 'BOX', 'SET']
-            }
-        },
+		{
+		    headerName: "공급단위",
+		    field: "unit",
+		    width: 100,
+
+		    // ✅ matUnit 있는 경우만 편집 가능
+		    editable: params => {
+		        const matUnit = params.data.matUnit?.toUpperCase();
+		        return !!unitMap[matUnit];
+		    },
+
+		    cellEditor: 'agSelectCellEditor',
+
+		    // ✅ 행(row)별로 선택지 동적 변경
+		    cellEditorParams: params => {
+		        const matUnit = params.data.matUnit?.toUpperCase();
+		        return {
+		            values: unitMap[matUnit] || []
+		        };
+		    },
+
+		    // ✅ 잘못된 단위 선택 시 저장 차단
+		    valueSetter: params => {
+		        const matUnit = params.data.matUnit?.toUpperCase();
+		        const allowedUnits = unitMap[matUnit] || [];
+
+		        if (!allowedUnits.includes(params.newValue)) {
+		            alert(`❌ ${matUnit} 기준에서는 [${allowedUnits.join(", ")}] 단위만 선택 가능합니다.`);
+		            return false; // ❌ 저장 안 됨
+		        }
+
+		        params.data.unit = params.newValue;
+		        return true;
+		    }
+		},
 
 		// 🔥 편집 가능: 발주단위 (1 단위 증가)
 		        {
@@ -182,18 +218,31 @@ function initItemGrid() {
 		          valueFormatter: p => p.value ? Number(p.value).toLocaleString() + '원' : ''
 		      },
 
-        // 🔥 편집 가능: 공급 여부
-        {
-            headerName: "공급",
-            field: "supplyAvailable",
-            width: 90,
-            editable: true,
-            cellEditor: 'agSelectCellEditor',
-            cellEditorParams: {
-                values: ['Y', 'N']
-            },
-            cellRenderer: p => (p.value === "Y" ? "가능" : "불가")
-        }
+			  {
+			      headerName: "공급",
+			      field: "supplyAvailable",
+			      width: 90,
+			      editable: true,
+			      cellEditor: 'agSelectCellEditor',
+			      cellEditorParams: {
+			          values: ['Y', 'N']
+			      },
+
+			      // ✅ 셀에 보여줄 값
+			      valueFormatter: p => {
+			          if (p.value === 'Y') return '가능';
+			          if (p.value === 'N') return '불가';
+			          return '';
+			      },
+
+			      // ✅ 셀렉트에서 선택 후 다시 Y/N으로 변환
+			      valueParser: p => {
+			          if (p.newValue === '가능') return 'Y';
+			          if (p.newValue === '불가') return 'N';
+			          return p.newValue;
+			      }
+			  }
+
     ];
 
     const gridOptions = {
@@ -201,7 +250,7 @@ function initItemGrid() {
         rowData: [],
         defaultColDef: {
             sortable: true,
-            filter: true,
+            filter: false,
             resizable: true
         },
         pagination: true,

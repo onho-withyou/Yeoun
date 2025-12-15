@@ -22,11 +22,25 @@ public class ClientService {
     }
 
     /** 검색 */
-    public List<Client> search(String name, String type) {
-        if ((name == null || name.isBlank()) && (type == null || type.isBlank()))
-            return clientRepository.findAll();
-        return clientRepository.search(name, type);
+    public List<Client> search(String keyword, String itemKeyword, String type) {
+
+        boolean hasItemKeyword = itemKeyword != null && !itemKeyword.isBlank();
+
+        // 협력사 + 품목 검색
+        if ("SUPPLIER".equalsIgnoreCase(type) && hasItemKeyword) {
+            return clientRepository.searchSupplierByItem(
+                    keyword == null || keyword.isBlank() ? null : keyword.trim(),
+                    itemKeyword.trim()
+            );
+        }
+
+        // 일반 검색
+        return clientRepository.search(
+                keyword == null || keyword.isBlank() ? null : keyword.trim(),
+                type
+        );
     }
+
 
     /** 상세조회 */
     public Client get(String clientId) {
