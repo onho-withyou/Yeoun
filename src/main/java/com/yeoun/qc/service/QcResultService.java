@@ -391,9 +391,6 @@ public class QcResultService {
 		}
 		
 		// 3) 수동 전체판정
-		// 디테일 FAIL 존재 여부(참고용)
-		boolean hasFail = !allPass;
-
 		// 사용자가 선택한 전체 판정 우선 적용
 		String overall = qcSaveRequestDTO.getOverallResult();
 
