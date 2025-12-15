@@ -33,6 +33,8 @@ clientInput.addEventListener("focus", async () => {
 
 // 거래처 검색 이벤트 (검색어 입력했을 때)
 clientInput.addEventListener("input", async function() {
+	resetClientSelection();
+	
 	// input에 입력한 검색어
 	const keyword = clientInput.value.trim().toLowerCase();
 	
@@ -82,6 +84,10 @@ function selectClient(item, data) {
 	
 	// 선택된 거래처 객체 찾기
 	const selectedClient = data.find(client => client.clientId === item.clientId);
+	
+	if (selectClient.length === 0) {
+		itemSelect.disabled = true;
+	}
 	
 	// 담당자 이름 설정
 	document.querySelector("#managerName").value = selectedClient.managerName;
@@ -277,6 +283,26 @@ orderTableBody.addEventListener("change", (e) => {
 	 tr.querySelector(".taxPrice").textContent = tax.toLocaleString();
 	 tr.querySelector(".totalPrice").textContent = total.toLocaleString();
 });
+
+// 거래처 선택 해제용 함수
+function resetClientSelection() {
+	hiddenId.value = "";
+	
+	document.querySelector("#managerName").value = "";
+	
+	itemSelect.innerHTML = "";
+	itemSelect.disabled = true;
+	
+	const defaultOption = document.createElement("option");
+	
+	defaultOption.value = "";
+	defaultOption.textContent = "거래처를 먼저 선택하세요.";
+	defaultOption.selected = true;
+	itemSelect.appendChild(defaultOption);
+	
+	// 발주 테이블 초기화
+	orderTableBody.innerHTML = "";
+}
 
 // ----------------------------------------------------------
 // 발주 등록
