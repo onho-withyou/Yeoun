@@ -1,5 +1,6 @@
 package com.yeoun.order.controller;
 
+import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.order.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -102,8 +103,23 @@ public class OrderController {
     // 작업자스케줄 페이지
     @GetMapping("/schedule")
     public String schedule (){
-    	orderService.selectAllWorkers();
         return "/order/schedule";
+    }
+    
+    // =====================================================
+    // 작업자스케줄 로드
+    @GetMapping("/schedule/data")
+    @ResponseBody
+    public List<WorkScheduleDTO> scheduleData() {
+    	return orderService.loadAllSchedules();
+    }
+    
+    // =====================================================
+    // 작업자목록 로드
+    @GetMapping("/workers/data")
+    @ResponseBody
+    public List<WorkerListDTO> workerData() {
+    	return orderService.loadAllWorkers();
     }
 
     // ========================================

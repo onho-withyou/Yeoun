@@ -207,15 +207,6 @@ public class EquipmentController {
         log.info("list ::::::::: " + list);
         return list;
     }
-    
-    // ===================================================
-    // 라인 목록
-    @GetMapping("/line")
-    public String line(Model model) {
-        List<ProdLineDTO> list = equipmentService.loadAllLines();
-        model.addAttribute("list", list);
-    	return "equipment/line";
-    }
 
 
 }

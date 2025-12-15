@@ -22,3 +22,10 @@ function formatTimeOnly(date = new Date()) {
 	
     return `${ampm} ${hours}:${minutes}`;
 }
+
+function formatTimeOnly24(d) {
+	const date = new Date(d);
+	const h = String(date.getHours()).padStart(2, '0');
+	const m = String(date.getMinutes()).padStart(2, '0');
+	return `${h}:${m}`;
+}
