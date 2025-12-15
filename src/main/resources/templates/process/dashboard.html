@@ -194,7 +194,7 @@
 				</div>
 				
 				<div class="d-flex gap-2 flex-wrap">
-					<span class="mini-chip">OK</span>
+					<span class="mini-chip" style="background:#ecfdf5;color:#065f46;">정상</span>
 					<span class="mini-chip" style="background:#fff7ed;color:#9a3412;">주의</span>
 			        <span class="mini-chip" style="background:#fee2e2;color:#991b1b;">지연</span>
 				</div>
@@ -224,29 +224,44 @@
 						<!-- 라인 반복 -->
 						<tr th:each="row : ${heatmapRows}">
 							<!-- 라인명 -->
-							<th class="fw-bold nowrap" th:text="${row.lineName}">
-								LINE 1
+							<th class="fw-bold nowrap">
+							  <div th:text="${row.lineName}">라인1</div>
+							
+							  <div class="text-muted small"
+							       th:if="${row.activeOrderId != null}"
+							       th:text="${row.activeOrderId}">
+							       WO-20251215-0001
+							  </div>
 							</th>
 							
 							<!-- 공정 6단계 반복 -->
 							<td th:each="cell : ${row.steps}">
-								<div class="rack kpi-card" th:data-line="${row.lineId}" th:data-step="${cell.stepSeq}"
-									 th:classappend="${cell.level} == 'DELAY' ? ' border border-danger bg-danger-subtle' :
-									 				 (${cell.level} == 'WARN' ? ' border border-warning bg-warning-subtle' : '')">
-									 				 
-				 					<!-- 체류 시간 -->
-				 					<div class="big-mid" th:text="${cell.inProgressCnt > 0 ? cell.stayMin + '분'
-				 												  : (cell.startableCnt > 0 ? '시작대기' : (cell.hasReady ? '대기' : '-'))}">
-				 						45분
-				 					</div>		
-				 					
-				 					<!-- 진행 중 건수 -->	
-				 					<div class="small-bot text-muted" th:text="${cell.inProgressCnt > 0	? '진행중 ' + cell.inProgressCnt + '건'
-				 						 : (cell.startableCnt > 0 ? '시작대기 ' + cell.startableCnt + '건'	
-				 						 : (cell.hasReady ? '대기 ' + cell.readyCnt + '건' : '진행중 0건'))}">
-			 							진행중 1건
-			 						</div>												  
-				 				</div>
+								<div class="rack kpi-card"
+								     th:data-line="${row.lineId}" th:data-step="${cell.stepSeq}"
+								     th:with="activeCnt=${cell.inProgressCnt + cell.qcPendingCnt}"
+								     th:classappend="${activeCnt > 0 ?
+								            (cell.level == 'DELAY' ? ' border border-danger bg-danger-subtle' :
+								             cell.level == 'WARN'  ? ' border border-warning bg-warning-subtle' :
+								                                     ' border border-success bg-success-subtle')
+								            : ''}">
+								
+								  <!-- 체류 시간 -->
+								  <div class="big-mid"
+								       th:data-stay="${cell.stayMin}"
+								       th:data-active="${activeCnt}"
+								       th:text="${activeCnt > 0 ? cell.stayMin + '분'
+								              : (cell.startableCnt > 0 ? '시작대기'
+								              : (cell.hasReady ? '대기' : ''))}">
+								  </div>
+								
+								  <!-- 상태 문구 -->
+								  <div class="small-bot text-muted"
+								       th:text="${cell.inProgressCnt > 0 ? '진행중 ' + cell.inProgressCnt + '건'
+								              : (cell.qcPendingCnt > 0 ? 'QC대기 ' + cell.qcPendingCnt + '건'
+								              : (cell.startableCnt > 0 ? '시작대기 ' + cell.startableCnt + '건'
+								              : (cell.hasReady ? '대기 ' + cell.readyCnt + '건' : '진행중 0건')))}">
+								  </div>
+								</div>
 							</td>
 						</tr>
 					</tbody>

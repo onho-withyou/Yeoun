@@ -232,6 +232,17 @@ function renderProcessDetail(detail) {
 	} else if (step.status === "QC_PENDING") {
 	  statusBadge = `<span class="badge bg-label-info text-dark">QC 대기</span>`;
 	}
+	
+	// 예상/지연 표시
+    const expectedText =
+      (step.expectedMinutes != null && step.expectedMinutes > 0)
+        ? `${step.expectedMinutes}분`
+        : "-";
+
+    const delayedHtml =
+      (step.delayed === true)
+        ? `<span class="badge bg-danger">지연</span>`
+        : `<span class="text-muted">-</span>`;
 
     // 버튼
     let workBtnHtml = "";
@@ -299,7 +310,6 @@ function renderProcessDetail(detail) {
 
     tr.innerHTML = `
       <td>${step.stepSeq}</td>
-      <td>${step.processId}</td>
       <td>
         <span class="badge rounded-pill bg-label-primary">
           ${step.processName}
@@ -308,6 +318,8 @@ function renderProcessDetail(detail) {
       <td>${statusBadge}</td>
       <td>${formatDateTime(step.startTime)}</td>
       <td>${formatDateTime(step.endTime)}</td>
+	  <td class="text-end">${expectedText}</td>
+      <td class="text-center">${delayedHtml}</td>
 	  <td class="text-end">${goodQtyText}</td>
 	  <td class="text-end">${defectQtyText}</td>
       <td>${workBtnHtml}</td>
@@ -584,6 +596,17 @@ function updateStepRowInModal(updatedStep) {
   } else if (updatedStep.status === "DONE") {
     statusBadge = `<span class="badge bg-label-success">완료</span>`;
   }
+  
+  // 예상/지연 표시
+  const expectedText =
+    (updatedStep.expectedMinutes != null && updatedStep.expectedMinutes > 0)
+      ? `${updatedStep.expectedMinutes}분`
+      : "-";
+
+  const delayedHtml =
+    (updatedStep.delayed === true)
+      ? `<span class="badge bg-danger">지연</span>`
+      : `<span class="text-muted">-</span>`;
 
   // 버튼
   let workBtnHtml = "";
@@ -663,6 +686,8 @@ function updateStepRowInModal(updatedStep) {
     <td>${statusBadge}</td>
     <td>${formatDateTime(updatedStep.startTime)}</td>
     <td>${formatDateTime(updatedStep.endTime)}</td>
+	<td class="text-end">${expectedText}</td>
+    <td class="text-center">${delayedHtml}</td>
 	<td class="text-end">${goodQtyText}</td>
     <td class="text-end">${defectQtyText}</td>
     <td>${workBtnHtml}</td>

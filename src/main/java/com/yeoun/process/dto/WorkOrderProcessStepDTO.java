@@ -45,9 +45,24 @@ public class WorkOrderProcessStepDTO {
 	// 특이사항
 	private String memo;
 	
-	// 기준배합량
+	// 기준배합량(1~2단계는 배합량, 3단계 이후는 개수 기준)
 	private Double standardQty;
 	
+	// =================================
+    // 시간 계산/지연 표시용
+    /**
+     * 해당 공정의 "예상 소요시간(분)"
+     * - 배치 공정: 고정 분
+     * - 단위 공정: EU 기반 계산된 분
+     */
+    private Long expectedMinutes;
+
+    /**
+     * 지연 여부
+     * - startTime이 있는 공정만 판정
+     * - (현재시각 - startTime) > expectedMinutes 이면 true
+     */
+    private Boolean delayed;
 	
 	// =================================
 	// 화면용
