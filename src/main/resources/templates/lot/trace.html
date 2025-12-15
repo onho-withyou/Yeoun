@@ -14,15 +14,17 @@
       <!-- LOT 검색 필터 -->
       <div class="card mb-4">
         <div class="card-body">
-          <form id="lotTraceSearchForm">
+          <form id="lotTraceSearchForm" method="get" action="/lot/trace">
             <div class="row gx-3 gy-2 align-items-end">
 
               <div class="col-md-4">
-                <label class="form-label" for="searchKeyword">LOT 번호 / 제품 코드</label>
+                <label class="form-label" for="searchKeyword">검색어</label>
                 <input type="text"
                        class="form-control"
                        id="searchKeyword"
-                       placeholder="LOT 번호 또는 제품 코드를 입력하세요">
+                       name="keyword"
+                       placeholder="LOT 번호 / 제품명"
+                       th:value="${keyword}">
               </div>
 
               <div class="col-md-3">
@@ -39,14 +41,20 @@
                 </select>
               </div>
 
-              <div class="col-md-2">
-                <button type="button"
+              <div class="col-md-1">
+                <button type="submit"
                         class="btn btn-outline-primary w-100"
                         id="btnSearch">
                   검색
                 </button>
               </div>
-
+              
+              <div class="col-md-1">
+				 <a href="/lot/trace"
+				    class="btn btn-outline-secondary w-100">
+				    초기화
+				 </a>
+			  </div>
             </div>
           </form>
         </div>

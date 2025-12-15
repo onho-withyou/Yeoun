@@ -151,29 +151,34 @@ public class LotTraceService {
 	// 완제품 ROOT 목록
 	@Transactional(readOnly = true)
 	public List<LotRootDTO> getFinishedLots() {
+	    return getFinishedLots(null);
+	}
+	
+	@Transactional(readOnly = true)
+	public List<LotRootDTO> getFinishedLots(String keyword) {
 		
 		// 완제품 공정에 속한 LOT 타입
 		List<String> lotTypes = List.of("WIP", "FIN");
 		
-		// 1) FIN LOT 목록 조회
+		// 1) FIN WIP LOT 목록 조회
 		List<LotMaster> lots = 
 				lotMasterRepository.findByLotTypeInOrderByCreatedDateDesc(lotTypes);
 		
+		final String kw = (keyword == null) ? "" : keyword.trim();
+		
 		return lots.stream()
-	            .map(lm -> {
-	                // LOT 상태 코드
-	                LotStatus statusEnum = LotStatus.fromCode(lm.getCurrentStatus());
-	                String statusLabel = (statusEnum != null)
-	                        ? statusEnum.getLabel()
-	                        : lm.getCurrentStatus();   
+		        .filter(lm -> {
+		            if (kw.isEmpty()) return true;
+		            return (lm.getLotNo() != null && lm.getLotNo().contains(kw))
+		                || (lm.getDisplayName() != null && lm.getDisplayName().contains(kw));
+		        })
+		        .map(lm -> {
+		            LotStatus statusEnum = LotStatus.fromCode(lm.getCurrentStatus());
+		            String statusLabel = (statusEnum != null) ? statusEnum.getLabel() : lm.getCurrentStatus();
 
-	                return new LotRootDTO(
-	                        lm.getLotNo(),
-	                        lm.getDisplayName(),
-	                        statusLabel                 
-	                );
-	            })
-	            .toList();
+		            return new LotRootDTO(lm.getLotNo(), lm.getDisplayName(), statusLabel);
+		        })
+		        .toList();
 	}
 	
 	// LOT ROOT 상세 정보 조회
