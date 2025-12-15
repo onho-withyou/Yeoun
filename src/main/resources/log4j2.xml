@@ -13,6 +13,7 @@
 		<Property name="LAYOUT_PATTERN">
 			%d{yyyy-MM-dd HH:mm:ss} %highlight{{%-5p}}: %style{[%c]}{CYAN} %m%n
 		</Property>
+<!-- 				<Property name="LOG_DIR">D:/logs/mylog</Property> -->
 		<Property name="LOG_DIR">/usr/local/tomcat/logs/mylog</Property>
 	</Properties>
 	
@@ -79,19 +80,23 @@
 		<!-- Root 로거 : 기본 시스템 로그 및 사용자 출력 로그 모두 담당 -->
         <Root level="INFO">
             <AppenderRef ref="console"/>
+            <AppenderRef ref="rollingFile"/>
+            <AppenderRef ref="rollingFileError" />
         </Root>
         
         <!-- Logger 로거 : 개발자가 지정한 대상의 로그 처리 담당 -->
         <!-- Logger 태그 name 속성으로 대상 패키지 또는 클래스 지정, level 속성으로 심각도, additivity 로 중복 로그 표시 여부 설정 -->
         <!-- 현재 프로젝트 내의 특정 패키지(시스템 패키지 or 사용자 패키지)에 대한 로그 설정 -->
-        <Logger name="com.itwillbs.test5" level="INFO" additivity="false">
-        	<AppenderRef ref="console"/>
-        </Logger>
+<!--         <Logger name="com.yeoun" level="INFO" additivity="false"> -->
+<!--         	<AppenderRef ref="console"/> -->
+<!--         	<AppenderRef ref="rollingFile"/> -->
+<!--         </Logger> -->
 
 		<!-- 스프링 시큐리티 패키지 전용 로거 => 디버깅을 위한 DEBUG 레벨로 출력(시큐리티 필터링 현황 등 확인 가능) -->
 <!--         <Logger name="org.springframework.security" level="DEBUG" additivity="false"> -->
         <Logger name="org.springframework.security" level="INFO" additivity="false">
         	<AppenderRef ref="console"/>
+        	<AppenderRef ref="rollingFile"/>
         </Logger>
         
         
