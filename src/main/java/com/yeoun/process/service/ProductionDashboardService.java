@@ -92,12 +92,9 @@ public class ProductionDashboardService {
         6, "포장"
     );
 
-    // 진행 흐름으로 카운트할 상태들
-    private static final Set<String> ACTIVE_STATUSES = Set.of("IN_PROGRESS", "QC_PENDING");
-
     // 조회는 READY까지 포함(표시/시작대기 계산용)
     private static final List<String> HEATMAP_STATUSES = List.of("IN_PROGRESS", "QC_PENDING", "READY", "DONE");
-
+    
     public List<LineStayRowDTO> getLineStayHeatmap() {
 
         LocalDateTime now = LocalDateTime.now();
@@ -146,6 +143,62 @@ public class ProductionDashboardService {
                 // ------------------------------------------------------------
                 List<WorkOrderProcess> list =
                     grouped.getOrDefault(new Key(lineId, step), List.of());
+                
+                WorkOrderProcess oneWop = list.stream()
+                	    .sorted((a, b) -> Integer.compare(rank(b.getStatus()), rank(a.getStatus())))
+                	    .findFirst()
+                	    .orElse(null);
+                
+                LocalDateTime start = null;
+                LocalDateTime end   = null;
+
+                // 1) 대표 wop(oneWop) 없으면 그냥 null 유지
+                if (oneWop != null) {
+
+                    String st = oneWop.getStatus();
+
+                    if ("IN_PROGRESS".equals(st)) {
+                        // 진행중: startTime 있어야 의미 있음
+                        start = oneWop.getStartTime();
+                        end   = null; // 진행중이니 end는 null 유지
+                    }
+
+                    else if ("QC_PENDING".equals(st)) {
+                        // QC 대기: QC startTime은 "없다"가 정책이니 null
+                        // QC대기 시간 보여주고 싶으면 prev DONE endTime을 start처럼 사용
+                        List<WorkOrderProcess> prevList =
+                            grouped.getOrDefault(new Key(lineId, step - 1), List.of());
+
+                        WorkOrderProcess prev = prevList.stream()
+                            .filter(p -> p.getWorkOrder() != null && oneWop.getWorkOrder() != null)
+                            .filter(p -> Objects.equals(p.getWorkOrder().getOrderId(), oneWop.getWorkOrder().getOrderId()))
+                            .filter(p -> "DONE".equals(p.getStatus()) && p.getEndTime() != null)
+                            .max(Comparator.comparing(WorkOrderProcess::getEndTime))
+                            .orElse(null);
+
+                        start = (prev != null) ? prev.getEndTime() : null;
+                        end = null;
+                    }
+
+                    else if ("DONE".equals(st)) {
+                        // 완료: 시작~끝 둘 다 있는 경우만 세팅(없으면 null 유지)
+                        start = oneWop.getStartTime();
+                        end   = oneWop.getEndTime();
+                    }
+
+                    else {
+                        // READY 포함: 시간은 굳이 안 보여준다
+                        start = null;
+                        end   = null;
+                    }
+                }
+
+
+            	// 진행중이 없어도(READY/DONE만 있어도) 라인 대표 작업지시 잡기
+            	if (lineMaxWop == null && oneWop != null) {
+            	    lineMaxWop = oneWop;
+            	}
+
 
                 // 진행중 카운트: IN_PROGRESS/QC_PENDING만 (실제로 흐름이 돈다고 보는 상태)
                 long inProgressCnt = list.stream()
@@ -156,8 +209,6 @@ public class ProductionDashboardService {
             	    .filter(w -> "QC_PENDING".equals(w.getStatus()))
             	    .count();
             	
-            	// 빈 라인 숨기기
-            	lineActiveTotal += (inProgressCnt + qcPendingCnt);
 
                 // READY 카운트(표시용)
                 long readyCnt = list.stream()
@@ -174,8 +225,12 @@ public class ProductionDashboardService {
                     prevDoneExists = prevList.stream()
                         .anyMatch(w -> "DONE".equals(w.getStatus()));
                 }
-                long startableCnt = (readyCnt > 0 && prevDoneExists) ? readyCnt : 0;
 
+                long startableCnt = (readyCnt > 0 && prevDoneExists) ? readyCnt : 0;
+                
+                // 빈 라인 숨기기
+                lineActiveTotal += (inProgressCnt + qcPendingCnt + startableCnt);
+                
                 // ------------------------------------------------------------
                 // B) 체류시간 계산 대상만 추림
                 //  - IN_PROGRESS: startTime 기준
@@ -266,7 +321,7 @@ public class ProductionDashboardService {
                     else if (ratio <= 1.2) level = "WARN";
                     else                   level = "DELAY";
                 }
-
+                
                 // ------------------------------------------------------------
                 // F) 셀 DTO 생성 + steps에 추가
                 // ------------------------------------------------------------
@@ -282,6 +337,8 @@ public class ProductionDashboardService {
                     .hasReady(hasReady)
                     .startableCnt(startableCnt)
                     .level(level)
+                    .startTime(start)
+                    .endTime(end)
                     .build();
 
                 steps.add(cell);
@@ -306,6 +363,17 @@ public class ProductionDashboardService {
         }
 
         return rows;
+    }
+    
+    private int rank(String status) {
+        if (status == null) return 0;
+        return switch (status) {
+            case "IN_PROGRESS" -> 4;
+            case "QC_PENDING"  -> 3;
+            case "DONE"        -> 2;
+            case "READY"       -> 1;
+            default            -> 0;
+        };
     }
     
     // =====================================================================================

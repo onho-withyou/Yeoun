@@ -258,11 +258,11 @@
 								
 								  <!-- 상태 문구 -->
 								  <div class="small-bot text-muted"
-								       th:text="${cell.inProgressCnt > 0 ? '진행중 ' + cell.inProgressCnt + '건'
-								              : (cell.qcPendingCnt > 0 ? 'QC대기 ' + cell.qcPendingCnt + '건'
-								              : (cell.startableCnt > 0 ? '시작대기 ' + cell.startableCnt + '건'
-								              : (cell.hasReady ? '대기 ' + cell.readyCnt + '건' : '진행중 0건')))}">
+									   th:if="${cell.startTime != null}"
+									   th:text="${#temporals.format(cell.startTime,'HH:mm') + (cell.endTime!=null ? ' ~ ' + #temporals.format(cell.endTime,'HH:mm') : '')}">
 								  </div>
+
+
 								</div>
 							</td>
 						</tr>
