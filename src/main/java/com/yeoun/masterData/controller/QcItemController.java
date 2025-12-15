@@ -1,6 +1,7 @@
 package com.yeoun.masterData.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
-import com.yeoun.masterData.dto.QcItemDTO;
 import com.yeoun.masterData.entity.QcItem;
 import com.yeoun.masterData.service.QcItemService;
 
@@ -39,7 +39,7 @@ public class QcItemController {
   	//품질의기준 조회
   	@ResponseBody
   	@GetMapping("/qc_item/list")
-  	public List<QcItem> qcItemList(Model model, @AuthenticationPrincipal LoginDTO loginDTO
+  	public List<Map<String, Object>> qcItemList(Model model, @AuthenticationPrincipal LoginDTO loginDTO
 	  			,@RequestParam(value = "qcItemId", required = false) String qcItemId) {
 			log.info("qc_item/list called with qcItemId={}", qcItemId);
 			return qcItemService.qcItemList(qcItemId);

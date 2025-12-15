@@ -30,7 +30,7 @@ public class MaterialMstController {
 	//원재료 조회
     @ResponseBody
   	@GetMapping("/list")
-  	public List<MaterialMst> materialList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,
+  	public List<Map<String, Object>> materialList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,
   					@RequestParam(value = "matId", required = false) String matId,
   					@RequestParam(value = "matName", required = false) String matName) {
   		// 서비스에서 null/빈값 처리를 수행하므로 그대로 전달

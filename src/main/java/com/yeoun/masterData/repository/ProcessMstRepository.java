@@ -5,11 +5,8 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import com.yeoun.masterData.entity.ProcessMst;
-import com.yeoun.masterData.entity.ProductMst;
-import com.yeoun.masterData.entity.RouteHeader;
 
 public interface ProcessMstRepository extends JpaRepository<ProcessMst, String> {
 

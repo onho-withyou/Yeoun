@@ -142,6 +142,7 @@ public class ProcessMstService {
 			RouteHeader routeHeader = null;
 			Object routeInfoObj = param.get("routeInfo");
 			if (routeInfoObj instanceof Map) {
+				@SuppressWarnings("unchecked")
 				Map<String,Object> routeInfo = (Map<String,Object>) routeInfoObj;
 				
 				// 1. 필요한 PK 및 연관 객체 조회 (routeId로 RouteHeader 조회)

@@ -22,9 +22,11 @@ const grid1 = new Grid({
         ,{header: 'MAX' ,name: 'maxValue' ,align: 'center'}
 		,{header: '사용' ,name: 'useYn' ,align: 'center'}  
 		,{header: '정렬순서' ,name: 'sortOrder' ,align: 'center',hidden: true}
-		,{header: '생성자' ,name: 'createdId' ,align: 'center',hidden: true}  
+		,{header: '생성자id' ,name: 'createdId' ,align: 'center',hidden: true} 
+		,{header: '생성자이름' ,name: 'createdByName' ,align: 'center',hidden: true}
 		,{header: '생성일시' ,name: 'createdDate' ,align: 'center',hidden: true}  
-		,{header: '수정자' ,name: 'updatedId' ,align: 'center',hidden: true}  
+		,{header: '수정자id' ,name: 'updatedId' ,align: 'center',hidden: true}  
+		,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center',hidden: true}
 		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center',hidden: true}
 		,{
 			header: '상세보기', name: 'view_details', align: 'center', width: 100
@@ -83,7 +85,9 @@ function qcItemGridAllSearch(){
 			.then(data => {
 				
 				console.log("검색데이터:", data);
-				grid1.resetData(data);
+				const camelCaseData = transformKeys(data);
+				console.log("camelCaseData",camelCaseData);
+				grid1.resetData(camelCaseData);
 			})
 			.catch(err => {
 				console.error("조회오류", err);
@@ -92,6 +96,48 @@ function qcItemGridAllSearch(){
 			});
 	 
 }
+
+
+const toCamelCase = (snakeCaseString) => {
+  if (!snakeCaseString || typeof snakeCaseString !== 'string') {
+    return snakeCaseString;
+  }
+
+  // 1. 소문자로 변환
+  // 2. 언더스코어(_)를 기준으로 문자열을 분리
+  // 3. reduce를 사용하여 카멜 케이스로 조합
+  return snakeCaseString.toLowerCase().split('_').reduce((acc, part) => {
+    // 첫 번째 파트는 그대로 사용 (created)
+    if (acc === '') {
+      return part;
+    }
+    // 두 번째 파트부터는 첫 글자를 대문자로 변환 후 뒤에 붙임 (ByName)
+    return acc + part.charAt(0).toUpperCase() + part.slice(1);
+  }, '');
+};
+
+const transformKeys = (data) => {
+  if (Array.isArray(data)) {
+    // 배열이면 배열의 모든 요소에 대해 재귀 호출
+    return data.map(transformKeys);
+  }
+
+  if (data !== null && typeof data === 'object') {
+    // 객체이면 키를 순회하며 변환
+    const newObject = {};
+    for (const key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        const newKey = toCamelCase(key);
+        // 값도 객체나 배열일 수 있으므로 재귀적으로 처리
+        newObject[newKey] = transformKeys(data[key]);
+      }
+    }
+    return newObject;
+  }
+
+  // 객체나 배열이 아니면 값 그대로 반환 (문자열, 숫자, null 등)
+  return data;
+};
 
 grid1.on("click", async (ev) => {
 
@@ -115,9 +161,9 @@ grid1.on("click", async (ev) => {
 		document.getElementById('maxValue').value = rowData.maxValue;//최대값
 		document.getElementById('sortOrder').value = rowData.sortOrder;//정렬순서
 		document.getElementById('useYn').value = rowData.useYn;//사용여부
-		document.getElementById('createdId').value = rowData.createdId;//생성자
+		document.getElementById('createdId').value = rowData.createdByName;//생성자
 		document.getElementById('createdDate').value = rowData.createdDate;//생성일시
-		document.getElementById('updatedId').value = rowData.updatedId;//수정자
+		document.getElementById('updatedId').value = rowData.updatedByName;//수정자
 		document.getElementById('updatedDate').value = rowData.updatedDate;//수정일시
 		
 		document.getElementById('qcItemId').readOnly = true;

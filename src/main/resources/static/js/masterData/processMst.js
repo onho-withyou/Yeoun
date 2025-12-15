@@ -7,11 +7,12 @@ window.onload = function () {
 document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
     tab.addEventListener('shown.bs.tab', function (e) {
         const targetId = e.target.getAttribute('data-bs-target');
-
         if (targetId === '#navs-process-tab') {//제품별 공정라우트 탭
             grid1.refreshLayout();
+			productRouteSearch();
         } else if (targetId === '#navs-processCode-tab') {//공정코드 관리 탭
             grid2.refreshLayout();
+			processCodeGridAllSearch();
         }
     });
 });
@@ -92,7 +93,7 @@ const grid2 = new Grid({
 	    ,{header: '설명' ,name: 'description' ,align: 'center',editor: 'text' ,width: 370
 			,renderer:{ type: StatusModifiedRenderer}
 		}
-        ,{header: '사용여부' ,name: 'useYn' ,align: 'center',hidden: true
+        ,{header: '사용여부' ,name: 'useYn' ,align: 'center'
 			,renderer:{ type: StatusModifiedRenderer}
 			,editor: {
 				type: 'select', // 드롭다운 사용
@@ -406,9 +407,6 @@ grid1.on("click", async (ev) => {
 //라우트 모달 셀렉트박스 값선택시 자동으로 routeId생성
 document.getElementById('modalProcessprdId').addEventListener('change', function() {
 	const prdId = this.value;
-	const timestamp = Date.now(); // 현재 시간을 밀리초로 가져옴
-	console.log('제품코드 선택됨:', prdId);
-	console.log('타임스탬프:', timestamp);
 	const generatedRouteId = `RT-${prdId}`; // 예: RT-제품코드-타임스탬프
 	document.getElementById('modalRouteId').value = generatedRouteId;
 });

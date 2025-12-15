@@ -10,8 +10,10 @@ document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
 
         if (targetId === '#navs-bomDetail-tab') {//bom 상세탭
             grid1.refreshLayout();
+			bomDetailGridAllSearch();
         } else if (targetId === '#navs-bom-tab') {//bom 정보 탭
             grid2.refreshLayout();
+			bomGridAllSearch();
         }
     });
 });
@@ -93,7 +95,6 @@ const grid5 = new Grid({
 					,editor: {
 						type: 'select', // 드롭다운 사용
 						options: {
-							// value는 실제 데이터 값, text는 사용자에게 보이는 값
 							listItems: [
 								{ text: 'g', value: 'g' },
 								{ text: 'ml', value: 'ml' },
@@ -197,11 +198,13 @@ const grid2 = new Grid({
 		,{header: '순서' ,name: 'bomSeqNo' ,align: 'center',editor: 'text'
 			,renderer:{ type: StatusModifiedRenderer}	
 		}
-		,{header: '생성자ID' ,name: 'createdId' ,align: 'center'}
+		,{header: '생성자ID' ,name: 'createdId' ,align: 'center',hidden:true}
+		,{header: '생성자이름' ,name: 'createdByName' ,align: 'center'}
 		,{header: '생성일자' ,name: 'createdDate' ,align: 'center'}
-		,{header: '수정자ID' ,name: 'updatedId' ,align: 'center'}
+		,{header: '수정자ID' ,name: 'updatedId' ,align: 'center',hidden:true}
+		,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center'}
 		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}   
-		,{header: '사용여부' ,name: 'useYn' ,align: 'center'}        
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center', hidden: true}        
 	  ]
 	  ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
 	  ,height:100
@@ -556,7 +559,9 @@ function bomGridAllSearch() {
 		.then(data => {
 			
 			console.log("검색데이터:", data);
-			grid2.resetData(data);
+			const camelCaseData = transformKeys(data);
+			console.log("camelCaseData",camelCaseData);
+			grid2.resetData(camelCaseData);
 		})
 		.catch(err => {
 			console.error("조회오류", err);
@@ -612,6 +617,49 @@ function safetyStockGridAllSearch() {
 		});
 
 }
+
+
+
+const toCamelCase = (snakeCaseString) => {
+  if (!snakeCaseString || typeof snakeCaseString !== 'string') {
+    return snakeCaseString;
+  }
+
+  // 1. 소문자로 변환
+  // 2. 언더스코어(_)를 기준으로 문자열을 분리
+  // 3. reduce를 사용하여 카멜 케이스로 조합
+  return snakeCaseString.toLowerCase().split('_').reduce((acc, part) => {
+    // 첫 번째 파트는 그대로 사용 (created)
+    if (acc === '') {
+      return part;
+    }
+    // 두 번째 파트부터는 첫 글자를 대문자로 변환 후 뒤에 붙임 (ByName)
+    return acc + part.charAt(0).toUpperCase() + part.slice(1);
+  }, '');
+};
+
+const transformKeys = (data) => {
+  if (Array.isArray(data)) {
+    // 배열이면 배열의 모든 요소에 대해 재귀 호출
+    return data.map(transformKeys);
+  }
+
+  if (data !== null && typeof data === 'object') {
+    // 객체이면 키를 순회하며 변환
+    const newObject = {};
+    for (const key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        const newKey = toCamelCase(key);
+        // 값도 객체나 배열일 수 있으므로 재귀적으로 처리
+        newObject[newKey] = transformKeys(data[key]);
+      }
+    }
+    return newObject;
+  }
+
+  // 객체나 배열이 아니면 값 그대로 반환 (문자열, 숫자, null 등)
+  return data;
+};
 
 grid1.on("click", async (ev) => {
 	const rowData = grid1.getRow(ev.rowKey);
