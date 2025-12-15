@@ -85,10 +85,6 @@ function selectClient(item, data) {
 	// 선택된 거래처 객체 찾기
 	const selectedClient = data.find(client => client.clientId === item.clientId);
 	
-	if (selectClient.length === 0) {
-		itemSelect.disabled = true;
-	}
-	
 	// 담당자 이름 설정
 	document.querySelector("#managerName").value = selectedClient.managerName;
 	
