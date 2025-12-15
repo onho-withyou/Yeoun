@@ -101,16 +101,20 @@ public class ProductionDashboardService {
 
         LocalDateTime now = LocalDateTime.now();
 
-        // 1) 라인 고정(진행중 없어도 표에 무조건 나옴)
-        List<ProdLine> lines = prodLineRepository.findAllByOrderByLineIdAsc();
+        // 1) 사용중(Y) 라인만 정렬 조회
+        List<ProdLine> lines = prodLineRepository.findByUseYnOrderByLineIdAsc("Y");
 
         // 2) 히트맵 구성에 필요한 WOP 조회
-        List<String> orderStatuses = List.of("IN_PROGRESS"); 
+        // - orderStatuses: 작업지시 상태 필터 (현재 IN_PROGRESS만 대상)
+        List<String> orderStatuses = List.of("IN_PROGRESS");
+
+        // - HEATMAP_STATUSES: 공정 상태 필터 (IN_PROGRESS/QC_PENDING/READY/DONE 등)
         List<WorkOrderProcess> wops =
             workOrderProcessRepository.findForHeatmap(HEATMAP_STATUSES, orderStatuses);
 
-        // 3) (라인ID, stepSeq) 그룹핑
+        // 3) (라인ID, stepSeq) 기준으로 그룹핑
         record Key(String lineId, Integer stepSeq) {}
+
         Map<Key, List<WorkOrderProcess>> grouped =
             wops.stream().collect(Collectors.groupingBy(
                 w -> new Key(
@@ -121,19 +125,21 @@ public class ProductionDashboardService {
 
         // 4) 라인 × 6단계 고정 생성
         List<LineStayRowDTO> rows = new ArrayList<>();
-        List<StayCellDTO> allCells = new ArrayList<>();
 
         for (ProdLine line : lines) {
-            String lineId = line.getLineId();
 
+            String lineId = line.getLineId();
             List<StayCellDTO> steps = new ArrayList<>();
 
             for (int step = 1; step <= 6; step++) {
 
+                // ------------------------------------------------------------
+                // A) (라인, 단계) 에 해당하는 공정진행 목록
+                // ------------------------------------------------------------
                 List<WorkOrderProcess> list =
                     grouped.getOrDefault(new Key(lineId, step), List.of());
 
-                // 진행중 카운트: IN_PROGRESS/QC_PENDING만
+                // 진행중 카운트: IN_PROGRESS/QC_PENDING만 (실제로 흐름이 돈다고 보는 상태)
                 long activeCnt = list.stream()
                     .filter(w -> ACTIVE_STATUSES.contains(w.getStatus()))
                     .count();
@@ -155,29 +161,74 @@ public class ProductionDashboardService {
                 }
                 long startableCnt = (readyCnt > 0 && prevDoneExists) ? readyCnt : 0;
 
-                // 체류시간: 상태별 기준시간
-                long stayMax = list.stream()
-                    .mapToLong(w -> {
-                        String st = w.getStatus();
+                // ------------------------------------------------------------
+                // B) 체류시간 계산 대상만 추림
+                //  - IN_PROGRESS: startTime 기준
+                //  - QC_PENDING : endTime 기준 (너희 시스템에서 QC 대기 시간이 중요)
+                // ------------------------------------------------------------
+                List<WorkOrderProcess> activeList = list.stream()
+                    .filter(w -> "IN_PROGRESS".equals(w.getStatus()) || "QC_PENDING".equals(w.getStatus()))
+                    .toList();
 
-                        // 진행중: startTime ~ now
-                        if ("IN_PROGRESS".equals(st)) {
-                            if (w.getStartTime() == null) return 0;
-                            return Duration.between(w.getStartTime(), now).toMinutes();
-                        }
+                // ------------------------------------------------------------
+                // C) stayMax(실제 체류시간 최대) + 그 대상(maxWop) 찾기
+                // ------------------------------------------------------------
+                WorkOrderProcess maxWop = null;
+                long stayMax = 0;
 
-                        // QC대기: endTime(공정 종료) ~ now
-                        // (너네 시스템에서 QC_PENDING은 startTime 없을 수 있으니 endTime 기준)
-                        if ("QC_PENDING".equals(st)) {
-                            if (w.getEndTime() == null) return 0;
-                            return Duration.between(w.getEndTime(), now).toMinutes();
-                        }
+                for (WorkOrderProcess w : activeList) {
+                    long stayMin;
 
-                        return 0; // READY/DONE 등은 체류 표시 대상 아님
-                    })
-                    .max()
-                    .orElse(0);
+                    if ("IN_PROGRESS".equals(w.getStatus())) {
+                        if (w.getStartTime() == null) continue;
+                        stayMin = Duration.between(w.getStartTime(), now).toMinutes();
+                    } else { // QC_PENDING
+                        if (w.getEndTime() == null) continue;
+                        stayMin = Duration.between(w.getEndTime(), now).toMinutes();
+                    }
 
+                    if (stayMin > stayMax) {
+                        stayMax = stayMin;
+                        maxWop = w;
+                    }
+                }
+
+                // ------------------------------------------------------------
+                // D) expectedMin(기준 예상시간) 계산
+                //  - maxWop가 있어야 의미 있음
+                // ------------------------------------------------------------
+                long expectedMin = 0;
+                double ratio = 0.0; // 실제/기준
+
+                if (maxWop != null) {
+                    double totalEU = ProcessTimeCalculator.calcTotalEU(maxWop.getWorkOrder());
+                    expectedMin = ProcessTimeCalculator.calcExpectedMinutes(
+                        maxWop.getProcess().getProcessId(),
+                        totalEU
+                    );
+
+                    if (expectedMin > 0) {
+                        ratio = (double) stayMax / (double) expectedMin;
+                    }
+                }
+
+                // ------------------------------------------------------------
+                // E) 3단계 판정
+                //  - OK    : 기준 이하
+                //  - WARN  : 기준 초과 ~ 20% 초과 이하
+                //  - DELAY : 20% 초과
+                // ------------------------------------------------------------
+                String level = "OK";
+
+                if (expectedMin > 0 && stayMax > 0) {
+                    if (ratio <= 1.0)      level = "OK";
+                    else if (ratio <= 1.2) level = "WARN";
+                    else                   level = "DELAY";
+                }
+
+                // ------------------------------------------------------------
+                // F) 셀 DTO 생성 + steps에 추가
+                // ------------------------------------------------------------
                 StayCellDTO cell = StayCellDTO.builder()
                     .lineId(lineId)
                     .lineName(line.getLineName())
@@ -188,13 +239,13 @@ public class ProductionDashboardService {
                     .readyCnt(readyCnt)
                     .hasReady(hasReady)
                     .startableCnt(startableCnt)
-                    .level("OK")
+                    .level(level)
                     .build();
 
                 steps.add(cell);
-                allCells.add(cell);
             }
 
+            // 라인 1개 row 완성
             rows.add(LineStayRowDTO.builder()
                 .lineId(lineId)
                 .lineName(line.getLineName())
@@ -202,21 +253,9 @@ public class ProductionDashboardService {
                 .build());
         }
 
-        // 5) 임계치 없이 TopN 기준 색상 (진행중/대기 흐름이 있는 셀만)
-        // - 우선순위: IN_PROGRESS/QC_PENDING 체류 기반
-        List<StayCellDTO> ranked =
-            allCells.stream()
-                .filter(c -> c.getInProgressCnt() > 0) // 진행 흐름이 있는 셀만
-                .sorted(Comparator.comparingLong(StayCellDTO::getStayMin).reversed())
-                .toList();
-
-        if (!ranked.isEmpty()) ranked.get(0).setLevel("DELAY");
-        if (ranked.size() >= 2) ranked.get(1).setLevel("WARN");
-        if (ranked.size() >= 3) ranked.get(2).setLevel("WARN");
-
         return rows;
     }
-
+    
     // =====================================================================================
     /**
      * 생산 현황 추적 차트 데이터 생성
