@@ -61,10 +61,11 @@ public class ClientItemService {
         // 1️⃣ 해당 협력사에 이미 등록된 materialId 목록
         List<String> registeredMaterialIds =
                 clientItemRepository.findMaterialIdsByClientId(clientId);
+        
 
         // 2️⃣ 카테고리별 전체 자재
         List<MaterialMst> allMaterials =
-                materialMstRepository.findByMatType(matType);
+                materialMstRepository.findByMatTypeAndUseYn(matType, "Y");
 
         // 3️⃣ 이미 등록된 자재 제외
         return allMaterials.stream()
