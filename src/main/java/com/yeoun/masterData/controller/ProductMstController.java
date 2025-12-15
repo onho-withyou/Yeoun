@@ -46,6 +46,24 @@ public class ProductMstController {
 	public List<Map<String, Object>> prdItemNameList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
 		return productMstService.findByPrdItemNameList();
 	}
+	//완제품 제품유형 드롭다운
+	@ResponseBody
+	@GetMapping("/product/prdItemTypeList")
+	public List<Map<String, Object>> prdTypeList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+		return productMstService.findByPrdTypeList();
+	}
+	//완제품 단위 드롭다운
+	@ResponseBody
+	@GetMapping("/product/prdUnitList")
+	public List<Map<String, Object>> prdUnitList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+		return productMstService.findByPrdUnitList();
+	}
+	//완제품 제품상태 드롭다운
+	@ResponseBody
+	@GetMapping("/product/prdStatusList")
+	public List<Map<String, Object>> prdStatusList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+		return productMstService.findByPrdStatusList();
+	}
 
 	// 완제품 그리드 조회
 	@ResponseBody

@@ -3,6 +3,9 @@ window.onload = function () {
 	productGridAllSearch();//완제품 그리드 조회
 	materialGridAllSearch();//원재료 그리드 조회
 	prdItemNameList();//완제품 품목명(향수타입) 드롭다운
+	prdItemTypeList();//완제품 제품유형 드롭다운
+	prdUnitList();//완제품 단위 드롭다운
+	prdStatusList();//완제품 제품상태 드롭다운
 
 }
 
@@ -22,6 +25,10 @@ document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
 
 
 let perfumeListItems = [];
+let itemTypeListItems = [];
+let unitListItems = [];
+let statusListItems = [];
+
 const Grid = tui.Grid;
 
 //g-grid1 완제품(상위품번)
@@ -60,11 +67,7 @@ const grid1 = new Grid({
 			,editor: {
 				type: 'select', // 드롭다운 사용
 				options: {
-					// value는 실제 데이터 값, text는 사용자에게 보이는 값
-					listItems: [
-						{ text: '완제품', value: 'FINISHED_GOODS' },
-						{ text: '반제품', value: 'SEMI_FINISHED_GOODS' }
-					]
+					listItems: itemTypeListItems
 				}
 			}
 		}
@@ -77,12 +80,7 @@ const grid1 = new Grid({
 			,editor: {
 				type: 'select', // 드롭다운 사용
 				options: {
-					// value는 실제 데이터 값, text는 사용자에게 보이는 값
-					listItems: [
-						{ text: 'g', value: 'g' },
-						{ text: 'ml', value: 'ml' },
-						{ text: 'EA', value: 'EA' }
-					]
+					listItems: unitListItems
 				}
 			}
 		}
@@ -99,13 +97,7 @@ const grid1 = new Grid({
 				type: 'select', // 드롭다운 사용
 				options: {
 					// value는 실제 데이터 값, text는 사용자에게 보이는 값
-					listItems: [
-						{ text: '활성', value: 'ACTIVE' },//활성
-						{ text: '비활성', value: 'INACTIVE' },//비활성
-						{ text: '단종', value: 'DISCONTINUED' },//단종
-						{ text: '시즌상품', value: 'SEASONAL' },//시즌상품
-						{ text: '재고없음', value: 'OUT_OF_STOCK' }//단종
-					]
+					listItems: statusListItems
 				}
 			}
 		}
@@ -419,6 +411,85 @@ function prdItemNameList() {
 	});
 
 }
+
+//완제품 제품유형 드롭다운 조회
+function prdItemTypeList() {
+	fetch('/masterData/product/prdItemTypeList', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		return res.json();
+	})
+	.then(data => {
+		console.log("제품유형 드롭다운 데이터:", data);
+		data.forEach(item => {
+			itemTypeListItems.push({
+				value: item.VALUE,
+				text: item.TEXT
+			});
+		});
+		console.log("itemTypeListItems:", itemTypeListItems);
+		// Dropdown editor의 listItems 업데이트
+	})
+
+}
+//완제품 단위 드롭다운 조회
+function prdUnitList() {
+	fetch('/masterData/product/prdUnitList', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		return res.json();
+	})
+	.then(data => {
+		console.log("단위 드롭다운 데이터:", data);
+		data.forEach(item => {
+			unitListItems.push({
+				value: item.VALUE,
+				text: item.TEXT
+			});
+		});
+		console.log("unitListItems:", unitListItems);
+		// Dropdown editor의 listItems 업데이트
+	})
+}
+
+//완제품 제품상태 드롭다운
+function prdStatusList() {
+	fetch('/masterData/product/prdStatusList', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		return res.json();
+	})
+	.then(data => {
+		console.log("제품상태 드롭다운 데이터:", data);
+		data.forEach(item => {
+			statusListItems.push({
+				value: item.VALUE,
+				text: item.TEXT
+			});
+		});
+		console.log("statusListItems:", statusListItems);
+		// Dropdown editor의 listItems 업데이트
+	})
+}
+
 
 //완제품 row 추가
 const addProductRowBtn = document.getElementById('addProductRowBtn');

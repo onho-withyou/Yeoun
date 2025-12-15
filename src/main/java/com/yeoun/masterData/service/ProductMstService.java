@@ -33,6 +33,21 @@ public class ProductMstService {
 	public List<Map<String, Object>> findByPrdItemNameList() {
 		return productMstRepository.findByPrdItemNameList();
 	}
+	//완제품 제품유형 드롭다운
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> findByPrdTypeList() {
+		return productMstRepository.findByPrdTypeList();
+	}
+	//완제품 단위 드롭다운
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> findByPrdUnitList() {
+		return productMstRepository.findByPrdUnitList();
+	}
+	//완제품 제품상태 드롭다운
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> findByPrdStatusList() {
+		return productMstRepository.findByPrdStatusList();
+	}
  
 	//1. 완제품 그리드 조회
 	@Transactional(readOnly = true)
