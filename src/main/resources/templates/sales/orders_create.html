@@ -39,7 +39,7 @@
            id="clientSearch"
            class="form-control"
            autocomplete="off"
-           placeholder="거래처명 또는 코드로 검색">
+           placeholder="거래처명 또는 코드 검색">
 
     <!-- 자동완성 목록 -->
     <div id="clientAutoList"
@@ -81,6 +81,7 @@
             <label class="form-label">담당자</label>
             <input type="text" id="clientManager"
                    name="managerName" class="form-control">
+                   <div class="text-danger small d-none" id="managerNameError"></div>
         </div>
     </div>
 
@@ -90,6 +91,7 @@
             <label class="form-label">담당자 연락처</label>
             <input type="text" id="clientManagerTel"
                    name="managerTel" class="form-control">
+                   <div class="text-danger small d-none" id="managerTelError"></div>
         </div>
 
         <!-- 담당자 이메일 -->
@@ -97,6 +99,7 @@
             <label class="form-label">담당자 이메일</label>
             <input type="text" id="clientManagerEmail"
                    name="managerEmail" class="form-control">
+                   <div class="text-danger small d-none" id="managerEmailError"></div>
         </div>
     </div>
 

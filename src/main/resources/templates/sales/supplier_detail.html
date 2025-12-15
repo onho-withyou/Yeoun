@@ -279,6 +279,19 @@
 
                         </div>
                     </div>
+                    	</div>
+                     <div class="text-end mt-3">
+					    <button id="btnEdit" class="btn btn-primary" onclick="enableEdit()">수정</button>
+					    <button id="btnSave" class="btn btn-success d-none" onclick="saveClient()">저장</button>
+					    <button id="btnCancel" class="btn btn-secondary d-none" onclick="cancelEdit()">취소</button>
+					
+					    <a href="/sales/client?type=SUPPLIER"
+					       class="btn btn-outline-secondary">
+					        목록으로
+					    </a>
+				
+
+                    
                 </div>
 
             </div>
@@ -302,14 +315,10 @@
         </div>
 
     </div>
-
-    <!-- 하단 버튼 -->
-    <div class="text-end mt-3">
-        <a href="/sales/client?type=SUPPLIER" class="btn btn-outline-secondary">목록으로</a>
-    </div>
-
 </div>
 
+    
+  
 <!-- JS 데이터 전달 -->
 <script th:inline="javascript">
     window.clientId = /*[[${client.clientId}]]*/ '';

@@ -46,6 +46,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+	// 🔥 엔터 키로 검색
+	document.getElementById("keyword")?.addEventListener("keydown", (e) => {
+	    if (e.key === "Enter") {
+	        e.preventDefault(); // form submit 방지
+	        loadGrid();
+	    }
+	});
+
 
     /* ================================
        AG-Grid 설정
