@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	        case "IN_PROGRESS":
 	          return "진행중";
 	        case "RELEASED":
-	          return "확정";
+	          return "대기";
 	        case "DONE":
 	          return "완료";
 	        case "CANCELLED":
