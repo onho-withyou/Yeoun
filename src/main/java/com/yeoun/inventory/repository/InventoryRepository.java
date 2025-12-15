@@ -147,5 +147,8 @@ public interface InventoryRepository
 	// lot번호와 창고위치로 재고 조회
 	Optional<Inventory> findByLotNoAndWarehouseLocation_LocationId(String lotNo, String locationId);
 
+	// 창고 위치 ID로 재고 존재 확인
+	boolean existsByWarehouseLocation_LocationId(String locationId);
+
 
 }
