@@ -201,9 +201,11 @@
 			</div>
 			
 			<!-- 진행중/대기 데이터 없음 안내 -->
-			<div th:if="${heatmapTotal == 0}" class="alert alert-light border text-center text-muted mb-3">
-				현재 <b>진행중 / QC대기</b> 공정이 없습니다.
+			<div th:if="${#lists.isEmpty(heatmapRows)}"
+			     class="alert alert-light border text-center text-muted mb-3">
+			  현재 <b>진행중 / QC대기</b> 공정이 없습니다.
 			</div>
+
 			
 			<!-- 테이블 -->
 			<div class="table-responsive">
