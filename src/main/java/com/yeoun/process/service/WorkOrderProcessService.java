@@ -482,7 +482,8 @@ public class WorkOrderProcessService {
 
                     // 지연 여부: 시작된 공정만 판단
                     // - proc/startTime 없으면 false
-                    boolean delayed = (proc != null) && ProcessTimeCalculator.isDelayed(proc, totalEU);
+                    boolean delayed = ProcessTimeCalculator.isDelayed(proc, totalEU);
+
                     dto.setDelayed(delayed);
 
                     return dto;
