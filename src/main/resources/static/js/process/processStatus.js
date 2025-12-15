@@ -42,9 +42,10 @@ document.addEventListener("DOMContentLoaded", () => {
         width: 150
       },
       {
-        header: "제품코드",
-        name: "prdId",
-        align: "center"
+        header: "라인",
+        name: "lineName",
+        align: "center",
+        width: 130
       },
       {
         header: "제품명",
@@ -54,11 +55,6 @@ document.addEventListener("DOMContentLoaded", () => {
       {
         header: "계획수량",
         name: "planQty",
-        align: "right"
-      },
-      {
-        header: "양품수량",
-        name: "goodQty",
         align: "right"
       },
 	  {
@@ -193,11 +189,15 @@ function renderProcessDetail(detail) {
       <div class="text-muted">제품명</div>
       <div class="fw-semibold">${summary.prdName}</div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
       <div class="text-muted">품번</div>
       <div class="fw-semibold">${summary.prdId}</div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
+      <div class="text-muted">라인</div>
+      <div class="fw-semibold">${summary.lineName}</div>
+    </div>
+    <div class="col-md-2">
       <div class="text-muted">계획수량</div>
       <div class="fw-semibold">${summary.planQty}</div>
     </div>
