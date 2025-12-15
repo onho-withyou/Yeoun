@@ -460,7 +460,7 @@ public class InboundService {
 			log.info("재입고 필요 제품 : " + obItemDTO.getItemType() + " " + obItemDTO.getLotNo());
 			
 			// LOT번호로 이전 입고완료한 입고대기 데이터 조회
-			InboundItem ibItem = inboundItemRepository.findByLotNo(obItemDTO.getLotNo());
+			InboundItem ibItem = inboundItemRepository.findFirstByLotNo(obItemDTO.getLotNo());
 			
 			// 입고대기 품목 생성
 			InboundItemDTO inboundItemDTO = InboundItemDTO.builder()

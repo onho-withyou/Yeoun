@@ -16,5 +16,7 @@ public interface InboundItemRepository extends JpaRepository<InboundItem, Long> 
 	Optional<InboundItem> findTopByLotNoOrderByInboundItemIdDesc(String lotNo);
 
 	InboundItem findByLotNo(String lotNo);
+
+	InboundItem findFirstByLotNo(String lotNo);
 	
 }
