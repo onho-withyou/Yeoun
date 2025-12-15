@@ -1,6 +1,7 @@
 package com.yeoun.masterData.repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,14 +22,25 @@ public interface BomMstRepository extends JpaRepository<BomMst, BomMstId>{
 	Optional<BomMst> findByPrdIdAndMatId(String prdId, String matId);
 
 	// BOM 그리드 조회
-		@Query(value="""
-				SELECT *
-				FROM bom_mst b
-				-- bomId, prdId, matId가 비어있거나 NULL이면 전체조회, 그렇지 않으면 포함(부분일치) 검색
+	@Query(value="""
+				SELECT
+				    b.*,
+				    ec.emp_name AS created_by_name,
+				    eu.emp_name AS updated_by_name
+				FROM
+				    bom_mst b
+				LEFT JOIN
+				    EMP ec
+				ON
+				    b.created_id = ec.emp_id
+				LEFT JOIN
+				    EMP eu
+				ON
+				    b.updated_id = eu.emp_id
 				WHERE (:bomId IS NULL OR :bomId = '' OR b.BOM_ID LIKE '%' || :bomId || '%')
 				AND (:matId IS NULL OR :matId = '' OR b.MAT_ID LIKE '%' || :matId || '%')
 				""", nativeQuery = true)
-		List<BomMst> findBybomList(@Param("bomId") String bomId, @Param("matId") String matId);
+	List<Map<String, Object>> findBybomList(@Param("bomId") String bomId, @Param("matId") String matId);
 
 	// BOM 상세 정보 조회
 	@Query(value="""

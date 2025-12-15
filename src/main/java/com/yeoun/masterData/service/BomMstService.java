@@ -27,7 +27,7 @@ public class BomMstService {
 	
 	//1. BOM 그리드 조회
 	@Transactional(readOnly = true)
-	public List<BomMst> findBybomList(String bomId, String matId) {
+	public List<Map<String, Object>> findBybomList(String bomId, String matId) {
 		log.info("bomMstRepository.findBybomList() 조회된개수 - {}",bomMstRepository.findBybomList(bomId, matId));
 		return bomMstRepository.findBybomList(bomId, matId);
 	}

@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
 
@@ -35,7 +34,7 @@ public class ProductMstService {
 	}
 	// 전체조회와 특정 prdId/prdName 조회(부분검색)를 모두 처리
 	@Transactional(readOnly = true)
-	public List<ProductMst> findByPrdIdList(String prdId, String prdName) {
+	public List<Map<String, Object>> findByPrdIdList(String prdId, String prdName) {
 		// repository 쿼리에서 null/빈값은 전체조회로 처리하도록 되어 있음
 		return productMstRepository.findByPrdIdList(prdId, prdName);
 	}
@@ -43,8 +42,8 @@ public class ProductMstService {
 	//2. 완제품 그리드 저장
 	// 프론트엔드에서 보낼 것으로 예상되는 구조:
 	// { createdRows: [{prdId:..., itemName:...}, ...], updatedRows: [...], deletedRows: [...] }
+	@Transactional
 	public String saveProductMst(String empId, Map<String,Object> param) {
-		log.info("productMstSaveList------------->{}",param);
 		try {
 			// createdRows
 			Object createdObj = param.get("createdRows");
@@ -52,9 +51,19 @@ public class ProductMstService {
 				@SuppressWarnings("unchecked")
 				List<Map<String,Object>> created = (List<Map<String,Object>>) createdObj;
 				for (Map<String,Object> row : created) {
+					Object idObj = row.get("prdId");
+					String prdId = (idObj == null) ? "" : String.valueOf(idObj).trim();
+	
+					if (!prdId.isEmpty()) {
+						productMstRepository.findById(prdId)
+							    .ifPresent(existingProduct -> {
+							        throw new IllegalStateException("중복되는 품번이 이미 존재합니다.");
+							    });//중복중
+					}
+					
 					ProductMst p = mapToProduct(row);
 					p.setCreatedId(empId);
-					// default useYn to 'Y' when not provided
+					p.setCreatedDate(LocalDate.now());
 					if (p.getUseYn() == null) p.setUseYn("Y");
 					productMstRepository.save(p);
 				}
@@ -110,8 +119,7 @@ public class ProductMstService {
 			}
 
 			return "success";
-		} catch (Exception e) {
-			log.error("saveProductMst error", e);
+		} catch(Exception e) {
 			return "error: " + e.getMessage();
 		}
 	}

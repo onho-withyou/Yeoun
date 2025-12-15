@@ -1,6 +1,7 @@
 package com.yeoun.masterData.repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,13 +26,24 @@ public interface ProductMstRepository extends JpaRepository<ProductMst, String> 
 	Optional<ProductMst> findByPrdId(String prdId);
 	
 	@Query(value = """
-			SELECT *
-			FROM PRODUCT_MST p
-			-- prdId가 비어있거나 NULL이면 전체조회, 그렇지 않으면 포함(부분일치) 검색
-			WHERE (:prdId IS NULL OR :prdId = '' OR p.PRD_ID LIKE '%' || :prdId || '%')
-		AND (:prdName IS NULL OR :prdName = '' OR p.PRD_NAME LIKE '%' || :prdName || '%')
-		AND (p.USE_YN = 'Y')
+				SELECT
+				    p.*,
+				    ec.emp_name AS created_by_name,
+				    eu.emp_name AS updated_by_name
+				FROM
+				    PRODUCT_MST p
+				LEFT JOIN
+				    EMP ec
+				ON
+				    p.created_id = ec.emp_id
+				LEFT JOIN
+				    EMP eu
+				ON
+				    p.updated_id = eu.emp_id
+				WHERE (:prdId IS NULL OR :prdId = '' OR p.PRD_ID LIKE '%' || :prdId || '%')
+			AND (:prdName IS NULL OR :prdName = '' OR p.PRD_NAME LIKE '%' || :prdName || '%')
+			AND (p.USE_YN = 'Y')
 			""", nativeQuery = true)
-	List<ProductMst> findByPrdIdList(@Param("prdId") String prdId, @Param("prdName") String prdName);
+	List<Map<String, Object>> findByPrdIdList(@Param("prdId") String prdId, @Param("prdName") String prdName);
 
 }

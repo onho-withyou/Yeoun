@@ -34,12 +34,12 @@ public class BomMstController {
 	//BOM 정보조회
  	@ResponseBody
   	@GetMapping("/list")
-  	public List<BomMst> bomList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,
+  	public List<Map<String, Object>> bomList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,
   				@RequestParam(value = "bomId", required = false) String bomId,
   				@RequestParam(value = "matId", required = false) String matId) {
 		// 보조 데이터: 페이지에서 사용할 bomId 목록
 		model.addAttribute("bomIdList", bomMstService.findAllDetail());
-	    List<BomMst> bomList = bomMstService.findBybomList(bomId, matId);
+		List<Map<String, Object>> bomList = bomMstService.findBybomList(bomId, matId);
 	    return bomList;
 	}
 

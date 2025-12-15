@@ -40,7 +40,7 @@ public class ProcessMstController {
     // 제품별 공정라우트 조회
     @ResponseBody
     @GetMapping("/process/list")
-    public List<RouteHeader> processList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,
+    public List<Map<String, Object>> processList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,
             @RequestParam("prdId") String prdId,
             @RequestParam("routeName") String routeName) {
         return processMstService.getRouteHeaderList(prdId, routeName);
@@ -49,7 +49,7 @@ public class ProcessMstController {
     // 공정코드 조회
     @ResponseBody
     @GetMapping("/processCode/list")
-    public List<ProcessMst> processCodeList(Model model, @AuthenticationPrincipal LoginDTO loginDTO
+    public List<Map<String, Object>> processCodeList(Model model, @AuthenticationPrincipal LoginDTO loginDTO
                                                     ,@RequestParam(value = "processId", required = false) String processId
                                                     ,@RequestParam(value = "processName", required = false) String processName){
 

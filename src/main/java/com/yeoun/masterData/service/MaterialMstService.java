@@ -32,7 +32,7 @@ public class MaterialMstService {
 	}
 	// 전체조회와 특정 matId 조회(부분검색)를 모두 처리
 	@Transactional(readOnly = true)
-	public List<MaterialMst> findByMatIdList(String matId, String matName) {
+	public List<Map<String, Object>> findByMatIdList(String matId, String matName) {
 		// repository 쿼리에서 null/빈값은 전체조회로 처리하도록 되어 있음
 		return materialMstRepository.findByMatIdList(matId, matName);
 	}
@@ -47,6 +47,15 @@ public class MaterialMstService {
 				@SuppressWarnings("unchecked")
 				List<Map<String,Object>> created = (List<Map<String,Object>>) createdObj;
 				for (Map<String,Object> row : created) {
+					Object idObj = row.get("matId");
+					String matId = (idObj == null) ? "" : String.valueOf(idObj).trim();
+	
+					if (!matId.isEmpty()) {
+						materialMstRepository.findById(matId)
+							    .ifPresent(existingProduct -> {
+							        throw new IllegalStateException("중복되는 원재료id 이미 존재합니다.");
+							    });//중복중
+					}
 					MaterialMst m = mapToMaterial(row);
 					m.setCreatedId(empId);
 					materialMstRepository.save(m);

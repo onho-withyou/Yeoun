@@ -39,8 +39,7 @@ public class ProcessMstService {
 	}
 	// 제품별 공정 라우트 그리드 조회
 	@Transactional(readOnly = true)
-	public List<RouteHeader> getRouteHeaderList(String prdId, String routeName) {
-		log.info("searchParams 조회된개수 - {}", prdId + routeName);
+	public List<Map<String, Object>> getRouteHeaderList(String prdId, String routeName) {
 		
 		return routeHeaderRepository.findByPrdIdAndRouteName(prdId, routeName);
 	}
@@ -51,7 +50,7 @@ public class ProcessMstService {
 	}
 	// 공정코드 그리드 조회
 	@Transactional(readOnly = true)
-	public List<ProcessMst> findByprocesslList(String processId, String processName) {
+	public List<Map<String, Object>> findByprocesslList(String processId, String processName) {
 		return processMstRepository.findByprocesslList(processId, processName);
 	}
 	// 공정단계 그리드 조회
@@ -142,6 +141,7 @@ public class ProcessMstService {
 			RouteHeader routeHeader = null;
 			Object routeInfoObj = param.get("routeInfo");
 			if (routeInfoObj instanceof Map) {
+				@SuppressWarnings("unchecked")
 				Map<String,Object> routeInfo = (Map<String,Object>) routeInfoObj;
 				
 				// 1. 필요한 PK 및 연관 객체 조회 (routeId로 RouteHeader 조회)
