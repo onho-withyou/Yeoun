@@ -230,27 +230,32 @@
 							
 							<!-- 공정 6단계 반복 -->
 							<td th:each="cell : ${row.steps}">
-								<div class="rack kpi-card" th:data-line="${row.lineId}" th:data-step="${cell.stepSeq}"
-									 th:classappend="${cell.inProgressCnt > 0 ?
-													      (cell.level == 'DELAY' ? ' border border-danger bg-danger-subtle' :
-													       cell.level == 'WARN'  ? ' border border-warning bg-warning-subtle' :
-													                               ' border border-success bg-success-subtle') : ''}">
-									 				 
-				 					<!-- 체류 시간 -->
-				 					<div class="big-mid" th:data-stay="${cell.stayMin}" th:data-active="${cell.inProgressCnt}"
-				 						th:text="${cell.inProgressCnt > 0 ? cell.stayMin + '분'
-									              : (cell.startableCnt > 0 ? '시작대기'
-									              : (cell.hasReady ? '대기' : '-'))}">
-				 						45분
-				 					</div>		
-				 					
-				 					<!-- 진행 중 건수 -->	
-				 					<div class="small-bot text-muted" th:text="${cell.inProgressCnt > 0	? '진행중 ' + cell.inProgressCnt + '건'
-				 						 : (cell.startableCnt > 0 ? '시작대기 ' + cell.startableCnt + '건'	
-				 						 : (cell.hasReady ? '대기 ' + cell.readyCnt + '건' : '진행중 0건'))}">
-			 							진행중 1건
-			 						</div>												  
-				 				</div>
+								<div class="rack kpi-card"
+								     th:data-line="${row.lineId}" th:data-step="${cell.stepSeq}"
+								     th:with="activeCnt=${cell.inProgressCnt + cell.qcPendingCnt}"
+								     th:classappend="${activeCnt > 0 ?
+								            (cell.level == 'DELAY' ? ' border border-danger bg-danger-subtle' :
+								             cell.level == 'WARN'  ? ' border border-warning bg-warning-subtle' :
+								                                     ' border border-success bg-success-subtle')
+								            : ''}">
+								
+								  <!-- 체류 시간 -->
+								  <div class="big-mid"
+								       th:data-stay="${cell.stayMin}"
+								       th:data-active="${activeCnt}"
+								       th:text="${activeCnt > 0 ? cell.stayMin + '분'
+								              : (cell.startableCnt > 0 ? '시작대기'
+								              : (cell.hasReady ? '대기' : '-'))}">
+								  </div>
+								
+								  <!-- 상태 문구 -->
+								  <div class="small-bot text-muted"
+								       th:text="${cell.inProgressCnt > 0 ? '진행중 ' + cell.inProgressCnt + '건'
+								              : (cell.qcPendingCnt > 0 ? 'QC대기 ' + cell.qcPendingCnt + '건'
+								              : (cell.startableCnt > 0 ? '시작대기 ' + cell.startableCnt + '건'
+								              : (cell.hasReady ? '대기 ' + cell.readyCnt + '건' : '진행중 0건')))}">
+								  </div>
+								</div>
 							</td>
 						</tr>
 					</tbody>

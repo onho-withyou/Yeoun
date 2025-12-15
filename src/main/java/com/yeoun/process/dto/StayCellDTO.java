@@ -21,8 +21,9 @@ public class StayCellDTO {
     private String stepName;
 
     private long stayMin;          // IN_PROGRESS/QC_PENDING 체류(분)
-    private long inProgressCnt;    // IN_PROGRESS/QC_PENDING 건수
-
+    private long inProgressCnt;    // IN_PROGRESS 건수
+    private long qcPendingCnt;	   // QC_PENDING
+    
     private long readyCnt;         // READY 건수(표시용)
     private boolean hasReady;      // READY 존재 여부
 

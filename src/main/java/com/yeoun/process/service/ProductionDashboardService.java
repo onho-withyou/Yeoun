@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -140,9 +141,13 @@ public class ProductionDashboardService {
                     grouped.getOrDefault(new Key(lineId, step), List.of());
 
                 // 진행중 카운트: IN_PROGRESS/QC_PENDING만 (실제로 흐름이 돈다고 보는 상태)
-                long activeCnt = list.stream()
-                    .filter(w -> ACTIVE_STATUSES.contains(w.getStatus()))
-                    .count();
+                long inProgressCnt = list.stream()
+                	    .filter(w -> "IN_PROGRESS".equals(w.getStatus()))
+                	    .count();
+
+            	long qcPendingCnt = list.stream()
+            	    .filter(w -> "QC_PENDING".equals(w.getStatus()))
+            	    .count();
 
                 // READY 카운트(표시용)
                 long readyCnt = list.stream()
@@ -183,8 +188,27 @@ public class ProductionDashboardService {
                         if (w.getStartTime() == null) continue;
                         stayMin = Duration.between(w.getStartTime(), now).toMinutes();
                     } else { // QC_PENDING
-                        if (w.getEndTime() == null) continue;
-                        stayMin = Duration.between(w.getEndTime(), now).toMinutes();
+                    	// QC 대기시간 = "이전 공정 종료시간" ~ now
+                        // 같은 라인/이 step(=QC)에서, 같은 작업지시의 이전 단계(step-1) DONE(endTime) 조회
+
+                        Integer curStep = w.getStepSeq();
+                        if (curStep == null || curStep <= 1) continue;
+
+                        // 이전 단계(step-1) 목록
+                        List<WorkOrderProcess> prevList =
+                            grouped.getOrDefault(new Key(lineId, curStep - 1), List.of());
+
+                        // "같은 작업지시"의 이전 단계 1건 찾기
+                        WorkOrderProcess prev = prevList.stream()
+                            .filter(p -> p.getWorkOrder() != null && w.getWorkOrder() != null)
+                            .filter(p -> Objects.equals(p.getWorkOrder().getOrderId(), w.getWorkOrder().getOrderId()))
+                            .filter(p -> "DONE".equals(p.getStatus()))
+                            .findFirst()
+                            .orElse(null);
+
+                        if (prev == null || prev.getEndTime() == null) continue;
+
+                        stayMin = Duration.between(prev.getEndTime(), now).toMinutes();
                     }
 
                     if (stayMin > stayMax) {
@@ -235,7 +259,8 @@ public class ProductionDashboardService {
                     .stepSeq(step)
                     .stepName(STEP_NAME_MAP.get(step))
                     .stayMin(stayMax)
-                    .inProgressCnt(activeCnt)
+                    .inProgressCnt(inProgressCnt)
+                    .qcPendingCnt(qcPendingCnt)
                     .readyCnt(readyCnt)
                     .hasReady(hasReady)
                     .startableCnt(startableCnt)
