@@ -3,100 +3,163 @@
           layout:decorate="~{/layouts/layout.html}">
 
   <th:block layout:fragment="content">
+
     <div class="custom-body container-xxl flex-grow-1 container-p-y">
 
       <!-- 페이지 타이틀 -->
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="mb-0">LOT 추적</h3>
-        <!-- 필요하면 여기에 우측 상단 버튼 추가 (엑셀다운, 전체조회 등) -->
       </div>
 
       <!-- LOT 검색 필터 -->
-<!--       <div class="card mb-4"> -->
-<!--         <div class="card-body"> -->
-          <form id="lotTraceSearchForm">
+      <div class="card mb-4">
+        <div class="card-body">
+          <form id="lotTraceSearchForm" method="get" action="/lot/trace">
             <div class="row gx-3 gy-2 align-items-end">
 
-              <!-- LOT / 제품 검색어 -->
               <div class="col-md-4">
-                <label class="form-label" for="searchKeyword">LOT 번호 / 제품 코드</label>
+                <label class="form-label" for="searchKeyword">검색어</label>
                 <input type="text"
                        class="form-control"
                        id="searchKeyword"
-                       placeholder="LOT 번호 또는 제품 코드를 입력하세요">
+                       name="keyword"
+                       placeholder="LOT 번호 / 제품명"
+                       th:value="${keyword}">
               </div>
 
-              <!-- 생산 상태 -->
               <div class="col-md-3">
-                <label class="form-label" for="searchProduct">생산 상태</label>
-                <select class="form-select" id="searchProduct">
+                <label class="form-label" for="searchProductStatus">생산 상태</label>
+                <select class="form-select" id="searchProductStatus">
                   <option value="">전체</option>
-                  <!-- 진행중, 완료, 보류 등 옵션 예정 -->
                 </select>
               </div>
 
-              <!-- 제품 유형 -->
               <div class="col-md-3">
-                <label class="form-label" for="searchHStatus">제품 유형</label>
-                <select class="form-select" id="searchHStatus">
+                <label class="form-label" for="searchProductType">제품 유형</label>
+                <select class="form-select" id="searchProductType">
                   <option value="">전체</option>
-                  <!-- 완제품, 반제품, 원자재 등 -->
                 </select>
               </div>
 
-              <!-- 검색 버튼 -->
-              <div class="col-md-2">
-                <button type="button"
+              <div class="col-md-1">
+                <button type="submit"
                         class="btn btn-outline-primary w-100"
                         id="btnSearch">
                   검색
                 </button>
               </div>
-
+              
+              <div class="col-md-1">
+				 <a href="/lot/trace"
+				    class="btn btn-outline-secondary w-100">
+				    초기화
+				 </a>
+			  </div>
             </div>
           </form>
-<!--         </div> -->
-<!--       </div> -->
-
-	<br>
-
-      <!-- 위치 / 실사 영역 -->
-      <div class="row">
-      
-	    <!-- LOT 계층구조 (좌측) -->
-	    <div class="col-md-5">
-	      <div class="card h-100">
-	        <div class="card-header">
-	          <h5 class="mb-0">LOT 계층구조</h5>
-	        </div>
-	        <div class="card-body" id="lotTree">
-	          <!-- LOT 트리 넣을 자리 (지금은 비워두기) -->
-	        </div>
-	      </div>
-	    </div>
-	
-	    <!-- LOT 상세 (우측) -->
-	    <div class="col-md-7">
-	      <div class="card h-100">
-	        <div class="card-header">
-	          <h5 class="mb-0">LOT 상세</h5>
-	        </div>
-	        <div class="card-body" id="lotDetail">
-	          <!-- LOT 상세 정보 들어갈 자리 (지금은 비워두기) -->
-	        </div>
-	      </div>
-	    </div>
-    	</div>
-
-      <!-- 나중에 LOT 이력/타임라인, TOAST UI Grid 붙일 자리 -->
-      <!--
-      <div class="card">
-        <div class="card-body p-0">
-          <div id="grid"></div>
         </div>
       </div>
-      -->
+
+      <!-- LOT 트리 / 상세 영역 -->
+      <div class="row">
+
+		<!-- LOT 계층구조 -->
+		<div class="col-md-5">
+		  <div class="card h-100">
+		    <div class="card-header">
+		      <h5 class="mb-0">LOT 계층구조</h5>
+		    </div>
+		
+		    <div class="card-body" id="lotTree">
+		
+		      <ul class="list-group"
+		          th:if="${lotList != null and !#lists.isEmpty(lotList)}">
+		
+		        <li class="list-group-item"
+		            th:each="lot : ${lotList}">
+		
+		          <!-- ROOT LOT 한 줄 -->
+		          <a href="#"
+		             class="d-block text-decoration-none mb-1 lot-root-link"
+		             th:data-lot-no="${lot.lotNo}">
+		            <span th:text="${lot.lotNo}">LOT-0001</span>
+		            <span th:text="' / ' + ${lot.displayName}"> / 제품명</span>
+		            <span th:text="' / ' + ${lot.status}"> / 상태</span>
+		          </a>
+		
+		          <!-- ROOT 하위: 공정 / 자재 / 설비 그룹 (기본은 숨김) -->
+		          <ul class="list-unstyled ms-3 mt-1 root-children d-none"
+		              th:data-root-lot-no="${lot.lotNo}">
+		
+		            <!-- 공정 그룹 -->
+					<li class="mb-1">
+					  <a href="#"
+					     class="lot-group-toggle text-decoration-none small"
+					     data-group="process"
+					     th:data-lot-no="${lot.lotNo}">
+					    ▶ 공정
+					  </a>
+					
+					  <!-- 공정 리스트: 이제 서버에서 안 채우고 JS로 채울 거라 비워둠 -->
+					  <ul class="list-unstyled ms-3 mt-1 group-children d-none"
+					      data-group="process"
+					      th:data-lot-no="${lot.lotNo}">
+					    <!-- JS에서 li.process-item 들이 동적으로 들어옴 -->
+					  </ul>
+					</li>
+					
+		            <!-- 자재 그룹 -->
+					<li class="mb-1">
+					  <a href="#"
+					     class="lot-group-toggle text-decoration-none small"
+					     data-group="material"
+					     th:data-lot-no="${lot.lotNo}">
+					    ▶ 자재
+					  </a>
+					
+					  <!-- 자재 리스트: 이제 서버에서 안 채우고 JS로 채울 거라 비워둠 -->
+					  <ul class="list-unstyled ms-3 mt-1 group-children d-none"
+					      data-group="material"
+					      th:data-lot-no="${lot.lotNo}">
+					    <!-- JS에서 li.process-item 들이 동적으로 들어옴 -->
+					  </ul>
+					</li>
+		          </ul>
+		        </li>
+		      </ul>
+		
+		      <div class="text-muted small"
+		           th:if="${lotList == null or #lists.isEmpty(lotList)}">
+		        조회된 LOT가 없습니다.
+		      </div>
+		
+		    </div>
+		  </div>
+		</div>
+
+        <!-- LOT 상세 -->
+		<div class="col-md-7">
+		  <div class="card h-100">
+		    <div class="card-header">
+		      <h5 class="mb-0">LOT 상세</h5>
+		    </div>
+		
+		    <div class="card-body" id="lotDetail">
+		      <!-- 초기 메시지 (AJAX 로딩 전) -->
+		      <div class="text-muted">
+		        왼쪽에서 LOT를 선택하면 상세 정보가 표시됩니다.
+		      </div>
+		    </div>
+		
+		  </div>
+		</div>
+
+
+      </div>
 
     </div>
+
   </th:block>
 </th:block>
+
+<script th:src="@{/js/lot/lotTrace.js}"></script>

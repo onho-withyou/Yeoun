@@ -1,7 +1,12 @@
 const Grid = tui.Grid;
 const productGrid = new Grid({
 	el: document.getElementById("productGrid"),
+	bodyHeight: 500,
 	rowHeaders: ['rowNum'],
+	pageOptions: {
+	    useClient: true,  // 클라이언트 사이드 페이징
+	    perPage: 20       // 페이지당 10개 행
+	},	
 	columns: [
 		{
 			header: "입고번호",
@@ -18,6 +23,7 @@ const productGrid = new Grid({
 		{
 			header: "입고예정일",
 			name: "expectArrivalDate",
+			sortable: true,
 			formatter: ({value}) => formatDate(value)
 		},
 		{
@@ -29,7 +35,7 @@ const productGrid = new Grid({
 			header: " ",
 			name: "btn",
 			formatter: (rowInfo) => {
-				return `<button class="btn btn-primary btn-sm" data-id="${rowInfo.row.id}">상세</button>`
+				return `<button class="btn btn-outline-info btn-sm" data-id="${rowInfo.row.id}">상세</button>`
 			}
 		}
 	]
@@ -42,7 +48,7 @@ productGrid.on("click", (ev) => {
 	if (columnName === "btn") {
 		const row = productGrid.getRow(rowKey);
 		// 입고 상세 페이지로 이동
-		location.href = `/inventory/inbound/mat/${row.inboundId}`
+		location.href = `/inventory/inbound/prd/${row.inboundId}`
 	}
 });
 
@@ -78,17 +84,17 @@ async function loadProductInbound(startDate, endDate, keyword, searchType) {
 			INSPECTED: "검수완료",
 			COMPLETED: "입고완료"
 		}
-		// 원재료정보만필터
-		data = data.filter(row => row.prodId != null && row.prodId !== '');
+		// 완제품 정보만필터
+		data = await data.filter(row => row.inboundType === "PRD_IB");
 
 		
 		// 상태값이 영어로 들어오는 것을 한글로 변환해서 기존 data에 덮어씌움
-		data = data.map(item => ({
+		data = await data.map(item => ({
 			...item,
 			inboundStatus: statusMap[item.inboundStatus] || item.inboundStatus
 		}));
-		console.log(data);
-		productGrid.resetData(data);
+//		console.log(data);
+		await productGrid.resetData(data);
 		
 	} catch (error) {
 		console.error(error);
@@ -111,6 +117,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 	prdEndDateInput.value = endDate;
 	
 	await loadProductInbound(startDate, endDate, null);
+
+	//스피너  off
+	hideSpinner();
+
+	await loadProductInbound(startDate, endDate, "", "");
 });
 
 // 검색

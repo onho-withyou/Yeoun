@@ -21,25 +21,28 @@ import com.yeoun.order.repository.WorkScheduleRepository;
 import com.yeoun.order.repository.WorkerProcessRepository;
 import com.yeoun.process.entity.WorkOrderProcess;
 import com.yeoun.process.repository.WorkOrderProcessRepository;
+import com.yeoun.process.service.ProcessTimeCalculator;
 import com.yeoun.production.entity.ProductionPlan;
+import com.yeoun.production.entity.ProductionPlanItem;
 import com.yeoun.production.enums.ProductionStatus;
-import com.yeoun.order.dto.WorkOrderSearchDTO;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yeoun.emp.dto.EmpListDTO;
-import com.yeoun.masterData.entity.ProdLine;
+import com.yeoun.emp.entity.Emp;
+import com.yeoun.equipment.entity.ProdLine;
 import com.yeoun.masterData.entity.ProductMst;
-
-import com.yeoun.masterData.repository.BomMstRepository;
-import com.yeoun.masterData.repository.ProdLineRepository;
+import com.yeoun.masterData.entity.RouteHeader;
+import com.yeoun.equipment.repository.ProdLineRepository;
+import com.yeoun.leave.repository.LeaveHistoryRepository;
 import com.yeoun.masterData.repository.ProductMstRepository;
-import com.yeoun.order.dto.WorkOrderDTO;
-import com.yeoun.order.dto.WorkOrderListDTO;
 import com.yeoun.order.mapper.OrderMapper;
-import com.yeoun.order.repository.WorkOrderRepository;
-import com.yeoun.outbound.dto.OutboundOrderDTO;
+import com.yeoun.outbound.service.OutboundService;
 import com.yeoun.production.dto.ProductionPlanListDTO;
+import com.yeoun.production.repository.ProductionPlanItemRepository;
 import com.yeoun.production.repository.ProductionPlanRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -55,20 +58,27 @@ public class OrderService {
 	private final ProdLineRepository prodLineRepository;
 	private final ProductMstRepository productMstRepository;
 	private final ProductionPlanRepository productionPlanRepository;
+	private final ProductionPlanItemRepository productionPlanItemRepository;
 	private final WorkOrderRepository workOrderRepository;
 
 	private final EmpRepository empRepository;
+	private final OutboundService outboundService;
 	private final WorkScheduleRepository workScheduleRepository;
 	private final ProcessMstRepository processMstRepository;
 	private final WorkerProcessRepository workerProcessRepository;
 	private final RouteStepRepository routeStepRepository;
 	private final RouteHeaderRepository routeHeaderRepository;
 	private final WorkOrderProcessRepository workOrderProcessRepository;
+	private final LeaveHistoryRepository leaveHistoryRepository;
+	
+	@Autowired
+	private ObjectMapper objectMapper;
 
 
 	// =======================================================
 	// 작업지시 목록 조회
 	public List<WorkOrderListDTO> loadAllOrders (WorkOrderSearchDTO dto){
+		log.info("dto....... loadAll...." + dto);
 		return orderMapper.selectOrderList(dto);
 	}
 	
@@ -82,6 +92,7 @@ public class OrderService {
 			
 			// 1) 생산 완료 계획은 제외하기
 			if (plan.getStatus().equals("DONE")) continue;
+			if (plan.getStatus().equals("CANCELLED")) continue;
 
 			int total = plan.getTotalQty().intValue();
 			int created = workOrderRepository.sumWorkOrderQty(plan.getPlanId());
@@ -119,8 +130,31 @@ public class OrderService {
 	
 	// =======================================================
 	// 작업자 조회
-	public List<EmpListDTO> loadAllWorkers() {
-		return orderMapper.selectWorkers();
+	public List<WorkerListDTO> loadAllWorkers() {
+		
+		LocalDate today = LocalDate.now();			// 휴가여부 판단용
+		LocalDateTime now = LocalDateTime.now();	// 작업여부 판단용
+		
+		List<WorkerListDTO> list = orderMapper.selectWorkers();
+		
+		for (WorkerListDTO dto : list) {
+			boolean isHoliday = leaveHistoryRepository.existsByEmp_EmpIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual
+								(dto.getEmpId(), today, today);
+			if (isHoliday) {
+				dto.setStatus("AWAY");
+				continue;
+			}
+			
+			Integer isWorking = orderMapper.existWorkingSchedule(dto.getEmpId(), now);
+			
+			if (isWorking > 0) {
+				dto.setStatus("WORK");
+			} else {
+				dto.setStatus("AVAIL");
+			}
+			
+		}
+		return list;
 	}
 
 	// =======================================================
@@ -156,7 +190,11 @@ public class OrderService {
 		ProductionPlan plan = productionPlanRepository.findById(dto.getPlanId())
 				.orElseThrow(() -> new RuntimeException("생산 계획을 찾을 수 없음!"));
 		plan.setStatus(ProductionStatus.IN_PROGRESS);
-		productionPlanRepository.save(plan);
+		
+		List<ProductionPlanItem> planItems = productionPlanItemRepository.findByPlanId(dto.getPlanId());
+		for (ProductionPlanItem item : planItems) {
+			item.setStatus(ProductionStatus.IN_PROGRESS);
+		}
 
 		// 4) 작업스케줄 생성
 		WorkSchedule schedule = WorkSchedule.builder()
@@ -233,6 +271,7 @@ public class OrderService {
 		return String.format("#%02X%02X%02X", R, G, B);
 	}
 	// =======================================================
+	// 공정별 작업자 할당
 	@Transactional
 	public void createWorkerProcessList(WorkOrderRequest dto, WorkSchedule schedule) {
 		Map<String, String> processWorkerMap = Map.of(
@@ -307,23 +346,61 @@ public class OrderService {
 		String planDate = start.toLocalDate().toString();
 		String planTime = start.toLocalTime() + "~" + end.toLocalTime();
 
-		// 작업자 목록 생성
-		List<WorkOrderDetailDTO.WorkInfo> workers =
-				workerProcessRepository.findAllBySchedule_Work_OrderId(id)
-						.stream()
-						.map(wp -> new WorkOrderDetailDTO.WorkInfo(
-								wp.getProcess().getProcessName(), // 공정명
-								wp.getWorker().getEmpName()		  // 작업자 이름
-						))
-						.collect(Collectors.toList());
+		// ================= 작업자 목록 생성 ==================
+		List<WorkOrderDetailDTO.WorkInfo> infos = new ArrayList<>();
+		List<WorkerProcess> workers = workerProcessRepository.findAllBySchedule_Work_OrderId(id);
+		log.info("workers size = {}", workers.size());
+		try {
+			log.info("workers JSON = {}", objectMapper.writeValueAsString(workers));
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
+		List<WorkOrderProcess> processList = workOrderProcessRepository.findByWorkOrderOrderIdOrderByStepSeqAsc(id);
+		log.info("processList size = {}", processList.size());
+		processList.forEach(p -> log.info("process = {}", p));
+		
+		// 1) WorkerProcess를 processId 기준으로 빠르게 조회할 Map 만들기
+		Map<String, String> workerMap = workers.stream()
+		        .collect(Collectors.toMap(
+		                wp -> wp.getProcess().getProcessId(),     // key: 공정ID
+		                wp -> wp.getWorker().getEmpId(),          // value: 작업자ID
+		                (a, b) -> a                               // 중복 발생 시 첫 값 유지
+		        ));
+		
+		// 2) 공정 리스트 순회하며 WorkInfo 생성
+		for (WorkOrderProcess proc : processList) {
 
-		// 공정 진행률 계산
-		int totalSteps = 6;
-		int complete = workOrderProcessRepository
-				.countByWorkOrder_OrderIdAndStatus(id, "COMPLETED");
+		    String processId = proc.getProcess().getProcessId();
+		    String processName = proc.getProcess().getProcessName();
+		    String status = proc.getStatus();  // COMPLETED / IN_PROGRESS / PENDING
+		    String workerId = workerMap.get(processId); // 작업자 없으면 자동으로 null
+		    String workerName = "";
+		    if (workerId != null && !workerId.isBlank()) {
+		    	workerName = empRepository.findByEmpId(workerId)
+		              .orElseThrow(() -> new RuntimeException("작업자 없음 : " + workerId))
+		              .getEmpName();
+		    } else {
+		    	workerName = null;
+		    }
 
-		int progress = (int)((double) complete / totalSteps * 100);
+		    infos.add(
+		            WorkOrderDetailDTO.WorkInfo.builder()
+		                    .processId(processId)
+		                    .processName(processName)
+		                    .status(status)
+		                    .workerId(workerId)
+		                    .workerName(workerName)
+		                    .build()
+		    );
+		}
 
+		// 결과 로깅 (테스트용)
+		infos.forEach(i ->
+		        log.info("WorkInfo => id={}, name={}, status={}, worker={}",
+		                i.getProcessId(), i.getProcessName(), i.getStatus(), i.getWorkerName())
+		);
+		
 		// DTO 변환 후 반환
 		return WorkOrderDetailDTO.builder()
 				.orderId(id)
@@ -335,44 +412,115 @@ public class OrderService {
 				.planTime(planTime)
 				.lineName(order.getLine().getLineName())
 				.routeId(order.getRouteId())
-				.workers(workers)
-				.progress(progress)
+				.infos(infos)
+				.outboundYn(order.getOutboundYn())
+				.remark(order.getRemark())
 				.build();
 
 	}
+	
+	// =======================================================
+	// 작업지시 확정 및 삭제
+	@Transactional
+	public void modifyOrderStatus(String id, String status) {
+		WorkOrder order = workOrderRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("해당하는 작업 번호가 없습니다."));
+		order.setStatus(status);
+		
+		if (status.equals("CANCELED"))
+			outboundService.canceledMaterialOutbound(id);
+			
+	}
+	
+	// =======================================================
+	// 작업지시 수정
+	@Transactional
+	public void updateOrder(String id, Map<String, String> map) {
+		
+		WorkOrder order = workOrderRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("작업지시가 없음"));
+		order.setRemark(map.get("remark"));
+
+		map.forEach((code, worker) -> {
+			if ("remark".equals(code)) return;
+			
+			WorkerProcess wp = workerProcessRepository
+					.findFirstBySchedule_Work_OrderIdAndProcess_ProcessId(id, code)
+					.orElseThrow();
+			
+			Emp emp = empRepository.findByEmpId(worker)
+					.orElseThrow(() -> new RuntimeException("일치하는 작업자가 없음"));
+			
+			wp.setWorker(emp);
+		});
+	}
+	
+	// =======================================================
+	// 모든 작업자 불러오기
+	public void selectAllWorkers() {
+		log.info("테스트.... ::: " + orderMapper.selectMaterials("BG030", 100));
+		
+	}
+
+	// =======================================================
+	// 모든 스케줄 불러오기
+	public List<WorkScheduleDTO> loadAllSchedules() {
+		List<WorkScheduleDTO> list = orderMapper.selectAllSchedules();
+		log.info("here 1................. list..." + list.toString());
+		for (WorkScheduleDTO schedule : list) {
+			log.info("here 1................. schedule..." + schedule.toString());
+			List<WorkerProcessDTO> dtos = orderMapper.selectWorkersBySchedule(schedule.getScheduleId());
+			List<String> workers = new ArrayList<>();
+			for (WorkerProcessDTO dto : dtos) {
+				log.info("here 1................. dto..." + dto.getEmpId());
+				workers.add(dto.getEmpId());
+			}
+			schedule.setWorkers(workers);
+		}
+		return list;
+	}
+	
+	// =======================================================
+	// 작업지시 예상 시간 조회
+	@Transactional(readOnly = true)
+	public long calcExpectedMinutes(String prdId, Integer planQty, String routeId) {
+
+	    // 1) 제품 조회
+	    ProductMst product = productMstRepository.findById(prdId)
+	        .orElseThrow(() -> new RuntimeException("품번 없음: " + prdId));
+
+	    // 2) 라우트 헤더 조회
+	    RouteHeader routeHeader = routeHeaderRepository.findById(routeId)
+	        .orElseThrow(() -> new RuntimeException("라우트 없음: " + routeId));
+
+	    // 3) 라우트 스텝 조회
+	    List<RouteStep> routeSteps =
+	        routeStepRepository.findByRouteHeaderOrderByStepSeqAsc(routeHeader);
+
+	    // 4) 계산용 임시 WorkOrder
+	    WorkOrder tmp = WorkOrder.builder()
+	        .product(product)
+	        .planQty(planQty)
+	        .build();
+
+	    // 5) 전체 공정 예상시간 계산
+	    return ProcessTimeCalculator
+	        .calcExpectedMinutesForWorkOrderFromRoute(tmp, routeSteps);
+	}
+
+	
   
 	// 작업지시서 전체 조회
 	public List<WorkOrderDTO> findAllWorkList() {
-  //		List<WorkOrder> workOrders = workOrderRepository.findByOutboundYn("N");
+  		List<WorkOrder> workOrders = workOrderRepository.findByOutboundYn("N");
 		// 상태가 "N"인게 없어서 "Y"로 작업 후 변경할 예정
-		List<WorkOrder> workOrders = workOrderRepository.findByOutboundYn("Y");
+//		List<WorkOrder> workOrders = workOrderRepository.findByOutboundYn("Y");
 		
 		return workOrders.stream()
 				.map(WorkOrderDTO::fromEntity)
 				.collect(Collectors.toList());
 	}
-	
 
-	// =======================================================
-	// BOM 조회 (여기서부터 재고까지 보류)
-//	public List<BomMstDTO> loadBom(String prdId) {
-//		List<BomMst> bomMst = bomMstRepository.findByPrdId(prdId);
-//		return bomMst.stream()
-//				.map(mst -> new BomMstDTO(
-//						mst.getBomId(),
-//						mst.getPrdId(),
-//						mst.getMatId(),
-//						mst.getMatQty(),
-//						mst.getMatUnit(),
-//						mst.getBomSeqNo(),
-//						mst.getCreatedId(),
-//						mst.getCreatedDate(),
-//						mst.getUpdatedId(),
-//						mst.getUpdatedDate()
-//					))
-//				.toList();
-//	}
-	
 
 }
 

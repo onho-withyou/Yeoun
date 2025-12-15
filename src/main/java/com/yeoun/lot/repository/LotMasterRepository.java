@@ -1,5 +1,6 @@
 package com.yeoun.lot.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,5 +33,9 @@ public interface LotMasterRepository extends JpaRepository<LotMaster, String> {
 
     // LOT 조회
 	Optional<LotMaster> findByLotNo(String lotNo);
+	
+	// 완제품 LOT 목록 조회 (LOT_TYPE = 'WIP', 'FIN' 인 LOT만 대상)
+	// - LOT 추적에서 왼쪽 목록에 출력될 ROOT
+	List<LotMaster> findByLotTypeInOrderByCreatedDateDesc(List<String> lotTypes);
 
 }

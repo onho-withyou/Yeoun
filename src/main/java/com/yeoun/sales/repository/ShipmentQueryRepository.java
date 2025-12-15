@@ -13,14 +13,11 @@ public class ShipmentQueryRepository {
     @PersistenceContext
     private EntityManager em;
 
-    /**
-     * 출하 목록 검색
-     */
     public List<ShipmentListDTO> search(
             String startDate,
             String endDate,
             String keyword,
-            String status
+            List<String> statusList
     ) {
 
         StringBuilder sql = new StringBuilder("""
@@ -30,7 +27,6 @@ public class ShipmentQueryRepository {
                 p.PRD_NAME               AS prdName,
                 oi.ORDER_QTY             AS orderQty,
 
-                /* 현재 재고 */
                 NVL((
                     SELECT SUM(iv.IV_AMOUNT - iv.EXPECT_OB_AMOUNT)
                     FROM INVENTORY iv
@@ -39,30 +35,69 @@ public class ShipmentQueryRepository {
 
                 o.DELIVERY_DATE          AS dueDate,
 
-                /* 출하상태 계산 (ENUM: WAITING, RESERVED, LACK, SHIPPED) */
+               
                 CASE 
                     WHEN EXISTS (
-                        SELECT 1 FROM SHIPMENT s 
+                        SELECT 1 FROM SHIPMENT s
                         WHERE s.ORDER_ID = oi.ORDER_ID
                           AND s.SHIPMENT_STATUS = 'SHIPPED'
-                    )
-                        THEN 'SHIPPED'
+                    ) THEN 'SHIPPED'
+                    
+                     WHEN EXISTS (
+                        SELECT 1 FROM SHIPMENT s
+                        WHERE s.ORDER_ID = oi.ORDER_ID
+                          AND s.SHIPMENT_STATUS = 'PENDING'
+                    ) THEN 'PENDING'
 
                     WHEN EXISTS (
-                        SELECT 1 FROM SHIPMENT s 
+                        SELECT 1 FROM SHIPMENT s
                         WHERE s.ORDER_ID = oi.ORDER_ID
                           AND s.SHIPMENT_STATUS = 'RESERVED'
-                    )
-                        THEN 'RESERVED'
+                    ) THEN 'RESERVED'
 
                     WHEN NVL((
                         SELECT SUM(iv.IV_AMOUNT - iv.EXPECT_OB_AMOUNT)
                         FROM INVENTORY iv WHERE iv.ITEM_ID = oi.PRD_ID
                     ), 0) < oi.ORDER_QTY
-                        THEN 'LACK'
+                    THEN 'LACK'
 
                     ELSE 'WAITING'
-                END AS status
+                END AS status,
+
+               
+                CASE
+                    WHEN 
+                        NOT EXISTS (SELECT 1 FROM SHIPMENT s WHERE s.ORDER_ID = oi.ORDER_ID)
+                        AND NVL((
+                            SELECT SUM(iv.IV_AMOUNT - iv.EXPECT_OB_AMOUNT)
+                            FROM INVENTORY iv WHERE iv.ITEM_ID = oi.PRD_ID
+                        ), 0) >= oi.ORDER_QTY
+                    THEN 1 ELSE 0
+                END AS reservable,
+
+                
+                CASE
+                    WHEN EXISTS (
+                        SELECT 1
+                        FROM ORDER_ITEM oi2
+                        WHERE oi2.ORDER_ID = oi.ORDER_ID
+                        AND (
+                           
+                            NVL((
+                                SELECT SUM(iv2.IV_AMOUNT - iv2.EXPECT_OB_AMOUNT)
+                                FROM INVENTORY iv2 WHERE iv2.ITEM_ID = oi2.PRD_ID
+                            ), 0) < oi2.ORDER_QTY
+                            
+                             OR EXISTS (
+				                SELECT 1
+				                FROM SHIPMENT s2
+				                WHERE s2.ORDER_ID = oi2.ORDER_ID
+				                AND s2.SHIPMENT_STATUS IN ('RESERVED', 'PENDING', 'SHIPPED')
+				          )				                
+                        )
+                    ) THEN 0  
+                    ELSE 1     
+                END AS reservable_group
 
             FROM ORDER_ITEM oi
             JOIN ORDERS o       ON oi.ORDER_ID = o.ORDER_ID
@@ -71,9 +106,6 @@ public class ShipmentQueryRepository {
             WHERE 1=1
         """);
 
-        // ==============================
-        // 날짜 조건
-        // ==============================
         if (startDate != null && !startDate.isEmpty()) {
             sql.append(" AND o.DELIVERY_DATE >= TO_DATE(:startDate, 'YYYY-MM-DD') ");
         }
@@ -82,9 +114,6 @@ public class ShipmentQueryRepository {
             sql.append(" AND o.DELIVERY_DATE <= TO_DATE(:endDate, 'YYYY-MM-DD') ");
         }
 
-        // ==============================
-        // 키워드 검색 조건
-        // ==============================
         if (keyword != null && !keyword.isEmpty()) {
             sql.append("""
                 AND (
@@ -95,11 +124,7 @@ public class ShipmentQueryRepository {
             """);
         }
 
-        // ==============================
-        // 상태 필터 조건
-        // ==============================
-        if (status != null && !status.equals("ALL")) {
-
+        if (statusList != null && !statusList.isEmpty() && !statusList.contains("ALL")) {
             sql.append("""
                 AND (
                     CASE 
@@ -107,40 +132,41 @@ public class ShipmentQueryRepository {
                             SELECT 1 FROM SHIPMENT s 
                             WHERE s.ORDER_ID = oi.ORDER_ID
                               AND s.SHIPMENT_STATUS = 'SHIPPED'
-                        )
-                            THEN 'SHIPPED'
+                        ) THEN 'SHIPPED'
 
                         WHEN EXISTS (
                             SELECT 1 FROM SHIPMENT s 
                             WHERE s.ORDER_ID = oi.ORDER_ID
-                              AND s.SHIPMENT_STATUS = 'RESERVED'
-                        )
-                            THEN 'RESERVED'
+                              AND s.SHIPMENT_STATUS IN ('RESERVED', 'PENDING','SHIPPED')
+                        ) THEN 'RESERVED'
 
                         WHEN NVL((
                             SELECT SUM(iv.IV_AMOUNT - iv.EXPECT_OB_AMOUNT)
                             FROM INVENTORY iv WHERE iv.ITEM_ID = oi.PRD_ID
                         ), 0) < oi.ORDER_QTY
-                            THEN 'LACK'
+                        THEN 'LACK'
 
                         ELSE 'WAITING'
                     END
-                ) = :status
+                ) IN (:statusList)
             """);
         }
 
+
         sql.append(" ORDER BY o.DELIVERY_DATE ");
 
-        // ==============================
-        // 쿼리 생성 + 파라미터 바인딩
-        // ==============================
         var query = em.createNativeQuery(sql.toString(), ShipmentListDTO.class);
 
         if (startDate != null && !startDate.isEmpty()) query.setParameter("startDate", startDate);
         if (endDate != null && !endDate.isEmpty()) query.setParameter("endDate", endDate);
         if (keyword != null && !keyword.isEmpty()) query.setParameter("keyword", keyword);
-        if (status != null && !status.equals("ALL")) query.setParameter("status", status);
+        if (statusList != null && !statusList.isEmpty() && !statusList.contains("ALL")) {
+            query.setParameter("statusList", statusList);
+        }
+
 
         return query.getResultList();
     }
+    
+    
 }

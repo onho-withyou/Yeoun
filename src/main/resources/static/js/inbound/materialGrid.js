@@ -1,6 +1,11 @@
 const grid = new tui.Grid({
 	el: document.getElementById("materialGrid"),
+	bodyHeight: 500,
 	rowHeaders: ['rowNum'],
+	pageOptions: {
+	    useClient: true,  // 클라이언트 사이드 페이징
+	    perPage: 20       // 페이지당 20개 행
+	},	
 	columns: [
 		{
 			header: "입고번호",
@@ -17,6 +22,7 @@ const grid = new tui.Grid({
 		{
 			header: "입고예정일",
 			name: "expectArrivalDate",
+			sortable: true,
 			formatter: ({value}) => formatDate(value)
 		},
 		{
@@ -28,7 +34,7 @@ const grid = new tui.Grid({
 			header: " ",
 			name: "btn",
 			formatter: (rowInfo) => {
-				return `<button class="btn btn-primary btn-sm" data-id="${rowInfo.row.id}">상세</button>`
+				return `<button class="btn btn-outline-info btn-sm" data-id="${rowInfo.row.id}">상세</button>`
 			}
 		}
 	]
@@ -85,7 +91,7 @@ async function loadMaterialInbound(startDate, endDate, searchType, keyword) {
 		}
 		
 		// 원재료정보만필터
-		data = data.filter(row => row.materialId != null && row.materialId !== '');
+		data = data.filter(row => row.inboundType === "MAT_IB");
 		
 		// 상태값이 영어로 들어오는 것을 한글로 변환해서 기존 data에 덮어씌움
 		data = data.map(item => ({
@@ -101,6 +107,9 @@ async function loadMaterialInbound(startDate, endDate, searchType, keyword) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+	//스피너 on
+	showSpinner();
+	
 	// 오늘 날짜 구하기
 	const today = new Date();
 	const year = today.getFullYear();
@@ -116,6 +125,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 	endDateInput.value = endDate;
 	
 	await loadMaterialInbound(startDate, endDate, "all", "");
+	
+	// -----------------------------------------------
+	// 화면 페이지 로딩 css 추가
+	const content = document.getElementById("tabContentArea");
+	
+	if (content) {
+       requestAnimationFrame(() => {
+           content.classList.add("loaded");
+       });
+	 }
+	 
+	//스피너  off
+	hideSpinner();
 });
 
 // 검색

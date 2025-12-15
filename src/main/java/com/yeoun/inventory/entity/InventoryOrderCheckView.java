@@ -33,4 +33,7 @@ public class InventoryOrderCheckView {
 
     @Column(name = "EXPECT_IB_QTY")
     private Long expectIbQty;
+    
+    @Column(name = "ITEM_UNIT")
+    private String itemUnit;
 }

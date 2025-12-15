@@ -32,13 +32,12 @@ import lombok.ToString;
 		)
 @Getter
 @Setter
-@ToString
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
 public class OutboundItem {
 	@Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "OUTBOUND_ITEM_GENERATOR")
 	@Column(name = "OUTBOUND_ITEM_ID", updatable = false)
-	private Long OutboundItemId; // 입고대기품목 id
+	private Long outboundItemId; // 입고대기품목 id
 	
 	@ManyToOne
 	@JoinColumn(name = "OUTBOUND_ID")
@@ -58,16 +57,21 @@ public class OutboundItem {
 
 	@Column(nullable = true)
 	private Long ivId; // 재고Id
+	
+	@Column(nullable = true)
+	private String locationId;
 
 	@Builder
-	public OutboundItem(Outbound outbound, String outboundId, String itemId, String lotNo, Long outboundAmount,
-			String itemType, Long ivId) {
+	public OutboundItem(Long outboundItemId, Outbound outbound, String outboundId, String itemId, String lotNo, Long outboundAmount,
+			String itemType, Long ivId, String locationId) {
+		this.outboundItemId = outboundItemId;
 		this.itemId = itemId;
 		this.lotNo = lotNo;
 		this.outboundAmount = outboundAmount;
 		this.itemType = itemType;
 		this.ivId = ivId;
 		this.outbound = outbound;
+		this.locationId = locationId;
 	}
 	
 	

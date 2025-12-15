@@ -1,5 +1,6 @@
 package com.yeoun.qc.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,16 +34,18 @@ public interface QcResultRepository extends JpaRepository<QcResult, Long> {
             w.product.prdName,
             w.planQty,
             q.overallResult,
-            q.inspectionDate
+            q.inspectionDate,
+            wop.lotNo
         )
         FROM QcResult q
         JOIN WorkOrder w ON w.orderId = q.orderId
+        LEFT JOIN WorkOrderProcess wop ON wop.workOrder = w AND wop.stepSeq = 1
         WHERE q.overallResult = :status
         ORDER BY w.createdDate DESC
         """)
     List<QcRegistDTO> findRegistListByStatus(@Param("status") String status);
     
-    //
+    // QC 결과 조회
     @Query("""
             select new com.yeoun.qc.dto.QcResultListDTO(
                 r.qcResultId,
@@ -60,5 +63,21 @@ public interface QcResultRepository extends JpaRepository<QcResult, Long> {
             order by r.inspectionDate desc nulls last
             """)
 	List<QcResultListDTO> findResultListForView();
+    
+    // 작업지시 기준으로 가장 최근에 생성된 QC 결과 1건 조회
+    // (QC 결과가 여러 건 존재할 수 있으므로 최신 데이터 기준)
+    Optional<QcResult> findFirstByOrderIdOrderByQcResultIdDesc(String orderId);
+
+    // =========================
+    // 생산관리 대시보드
+    // =========================
+    // QC FAIL 집계
+    long countByOverallResultAndInspectionDateGreaterThanEqualAndInspectionDateLessThan(
+            String overallResult,
+            LocalDate start,
+            LocalDate end
+    );
+
+
     
 }

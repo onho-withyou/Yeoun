@@ -49,8 +49,20 @@ public class LotMaster {
 	private String orderId;
 	
 	// 제품 ID
-	@Column(nullable = false)
+	@Column(name = "PRD_ID", nullable = false)
 	private String prdId;
+	
+	// 완제품(Product) 조인 - prdId가 제품 코드일 때만 매칭됨
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "PRD_ID", insertable = false, updatable = false)
+	@NotFound(action = NotFoundAction.IGNORE)
+	private ProductMst product;
+
+	// 원자재(Material) 조인 - prdId가 원자재 코드일 때만 매칭됨
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "PRD_ID", insertable = false, updatable = false)
+	@NotFound(action = NotFoundAction.IGNORE)
+	private MaterialMst material;
 	
 	// 현재수량
 	@Column(name = "QUANTITY", nullable = true)
@@ -78,6 +90,22 @@ public class LotMaster {
 	private LocalDateTime createdDate;
 	
 	// =======================================================
-	// 상태 변경 메서드 추가 예정
+	// 표준 이름 반환 메서드
+	public String getDisplayName() {
+
+	    // 완제품이면
+	    if (product != null) {
+	        return product.getPrdName();
+	    }
+
+	    // 원자재 LOT이면
+	    if (material != null) {
+	        return material.getMatName();
+	    }
+
+	    // 둘 다 없으면 코드라도
+	    return prdId;
+	}
+
 
 }

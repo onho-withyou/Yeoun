@@ -1,8 +1,5 @@
-package com.yeoun.masterData.entity;
+package com.yeoun.equipment.entity;
 
-import java.time.LocalDateTime;
-
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
@@ -14,26 +11,25 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "EQUIPMENT")
+@Table(name = "PROD_LINE")
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
-public class Equipment {
+public class ProdLine {
 	
-	@Id @Column(nullable = false)
-	private String equipId;
-	
-	@Column(nullable = false)
-	private String koName;
+	@Id @Column(nullable = false, name = "LINE_ID")
+	private String lineId;
 	
 	@Column(nullable = false)
-	private String equipName;
+	private String lineName;
 	
-	@CreatedDate
 	@Column(nullable = false)
-	private LocalDateTime createdDate;
+	private String status;
+
+	@Column(nullable = false,  columnDefinition = "CHAR(1) DEFAULT 'Y'")
+	private String useYn = "Y";
 	
-	@Column
-	private LocalDateTime updatedDate;
+	@Column(length = 500)
+	private String remark;
 
 }

@@ -1,12 +1,9 @@
-package com.yeoun.order.entity;
+package com.yeoun.equipment.entity;
 
 import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import com.yeoun.masterData.entity.Equipment;
-import com.yeoun.masterData.entity.ProdLine;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

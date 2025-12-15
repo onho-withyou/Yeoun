@@ -1,14 +1,17 @@
 package com.yeoun.process.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.process.dto.WorkOrderProcessDTO;
@@ -36,8 +39,11 @@ public class WorkOrderProcessController {
 	// 공정 현황 목록 데이터
 	@GetMapping("/status/data")
 	@ResponseBody
-	public List<WorkOrderProcessDTO> getWorkOrdersForGrid() {
-		return workOrderProcessService.getWorkOrderListForStatus();
+	public List<WorkOrderProcessDTO> getWorkOrdersForGrid(@RequestParam(name = "workDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate workDate,
+														  @RequestParam(name = "searchProcess", required = false) String processId,
+														  @RequestParam(name = "searchHStatus", required = false) String status,
+														  @RequestParam(name = "searchKeyword", required = false) String keyword) {
+		return workOrderProcessService.getWorkOrderListForStatus(workDate, processId, status, keyword);
 	}
 	
 	// 공정 현황 상세 모달용 데이터
@@ -54,12 +60,16 @@ public class WorkOrderProcessController {
     @ResponseBody
     public Map<String, Object> startStep(@RequestBody StepRequest req) {
         try {
-            WorkOrderProcessStepDTO updated =
-                    workOrderProcessService.startStep(req.getOrderId(), req.getStepSeq());
+        	workOrderProcessService.startStep(req.getOrderId(), req.getStepSeq());
+        	
+        	// 공정 시작 처리 후, 최신 상세 다시 조회
+        	WorkOrderProcessDetailDTO detail =
+                    workOrderProcessService.getWorkOrderProcessDetail(req.getOrderId());
+        	
             return Map.of(
                     "success", true,
                     "message", "공정을 시작 처리했습니다.",
-                    "updatedStep", updated
+                    "detail", detail
             );
         } catch (Exception e) {
             return Map.of(
@@ -73,12 +83,17 @@ public class WorkOrderProcessController {
     @ResponseBody
     public Map<String, Object> finishStep(@RequestBody StepRequest req) {
         try {
-            WorkOrderProcessStepDTO updated =
-                    workOrderProcessService.finishStep(req.getOrderId(), req.getStepSeq());
+        	workOrderProcessService.finishStep(req.getOrderId(), req.getStepSeq(), 
+        									   req.getGoodQty(), req.getDefectQty(), req.getMemo());
+        	
+        	// 공정 종료 처리 후, 최신 상세 다시 조회
+        	WorkOrderProcessDetailDTO detail =
+                    workOrderProcessService.getWorkOrderProcessDetail(req.getOrderId());
+        	
             return Map.of(
                     "success", true,
                     "message", "공정을 종료 처리했습니다.",
-                    "updatedStep", updated
+                    "detail", detail
             );
         } catch (Exception e) {
             return Map.of(
@@ -92,12 +107,17 @@ public class WorkOrderProcessController {
     @ResponseBody
     public Map<String, Object> updateMemo(@RequestBody MemoRequest req) {
         try {
-            WorkOrderProcessStepDTO updated =
-                    workOrderProcessService.updateStepMemo(req.getOrderId(), req.getStepSeq(), req.getMemo());
+        	workOrderProcessService.updateStepMemo(
+                    req.getOrderId(), req.getStepSeq(), req.getMemo());
+        	
+        	// 메모 저장 후, 최신 상세 다시 조회
+            WorkOrderProcessDetailDTO detail =
+                    workOrderProcessService.getWorkOrderProcessDetail(req.getOrderId());
+        	
             return Map.of(
                     "success", true,
                     "message", "메모를 저장했습니다.",
-                    "updatedStep", updated
+                    "detail", detail
             );
         } catch (Exception e) {
             return Map.of(
@@ -112,6 +132,9 @@ public class WorkOrderProcessController {
     public static class StepRequest {
         private String orderId;
         private Integer stepSeq;
+        private Integer goodQty;
+        private Integer defectQty;
+        private String memo;
     }
 
     @Getter @Setter

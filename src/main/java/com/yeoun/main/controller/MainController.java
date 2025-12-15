@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -43,17 +44,7 @@ public class MainController {
 	private final AttendanceService attendanceService;
 	private final ApprovalDocService approvalDocService;
 
-	@GetMapping("/test")
-	public String test() {
-		return "/main/organizationChartModal";
-	}
-
-	// 메인페이지 맵핑
-	// @GetMapping("")
-	// public String Main() {
-	//
-	// return "/main/main";
-	// }
+	private final SimpMessagingTemplate messagingTemplate;
 
 	// 메인페이지 스케줄페이지
 	@GetMapping("")

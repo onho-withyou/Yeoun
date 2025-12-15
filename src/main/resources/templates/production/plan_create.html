@@ -18,8 +18,10 @@
 <th:block layout:fragment="content">
 
 <div class="custom-body container-xxl flex-grow-1 container-p-y">
+   
 
     <h3 class="fw-bold mb-4">생산계획생성</h3>
+
 
     <!-- =============================
          1) 조회 영역
@@ -40,6 +42,12 @@
             <button id="btnLoadSuggested" class="btn btn-primary">
                 조회
             </button>
+            
+            <a href="/production/plan" class="btn btn-outline-secondary">
+            ← 목록으로
+        </a>
+            
+    
         </div>
     </div>
     
@@ -129,8 +137,10 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-            </div>
+			    <button class="btn btn-primary" id="btnSelectOrders">생산계획 생성</button>
+			    <button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+			</div>
+
 
         </div>
     </div>

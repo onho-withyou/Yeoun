@@ -23,6 +23,10 @@ import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.inbound.dto.ReceiptDTO;
 import com.yeoun.outbound.dto.OutboundOrderDTO;
 import com.yeoun.outbound.service.OutboundService;
+import com.yeoun.sales.dto.OrderDetailDTO;
+import com.yeoun.sales.dto.ShipmentDetailDTO;
+import com.yeoun.sales.service.ShipmentDetailService;
+import com.yeoun.sales.service.ShipmentService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -33,9 +37,12 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class OutboundController {
 	private final OutboundService outboundService;
+	private final ShipmentDetailService shipmentDetailService;
+	private final ShipmentService shipmentService;
+
 	
 	// 출고관리 페이지
-	@GetMapping("/list")
+	@GetMapping("")
 	public String outboundList(Model model) {
 		// 탭 활성화를 위한 정보
 		model.addAttribute("activeTab", "mat");
@@ -78,7 +85,6 @@ public class OutboundController {
 	public ResponseEntity<Map<String, String>> registFgOutbound(@RequestBody OutboundOrderDTO outboundOrderDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
 		try {
 			outboundService.saveOutbound(outboundOrderDTO, loginDTO.getEmpId());
-			
 			return ResponseEntity.status(HttpStatus.CREATED)
 					.body(Map.of("message", "등록 완료"));
 		} catch (Exception e) {
@@ -114,6 +120,16 @@ public class OutboundController {
 		return "outbound/material_detail";
 	}
 	
+	// 완제품 출고 상세페이지
+	@GetMapping("/prd/{outboundId}")
+	public String productDetail(@PathVariable("outboundId") String outboundId, Model model) {
+		OutboundOrderDTO outboundOrderDTO = outboundService.getProductOutbound(outboundId);
+		
+		model.addAttribute("outboundOrderDTO", outboundOrderDTO);
+		
+		return "outbound/product_detail";
+	}
+	
 	// 출고완료
 	@PostMapping("/mat/complete")
 	@ResponseBody
@@ -125,5 +141,40 @@ public class OutboundController {
 		result.put("success", true);
 		
 		return result;
+	}
+	
+	// 완제품 출고 완료
+	@PostMapping("/prd/complete")
+	@ResponseBody
+	public Map<String, Object> productComplete(@RequestBody OutboundOrderDTO OutboundOrderDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
+		outboundService.updateOutbound(OutboundOrderDTO, loginDTO.getEmpId());
+		
+		  // 출하 확정 + TRACKING_NUMBER 생성
+	   // String shipmentId = OutboundOrderDTO.getShipmentId(); // ⭐ 중요
+	   // shipmentService.confirmShipment(shipmentId, loginDTO.getEmpId());
+		
+		Map<String, Object> result = new HashMap<>();
+		
+		result.put("success", true);
+		
+		return result;
+	}
+	
+	// 출고상세정보 - 작업지시서 새창
+	@GetMapping("/detail/prodWin/{id}")
+	public String product(Model model, @PathVariable("id") String id) {
+		// 탭 활성화를 위한 정보
+		model.addAttribute("id", id);
+		return "inbound/workorder_window";
+	}
+	
+	// 출고상세정보 - 출하지시서 새창
+	@GetMapping("/detail/shipdWin/{id}")
+	public String shipmnet(@PathVariable("id") String id, Model model) {
+		OrderDetailDTO orderDetailDTO  = outboundService.getShipmentDetail(id);
+		
+		model.addAttribute("orderDetailDTO", orderDetailDTO);
+		
+		return "outbound/shipment_info";
 	}
 }

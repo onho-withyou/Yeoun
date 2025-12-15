@@ -1,6 +1,11 @@
 const productGrid = new tui.Grid({
 	el: document.getElementById("productGrid"),
+	bodyHeight: 500,
 	rowHeaders: ['rowNum'],
+	pageOptions: {
+	    useClient: true,  // 클라이언트 사이드 페이징
+	    perPage: 20       // 페이지당 20개 행
+	},	
 	columns: [
 		{
 			header: "출고번호",
@@ -13,11 +18,13 @@ const productGrid = new tui.Grid({
 		{
 			header: "출고예정일",
 			name: "startDate",
+			sortable: true,
 			formatter: ({value}) => formatDate(value)
 		},
 		{
 			header: "출고일",
 			name: "outboundDate",
+			sortable: true,
 			formatter: ({value}) => formatDate(value)
 		},
 		{
@@ -29,7 +36,7 @@ const productGrid = new tui.Grid({
 			header: " ",
 			name: "btn",
 			formatter: (rowInfo) => {
-				return `<button class="btn btn-primary btn-sm" data-id="${rowInfo.row.id}">상세</button>`
+				return `<button class="btn btn-outline-info btn-sm" data-id="${rowInfo.row.id}">상세</button>`
 			}
 		}
 	]
@@ -41,7 +48,6 @@ productGrid.on("click", (ev) => {
 	
 	if (columnName === "btn") {
 		const row = productGrid.getRow(rowKey);
-		console.log(row);
 		// 입고 상세 페이지로 이동
 		location.href = `/inventory/outbound/prd/${row.outboundId}`
 	}
@@ -57,7 +63,7 @@ function formatDate(isoDate) {
 	return isoDate.split("T")[0]; // YYYY-MM-dd 형식
 }
 
-// 원재료 정보 불러오기
+// 출고 정보 불러오기
 async function loadProductOutbound(startDate, endDate, keyword) {
 	const MATERIAL_OUTBOUND_LIST = 
 		`/inventory/outbound/list/data` +
@@ -76,8 +82,6 @@ async function loadProductOutbound(startDate, endDate, keyword) {
 		
 		let prdOutboundList  = data.filter(item => item.shipmentId != null);
 		
-		console.log(prdOutboundList );
-		
 		// 데이터가 없을 경우 빈배열 반환
 		if (!prdOutboundList  || prdOutboundList .length === 0) {
 			productGrid.resetData([]);
@@ -85,7 +89,8 @@ async function loadProductOutbound(startDate, endDate, keyword) {
 		
 		const statusMap = {
 			WAITING : "출고대기",
-			COMPLETED: "출고완료"
+			COMPLETED: "출고완료",
+			CANCELED: "출고취소"
 		}
 		
 		// 상태값이 영어로 들어오는 것을 한글로 변환해서 기존 data에 덮어씌움
@@ -102,6 +107,9 @@ async function loadProductOutbound(startDate, endDate, keyword) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+	//스피너 on
+	showSpinner();
+	
 	// 오늘 날짜 구하기
 	const today = new Date();
 	const year = today.getFullYear();
@@ -117,6 +125,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 	prdEndDateInput.value = endDate;
 	
 	await loadProductOutbound(startDate, endDate, null);
+	
+	//스피너  off
+	hideSpinner();
 });
 
 // 검색
@@ -154,7 +165,7 @@ document.querySelector("#prdEndDate").addEventListener("input", async () => {
 
 // =============================================================
 // 출고 등록 로직
-const shipmentSelect = document.querySelector("#shipmnetSelect");
+const shipmentSelect = document.querySelector("#shipmentSelect");
 const processByName = document.querySelector("#processByName");
 const processByEmpId = document.querySelector(".processById");
 const shopClientName = document.querySelector("#shopClientName");
@@ -167,7 +178,7 @@ let shipmentList = [];
 let prdOutboundDate;
 
 // 출하지시서 정보 가져오기
-async function loadShipmnetList() {
+async function loadShipmentList() {
 	try {
 		
 		// 출하지시서 데이터 가져오는 API 작성하기
@@ -190,7 +201,7 @@ async function loadShipmnetList() {
 
 // 출하지시서 선택 이벤트
 shipmentSelect.addEventListener("focus", async () => {
-	shipmentList = await loadShipmnetList();
+	shipmentList = await loadShipmentList();
 	
 	if (shipmentList.length === 0) {
 		return;
@@ -226,7 +237,18 @@ shipmentSelect.addEventListener("focus", async () => {
 		// 선택한 출하지시서에 따른 담당자, 거래처명, 출고일 정보 입력
 		processByName.value = shipOrder.createdName;
 		shopClientName.value = shipOrder.clientName;
-		expectDate.value = shipOrder.startDate?.split("T")[0] || "0";
+		
+		// 오늘 날짜 구하기(한국 시간)
+		const now = new Date();
+		const today = new Date(now.getTime() - (now.getTimezoneOffset() * 60000))
+				.toISOString()
+				.split("T")[0];
+				
+		// 오늘 이전 날자 선택 불가
+		expectDate.min = today;
+		
+		// startDate가 없으면 오늘 날짜를 기본값으로 하거나 0 처리
+		expectDate.value = shipOrder.startDate?.split("T")[0] || today;
 		
 		prdOutboundDate = shipOrder.startDate;
 		
@@ -234,6 +256,11 @@ shipmentSelect.addEventListener("focus", async () => {
 		renderProductList(shipOrder.items);
 		
 	});
+});
+
+// 출고 버튼 클릭(모달 초기화)
+document.querySelector("#prdRegistBtn").addEventListener("click", () => {
+	restPrdModal();
 });
 
 // 출하지시서에 해당하는 품목 렌더링
@@ -248,8 +275,8 @@ function renderProductList(items) {
 			<tr>
 				<td>${prd.prdId}</td>
 				<td>${prd.prdName}</td>
-				<td>${prd.shipmentQty}</td>
-				<td>${prd.orderqQty}</td>
+				<td data-qty="${prd.shipmentQty}" name="shipmentQty">${prd.shipmentQty}</td>
+				<td data-stock="${prd.orderqQty}" name="stock">${prd.orderqQty}</td>
 				<td>
 					<input type="number" class="form-control outboundQty" min="0">
 					<input type="hidden" name="prdId" value="${prd.prdId}"/>
@@ -265,14 +292,32 @@ function renderProductList(items) {
 const submitPrdOutbound = async () => {
 	// 출고 품목을 담을 변수
 	const items = [];
+	const rows = document.querySelectorAll("#shipTbody tr");
 	
 	// 출고 품목들 items 추가
-	document.querySelectorAll("#shipTbody tr").forEach(tr => {
+	for (const row of rows) {
+		const shipmentQty = Number(row.querySelector("td[name=shipmentQty]").dataset.qty);
+		// 출고 수량
+		const outboundQty = Number(row.querySelector(".outboundQty").value);
+		
+		// 출고 수량과 요청 수량 비교
+		if (outboundQty > shipmentQty) {
+			alert("출고 수량이 요청 수량보다 많습니다.");
+			return;
+		}
+		
+		// 출고 수량과 요청 수량 비교
+		if (shipmentQty > outboundQty) {
+			alert("출고 수량이 요청 수량보다 적습니다.");
+			return;
+		}
+		
 		items.push({
-			prdId: tr.querySelector("input[name=prdId]").value,
-			outboundQty: tr.querySelector(".outboundQty").value
+			prdId: row.querySelector("input[name=prdId]").value,
+			outboundQty: row.querySelector(".outboundQty").value
 		});
-	});
+		
+	}
 	
 	// body에 담아서 보낼 내용
 	const payload = {
@@ -302,6 +347,15 @@ const submitPrdOutbound = async () => {
 	alert("출고 등록이 완료되었습니다." || result.message);
 	
 	setTimeout(() => {
-		location.reload();
+		location.href = "/inventory/outbound/productList";
 	}, 300);
+}
+
+// 모달 초기화
+function restPrdModal() {
+	shipmentSelect.innerHTML = '<option value="">출하지시서를 선택하세요</option>';
+	processByName.vlaeu = "";
+	shopClientName.value = "";
+	expectDate.value = "";
+	shipTbody.innerHTML = "";
 }

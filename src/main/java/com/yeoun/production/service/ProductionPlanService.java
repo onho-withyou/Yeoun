@@ -47,22 +47,22 @@ public class ProductionPlanService {
              .orElse("미지정");
 
      return new OrderItemDTO(
-             oi.getOrderItemId(),
-             oi.getOrderId(),
-             oi.getPrdId(),
-             oi.getProduct().getPrdName(),
-             oi.getOrderQty().intValue(),
+    		    oi.getOrderItemId(),
+    		    oi.getOrderId(),
+    		    oi.getPrdId(),
+    		    oi.getProduct().getPrdName(),
+    		    oi.getOrderQty(),   // ✅ BigDecimal 그대로
 
-             oi.getOrder().getClient().getClientName(),     // 거래처명
-             oi.getOrder().getClient().getManagerName(),    // 담당자명
-             oi.getOrder().getClient().getManagerTel(),     // 연락처
-             oi.getOrder().getClient().getManagerEmail(),   // 이메일
+    		    oi.getOrder().getClient().getClientName(),
+    		    oi.getOrder().getClient().getManagerName(),
+    		    oi.getOrder().getClient().getManagerTel(),
+    		    oi.getOrder().getClient().getManagerEmail(),
 
-             oi.getOrder().getOrderDate(),                  // 수주일자
-             oi.getOrder().getDeliveryDate(),               // 납기일
+    		    oi.getOrder().getOrderDate(),
+    		    oi.getOrder().getDeliveryDate(),
 
-             empName                                        // ⭐ 내부 담당자명
-     );
+    		    empName
+    		);
  }
 
 
@@ -92,75 +92,93 @@ public class ProductionPlanService {
         return prefix + String.format("%03d", seq);
     }
 
+
     /* ================================
-        생산계획 생성 (수동)
-    ================================ */
-    @Transactional
-    public String createPlan(List<PlanCreateItemDTO> items, String createdBy, String memo) {
+    생산계획 생성 (수동, 모달 선택 기반)
+ ================================ */
+@Transactional
+public String createPlan(List<PlanCreateItemDTO> items, String createdBy, String memo) {
 
-        if (items == null || items.isEmpty()) {
-            throw new IllegalArgumentException("생산계획 생성 실패: 선택된 수주 항목이 없습니다.");
-        }
+    if (items == null || items.isEmpty()) {
+        throw new IllegalArgumentException("생산계획 생성 실패: 선택된 수주 항목이 없습니다.");
+    }
 
-        String prdId = null;
-        int totalPlanQty = 0;
-        List<Long> orderItemIdList = new ArrayList<>();
+    String prdId = null;
+    int totalPlanQty = 0;
 
-        for (PlanCreateItemDTO dto : items) {
-            OrderItem oi = orderItemRepository.findById(dto.getOrderItemId())
-                    .orElseThrow(() -> new IllegalArgumentException("OrderItem 없음: " + dto.getOrderItemId()));
+    List<Long> orderItemIdList = new ArrayList<>();
 
-            orderItemIdList.add(oi.getOrderItemId());
+    for (PlanCreateItemDTO dto : items) {
 
-            if (prdId == null) prdId = oi.getPrdId();
-            else if (!prdId.equals(oi.getPrdId()))
-                throw new IllegalArgumentException("생산계획은 동일 제품만 묶어서 생성할 수 있습니다.");
+        OrderItem oi = orderItemRepository.findById(dto.getOrderItemId())
+                .orElseThrow(() -> new IllegalArgumentException("OrderItem 없음: " + dto.getOrderItemId()));
 
-            totalPlanQty += dto.getQty();
-        }
+        // 제품 통일성 체크
+        if (prdId == null) prdId = oi.getPrdId();
+        else if (!prdId.equals(oi.getPrdId()))
+            throw new IllegalArgumentException("생산계획은 동일 제품만 묶어서 생성할 수 있습니다.");
 
-        String planId = generatePlanId();
+        // 프론트에서 선택한 qty 사용
+        int qty = dto.getQty();
+        if (qty <= 0) throw new IllegalArgumentException("잘못된 생산 수량: " + qty);
 
-        // 마스터 생성
-        ProductionPlan plan = ProductionPlan.builder()
+        totalPlanQty += qty;
+        orderItemIdList.add(oi.getOrderItemId());
+    }
+
+    // ================================
+    // PLAN MASTER 생성
+    // ================================
+    String planId = generatePlanId();
+
+    ProductionPlan plan = ProductionPlan.builder()
+            .planId(planId)
+            .prdId(prdId)
+            .planQty(totalPlanQty)
+            .planDate(LocalDate.now())
+            .dueDate(LocalDate.now().plusDays(7))
+            .status(ProductionStatus.PLANNING)
+            .planMemo(memo)
+            .createdBy(createdBy)
+            .build();
+
+    planRepo.save(plan);
+
+
+    // ================================
+    // PLAN DETAIL 생성
+    // ================================
+    for (PlanCreateItemDTO dto : items) {
+
+        OrderItem oi = orderItemRepository.findById(dto.getOrderItemId())
+                .orElseThrow(() -> new IllegalArgumentException("OrderItem 없음: " + dto.getOrderItemId()));
+
+        int qty = dto.getQty(); // ⭐ 선택된 qty 그대로 사용
+
+        ProductionPlanItem detail = ProductionPlanItem.builder()
+                .planItemId(generatePlanItemId())
                 .planId(planId)
                 .prdId(prdId)
-                .planQty(totalPlanQty)
-                .planDate(LocalDate.now())
-                .dueDate(LocalDate.now().plusDays(7))
+                .orderItemId(oi.getOrderItemId())
+                .orderQty(oi.getOrderQty())   // 원 수주 수량은 기록만
+                .planQty(BigDecimal.valueOf(qty)) // ⭐ 실제 생산계획 수량
+                .bomStatus(BomStatus.WAIT)
                 .status(ProductionStatus.PLANNING)
-                .planMemo(memo)
+                .itemMemo("")
                 .createdBy(createdBy)
                 .build();
 
-        planRepo.save(plan);
-
-        // 상세 생성
-        for (PlanCreateItemDTO dto : items) {
-            OrderItem oi = orderItemRepository.findById(dto.getOrderItemId())
-                    .orElseThrow(() -> new IllegalArgumentException("OrderItem 없음: " + dto.getOrderItemId()));
-
-            ProductionPlanItem detail = ProductionPlanItem.builder()
-                    .planItemId(generatePlanItemId())
-                    .planId(planId)
-                    .prdId(prdId)
-                    .orderItemId(oi.getOrderItemId())
-                    .orderQty(oi.getOrderQty())
-                    .planQty(oi.getOrderQty())
-                    .bomStatus(BomStatus.WAIT)
-                    .status(ProductionStatus.PLANNING)
-                    .itemMemo("")
-                    .createdBy(createdBy)
-                    .build();
-
-            itemRepo.save(detail);
-        }
-
-        // OrderItem 상태 변경
-        orderItemIdList.forEach(orderItemRepository::updateStatusToPlanned);
-
-        return planId;
+        itemRepo.save(detail);
     }
+
+
+    // ================================
+    // ORDER ITEM 상태 변경
+    // ================================
+    orderItemIdList.forEach(orderItemRepository::updateStatusToPlanned);
+
+    return planId;
+}
 
     /* ================================
        생산계획 목록 조회
@@ -399,7 +417,8 @@ public class ProductionPlanService {
     ============================ */
     public List<OrderItemDTO> getOrderItemsByProduct(String prdId) {
 
-        List<OrderItem> list = orderItemRepository.findByPrdId(prdId);
+      //  List<OrderItem> list = orderItemRepository.findByPrdId(prdId);
+        List<OrderItem> list = orderItemRepository.findByPrdIdAndItemStatus(prdId, "CONFIRMED");
 
         List<OrderItemDTO> dtoList = new ArrayList<>();
 
@@ -478,6 +497,47 @@ public class ProductionPlanService {
 
         log.info("✅ prdId={} : 모든 원자재 충분 → BOM 정상", prdId);
         return false;
+    }
+    
+    /* ============================
+    		생산계획 취소
+  		============================ */    
+    
+    @Transactional
+    public void cancelProductionPlan(String planId, String empId) {
+
+        // 1️⃣ 생산계획 조회
+        ProductionPlan plan = planRepo.findById(planId)
+            .orElseThrow(() -> new IllegalArgumentException("생산계획이 존재하지 않습니다."));
+
+        // 2️⃣ 상태 체크 (검토대기만 가능)
+        if (plan.getStatus() != ProductionStatus.PLANNING) {
+            throw new IllegalStateException(
+                "검토대기 상태의 생산계획만 취소할 수 있습니다."
+            );
+        }
+
+        // 3️⃣ 생산계획 상태 취소
+        plan.setStatus(ProductionStatus.CANCELLED);
+        plan.setUpdatedBy(empId);
+
+        // 4️⃣ 생산계획 상세 조회
+        List<ProductionPlanItem> planItems =
+            itemRepo.findByPlanId(planId);
+
+        for (ProductionPlanItem item : planItems) {
+
+            // 4-1️⃣ 생산계획 ITEM 상태 취소
+            item.setStatus(ProductionStatus.CANCELLED);            
+
+            // 4-2️⃣ 연결된 주문상세 상태 복구
+            Long orderItemId = item.getOrderItemId();
+            if (orderItemId != null) {
+                orderItemRepository
+                    .updateItemStatusToConfirmedByOrderItemId(orderItemId);
+            
+            }
+        }
     }
 
 }
