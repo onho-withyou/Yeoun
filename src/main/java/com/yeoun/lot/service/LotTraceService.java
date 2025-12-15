@@ -151,11 +151,11 @@ public class LotTraceService {
 	// 완제품 ROOT 목록
 	@Transactional(readOnly = true)
 	public List<LotRootDTO> getFinishedLots() {
-	    return getFinishedLots(null);
+	    return getFinishedLots(null, null, null);
 	}
 	
 	@Transactional(readOnly = true)
-	public List<LotRootDTO> getFinishedLots(String keyword) {
+	public List<LotRootDTO> getFinishedLots(String keyword, String status, String type) {
 		
 		// 완제품 공정에 속한 LOT 타입
 		List<String> lotTypes = List.of("WIP", "FIN");
@@ -165,12 +165,22 @@ public class LotTraceService {
 				lotMasterRepository.findByLotTypeInOrderByCreatedDateDesc(lotTypes);
 		
 		final String kw = (keyword == null) ? "" : keyword.trim();
+		final String st = (status == null) ? "" : status.trim();
+		final String tp = (type == null) ? "" : type.trim();
 		
 		return lots.stream()
 		        .filter(lm -> {
 		            if (kw.isEmpty()) return true;
 		            return (lm.getLotNo() != null && lm.getLotNo().contains(kw))
 		                || (lm.getDisplayName() != null && lm.getDisplayName().contains(kw));
+		        })
+		        .filter(lm -> {
+		            if (st.isEmpty()) return true;
+		            return st.equals(lm.getCurrentStatus());
+		        })
+		        .filter(lm -> {
+		            if (tp.isEmpty()) return true;
+		            return tp.equals(lm.getLotType());
 		        })
 		        .map(lm -> {
 		            LotStatus statusEnum = LotStatus.fromCode(lm.getCurrentStatus());

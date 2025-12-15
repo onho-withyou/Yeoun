@@ -33,14 +33,18 @@ public class LotTraceController {
 	public String view(@RequestParam(name = "lotNo", required = false) String lotNo, 
 					   @RequestParam(name = "stepSeq", required = false) Integer stepSeq,
 					   @RequestParam(name = "keyword", required = false) String keyword,
+					   @RequestParam(name="status", required=false) String status,
+	                   @RequestParam(name="type", required=false) String type,
 					   Model model) {
 		
 		// 1) 왼쪽에 표시할 WIP + FIN LOT 목록
-		List<LotRootDTO> lotList = lotTraceService.getFinishedLots(keyword);
+		List<LotRootDTO> lotList = lotTraceService.getFinishedLots(keyword, status, type);
 		model.addAttribute("lotList", lotList);
 		
 		// 2) 검색어 유지
 	    model.addAttribute("keyword", keyword);
+	    model.addAttribute("status", status);
+	    model.addAttribute("type", type);
 		
 		return "/lot/trace";
 	}

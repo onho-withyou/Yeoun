@@ -29,16 +29,21 @@
 
               <div class="col-md-3">
                 <label class="form-label" for="searchProductStatus">생산 상태</label>
-                <select class="form-select" id="searchProductStatus">
-                  <option value="">전체</option>
-                </select>
+				<select class="form-select" id="searchProductStatus" name="status">
+				  <option value="" th:selected="${status == null || status == ''}">전체</option>
+				  <option value="IN_PROCESS" th:selected="${status == 'IN_PROCESS'}">공정 진행 중</option>
+				  <option value="PROD_DONE"  th:selected="${status == 'PROD_DONE'}">생산 완료</option>
+				  <option value="SCRAPPED"   th:selected="${status == 'SCRAPPED'}">폐기</option>
+				</select>
               </div>
 
               <div class="col-md-3">
                 <label class="form-label" for="searchProductType">제품 유형</label>
-                <select class="form-select" id="searchProductType">
-                  <option value="">전체</option>
-                </select>
+                <select class="form-select" id="searchProductType" name="type">
+				  <option value="" th:selected="${type == null || type == ''}">전체</option>
+				  <option value="WIP" th:selected="${type == 'WIP'}">재공</option>
+				  <option value="FIN" th:selected="${type == 'FIN'}">완제품</option>
+				</select>
               </div>
 
               <div class="col-md-1">
