@@ -1,5 +1,115 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+  /* ============================================
+     ✅ 수주일자 / 납기일자 즉시 검증 + 버튼 비활성화
+  ============================================ */
+  const form = document.getElementById("orderForm");
+  const btnSave = document.getElementById("btnSaveOrder");
+
+  const orderDateInput = document.getElementById("orderDate");
+  const deliveryDateInput = document.getElementById("deliveryDate");
+  const deliveryErr = document.getElementById("deliveryDateError");
+
+  function showDeliveryError(msg) {
+    if (!deliveryErr) return;
+    if (!msg) {
+      deliveryErr.classList.add("d-none");
+      deliveryErr.textContent = "";
+    } else {
+      deliveryErr.classList.remove("d-none");
+      deliveryErr.textContent = msg;
+    }
+  }
+
+  function setSaveEnabled(enabled) {
+    if (!btnSave) return;
+    btnSave.disabled = !enabled;
+  }
+
+  // 영업일 더하기(주말 제외)
+  function addBusinessDays(startDate, days) {
+    const date = new Date(startDate);
+    let added = 0;
+    while (added < days) {
+      date.setDate(date.getDate() + 1);
+      const day = date.getDay();
+      if (day !== 0 && day !== 6) added++;
+    }
+    return date;
+  }
+
+  // ✅ 납기일 검증(버튼 잠금까지)
+  function validateDeliveryDate() {
+    if (!orderDateInput || !deliveryDateInput) return true;
+
+    // 납기일 미선택 → 저장 막기
+    if (!deliveryDateInput.value) {
+      showDeliveryError("납기일자를 선택하세요.");
+      setSaveEnabled(false);
+      return false;
+    }
+
+    const orderDate = new Date(orderDateInput.value);
+    const deliveryDate = new Date(deliveryDateInput.value);
+
+    // 주말 금지
+    const day = deliveryDate.getDay();
+    if (day === 0 || day === 6) {
+      showDeliveryError("납기일은 평일만 선택 가능합니다.");
+      setSaveEnabled(false);
+      return false;
+    }
+
+    // 최소 5영업일 이후
+    const minDate = addBusinessDays(orderDate, 5);
+    // 시간값 때문에 하루 밀리는 거 방지 (날짜만 비교)
+    minDate.setHours(0,0,0,0);
+    deliveryDate.setHours(0,0,0,0);
+
+    if (deliveryDate < minDate) {
+      showDeliveryError("납기일은 평일 기준 최소 5영업일 이후여야 합니다.");
+      setSaveEnabled(false);
+      return false;
+    }
+
+    // 통과
+    showDeliveryError("");
+    setSaveEnabled(true);
+    return true;
+  }
+
+  if (orderDateInput && deliveryDateInput) {
+    const today = new Date();
+    const todayStr = today.toISOString().split("T")[0];
+
+    // 수주일자 오늘 고정
+    orderDateInput.value = todayStr;
+    orderDateInput.min = todayStr;
+    orderDateInput.readOnly = true;
+
+    // 납기일 min 세팅(5영업일)
+    const minDeliveryDate = addBusinessDays(today, 5);
+    const minDeliveryStr = minDeliveryDate.toISOString().split("T")[0];
+    deliveryDateInput.min = minDeliveryStr;
+
+    // ✅ 입력 즉시 검증 (선택/직접입력 둘 다 커버)
+    deliveryDateInput.addEventListener("input", validateDeliveryDate);
+    deliveryDateInput.addEventListener("change", validateDeliveryDate);
+
+    // 처음 로딩 시에도 버튼 잠그기
+    validateDeliveryDate();
+  }
+
+  // ✅ 마지막 방어: 혹시 버튼이 눌려도 submit 못하게
+  if (form) {
+    form.addEventListener("submit", (e) => {
+      if (!validateDeliveryDate()) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+  }
+
     /* ============================================
        1) 제품 목록 추가 버튼
     ============================================ */
@@ -187,8 +297,6 @@ document.addEventListener("DOMContentLoaded", () => {
             .catch(err => console.error("거래처 정보 조회 오류", err));
     });
 
-});
-
 
 /* ============================================
    거래처 정보 초기화
@@ -231,3 +339,18 @@ if (addrSearchBtn) {
 
     });
 }
+//영업일 계산
+function addBusinessDays(startDate, days) {
+    const date = new Date(startDate);
+    let added = 0;
+
+    while (added < days) {
+        date.setDate(date.getDate() + 1);
+        const day = date.getDay();
+        if (day !== 0 && day !== 6) {
+            added++;
+        }
+    }
+    return date;
+}
+});
