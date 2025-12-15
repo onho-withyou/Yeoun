@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
   treeEl.addEventListener("click", (e) => {
     const rootLink = e.target.closest(".lot-root-link");
     const groupToggle = e.target.closest(".lot-group-toggle");
-    const processItem = e.target.closest(".process-item");
 
     // 1) ROOT 클릭 -> ROOT 하위 그룹(공정/자재/설비) 열기 + 오른쪽 LOT 개요
     if (rootLink) {
@@ -62,22 +61,36 @@ document.addEventListener("DOMContentLoaded", () => {
 		   
       return;
     }
+	
+	// 3) 공정/자재 항목 클릭 -> 선택 표시(active) + 상세 조회
+	const childLink = e.target.closest(".tree-child-link");
+	if (childLink) {
+	  e.preventDefault();
 
-    // 3) 공정 아이템 클릭 -> 오른쪽 공정 상세
-    if (processItem) {
-      e.preventDefault();
+	  // 1) 기존 선택 해제
+	  treeEl.querySelectorAll(".tree-item-active")
+	    .forEach(el => el.classList.remove("tree-item-active"));
 
-      const orderId = processItem.dataset.orderId;
-      const stepSeq = processItem.dataset.stepSeq;
-	  
-	  if (!orderId || !stepSeq) {
-	     console.warn("orderId 또는 stepSeq가 없습니다.", processItem);
-	     return;
-	   }
+	  // 2) 현재 선택 표시
+	  childLink.classList.add("tree-item-active");
 
-      loadProcessDetail(orderId, stepSeq);
-      return;
-    }
+	  // 3) 공정 상세
+	  const orderId = childLink.dataset.orderId;
+	  const stepSeq = childLink.dataset.stepSeq;
+	  if (orderId && stepSeq) {
+	    loadProcessDetail(orderId, stepSeq);
+	    return;
+	  }
+
+	  // 4) 자재 상세
+	  const outputLotNo = childLink.dataset.outputLotNo;
+	  const inputLotNo  = childLink.dataset.inputLotNo;
+	  if (outputLotNo && inputLotNo) {
+	    // 기존 너 코드(아래 document.addEventListener 클릭) 안 쓰고 여기서 바로 호출하게
+	    loadMaterialDetail(outputLotNo, inputLotNo);
+	    return;
+	  }
+	}
   });
 
   function loadLotDetail(lotNo, stepSeq) {
@@ -133,7 +146,9 @@ function loadProcessList(container, lotNo) {
 		li.dataset.orderId = p.orderId;
 
         li.innerHTML = `
-          <a href="#" class="text-decoration-none small">
+          <a href="#" class="tree-child-link small"
+		  	 data-order-id="${p.orderId}"
+			 data-step-seq="${p.stepSeq}">
             ${p.processName} / ${p.processId}
             <span class="text-muted"> (${p.status})</span>
           </a>
@@ -266,10 +281,9 @@ function loadMaterialList(container, lotNo) {
         li.dataset.lotNo = lotNo;
 
         li.innerHTML = `
-          <a href="#" 
-		     class="text-decoration-none small material-item"
-		  	 data-output-lot-no="${lotNo}"
-			 data-input-lot-no="${m.lotNo}">
+		<a href="#" class="tree-child-link small"
+		     data-output-lot-no="${lotNo}"
+		     data-input-lot-no="${m.lotNo}">
             ${m.displayName}
             <span class="text-muted"> (${m.usedQty}${m.unit ? " " + m.unit : ""})</span>
           </a>
@@ -284,31 +298,6 @@ function loadMaterialList(container, lotNo) {
         "<li class='small text-danger'>(자재 목록을 불러오는 중 오류가 발생했습니다)</li>";
     });
 }
-
-// 자재 클릭 -> 상세 조회
-document.addEventListener("click", async (e) => {
-  const matLink = e.target.closest(".material-item");
-  if (!matLink) return;
-
-  e.preventDefault();
-
-  const outputLotNo = matLink.dataset.outputLotNo;
-  const inputLotNo  = matLink.dataset.inputLotNo;
-
-  if (!outputLotNo || !inputLotNo) return;
-
-  try {
-    const res = await fetch(`/lot/trace/material-detail?outputLotNo=${encodeURIComponent(outputLotNo)}&inputLotNo=${encodeURIComponent(inputLotNo)}`);
-    if (!res.ok) throw new Error("자재 상세 조회 실패");
-
-    const detail = await res.json();
-    renderMaterialDetail(detail);
-
-  } catch (err) {
-    console.error(err);
-    alert("자재 상세 조회 중 오류가 발생했습니다.");
-  }
-});
 
 function renderMaterialDetail(d) {
   const panel = document.getElementById("materialDetailPanel");
@@ -350,6 +339,22 @@ function renderMaterialDetail(d) {
 
   // 패널 표시
   panel.style.display = "block";
+}
+
+async function loadMaterialDetail(outputLotNo, inputLotNo) {
+  try {
+    const res = await fetch(
+      `/lot/trace/material-detail?outputLotNo=${encodeURIComponent(outputLotNo)}&inputLotNo=${encodeURIComponent(inputLotNo)}`
+    );
+    if (!res.ok) throw new Error("자재 상세 조회 실패");
+
+    const detail = await res.json();
+    renderMaterialDetail(detail);
+
+  } catch (err) {
+    console.error(err);
+    alert("자재 상세 조회 중 오류가 발생했습니다.");
+  }
 }
 
 // -------------------------------
