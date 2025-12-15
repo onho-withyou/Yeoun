@@ -175,37 +175,36 @@
                 </a>
                 <ul class="menu-sub">
                     <!-- 관리자(HR_ADMIN, SYS_ADMIN)만 보임 -->
-                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'LOG_ADMIN')">
                         <a th:href="@{/inventory/dashboard}" class="menu-link">
                             <div data-i18n="Menu1" class="menu-link-sub">대시보드</div>
                         </a>
                     </li>
 
-                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'MES_USER')">
                         <a th:href="@{/inventory/list}" class="menu-link">
                             <div data-i18n="Menu2" class="menu-link-sub">재고조회</div>
                         </a>
                     </li>
 
-                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'MES_USER')">
                         <a th:href="@{/inventory/history}" class="menu-link">
                             <div data-i18n="Menu3" class="menu-link-sub">재고이력</div>
                         </a>
                     </li>
 
-                    <!-- 사원 누구나: 본인 급여명세서 조회 -->
-                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'LOG_USER')">
                         <a th:href="@{/inventory/stock-take}" class="menu-link">
                             <div data-i18n="Menu4" class="menu-link-sub">재고 실사</div>
                         </a>
                     </li>
                     
-                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'LOG_USER')">
                         <a th:href="@{/inventory/inbound}" class="menu-link">
                             <div data-i18n="Menu4" class="menu-link-sub">입고관리</div>
                         </a>
                     </li>
-                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                    <li class="menu-item" sec:authorize="hasAnyRole('SYS_ADMIN', 'LOG_USER')">
                         <a th:href="@{/inventory/outbound}" class="menu-link">
                             <div data-i18n="Menu4" class="menu-link-sub">출고관리</div>
                         </a>
