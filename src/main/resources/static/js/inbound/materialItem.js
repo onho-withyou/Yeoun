@@ -155,7 +155,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	if (inboundInputs.length > 0) {
 		inboundInputs.forEach(input => {
 			
-			input.addEventListener("input", function() {
+			input.addEventListener("change", function() {
 				const currentIndex = this.getAttribute('data-index');
 				const currentVal = Number(this.value);
 				
