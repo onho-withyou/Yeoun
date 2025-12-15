@@ -162,7 +162,7 @@ public class LotTraceService {
 		
 		// 1) FIN WIP LOT 목록 조회
 		List<LotMaster> lots = 
-				lotMasterRepository.findByLotTypeInOrderByCreatedDateDesc(lotTypes);
+				lotMasterRepository.findRootLotsOrdered(lotTypes);
 		
 		final String kw = (keyword == null) ? "" : keyword.trim();
 		final String st = (status == null) ? "" : status.trim();
@@ -577,6 +577,7 @@ public class LotTraceService {
 	    Map.entry("SUB", "부자재"),
 	    Map.entry("PKG", "포장재"),
 	    Map.entry("FIN", "완제품"),
+	    Map.entry("FINISHED_GOODS", "완제품"),
 
 	    // 설비 상태
 	    Map.entry("RUN", "가동"),
