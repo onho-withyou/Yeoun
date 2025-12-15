@@ -35,7 +35,7 @@ const productGrid = new Grid({
 			header: " ",
 			name: "btn",
 			formatter: (rowInfo) => {
-				return `<button class="btn btn-primary btn-sm" data-id="${rowInfo.row.id}">상세</button>`
+				return `<button class="btn btn-outline-info btn-sm" data-id="${rowInfo.row.id}">상세</button>`
 			}
 		}
 	]
