@@ -1,8 +1,13 @@
 // qc_result.js
 
 let qcResultGrid = null;
+let qcViewModal = null;
 
 document.addEventListener("DOMContentLoaded", () => {
+	
+	// 모달 초기화
+	const modalEl = document.getElementById("qcViewModal");
+	qcViewModal = new bootstrap.Modal(modalEl);
 	
 	// 그리드 초기화
 	const gridEl = document.getElementById("qcResultGrid");

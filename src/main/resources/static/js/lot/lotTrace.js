@@ -230,6 +230,30 @@ function renderProcessDetail(detail) {
     document.getElementById("pd-defectRate").innerText = detail.defectRate != null
 		? detail.defectRate.toFixed(1) + "%"
 		: "-";
+		
+	// QC 결과 버튼 렌더링
+	const qcActions = document.getElementById("pd-qcActions");
+	if (qcActions) {
+		qcActions.innerHTML = "";
+		
+		const isQc = detail.processId === "PRC-QC";
+		const qcResultId = detail.qcResultId;
+		
+		if (isQc) {
+			const btn = document.createElement("button");
+			btn.type = "button";
+		    btn.className = "btn btn-sm btn-outline-primary";
+		    btn.innerText = "QC 결과 보기";
+			
+			if (!qcResultId) {
+				btn.disabled = true;
+		      	btn.title = "QC 결과가 아직 등록되지 않았습니다.";
+			} else {
+				btn.addEventListener("click", () => openQcViewModal(qcResultId));
+			}
+			qcActions.appendChild(btn);
+		}
+	}
 	
 	// 설비 목록 렌더링		
 	const eqBox = document.getElementById("pd-equipments");

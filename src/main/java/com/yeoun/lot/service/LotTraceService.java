@@ -354,16 +354,22 @@ public class LotTraceService {
 		String workerId = null;
 		String workerName = null;
 		String deptName = null;
+		
+		Long qcResultId = null;
 
 		if ("PRC-QC".equals(processId)) {
-		    // QC는 qc_result의 inspectorId로 담당자 표시
-		    String inspectorId = qcResultRepository
+
+		    QcResult latest = qcResultRepository
 		            .findFirstByOrderIdOrderByQcResultIdDesc(orderId)
-		            .map(QcResult::getInspectorId)
 		            .orElse(null);
 
-		    if (inspectorId != null) {
-		        worker = empRepository.findById(inspectorId).orElse(null);
+		    if (latest != null) {
+		        qcResultId = latest.getQcResultId();
+
+		        String inspectorId = latest.getInspectorId();
+		        if (inspectorId != null) {
+		            worker = empRepository.findByEmpId(inspectorId).orElse(null);
+		        }
 		    }
 
 		} else {
@@ -440,6 +446,7 @@ public class LotTraceService {
 		        .defectRate(defectRate)
 		        .lineId(lineId)
 		        .equipments(equipments)
+		        .qcResultId(qcResultId)
 		        .build();
 	}
 	
@@ -483,7 +490,7 @@ public class LotTraceService {
 	                }
 					
 					return new LotMaterialNodeDTO(
-							child.getLotNo(), 
+							lotNoChild,
 							name, 
 							rel.getUsedQty(), 
 							unit
