@@ -1,6 +1,5 @@
 package com.yeoun.inbound.service;
 
-import java.awt.ItemSelectable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -48,7 +47,6 @@ import com.yeoun.outbound.dto.OutboundItemDTO;
 import com.yeoun.outbound.entity.Outbound;
 import com.yeoun.outbound.entity.OutboundItem;
 import com.yeoun.outbound.repository.OutboundRepository;
-import com.yeoun.outbound.service.OutboundService;
 import com.yeoun.process.entity.WorkOrderProcess;
 import com.yeoun.process.repository.WorkOrderProcessRepository;
 import com.yeoun.sales.entity.ClientItem;
@@ -97,6 +95,7 @@ public class InboundService {
 		
 		// 원재료의 유효기간(유통기한) 정보
 		LocalDate datePlus = LocalDate.parse(materialOrder.getDueDate()).plusMonths(36);
+		LocalDateTime expirationDate = datePlus.atStartOfDay();
 		
 		// 파라미터로 전달받은 발주 엔터티에서 발주 품목들 반복문으로 DTO로 변환
 		for (MaterialOrderItem item : materialOrder.getItems()) {
@@ -108,6 +107,10 @@ public class InboundService {
 			MaterialMst materialMst = materialMstRepository.findByMatId(clientItem.getMaterialId())
 					.orElseThrow(() -> new NoSuchElementException("해당 원재료 정보를 찾을 수 없습니다."));
 			
+			if ("PKG".equals(materialMst.getMatType()) || "SUB".equals(materialMst.getMatType())) {
+				expirationDate = null;
+			}
+			
 			// 입고대기 품목 생성
 			InboundItemDTO inboundItemDTO = InboundItemDTO.builder()
 					.inboundId(inboundId)
@@ -118,7 +121,7 @@ public class InboundService {
 					.itemType(materialMst.getMatType())
 					.locationId(null)
 					.manufactureDate(LocalDate.parse(materialOrder.getDueDate()).atStartOfDay())
-					.expirationDate(datePlus.atStartOfDay())
+					.expirationDate(expirationDate)
 					.build();
 
 			items.add(inboundItemDTO);
