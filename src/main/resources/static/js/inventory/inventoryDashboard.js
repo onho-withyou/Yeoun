@@ -587,7 +587,7 @@ async function renderShipmentGrid() {
 			width: 100,
 			align: 'center',
 			formatter: ({ rowKey }) =>
-			`<button type="button" class="btn btn-primary btn-sm" data-row="${rowKey}">출고등록</button>`
+			`<button type="button" class="btn btn btn-outline-info btn-sm" data-row="${rowKey}">출고등록</button>`
 		}
 		],
 		data: shipmentData   // 여기서 /api/shipment/list 결과 사용
@@ -758,7 +758,7 @@ async function renderNeedOrderStockGrid() {
 		    },
 			{ header: '단위',   name: 'itemUnit', minWidth: 50 },
 			{ header: '발주',      name: "btn", width: 100, align: "center",
-			  formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary btn-sm' data-row='${cellInfo.rowKey}' >발주</button>"
+			  formatter: (cellInfo) => "<button type='button' class='btn-detail btn btn-outline-info btn-sm' data-row='${cellInfo.rowKey}' >발주</button>"
 			}
         ],
         data: needOrderStocks
@@ -974,7 +974,7 @@ async function renderExpireDisposalGrid() {
 			},
 			{
 				header: '상세',      name: "btn", width: 100, align: "center",
-				formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary btn-sm' data-row='${cellInfo.rowKey}' >상세</button>"
+				formatter: (cellInfo) => "<button type='button' class='btn-detail btn btn-outline-info btn-sm' data-row='${cellInfo.rowKey}' >상세</button>"
 			}
         ],
         data: rows
