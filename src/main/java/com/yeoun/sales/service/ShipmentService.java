@@ -170,4 +170,50 @@ public class ShipmentService {
         // 3️⃣ 출하지시 상태 → WAITING (재예약 가능)
         shipment.changeStatus(ShipmentStatus.WAITING);
     }
+    
+ // ================================
+ // 출하 확정 + 운송장번호(TRACKING_NUMBER) 생성
+ // ================================
+ @Transactional
+ public void confirmShipment(String shipmentId, String empId) {
+
+     Shipment shipment = shipmentRepository.findById(shipmentId)
+         .orElseThrow(() -> new IllegalArgumentException("출하 데이터 없음"));
+
+     // 이미 출하 완료면 차단
+     if (shipment.getShipmentStatus() == ShipmentStatus.SHIPPED) {
+         throw new IllegalStateException("이미 출하 완료된 건입니다.");
+     }
+
+     // ⭐ TRACKING_NUMBER 없을 때만 생성
+     if (shipment.getTrackingNumber() == null) {
+         shipment.setTrackingNumber(generateTrackingNumber());
+     }
+
+     shipment.setShipmentStatus(ShipmentStatus.SHIPPED);
+     shipment.setShipmentDate(LocalDate.now());
+     shipment.setEmpId(empId);
+ }
+ 
+//================================
+//TRACKING_NUMBER 생성
+//TRK + yyyyMMdd + - + 4자리
+//================================
+private String generateTrackingNumber() {
+
+  String today = LocalDate.now()
+      .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+  String prefix = "TRK" + today + "-";
+
+  String lastNo = shipmentRepository.findLastTrackingNumber(prefix);
+
+  int seq = (lastNo == null)
+      ? 1
+      : Integer.parseInt(lastNo.substring(lastNo.lastIndexOf("-") + 1)) + 1;
+
+  return prefix + String.format("%04d", seq);
+}
+
+
 }

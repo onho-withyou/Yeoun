@@ -52,6 +52,15 @@ public interface ShipmentRepository extends JpaRepository<Shipment, String> {
             List<ShipmentStatus> statusList
     );
 
+    // 운송번호 자동생성
+    @Query("""
+    	    SELECT MAX(s.trackingNumber)
+    	    FROM Shipment s
+    	    WHERE s.trackingNumber LIKE :prefix%
+    	""")
+    	String findLastTrackingNumber(@Param("prefix") String prefix);
+
+
 
 
 }

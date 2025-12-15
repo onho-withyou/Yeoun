@@ -38,6 +38,8 @@ import lombok.extern.log4j.Log4j2;
 public class OutboundController {
 	private final OutboundService outboundService;
 	private final ShipmentDetailService shipmentDetailService;
+	private final ShipmentService shipmentService;
+
 	
 	// 출고관리 페이지
 	@GetMapping("")
@@ -146,6 +148,10 @@ public class OutboundController {
 	@ResponseBody
 	public Map<String, Object> productComplete(@RequestBody OutboundOrderDTO OutboundOrderDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
 		outboundService.updateOutbound(OutboundOrderDTO, loginDTO.getEmpId());
+		
+		  // 출하 확정 + TRACKING_NUMBER 생성
+	   // String shipmentId = OutboundOrderDTO.getShipmentId(); // ⭐ 중요
+	   // shipmentService.confirmShipment(shipmentId, loginDTO.getEmpId());
 		
 		Map<String, Object> result = new HashMap<>();
 		
