@@ -700,5 +700,5 @@ function updateStepRowInModal(updatedStep) {
 // -------------------------------
 function formatDateTime(dt) {
   if (!dt) return "-";
-  return dt.replace("T", " ").split(".")[0];
+  return dt.replace("T", " ").substring(0, 16);
 }

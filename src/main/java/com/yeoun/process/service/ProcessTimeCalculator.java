@@ -85,25 +85,35 @@ public class ProcessTimeCalculator {
     // 공정 지연 여부 판정
     // - expectedMin(예상시간) vs elapsedMin(실경과시간)을 비교
     public static boolean isDelayed(WorkOrderProcess wop, double totalEU) {
+        if (wop == null || wop.getProcess() == null) return false;
 
-        if (wop == null || wop.getStartTime() == null) return false;
+        String status = wop.getStatus();
+        if (status == null) return false;
 
-        // 해당 공정의 예상시간(분) 계산
-        long expectedMin =
-            calcExpectedMinutes(
-                wop.getProcess().getProcessId(),
-                totalEU
-            );
+        long expectedMin = calcExpectedMinutes(wop.getProcess().getProcessId(), totalEU);
+        if (expectedMin <= 0) return false;
 
-        // 실제 경과시간(분) = startTime ~ 현재(now)
-        long elapsedMin =
-            Duration.between(
-                wop.getStartTime(),
-                LocalDateTime.now()
-            ).toMinutes();
+        // READY는 지연 판단 안 함
+        if ("READY".equals(status)) return false;
 
-        // elapsedMin > expectedMin 이면 "지연"
-        return expectedMin > 0 && elapsedMin > expectedMin;
+        // QC_PENDING은 지연 판단 안 함
+        if ("QC_PENDING".equals(status)) return false;
+
+        // IN_PROGRESS: startTime ~ now
+        if ("IN_PROGRESS".equals(status)) {
+            if (wop.getStartTime() == null) return false;
+            long elapsedMin = Duration.between(wop.getStartTime(), LocalDateTime.now()).toMinutes();
+            return elapsedMin > expectedMin;
+        }
+
+        // DONE: startTime ~ endTime
+        if ("DONE".equals(status)) {
+            if (wop.getStartTime() == null || wop.getEndTime() == null) return false;
+            long actualMin = Duration.between(wop.getStartTime(), wop.getEndTime()).toMinutes();
+            return actualMin > expectedMin;
+        }
+
+        return false;
     }
     
     // 작업지시 1건의 "전체 공정 예상시간(분)" 계산

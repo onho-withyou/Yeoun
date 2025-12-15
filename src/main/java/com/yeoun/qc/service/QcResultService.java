@@ -17,6 +17,7 @@ import com.yeoun.common.entity.FileAttach;
 import com.yeoun.common.repository.FileAttachRepository;
 import com.yeoun.common.util.FileUtil;
 import com.yeoun.emp.repository.EmpRepository;
+import com.yeoun.inbound.service.InboundService;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.entity.LotMaster;
 import com.yeoun.lot.repository.LotMasterRepository;
@@ -50,6 +51,7 @@ public class QcResultService {
     private final QcResultDetailRepository qcResultDetailRepository;
     private final WorkOrderProcessRepository workOrderProcessRepository;
     private final EmpRepository empRepository;
+    private final InboundService inboundService;
     
     // LOT 연동용
     private final LotTraceService lotTraceService;
@@ -391,9 +393,6 @@ public class QcResultService {
 		}
 		
 		// 3) 수동 전체판정
-		// 디테일 FAIL 존재 여부(참고용)
-		boolean hasFail = !allPass;
-
 		// 사용자가 선택한 전체 판정 우선 적용
 		String overall = qcSaveRequestDTO.getOverallResult();
 
@@ -498,6 +497,7 @@ public class QcResultService {
 	    // QC_RESULT에 LOT_NO가 비어있으면 같이 세팅해 두기 (조회용)
 	    if (header.getLotNo() == null || header.getLotNo().isBlank()) {
 	        header.setLotNo(lotNo);
+	        qcResultRepository.save(header);
 	    }
 
 	    // 3) LOT_MASTER 조회
@@ -532,18 +532,23 @@ public class QcResultService {
 	            // PASS: 일단 계속 공정 진행 예정이므로 IN_PROCESS 유지
 	            lot.setCurrentStatus("IN_PROCESS");
 	            lot.setStatusChangeDate(LocalDateTime.now());
-	            // 작업지시 상태는 기존 공정 로직에서 마지막 공정 완료 시 COMPLETED 처리
 	        }
 	        case "FAIL" -> {
 	            // FAIL: 불량/폐기 처리
 	            lot.setCurrentStatus("SCRAPPED");    // LOT_STATUS
 	            lot.setStatusChangeDate(LocalDateTime.now());
+	            
 	            workOrder.setStatus("SCRAPPED");
+	            workOrder.setActEndDate(LocalDateTime.now());
+	            
+	            inboundService.saveReInbound(orderId);
 	        }
 	        default -> {
 	            // PENDING 등은 상태 변경 없음
 	        }
 	    }
+	    lotMasterRepository.save(lot);
+	    workOrderRepository.save(workOrder);
 	}
 	
 	// QC 결과 → LOT_STATUS 매핑
