@@ -1,5 +1,7 @@
 package com.yeoun.sales.service;
 
+import com.yeoun.common.e_num.AlarmDestination;
+import com.yeoun.common.service.AlarmService;
 import com.yeoun.outbound.service.OutboundService;
 import com.yeoun.sales.dto.ShipmentListDTO;
 import com.yeoun.sales.entity.OrderItem;
@@ -37,6 +39,7 @@ public class ShipmentService {
     private final OrderItemRepository orderItemRepository;
     private final ShipmentQueryRepository shipmentQueryRepository;
     private final OutboundService outboundService;
+    private final AlarmService alarmService;
     
     private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -110,6 +113,10 @@ public class ShipmentService {
      }
 
      log.info("출하 예약 완료 → shipmentId={}, orderId={}", shipmentId, orderId);
+     
+     // 🔥 출하 예약 후 알림 발송
+     String message = String.format("새로운 출하 예약이 생성되었습니다. (주문번호: %s)", orderId);
+     alarmService.sendAlarmMessage(AlarmDestination.SHIPMENT, message);
 
      return shipmentId;
  }
@@ -196,6 +203,10 @@ public class ShipmentService {
      shipment.setShipmentStatus(ShipmentStatus.SHIPPED);
      shipment.setShipmentDate(LocalDate.now());
      shipment.setEmpId(empId);
+     
+     // 🔥 출하 확정 후 알림 발송
+     String message = String.format("출하가 확정되었습니다. (운송장번호: %s)", shipment.getTrackingNumber());
+     alarmService.sendAlarmMessage(AlarmDestination.SHIPMENT, message);
  }
  
 //================================
