@@ -62,6 +62,11 @@
                             <div data-i18n="Menu2" class="menu-link-sub">출/퇴근 현황</div>
                         </a>
                     </li>
+                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                        <a href="/attendance/outwork" class="menu-link">
+                            <div data-i18n="Menu2" class="menu-link-sub">외근 현황</div>
+                        </a>
+                    </li>
                     <!-- 로그인한 사람 누구나 -->
                     <li class="menu-item" sec:authorize="isAuthenticated()">
                         <a href="/leave/my" class="menu-link">
