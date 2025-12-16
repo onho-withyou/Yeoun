@@ -27,13 +27,14 @@ document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
 });
 
 
-let perfumeListItems = [];
-let itemTypeListItems = [];
-let unitListItems = [];
-let statusListItems = [];
+let perfumeListItems = []; //완제품 품목명(향수타입) 드롭다운
+let itemTypeListItems = [];//완제품 제품유형 드롭다운
+let unitListItems = [];//완제품 단위 드롭다운
+let statusListItems = [];//완제품 제품상태 드롭다운
 
-let matTypeListItems = [];
-let matUnitListItems = [];
+let matTypeListItems = [];//원재료 원재료유형 드롭다운
+let matUnitListItems = [];//원재료 단위 드롭다운
+
 
 const Grid = tui.Grid;
 
@@ -41,8 +42,7 @@ const Grid = tui.Grid;
 const grid1 = new Grid({
 	  el: document.getElementById('productGrid'),
       rowHeaders: [
-			{ type: 'rowNum', header: 'No.'},
-			{ type: 'checkbox' } 
+			{ type: 'rowNum', header: 'No.'}
 		],
 	  columns: [
 		{header: '품번' ,name: 'prdId' ,align: 'center',editor: 'text',width: 100
@@ -93,7 +93,7 @@ const grid1 = new Grid({
 		,{header: '단가' ,name: 'unitPrice' ,align: 'center',editor: 'text'
 			,renderer:{ type: StatusModifiedRenderer}
 		}
-        ,{header: '상태' ,name: 'prdStatus' ,align: 'center'
+        ,{header: '상태' ,name: 'prdStatus' ,align: 'center',hidden:true
 			,renderer:{ type: StatusModifiedRenderer
 				,options: {
 					isSelect: true   // ⭐ 이걸로 구분
@@ -119,10 +119,10 @@ const grid1 = new Grid({
         ,{header: '수정자ID' ,name: 'updatedId' ,align: 'center',hidden:true}
 		,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center',hidden:true}
         ,{header: '수정일자' ,name: 'updatedDate' ,align: 'center',hidden:true}           
-		,{header: '사용여부' ,name: 'useYn' ,align: 'center'
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center',filter: "select",width:83
 			,renderer:{ type: StatusModifiedRenderer
 				,options: {
-					isSelect: true   // ⭐ 이걸로 구분
+					isSelect: false   // ⭐ 이걸로 구분
 				}
 			}
 			,editor: {
@@ -154,8 +154,7 @@ const grid1 = new Grid({
 const grid2 = new Grid({
 	    el: document.getElementById('materialGrid'),
           rowHeaders: [
-			{ type: 'rowNum', header: 'No.'},
-			{ type: 'checkbox' } 
+			{ type: 'rowNum', header: 'No.'}
 		],
 	    columns: [
 		    {header: '원재료ID' ,name: 'matId' ,align: 'center',editor: 'text'
@@ -203,10 +202,10 @@ const grid2 = new Grid({
 	        ,{header: '수정자ID' ,name: 'updatedId' ,align: 'center',hidden:true}
 			,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center',hidden:true}
 	        ,{header: '수정일시' ,name: 'updatedDate' ,align: 'center',hidden:true}
-			,{header: '사용여부' ,name: 'useYn' ,align: 'center',width:83
+			,{header: '사용여부' ,name: 'useYn' ,align: 'center',filter: "select",width:83
 				,renderer:{ type: StatusModifiedRenderer
 					,options: {
-						isSelect: true   // ⭐ 이걸로 구분
+						isSelect: false   // ⭐ 이걸로 구분
 					}
 				}
 				,editor: {

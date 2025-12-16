@@ -53,61 +53,93 @@ class StatusModifiedRenderer {
     getElement() {
         return this.el;
     }
+
+    formatStatusBadge(status) {
+        const map = {
+            "Y": { text: "활성", cls: "status-badge bg-primary" },
+            "N": { text: "비활성", cls: "status-badge bg-warning" },
+        };
+        const item = map[status] || { text: status, cls: "status-badge" };
+        
+        // TOAST UI Grid의 html 유틸리티를 사용하여 안전하게 HTML 문자열 반환
+        return `<span class="${item.cls}" style="padding: 4px 8px; border-radius: 4px; color: white; font-weight: bold;">${item.text}<span style="font-size:10px;opacity:0.6;pa">▼</span></span> `;
+    }
 	
     render(props) {
-    const value = props.value;
-    const rowKey = props.rowKey;
-    const isSelect = props.columnInfo.renderer?.options?.isSelect;
+        const value = props.value;
+        const rowKey = props.rowKey;
+        const isSelect = props.columnInfo.renderer?.options?.isSelect;
 
-    const koreanText = StatusModifiedRenderer.getKoreanText(value);
+        const koreanText = StatusModifiedRenderer.getKoreanText(value);
 
-    // 신규 행 여부
-    let isCreated = false;
-    let isUpdated = false;
+        // 신규 행 여부
+        let isCreated = false;
+        let isUpdated = false;
 
-    if (this.grid) {
-        const { createdRows, updatedRows } = this.grid.getModifiedRows();
-        isCreated = createdRows.some(r => String(r.rowKey) === String(rowKey));
-        isUpdated = updatedRows.some(r => String(r.rowKey) === String(rowKey));
-    }
+        if (this.grid) {
+            const { createdRows, updatedRows } = this.grid.getModifiedRows();
+            isCreated = createdRows.some(r => String(r.rowKey) === String(rowKey));
+            isUpdated = updatedRows.some(r => String(r.rowKey) === String(rowKey));
+        }
 
-    const hasValue = value !== null && value !== undefined && value !== '';
-    const displayText = (!hasValue && isCreated) ? '' : koreanText;
+        const hasValue = value !== null && value !== undefined && value !== '';
+        const displayText = (!hasValue && isCreated) ? '' : koreanText;
 
-    // UI
-    if (isSelect) {
-        this.el.innerHTML = `
-          <div style="
-            width:100%;
-            height:100%;
-            padding:0px 10px;
-            box-sizing:border-box;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            background:transparent;
-            cursor:pointer;
-          ">
-            <span>${displayText}</span>
-            <span style="font-size:10px;opacity:0.6;">▼</span>
-          </div>
-        `;
-    } else {
-        this.el.textContent = koreanText;
-    }
+        let contentHTML = '';
+        // UI
+        if (isSelect) {
+            contentHTML = `
+            <div style="
+                width:100%;
+                height:100%;
+                padding:0px 10px;
+                box-sizing:border-box;
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                background:transparent;
+                cursor:pointer;
+            ">
+                <span>${displayText}</span>
+                <span style="font-size:10px;opacity:0.6;">▼</span>
+            </div>
+            `;
+        } else if (value === 'Y' || value === 'N') {
+            // ⭐ 2. Y/N 값일 때: 배지 HTML 할당
+            contentHTML = this.formatStatusBadge(value);
+            
+        } else {
+            contentHTML = koreanText;
+        }
 
-    // 🎨 색상 조건 수정
-    const shouldHighlight = isUpdated || (isCreated && hasValue);
+        this.el.innerHTML = contentHTML;
 
-    if (shouldHighlight) {
-        this.el.style.backgroundColor = '#c3f2ffff';
-        this.el.style.color = '#007aff';
-    } else {
-        this.el.style.backgroundColor = '';
-        this.el.style.color = '';
-    }
+        // 🎨 색상 조건 수정
+        const shouldHighlight = isUpdated || (isCreated && hasValue);
+        
+        const highlightClassName = 'modified-cell-highlight';
+
+        if (shouldHighlight) {
+            // 하이라이트 클래스 추가
+            this.el.classList.add(highlightClassName);
+            
+            // ⭐ 이전에 인라인으로 설정했던 색상 코드는 CSS 클래스 내부로 이동
+            // this.el.style.backgroundColor = '#c3f2ffff'; 
+            // this.el.style.color = '#007aff';
+            
+        } else {
+            // 하이라이트 클래스 제거 (원래 스타일로 복원)
+            this.el.classList.remove(highlightClassName);
+            
+            // this.el.style.backgroundColor = '';
+            // this.el.style.color = '';
+        }
+        
+
+
+        
  
-}
+    }
 
 }
 
