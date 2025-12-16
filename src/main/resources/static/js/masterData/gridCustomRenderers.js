@@ -10,6 +10,8 @@ const CODE_MAP = {
 	//상태코드
     'Y': '활성',
     'N': '비활성',
+    'PRD_ACTIVE': '활성',
+    'PRD_INACTIVE': '비활성',
     'PRD_DISCONTINUED': '단종',
     'PRD_SEASONAL': '시즌상품',
     'PRD_OUT_OF_STOCK': '재고없음',
@@ -22,6 +24,7 @@ const CODE_MAP = {
     'WIP': '공정중', // 또는 '재공품' (Work-in-Process)
     'FIN': '완제품', // 또는 '생산품' (Finished Goods)
     'BOX': '박스',
+    'UNIT_BOX': '박스',
 	
 	//향수 유형
 	'LIQUID': '고체향수', 
