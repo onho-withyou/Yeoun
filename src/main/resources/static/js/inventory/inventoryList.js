@@ -213,7 +213,10 @@ function initGrid() {
 		pageOptions: {
 		    useClient: true,  // 클라이언트 사이드 페이징
 		    perPage: 20       // 페이지당 20개 행
-		},	
+		},
+		columnOptions: {
+			resizable: true
+		},
 		columns: [
 		  { header: 'LOT 번호',  name: 'lotNo',    minWidth: 220 },
 		  { header: '상품명',    name: 'prodName', minWidth: 180 },

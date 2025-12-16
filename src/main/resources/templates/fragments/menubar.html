@@ -170,7 +170,7 @@
                 </ul>
             </li>
             <li class="menu-item">
-                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <a href="javascript:void(0);" class="menu-link menu-toggle" sec:authorize="hasAnyRole('SYS_ADMIN', 'MES_USER')">
                     <div data-i18n="Salary management">재고관리</div>
                 </a>
                 <ul class="menu-sub">
@@ -325,6 +325,12 @@
 	                </li>
                 
 	            </ul>
+            </li>
+            <!-- 품질 관리 -->
+            <li class="menu-item">
+                <a href="/dispose" class="menu-link">
+                    <div data-i18n="DisposeList">폐기 목록</div>
+                </a>
             </li>
 
             <li class="menu-item">
