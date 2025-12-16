@@ -536,25 +536,12 @@ public class QcResultService {
 	                if (qcProc.getEndTime() == null) {
 	                    qcProc.setEndTime(LocalDateTime.now());
 	                }
-
+	                
 	                workOrderProcessRepository.save(qcProc);
 	            });
 
-	    // 3-2) 마지막 공정(WOP)에도 양품/불량 수량 복사
-	    //      -> 포장 완료 시 saveProductInbound()에서 사용
-	    List<WorkOrderProcess> allSteps =
-	            workOrderProcessRepository.findByWorkOrderOrderIdOrderByStepSeqAsc(orderId);
-
-	    if (!allSteps.isEmpty()) {
-	        WorkOrderProcess lastStep = allSteps.get(allSteps.size() - 1);
-	        lastStep.setGoodQty(header.getGoodQty());
-	        lastStep.setDefectQty(header.getDefectQty());
-	        workOrderProcessRepository.save(lastStep);
-	    }
-
 	    // LOT / WORK_ORDER 연동
 	    applyQcResultToLotAndWorkOrder(header);
-
 	}
 	
 	// ----------------------------------------------------------
@@ -631,7 +618,7 @@ public class QcResultService {
 	            workOrder.setStatus("SCRAPPED");
 	            workOrder.setActEndDate(LocalDateTime.now());
 	            
-	            // QC FAIL이면 이후 공정 단계는 중단 처
+	            // QC FAIL이면 이후 공정 단계는 중단 처리
 	            skipAfterQcSteps(orderId);
 	            
 	            // 사용 원자재 폐기

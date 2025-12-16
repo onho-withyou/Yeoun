@@ -128,10 +128,30 @@
 	
 	<select id="existWorkingSchedule" resultType="Integer">
 		SELECT COUNT(*)
-		FROM work_schedule s
-		JOIN worker_process wp ON s.schedule_id = wp.schedule_id
-		WHERE wp.worker_id = #{empId}
-		AND #{now} BETWEEN s.start_date AND s.end_date
+			FROM WORK_SCHEDULE s
+			JOIN WORKER_PROCESS wp ON s.SCHEDULE_ID = wp.SCHEDULE_ID
+		WHERE wp.WORKER_ID = #{empId}
+		AND #{now} BETWEEN s.START_DATE AND s.END_DATE
+	</select>
+	
+	<select id="countLineOverlap" resultType="Integer">
+		SELECT COUNT(ORDER_ID)
+			FROM WORK_ORDER w
+		WHERE w.LINE_ID = #{lineId}
+		AND w.STATUS IN ('CREATED', 'RELEASED', 'IN_PROGRESS')
+		AND w.PLAN_START_DATE <![CDATA[ < ]]> #{endTime}
+		AND w.PLAN_END_DATE   <![CDATA[ > ]]> #{startTime}
+	</select>
+		
+	<select id="countWorkerOverlap" resultType="Integer">
+		SELECT COUNT(ORDER_ID)
+			FROM WORK_ORDER w
+			JOIN WORK_SCHEDULE s  ON w.ORDER_ID = s.WORK_ID
+			JOIN WORKER_PROCESS p ON s.SCHEDULE_ID = p.SCHEDULE_ID
+		WHERE s.WORKER_ID = #{workerId}
+		AND w.STATUS IN ('CREATED', 'RELEASED', 'IN_PROGRESS')
+		AND w.PLAN_START_DATE <![CDATA[ < ]]> #{endTime}
+		AND w.PLAN_END_DATE   <![CDATA[ > ]]> #{startTime}
 	</select>
 	
 </mapper>

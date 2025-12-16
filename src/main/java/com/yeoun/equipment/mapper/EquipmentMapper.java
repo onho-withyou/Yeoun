@@ -1,5 +1,7 @@
 package com.yeoun.equipment.mapper;
 
+import com.yeoun.equipment.dto.EquipDowntimeDTO;
+import com.yeoun.equipment.dto.HistorySearchDTO;
 import com.yeoun.process.dto.WorkOrderProcessDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -14,5 +16,9 @@ public interface EquipmentMapper {
             @Param("line") String line,
             @Param("step") Integer step
     );
+    
+	
+	// 설비 비가동 사유 정보 불러오기
+	List<EquipDowntimeDTO> selectDowntimeHistories (HistorySearchDTO dto);
 
 }

@@ -241,7 +241,24 @@ public class WorkOrderProcessService {
 
         int progressRate = calculateProgressRate(processes);
         String currentProcess = resolveCurrentProcess(processes);
-        String elapsedTime = calculateElapsedTime(processes);
+        LocalDateTime endAt = null;
+
+	    // 완료/폐기면 actEndDate로 끊기
+	    if ("COMPLETED".equals(workOrder.getStatus()) || "SCRAPPED".equals(workOrder.getStatus())) {
+	        endAt = workOrder.getActEndDate();
+	
+	        // 혹시 actEndDate 없으면 마지막 공정 endTime으로 대체
+	        if (endAt == null) {
+	            endAt = processes.stream()
+	                    .map(WorkOrderProcess::getEndTime)
+	                    .filter(Objects::nonNull)
+	                    .max(LocalDateTime::compareTo)
+	                    .orElse(null);
+	        }
+	    }
+	
+	    String elapsedTime = calculateElapsedTime(processes, endAt);
+
 
         WorkOrderProcessDTO dto = new WorkOrderProcessDTO();
         dto.setOrderId(workOrder.getOrderId());
@@ -249,6 +266,11 @@ public class WorkOrderProcessService {
         dto.setPrdName(workOrder.getProduct().getPrdName());
         dto.setPlanQty(workOrder.getPlanQty());
         dto.setStatus(workOrder.getStatus());
+        if ("COMPLETED".equals(workOrder.getStatus()) || "SCRAPPED".equals(workOrder.getStatus())) {
+        	dto.setDoneTime(workOrder.getActEndDate()); // 없으면 null
+        }
+        dto.setPlanStartDate(workOrder.getPlanStartDate());
+        dto.setPlanEndDate(workOrder.getPlanEndDate());
         
         // 라인 정보
         if (workOrder.getLine() != null) {
@@ -337,25 +359,32 @@ public class WorkOrderProcessService {
     }
 
     /**
-     * 경과시간 계산 (첫 START_TIME ~ 현재)
+     * 경과시간 계산
+     * - 진행중: firstStart ~ now
+     * - 완료/폐기: firstStart ~ endAt(완료/폐기 시각)
      */
-    private String calculateElapsedTime(List<WorkOrderProcess> processes) {
+    private String calculateElapsedTime(List<WorkOrderProcess> processes, LocalDateTime endAtOrNull) {
+
         LocalDateTime firstStart = processes.stream()
                 .map(WorkOrderProcess::getStartTime)
                 .filter(Objects::nonNull)
                 .min(LocalDateTime::compareTo)
                 .orElse(null);
 
-        if (firstStart == null) {
-            return "-";
-        }
+        if (firstStart == null) return "-";
 
-        Duration d = Duration.between(firstStart, LocalDateTime.now());
+        LocalDateTime endAt = (endAtOrNull != null) ? endAtOrNull : LocalDateTime.now();
+
+        // 방어: endAt이 firstStart보다 빠르면 firstStart로 맞춤
+        if (endAt.isBefore(firstStart)) endAt = firstStart;
+
+        Duration d = Duration.between(firstStart, endAt);
         long hours = d.toHours();
         long minutes = d.toMinutesPart();
 
         return hours + "시간 " + minutes + "분";
     }
+
 
     // =========================================================================
     // 2. 공정현황 상세 모달
@@ -961,5 +990,77 @@ public class WorkOrderProcessService {
 
         return dto;
     }
+
+    // 공정 관리 -> 완료 처리부분
+    @Transactional(readOnly = true)
+    public List<WorkOrderProcessDTO> getWorkOrderListForDone(LocalDate workDate, String keyword, String status) {
+
+        // 완료/폐기 탭 대상
+        List<String> statuses = List.of("COMPLETED", "SCRAPPED");
+        
+        if (status != null && !status.isBlank()) {
+            statuses = statuses.stream()
+                    .filter(s -> s.equalsIgnoreCase(status))
+                    .toList();
+        }
+
+        if (statuses.isEmpty()) return List.of();
+
+        List<WorkOrder> workOrders =
+                workOrderRepository.findByStatusInAndOutboundYn(statuses, "Y");
+
+        if (workOrders.isEmpty()) return List.of();
+
+        if (workDate != null) {
+            workOrders = workOrders.stream()
+                    .filter(w -> w.getActEndDate() != null
+                            && w.getActEndDate().toLocalDate().equals(workDate))
+                    .toList();
+        }
+        if (workOrders.isEmpty()) return List.of();
+
+        // 최근 완료/폐기 우선
+        workOrders = workOrders.stream()
+                .sorted(Comparator
+                        .comparing(WorkOrder::getActEndDate, Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(WorkOrder::getOrderId))
+                .toList();
+
+        List<String> orderIds = workOrders.stream().map(WorkOrder::getOrderId).toList();
+
+        List<WorkOrderProcess> allProcesses =
+                workOrderProcessRepository
+                        .findByWorkOrderOrderIdInOrderByWorkOrderOrderIdAscStepSeqAsc(orderIds);
+
+        Map<String, List<WorkOrderProcess>> processMap = allProcesses.stream()
+                .collect(Collectors.groupingBy(p -> p.getWorkOrder().getOrderId()));
+
+        List<QcResult> allQcResults = qcResultRepository.findByOrderIdIn(orderIds);
+        Map<String, QcResult> qcMap = allQcResults.stream()
+                .collect(Collectors.toMap(QcResult::getOrderId, q -> q, (a, b) -> a));
+
+        List<WorkOrderProcessDTO> dtoList = workOrders.stream()
+                .map(w -> toProcessSummaryDto(
+                        w,
+                        processMap.getOrDefault(w.getOrderId(), List.of()),
+                        qcMap.get(w.getOrderId())
+                ))
+                .toList();
+
+        // 키워드 검색
+        if (keyword != null && !keyword.isBlank()) {
+            String kw = keyword.toLowerCase();
+            dtoList = dtoList.stream()
+                    .filter(dto ->
+                            (dto.getOrderId() != null && dto.getOrderId().toLowerCase().contains(kw)) ||
+                            (dto.getPrdId() != null   && dto.getPrdId().toLowerCase().contains(kw)) ||
+                            (dto.getPrdName() != null && dto.getPrdName().toLowerCase().contains(kw))
+                    )
+                    .toList();
+        }
+
+        return dtoList;
+    }
+
 
 }

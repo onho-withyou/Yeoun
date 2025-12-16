@@ -187,6 +187,10 @@ public class EquipmentService {
 
 		return equipmentMapper.selectProcessByLineAndStep(line, step);
 	}
+
+	public List<EquipDowntimeDTO> loadAllEquipDowntimeHistory(HistorySearchDTO dto) {
+		return equipmentMapper.selectDowntimeHistories(dto);
+	}
 }
 
 

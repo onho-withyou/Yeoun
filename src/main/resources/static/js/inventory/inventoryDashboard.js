@@ -475,6 +475,9 @@ async function renderOrderGrid() {
 			    useClient: true, 
 			    perPage: 5 
 			},
+			columnOptions: {
+				resizable: true
+			},
 	        columns: [
 	            { header: '작업지시서',   name: 'orderId', minWidth: 160 },
 	            { header: '생산 품목', name: 'productName', minWidth: 110, align: 'center' },
@@ -575,6 +578,9 @@ async function renderShipmentGrid() {
 	   bodyHeight: 160,
 	   rowHeaders: ['rowNum'],
 	   pageOptions: { useClient: true, perPage: 5 },
+	   columnOptions: {
+	   	resizable: true
+	   },
 	   columns: [
 		{ header: '출하지시서', name: 'shipmentId', minWidth: 140 },
 		{ header: '거래처',     name: 'clientName', minWidth: 120 },
@@ -731,6 +737,9 @@ async function renderNeedOrderStockGrid() {
 		pageOptions: {
 		    useClient: true, 
 		    perPage: 5 
+		},
+		columnOptions: {
+			resizable: true
 		},
         columns: [
             { header: '품목명',   name: 'itemName', minWidth: 160 },
@@ -931,6 +940,9 @@ async function renderExpireDisposalGrid() {
 		pageOptions: {
 		    useClient: true,
 		    perPage: 5
+		},
+		columnOptions: {
+			resizable: true
 		},
         columns: [
 //            { header: '품목코드', name: 'itemId', width: 110, align: 'center' },
