@@ -62,6 +62,9 @@ public class ShipmentDetailService {
 
                 // 2: EMP_NAME
                 dto.setProcessBy((String) ch[2]);
+                
+                // 3: TrackingNumber
+                dto.setTrackingNumber((String) ch[3]);
             }            
 
             /* -----------------------------------------

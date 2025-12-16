@@ -212,13 +212,17 @@
 </form>
 </div>
 
-
-<script src="/js/sales/orders_create.js"></script>
+<!-- 카카오 주소 API -->
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
+<!-- 🔥 productList를 먼저 선언 -->
 <script th:inline="javascript">
-    window.productList = /*[[${products}]]*/ [];
+    const productList = /*[[${products}]]*/ [];
+    console.log("productList:", productList); 
 </script>
+
+<!-- 🔥 그 다음에 JS 파일 로드 -->
+<script src="/js/sales/orders_create.js"></script>
 
 </th:block>
 </th:block>

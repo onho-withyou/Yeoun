@@ -316,53 +316,38 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (managerEmailInput) {
-    // 🔥 이메일 입력 시 한글 입력 방지 및 실시간 검증
-    managerEmailInput.addEventListener("input", (e) => {
-      // 한글 및 공백 제거
-      let value = e.target.value.replace(/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣\s]/g, "");
-      e.target.value = value;
+      // 🔥 이메일 입력 시 한글 입력 방지 및 실시간 검증
+      managerEmailInput.addEventListener("input", (e) => {
+        // 한글 및 공백 제거
+        let value = e.target.value.replace(/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣\s]/g, "");
+        e.target.value = value;
 
-      const val = value.trim();
-      
-      if (val) {
-        // 세부 검증
-        if (val.indexOf("@") === -1) {
-          showError(emailErr, "@ 기호가 필요합니다.");
-        } else if (val.indexOf("@") === 0) {
-          showError(emailErr, "@ 앞에 이메일 주소가 필요합니다.");
-        } else if (val.lastIndexOf("@") !== val.indexOf("@")) {
-          showError(emailErr, "@ 기호는 하나만 사용할 수 있습니다.");
-        } else if (val.indexOf(".") === -1 || val.indexOf(".") < val.indexOf("@")) {
-          showError(emailErr, "도메인에 . 이 필요합니다 (예: @example.com)");
-        } else if (val.endsWith(".")) {
-          showError(emailErr, "도메인이 완전하지 않습니다.");
-        } else if (!EMAIL_REGEX.test(val)) {
-          showError(emailErr, "올바른 이메일 형식이 아닙니다.");
+        const val = value.trim();
+        
+        if (val && !EMAIL_REGEX.test(val)) {
+          showError(emailErr, "이메일 형식이 올바르지 않습니다.");
         } else {
           showError(emailErr, "");
         }
-      } else {
-        showError(emailErr, "");
-      }
-      
-      refreshSaveButtonState();
-    });
+        
+        refreshSaveButtonState();
+      });
 
-    // 🔥 한글 입력 자체를 막기 (compositionstart/end 이벤트)
-    let isComposing = false;
-    
-    managerEmailInput.addEventListener("compositionstart", () => {
-      isComposing = true;
-    });
-    
-    managerEmailInput.addEventListener("compositionend", (e) => {
-      isComposing = false;
-      // 한글이 입력되었다면 제거
-      const value = e.target.value.replace(/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣\s]/g, "");
-      e.target.value = value;
-      e.target.dispatchEvent(new Event("input"));
-    });
-  }
+      // 🔥 한글 입력 자체를 막기 (compositionstart/end 이벤트)
+      let isComposing = false;
+      
+      managerEmailInput.addEventListener("compositionstart", () => {
+        isComposing = true;
+      });
+      
+      managerEmailInput.addEventListener("compositionend", (e) => {
+        isComposing = false;
+        // 한글이 입력되었다면 제거
+        const value = e.target.value.replace(/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣\s]/g, "");
+        e.target.value = value;
+        e.target.dispatchEvent(new Event("input"));
+      });
+    }
 
   /* ============================================
      ✅ submit 최종 방어

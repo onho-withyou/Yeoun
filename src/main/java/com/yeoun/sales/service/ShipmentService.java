@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -36,6 +37,8 @@ public class ShipmentService {
     private final OrderItemRepository orderItemRepository;
     private final ShipmentQueryRepository shipmentQueryRepository;
     private final OutboundService outboundService;
+    
+    private static final SecureRandom RANDOM = new SecureRandom();
 
 
     // ================================
@@ -199,21 +202,15 @@ public class ShipmentService {
 //TRACKING_NUMBER 생성
 //TRK + yyyyMMdd + - + 4자리
 //================================
-private String generateTrackingNumber() {
+ private String generateTrackingNumber() {
 
-  String today = LocalDate.now()
-      .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+	    String today = LocalDate.now()
+	            .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
-  String prefix = "TRK" + today + "-";
+	    int randomNumber = RANDOM.nextInt(900000) + 100000; // 100000 ~ 999999
 
-  String lastNo = shipmentRepository.findLastTrackingNumber(prefix);
-
-  int seq = (lastNo == null)
-      ? 1
-      : Integer.parseInt(lastNo.substring(lastNo.lastIndexOf("-") + 1)) + 1;
-
-  return prefix + String.format("%04d", seq);
-}
+	    return "TRK" + today + "-" + randomNumber;
+	}
 
 
 }
