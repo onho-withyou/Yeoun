@@ -49,19 +49,73 @@
 	  padding: 2px 6px;
 	  display: inline-block;
 	}
+	
+		  /* ===================== 탭 커스텀 ===================== */
+	  .pay-tabs {
+	    border-bottom: 2px solid #e5e7eb;
+	    margin-bottom: 1.5rem;
+	  }
+	  .pay-tabs .nav-link {
+	    position: relative;
+	    color: #6b7280;
+	    font-weight: 600;
+	    padding: 0.75rem 1.5rem;
+	    border: none;
+	    border-radius: 8px 8px 0 0;
+	    transition: all 0.25s ease;
+	  }
+	  .pay-tabs .nav-link:hover {
+	    color: #0d6efd;
+	    background: #f1f5ff;
+	  }
+	  .pay-tabs .nav-link.active {
+	    color: #0d6efd;
+	    background: #ffffff;
+	    box-shadow: 0 -2px 8px rgba(13,110,253,0.1);
+	  }
+	  .pay-tabs .nav-link.active::after {
+	    content: '';
+	    position: absolute;
+	    left: 0; right: 0; bottom: -2px;
+	    height: 3px;
+	    background: #0d6efd;
+	    border-radius: 2px;
+	    animation: underlineIn 0.3s ease forwards;
+	  }
+	  @keyframes underlineIn {
+	    from {width: 0; margin-left: 50%;}
+	    to {width: 100%; margin-left: 0;}
+	  }
     </style>
 
-    <div class="custom-body container-xxl flex-grow-1 container-p-y">
+    <div class="custom-body container-xxl flex-grow-1 container-p-y" id="tracePage" th:attr="data-mode=${mode}">
 
       <!-- 페이지 타이틀 -->
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="mb-0">LOT 추적</h3>
+        <ul class="nav pay-tabs mb-3">
+		  <li class="nav-item">
+		    <a class="nav-link"
+		       th:href="@{/lot/trace(mode='PRODUCT', keyword=${keyword}, status=${status}, type=${type})}"
+		       th:classappend="${mode}=='PRODUCT' ? ' active'">
+		      완제품 LOT 기준
+		    </a>
+		  </li>
+		  <li class="nav-item">
+		    <a class="nav-link"
+		       th:href="@{/lot/trace(mode='MATERIAL', keyword=${keyword}, status=${status}, type=${type})}"
+		       th:classappend="${mode}=='MATERIAL' ? ' active'">
+		      자재 LOT 기준
+		    </a>
+		  </li>
+		</ul>
       </div>
 
       <!-- LOT 검색 필터 -->
       <div class="card mb-4">
         <div class="card-body">
           <form id="lotTraceSearchForm" method="get" action="/lot/trace">
+          	<input type="hidden" name="mode" th:value="${mode}">
             <div class="row gx-3 gy-2 align-items-end">
 
               <div class="col-md-4">
@@ -102,7 +156,7 @@
               </div>
               
               <div class="col-md-1">
-				 <a href="/lot/trace"
+				 <a th:href="@{/lot/trace(mode=${mode})}"
 				    class="btn btn-outline-secondary w-100">
 				    초기화
 				 </a>
@@ -154,6 +208,9 @@
 		          <ul class="list-unstyled ms-3 mt-1 root-children d-none"
 		              th:data-root-lot-no="${lot.lotNo}">
 		
+					<!-- ===================== PRODUCT 모드 ===================== -->
+		            <th:block th:if="${mode}=='PRODUCT'">
+		            
 		            <!-- 공정 그룹 -->
 					<li class="mb-1">
 					  <a href="#"
@@ -187,6 +244,29 @@
 					    <!-- JS에서 li.process-item 들이 동적으로 들어옴 -->
 					  </ul>
 					</li>
+					
+					</th:block>
+					
+					<!-- ===================== MATERIAL 모드 ===================== -->
+					  <th:block th:if="${mode}=='MATERIAL'">
+					
+					    <!-- Forward: 사용된 완제품 LOT 그룹 -->
+					    <li class="mb-1">
+					      <a href="#"
+					         class="lot-group-toggle text-body text-decoration-none small"
+					         data-group="usedProducts"
+					         th:data-lot-no="${lot.lotNo}">
+					        ▶ 사용된 완제품 LOT
+					      </a>
+					
+					      <ul class="list-unstyled ms-3 mt-1 group-children d-none"
+					          data-group="usedProducts"
+					          th:data-lot-no="${lot.lotNo}">
+					        <!-- JS에서 채움 -->
+					      </ul>
+					    </li>
+					
+					  </th:block>
 		          </ul>
 		        </li>
 		      </ul>
