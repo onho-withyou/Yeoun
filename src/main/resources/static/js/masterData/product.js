@@ -6,6 +6,9 @@ window.onload = function () {
 	prdItemTypeList();//완제품 제품유형 드롭다운
 	prdUnitList();//완제품 단위 드롭다운
 	prdStatusList();//완제품 제품상태 드롭다운
+	matTypeList();//원재료 원재료유형 드롭다운
+	matUnitList();//원재료 단위 드롭다운
+	
 
 }
 
@@ -28,6 +31,9 @@ let perfumeListItems = [];
 let itemTypeListItems = [];
 let unitListItems = [];
 let statusListItems = [];
+
+let matTypeListItems = [];
+let matUnitListItems = [];
 
 const Grid = tui.Grid;
 
@@ -151,19 +157,11 @@ const grid2 = new Grid({
 				,editor: {
 					type: 'select', // 드롭다운 사용
 					options: {
-						// value는 실제 데이터 값, text는 사용자에게 보이는 값
-						listItems: [
-							{ text: '원재료', value: 'RAW' },
-							{ text: '부자재', value: 'SUB' },
-							{ text: '포장재', value: 'PKG' },
-							{ text: '공정중', value: 'WIP' },
-							{ text: '생산품', value: 'FIN' },
-							{ text: '박스', value: 'BOX' }
-						]
+						listItems: matTypeListItems
 					}
 				}
 			}
-		    ,{header: '단위' ,name: 'matUnit' ,align: 'center',editor: 'text',filter: "select",width:60
+		    ,{header: '단위' ,name: 'matUnit' ,align: 'center',editor: 'text',filter: "select",width:70
 				,renderer:{ type: StatusModifiedRenderer
 					,options: {
 					isSelect: true 
@@ -173,12 +171,7 @@ const grid2 = new Grid({
 					type: 'select', // 드롭다운 사용
 					options: {
 						// value는 실제 데이터 값, text는 사용자에게 보이는 값
-						listItems: [
-							{ text: 'g', value: 'g' },
-							{ text: 'ml', value: 'ml' },
-							{ text: 'EA', value: 'EA' },
-							{ text: 'BOX', value:'Box'}
-						]
+						listItems: matUnitListItems
 					}
 				}
 			}
@@ -490,6 +483,57 @@ function prdStatusList() {
 	})
 }
 
+//원재료 원재료 유형 드롭다운
+function matTypeList() {
+	fetch('/material/matTypeList', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		return res.json();
+	})
+	.then(data => {
+		console.log("원재료 원재료유형 드롭다운 데이터:", data);
+		data.forEach(item => {
+			matTypeListItems.push({
+				value: item.VALUE,
+				text: item.TEXT
+			});
+		});
+		console.log("matTypeListItems:", matTypeListItems);
+		// Dropdown editor의 listItems 업데이트
+	})
+}
+
+//원재료 단위 드롭다운
+function matUnitList() {
+	fetch('/material/matUnitList', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		return res.json();
+	})
+	.then(data => {
+		console.log("원재료 원재료 단위 드롭다운 데이터:", data);
+		data.forEach(item => {
+			matUnitListItems.push({
+				value: item.VALUE,
+				text: item.TEXT
+			});
+		});
+		console.log("matUnitListItems:", matUnitListItems);
+		// Dropdown editor의 listItems 업데이트
+	})
+}
 
 //완제품 row 추가
 const addProductRowBtn = document.getElementById('addProductRowBtn');

@@ -1,5 +1,4 @@
 package com.yeoun.masterData.service;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import com.yeoun.masterData.entity.MaterialMst;
-import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.masterData.repository.MaterialMstRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -35,6 +33,21 @@ public class MaterialMstService {
 	public List<Map<String, Object>> findByMatIdList(String matId, String matName) {
 		// repository 쿼리에서 null/빈값은 전체조회로 처리하도록 되어 있음
 		return materialMstRepository.findByMatIdList(matId, matName);
+	}
+	
+	//원재료유형 드롭다운
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> findByMatTypeList() {
+		// repository 쿼리에서 null/빈값은 전체조회로 처리하도록 되어 있음
+		return materialMstRepository.findByMatTypeList();
+	}
+	
+	
+	//원재료 단위 드롭다운
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> findByMatUnitList() {
+		// repository 쿼리에서 null/빈값은 전체조회로 처리하도록 되어 있음
+		return materialMstRepository.findByMatUnitList();
 	}
 
 	//2. 원재료 그리드 저장

@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
-import com.yeoun.masterData.entity.MaterialMst;
 import com.yeoun.masterData.service.MaterialMstService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -37,6 +36,23 @@ public class MaterialMstController {
   		return materialMstService.findByMatIdList(matId, matName);
 
   	}
+    
+    //원재료 유형 드롭다운
+    @ResponseBody
+  	@GetMapping("/matTypeList")
+  	public List<Map<String, Object>> materialTypeList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+  		return materialMstService.findByMatTypeList();
+
+  	}
+    
+    //원재료 단위 드롭다운
+    @ResponseBody
+  	@GetMapping("/matUnitList")
+  	public List<Map<String, Object>> materialUnitList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+  		return materialMstService.findByMatUnitList();
+
+  	}
+    
 
 	//원재료 저장
     @ResponseBody

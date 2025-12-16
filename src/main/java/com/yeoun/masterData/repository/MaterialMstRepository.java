@@ -32,7 +32,7 @@ public interface MaterialMstRepository extends JpaRepository<MaterialMst, String
 			ORDER BY
 				CODE_SEQ 
 			""", nativeQuery = true)
-	Map<String, Object> findByMatTypeList();
+	List<Map<String, Object>> findByMatTypeList();
 
 	// 원자재 단위 드롭다운
 	@Query(value = """
@@ -47,7 +47,7 @@ public interface MaterialMstRepository extends JpaRepository<MaterialMst, String
 		ORDER BY
 			CODE_SEQ
 			""", nativeQuery = true)
-	Map<String, Object> findByMatUnitList();
+	List<Map<String, Object>> findByMatUnitList();
 	
 
 	// 원자재 조회(검색)
