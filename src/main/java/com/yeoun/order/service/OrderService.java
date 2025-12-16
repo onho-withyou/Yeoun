@@ -78,7 +78,7 @@ public class OrderService {
 	// =======================================================
 	// 작업지시 목록 조회
 	public List<WorkOrderListDTO> loadAllOrders (WorkOrderSearchDTO dto){
-		log.info("dto....... loadAll...." + dto);
+		//log.info("dto....... loadAll...." + dto);
 		return orderMapper.selectOrderList(dto);
 	}
 	
@@ -125,7 +125,7 @@ public class OrderService {
 	// =======================================================
 	// 라인 조회
 	public List<ProdLine> loadAllLines() {
-		return prodLineRepository.findAll();
+		return prodLineRepository.findByUseYnOrderByLineIdAsc("Y");
 	}
 	
 	// =======================================================
@@ -156,6 +156,9 @@ public class OrderService {
 		}
 		return list;
 	}
+	
+	// =======================================================
+	// 품질검사팀 조회
 
 	// =======================================================
 	// 작업지시 등록
@@ -349,15 +352,15 @@ public class OrderService {
 		// ================= 작업자 목록 생성 ==================
 		List<WorkOrderDetailDTO.WorkInfo> infos = new ArrayList<>();
 		List<WorkerProcess> workers = workerProcessRepository.findAllBySchedule_Work_OrderId(id);
-		log.info("workers size = {}", workers.size());
-		try {
-			log.info("workers JSON = {}", objectMapper.writeValueAsString(workers));
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
+//		//log.info("workers size = {}", workers.size());
+//		try {
+//			log.info("workers JSON = {}", objectMapper.writeValueAsString(workers));
+//		} catch (JsonProcessingException e) {
+//			e.printStackTrace();
+//		}
 		
 		List<WorkOrderProcess> processList = workOrderProcessRepository.findByWorkOrderOrderIdOrderByStepSeqAsc(id);
-		log.info("processList size = {}", processList.size());
+//		log.info("processList size = {}", processList.size());
 		processList.forEach(p -> log.info("process = {}", p));
 		
 		// 1) WorkerProcess를 processId 기준으로 빠르게 조회할 Map 만들기
@@ -396,10 +399,10 @@ public class OrderService {
 		}
 
 		// 결과 로깅 (테스트용)
-		infos.forEach(i ->
-		        log.info("WorkInfo => id={}, name={}, status={}, worker={}",
-		                i.getProcessId(), i.getProcessName(), i.getStatus(), i.getWorkerName())
-		);
+//		infos.forEach(i ->
+//		        log.info("WorkInfo => id={}, name={}, status={}, worker={}",
+//		                i.getProcessId(), i.getProcessName(), i.getStatus(), i.getWorkerName())
+//		);
 		
 		// DTO 변환 후 반환
 		return WorkOrderDetailDTO.builder()

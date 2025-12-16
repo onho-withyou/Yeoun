@@ -6,6 +6,9 @@ const productGrid = new tui.Grid({
 	    useClient: true,  // 클라이언트 사이드 페이징
 	    perPage: 20       // 페이지당 20개 행
 	},	
+	columnOptions: {
+		resizable: true
+	},
 	columns: [
 		{
 			header: "출고번호",

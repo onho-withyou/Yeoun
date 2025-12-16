@@ -175,7 +175,7 @@
                 </ul>
             </li>
             <li class="menu-item">
-                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <a href="javascript:void(0);" class="menu-link menu-toggle" sec:authorize="hasAnyRole('SYS_ADMIN', 'MES_USER')">
                     <div data-i18n="Salary management">재고관리</div>
                 </a>
                 <ul class="menu-sub">
@@ -278,8 +278,8 @@
 	                   </a>
 	                </li>
 	                <li class="menu-item" sec:authorize="isAuthenticated()">
-	                   <a th:href="@{/equipment/line}" class="menu-link">
-	                       <div data-i18n="Menu2" class="menu-link-sub">라인현황</div>
+	                   <a th:href="@{/equipment/history}" class="menu-link">
+	                       <div data-i18n="Menu2" class="menu-link-sub">설비이력</div>
 	                   </a>
 	                </li>
                 </ul>
@@ -330,6 +330,12 @@
 	                </li>
                 
 	            </ul>
+            </li>
+            <!-- 품질 관리 -->
+            <li class="menu-item">
+                <a href="/dispose" class="menu-link">
+                    <div data-i18n="DisposeList">폐기 목록</div>
+                </a>
             </li>
 
             <li class="menu-item">
