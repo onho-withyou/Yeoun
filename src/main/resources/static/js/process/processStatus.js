@@ -116,13 +116,40 @@ document.addEventListener("DOMContentLoaded", () => {
     ]
   });
 
-  // 2) 검색 버튼 클릭 시 조회
+  // 2) 검색/초기화 이벤트 바인딩
   const btnSearch = document.getElementById("btnSearchProcess");
-  if (btnSearch) {
-    btnSearch.addEventListener("click", () => {
+  const btnReset  = document.getElementById("btnResetProcess");
+
+  btnSearch?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.currentTarget.blur();
+    loadProcessGrid();
+  });
+  
+  // 검색어 엔터로 검색
+  document.getElementById("searchKeyword")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
       loadProcessGrid();
-    });
-  }
+    }
+  });
+
+  btnReset?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.currentTarget.blur();
+
+    const workDate      = document.getElementById("workDate");
+    const searchProcess = document.getElementById("searchProcess");
+    const searchHStatus = document.getElementById("searchHStatus");
+    const searchKeyword = document.getElementById("searchKeyword");
+
+    if (workDate) workDate.value = "";
+    if (searchProcess) searchProcess.value = "";
+    if (searchHStatus) searchHStatus.value = "";
+    if (searchKeyword) searchKeyword.value = "";
+
+    loadProcessGrid();
+  });
 
   // 3) 페이지 처음 들어올 때 전체 목록 조회
   loadProcessGrid();

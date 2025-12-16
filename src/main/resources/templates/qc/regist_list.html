@@ -10,30 +10,33 @@
 	<div class="row g-2 align-items-center">
 		<!-- Search Filter -->
 	    <form id="qcRegistSearchForm">
-	        <div class="row gx-3 gy-2 align-items-center">
-	        
-              <!-- 작업지시번호 -->
-		      <div class="col-md-4">
-		        <label class="form-label" for="orderFilter">작업지시번호</label>
-		        <select class="form-select" id="orderFilter">
-		          <option value="ALL">전체</option>
-		        </select>
-		      </div>
-		      <!-- 제품명 -->
-		      <div class="col-md-3">
-		        <label class="form-label" for="productFilter">제품</label>
-		        <select class="form-select" id="productFilter">
-		          <option value="ALL">전체</option>
-		        </select>
-		      </div>
-	      	 <!-- 초기화 버튼 -->
-		      <div class="col-md-1">
-		        <label class="form-label d-block">&nbsp;</label>
-		        <button type="button" class="btn btn-outline-secondary w-100" id="btnResetFilter">
-		          초기화
-		        </button>
-		      </div>
-	        </div>
+	        <div class="row gx-3 gy-2 align-items-end">
+
+			  <!-- 작업지시번호 -->
+			  <div class="col-md-4">
+			    <label class="form-label">작업지시번호</label>
+			    <select class="form-select" id="orderFilter">
+			      <option value="ALL">전체</option>
+			    </select>
+			  </div>
+			
+			  <!-- 제품 -->
+			  <div class="col-md-3">
+			    <label class="form-label">제품</label>
+			    <select class="form-select" id="productFilter">
+			      <option value="ALL">전체</option>
+			    </select>
+			  </div>
+			
+			  <!-- 버튼 영역 -->
+			  <div class="col-md-5 d-flex gap-2">
+			    <button type="button" class="btn btn-outline-secondary" id="btnResetFilter">
+			      초기화
+			    </button>
+			  </div>
+			
+			</div>
+
 	    </form>
 
 	</div>
