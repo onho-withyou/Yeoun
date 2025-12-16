@@ -1,6 +1,5 @@
 package com.yeoun.qc.controller;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,14 +20,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.common.dto.FileAttachDTO;
-import com.yeoun.common.service.FileAttachService;
 import com.yeoun.qc.dto.QcDetailRowDTO;
 import com.yeoun.qc.dto.QcRegistDTO;
 import com.yeoun.qc.dto.QcResultListDTO;
 import com.yeoun.qc.dto.QcResultViewDTO;
 import com.yeoun.qc.dto.QcSaveRequestDTO;
-import com.yeoun.qc.entity.QcResultDetail;
-import com.yeoun.qc.repository.QcResultDetailRepository;
 import com.yeoun.qc.service.QcResultService;
 
 import lombok.RequiredArgsConstructor;
