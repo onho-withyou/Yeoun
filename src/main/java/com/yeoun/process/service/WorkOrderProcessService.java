@@ -243,21 +243,21 @@ public class WorkOrderProcessService {
         String currentProcess = resolveCurrentProcess(processes);
         LocalDateTime endAt = null;
 
-	     // 완료/폐기면 actEndDate로 끊기
-	     if ("COMPLETED".equals(workOrder.getStatus()) || "SCRAPPED".equals(workOrder.getStatus())) {
-	         endAt = workOrder.getActEndDate();
+	    // 완료/폐기면 actEndDate로 끊기
+	    if ("COMPLETED".equals(workOrder.getStatus()) || "SCRAPPED".equals(workOrder.getStatus())) {
+	        endAt = workOrder.getActEndDate();
 	
-	         // 혹시 actEndDate 없으면 마지막 공정 endTime으로 대체
-	         if (endAt == null) {
-	             endAt = processes.stream()
-	                     .map(WorkOrderProcess::getEndTime)
-	                     .filter(Objects::nonNull)
-	                     .max(LocalDateTime::compareTo)
-	                     .orElse(null);
-	         }
-	     }
+	        // 혹시 actEndDate 없으면 마지막 공정 endTime으로 대체
+	        if (endAt == null) {
+	            endAt = processes.stream()
+	                    .map(WorkOrderProcess::getEndTime)
+	                    .filter(Objects::nonNull)
+	                    .max(LocalDateTime::compareTo)
+	                    .orElse(null);
+	        }
+	    }
 	
-	     String elapsedTime = calculateElapsedTime(processes, endAt);
+	    String elapsedTime = calculateElapsedTime(processes, endAt);
 
 
         WorkOrderProcessDTO dto = new WorkOrderProcessDTO();
@@ -266,6 +266,9 @@ public class WorkOrderProcessService {
         dto.setPrdName(workOrder.getProduct().getPrdName());
         dto.setPlanQty(workOrder.getPlanQty());
         dto.setStatus(workOrder.getStatus());
+        if ("COMPLETED".equals(workOrder.getStatus()) || "SCRAPPED".equals(workOrder.getStatus())) {
+        	dto.setDoneTime(workOrder.getActEndDate()); // 없으면 null
+        }
         
         // 라인 정보
         if (workOrder.getLine() != null) {

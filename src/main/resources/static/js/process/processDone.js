@@ -20,6 +20,10 @@ document.addEventListener("DOMContentLoaded", () => {
       { header: "계획수량", name: "planQty" },
       { header: "양품", name: "goodQty" },
       { header: "불량", name: "defectQty" },
+	  { header: "완료일시", name: "doneTime", width: 160,
+		formatter: ({ value }) =>
+		    value ? value.replace("T", " ").substring(0, 16) : "-"
+	  },
       {
         header: "처리결과",
         name: "status",
@@ -36,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
         name: "btn",
         width: 90,
         align: "center",
-        formatter: () => "<button type='button' class='btn btn-info btn-sm'>상세</button>"
+        formatter: () => "<button type='button' class='btn btn-outline-info btn-sm'>상세</button>"
       }
     ]
   });

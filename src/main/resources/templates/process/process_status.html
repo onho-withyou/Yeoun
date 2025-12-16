@@ -3,6 +3,46 @@
   layout:decorate="~{/layouts/layout.html}">
 
 <th:block layout:fragment="content">
+
+	<style>
+	  /* ===================== 탭 커스텀 ===================== */
+	  .pay-tabs {
+	    border-bottom: 2px solid #e5e7eb;
+	    margin-bottom: 1.5rem;
+	  }
+	  .pay-tabs .nav-link {
+	    position: relative;
+	    color: #6b7280;
+	    font-weight: 600;
+	    padding: 0.75rem 1.5rem;
+	    border: none;
+	    border-radius: 8px 8px 0 0;
+	    transition: all 0.25s ease;
+	  }
+	  .pay-tabs .nav-link:hover {
+	    color: #0d6efd;
+	    background: #f1f5ff;
+	  }
+	  .pay-tabs .nav-link.active {
+	    color: #0d6efd;
+	    background: #ffffff;
+	    box-shadow: 0 -2px 8px rgba(13,110,253,0.1);
+	  }
+	  .pay-tabs .nav-link.active::after {
+	    content: '';
+	    position: absolute;
+	    left: 0; right: 0; bottom: -2px;
+	    height: 3px;
+	    background: #0d6efd;
+	    border-radius: 2px;
+	    animation: underlineIn 0.3s ease forwards;
+	  }
+	  @keyframes underlineIn {
+	    from {width: 0; margin-left: 50%;}
+	    to {width: 100%; margin-left: 0;}
+	  }
+	</style>
+
   <div class="custom-body container-xxl flex-grow-1 container-p-y">
 
     <h2>공정 현황</h2>

@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
         width: 90,
         align: "center",
         formatter: () =>
-          "<button type='button' class='btn btn-info btn-sm'>상세</button>"
+          "<button type='button' class='btn btn-outline-info btn-sm'>상세</button>"
       }
     ]
   });
@@ -228,71 +228,71 @@ function renderProcessDetail(detail) {
 	  statusBadge = `<span class="badge bg-label-success">완료</span>`;
 	} else if (step.status === "QC_PENDING") {
 	  statusBadge = `<span class="badge bg-label-info text-dark">QC 대기</span>`;
-	}
+  	} else if (step.status === "SKIPPED") {
+      statusBadge = `<span class="badge bg-secondary">생략</span>`;
+    }
 	
 	// 예상/지연 표시
     const expectedText =
       (step.expectedMinutes != null && step.expectedMinutes > 0)
         ? `${step.expectedMinutes}분`
-        : "-";
+        : "";
 
     const delayedHtml =
       (step.delayed === true)
         ? `<span class="badge bg-danger">지연</span>`
-        : `<span class="text-muted">-</span>`;
+        : `<span class="text-muted"></span>`;
 
-    // 버튼
-    let workBtnHtml = "";
+	let workBtnHtml = "";
 
-    if (step.processId === "PRC-QC") {
-      // QC 공정
-      if (step.status === "DONE") {
-        workBtnHtml = '<span class="text-muted">완료</span>';
-      } else if (step.status === "QC_PENDING") {
-        workBtnHtml = `
-          <button type="button"
-                  class="btn btn-outline-info btn-sm btn-qc-regist"
-                  data-order-id="${summary.orderId}">
-            QC 등록
-          </button>
-        `;
-      } else {
-        workBtnHtml = '<span class="text-muted">대기</span>';
-      }
-    } else {
-      // 일반 공정
-      if (step.canStart) {
-        workBtnHtml += `
-          <button type="button"
-                  class="btn btn-primary btn-sm btn-step-start"
-                  data-order-id="${summary.orderId}"
-                  data-step-seq="${step.stepSeq}">
-            시작
-          </button>
-        `;
-      }
-      if (step.canFinish) {
-        workBtnHtml += `
-          <button type="button"
-                  class="btn btn-success btn-sm btn-step-finish ms-1"
-                  data-order-id="${summary.orderId}"
-                  data-step-seq="${step.stepSeq}"
-				  data-standard-qty="${step.standardQty ?? ''}"
-				  data-plan-qty="${step.planQty}">
-            종료
-          </button>
-        `;
-      }
-      if (!step.canStart && !step.canFinish) {
-        if (step.status === "DONE") {
-          workBtnHtml = '<span class="text-muted">완료</span>';
-        } else if (step.status === "READY") {
-          workBtnHtml = '<span class="text-muted">대기</span>';
-        } else {
-          workBtnHtml = "-";
-        }
-      }
-    }
+	if (step.status === "SKIPPED") {
+	  workBtnHtml = `<span class="text-muted">생략</span>`;
+	} else if (step.processId === "PRC-QC") {
+	  if (step.status === "DONE") {
+	    workBtnHtml = `<span class="text-muted">완료</span>`;
+	  } else if (step.status === "QC_PENDING") {
+	    workBtnHtml = `
+	      <button type="button"
+	              class="btn btn-outline-info btn-sm btn-qc-regist"
+	              data-order-id="${summary.orderId}">
+	        QC 등록
+	      </button>
+	    `;
+	  } else {
+	    workBtnHtml = `<span class="text-muted">대기</span>`;
+	  }
+	} else {
+	  if (step.canStart) {
+	    workBtnHtml += `
+	      <button type="button"
+	              class="btn btn-primary btn-sm btn-step-start"
+	              data-order-id="${summary.orderId}"
+	              data-step-seq="${step.stepSeq}">
+	        시작
+	      </button>
+	    `;
+	  }
+	  if (step.canFinish) {
+	    workBtnHtml += `
+	      <button type="button"
+	              class="btn btn-success btn-sm btn-step-finish ms-1"
+	              data-order-id="${summary.orderId}"
+	              data-step-seq="${step.stepSeq}"
+	              data-standard-qty="${step.standardQty ?? ''}"
+	              data-plan-qty="${step.planQty}">
+	        종료
+	      </button>
+	    `;
+	  }
+
+	  if (!step.canStart && !step.canFinish) {
+	    if (step.status === "DONE")      workBtnHtml = `<span class="text-muted">완료</span>`;
+	    else if (step.status === "READY") workBtnHtml = `<span class="text-muted">대기</span>`;
+	    else if (step.status === "QC_PENDING") workBtnHtml = `<span class="text-muted">QC 대기</span>`; 
+	    else workBtnHtml = "-";
+	  }
+	}
+
 
     const memoInputHtml = `
       <input type="text"
@@ -592,6 +592,8 @@ function updateStepRowInModal(updatedStep) {
     statusBadge = `<span class="badge bg-label-warning text-dark">진행중</span>`;
   } else if (updatedStep.status === "DONE") {
     statusBadge = `<span class="badge bg-label-success">완료</span>`;
+  } else if (step.status === "SKIPPED") {
+	statusBadge = `<span class="badge bg-secondary">생략</span>`;
   }
   
   // 예상/지연 표시
