@@ -69,8 +69,11 @@ public class QcController {
 	// QC 결과 목록 데이터
 	@GetMapping("/result/data")
 	@ResponseBody
-	public List<QcResultListDTO> qcResultListForGrid() {
-		return qcResultService.getQcResultListForView();
+	public List<QcResultListDTO> qcResultListForGrid(@RequestParam(name = "startDate", required = false) String startDate,
+											         @RequestParam(name = "endDate", required = false) String endDate,
+											         @RequestParam(name = "keyword", required = false) String keyword,
+											         @RequestParam(name = "result", defaultValue = "ALL") String result) {
+		return qcResultService.getQcResultListForView(startDate, endDate, keyword, result);
 	}
 	
 	// --------------------------------------------------------------

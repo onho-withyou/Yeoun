@@ -309,8 +309,14 @@ public class QcResultService {
 
 	// ----------------------------------------------------------
 	// QC 결과 목록 조회
-	public List<QcResultListDTO> getQcResultListForView() {
-		return qcResultRepository.findResultListForView();
+	public List<QcResultListDTO> getQcResultListForView(String startDate, String endDate, String keyword, String result) {
+		
+		LocalDate start = (startDate == null || startDate.isBlank()) ? null : LocalDate.parse(startDate);
+	    LocalDate end   = (endDate   == null || endDate.isBlank())   ? null : LocalDate.parse(endDate);
+
+	    String kw = (keyword == null || keyword.isBlank()) ? null : keyword.trim().toUpperCase();
+		
+		return qcResultRepository.findResultListForView(start, end, kw, result);
 	}
 	
 	// ----------------------------------------------------------

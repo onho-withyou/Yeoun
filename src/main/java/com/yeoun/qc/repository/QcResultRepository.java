@@ -49,24 +49,35 @@ public interface QcResultRepository extends JpaRepository<QcResult, Long> {
     
     // QC 결과 조회
     @Query("""
-    	    select new com.yeoun.qc.dto.QcResultListDTO(
-    	        r.qcResultId,
-    	        r.orderId,
-    	        p.prdId,
-    	        p.prdName,
-    	        r.inspectionDate,
-    	        r.overallResult,
-    	        r.failReason,
-    	        e.empName
-    	    )
-    	    from QcResult r
-    	      join WorkOrder w on r.orderId = w.orderId
-    	      join w.product p
-    	      left join Emp e on r.inspectorId = e.empId
-    	    where r.overallResult <> 'PENDING'
-    	    order by r.inspectionDate desc nulls last
-    	""")
-	List<QcResultListDTO> findResultListForView();
+		select new com.yeoun.qc.dto.QcResultListDTO(
+		    r.qcResultId,
+		    r.orderId,
+		    p.prdId,
+		    p.prdName,
+		    r.inspectionDate,
+		    r.overallResult,
+		    r.failReason,
+		    e.empName
+		)
+		from QcResult r
+		  join WorkOrder w on r.orderId = w.orderId
+		  join w.product p
+		  left join Emp e on r.inspectorId = e.empId
+		where r.overallResult <> 'PENDING'
+		  and (:result = 'ALL' or r.overallResult = :result)
+		  and (:start is null or r.inspectionDate >= :start)
+		  and (:end   is null or r.inspectionDate <= :end)
+		  and (
+		        :kw is null
+		        or upper(r.orderId) like concat('%', :kw, '%')
+		        or upper(p.prdName) like concat('%', :kw, '%')
+		      )
+		order by r.inspectionDate desc nulls last, r.qcResultId desc
+		""")
+	List<QcResultListDTO> findResultListForView(@Param("start") LocalDate start,
+										        @Param("end") LocalDate end,
+										        @Param("kw") String kw,
+										        @Param("result") String result);
     
     // 작업지시 기준으로 가장 최근에 생성된 QC 결과 1건 조회
     // (QC 결과가 여러 건 존재할 수 있으므로 최신 데이터 기준)
