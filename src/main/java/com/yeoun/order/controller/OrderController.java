@@ -1,6 +1,8 @@
 package com.yeoun.order.controller;
 
 import com.yeoun.order.dto.*;
+import com.yeoun.order.service.OrderCommandService;
+import com.yeoun.order.service.OrderValidationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -17,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.yeoun.order.dto.WorkOrderDTO;
 import com.yeoun.order.dto.WorkOrderListDTO;
-import com.yeoun.order.service.OrderService;
+import com.yeoun.order.service.OrderQueryService;
 
 @Controller
 @RequiredArgsConstructor
@@ -25,7 +27,9 @@ import com.yeoun.order.service.OrderService;
 @Log4j2
 public class OrderController {
 	
-	private final OrderService orderService;
+	private final OrderQueryService orderService;
+    private final OrderCommandService orderCommandService;
+    private final OrderValidationService orderValidationService;
 
     // ======================================================
     // 작업지시 목록
@@ -65,7 +69,7 @@ public class OrderController {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
         }
 
-        orderService.createWorkOrder(req, auth.getName());
+        orderCommandService.createWorkOrder(req, auth.getName());
         return ResponseEntity.ok().build();
     }
 
@@ -82,7 +86,7 @@ public class OrderController {
     @PatchMapping("/modify/{id}")
     public ResponseEntity<?> modifyOrder (@PathVariable("id")String id,
                                           @RequestBody Map<String, String> map){
-    	orderService.updateOrder(id, map);
+    	orderCommandService.updateOrder(id, map);
     	return ResponseEntity.ok("updated");
     }
     
@@ -91,7 +95,7 @@ public class OrderController {
     @PatchMapping("/status/{id}")
     public ResponseEntity<?> released (@PathVariable("id") String id, 
     								   @RequestParam("status") String status){
-    	orderService.modifyOrderStatus(id, status);
+    	orderCommandService.modifyOrderStatus(id, status);
     	return ResponseEntity.ok("updated");
     }
     
@@ -116,6 +120,16 @@ public class OrderController {
     @ResponseBody
     public List<WorkerListDTO> workerData() {
     	return orderService.loadAllWorkers();
+    }
+
+    // =====================================================
+    // 작업지시 유효성 검증
+    @PostMapping("/validate")
+    @ResponseBody
+    public WorkOrderValidationResult validateWorkOrder (
+            @RequestBody WorkOrderValidateRequest req
+    ) {
+        return orderValidationService.validateAll(req);
     }
 
     // ========================================
