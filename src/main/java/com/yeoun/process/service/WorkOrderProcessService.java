@@ -993,10 +993,18 @@ public class WorkOrderProcessService {
 
     // 공정 관리 -> 완료 처리부분
     @Transactional(readOnly = true)
-    public List<WorkOrderProcessDTO> getWorkOrderListForDone(LocalDate workDate, String keyword) {
+    public List<WorkOrderProcessDTO> getWorkOrderListForDone(LocalDate workDate, String keyword, String status) {
 
         // 완료/폐기 탭 대상
         List<String> statuses = List.of("COMPLETED", "SCRAPPED");
+        
+        if (status != null && !status.isBlank()) {
+            statuses = statuses.stream()
+                    .filter(s -> s.equalsIgnoreCase(status))
+                    .toList();
+        }
+
+        if (statuses.isEmpty()) return List.of();
 
         List<WorkOrder> workOrders =
                 workOrderRepository.findByStatusInAndOutboundYn(statuses, "Y");

@@ -62,6 +62,26 @@ document.addEventListener("DOMContentLoaded", () => {
 	    formatter: ({ row }) => formatPlanPeriod(row.planStartDate, row.planEndDate)
 	  },
 	  {
+	    header: "상태",
+	    name: "status",
+	    align: "center",
+		formatter: ({ value }) => {
+		  switch (value) {
+		    case "IN_PROGRESS":
+		      return `<span class="badge bg-primary">진행중</span>`;
+		    case "RELEASED":
+		      return `<span class="badge bg-secondary">대기</span>`;
+		    default:
+		      return `<span class="badge bg-light text-dark">-</span>`;
+		  }
+		}
+	  },
+      {
+        header: "현재공정",
+        name: "currentProcess",
+        align: "center"
+      },
+	  {
 	    header: "진행률",
 	    name: "progressRate",
 	    align: "center",
@@ -78,30 +98,6 @@ document.addEventListener("DOMContentLoaded", () => {
 	        </div>
 	        <div style="font-size:11px; margin-top:2px;">${percent}%</div>
 	      `;
-	    }
-	  },
-      {
-        header: "현재공정",
-        name: "currentProcess",
-        align: "center"
-      },
-	  {
-	    header: "상태",
-	    name: "status",
-	    align: "center",
-	    formatter: ({ value }) => {
-	      switch (value) {
-	        case "IN_PROGRESS":
-	          return "진행중";
-	        case "RELEASED":
-	          return "대기";
-	        case "DONE":
-	          return "완료";
-	        case "CANCELLED":
-	          return "취소";
-	        default:
-	          return value || "-";
-	      }
 	    }
 	  },
       {
@@ -596,10 +592,10 @@ function updateStepRowInModal(updatedStep) {
   if (updatedStep.status === "READY") {
     statusBadge = `<span class="badge bg-label-secondary">대기</span>`;
   } else if (updatedStep.status === "IN_PROGRESS") {
-    statusBadge = `<span class="badge bg-label-warning text-dark">진행중</span>`;
+    statusBadge = `<span class="badge bg-label-warning text-dark">진행중</span>`; 
   } else if (updatedStep.status === "DONE") {
     statusBadge = `<span class="badge bg-label-success">완료</span>`;
-  } else if (step.status === "SKIPPED") {
+  } else if (updatedStep.status === "SKIPPED") {
 	statusBadge = `<span class="badge bg-secondary">생략</span>`;
   }
   
@@ -617,8 +613,10 @@ function updateStepRowInModal(updatedStep) {
   // 버튼
   let workBtnHtml = "";
 
+  if (updatedStep.status === "SKIPPED") {
+    workBtnHtml = `<span class="text-muted">생략</span>`;
   // QC 공정일 때
-  if (updatedStep.processId === "PRC-QC") {
+  } else if (updatedStep.processId === "PRC-QC") {
 
     if (updatedStep.status === "DONE") {
       workBtnHtml = '<span class="text-muted">완료</span>';

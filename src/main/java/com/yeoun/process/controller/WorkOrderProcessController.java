@@ -44,9 +44,10 @@ public class WorkOrderProcessController {
 	public List<WorkOrderProcessDTO> getDoneWorkOrdersForGrid(
 	        @RequestParam(name = "workDate", required = false)
 	        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate workDate,
-	        @RequestParam(name = "searchKeyword", required = false) String keyword) {
+	        @RequestParam(name = "searchKeyword", required = false) String keyword,
+	        @RequestParam(name = "doneStatus", required = false) String status) {
 
-	    return workOrderProcessService.getWorkOrderListForDone(workDate, keyword);
+	    return workOrderProcessService.getWorkOrderListForDone(workDate, keyword, status);
 	}
 	
 	// 공정 현황 목록 데이터

@@ -20,10 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
       { header: "계획수량", name: "planQty" },
       { header: "양품", name: "goodQty" },
       { header: "불량", name: "defectQty" },
-	  { header: "완료일시", name: "doneTime", width: 160,
-		formatter: ({ value }) =>
-		    value ? value.replace("T", " ").substring(0, 16) : "-"
-	  },
       {
         header: "처리결과",
         name: "status",
@@ -34,6 +30,10 @@ document.addEventListener("DOMContentLoaded", () => {
           return value || "-";
         }
       },
+	  { header: "완료일시", name: "doneTime", width: 160,
+		formatter: ({ value }) =>
+		    value ? value.replace("T", " ").substring(0, 16) : "-"
+	  },
       { header: "경과시간", name: "elapsedTime" },
       {
         header: " ",
@@ -61,10 +61,12 @@ document.addEventListener("DOMContentLoaded", () => {
 function loadDoneGrid() {
   const workDate = document.getElementById("doneDate")?.value || "";
   const searchKeyword = document.getElementById("doneKeyword")?.value || "";
+  const status   = document.getElementById("doneStatus")?.value || "";
 
   const params = new URLSearchParams();
   if (workDate) params.append("workDate", workDate);
   if (searchKeyword) params.append("searchKeyword", searchKeyword);
+  if (status)   params.append("doneStatus", status);
 
   fetch("/process/status/done/data?" + params.toString())
     .then(res => {
@@ -77,3 +79,6 @@ function loadDoneGrid() {
       alert("완료 데이터를 불러오는 중 오류가 발생했습니다.");
     });
 }
+
+document.getElementById("btnSearchDone")?.addEventListener("click", loadDoneGrid);
+document.getElementById("doneStatus")?.addEventListener("change", loadDoneGrid);
