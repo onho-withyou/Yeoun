@@ -1,15 +1,13 @@
 package com.yeoun.masterData.repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import com.yeoun.masterData.entity.ProcessMst;
-import com.yeoun.masterData.entity.ProductMst;
-import com.yeoun.masterData.entity.RouteHeader;
 
 public interface ProcessMstRepository extends JpaRepository<ProcessMst, String> {
 
@@ -25,12 +23,25 @@ public interface ProcessMstRepository extends JpaRepository<ProcessMst, String> 
 
 	// 공정코드 그리드 조회
 	@Query(value="""
-			SELECT * FROM PROCESS_MST
+			SELECT
+				    p.*,
+				    ec.emp_name AS created_by_name,
+				    eu.emp_name AS updated_by_name
+				FROM
+				    PROCESS_MST p
+				LEFT JOIN
+				    EMP ec
+				ON
+				    p.created_id = ec.emp_id
+				LEFT JOIN
+				    EMP eu
+				ON
+				    p.updated_id = eu.emp_id
 			WHERE ( ?1 IS NULL OR ?1 = '' OR PROCESS_ID LIKE '%' || ?1 || '%')
 			  AND ( ?2 IS NULL OR ?2 = '' OR PROCESS_NAME LIKE '%' || ?2 || '%')
 			  AND USE_YN = 'Y'
 			ORDER BY PROCESS_ID ASC
 			""", nativeQuery = true)
-	List<ProcessMst> findByprocesslList(String processId, String processName);
+	List<Map<String, Object>> findByprocesslList(String processId, String processName);
 	
 }

@@ -87,110 +87,124 @@ public class WorkOrderProcessService {
         return getWorkOrderListForStatus(null, null, null, null);
     }
     
-    // 1. 공정현황 메인 목록
-    @Transactional(readOnly = true)
-    public List<WorkOrderProcessDTO> getWorkOrderListForStatus(LocalDate workDate, String processName, String status, String keyword) {
+	// =========================================================================
+	// 1. 공정현황 메인 목록 (검색/필터/정렬 포함)
+	// =========================================================================
+	@Transactional(readOnly = true)
+	public List<WorkOrderProcessDTO> getWorkOrderListForStatus(LocalDate workDate, String processId, String status, String keyword) {
+		
+	    // 1) 공정현황 대상 작업지시만 조회
+	    List<String> statuses = List.of("RELEASED", "IN_PROGRESS");
+	    List<WorkOrder> workOrders =
+	            workOrderRepository.findByStatusInAndOutboundYn(statuses, "Y");
+	
+	     // 대상 자체가 없으면 빈 리스트 반환
+	     if (workOrders.isEmpty()) {
+	         return List.of();
+	     }
+	
+	    // 2) 작업일자(workDate) 필터
+	    // 현재는 WorkOrder.createdDate를 작업지시일자로 사용 중
+	    // (추후 actStartDate / planDate 등으로 기준 변경 시 이 부분만 수정하면 됨)
+	    if (workDate != null) {
+	        workOrders = workOrders.stream()
+	                .filter(w ->
+	                        w.getCreatedDate() != null &&
+	                        w.getCreatedDate().toLocalDate().equals(workDate)
+	                )
+	                .collect(Collectors.toList());
+	    }
+	    if (workOrders.isEmpty()) return List.of();
+	
+	    // 3) 작업지시 상태(status) 필터
+	    if (status != null && !status.isBlank()) {
+	        workOrders = workOrders.stream()
+	                .filter(w -> status.equals(w.getStatus()))
+	                .collect(Collectors.toList());
+	    }
+	    if (workOrders.isEmpty()) return List.of();
+	
+	    // 4) 정렬: 상태 우선순위 + 작업지시번호
+	    workOrders.sort(
+	    	    Comparator.comparing((WorkOrder w) -> statusPriority(w.getStatus()))
+	    	              .thenComparing(WorkOrder::getCreatedDate, Comparator.nullsLast(Comparator.naturalOrder()))
+	    	              .thenComparing(WorkOrder::getOrderId)
+	    	);
 
-        // 1) 공정현황 대상이 되는 작업지시 조회 (RELEASE, IN_PROGRESS)
-        List<String> statuses = List.of("RELEASED", "IN_PROGRESS");
-        List<WorkOrder> workOrders = workOrderRepository.findByStatusInAndOutboundYn(statuses, "Y");
+	    // 5) 남은 작업지시의 ID 목록 추출
+	    // 이후 공정단계 / QC 결과를 IN 조회로 일괄 조회하기 위한 준비
+	    List<String> orderIds = workOrders.stream()
+	            .map(WorkOrder::getOrderId)
+	            .toList();
+	
+	    // 6) 공정단계(WorkOrderProcess) 일괄 조회
+	    // N+1 방지 포인트: 작업지시별로 조회하지 않고 IN + 정렬로 한 번에 조회
+	    // 정렬 기준: orderId ASC, stepSeq ASC (화면 계산 시 순서가 중요)
+	    List<WorkOrderProcess> allProcesses =
+	            workOrderProcessRepository
+	                    .findByWorkOrderOrderIdInOrderByWorkOrderOrderIdAscStepSeqAsc(orderIds);
+	
+	    // 작업지시번호별 공정 리스트로 묶어두면 DTO 변환 때 빠르게 매칭 가능
+	    Map<String, List<WorkOrderProcess>> processMap = allProcesses.stream()
+	            .collect(Collectors.groupingBy(p -> p.getWorkOrder().getOrderId()));
+	
+	    // 7) QC 결과(QcResult) 일괄 조회
+	    // 작업지시 단위로 QC_RESULT가 존재하며, 목록에서 양품/불량을 보여주기 위함
+	    List<QcResult> allQcResults = qcResultRepository.findByOrderIdIn(orderIds);
+	
+	    // orderId -> qcResult 맵 (중복 방어: 같은 orderId가 여러 건이면 첫 번째만 사용)
+	    Map<String, QcResult> qcMap = allQcResults.stream()
+	            .collect(Collectors.toMap(
+	                    QcResult::getOrderId,
+	                    qc -> qc,
+	                    (q1, q2) -> q1
+	            ));
+	
+	    // 8) DTO 변환: WorkOrder(헤더) + 공정단계 + QC 결과를 합쳐 요약 DTO 생성
+	    List<WorkOrderProcessDTO> dtoList = workOrders.stream()
+	            .map(w -> {
+	                List<WorkOrderProcess> processes =
+	                        processMap.getOrDefault(w.getOrderId(), List.of());
+	                QcResult qcResult = qcMap.get(w.getOrderId());
+	                return toProcessSummaryDto(w, processes, qcResult);
+	            })
+	            .collect(Collectors.toList());
+	
+	    // 9) 현재공정 필터(DTO단)
+	    if (processId != null && !processId.isBlank()) {
+	        dtoList = dtoList.stream()
+	                .filter(dto -> processId.equals(dto.getCurrentProcess()))
+	                .toList();
+	    }
+	
+	    // 10) 키워드 검색(DTO단)
+	    // 검색 대상: 작업지시번호 / 제품ID / 제품명
+	    if (keyword != null && !keyword.isBlank()) {
+	        String kw = keyword.toLowerCase();
+	
+	        dtoList = dtoList.stream()
+	                .filter(dto ->
+	                        (dto.getOrderId() != null && dto.getOrderId().toLowerCase().contains(kw)) ||
+	                        (dto.getPrdId() != null   && dto.getPrdId().toLowerCase().contains(kw)) ||
+	                        (dto.getPrdName() != null && dto.getPrdName().toLowerCase().contains(kw))
+	                )
+	                .toList();
+	    }
+	
+	    return dtoList;
+	}
 
-        if (workOrders.isEmpty()) {
-            return List.of();
-        }
-        
-        // 날짜 필터: 작성일자(createdDate)를 "작업지시일자"로 사용
-        if (workDate != null) {
-            workOrders = workOrders.stream()
-                    .filter(w -> w.getCreatedDate() != null &&
-                                 w.getCreatedDate().toLocalDate().equals(workDate))
-                    .collect(Collectors.toList());
-        }
-        
-        // 상태 필터: 셀렉트에서 넘어온 status 값과 동일한 것만
-        if (status != null && !status.isBlank()) {
-            workOrders = workOrders.stream()
-                    .filter(w -> status.equals(w.getStatus()))
-                    .collect(Collectors.toList());
-        }
-        
-        if (workOrders.isEmpty()) {
-            return List.of();
-        }
-
-        // 작업지시번호 리스트 추출
-        // 2) 정렬 (상태 우선순위 + 작업지시번호)
-        workOrders.sort(
-        	    Comparator.comparing((WorkOrder w) -> statusPriority(w.getStatus()))
-        	              .thenComparing(WorkOrder::getOrderId)
-    	);
-
-        // 3) 작업지시번호 리스트 추출
-        List<String> orderIds = workOrders.stream()
-                .map(WorkOrder::getOrderId)
-                .toList();
-
-        // 4) 모든 공정 데이터를 한 번에 조회 (orderId + stepSeq 순)
-        List<WorkOrderProcess> allProcesses =
-                workOrderProcessRepository.findByWorkOrderOrderIdInOrderByWorkOrderOrderIdAscStepSeqAsc(orderIds);
-
-        // orderId -> 공정 리스트 맵핑
-        Map<String, List<WorkOrderProcess>> processMap = allProcesses.stream()
-                .collect(Collectors.groupingBy(p -> p.getWorkOrder().getOrderId()));
-
-        // 5) 모든 QC 결과를 한 번에 조회
-        List<QcResult> allQcResults = qcResultRepository.findByOrderIdIn(orderIds);
-
-        Map<String, QcResult> qcMap = allQcResults.stream()
-                .collect(Collectors.toMap(
-                        QcResult::getOrderId,
-                        qc -> qc,
-                        (q1, q2) -> q1 // 중복 시 첫 번째 사용
-                ));
-
-        // 6) 각 작업지시를 공정현황 DTO로 변환
-        List<WorkOrderProcessDTO> dtoList = workOrders.stream()
-                .map(w -> {
-                    List<WorkOrderProcess> processes =
-                            processMap.getOrDefault(w.getOrderId(), List.of());
-                    QcResult qcResult = qcMap.get(w.getOrderId());
-                    return toProcessSummaryDto(w, processes, qcResult);
-                })
-                .collect(Collectors.toList());
-        
-        // 7) 현재공정 필터 (DTO 단)
-        if (processName != null && !processName.isBlank()) {
-            dtoList = dtoList.stream()
-                    .filter(dto -> processName.equals(dto.getCurrentProcess()))
-                    .toList();
-        }
-        
-        // 8) 검색어 필터 (작업지시번호 / 제품ID / 제품명)
-        if (keyword != null && !keyword.isBlank()) {
-            String kw = keyword.toLowerCase();
-
-            dtoList = dtoList.stream()
-                    .filter(dto ->
-                            (dto.getOrderId() != null &&
-                             dto.getOrderId().toLowerCase().contains(kw))
-                         || (dto.getPrdId() != null &&
-                             dto.getPrdId().toLowerCase().contains(kw))
-                         || (dto.getPrdName() != null &&
-                             dto.getPrdName().toLowerCase().contains(kw))
-                    )
-                    .toList();
-        }
-
-        return dtoList;
-    }
     
-    private int statusPriority(String status) {
-        return switch (status) {
-            case "IN_PROGRESS" -> 1;
-            case "RELEASED"    -> 2;
-            default            -> 3;
-        };
-    }
+	private int statusPriority(String status) {
+	    if (status == null) return 99;
+
+	    return switch (status) {
+	        case "IN_PROGRESS" -> 1;   // 진행중
+	        case "RELEASED"    -> 2;   // 대기
+	        default            -> 50;  // 기타 상태
+	    };
+	}
+
 
 
     /**
@@ -227,7 +241,24 @@ public class WorkOrderProcessService {
 
         int progressRate = calculateProgressRate(processes);
         String currentProcess = resolveCurrentProcess(processes);
-        String elapsedTime = calculateElapsedTime(processes);
+        LocalDateTime endAt = null;
+
+	    // 완료/폐기면 actEndDate로 끊기
+	    if ("COMPLETED".equals(workOrder.getStatus()) || "SCRAPPED".equals(workOrder.getStatus())) {
+	        endAt = workOrder.getActEndDate();
+	
+	        // 혹시 actEndDate 없으면 마지막 공정 endTime으로 대체
+	        if (endAt == null) {
+	            endAt = processes.stream()
+	                    .map(WorkOrderProcess::getEndTime)
+	                    .filter(Objects::nonNull)
+	                    .max(LocalDateTime::compareTo)
+	                    .orElse(null);
+	        }
+	    }
+	
+	    String elapsedTime = calculateElapsedTime(processes, endAt);
+
 
         WorkOrderProcessDTO dto = new WorkOrderProcessDTO();
         dto.setOrderId(workOrder.getOrderId());
@@ -235,6 +266,11 @@ public class WorkOrderProcessService {
         dto.setPrdName(workOrder.getProduct().getPrdName());
         dto.setPlanQty(workOrder.getPlanQty());
         dto.setStatus(workOrder.getStatus());
+        if ("COMPLETED".equals(workOrder.getStatus()) || "SCRAPPED".equals(workOrder.getStatus())) {
+        	dto.setDoneTime(workOrder.getActEndDate()); // 없으면 null
+        }
+        dto.setPlanStartDate(workOrder.getPlanStartDate());
+        dto.setPlanEndDate(workOrder.getPlanEndDate());
         
         // 라인 정보
         if (workOrder.getLine() != null) {
@@ -323,25 +359,32 @@ public class WorkOrderProcessService {
     }
 
     /**
-     * 경과시간 계산 (첫 START_TIME ~ 현재)
+     * 경과시간 계산
+     * - 진행중: firstStart ~ now
+     * - 완료/폐기: firstStart ~ endAt(완료/폐기 시각)
      */
-    private String calculateElapsedTime(List<WorkOrderProcess> processes) {
+    private String calculateElapsedTime(List<WorkOrderProcess> processes, LocalDateTime endAtOrNull) {
+
         LocalDateTime firstStart = processes.stream()
                 .map(WorkOrderProcess::getStartTime)
                 .filter(Objects::nonNull)
                 .min(LocalDateTime::compareTo)
                 .orElse(null);
 
-        if (firstStart == null) {
-            return "-";
-        }
+        if (firstStart == null) return "-";
 
-        Duration d = Duration.between(firstStart, LocalDateTime.now());
+        LocalDateTime endAt = (endAtOrNull != null) ? endAtOrNull : LocalDateTime.now();
+
+        // 방어: endAt이 firstStart보다 빠르면 firstStart로 맞춤
+        if (endAt.isBefore(firstStart)) endAt = firstStart;
+
+        Duration d = Duration.between(firstStart, endAt);
         long hours = d.toHours();
         long minutes = d.toMinutesPart();
 
         return hours + "시간 " + minutes + "분";
     }
+
 
     // =========================================================================
     // 2. 공정현황 상세 모달
@@ -375,7 +418,7 @@ public class WorkOrderProcessService {
                         p -> p,
                         (p1, p2) -> p1
                 ));
-
+        
         // 5) 상단 요약 DTO
         WorkOrderProcessDTO headerDto = new WorkOrderProcessDTO();
         headerDto.setOrderId(workOrder.getOrderId());
@@ -383,7 +426,9 @@ public class WorkOrderProcessService {
         headerDto.setPrdName(workOrder.getProduct().getPrdName());
         headerDto.setPlanQty(workOrder.getPlanQty());
         headerDto.setStatus(workOrder.getStatus());
-
+        headerDto.setLineId(workOrder.getLine().getLineId());
+        headerDto.setLineName(workOrder.getLine().getLineName());
+        
         // QC 결과 PASS 여부 (포장 공정 시작 조건)
         boolean isQcPassed = qcResultRepository.existsByOrderIdAndOverallResult(orderId, "PASS");
 
@@ -945,5 +990,77 @@ public class WorkOrderProcessService {
 
         return dto;
     }
+
+    // 공정 관리 -> 완료 처리부분
+    @Transactional(readOnly = true)
+    public List<WorkOrderProcessDTO> getWorkOrderListForDone(LocalDate workDate, String keyword, String status) {
+
+        // 완료/폐기 탭 대상
+        List<String> statuses = List.of("COMPLETED", "SCRAPPED");
+        
+        if (status != null && !status.isBlank()) {
+            statuses = statuses.stream()
+                    .filter(s -> s.equalsIgnoreCase(status))
+                    .toList();
+        }
+
+        if (statuses.isEmpty()) return List.of();
+
+        List<WorkOrder> workOrders =
+                workOrderRepository.findByStatusInAndOutboundYn(statuses, "Y");
+
+        if (workOrders.isEmpty()) return List.of();
+
+        if (workDate != null) {
+            workOrders = workOrders.stream()
+                    .filter(w -> w.getActEndDate() != null
+                            && w.getActEndDate().toLocalDate().equals(workDate))
+                    .toList();
+        }
+        if (workOrders.isEmpty()) return List.of();
+
+        // 최근 완료/폐기 우선
+        workOrders = workOrders.stream()
+                .sorted(Comparator
+                        .comparing(WorkOrder::getActEndDate, Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(WorkOrder::getOrderId))
+                .toList();
+
+        List<String> orderIds = workOrders.stream().map(WorkOrder::getOrderId).toList();
+
+        List<WorkOrderProcess> allProcesses =
+                workOrderProcessRepository
+                        .findByWorkOrderOrderIdInOrderByWorkOrderOrderIdAscStepSeqAsc(orderIds);
+
+        Map<String, List<WorkOrderProcess>> processMap = allProcesses.stream()
+                .collect(Collectors.groupingBy(p -> p.getWorkOrder().getOrderId()));
+
+        List<QcResult> allQcResults = qcResultRepository.findByOrderIdIn(orderIds);
+        Map<String, QcResult> qcMap = allQcResults.stream()
+                .collect(Collectors.toMap(QcResult::getOrderId, q -> q, (a, b) -> a));
+
+        List<WorkOrderProcessDTO> dtoList = workOrders.stream()
+                .map(w -> toProcessSummaryDto(
+                        w,
+                        processMap.getOrDefault(w.getOrderId(), List.of()),
+                        qcMap.get(w.getOrderId())
+                ))
+                .toList();
+
+        // 키워드 검색
+        if (keyword != null && !keyword.isBlank()) {
+            String kw = keyword.toLowerCase();
+            dtoList = dtoList.stream()
+                    .filter(dto ->
+                            (dto.getOrderId() != null && dto.getOrderId().toLowerCase().contains(kw)) ||
+                            (dto.getPrdId() != null   && dto.getPrdId().toLowerCase().contains(kw)) ||
+                            (dto.getPrdName() != null && dto.getPrdName().toLowerCase().contains(kw))
+                    )
+                    .toList();
+        }
+
+        return dtoList;
+    }
+
 
 }

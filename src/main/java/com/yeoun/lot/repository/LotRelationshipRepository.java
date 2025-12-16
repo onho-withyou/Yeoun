@@ -16,4 +16,6 @@ public interface LotRelationshipRepository extends JpaRepository<LotRelationship
 
 	Optional<LotRelationship> findByOutputLot_LotNoAndInputLot_LotNo(String outputLotNo, String inputLotNo);
 	
+	List<LotRelationship> findByInputLot_LotNo(String inputLotNo);
+
 }

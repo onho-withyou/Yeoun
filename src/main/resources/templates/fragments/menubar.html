@@ -62,6 +62,11 @@
                             <div data-i18n="Menu2" class="menu-link-sub">출/퇴근 현황</div>
                         </a>
                     </li>
+                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                        <a href="/attendance/outwork" class="menu-link">
+                            <div data-i18n="Menu2" class="menu-link-sub">외근 현황</div>
+                        </a>
+                    </li>
                     <!-- 로그인한 사람 누구나 -->
                     <li class="menu-item" sec:authorize="isAuthenticated()">
                         <a href="/leave/my" class="menu-link">
@@ -273,8 +278,8 @@
 	                   </a>
 	                </li>
 	                <li class="menu-item" sec:authorize="isAuthenticated()">
-	                   <a th:href="@{/equipment/line}" class="menu-link">
-	                       <div data-i18n="Menu2" class="menu-link-sub">라인현황</div>
+	                   <a th:href="@{/equipment/history}" class="menu-link">
+	                       <div data-i18n="Menu2" class="menu-link-sub">설비이력</div>
 	                   </a>
 	                </li>
                 </ul>

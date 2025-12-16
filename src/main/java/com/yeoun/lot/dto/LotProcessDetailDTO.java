@@ -28,6 +28,7 @@ public class LotProcessDetailDTO {
     private Long defectQty;					// 불량수량
     private Double defectRate;				// 불량률
     private String lineId;					// 라인ID
+    private Long qcResultId;				// QC 결과
     
     // 설비 정보
     private List<LotEquipInfoDTO> equipments;

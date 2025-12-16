@@ -3,14 +3,34 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{/layouts/layout.html}">
 <head>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@latest/dist/web/static/pretendard.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-  body {
+body {
     background: #f4f3fb;
-    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-family:
+        "Pretendard",
+        -apple-system,
+        BlinkMacSystemFont,
+        system-ui,
+        "Segoe UI",
+        Roboto,
+        "Apple SD Gothic Neo",
+        "Noto Sans KR",
+        "Malgun Gothic",
+        Arial,
+        sans-serif;
     color: #2f2b43;
-  }
+}
+
+/* Toast UI 전체 */
+.toastui-calendar *,
+.tui-grid-container *,
+.tui-grid-table * {
+    font-family: "Pretendard", sans-serif !important;
+}
+
 
   .title {
     font-size: 1.8em;
@@ -55,17 +75,19 @@
 
   .status-badge {
     width: 90px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 3px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 0.25rem;
+    padding: 0.52em 0.593em;
+    color: white !important;
   }
 
-  .status-create     { background: #e7eef7; color: #3a5a8a; }
-  .status-release    { background: #f0eaff; color: #6a4cc3; }
-  .status-progress   { background: #e6f5ec; color: #15803d; }
-  .status-complete   { background: #e8f1ff; color: #1d4ed8; }
-  .status-cancel     { background: #fdecec; color: #c0392b; }
+  .status-create     { background: #3a5a8a; color: #e7eef7; }
+  .status-release    { background: #6a4cc3; color: #f0eaff; }
+  .status-progress   { background: #15803d; color: #e6f5ec; }
+  .status-scrap	     { background: #475569; color: #eef2f7; }
+  .status-complete   { background: #1d4ed8; color: #e8f1ff; }
+  .status-cancel     { background: #c0392b; color: #fdecec; }
 
 
   .form-label {
@@ -676,7 +698,8 @@
 	              </div>
 	              <div class="col-3">
 	                <label class="form-label">시작 시간</label>
-	                <input type="time" class="form-control" id="startTime">
+	                <input type="time" class="form-control" id="startTime"
+	                	   min="09:00" max="18:00" step="1800">
 	                  <input type="hidden" th:field="*{planStartDate}">
 	                  <div class="invalid-feedback"
 	                       data-error-for="planStartDate" style="display:none;">
@@ -685,7 +708,8 @@
 	              </div>
 	              <div class="col-3">
 	                <label class="form-label">종료 시간</label>
-	                <input type="time" class="form-control" id="endTime">
+	                <input type="time" class="form-control" id="endTime"
+	                	   min="09:00" max="18:00" step="1800">
 	                  <input type="hidden" th:field="*{planEndDate}">
 	                  <div class="invalid-feedback"
 	                       data-error-for="planEndDate" style="display:none;">
@@ -1103,11 +1127,12 @@
   function formatStatusBadge(status) {
 
     const map = {
-      "CREATED":      { text: "준비",       cls: "status-badge status-create" },
-      "RELEASED":     { text: "확정",       cls: "status-badge status-release" },
-      "IN_PROGRESS":  { text: "진행중",     cls: "status-badge status-progress" },
-      "COMPLETED":    { text: "완료",       cls: "status-badge status-complete" },
-      "CANCELED":     { text: "취소",       cls: "status-badge status-cancel" }
+      "CREATED":      { text: "준비",  cls: "status-badge bg-secondary" },
+      "RELEASED":     { text: "확정",  cls: "status-badge bg-warning" },
+      "IN_PROGRESS":  { text: "진행",  cls: "status-badge bg-primary" },
+      "SCRAPPED":	  { text: "중단",  cls: "status-badge bg-dark"},
+      "COMPLETED":    { text: "완료",  cls: "status-badge bg-success" },
+      "CANCELED":     { text: "취소",  cls: "status-badge bg-danger" }
     };
 
     const item = map[status] || { text: status, cls: "status-badge" };
@@ -1415,7 +1440,7 @@
                 	  		statusText.innerText = '확정';
                 	  		break;
                 	  	case "IN_PROGRESS":
-                	  		statusText.innerText = '진행중';
+                	  		statusText.innerText = '진행';
                 	  		break;
                 	  	case "COMPLETED":
                 	  		statusText.innerText = '완료';
@@ -1571,6 +1596,63 @@
 	  })
 	    .catch(err => console.error ("오류 발생", err));
   });
+  
+  	// 시작입력 보정
+	const startTime = document.getElementById("startTime");
+	const endTime 	= document.getElementById("endTime");
+	 
+	function validateTimes(){
+		const start = startTime.value;
+		const end	= endTime.value;
+	
+	
+		if (!start || !end) 
+			return;
+		
+		
+		// 근무시간 범위 설정
+		if (start < "09:00" || start > "18:00") {
+			alert ("시작 시간은 09:00~18:00 사이여야 합니다.");
+			startTime.value = "";
+			return;
+		}
+		
+		if (end < "09:00" || end > "18:00") {
+			alert ("종료 시간은 09:00~18:00 사이여야 합니다.");
+			endTime.value = "";
+			return;
+		}
+		
+		// 30분 단위로 가능
+		const startMin = Number(start.split(":")[1]);
+		const endMin   = Number(end.split(":")[1]);
+		 
+		if (startMin % 30 !== 0 || endMin % 30 !== 0) {
+			alert("시간은 30분 단위로만 선택할 수 있습니다.");
+			startTime.value = "";
+			endTime.value	= "";
+			return;
+		}
+		
+		// 시작시간 < 종료시간
+		if (start >= end) {
+			alert("종료 시간은 시작 시간 이후여야 합니다.");
+			endTime.value = "";
+			return;
+		}
+	}
+	
+	// 이벤트 연결
+	startTime.addEventListener("change", () => {
+		// 시작 시간이 바뀌면 최솟값 갱신
+		if (startTime.value) {
+			endTime.min = startTime.value;
+		}
+		validateTimes();
+	});
+	
+	endTime.addEventListener("change", validateTimes);
+	
   
 </script>
 </th:block>

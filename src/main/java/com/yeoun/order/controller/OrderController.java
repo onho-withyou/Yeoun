@@ -5,8 +5,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import com.yeoun.order.dto.WorkOrderDTO;
 import com.yeoun.order.dto.WorkOrderListDTO;
-import com.yeoun.order.entity.WorkOrder;
 import com.yeoun.order.service.OrderService;
 
 @Controller
@@ -102,8 +99,23 @@ public class OrderController {
     // 작업자스케줄 페이지
     @GetMapping("/schedule")
     public String schedule (){
-    	orderService.selectAllWorkers();
         return "/order/schedule";
+    }
+    
+    // =====================================================
+    // 작업자스케줄 로드
+    @GetMapping("/schedule/data")
+    @ResponseBody
+    public List<WorkScheduleDTO> scheduleData() {
+    	return orderService.loadAllSchedules();
+    }
+    
+    // =====================================================
+    // 작업자목록 로드
+    @GetMapping("/workers/data")
+    @ResponseBody
+    public List<WorkerListDTO> workerData() {
+    	return orderService.loadAllWorkers();
     }
 
     // ========================================

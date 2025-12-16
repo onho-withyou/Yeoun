@@ -21,10 +21,10 @@ import com.yeoun.order.repository.WorkScheduleRepository;
 import com.yeoun.order.repository.WorkerProcessRepository;
 import com.yeoun.process.entity.WorkOrderProcess;
 import com.yeoun.process.repository.WorkOrderProcessRepository;
+import com.yeoun.process.service.ProcessTimeCalculator;
 import com.yeoun.production.entity.ProductionPlan;
 import com.yeoun.production.entity.ProductionPlanItem;
 import com.yeoun.production.enums.ProductionStatus;
-import com.yeoun.order.dto.WorkOrderSearchDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,11 +35,10 @@ import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.equipment.entity.ProdLine;
 import com.yeoun.masterData.entity.ProductMst;
-
+import com.yeoun.masterData.entity.RouteHeader;
 import com.yeoun.equipment.repository.ProdLineRepository;
+import com.yeoun.leave.repository.LeaveHistoryRepository;
 import com.yeoun.masterData.repository.ProductMstRepository;
-import com.yeoun.order.dto.WorkOrderDTO;
-import com.yeoun.order.dto.WorkOrderListDTO;
 import com.yeoun.order.mapper.OrderMapper;
 import com.yeoun.outbound.service.OutboundService;
 import com.yeoun.production.dto.ProductionPlanListDTO;
@@ -70,6 +69,7 @@ public class OrderService {
 	private final RouteStepRepository routeStepRepository;
 	private final RouteHeaderRepository routeHeaderRepository;
 	private final WorkOrderProcessRepository workOrderProcessRepository;
+	private final LeaveHistoryRepository leaveHistoryRepository;
 	
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -78,7 +78,7 @@ public class OrderService {
 	// =======================================================
 	// 작업지시 목록 조회
 	public List<WorkOrderListDTO> loadAllOrders (WorkOrderSearchDTO dto){
-		log.info("dto....... loadAll...." + dto);
+		//log.info("dto....... loadAll...." + dto);
 		return orderMapper.selectOrderList(dto);
 	}
 	
@@ -92,6 +92,7 @@ public class OrderService {
 			
 			// 1) 생산 완료 계획은 제외하기
 			if (plan.getStatus().equals("DONE")) continue;
+			if (plan.getStatus().equals("CANCELLED")) continue;
 
 			int total = plan.getTotalQty().intValue();
 			int created = workOrderRepository.sumWorkOrderQty(plan.getPlanId());
@@ -124,14 +125,40 @@ public class OrderService {
 	// =======================================================
 	// 라인 조회
 	public List<ProdLine> loadAllLines() {
-		return prodLineRepository.findAll();
+		return prodLineRepository.findByUseYnOrderByLineIdAsc("Y");
 	}
 	
 	// =======================================================
 	// 작업자 조회
-	public List<EmpListDTO> loadAllWorkers() {
-		return orderMapper.selectWorkers();
+	public List<WorkerListDTO> loadAllWorkers() {
+		
+		LocalDate today = LocalDate.now();			// 휴가여부 판단용
+		LocalDateTime now = LocalDateTime.now();	// 작업여부 판단용
+		
+		List<WorkerListDTO> list = orderMapper.selectWorkers();
+		
+		for (WorkerListDTO dto : list) {
+			boolean isHoliday = leaveHistoryRepository.existsByEmp_EmpIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual
+								(dto.getEmpId(), today, today);
+			if (isHoliday) {
+				dto.setStatus("AWAY");
+				continue;
+			}
+			
+			Integer isWorking = orderMapper.existWorkingSchedule(dto.getEmpId(), now);
+			
+			if (isWorking > 0) {
+				dto.setStatus("WORK");
+			} else {
+				dto.setStatus("AVAIL");
+			}
+			
+		}
+		return list;
 	}
+	
+	// =======================================================
+	// 품질검사팀 조회
 
 	// =======================================================
 	// 작업지시 등록
@@ -325,15 +352,15 @@ public class OrderService {
 		// ================= 작업자 목록 생성 ==================
 		List<WorkOrderDetailDTO.WorkInfo> infos = new ArrayList<>();
 		List<WorkerProcess> workers = workerProcessRepository.findAllBySchedule_Work_OrderId(id);
-		log.info("workers size = {}", workers.size());
-		try {
-			log.info("workers JSON = {}", objectMapper.writeValueAsString(workers));
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
+//		//log.info("workers size = {}", workers.size());
+//		try {
+//			log.info("workers JSON = {}", objectMapper.writeValueAsString(workers));
+//		} catch (JsonProcessingException e) {
+//			e.printStackTrace();
+//		}
 		
 		List<WorkOrderProcess> processList = workOrderProcessRepository.findByWorkOrderOrderIdOrderByStepSeqAsc(id);
-		log.info("processList size = {}", processList.size());
+//		log.info("processList size = {}", processList.size());
 		processList.forEach(p -> log.info("process = {}", p));
 		
 		// 1) WorkerProcess를 processId 기준으로 빠르게 조회할 Map 만들기
@@ -372,10 +399,10 @@ public class OrderService {
 		}
 
 		// 결과 로깅 (테스트용)
-		infos.forEach(i ->
-		        log.info("WorkInfo => id={}, name={}, status={}, worker={}",
-		                i.getProcessId(), i.getProcessName(), i.getStatus(), i.getWorkerName())
-		);
+//		infos.forEach(i ->
+//		        log.info("WorkInfo => id={}, name={}, status={}, worker={}",
+//		                i.getProcessId(), i.getProcessName(), i.getStatus(), i.getWorkerName())
+//		);
 		
 		// DTO 변환 후 반환
 		return WorkOrderDetailDTO.builder()
@@ -431,6 +458,60 @@ public class OrderService {
 		});
 	}
 	
+	// =======================================================
+	// 모든 작업자 불러오기
+	public void selectAllWorkers() {
+		log.info("테스트.... ::: " + orderMapper.selectMaterials("BG030", 100));
+		
+	}
+
+	// =======================================================
+	// 모든 스케줄 불러오기
+	public List<WorkScheduleDTO> loadAllSchedules() {
+		List<WorkScheduleDTO> list = orderMapper.selectAllSchedules();
+		log.info("here 1................. list..." + list.toString());
+		for (WorkScheduleDTO schedule : list) {
+			log.info("here 1................. schedule..." + schedule.toString());
+			List<WorkerProcessDTO> dtos = orderMapper.selectWorkersBySchedule(schedule.getScheduleId());
+			List<String> workers = new ArrayList<>();
+			for (WorkerProcessDTO dto : dtos) {
+				log.info("here 1................. dto..." + dto.getEmpId());
+				workers.add(dto.getEmpId());
+			}
+			schedule.setWorkers(workers);
+		}
+		return list;
+	}
+	
+	// =======================================================
+	// 작업지시 예상 시간 조회
+	@Transactional(readOnly = true)
+	public long calcExpectedMinutes(String prdId, Integer planQty, String routeId) {
+
+	    // 1) 제품 조회
+	    ProductMst product = productMstRepository.findById(prdId)
+	        .orElseThrow(() -> new RuntimeException("품번 없음: " + prdId));
+
+	    // 2) 라우트 헤더 조회
+	    RouteHeader routeHeader = routeHeaderRepository.findById(routeId)
+	        .orElseThrow(() -> new RuntimeException("라우트 없음: " + routeId));
+
+	    // 3) 라우트 스텝 조회
+	    List<RouteStep> routeSteps =
+	        routeStepRepository.findByRouteHeaderOrderByStepSeqAsc(routeHeader);
+
+	    // 4) 계산용 임시 WorkOrder
+	    WorkOrder tmp = WorkOrder.builder()
+	        .product(product)
+	        .planQty(planQty)
+	        .build();
+
+	    // 5) 전체 공정 예상시간 계산
+	    return ProcessTimeCalculator
+	        .calcExpectedMinutesForWorkOrderFromRoute(tmp, routeSteps);
+	}
+
+	
   
 	// 작업지시서 전체 조회
 	public List<WorkOrderDTO> findAllWorkList() {
@@ -442,13 +523,6 @@ public class OrderService {
 				.map(WorkOrderDTO::fromEntity)
 				.collect(Collectors.toList());
 	}
-
-	public void selectAllWorkers() {
-		log.info("테스트.... ::: " + orderMapper.selectMaterials("BG030", 100));
-		
-	}
-
-	
 
 
 }

@@ -149,38 +149,55 @@
         </div>
       </div>
 
-      <!-- 출하 이력 섹션 - 아직 없으면 비워두고 메시지만 -->
-      <h5 class="fw-bold mb-2">출하 이력</h5>
-      <div class="card shadow-sm mb-4">
-        <div class="card-body p-0">
-          <table class="table table-bordered align-middle mb-0 text-center">
-            <thead>
-            <tr>
-              <th style="width:80px">No</th>
-              <th>제품명</th>
-              <th style="width:140px">출하수량</th>
-              <th style="width:160px">LOT</th>
-              <th style="width:160px">출하일자</th>
-              <th style="width:180px">송장번호</th>
-              <th style="width:140px">출하상태</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-              <td colspan="7" class="text-muted py-4">출하 이력이 없습니다.</td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+<!-- 출하 이력 섹션 -->
+<h5 class="fw-bold mb-2">출하 이력</h5>
+<div class="card shadow-sm mb-4">
+  <div class="card-body p-0">
+    <table class="table table-bordered align-middle mb-0 text-center">
+      <thead>
+      <tr>
+        <th style="width:80px">No</th>
+        <th style="width:140px">제품명</th>
+        <th style="width:140px">출하수량</th>
+        <th style="width:200px">LOT</th>
+        <th style="width:140px">출하일자</th>
+        <th style="width:180px">출하번호</th>
+        <th style="width:140px">출하상태</th>
+      </tr>
+      </thead>
+      <tbody>
+      <!-- 🔥 출하 이력이 있을 때 -->
+      <tr th:each="history, stat : ${order.shipmentHistories}">
+        <td th:text="${stat.count}"></td>
+        <td th:text="${history.prdName}"></td>
+        <td th:text="${history.outboundAmount}"></td>
+        <td th:text="${history.lotNo ?: '-'}"></td>
+        <td th:text="${history.outboundDate != null ? #strings.substring(history.outboundDate.toString(), 0, 16).replace('T', ' ') : '-'}"></td>
+        <td th:text="${history.shipmentId}"></td>
+        <td>
+          <span th:if="${history.shipmentStatus == 'SHIPPED'}" 
+                class="badge bg-success">출하완료</span>
+          <span th:if="${history.shipmentStatus == 'RESERVED'}" 
+                class="badge bg-primary">예약</span>
+          <span th:if="${history.shipmentStatus == 'PENDING'}" 
+                class="badge bg-secondary">대기</span>
+          <span th:if="${history.shipmentStatus == 'LACK'}" 
+                class="badge bg-danger">부족</span>
+        </td>
+      </tr>
+      
+      <!-- 🔥 출하 이력이 없을 때 -->
+      <tr th:if="${#lists.isEmpty(order.shipmentHistories)}">
+        <td colspan="7" class="text-muted py-4">출하 이력이 없습니다.</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
       <!-- 하단 버튼 -->
       <div class="d-flex justify-content-end gap-2 mt-4">
         <a th:href="@{/sales/orders}" class="btn btn-outline-secondary rounded-pill px-4">목록으로</a>
-        <a th:href="@{/sales/orders/{orderId}/pdf(orderId=${order.orderId})}"
-           class="btn btn-warning rounded-pill px-4">
-          PDF 다운로드
-        </a>
       </div>
 
     </div>

@@ -10,7 +10,9 @@ public enum ProcessStepStatus {
 	
 	READY("대기"),
 	IN_PROGRESS("진행 중"),
-	DONE("완료");
+	DONE("완료"),
+	QC_PENDING("QC 대기"),
+	SKIPPED("중단");
 	
 	private final String label;
 	

@@ -1,7 +1,15 @@
 window.onload = function () {	
 	bomDetailGridAllSearch();// bom상세 그리드 조회
-	bomGridAllSearch();// bom그리드 조회
+	bomGridAllSearch();// bom 정보그리드 조회
 	safetyStockGridAllSearch();//안전재고 그리드 조회
+	matGridAllSearch();	// bom 정보 - bom 원재료id 모달
+	prdItemList(); // bom 정보 - bom 완제품id 드롭다운
+	bomUnitList(); // bom 정보 - bom 단위 드롭다운 
+	safetyStockMatTypeList(); //안전재고 - 품목유형 드롭다운
+	safetyStockPolicyTypeList(); //안전재고 - 정책방식 드롭다운
+	safetyStockUnitList(); //안전재고 - 단위 드롭다운
+	safetyStockStatusList(); //안전재고 - 상태 드롭다운
+	
 }
 
 document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
@@ -10,16 +18,34 @@ document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
 
         if (targetId === '#navs-bomDetail-tab') {//bom 상세탭
             grid1.refreshLayout();
+			bomDetailGridAllSearch();
         } else if (targetId === '#navs-bom-tab') {//bom 정보 탭
             grid2.refreshLayout();
+			bomGridAllSearch();
         }
     });
 });
 
-const modalElement = document.getElementById('safetyStockModal');//안전재고 모달
+const modalElement = document.getElementById('safetyStock-modal');//안전재고 모달
 modalElement.addEventListener('shown.bs.modal', function () {
     grid3.refreshLayout();
 });
+
+const routeModalElement = document.getElementById('matItems-modal');//원재료 모달
+routeModalElement.addEventListener('shown.bs.modal', function () {
+    grid7.refreshLayout();
+});
+
+//bom 정보 그리드 드롭다운 리스트
+let prdListItems = []; //완제품id
+let matListItems = []; //원재료 id
+let unitListItems = []; //bom 단위
+
+//안전재고 그리드 드롭다운 리스트
+let safetyStockMatTypeListItems = []; //안전재고 품목유형
+let safetyStockPolicyTypeListItems = []; //안전재고 정책방식
+let safetyStockUnitListItems = []; //안전재고 단위
+let safetyStockStatusListItems = []; //안전재고 상태
 
 const Grid = tui.Grid;
 //g-grid1 bom 상세 bomDetailGrid
@@ -93,7 +119,6 @@ const grid5 = new Grid({
 					,editor: {
 						type: 'select', // 드롭다운 사용
 						options: {
-							// value는 실제 데이터 값, text는 사용자에게 보이는 값
 							listItems: [
 								{ text: 'g', value: 'g' },
 								{ text: 'ml', value: 'ml' },
@@ -137,11 +162,7 @@ const grid6 = new Grid({
 						type: 'select', // 드롭다운 사용
 						options: {
 							// value는 실제 데이터 값, text는 사용자에게 보이는 값
-							listItems: [
-								{ text: 'g', value: 'g' },
-								{ text: 'ml', value: 'ml' },
-								{ text: 'EA', value: 'EA' }
-							]
+							listItems: unitListItems
 						}
 					}	
 				}
@@ -167,14 +188,31 @@ const grid2 = new Grid({
 	    {header: 'BOMId' ,name: 'bomId' ,align: 'center',editor: 'text',filter: "select"
 			,renderer:{ type: StatusModifiedRenderer}	
 		}
-		,{header: '완제품 id' ,name: 'prdId' ,align: 'center',editor: 'text',filter: "select"
-			,renderer:{ type: StatusModifiedRenderer}	
+		,{header: '완제품 id' ,name: 'prdId' ,align: 'center',filter: "select"
+			,renderer:{ type: StatusModifiedRenderer
+				,options: {
+					isSelect: true 
+				}
+			}	
+			,editor: {
+				type: 'select', // 드롭다운 사용
+				options: {
+					// value는 실제 데이터 값, text는 사용자에게 보이는 값
+					listItems: prdListItems
+				}
+			}	
 		}
 		,{header: '원재료 id' ,name: 'matId' ,align: 'center',editor: 'text',width: 230
 			,renderer:{ type: StatusModifiedRenderer}	
 		}
 		,{header: '원재료 사용량' ,name: 'matQty' ,align: 'center',editor: 'text'
-			,renderer:{ type: StatusModifiedRenderer}	
+			,renderer:{ type: StatusModifiedRenderer}
+			,editor: {
+            	type: NumberOnlyEditor, // ⬅️ 클래스 이름 직접 사용
+            	options: {
+              		maxLength: 10
+            	}
+          	}	
 		}
 		,{header: '단위' ,name: 'matUnit' ,align: 'center',filter: "select",width:60
 			,renderer:{ type: StatusModifiedRenderer
@@ -185,23 +223,26 @@ const grid2 = new Grid({
 			,editor: {
 				type: 'select', // 드롭다운 사용
 				options: {
-					// value는 실제 데이터 값, text는 사용자에게 보이는 값
-					listItems: [
-						{ text: 'g', value: 'g' },
-						{ text: 'ml', value: 'ml' },
-						{ text: 'EA', value: 'EA' }
-					]
+					listItems: unitListItems
 				}
 			}	
 		}
 		,{header: '순서' ,name: 'bomSeqNo' ,align: 'center',editor: 'text'
-			,renderer:{ type: StatusModifiedRenderer}	
+			,renderer:{ type: StatusModifiedRenderer}
+			,editor: {
+            	type: NumberOnlyEditor, // ⬅️ 클래스 이름 직접 사용
+            	options: {
+              		maxLength: 10
+            	}
+          	}		
 		}
-		,{header: '생성자ID' ,name: 'createdId' ,align: 'center'}
+		,{header: '생성자ID' ,name: 'createdId' ,align: 'center',hidden:true}
+		,{header: '생성자이름' ,name: 'createdByName' ,align: 'center'}
 		,{header: '생성일자' ,name: 'createdDate' ,align: 'center'}
-		,{header: '수정자ID' ,name: 'updatedId' ,align: 'center'}
+		,{header: '수정자ID' ,name: 'updatedId' ,align: 'center',hidden:true}
+		,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center'}
 		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}   
-		,{header: '사용여부' ,name: 'useYn' ,align: 'center'}        
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center', hidden: true}        
 	  ]
 	  ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
 	  ,height:100
@@ -235,14 +276,7 @@ const grid3 = new Grid({
 					type: 'select', // 드롭다운 사용
 					options: {
 						// value는 실제 데이터 값, text는 사용자에게 보이는 값
-						listItems: [
-							{ text: '원재료', value: 'RAW' },
-							{ text: '부자재', value: 'SUB' },
-							{ text: '포장재', value: 'PKG' },
-							{ text: '공정중', value: 'WIP' },
-							{ text: '생산품', value: 'FIN' },
-							{ text: '박스', value: 'BOX' }
-						]
+						listItems: safetyStockMatTypeListItems
 					}
 				}
 
@@ -262,11 +296,7 @@ const grid3 = new Grid({
 				,editor: {
 					type: 'select', // 드롭다운 사용
 					options: {
-						listItems: [
-							{ text: 'g', value: 'g' },
-							{ text: 'ml', value: 'ml' },
-							{ text: 'EA', value: 'EA' }
-						]
+						listItems: safetyStockUnitListItems
 					}
 				}
 
@@ -280,10 +310,7 @@ const grid3 = new Grid({
 				,editor: {
 					type: 'select', // 드롭다운 사용
 					options: {
-						listItems: [
-							{ text: '고정 계산방식', value: 'FIXED_QTY' },
-							{ text: '일수기반', value: 'DAYS_COVER' },
-						]
+						listItems: safetyStockPolicyTypeListItems
 					}
 				}
 			}
@@ -306,19 +333,51 @@ const grid3 = new Grid({
 					type: 'select', // 드롭다운 사용
 					options: {
 						// value는 실제 데이터 값, text는 사용자에게 보이는 값
-						listItems: [
-							{ text: 'ACTIVE', value: 'ACTIVE' },//활성
-							{ text: 'INACTIVE', value: 'INACTIVE' },//비활성
-							{ text: 'DISCONTINUED', value: 'DISCONTINUED' },//단종
-							{ text: 'SEASONAL', value: 'SEASONAL' },//시즌상품
-							{ text: 'OUT_OF_STOCK', value: 'OUT_OF_STOCK' }//단종
-						]
+						listItems: safetyStockStatusListItems
 					}
 				}
 			}
 			,{header: '비고' ,name: 'remark' ,align: 'center',editor: 'text'
 				,renderer:{ type: StatusModifiedRenderer}
 			}           
+		  ]
+		  ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
+		  ,height:100
+		  ,columnOptions: {
+	    		resizable: true
+	  	  }
+		  ,pageOptions: {
+	    		useClient: true,
+	    		perPage: 20
+	  	  }
+});
+
+//원재료 조회 모달을위한 그리드
+const grid7 = new Grid({
+		  el: document.getElementById('matItemsGrid'), 
+		  data: [],
+	      rowHeaders: ['rowNum'],
+		  columns: [
+			    {header: '원재료ID' ,name: 'matId' ,align: 'center'
+					,renderer:{ type: StatusModifiedRenderer}	
+				}
+			    ,{header: '원재료 품목명' ,name: 'matName' ,align: 'center'
+					,renderer:{ type: StatusModifiedRenderer}	
+				}
+			    ,{header: '원재료 유형' ,name: 'matType' ,align: 'center',filter: "select"
+					,renderer:{ type: StatusModifiedRenderer}
+				}
+			    ,{header: '단위' ,name: 'matUnit' ,align: 'center',filter: "select",width:70,hidden:true
+					,renderer:{ type: StatusModifiedRenderer}		
+				}
+		        ,{header: '유효일자' ,name: 'effectiveDate' ,align: 'center',hidden:true
+					,renderer:{ type: StatusModifiedRenderer}	
+				}
+		        ,{header: '상세설명(원재료)' ,name: 'matDesc' ,align: 'center',width: 280
+					,renderer:{ type: StatusModifiedRenderer}	
+				}
+				,{header: '사용여부' ,name: 'useYn' ,align: 'center',hidden: true}  
+		    
 		  ]
 		  ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
 		  ,height:100
@@ -350,6 +409,26 @@ grid2.on('beforeChange', (ev) => {
 	            alert('기존 완제품 Id,원재료Id는 수정할 수 없습니다.  삭제후 새로추가(등록) 해주세요!'); 
 	        }
 	    }
+});
+//BOM정보 원재료 id-> 원재료 조회 클릭시 row 더블클릭시 값이 들어감 
+// 1. grid7에 dblclick 이벤트 리스너 등록
+grid7.on('dblclick', function(ev) {
+    if (ev.targetType !== 'cell' && ev.targetType !== 'rowHeader') {
+        return; 
+    }
+
+    var sourceRowKey = ev.rowKey; 
+    var rowData = grid7.getRow(sourceRowKey); 
+	console.log("선택된 원재료 데이터:", rowData.matId);
+	var focusedRowIndex = grid2.getFocusedCell();
+	console.log("포커스된 행 인덱스:", focusedRowIndex);
+	if (focusedRowIndex.value === null || focusedRowIndex.value === undefined) {
+		var targetRowKey = focusedRowIndex.rowKey;
+		grid2.setValue(targetRowKey, 'matId', rowData.matId);
+		//모달닫기
+		document.querySelector('#matItems-modal .modal-footer [data-bs-dismiss="modal"]').click();
+	}
+
 });
 
 
@@ -556,7 +635,9 @@ function bomGridAllSearch() {
 		.then(data => {
 			
 			console.log("검색데이터:", data);
-			grid2.resetData(data);
+			const camelCaseData = transformKeys(data);
+			console.log("camelCaseData",camelCaseData);
+			grid2.resetData(camelCaseData);
 		})
 		.catch(err => {
 			console.error("조회오류", err);
@@ -613,6 +694,71 @@ function safetyStockGridAllSearch() {
 
 }
 
+//BOM 원재료 조회 모달 matGridAllSearch
+function matGridAllSearch(){
+	fetch('/bom/matList', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		return res.json();
+	})
+	.then(data => {
+		console.log("원재료 id 데이터:", data);
+		grid7.resetData(data);
+		
+	})
+	.catch(err => {
+		console.error('원재료  조회 오류', err);
+	});
+}
+
+
+const toCamelCase = (snakeCaseString) => {
+  if (!snakeCaseString || typeof snakeCaseString !== 'string') {
+    return snakeCaseString;
+  }
+
+  // 1. 소문자로 변환
+  // 2. 언더스코어(_)를 기준으로 문자열을 분리
+  // 3. reduce를 사용하여 카멜 케이스로 조합
+  return snakeCaseString.toLowerCase().split('_').reduce((acc, part) => {
+    // 첫 번째 파트는 그대로 사용 (created)
+    if (acc === '') {
+      return part;
+    }
+    // 두 번째 파트부터는 첫 글자를 대문자로 변환 후 뒤에 붙임 (ByName)
+    return acc + part.charAt(0).toUpperCase() + part.slice(1);
+  }, '');
+};
+
+const transformKeys = (data) => {
+  if (Array.isArray(data)) {
+    // 배열이면 배열의 모든 요소에 대해 재귀 호출
+    return data.map(transformKeys);
+  }
+
+  if (data !== null && typeof data === 'object') {
+    // 객체이면 키를 순회하며 변환
+    const newObject = {};
+    for (const key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        const newKey = toCamelCase(key);
+        // 값도 객체나 배열일 수 있으므로 재귀적으로 처리
+        newObject[newKey] = transformKeys(data[key]);
+      }
+    }
+    return newObject;
+  }
+
+  // 객체나 배열이 아니면 값 그대로 반환 (문자열, 숫자, null 등)
+  return data;
+};
+
 grid1.on("click", async (ev) => {
 	const rowData = grid1.getRow(ev.rowKey);
 	const bomId = rowData.bomId;
@@ -620,6 +766,189 @@ grid1.on("click", async (ev) => {
 	bomDetailMatGridAllSearch(bomId);
 	bomDetailMatTypeGridAllSearch(bomId);
 });
+
+//BOM 완제품id 드롭다운
+function prdItemList() {
+	fetch('/bom/prdList', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		return res.json();
+	})
+	.then(data => {
+		console.log("완제품 id 드롭다운 데이터:", data);
+	
+		data.forEach(item => {
+			prdListItems.push({
+				value: item.VALUE, 
+				text: item.TEXT   
+			});
+		});
+		console.log("prdListItems:", prdListItems);
+		// Dropdown editor의 listItems 업데이트
+		
+	})
+	.catch(err => {
+		console.error('품목명(향수타입) 드롭다운 조회 오류', err);
+	});
+
+}
+
+//Bom 단위 드롭다운
+function bomUnitList(){
+	fetch('/bom/UnitList', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		return res.json();
+	})
+	.then(data => {
+		console.log("단위 드롭다운 데이터:", data);
+
+		data.forEach(item => {
+			unitListItems.push({
+				value: item.VALUE, 
+				text: item.TEXT   
+			});
+		});
+		console.log("unitListItems:", unitListItems);
+		// Dropdown editor의 listItems 업데이트
+		
+	})
+	.catch(err => {
+		console.error('단위 드롭다운 데이터:', err);
+	});
+}
+
+//안전재고 품목종류 드롭다운
+function safetyStockMatTypeList(){
+	fetch('/safetyStock/matTypeList', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		return res.json();
+	}
+	)
+	.then(data => {
+		console.log("안전재고 품목종류 드롭다운 데이터:", data);
+		data.forEach(item => {
+			safetyStockMatTypeListItems.push({
+				value: item.VALUE, 
+				text: item.TEXT   
+			});
+		}
+		);
+		console.log("safetyStockMatTypeListItems:", safetyStockMatTypeListItems);
+		// Dropdown editor의 listItems 업데이트
+	}
+	)
+	.catch(err => {
+		console.error('안전재고 품목종류 드롭다운 조회 오류', err);
+	});
+}
+
+//안전재고 단위 드롭다운
+function safetyStockUnitList(){
+	fetch('/safetyStock/unitList', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		return res.json();
+	})
+	.then(data => {
+		console.log("안전재고 단위 드롭다운 데이터:", data);		
+		data.forEach(item => {
+			safetyStockUnitListItems.push({
+				value: item.VALUE,
+				text: item.TEXT
+			});
+		});
+		console.log("safetyStockUnitListItems:", safetyStockUnitListItems);
+		// Dropdown editor의 listItems 업데이트
+	})
+	.catch(err => {
+		console.error('안전재고 단위 드롭다운 조회 오류', err);
+	});
+}
+//안전재고 정책방식 드롭다운
+function safetyStockPolicyTypeList(){
+	fetch('/safetyStock/policyTypeList', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		return res.json();
+	})
+	.then(data => {
+		console.log("안전재고 정책방식 드롭다운 데이터:", data);		
+		data.forEach(item => {
+			safetyStockPolicyTypeListItems.push({
+				value: item.VALUE,
+				text: item.TEXT
+			});
+		});
+		console.log("safetyStockPolicyTypeListItems:", safetyStockPolicyTypeListItems);
+		// Dropdown editor의 listItems 업데이트
+	})
+	.catch(err => {
+		console.error('안전재고 정책방식 드롭다운 조회 오류', err);
+	});		
+}
+
+//안전재고 상태 드롭다운
+function safetyStockStatusList(){
+	fetch('/safetyStock/statusList', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		return res.json();
+	})
+	.then(data => {
+		console.log("안전재고 상태 드롭다운 데이터:", data);
+		data.forEach(item => {
+			safetyStockStatusListItems.push({
+				value: item.VALUE, 
+				text: item.TEXT   
+			});
+		}
+		);
+		console.log("safetyStockStatusListItems:", safetyStockStatusListItems);
+		// Dropdown editor의 listItems 업데이트
+	})
+	.catch(err => {
+		console.error('안전재고 상태 드롭다운 조회 오류', err);
+	});	
+}
+
 
 
 //bom row 추가
