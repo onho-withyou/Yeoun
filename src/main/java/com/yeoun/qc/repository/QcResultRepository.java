@@ -49,21 +49,23 @@ public interface QcResultRepository extends JpaRepository<QcResult, Long> {
     
     // QC 결과 조회
     @Query("""
-            select new com.yeoun.qc.dto.QcResultListDTO(
-                r.qcResultId,
-                r.orderId,
-                p.prdId,
-                p.prdName,
-                r.inspectionDate,
-                r.overallResult,
-                r.failReason
-            )
-            from QcResult r
-              join WorkOrder w on r.orderId = w.orderId
-              join w.product p
-            where r.overallResult <> 'PENDING'
-            order by r.inspectionDate desc nulls last
-            """)
+    	    select new com.yeoun.qc.dto.QcResultListDTO(
+    	        r.qcResultId,
+    	        r.orderId,
+    	        p.prdId,
+    	        p.prdName,
+    	        r.inspectionDate,
+    	        r.overallResult,
+    	        r.failReason,
+    	        e.empName
+    	    )
+    	    from QcResult r
+    	      join WorkOrder w on r.orderId = w.orderId
+    	      join w.product p
+    	      left join Emp e on r.inspectorId = e.empId
+    	    where r.overallResult <> 'PENDING'
+    	    order by r.inspectionDate desc nulls last
+    	""")
 	List<QcResultListDTO> findResultListForView();
     
     // 작업지시 기준으로 가장 최근에 생성된 QC 결과 1건 조회

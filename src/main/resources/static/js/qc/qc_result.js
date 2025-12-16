@@ -1,8 +1,14 @@
 // qc_result.js
 
 let qcResultGrid = null;
+let qcViewModal = null;
 
 document.addEventListener("DOMContentLoaded", () => {
+	
+	// 모달 초기화
+	const modalEl = document.getElementById("qcViewModal");
+	qcViewModal = modalEl ? new bootstrap.Modal(modalEl) : null;
+
 	
 	// 그리드 초기화
 	const gridEl = document.getElementById("qcResultGrid");
@@ -21,16 +27,13 @@ document.addEventListener("DOMContentLoaded", () => {
 		},
 		columns: [
 			{
-				header: 'QC 결과ID',
-				name: 'qcResultId'
+			  header: 'QC결과ID',
+			  name: 'qcResultId',
+			  hidden: true
 			},
 			{
 				header: '작업지시번호',
 				name: 'orderId'
-			},
-			{
-				header: '제품코드',
-				name: 'prdId'
 			},
 			{
 				header: '제품명',
@@ -41,22 +44,24 @@ document.addEventListener("DOMContentLoaded", () => {
 				name: 'inspectionDate'
 			},
 			{
+			  	header: '검사자',
+			  	name: 'inspectorId',
+				width: '100'
+			},
+			{
 				header: '상태',
 				name: 'overallResult',
+				width: '100',
 				formatter: ({ value }) => {
-				    switch (value) {
-				      case "PASS":
-				        return "합격";
-				      case "FAIL":
-				        return "불합격";
-				      default:
-				        return value || "-";
-				    }
-			    }
+		          if (value === "PASS") return "<span class='badge bg-success'>합격</span>";
+		          if (value === "FAIL") return "<span class='badge bg-danger'>불합격</span>";
+		          return "<span class='badge bg-secondary'>-</span>";
+		        }
 			},
 			{
 				header: '불합격사유',
-				name: 'failReason'
+				name: 'failReason',
+				width: '380'
 			},
 			{
 			  	header: " ",
@@ -64,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			 	width: 90,
 			  	align: "center",
 			  	formatter: () =>
-			    	"<button type='button' class='btn btn-info btn-sm'>상세</button>"
+			    	"<button type='button' class='btn btn-outline-info btn-sm'>상세</button>"
 			}
 		]
 	});
