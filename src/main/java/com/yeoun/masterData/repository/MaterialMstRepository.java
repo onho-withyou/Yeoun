@@ -68,7 +68,8 @@ public interface MaterialMstRepository extends JpaRepository<MaterialMst, String
 				    m.updated_id = eu.emp_id
 			WHERE (:matId IS NULL OR :matId = '' OR m.MAT_ID LIKE '%' || :matId || '%')
 			AND (:matName IS NULL OR :matName = '' OR m.MAT_NAME LIKE '%' || :matName || '%')
-			AND (m.USE_YN = 'Y')
+			ORDER BY
+			    m.USE_YN DESC
 			""", nativeQuery = true)
 	List<Map<String, Object>> findByMatIdList(@Param("matId") String matId, @Param("matName") String matName);
 

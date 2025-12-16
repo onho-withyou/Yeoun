@@ -8,11 +8,12 @@ const CODE_MAP = {
     'SEMI_FINISHED_GOODS': '반제품',
 	
 	//상태코드
-    'PRD_ACTIVE': '활성',
-    'PRD_INACTIVE': '비활성',
+    'Y': '활성',
+    'N': '비활성',
     'PRD_DISCONTINUED': '단종',
     'PRD_SEASONAL': '시즌상품',
     'PRD_OUT_OF_STOCK': '재고없음',
+    'PRD_IN_STOCK': '재고있음',
 	
 	//원재료 유형
     'RAW': '원재료',

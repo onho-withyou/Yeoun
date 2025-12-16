@@ -114,12 +114,28 @@ const grid1 = new Grid({
 			,renderer:{ type: StatusModifiedRenderer}
 		}
         ,{header: '생성자ID' ,name: 'createdId' ,align: 'center',hidden:true}
-		,{header: '생성자이름' ,name: 'createdByName' ,align: 'center'}
-        ,{header: '생성일자' ,name: 'createdDate' ,align: 'center'}
+		,{header: '생성자이름' ,name: 'createdByName' ,align: 'center',hidden:true}
+        ,{header: '생성일자' ,name: 'createdDate' ,align: 'center',hidden:true}
         ,{header: '수정자ID' ,name: 'updatedId' ,align: 'center',hidden:true}
-		,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center'}
-        ,{header: '수정일자' ,name: 'updatedDate' ,align: 'center'}           
-		,{header: '사용여부' ,name: 'useYn' ,align: 'center', hidden: true}          
+		,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center',hidden:true}
+        ,{header: '수정일자' ,name: 'updatedDate' ,align: 'center',hidden:true}           
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center'
+			,renderer:{ type: StatusModifiedRenderer
+				,options: {
+					isSelect: true   // ⭐ 이걸로 구분
+				}
+			}
+			,editor: {
+				type: 'select', // 드롭다운 사용
+				options: {
+					// value는 실제 데이터 값, text는 사용자에게 보이는 값
+					listItems: [
+						{value: 'Y', text: '활성'},
+						{value: 'N', text: '비활성'}
+					]
+				}
+			}
+		}          
 
 	  ]
 	  ,data: []
@@ -178,16 +194,32 @@ const grid2 = new Grid({
 	        ,{header: '유효일자' ,name: 'effectiveDate' ,align: 'center',editor: 'text'
 				,renderer:{ type: StatusModifiedRenderer}	
 			}
-	        ,{header: '상세설명(원재료)' ,name: 'matDesc' ,align: 'center',editor: 'text',width: 280
+	        ,{header: '상세설명(원재료)' ,name: 'matDesc' ,align: 'center',editor: 'text',width: 370
 				,renderer:{ type: StatusModifiedRenderer}	
 			}
 	        ,{header: '생성자ID' ,name: 'createdId' ,align: 'center',hidden:true}
-			,{header: '생성자이름' ,name: 'createdByName' ,align: 'center'}
-	        ,{header: '생성일자' ,name: 'createdDate' ,align: 'center'}
+			,{header: '생성자이름' ,name: 'createdByName' ,align: 'center',hidden:true}
+	        ,{header: '생성일자' ,name: 'createdDate' ,align: 'center',hidden:true}
 	        ,{header: '수정자ID' ,name: 'updatedId' ,align: 'center',hidden:true}
-			,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center'}
-	        ,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}
-			,{header: '사용여부' ,name: 'useYn' ,align: 'center',hidden: true}          
+			,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center',hidden:true}
+	        ,{header: '수정일시' ,name: 'updatedDate' ,align: 'center',hidden:true}
+			,{header: '사용여부' ,name: 'useYn' ,align: 'center',width:83
+				,renderer:{ type: StatusModifiedRenderer
+					,options: {
+						isSelect: true   // ⭐ 이걸로 구분
+					}
+				}
+				,editor: {
+					type: 'select', // 드롭다운 사용
+					options: {
+						// value는 실제 데이터 값, text는 사용자에게 보이는 값
+						listItems: [
+							{value: 'Y', text: '활성'},
+							{value: 'N', text: '비활성'}
+						]
+					}
+				}
+			}          
 	    ],
 	    data: []
 	    ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
