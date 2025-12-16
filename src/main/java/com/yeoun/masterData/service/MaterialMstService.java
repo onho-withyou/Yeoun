@@ -135,7 +135,19 @@ public class MaterialMstService {
 		if (row.get("matName") != null) m.setMatName(String.valueOf(row.get("matName")));
 		if (row.get("matType") != null) m.setMatType(String.valueOf(row.get("matType")));
 		if (row.get("matUnit") != null) m.setMatUnit(String.valueOf(row.get("matUnit")));
-		if (row.get("effectiveDate") != null) m.setEffectiveDate((Integer) row.get("effectiveDate"));
+		if (row.get("effectiveDate") != null) {
+			Object eff = row.get("effectiveDate");
+			try {
+				if (eff instanceof Number) {
+					m.setEffectiveDate(((Number) eff).intValue());
+				} else {
+					String s = eff.toString().trim();
+					if (!s.isEmpty()) m.setEffectiveDate(Integer.valueOf(s));
+				}
+			} catch (Exception ignore) {
+				// invalid number format: leave as null
+			}
+		}
 		if (row.get("matDesc") != null) m.setMatDesc(String.valueOf(row.get("matDesc")));
 		// useYn 기본값을 'Y'로 설정 (DB의 NOT NULL 제약 대비)
 		if (row.get("useYn") != null) {

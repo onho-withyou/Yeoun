@@ -146,5 +146,32 @@ class StatusModifiedRenderer {
 
 }
 
+class NumberOnlyEditor {
+  constructor(props) {
+    const el = document.createElement('input');
+    el.type = 'text'; // type을 text로 두어야 input 이벤트 제어가 용이합니다.
+    this.el = el;
+
+    // 초기 값 설정
+    this.el.value = props.value;
+
+    // 입력 이벤트를 감지하여 숫자만 남기는 함수 바인딩
+    this.el.addEventListener('input', this.handleInput.bind(this));
+  }
+
+  getElement() {
+    return this.el;
+  }
+
+  getValue() {
+    // 최종적으로 저장될 때도 숫자가 아닌 문자는 제거하고 반환합니다.
+    return this.el.value.replace(/[^0-9]/g, ''); 
+  }
+  
+  // 입력 시마다 실행되어 숫자(0-9)가 아닌 문자를 제거합니다.
+  handleInput() {
+    this.el.value = this.el.value.replace(/[^0-9]/g, ''); 
+  }
+}
 
 

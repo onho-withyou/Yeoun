@@ -33,6 +33,11 @@ let statusListItems = [];//완제품 제품상태 드롭다운
 let matTypeListItems = [];//원재료 원재료유형 드롭다운
 let matUnitListItems = [];//원재료 단위 드롭다운
 
+// effectiveDate 허용범위 (개월 단위)
+const EFFECTIVE_DATE_MIN = 0;
+const EFFECTIVE_DATE_MAX = 120; // 예: 최대 120개월(10년)
+
+
 
 const Grid = tui.Grid;
 
@@ -89,8 +94,14 @@ const grid1 = new Grid({
 				}
 			}
 		}
-		,{header: '단가' ,name: 'unitPrice' ,align: 'center',editor: 'text'
+		,{header: '단가' ,name: 'unitPrice' ,align: 'center'
 			,renderer:{ type: StatusModifiedRenderer}
+			,editor: {
+            	type: NumberOnlyEditor, // ⬅️ 클래스 이름 직접 사용
+            options: {
+              maxLength: 10
+            }
+          }
 		}
         ,{header: '상태' ,name: 'prdStatus' ,align: 'center',hidden:true
 			,renderer:{ type: StatusModifiedRenderer
@@ -106,8 +117,14 @@ const grid1 = new Grid({
 				}
 			}
 		}
-		,{header: '유효일자' ,name: 'effectiveDate' ,align: 'center',editor: 'text'
+		,{header: '유효일자(개월)' ,name: 'effectiveDate' ,align: 'center'
 			,renderer:{ type: StatusModifiedRenderer}
+			,editor: {
+            	type: NumberOnlyEditor, // ⬅️ 클래스 이름 직접 사용
+            	options: {
+					maxLength: 10
+				},
+			}
 		}
         ,{header: '제품상세설명' ,name: 'prdSpec' ,align: 'center',editor: 'text',width: 370
 			,renderer:{ type: StatusModifiedRenderer}
@@ -190,8 +207,14 @@ const grid2 = new Grid({
 					}
 				}
 			}
-	        ,{header: '유효일자' ,name: 'effectiveDate' ,align: 'center',editor: 'text',width: 102
+	        ,{header: '유효일자(개월)' ,name: 'effectiveDate' ,align: 'center',width: 102
 				,renderer:{ type: StatusModifiedRenderer}	
+				,editor: {
+            		type: NumberOnlyEditor 
+					,options: {
+						maxLength: 10
+					}
+				}
 			}
 	        ,{header: '상세설명(원재료)' ,name: 'matDesc' ,align: 'center',editor: 'text',width: 370
 				,renderer:{ type: StatusModifiedRenderer}	
@@ -594,33 +617,25 @@ saveProductRowBtn.addEventListener('click', function() {
 	const requiredFields = ['prdId', 'itemName', 'prdName'];
 	const fieldLabels = { prdId: '품번', itemName: '품목명', prdName: '제품명' };
 	const rowsToCheck = [...createdRows, ...updatedRows];
-	const invalidRows = rowsToCheck.map((row, idx) => {
-		const missing = requiredFields.filter(f => {
-			try {
-				const v = row[f];
-				return v === null || v === undefined || (typeof v === 'string' && v.trim() === '');
-			} catch (e) {
-				return true;
-			}
-		});
-		if (missing.length > 0) {
-			// 우선 기본 id를 설정
-			let id = row.prdId || row.rowKey || ('#' + (idx + 1));
-			// 가능하면 그리드에서 행의 No.(행 번호)를 찾아 사용
-			try {
-				const gridData = (typeof grid1.getData === 'function') ? grid1.getData() : (grid1.data || []);
-				const foundIndex = gridData.findIndex(d => d && (
-					(row.prdId && String(d.prdId) === String(row.prdId)) ||
-					(row.rowKey && String(d.rowKey) === String(row.rowKey))
-				));
-				if (foundIndex >= 0) {
-					id = String(foundIndex + 1); // No. 컬럼 값
-				}
-			} catch (e) { /* 무시 */ }
-			return { id, missing };
-		}
-		return null;
-	}).filter(Boolean);
+	const gd = (typeof grid1.getData === 'function') ? grid1.getData() : (grid1.data || []);
+	// rowsToCheck를 순회하여 필수값이 누락된 행을 수집합니다.
+	// - 빈 행은 무시
+	// - 필수 필드(requiredFields)를 검사하여 비어있으면 missing에 기록
+	// - 그리드 원본 데이터(gd)에서 해당 행의 No.(index)를 찾아 id로 사용
+	// - id가 숫자형이면 No. 표시에 사용될 수 있도록 저장
+	const invalidRows = rowsToCheck.reduce((acc, row, idx) => {
+		// 행이 없으면 건너뜀
+		if (!row) return acc;
+		// 각 필수 필드가 비어있는지 확인 (null/undefined 또는 공백 문자열)
+		const missing = requiredFields.filter(f => !String(row[f] ?? '').trim());
+		// 누락된 필드가 없으면 통과
+		if (!missing.length) return acc;
+		// 화면 그리드 데이터에서 해당 행의 No. 위치를 찾음(일치하는 prdId 또는 rowKey 기준)
+		const fi = gd.findIndex(d => d && ((row.prdId && String(d.prdId) === String(row.prdId)) || (row.rowKey && String(d.rowKey) === String(row.rowKey))));
+		// 찾은 인덱스가 있으면 1-based 번호를 id로, 없으면 prdId/rowKey 또는 임시 '#idx' 사용
+		acc.push({ id: fi >= 0 ? String(fi + 1) : (row.prdId || row.rowKey || `#${idx + 1}`), missing });
+		return acc;
+	}, []);
 
 	if (invalidRows.length > 0) {
 		// 숫자형 id를 가진 항목을 기준으로 오름차순 정렬(그리드의 No. 순서)
@@ -641,6 +656,26 @@ saveProductRowBtn.addEventListener('click', function() {
 		return;
 	}
 
+	// 단가, 유효기간 범위 검사 — 유효하지 않으면 즉시 저장 중단
+	for (let idx = 0; idx < rowsToCheck.length; idx++) {
+		const row = rowsToCheck[idx];
+		if (!row) continue;
+		if (row.effectiveDate != null && String(row.effectiveDate).trim() !== '') {
+			const ed = Number(row.effectiveDate);
+			if (isNaN(ed) || ed < EFFECTIVE_DATE_MIN || ed > EFFECTIVE_DATE_MAX) {
+				alert('유효일자(개월)는 ' + EFFECTIVE_DATE_MIN + ' ~ ' + EFFECTIVE_DATE_MAX + ' 범위 내의 값이어야 합니다. (행: ' + (idx+1) + ')');
+				return;
+			}
+		}
+		if (row.unitPrice != null && String(row.unitPrice).trim() !== '') {
+			const up = Number(row.unitPrice);
+			if (isNaN(up) || up < 0 || up > 1000000000) {
+				alert('단가는 0 ~ 1,000,000,000 범위 내의 값이어야 합니다. (행: ' + (idx+1) + ')');
+				return;
+			}
+		}
+	}
+
 	fetch('/masterData/product/save', {
 		method: 'POST',
 		credentials: 'same-origin',
@@ -651,7 +686,9 @@ saveProductRowBtn.addEventListener('click', function() {
 		body: JSON.stringify(modifiedData)
 	})
 	.then(res => {
-		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		if (!res.ok) {
+			return res.text().then(t => { throw new Error(`HTTP ${res.status}: ${t || res.statusText}`); });
+		}
 		const ct = (res.headers.get('content-type') || '').toLowerCase();
 		if (ct.includes('application/json')) return res.json();
 		return res.text();
@@ -672,7 +709,7 @@ saveProductRowBtn.addEventListener('click', function() {
 	})
 	.catch(err => {
 		console.error('저장 오류', err);
-		try { alert('저장 중 오류가 발생했습니다. ' + (err && err.message ? err.message : '')); } catch (e) {}
+		try { alert('저장 중 오류가 발생했습니다.\n' + msg); } catch (e) {}
 	});
 });
 
@@ -696,49 +733,52 @@ saveMaterialRowBtn.addEventListener('click', function() {
 	};
 	try { createdRows = createdRows.filter(r => !isRowEmpty(r)); } catch (e) { /* ignore */ }
 
-	// 2) matId 필수 검사: matId가 비어있고, matId 외 다른 필드에 값이 있는(의미있는) 행만 경고
 	const rowsToCheck = [...createdRows, ...updatedRows];
-	const invalidRows = rowsToCheck.map((row, idx) => {
+	const gd = (typeof grid2.getData === 'function') ? grid2.getData() : (grid2.data || []);
+	// matId와 matName 둘 다 필수 검사(완전 빈 행은 무시)
+	const missingRows = rowsToCheck.reduce((acc, row, i) => {
 		try {
-			const hasMatId = row && row.matId !== null && row.matId !== undefined && !(typeof row.matId === 'string' && row.matId.toString().trim() === '');
-			if (hasMatId) return null; // matId가 있으면 OK
-
-			// matId가 없으면, matId 외 다른 필드에 값이 있는지 확인
-			const otherKeys = Object.keys(row || {}).filter(k => k !== 'matId' && k !== 'rowKey');
-			const hasOtherValue = otherKeys.some(k => {
-				const v = row[k];
-				return !(v === null || v === undefined || (typeof v === 'string' && v.toString().trim() === ''));
-			});
-			if (!hasOtherValue) return null; // 완전 빈 행은 이미 제거했지만, 안전하게 무시
-
-			// 표시용 id 계산
-			let id = row && (row.rowKey || '#'+(idx+1));
-			try {
-				const gridData = (typeof grid2.getData === 'function') ? grid2.getData() : (grid2.data || []);
-				const foundIndex = gridData.findIndex(d => d && (
-					(row.matId && String(d.matId) === String(row.matId)) ||
-					(row.rowKey && String(d.rowKey) === String(row.rowKey))
-				));
-				if (foundIndex >= 0) id = String(foundIndex + 1);
-			} catch (e) { /* ignore */ }
-			return { id };
-		} catch (e) { return { id: '#'+(idx+1) }; }
-	}).filter(Boolean);
-
-	if (invalidRows.length > 0) {
-		const sorted = invalidRows.slice().sort((a,b) => {
-			const na = Number(a.id);
-			const nb = Number(b.id);
-			if (!isNaN(na) && !isNaN(nb)) return na - nb;
-			return String(a.id).localeCompare(String(b.id));
+			if (!row) return acc;
+			// 행이 완전히 비어있으면 무시
+			if (!Object.values(row || {}).some(v => v != null && String(v).trim() !== '')) return acc;
+			const missing = [];
+			if (!(row?.matId != null && String(row.matId).trim() !== '')) missing.push('matId');
+			if (!(row?.matName != null && String(row.matName).trim() !== '')) missing.push('matName');
+			if (missing.length) {
+				const f = gd.findIndex(d => d && ((row.matId && String(d.matId) === String(row.matId)) || (row.rowKey && String(d.rowKey) === String(row.rowKey))));
+				acc.push({ id: f >= 0 ? String(f + 1) : (row?.rowKey || `#${i+1}`), missing });
+			}
+			return acc;
+		} catch {
+			acc.push({ id: `#${i+1}`, missing: ['matId','matName'] });
+			return acc;
+		}
+	}, []);
+	if (missingRows.length) {
+		// 정렬 및 메시지 생성
+		missingRows.sort((a,b) => { const A = Number(a.id), B = Number(b.id); return (!isNaN(A) && !isNaN(B)) ? A - B : String(a.id).localeCompare(String(b.id)); });
+		const labels = { matId: '원재료ID(matId)', matName: '원재료명(matName)' };
+		const lines = missingRows.map(r => {
+			const displayId = Number.isFinite(Number(r.id)) ? `No. ${Number(r.id)}` : r.id;
+			const missNames = r.missing.map(k => labels[k] || k).join(', ');
+			return `${displayId} (누락: ${missNames})`;
 		});
-		const lines = sorted.map(r => {
-			const displayId = (!isNaN(Number(r.id))) ? `No. ${Number(r.id)}` : r.id;
-			return `${displayId} (누락: 원재료ID)`;
-		});
-		alert('다음 행에 원재료ID(matId)가 비어 있어 저장할 수 없습니다.\n' + lines.join('\n'));
+		alert('다음 행에 필수값이 비어 있어 저장할 수 없습니다.\n' + lines.join('\n'));
 		return;
 	}
+	// 유효기간 범위 검사 — 유효하지 않으면 즉시 저장 중단
+	for (let idx = 0; idx < rowsToCheck.length; idx++) {
+		const row = rowsToCheck[idx];
+		if (!row) continue;
+		if (row.effectiveDate != null && String(row.effectiveDate).trim() !== '') {
+			const ed = Number(row.effectiveDate);
+			if (isNaN(ed) || ed < EFFECTIVE_DATE_MIN || ed > EFFECTIVE_DATE_MAX) {
+				alert('유효일자(개월)는 ' + EFFECTIVE_DATE_MIN + ' ~ ' + EFFECTIVE_DATE_MAX + ' 범위 내의 값이어야 합니다. (행: ' + (idx+1) + ')');
+				return;
+			}
+		}
+	}
+
 	fetch('/material/save', {
 		method: 'POST',
 		credentials: 'same-origin',
@@ -749,7 +789,9 @@ saveMaterialRowBtn.addEventListener('click', function() {
 		body: JSON.stringify(modifiedData)
 	})
 	.then(res => {
-		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		if (!res.ok) {
+			return res.text().then(t => { throw new Error(`HTTP ${res.status}: ${t || res.statusText}`); });
+		}
 		const ct = (res.headers.get('content-type') || '').toLowerCase();
 		if (ct.includes('application/json')) return res.json();
 		return res.text();
@@ -769,7 +811,7 @@ saveMaterialRowBtn.addEventListener('click', function() {
 	})
 	.catch(err => {
 		console.error('저장 오류', err);
-		try { alert('저장 중 오류가 발생했습니다. ' + (err && err.message ? err.message : '')); } catch (e) {}
+		try { alert('저장 중 오류가 발생했습니다.\n' + msg); } catch (e) {}
 	});
 });
 
