@@ -76,6 +76,13 @@ public class OrdersController {
             @AuthenticationPrincipal LoginDTO login
     ) {
         List<ProductMst> products = ordersService.getProducts();
+        
+        
+        // 🔥 디버깅: 로그 출력
+        System.out.println("========== 제품 목록 ==========");
+        System.out.println("제품 개수: " + products.size());
+        products.forEach(p -> System.out.println(p.getPrdId() + " - " + p.getPrdName()));
+        System.out.println("==============================");
 
         model.addAttribute("products", products);
         model.addAttribute("productList", products);

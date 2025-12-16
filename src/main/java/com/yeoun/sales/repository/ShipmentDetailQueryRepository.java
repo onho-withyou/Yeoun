@@ -85,7 +85,8 @@ public class ShipmentDetailQueryRepository {
             SELECT
                 s.SHIPMENT_ID,
                 o.OUTBOUND_DATE,
-                e.EMP_NAME      
+                e.EMP_NAME,
+                s.TRACKING_NUMBER     
             FROM SHIPMENT s
             JOIN OUTBOUND o ON s.SHIPMENT_ID = o.SHIPMENT_ID
             JOIN EMP e ON o.PROCESS_BY = e.EMP_ID

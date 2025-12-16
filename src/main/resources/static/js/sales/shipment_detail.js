@@ -91,6 +91,10 @@ function renderShipmentDetail(detail) {
     // =========================
     if (isCompleted) {
         console.log("🚚 출하완료 분기 진입");
+		
+		// 🔥 [추가된 부분] 운송장번호
+		   document.getElementById("detailTrackingNumber").textContent =
+		       detail.trackingNumber ?? "-";
         
         // 🔥 수정: items 대신 completedItems 사용
         const shipmentItems = detail.completedItems || [];
