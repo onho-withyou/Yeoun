@@ -26,6 +26,7 @@ import com.yeoun.masterData.entity.QcItem;
 import com.yeoun.masterData.repository.QcItemRepository;
 import com.yeoun.order.entity.WorkOrder;
 import com.yeoun.order.repository.WorkOrderRepository;
+import com.yeoun.process.constant.ProcessStepStatus;
 import com.yeoun.process.entity.WorkOrderProcess;
 import com.yeoun.process.repository.WorkOrderProcessRepository;
 import com.yeoun.qc.dto.QcDetailRowDTO;
@@ -541,6 +542,9 @@ public class QcResultService {
 	            workOrder.setStatus("SCRAPPED");
 	            workOrder.setActEndDate(LocalDateTime.now());
 	            
+	            // QC FAIL이면 이후 공정 단계는 중단 처
+	            skipAfterQcSteps(orderId);
+	            
 	            inboundService.saveReInbound(orderId);
 	        }
 	        default -> {
@@ -559,6 +563,36 @@ public class QcResultService {
 	        default -> "IN_PROCESS";
 	    };
 	}
+	
+	private static final String QC_PROCESS_ID = "PRC-QC"; 
+	private static final String STATUS_READY   = "READY";
+	private static final String STATUS_SKIPPED = "SKIPPED";
+
+	// QC 실패 시 QC 이후 단계(포장 등) 상태 SKIPPED 처리
+	private void skipAfterQcSteps(String orderId) {
+
+	    // 1) QC 공정 stepSeq 조회 (하드코딩 제거)
+		WorkOrderProcess qcProc = workOrderProcessRepository
+	            .findByWorkOrderOrderIdAndProcessProcessId(orderId, QC_PROCESS_ID)
+	            .orElseThrow(() -> new IllegalStateException("QC 공정 없음: " + orderId));
+
+		int qcStepSeq = qcProc.getStepSeq();
+
+	    // 2) QC 이후 단계 조회
+		List<WorkOrderProcess> afterSteps =
+	            workOrderProcessRepository.findByWorkOrderOrderIdAndStepSeqGreaterThan(orderId, qcStepSeq);
+
+
+	    // 3) READY인 단계만 SKIPPED로 정리
+		for (WorkOrderProcess p : afterSteps) {
+		    if (STATUS_READY.equals(p.getStatus())) {
+		        p.setStatus(STATUS_SKIPPED);
+		        p.setEndTime(LocalDateTime.now());
+		    }
+		}
+		workOrderProcessRepository.saveAll(afterSteps);
+	}
+
 
 	// ----------------------------------------------------------
 	// QC 결과 상세 조회 (결과 보기 모달용)
