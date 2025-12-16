@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.masterData.entity.BomMst;
+import com.yeoun.masterData.entity.MaterialMst;
 import com.yeoun.masterData.service.BomMstService;
 import com.yeoun.outbound.dto.OutboundOrderItemDTO;
 
@@ -30,6 +31,26 @@ import lombok.extern.log4j.Log4j2;
 public class BomMstController {
 	
 	private final BomMstService bomMstService; 
+	//BOM 완제품 드롭다운 조회
+	@ResponseBody
+	@GetMapping("/prdList")
+	public List<Map<String, Object>> findBomPrdList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+		return bomMstService.findBomPrdList();
+	}
+	
+	//BOM 원재료 드롭다운 조회
+	@ResponseBody
+	@GetMapping("/matList")
+	public List<MaterialMst> findBomMatList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+		return bomMstService.findBomMatList();
+	}
+	
+	//BOM 단위 드롭다운조회
+	@ResponseBody
+	@GetMapping("/UnitList")
+	public List<Map<String, Object>> findBomUnitList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+		return bomMstService.findBomUnitList();
+	}
 	
 	//BOM 정보조회
  	@ResponseBody
