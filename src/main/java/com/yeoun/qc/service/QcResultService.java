@@ -540,18 +540,6 @@ public class QcResultService {
 	                workOrderProcessRepository.save(qcProc);
 	            });
 
-	    // 3-2) 마지막 공정(WOP)에도 양품/불량 수량 복사
-	    //      -> 포장 완료 시 saveProductInbound()에서 사용
-	    List<WorkOrderProcess> allSteps =
-	            workOrderProcessRepository.findByWorkOrderOrderIdOrderByStepSeqAsc(orderId);
-
-	    if (!allSteps.isEmpty()) {
-	        WorkOrderProcess lastStep = allSteps.get(allSteps.size() - 1);
-	        lastStep.setGoodQty(header.getGoodQty());
-	        lastStep.setDefectQty(header.getDefectQty());
-	        workOrderProcessRepository.save(lastStep);
-	    }
-
 	    // LOT / WORK_ORDER 연동
 	    applyQcResultToLotAndWorkOrder(header);
 
