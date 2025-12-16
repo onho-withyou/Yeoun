@@ -13,11 +13,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.yeoun.common.dto.FileAttachDTO;
+import com.yeoun.common.entity.Dispose;
 import com.yeoun.common.entity.FileAttach;
+import com.yeoun.common.repository.DisposeRepository;
 import com.yeoun.common.repository.FileAttachRepository;
 import com.yeoun.common.util.FileUtil;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.inbound.service.InboundService;
+import com.yeoun.inventory.entity.Inventory;
+import com.yeoun.inventory.repository.InventoryRepository;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.entity.LotMaster;
 import com.yeoun.lot.repository.LotMasterRepository;
@@ -26,6 +30,9 @@ import com.yeoun.masterData.entity.QcItem;
 import com.yeoun.masterData.repository.QcItemRepository;
 import com.yeoun.order.entity.WorkOrder;
 import com.yeoun.order.repository.WorkOrderRepository;
+import com.yeoun.outbound.entity.Outbound;
+import com.yeoun.outbound.entity.OutboundItem;
+import com.yeoun.outbound.repository.OutboundRepository;
 import com.yeoun.process.constant.ProcessStepStatus;
 import com.yeoun.process.entity.WorkOrderProcess;
 import com.yeoun.process.repository.WorkOrderProcessRepository;
@@ -52,7 +59,12 @@ public class QcResultService {
     private final QcResultDetailRepository qcResultDetailRepository;
     private final WorkOrderProcessRepository workOrderProcessRepository;
     private final EmpRepository empRepository;
+    
+    // QC 실패 시
     private final InboundService inboundService;
+    private final OutboundRepository outboundRepository;
+    private final DisposeRepository disposeRepository;
+    
     
     // LOT 연동용
     private final LotTraceService lotTraceService;
@@ -545,6 +557,9 @@ public class QcResultService {
 	            // QC FAIL이면 이후 공정 단계는 중단 처
 	            skipAfterQcSteps(orderId);
 	            
+	            // 사용 원자재 폐기
+	            disposeMaterialByQcFail(orderId, header.getInspectorId());
+	            
 	            inboundService.saveReInbound(orderId);
 	        }
 	        default -> {
@@ -591,6 +606,46 @@ public class QcResultService {
 		    }
 		}
 		workOrderProcessRepository.saveAll(afterSteps);
+	}
+	
+	// QC 실패 시 사용 자재 폐기 (RAW / SUB 타입 자재를 자동으로 폐기)
+	@Transactional
+	public void disposeMaterialByQcFail(String orderId, String empId) {
+		
+		// 1. 작업지시 기준 출고 정보 조회
+		Outbound outbound = outboundRepository.findByWorkOrderId(orderId)
+		        .orElseThrow(() -> new IllegalStateException("출고 정보 없음: " + orderId));
+		
+		// 2. 출고된 자재 목록 반복 처리
+		for (OutboundItem item : outbound.getItems()) {
+			
+			// RAW / SUB 자재만 폐기 대상
+			if (!"RAW".equals(item.getItemType()) && !"SUB".equals(item.getItemType())) {
+				continue;
+			}
+			
+			// 중복 방지 (이미 QC_FAIL 폐기 이력 있으면 skip)
+	        boolean alreadyDisposed =
+	            disposeRepository.existsByWorkTypeAndLotNo("QC_FAIL", item.getLotNo());
+
+	        if (alreadyDisposed) {
+	            continue;
+	        }
+			
+			// 폐기 이력만 기록 (재고 차감 X)
+	        Dispose dispose = Dispose.builder()
+        		.lotNo(item.getLotNo())
+                .itemId(item.getItemId())
+                .workType("QC_FAIL")
+                .empId(empId)
+                .disposeAmount(item.getOutboundAmount())
+                .disposeReason("QC 검사 불합격")
+                .createdDate(LocalDateTime.now())
+	            .build();
+	        
+	        disposeRepository.save(dispose);
+
+		}
 	}
 
 
