@@ -206,7 +206,13 @@ const grid2 = new Grid({
 			,renderer:{ type: StatusModifiedRenderer}	
 		}
 		,{header: '원재료 사용량' ,name: 'matQty' ,align: 'center',editor: 'text'
-			,renderer:{ type: StatusModifiedRenderer}	
+			,renderer:{ type: StatusModifiedRenderer}
+			,editor: {
+            	type: NumberOnlyEditor, // ⬅️ 클래스 이름 직접 사용
+            	options: {
+              		maxLength: 10
+            	}
+          	}	
 		}
 		,{header: '단위' ,name: 'matUnit' ,align: 'center',filter: "select",width:60
 			,renderer:{ type: StatusModifiedRenderer
@@ -222,7 +228,13 @@ const grid2 = new Grid({
 			}	
 		}
 		,{header: '순서' ,name: 'bomSeqNo' ,align: 'center',editor: 'text'
-			,renderer:{ type: StatusModifiedRenderer}	
+			,renderer:{ type: StatusModifiedRenderer}
+			,editor: {
+            	type: NumberOnlyEditor, // ⬅️ 클래스 이름 직접 사용
+            	options: {
+              		maxLength: 10
+            	}
+          	}		
 		}
 		,{header: '생성자ID' ,name: 'createdId' ,align: 'center',hidden:true}
 		,{header: '생성자이름' ,name: 'createdByName' ,align: 'center'}

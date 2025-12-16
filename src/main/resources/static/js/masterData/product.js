@@ -861,7 +861,6 @@ deleteProductRowBtn.addEventListener('click', async function() {
 	}).filter(Boolean);
 
 		// 구분: 빈 행(또는 prdId가 없는 행)은 화면에서만 삭제하고, prdId가 있는 행만 서버에 삭제 요청
-		let serverPrdIds = [];
 		try {
 			const getAllData = () => (typeof grid1.getData === 'function' ? grid1.getData() : (grid1.data || []));
 			const data = getAllData();
@@ -869,6 +868,7 @@ deleteProductRowBtn.addEventListener('click', async function() {
 			const modified = (typeof grid1.getModifiedRows === 'function') ? (grid1.getModifiedRows() || {}) : {};
 			const createdRows = Array.isArray(modified.createdRows) ? modified.createdRows : [];
 			const uiOnlyKeys = []; // 화면에서만 제거할 rowKey
+			const serverPrdIds = []; // 서버에 삭제 요청할 prdId 목록
 			for (const key of rowKeysToDelete) {
 				// 우선 해당 키가 생성된(신규) 행인지 확인
 				const isCreated = createdRows.some(r => r && (String(r.rowKey) === String(key) || String(r.prdId) === String(key)));
