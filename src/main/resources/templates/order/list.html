@@ -669,6 +669,7 @@ body {
 	                       data-error-for="lineId" style="display:none;">
 	                      작업 라인은 필수 선택값입니다.
 	                  </div>
+					  <div id="lineSuggestBox" class="suggest-box"></div>
 	              </div>
 	              <div class="col-4">
 	                <label class="form-label">계획 수량</label>
@@ -969,6 +970,7 @@ body {
 							    </select>
 				            </div>
 				        </div>
+						<div id="workerSuggestBox" class="mt-2 small text-muted suggest-box"></div>
 				    </div>
 				    
 				    <!-- ===== 5. 상태 ===== -->
@@ -1221,6 +1223,14 @@ body {
   // 작업지시 등록 모달
   // ======================================================
 
+  function debounce(fn, delay = 300) {
+	  let timer = null;
+	  return function (...args) {
+		  clearTimeout(timer);
+		  timer = setTimeout(() => fn.apply(this, args), delay);
+	  };
+  }
+
   // 등록 모달 열기
   document.getElementById("btnCreate").addEventListener("click", () => {
     clearFormFields();
@@ -1259,29 +1269,6 @@ body {
 	    .then(res => res.json())
 	    .then(list => renderStockPanel(list));
 	});
-  
-  // 재고 렌더링
-  function renderStockPanel(list) {
-    const panel = document.querySelector('.stock-panel');
-	    panel.innerHTML = "";
-	
-	    list.forEach(item => {
-	        const shortage = item.requiredQty - item.stockQty;
-	        const statusClass = shortage > 0 ? "low" : "ok";
-	
-	        panel.innerHTML += `
-	            <div class="stock-item ${statusClass}">
-	                <div><strong>${item.matName}</strong> (${item.matId})</div>
-	                <div>필요량: ${item.requiredQty}</div>
-	                <div>재고량: ${item.stockQty}</div>
-	                ${shortage > 0 
-	                    ? `<div style="color:#d63030;">부족: ${shortage}</div>` 
-	                    : `<div style="color:#2ecc71;">충분</div>`}
-	            </div>
-	        `;
-	    })
-	}
-
 
   // 품목 자동 선택
   function selectOptionByText(selectId, text) {
@@ -1308,6 +1295,27 @@ body {
 	   const hours = remain / 42;
 	   return "약 " + Math.ceil(remain / 42) + "시간(" + Math.round(hours * 10) / 10 + "시간) 소요 예상";
   }
+
+  // 유효성 검증용 페이로드
+  function collectValidatePayload() {
+	  const date	= document.getElementById("planDate").value;
+	  const start	= document.getElementById("startTime").value;
+	  const end		= document.getElementById("endTime").value;
+
+	  return {
+		  lineId: document.getElementById("lineId").value,
+		  startTime: `${date}T${start}`,
+		  endTime: `${date}T${end}`,
+		  workers: [
+			  document.querySelector('[name="prcBld"]').value,
+			  document.querySelector('[name="prcFlt"]').value,
+			  document.querySelector('[name="prcFil"]').value,
+			  document.querySelector('[name="prcCap"]').value,
+			  document.querySelector('[name="prcLbl"]').value
+		  ].filter(v => v)	// null 제거
+	  };
+  }
+
 
   // 폼 전송(실제 등록 처리)
   document.getElementById("btnCreateSubmit").addEventListener("click", async () => {
@@ -1342,6 +1350,31 @@ body {
           remark: document.querySelector('[name="remark"]').value
       };
 
+	  // 서버 유효성 검증
+	  const validateRes = await fetch ("/order/validate", {
+		  method: "POST",
+		  headers: {
+			  "Content-Type": "application/json",
+			  [csrfHeader]: csrfToken
+		  },
+		  body: JSON.stringify(collectValidatePayload())
+	  });
+
+	  const validation = await validateRes.json();
+	  if (!validation.valid) {
+		  alert(validation.message);
+
+		  if (validation.suggestedLines) {
+			  showSuggestedLines(validation.suggestedLines);
+		  }
+
+		  if (validation.suggestedWorkers) {
+			  showSuggestedWorkers(validation.suggestedWorkers);
+		  }
+
+		  return;
+	  }
+
       const res = await fetch("/order/create", {
           method: "POST",
           headers: {
@@ -1359,6 +1392,138 @@ body {
           alert("등록 실패: 서버 오류");
       }
   });
+
+  // 서버 유효성 검증 호출
+  async function validateBeforeSubmit() {
+	  const payload = collectValidatePayload();
+
+	  const res = await fetch("/order/validate", {
+		  method: "POST",
+		  headers: {
+			  "Content-Type": "application/json",
+			  [csrfHeader]: csrfToken
+		  },
+		  body: JSON.stringify(payload)
+	  });
+
+	  const result = await res.json();
+	  return result;
+  }
+
+  // change 될 때 유효성 검증
+  const watchFields = ["line", "startTime", "endTime", "PRC-BLD", "PRC-FLT", "PRC-FIL", "PRC-CAP", "PRC-LBL"];
+
+  watchFields.forEach(id => {
+	  document.getElementById(id).addEventListener("change", debounce(runValidation, 300));
+  });
+
+  async function runValidation() {
+	  const payload = collectValidatePayload();
+	  const response = await fetch("/order/validate", {
+		  method: "POST",
+		  headers: {
+			  "Content-Type": "application/json",
+			  [csrfHeader]: csrfToken
+		  },
+		  body: JSON.stringify(payload)
+	  });
+	  const result = await response.json();
+	  updateValidationUI(result);
+  }
+
+  // line 추천
+  function showSuggestedLines(lines) {
+	const box = document.getElementById("lineSuggestBox");
+	box.innerHTML = "";
+
+	lines.forEach(lineId => {
+		const btn = document.createElement("button");
+		btn.className = "btn btn-sm btn-outline-primary me-1";
+		btn.innerText = lineId;
+		btn.onclick = () => {
+			document.querySelector('[name="lineId"]').value = lineId;
+			runValidation();
+		};
+		box.appendChild(btn);
+	});
+  }
+
+  // 작업자 추천
+  function showSuggestedWorkers(workers) {
+	  const box = document.getElementById("workerSuggestBox");
+	  box.innerHTML = "";
+
+	  workers.forEach(workerId => {
+		 const btn = document.createElement("button");
+		 btn.className = "btn btn-sm btn-outline-primary me-1";
+		 btn.innerText = workerId;
+		 btn.onclick = () => {
+			 const targetField = findEmptyWorkerField();
+
+			 if (!targetField) {
+				 alert("이미 모든 작업자 슬롯이 채워져 있습니다.");
+				 return;
+			 }
+
+			 document.querySelector(`[name="${targetField}"]`).value = workerId;
+
+			 // 값을 다 채웠다면 다시 서버 검증 진행
+			 runValidation();
+		 };
+
+		 box.appendChild(btn);
+	  });
+  }
+
+  // 작업자 필드
+  const workerFields = [
+	  "prcBld", "prcFlt", "prcFil", "prcCap", "prcLbl"
+  ];
+
+  // 비어있는 슬롯 찾기
+  function findEmptyWorkerField() {
+	  return workerFields.find(name => {
+		  const el = document.querySelector(`[name="${name}"]`);
+		  return el && !el.value;
+	  });
+  }
+
+  // 유효성검사 결과 UI
+  function updateValidationUI(result) {
+
+	  const msgBox = document.getElementById("validationMessage");
+	  const lineBox = document.getElementById("lineSuggestBox");
+	  const workerBox = document.getElementById("workerSuggestBox");
+	  const submitBtn = document.getElementById("btnSubmit");
+
+	  // 초기화
+	  msgBox.innerText = "";
+	  lineBox.innerHTML = "";
+	  workerBox.innerHTML = "";
+
+	  if (result.valid) {
+		  msgBox.innerText = "작업지시 등록 가능";
+		  msgBox.className = "text-success";
+		  submitBtn.disabled = false;
+		  return;
+	  }
+
+	  // 유효하지 않은 경우
+	  submitBtn.disabled = true;
+	  msgBox.innerText = result.message;
+	  msgBox.className = "text-danger";
+
+	  // 라인 추천
+	  if (!result.lineAvailable && result.suggestedLines) {
+		  showSuggestedLines(result.suggestedLines);
+	  }
+
+	  // 작업자 추천
+	  if (!result.workerAvailable && result.suggestedWorkers) {
+		  showSuggestedWorkers(result.suggestedWorkers);
+	  }
+  }
+
 
   // 값 초기화
   function clearFormFields(){

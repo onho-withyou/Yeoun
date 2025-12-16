@@ -2,11 +2,9 @@ package com.yeoun.order.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.yeoun.emp.repository.EmpRepository;
@@ -22,16 +20,11 @@ import com.yeoun.order.repository.WorkerProcessRepository;
 import com.yeoun.process.entity.WorkOrderProcess;
 import com.yeoun.process.repository.WorkOrderProcessRepository;
 import com.yeoun.process.service.ProcessTimeCalculator;
-import com.yeoun.production.entity.ProductionPlan;
-import com.yeoun.production.entity.ProductionPlanItem;
-import com.yeoun.production.enums.ProductionStatus;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yeoun.emp.dto.EmpListDTO;
 import com.yeoun.emp.entity.Emp;
 import com.yeoun.equipment.entity.ProdLine;
 import com.yeoun.masterData.entity.ProductMst;
@@ -52,27 +45,21 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Log4j2
-public class OrderService {
+public class OrderQueryService {
 	
 	private final OrderMapper orderMapper;
 	private final ProdLineRepository prodLineRepository;
 	private final ProductMstRepository productMstRepository;
 	private final ProductionPlanRepository productionPlanRepository;
-	private final ProductionPlanItemRepository productionPlanItemRepository;
 	private final WorkOrderRepository workOrderRepository;
 
 	private final EmpRepository empRepository;
-	private final OutboundService outboundService;
-	private final WorkScheduleRepository workScheduleRepository;
-	private final ProcessMstRepository processMstRepository;
 	private final WorkerProcessRepository workerProcessRepository;
-	private final RouteStepRepository routeStepRepository;
-	private final RouteHeaderRepository routeHeaderRepository;
 	private final WorkOrderProcessRepository workOrderProcessRepository;
 	private final LeaveHistoryRepository leaveHistoryRepository;
 	
-	@Autowired
-	private ObjectMapper objectMapper;
+//	@Autowired
+//	private ObjectMapper objectMapper;
 
 
 	// =======================================================
@@ -161,180 +148,6 @@ public class OrderService {
 	// 품질검사팀 조회
 
 	// =======================================================
-	// 작업지시 등록
-	@Transactional
-	public void createWorkOrder(WorkOrderRequest dto, String id) {
-
-		log.info("create dto!!!!! :::::::: " + dto);
-
-		// 1) 새 작업지시 번호 생성
-		String orderId = generateOrderId();
-
-		// 2) 작업지시 등록
-		WorkOrder order = WorkOrder.builder()
-				.orderId(orderId)
-				.planId(dto.getPlanId())
-				.product(productMstRepository.findById(dto.getPrdId())
-						.orElseThrow(() -> new RuntimeException("품번을 찾을 수 없음!")))
-				.planQty(dto.getPlanQty())
-				.planStartDate(dto.getPlanStartDate())
-				.planEndDate(dto.getPlanEndDate())
-				.routeId(dto.getRouteId())
-				.line(prodLineRepository.findById(dto.getLineId())
-						.orElseThrow(() -> new RuntimeException("라인을 찾을 수 없음!")))
-				.status("CREATED")
-				.createdEmp(empRepository.findByEmpId(id)
-						.orElseThrow(() -> new RuntimeException("작성자를 찾을 수 없음!")))
-				.remark(dto.getRemark())
-				.build();
-		workOrderRepository.save(order);
-		
-		// 3) 생산계획 상태 변경
-		ProductionPlan plan = productionPlanRepository.findById(dto.getPlanId())
-				.orElseThrow(() -> new RuntimeException("생산 계획을 찾을 수 없음!"));
-		plan.setStatus(ProductionStatus.IN_PROGRESS);
-		
-		List<ProductionPlanItem> planItems = productionPlanItemRepository.findByPlanId(dto.getPlanId());
-		for (ProductionPlanItem item : planItems) {
-			item.setStatus(ProductionStatus.IN_PROGRESS);
-		}
-
-		// 4) 작업스케줄 생성
-		WorkSchedule schedule = WorkSchedule.builder()
-				.work(workOrderRepository.findById(orderId)
-						.orElseThrow(() -> new RuntimeException("작업지시 번호를 찾을 수 없음!")))
-				.line(order.getLine())
-				.startDate(order.getPlanStartDate())
-				.endDate(order.getPlanEndDate())
-				.colorCode(generateColorCode(orderId))
-				.build();
-		workScheduleRepository.save(schedule);
-
-		// 5) 방금 생성된 작업스케줄 번호 조회
-		WorkSchedule newSchedule = workScheduleRepository.findTopByWork_OrderIdOrderByScheduleIdAsc(orderId)
-				.orElseThrow(() -> new RuntimeException("일치하는 번호 없음!"));
-
-		// 6) 작업자 저장
-		createWorkerProcessList(dto, newSchedule);
-
-		// 7) 새 공정 생성
-		createWorkOrderProcessList(order, id);
-
-	}
-
-	// =======================================================
-	// 작업지시 번호 생성
-	public String generateOrderId(){
-		String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-		String prefix = "WO-" + today;
-
-		Optional<WorkOrder> lastOrder = workOrderRepository.findTopByOrderIdStartingWithOrderByOrderIdDesc(prefix);
-
-		if (lastOrder.isEmpty()){
-			return prefix + "-0001";
-		}
-
-		String lastId = lastOrder.get().getOrderId();
-
-		int nextSeq = Integer.parseInt(lastId.substring(prefix.length() + 1));
-		nextSeq++;
-
-		return String.format("%s-%04d", prefix, nextSeq);
-	}
-
-	// =======================================================
-	// 컬러코드 자동 생성
-	public String generateColorCode(String workId) {
-		int hash = workId.hashCode();
-
-		int h = Math.floorMod(hash, 360);
-		int s = 30 + Math.floorMod(hash >>> 3, 25);
-		int l = 65 + Math.floorMod(hash >>> 5, 15);
-
-		double sat = s / 100.0;
-		double lig = l / 100.0;
-
-		double c = (1 - Math.abs(2 * lig - 1)) * sat;
-		double x = c * (1 - Math.abs((h / 60.0) % 2 - 1));
-		double m = lig - c / 2.0;
-
-		double r = 0, g = 0, b = 0;
-
-		if (h < 60) { r = c; g = x; }
-		else if (h < 120) { r = x; g = c; }
-		else if (h < 180) { g = c; b = x; }
-		else if (h < 240) { g = x; b = c; }
-		else if (h < 300) { r = x; b = c; }
-		else { r = c; b = x; }
-
-		int R = (int) Math.round((r + m) * 255);
-		int G = (int) Math.round((g + m) * 255);
-		int B = (int) Math.round((b + m) * 255);
-
-		return String.format("#%02X%02X%02X", R, G, B);
-	}
-	// =======================================================
-	// 공정별 작업자 할당
-	@Transactional
-	public void createWorkerProcessList(WorkOrderRequest dto, WorkSchedule schedule) {
-		Map<String, String> processWorkerMap = Map.of(
-				"PRC-BLD", dto.getPrcBld(),
-				"PRC-FLT", dto.getPrcFlt(),
-				"PRC-FIL", dto.getPrcFil(),
-				"PRC-CAP", dto.getPrcCap(),
-				"PRC-LBL", dto.getPrcLbl()
-		);
-
-		for (Map.Entry<String, String> entry : processWorkerMap.entrySet()) {
-
-			String processId = entry.getKey();    // ex: "PRC_BLD"
-			String workerId  = entry.getValue();  // ex: dto.getPrcBld()
-
-			WorkerProcess wp = WorkerProcess.builder()
-					.schedule(schedule)
-					.worker(empRepository.findByEmpId(workerId)
-							.orElseThrow(() -> new RuntimeException(processId + "작업자 불일치")))
-					.process(processMstRepository.findByProcessId(processId)
-							.orElseThrow(() -> new RuntimeException(processId + "공정 불일치")))
-					.build();
-
-			workerProcessRepository.save(wp);
-		}
-	}
-
-	// =======================================================
-	// 새 공정 생성 로직
-	@Transactional
-	public void createWorkOrderProcessList (WorkOrder order, String id) {
-
-		String routeId = order.getRouteId();
-
-
-		// 1) ROUTE_STEP 전체 조회
-		List<RouteStep> routeSteps =
-				routeStepRepository.findByRouteHeaderOrderByStepSeqAsc(
-						routeHeaderRepository.findById(routeId)
-								.orElseThrow(() -> new RuntimeException("해당 품목의 라우팅 정보가 없음! : " + routeId))
-				);
-
-
-		// 2) 데이터를 기반으로 WORK_ORDER_PROCESS 생성
-		for (RouteStep routeStep : routeSteps) {
-			WorkOrderProcess wop = new WorkOrderProcess();
-			wop.setWopId("WOP-" + order.getOrderId() + "-" + String.format("%02d", routeStep.getStepSeq()));
-			wop.setWorkOrder(order);
-			wop.setRouteStep(routeStep);
-			wop.setProcess(routeStep.getProcess());
-			wop.setStepSeq(routeStep.getStepSeq());
-			wop.setStatus("READY");
-			wop.setCreatedId(id);
-
-			workOrderProcessRepository.save(wop);
-		}
-
-	}
-
-	// =======================================================
 	// 작업지시 상세 조회
 	public WorkOrderDetailDTO getDetailWorkOrder(String id) {
 
@@ -421,97 +234,24 @@ public class OrderService {
 				.build();
 
 	}
-	
-	// =======================================================
-	// 작업지시 확정 및 삭제
-	@Transactional
-	public void modifyOrderStatus(String id, String status) {
-		WorkOrder order = workOrderRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("해당하는 작업 번호가 없습니다."));
-		order.setStatus(status);
-		
-		if (status.equals("CANCELED"))
-			outboundService.canceledMaterialOutbound(id);
-			
-	}
-	
-	// =======================================================
-	// 작업지시 수정
-	@Transactional
-	public void updateOrder(String id, Map<String, String> map) {
-		
-		WorkOrder order = workOrderRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("작업지시가 없음"));
-		order.setRemark(map.get("remark"));
-
-		map.forEach((code, worker) -> {
-			if ("remark".equals(code)) return;
-			
-			WorkerProcess wp = workerProcessRepository
-					.findFirstBySchedule_Work_OrderIdAndProcess_ProcessId(id, code)
-					.orElseThrow();
-			
-			Emp emp = empRepository.findByEmpId(worker)
-					.orElseThrow(() -> new RuntimeException("일치하는 작업자가 없음"));
-			
-			wp.setWorker(emp);
-		});
-	}
-	
-	// =======================================================
-	// 모든 작업자 불러오기
-	public void selectAllWorkers() {
-		log.info("테스트.... ::: " + orderMapper.selectMaterials("BG030", 100));
-		
-	}
 
 	// =======================================================
 	// 모든 스케줄 불러오기
 	public List<WorkScheduleDTO> loadAllSchedules() {
 		List<WorkScheduleDTO> list = orderMapper.selectAllSchedules();
-		log.info("here 1................. list..." + list.toString());
+		//log.info("here 1................. list..." + list.toString());
 		for (WorkScheduleDTO schedule : list) {
-			log.info("here 1................. schedule..." + schedule.toString());
+			//log.info("here 1................. schedule..." + schedule.toString());
 			List<WorkerProcessDTO> dtos = orderMapper.selectWorkersBySchedule(schedule.getScheduleId());
 			List<String> workers = new ArrayList<>();
 			for (WorkerProcessDTO dto : dtos) {
-				log.info("here 1................. dto..." + dto.getEmpId());
+				//log.info("here 1................. dto..." + dto.getEmpId());
 				workers.add(dto.getEmpId());
 			}
 			schedule.setWorkers(workers);
 		}
 		return list;
 	}
-	
-	// =======================================================
-	// 작업지시 예상 시간 조회
-	@Transactional(readOnly = true)
-	public long calcExpectedMinutes(String prdId, Integer planQty, String routeId) {
-
-	    // 1) 제품 조회
-	    ProductMst product = productMstRepository.findById(prdId)
-	        .orElseThrow(() -> new RuntimeException("품번 없음: " + prdId));
-
-	    // 2) 라우트 헤더 조회
-	    RouteHeader routeHeader = routeHeaderRepository.findById(routeId)
-	        .orElseThrow(() -> new RuntimeException("라우트 없음: " + routeId));
-
-	    // 3) 라우트 스텝 조회
-	    List<RouteStep> routeSteps =
-	        routeStepRepository.findByRouteHeaderOrderByStepSeqAsc(routeHeader);
-
-	    // 4) 계산용 임시 WorkOrder
-	    WorkOrder tmp = WorkOrder.builder()
-	        .product(product)
-	        .planQty(planQty)
-	        .build();
-
-	    // 5) 전체 공정 예상시간 계산
-	    return ProcessTimeCalculator
-	        .calcExpectedMinutesForWorkOrderFromRoute(tmp, routeSteps);
-	}
-
-	
   
 	// 작업지시서 전체 조회
 	public List<WorkOrderDTO> findAllWorkList() {
