@@ -25,6 +25,7 @@ public class ShipmentDetailDTO {
     private String shipmentId;
     private LocalDateTime outboundDate;
     private String processBy;
+    private String trackingNumber;
     
     private List<ShipmentCompletedItemDTO> completedItems;
 

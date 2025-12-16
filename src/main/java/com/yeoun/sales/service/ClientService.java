@@ -61,6 +61,10 @@ public class ClientService {
 
         if (client.getBusinessNo() == null || client.getBusinessNo().isBlank())
             throw new IllegalArgumentException("사업자번호는 필수입니다.");
+        
+        /* ⭐ 업태/업종 기본값 보정*/
+        if (client.getBizType() == null) client.setBizType("");
+        if (client.getBizItem() == null) client.setBizItem("");
 
 
         /* ⭐⭐ 2. 사업자번호 숫자만 남기기 */
@@ -101,6 +105,8 @@ public class ClientService {
         origin.setClientName(updateForm.getClientName());
         origin.setClientType(updateForm.getClientType());
         origin.setBusinessNo(updateForm.getBusinessNo());
+        origin.setBizType(updateForm.getBizType());
+        origin.setBizItem(updateForm.getBizItem());
         origin.setCeoName(updateForm.getCeoName());
         origin.setManagerName(updateForm.getManagerName());
         origin.setManagerDept(updateForm.getManagerDept());
@@ -175,7 +181,9 @@ public class ClientService {
         c.setAddr(req.getAddr());
         c.setAddrDetail(req.getAddrDetail());
         
-        c.setPostCode(req.getPostCode());   
+        c.setPostCode(req.getPostCode()); 
+        c.setBizType(req.getBizType());
+        c.setBizItem(req.getBizItem());
 
         c.setBankName(req.getBankName());         
         c.setAccountNumber(req.getAccountNumber());

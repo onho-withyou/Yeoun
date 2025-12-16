@@ -99,7 +99,7 @@ public class OrdersService {
     public List<ProductMst> getProducts() {
         return em.createQuery(
                 "SELECT p FROM ProductMst p " +
-                        "WHERE p.prdStatus = 'ACTIVE' " +
+                        "WHERE p.useYn = 'Y' " +
                         "ORDER BY p.prdName", ProductMst.class
         ).getResultList();
     }

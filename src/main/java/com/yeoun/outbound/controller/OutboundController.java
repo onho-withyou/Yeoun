@@ -143,11 +143,13 @@ public class OutboundController {
 	@PostMapping("/prd/complete")
 	@ResponseBody
 	public Map<String, Object> productComplete(@RequestBody OutboundOrderDTO OutboundOrderDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
+
 		outboundService.updateOutbound(OutboundOrderDTO, loginDTO.getEmpId());
 		
 		// 출하 확정 + TRACKING_NUMBER 생성
 	    String shipmentId = OutboundOrderDTO.getShipmentId();
 	    shipmentService.confirmShipment(shipmentId, loginDTO.getEmpId());
+
 		
 		Map<String, Object> result = new HashMap<>();
 		

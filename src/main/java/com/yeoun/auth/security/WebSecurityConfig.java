@@ -110,6 +110,10 @@ public class WebSecurityConfig {
 					// 출고관리
 					.requestMatchers("/inventory/outbound/**")
 					.hasAnyRole("SYS_ADMIN", "LOG_USER")
+					
+					//영업관리
+					.requestMatchers("/sales/**")
+					.hasAnyRole("SYS_ADMIN", "SALES_ADMIN")
 						
 	                // 그 외 나머지는 로그인만 되어있으면 접근 허용
 	                .anyRequest().authenticated()
