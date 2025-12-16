@@ -199,7 +199,7 @@ public class EquipmentController {
     }
     
     // ===================================================
-    // 설비 이력 조회
+    // 설비별 작업 이력 조회
     @GetMapping("/equip/{id}/history")
     @ResponseBody
     public List<WorkOrderProcessDTO> loadHistory(@PathVariable Long id) {
@@ -207,6 +207,33 @@ public class EquipmentController {
         log.info("list ::::::::: " + list);
         return list;
     }
+    
+    // ===================================================
+    // 설비 비가동 이력
+    @GetMapping("/history")
+    public String history(Model model) {
+        // 모든 설비
+        List<EquipmentDTO> equipments = equipmentRepository.findAll().stream()
+                .map(EquipmentDTO::fromEntity)
+                .toList();
+
+        // 모든 라인
+        List<ProdLineDTO> lines = prodLineRepository.findAll().stream()
+                .map(ProdLineDTO::fromEntity)
+                .toList();
+
+        model.addAttribute("equipTypes", equipments);
+        model.addAttribute("lines", lines);
+    	return "/equipment/history";
+    }
+    
+    // ===================================================
+    // 설비 비가동 이력
+    @GetMapping("/history/data")
+    public List<EquipDowntimeDTO> historyData(HistorySearchDTO dto) {
+    	return equipmentService.loadAllEquipDowntimeHistory(dto);
+    }
+    
 
 
 }
