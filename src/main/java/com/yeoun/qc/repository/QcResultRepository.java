@@ -35,13 +35,15 @@ public interface QcResultRepository extends JpaRepository<QcResult, Long> {
             w.planQty,
             q.overallResult,
             q.inspectionDate,
-            wop.lotNo
+            wop.lotNo,
+            q.createdDate,
+            w.line.lineName
         )
         FROM QcResult q
         JOIN WorkOrder w ON w.orderId = q.orderId
         LEFT JOIN WorkOrderProcess wop ON wop.workOrder = w AND wop.stepSeq = 1
         WHERE q.overallResult = :status
-        ORDER BY w.createdDate DESC
+        ORDER BY q.qcResultId ASC
         """)
     List<QcRegistDTO> findRegistListByStatus(@Param("status") String status);
     
