@@ -20,8 +20,6 @@ import com.yeoun.common.repository.FileAttachRepository;
 import com.yeoun.common.util.FileUtil;
 import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.inbound.service.InboundService;
-import com.yeoun.inventory.entity.Inventory;
-import com.yeoun.inventory.repository.InventoryRepository;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.entity.LotMaster;
 import com.yeoun.lot.repository.LotMasterRepository;
@@ -33,7 +31,6 @@ import com.yeoun.order.repository.WorkOrderRepository;
 import com.yeoun.outbound.entity.Outbound;
 import com.yeoun.outbound.entity.OutboundItem;
 import com.yeoun.outbound.repository.OutboundRepository;
-import com.yeoun.process.constant.ProcessStepStatus;
 import com.yeoun.process.entity.WorkOrderProcess;
 import com.yeoun.process.repository.WorkOrderProcessRepository;
 import com.yeoun.qc.dto.QcDetailRowDTO;
@@ -65,7 +62,6 @@ public class QcResultService {
     private final OutboundRepository outboundRepository;
     private final DisposeRepository disposeRepository;
     
-    
     // LOT 연동용
     private final LotTraceService lotTraceService;
     private final LotMasterRepository lotMasterRepository;
@@ -73,6 +69,11 @@ public class QcResultService {
     // 파일
     private final FileUtil fileUtil;
     private final FileAttachRepository fileAttachRepository;
+    
+    // ===================================================
+	private static final String QC_PROCESS_ID = "PRC-QC"; 
+	private static final String STATUS_READY   = "READY";
+	private static final String STATUS_SKIPPED = "SKIPPED";
     
     // --------------------------------------------------------------
     // 캡/펌프 공정 종료 시 호출되는 QC 결과 생성 메서드
@@ -185,7 +186,6 @@ public class QcResultService {
             qcResultDetailRepository.save(detail);
         }
     }
-
 
     // -------------------------------------------------------------
     // QC 등록 목록
@@ -311,6 +311,83 @@ public class QcResultService {
 	// QC 결과 목록 조회
 	public List<QcResultListDTO> getQcResultListForView() {
 		return qcResultRepository.findResultListForView();
+	}
+	
+	// ----------------------------------------------------------
+	// QC 결과 상세 조회 (결과 보기 모달용)
+	// - 헤더 + 디테일 정보를 한 번에 DTO로 반환
+	@Transactional(readOnly = true)
+	public QcResultViewDTO getQcResultView(Long qcResultId) {
+
+	    // 1) 헤더 조회
+	    QcResult header = qcResultRepository.findById(qcResultId)
+	            .orElseThrow(() -> new IllegalArgumentException(
+	                    "QC 결과가 존재하지 않습니다. ID = " + qcResultId));
+
+	    // 2) 작업지시 조회 (제품/수량용)
+	    WorkOrder workOrder = workOrderRepository.findById(header.getOrderId())
+	            .orElse(null);
+
+	    // 3) 디테일 목록 조회
+	    List<QcResultDetail> details =
+	            qcResultDetailRepository.findByQcResultId(String.valueOf(qcResultId));
+
+	    // 4) 디테일 → QcDetailRowDTO 변환
+	    List<QcDetailRowDTO> detailDtos = new ArrayList<>();
+
+	    for (QcResultDetail d : details) {
+
+	        QcItem item = qcItemRepository.findById(d.getQcItemId())
+	                .orElse(null);
+
+	        QcDetailRowDTO dto = new QcDetailRowDTO();
+	        dto.setQcResultDtlId(d.getQcResultDtlId());
+	        dto.setQcItemId(d.getQcItemId());
+
+	        if (item != null) {
+	            dto.setItemName(item.getItemName());
+	            dto.setUnit(item.getUnit());
+	            dto.setStdText(buildStdText(item));
+	        }
+
+	        dto.setMeasureValue(d.getMeasureValue());
+	        dto.setResult(d.getResult());
+	        dto.setRemark(d.getRemark());
+
+	        detailDtos.add(dto);
+	    }
+
+	    // 5) 헤더 + 디테일 합쳐서 ViewDTO 세팅
+	    QcResultViewDTO view = new QcResultViewDTO();
+	    view.setQcResultId(qcResultId);
+	    view.setOrderId(header.getOrderId());
+	    view.setLotNo(header.getLotNo());
+	    view.setInspectionDate(header.getInspectionDate());
+	    view.setOverallResult(header.getOverallResult());
+	    view.setFailReason(header.getFailReason());
+	    view.setInspectionQty(header.getInspectionQty());
+	    view.setGoodQty(header.getGoodQty());
+	    view.setDefectQty(header.getDefectQty());
+
+	    // 검사자 정보
+	    view.setInspectorId(header.getInspectorId());
+	    if (header.getInspectorId() != null) {
+	        empRepository.findById(header.getInspectorId())
+	                .ifPresent(emp -> view.setInspectorName(emp.getEmpName()));
+	    }
+
+	    // 작업지시(제품) 정보
+	    if (workOrder != null) {
+	        view.setPlanQty(workOrder.getPlanQty());
+	        if (workOrder.getProduct() != null) {
+	            view.setProductCode(workOrder.getProduct().getPrdId());
+	            view.setProductName(workOrder.getProduct().getPrdName());
+	        }
+	    }
+
+	    view.setDetails(detailDtos);
+
+	    return view;
 	}
 
 	// ----------------------------------------------------------
@@ -578,11 +655,6 @@ public class QcResultService {
 	        default -> "IN_PROCESS";
 	    };
 	}
-	
-	private static final String QC_PROCESS_ID = "PRC-QC"; 
-	private static final String STATUS_READY   = "READY";
-	private static final String STATUS_SKIPPED = "SKIPPED";
-
 	// QC 실패 시 QC 이후 단계(포장 등) 상태 SKIPPED 처리
 	private void skipAfterQcSteps(String orderId) {
 
@@ -648,83 +720,6 @@ public class QcResultService {
 		}
 	}
 
-
-	// ----------------------------------------------------------
-	// QC 결과 상세 조회 (결과 보기 모달용)
-	// - 헤더 + 디테일 정보를 한 번에 DTO로 반환
-	@Transactional(readOnly = true)
-	public QcResultViewDTO getQcResultView(Long qcResultId) {
-
-	    // 1) 헤더 조회
-	    QcResult header = qcResultRepository.findById(qcResultId)
-	            .orElseThrow(() -> new IllegalArgumentException(
-	                    "QC 결과가 존재하지 않습니다. ID = " + qcResultId));
-
-	    // 2) 작업지시 조회 (제품/수량용)
-	    WorkOrder workOrder = workOrderRepository.findById(header.getOrderId())
-	            .orElse(null);
-
-	    // 3) 디테일 목록 조회
-	    List<QcResultDetail> details =
-	            qcResultDetailRepository.findByQcResultId(String.valueOf(qcResultId));
-
-	    // 4) 디테일 → QcDetailRowDTO 변환
-	    List<QcDetailRowDTO> detailDtos = new ArrayList<>();
-
-	    for (QcResultDetail d : details) {
-
-	        QcItem item = qcItemRepository.findById(d.getQcItemId())
-	                .orElse(null);
-
-	        QcDetailRowDTO dto = new QcDetailRowDTO();
-	        dto.setQcResultDtlId(d.getQcResultDtlId());
-	        dto.setQcItemId(d.getQcItemId());
-
-	        if (item != null) {
-	            dto.setItemName(item.getItemName());
-	            dto.setUnit(item.getUnit());
-	            dto.setStdText(buildStdText(item));
-	        }
-
-	        dto.setMeasureValue(d.getMeasureValue());
-	        dto.setResult(d.getResult());
-	        dto.setRemark(d.getRemark());
-
-	        detailDtos.add(dto);
-	    }
-
-	    // 5) 헤더 + 디테일 합쳐서 ViewDTO 세팅
-	    QcResultViewDTO view = new QcResultViewDTO();
-	    view.setQcResultId(qcResultId);
-	    view.setOrderId(header.getOrderId());
-	    view.setLotNo(header.getLotNo());
-	    view.setInspectionDate(header.getInspectionDate());
-	    view.setOverallResult(header.getOverallResult());
-	    view.setFailReason(header.getFailReason());
-	    view.setInspectionQty(header.getInspectionQty());
-	    view.setGoodQty(header.getGoodQty());
-	    view.setDefectQty(header.getDefectQty());
-
-	    // 검사자 정보
-	    view.setInspectorId(header.getInspectorId());
-	    if (header.getInspectorId() != null) {
-	        empRepository.findById(header.getInspectorId())
-	                .ifPresent(emp -> view.setInspectorName(emp.getEmpName()));
-	    }
-
-	    // 작업지시(제품) 정보
-	    if (workOrder != null) {
-	        view.setPlanQty(workOrder.getPlanQty());
-	        if (workOrder.getProduct() != null) {
-	            view.setProductCode(workOrder.getProduct().getPrdId());
-	            view.setProductName(workOrder.getProduct().getPrdName());
-	        }
-	    }
-
-	    view.setDetails(detailDtos);
-
-	    return view;
-	}
 
 	// -----------------------------------------------------------------------------------------------
 	// QC 상세 항목별 첨부파일 저장
