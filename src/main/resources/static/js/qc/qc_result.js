@@ -78,16 +78,16 @@ document.addEventListener("DOMContentLoaded", () => {
 	const startEl  = document.getElementById("startDate");
 	const endEl    = document.getElementById("endDate");
 	const kwEl     = document.getElementById("searchKeyword");
-	const resultEl = document.getElementById("searchHStatus"); // 너 select id 이거 맞지?
+	const resultEl = document.getElementById("searchHStatus"); // select id 맞춰
+	const btnSearch = document.getElementById("btnSearch");     // 버튼 id 맞춰
+	const btnReset  = document.getElementById("btnReset");
 
-	// 1) 현재 URL 파라미터 -> 입력값에 반영 (새로고침/뒤로가기 대응)
+	// 1) URL -> 입력값 동기화 (새로고침/뒤로가기 대비)
 	syncInputsFromUrl();
 
-	// 2) 이벤트: 바뀌면 즉시 적용
+	// 2) 날짜/셀렉트는 바꾸면 바로 적용
 	startEl?.addEventListener("change", () => {
-	  // 시작일 바꾸면, 종료일의 최소값을 시작일로 제한
 	  if (endEl && startEl.value) endEl.min = startEl.value;
-	  // 종료일이 더 빠르면 자동으로 종료일을 시작일로 맞춤
 	  if (startEl.value && endEl?.value && endEl.value < startEl.value) {
 	    endEl.value = startEl.value;
 	  }
@@ -97,35 +97,35 @@ document.addEventListener("DOMContentLoaded", () => {
 	endEl?.addEventListener("change", () => {
 	  if (startEl?.value && endEl.value && endEl.value < startEl.value) {
 	    alert("종료일자는 시작일자보다 빠를 수 없습니다.");
-	    endEl.value = startEl.value; // 자동 보정
+	    endEl.value = startEl.value;
 	  }
 	  applyToUrlAndReload();
 	});
 
 	resultEl?.addEventListener("change", applyToUrlAndReload);
 
-	// 키워드는 입력 중엔 안 쏘고, Enter 또는 타이핑 멈춤(디바운스) 때만 반영
-	let kwTimer = null;
+	// 3) 키워드는 Enter/검색 버튼에서만 적용 (※ input 이벤트 없음)
 	kwEl?.addEventListener("keydown", (e) => {
 	  if (e.key === "Enter") {
 	    e.preventDefault();
 	    applyToUrlAndReload();
 	  }
 	});
-	kwEl?.addEventListener("input", () => {
-	  clearTimeout(kwTimer);
-	  kwTimer = setTimeout(applyToUrlAndReload, 300);
+
+	btnSearch?.addEventListener("click", (e) => {
+	  e.preventDefault();
+	  applyToUrlAndReload();
 	});
 
-	// 초기화 버튼 (있으면)
-	document.getElementById("btnReset")?.addEventListener("click", (e) => {
+	// 4) 초기화
+	btnReset?.addEventListener("click", (e) => {
 	  e.preventDefault();
-	  history.pushState({}, "", "/qc/result"); // 파라미터 싹 제거
+	  history.replaceState({}, "", "/qc/result");
 	  syncInputsFromUrl();
 	  loadQcResultGrid();
 	});
 
-	// 뒤로가기/앞으로가기 시에도 필터 맞추기
+	// 뒤로/앞으로가기 대응(원하면 유지)
 	window.addEventListener("popstate", () => {
 	  syncInputsFromUrl();
 	  loadQcResultGrid();
@@ -139,27 +139,25 @@ document.addEventListener("DOMContentLoaded", () => {
 	  if (kwEl)    kwEl.value    = p.get("keyword")   || "";
 	  if (resultEl) resultEl.value = p.get("result") || "ALL";
 
-	  // min 세팅
 	  if (endEl) endEl.min = startEl?.value || "";
 	}
 
 	function applyToUrlAndReload() {
-	  const p = new URLSearchParams(location.search);
+	  const p = new URLSearchParams();
 
-	  setOrDelete(p, "startDate", startEl?.value);
-	  setOrDelete(p, "endDate",   endEl?.value);
-	  setOrDelete(p, "keyword",   kwEl?.value?.trim());
-	  setOrDelete(p, "result",    resultEl?.value && resultEl.value !== "ALL" ? resultEl.value : "");
+	  if (startEl?.value) p.set("startDate", startEl.value);
+	  if (endEl?.value)   p.set("endDate", endEl.value);
+
+	  const keyword = kwEl?.value?.trim();
+	  if (keyword) p.set("keyword", keyword);
+
+	  const result = resultEl?.value;
+	  if (result && result !== "ALL") p.set("result", result);
 
 	  const qs = p.toString();
-	  history.pushState({}, "", qs ? ("/qc/result?" + qs) : "/qc/result");
+	  history.replaceState({}, "", qs ? ("/qc/result?" + qs) : "/qc/result");
 
 	  loadQcResultGrid();
-	}
-
-	function setOrDelete(params, key, value) {
-	  if (value == null || value === "") params.delete(key);
-	  else params.set(key, value);
 	}
 		
 	loadQcResultGrid();

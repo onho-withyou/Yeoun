@@ -10,21 +10,18 @@
       <div class="row g-2 align-items-center">
 
         <form id="qcResultSearchForm" method="get" action="/qc/result">
-		  <div class="row gx-3 gy-2 align-items-center">
+		  <div class="row gx-3 gy-2 align-items-end">
 		
-		    <!-- 검사일자 -->
-		    <div class="col-md-2">
-		      <label class="form-label" for="startDate">검사일자</label>
-		      <input type="date" class="form-control"
-		             id="startDate" name="startDate"
-		             th:value="${param.startDate}">
-		    </div>
-		
-		    <div class="col-md-2">
-		      <label class="form-label" for="endDate">검사일자 (종료)</label>
-		      <input type="date" class="form-control"
-		             id="endDate" name="endDate"
-		             th:value="${param.endDate}">
+		    <!-- 검사일자(기간) -->
+		    <div class="col-md-4">
+		      <label class="form-label">검사일자</label>
+		      <div class="d-flex align-items-center gap-2">
+		        <input type="date" class="form-control" id="startDate" name="startDate"
+		               th:value="${param.startDate}">
+		        <span class="text-muted fw-semibold">~</span>
+		        <input type="date" class="form-control" id="endDate" name="endDate"
+		               th:value="${param.endDate}">
+		      </div>
 		    </div>
 		
 		    <!-- 검색어 -->
@@ -46,16 +43,14 @@
 		      </select>
 		    </div>
 		
-			<div class="col-md-1">
-			  <label class="form-label d-block">&nbsp;</label>
-			  <a href="/qc/result" class="btn btn-outline-secondary w-100">
-			    초기화
-			  </a>
-			</div>
+		    <!-- 버튼 -->
+		    <div class="col-md-3 d-flex gap-2">
+		      <button type="submit" class="btn btn-outline-primary flex-fill">검색</button>
+		      <a href="/qc/result" class="btn btn-outline-secondary flex-fill">초기화</a>
+		    </div>
 		
 		  </div>
 		</form>
-
       </div>
 
       <br>
