@@ -861,6 +861,7 @@ deleteProductRowBtn.addEventListener('click', async function() {
 	}).filter(Boolean);
 
 		// 구분: 빈 행(또는 prdId가 없는 행)은 화면에서만 삭제하고, prdId가 있는 행만 서버에 삭제 요청
+		let serverPrdIds = [];
 		try {
 			const getAllData = () => (typeof grid1.getData === 'function' ? grid1.getData() : (grid1.data || []));
 			const data = getAllData();
@@ -868,7 +869,6 @@ deleteProductRowBtn.addEventListener('click', async function() {
 			const modified = (typeof grid1.getModifiedRows === 'function') ? (grid1.getModifiedRows() || {}) : {};
 			const createdRows = Array.isArray(modified.createdRows) ? modified.createdRows : [];
 			const uiOnlyKeys = []; // 화면에서만 제거할 rowKey
-			const serverPrdIds = []; // 서버에 삭제 요청할 prdId 목록
 			for (const key of rowKeysToDelete) {
 				// 우선 해당 키가 생성된(신규) 행인지 확인
 				const isCreated = createdRows.some(r => r && (String(r.rowKey) === String(key) || String(r.prdId) === String(key)));
@@ -963,7 +963,7 @@ deleteMaterialRowBtn.addEventListener('click', async function() {
 			rowKeysToDelete = grid2.getCheckedRowKeys() || [];
 		} else if (typeof grid2.getCheckedRows === 'function') {
 			const checkedRows = grid2.getCheckedRows() || [];
-			rowKeysToDelete = checkedRows.map(r => r && (r.rowKey || r.prdId)).filter(Boolean);
+			rowKeysToDelete = checkedRows.map(r => r && (r.rowKey || r.matId)).filter(Boolean);
 		}else  {
 			// 그리드 빈행 제거
 			console.log('체크된 행 키:', rowKeysToDelete);
@@ -983,20 +983,20 @@ deleteMaterialRowBtn.addEventListener('click', async function() {
 		return;
 	}
 
-	// 간결한 방식으로 각 rowKey로부터 prdId(또는 식별 가능한 ID)를 수집
+	// 간결한 방식으로 각 rowKey로부터 matId(또는 식별 가능한 ID)를 수집
 	const getAllData = () => (typeof grid2.getData === 'function' ? grid2.getData() : (grid2.data || []));
-	const prdIds = rowKeysToDelete.map(key => {
+	const matIds = rowKeysToDelete.map(key => {
 		try {
 			const row = (typeof grid2.getRow === 'function' && grid2.getRow(key)) ||
-				getAllData().find(d => d && (String(d.rowKey) === String(key) || String(d.prdId) === String(key)));
-			return row && row.prdId ? String(row.prdId) : String(key);
+				getAllData().find(d => d && (String(d.rowKey) === String(key) || String(d.matId) === String(key)));
+			return row && row.matId ? String(row.matId) : String(key);
 		} catch (e) {
 			console.warn('삭제 ID 수집 중 오류', e);
 			return String(key);
 		}
 	}).filter(Boolean);
 
-		// 구분: 빈 행(또는 prdId가 없는 행)은 화면에서만 삭제하고, prdId가 있는 행만 서버에 삭제 요청
+		// 구분: 빈 행(또는 matId가 없는 행)은 화면에서만 삭제하고, matId가 있는 행만 서버에 삭제 요청
 		try {
 			const getAllData = () => (typeof grid2.getData === 'function' ? grid2.getData() : (grid2.data || []));
 			const data = getAllData();
@@ -1004,24 +1004,24 @@ deleteMaterialRowBtn.addEventListener('click', async function() {
 			const modified = (typeof grid2.getModifiedRows === 'function') ? (grid2.getModifiedRows() || {}) : {};
 			const createdRows = Array.isArray(modified.createdRows) ? modified.createdRows : [];
 			const uiOnlyKeys = []; // 화면에서만 제거할 rowKey
-			const serverPrdIds = []; // 서버에 삭제 요청할 prdId 목록
+			const serverMatIds = []; // 서버에 삭제 요청할 matId 목록
 			for (const key of rowKeysToDelete) {
 				// 우선 해당 키가 생성된(신규) 행인지 확인
-				const isCreated = createdRows.some(r => r && (String(r.rowKey) === String(key) || String(r.prdId) === String(key)));
+				const isCreated = createdRows.some(r => r && (String(r.rowKey) === String(key) || String(r.matId) === String(key)));
 				if (isCreated) {
 					uiOnlyKeys.push(key);
 					continue;
 				}
 				let row = null;
 				if (typeof grid2.getRow === 'function') row = grid2.getRow(key);
-				if (!row) row = data.find(d => d && (String(d.rowKey) === String(key) || String(d.prdId) === String(key)));
-				// 빈 행 판단: 모든 필드가 비어있거나 prdId가 없으면 UI에서만 삭제
+				if (!row) row = data.find(d => d && (String(d.rowKey) === String(key) || String(d.matId) === String(key)));
+				// 빈 행 판단: 모든 필드가 비어있거나 matId가 없으면 UI에서만 삭제
 				const vals = row ? Object.values(row) : [];
 				const allEmpty = !row || vals.length === 0 || vals.every(v => v === null || v === undefined || (typeof v === 'string' && v.trim() === ''));
-				if (allEmpty || !row || !row.prdId) {
+				if (allEmpty || !row || !row.matId) {
 					uiOnlyKeys.push(key);
 				} else {
-					serverPrdIds.push(String(row.prdId));
+					serverMatIds.push(String(row.matId));
 				}
 			}
 
@@ -1032,15 +1032,15 @@ deleteMaterialRowBtn.addEventListener('click', async function() {
 					try {
 						if (typeof grid2.removeRow === 'function') { grid2.removeRow(k); removedUi++; continue; }
 						if (typeof grid2.deleteRow === 'function') { grid2.deleteRow(k); removedUi++; continue; }
-						const newData = data.filter(r => !(r && (String(r.rowKey) === String(k) || String(r.prdId) === String(k))));
+						const newData = data.filter(r => !(r && (String(r.rowKey) === String(k) || String(r.matId) === String(k))));
 						grid2.resetData(newData);
 						removedUi++;
 					} catch (e) { console.warn('UI 전용 행 삭제 실패', k, e); }
 				}
 			}
 
-			// 서버에 삭제 요청 보낼 prdId가 있으면 기존 로직 수행
-			if (serverPrdIds.length > 0) {
+			// 서버에 삭제 요청 보낼 matId가 있으면 기존 로직 수행
+			if (serverMatIds.length > 0) {
 				// if (!confirm('선택한 항목을 삭제하시겠습니까?')) return;
 				// fetch('/material/delete', {
 				// 	method: 'POST',
