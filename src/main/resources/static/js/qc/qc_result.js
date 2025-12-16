@@ -1,8 +1,14 @@
 // qc_result.js
 
 let qcResultGrid = null;
+let qcViewModal = null;
 
 document.addEventListener("DOMContentLoaded", () => {
+	
+	// 모달 초기화
+	const modalEl = document.getElementById("qcViewModal");
+	qcViewModal = modalEl ? new bootstrap.Modal(modalEl) : null;
+
 	
 	// 그리드 초기화
 	const gridEl = document.getElementById("qcResultGrid");
@@ -21,16 +27,13 @@ document.addEventListener("DOMContentLoaded", () => {
 		},
 		columns: [
 			{
-				header: 'QC 결과ID',
-				name: 'qcResultId'
+			  header: 'QC결과ID',
+			  name: 'qcResultId',
+			  hidden: true
 			},
 			{
 				header: '작업지시번호',
 				name: 'orderId'
-			},
-			{
-				header: '제품코드',
-				name: 'prdId'
 			},
 			{
 				header: '제품명',
@@ -41,22 +44,24 @@ document.addEventListener("DOMContentLoaded", () => {
 				name: 'inspectionDate'
 			},
 			{
+			  	header: '검사자',
+			  	name: 'inspectorId',
+				width: '100'
+			},
+			{
 				header: '상태',
 				name: 'overallResult',
+				width: '100',
 				formatter: ({ value }) => {
-				    switch (value) {
-				      case "PASS":
-				        return "합격";
-				      case "FAIL":
-				        return "불합격";
-				      default:
-				        return value || "-";
-				    }
-			    }
+		          if (value === "PASS") return "<span class='badge bg-success'>합격</span>";
+		          if (value === "FAIL") return "<span class='badge bg-danger'>불합격</span>";
+		          return "<span class='badge bg-secondary'>-</span>";
+		        }
 			},
 			{
 				header: '불합격사유',
-				name: 'failReason'
+				name: 'failReason',
+				width: '380'
 			},
 			{
 			  	header: " ",
@@ -64,10 +69,97 @@ document.addEventListener("DOMContentLoaded", () => {
 			 	width: 90,
 			  	align: "center",
 			  	formatter: () =>
-			    	"<button type='button' class='btn btn-info btn-sm'>상세</button>"
+			    	"<button type='button' class='btn btn-outline-info btn-sm'>상세</button>"
 			}
 		]
 	});
+
+	// --- [자동 검색] 필터 변경 즉시 반영 + 날짜 유효성 ---
+	const startEl  = document.getElementById("startDate");
+	const endEl    = document.getElementById("endDate");
+	const kwEl     = document.getElementById("searchKeyword");
+	const resultEl = document.getElementById("searchHStatus"); // select id 맞춰
+	const btnSearch = document.getElementById("btnSearch");     // 버튼 id 맞춰
+	const btnReset  = document.getElementById("btnReset");
+
+	// 1) URL -> 입력값 동기화 (새로고침/뒤로가기 대비)
+	syncInputsFromUrl();
+
+	// 2) 날짜/셀렉트는 바꾸면 바로 적용
+	startEl?.addEventListener("change", () => {
+	  if (endEl && startEl.value) endEl.min = startEl.value;
+	  if (startEl.value && endEl?.value && endEl.value < startEl.value) {
+	    endEl.value = startEl.value;
+	  }
+	  applyToUrlAndReload();
+	});
+
+	endEl?.addEventListener("change", () => {
+	  if (startEl?.value && endEl.value && endEl.value < startEl.value) {
+	    alert("종료일자는 시작일자보다 빠를 수 없습니다.");
+	    endEl.value = startEl.value;
+	  }
+	  applyToUrlAndReload();
+	});
+
+	resultEl?.addEventListener("change", applyToUrlAndReload);
+
+	// 3) 키워드는 Enter/검색 버튼에서만 적용 (※ input 이벤트 없음)
+	kwEl?.addEventListener("keydown", (e) => {
+	  if (e.key === "Enter") {
+	    e.preventDefault();
+	    applyToUrlAndReload();
+	  }
+	});
+
+	btnSearch?.addEventListener("click", (e) => {
+	  e.preventDefault();
+	  applyToUrlAndReload();
+	});
+
+	// 4) 초기화
+	btnReset?.addEventListener("click", (e) => {
+	  e.preventDefault();
+	  history.replaceState({}, "", "/qc/result");
+	  syncInputsFromUrl();
+	  loadQcResultGrid();
+	});
+
+	// 뒤로/앞으로가기 대응(원하면 유지)
+	window.addEventListener("popstate", () => {
+	  syncInputsFromUrl();
+	  loadQcResultGrid();
+	});
+
+	function syncInputsFromUrl() {
+	  const p = new URLSearchParams(location.search);
+
+	  if (startEl) startEl.value = p.get("startDate") || "";
+	  if (endEl)   endEl.value   = p.get("endDate")   || "";
+	  if (kwEl)    kwEl.value    = p.get("keyword")   || "";
+	  if (resultEl) resultEl.value = p.get("result") || "ALL";
+
+	  if (endEl) endEl.min = startEl?.value || "";
+	}
+
+	function applyToUrlAndReload() {
+	  const p = new URLSearchParams();
+
+	  if (startEl?.value) p.set("startDate", startEl.value);
+	  if (endEl?.value)   p.set("endDate", endEl.value);
+
+	  const keyword = kwEl?.value?.trim();
+	  if (keyword) p.set("keyword", keyword);
+
+	  const result = resultEl?.value;
+	  if (result && result !== "ALL") p.set("result", result);
+
+	  const qs = p.toString();
+	  history.replaceState({}, "", qs ? ("/qc/result?" + qs) : "/qc/result");
+
+	  loadQcResultGrid();
+	}
+		
 	loadQcResultGrid();
 	
 	qcResultGrid.on('click', (ev) => {
@@ -82,11 +174,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // 목록 조회
 function loadQcResultGrid() {
-    fetch("/qc/result/data")
-        .then(res => res.json())
-        .then(data => {
-            qcResultGrid.resetData(data);
-        });
+	const params = new URLSearchParams(location.search);
+	fetch("/qc/result/data?" + params.toString())
+	    .then(res => res.json())
+	    .then(data => qcResultGrid.resetData(data));
 }
 
 // 모달을 열면서 데이터 넣는 함수

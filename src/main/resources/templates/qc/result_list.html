@@ -9,42 +9,48 @@
 
       <div class="row g-2 align-items-center">
 
-        <form id="qcResultSearchForm">
-          <div class="row gx-3 gy-2 align-items-center">
-
-            <!-- 검사일자 -->
-            <div class="col-md-2">
-              <label class="form-label" for="startDate">검사일자 (시작)</label>
-              <input type="date" class="form-control" id="startDate">
-            </div>
-
-            <div class="col-md-2">
-              <label class="form-label" for="endDate">검사일자 (종료)</label>
-              <input type="date" class="form-control" id="endDate">
-            </div>
-
-            <!-- 검색어 -->
-            <div class="col-md-3">
-              <label class="form-label" for="searchKeyword">검색어 (작업지시번호)</label>
-              <input type="text" class="form-control" id="searchKeyword" placeholder="검색어 입력">
-            </div>
-
-            <!-- 합격 여부 -->
-            <div class="col-md-2">
-              <label class="form-label" for="searchHStatus">합격 여부</label>
-              <select class="form-select" id="searchHStatus">
-                <option value="">전체</option>
-              </select>
-            </div>
-
-            <div class="col-md-2">
-              <label class="form-label d-block">&nbsp;</label>
-              <button type="button" class="btn btn-outline-primary w-100" id="btnSearchProcess">검색</button>
-            </div>
-
-          </div>
-        </form>
-
+        <form id="qcResultSearchForm" method="get" action="/qc/result">
+		  <div class="row gx-3 gy-2 align-items-end">
+		
+		    <!-- 검사일자(기간) -->
+		    <div class="col-md-4">
+		      <label class="form-label">검사일자</label>
+		      <div class="d-flex align-items-center gap-2">
+		        <input type="date" class="form-control" id="startDate" name="startDate"
+		               th:value="${param.startDate}">
+		        <span class="text-muted fw-semibold">~</span>
+		        <input type="date" class="form-control" id="endDate" name="endDate"
+		               th:value="${param.endDate}">
+		      </div>
+		    </div>
+		
+		    <!-- 검색어 -->
+		    <div class="col-md-3">
+		      <label class="form-label" for="searchKeyword">검색어</label>
+		      <input type="text" class="form-control"
+		             id="searchKeyword" name="keyword"
+		             th:value="${param.keyword}"
+		             placeholder="작업지시번호 / 제품명">
+		    </div>
+		
+		    <!-- 합격 여부 -->
+		    <div class="col-md-2">
+		      <label class="form-label" for="searchHStatus">합격 여부</label>
+		      <select class="form-select" id="searchHStatus" name="result">
+		        <option value="ALL"  th:selected="${param.result == null || param.result[0] == 'ALL'}">전체</option>
+		        <option value="PASS" th:selected="${param.result != null && param.result[0] == 'PASS'}">합격</option>
+		        <option value="FAIL" th:selected="${param.result != null && param.result[0] == 'FAIL'}">불합격</option>
+		      </select>
+		    </div>
+		
+		    <!-- 버튼 -->
+		    <div class="col-md-3 d-flex gap-2">
+		      <button type="submit" class="btn btn-outline-primary flex-fill">검색</button>
+		      <a href="/qc/result" class="btn btn-outline-secondary flex-fill">초기화</a>
+		    </div>
+		
+		  </div>
+		</form>
       </div>
 
       <br>
@@ -57,7 +63,6 @@
 
     </div>
 
-	<script src="/js/qc/qc_view_modal.js"></script>
     <script src="/js/qc/qc_result.js"></script>
 
   </th:block>

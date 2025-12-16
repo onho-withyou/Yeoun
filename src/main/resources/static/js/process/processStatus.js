@@ -116,13 +116,40 @@ document.addEventListener("DOMContentLoaded", () => {
     ]
   });
 
-  // 2) 검색 버튼 클릭 시 조회
+  // 2) 검색/초기화 이벤트 바인딩
   const btnSearch = document.getElementById("btnSearchProcess");
-  if (btnSearch) {
-    btnSearch.addEventListener("click", () => {
+  const btnReset  = document.getElementById("btnResetProcess");
+
+  btnSearch?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.currentTarget.blur();
+    loadProcessGrid();
+  });
+  
+  // 검색어 엔터로 검색
+  document.getElementById("searchKeyword")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
       loadProcessGrid();
-    });
-  }
+    }
+  });
+
+  btnReset?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.currentTarget.blur();
+
+    const workDate      = document.getElementById("workDate");
+    const searchProcess = document.getElementById("searchProcess");
+    const searchHStatus = document.getElementById("searchHStatus");
+    const searchKeyword = document.getElementById("searchKeyword");
+
+    if (workDate) workDate.value = "";
+    if (searchProcess) searchProcess.value = "";
+    if (searchHStatus) searchHStatus.value = "";
+    if (searchKeyword) searchKeyword.value = "";
+
+    loadProcessGrid();
+  });
 
   // 3) 페이지 처음 들어올 때 전체 목록 조회
   loadProcessGrid();
@@ -363,20 +390,23 @@ function openDetailModal(orderId) {
 // -------------------------------
 // 시작/종료/QC등록 버튼 공통 이벤트 (이벤트 위임)
 document.addEventListener("click", (e) => {
-  if (e.target.classList.contains("btn-step-start")) {
-    const btn     = e.target;
-    const orderId = btn.dataset.orderId;
-    const stepSeq = btn.dataset.stepSeq;
 
+  const startBtn  = e.target.closest(".btn-step-start");
+  const finishBtn = e.target.closest(".btn-step-finish");
+  const qcBtn     = e.target.closest(".btn-qc-regist");
+
+  if (startBtn) {
+    const orderId = startBtn.dataset.orderId;
+    const stepSeq = startBtn.dataset.stepSeq;
     handleStartStep(orderId, stepSeq);
+    return;
   }
 
-  if (e.target.classList.contains("btn-step-finish")) {
-    const btn      = e.target;
-    const orderId  = btn.dataset.orderId;
-    const stepSeq  = btn.dataset.stepSeq;
-    const planQty  = btn.dataset.planQty || "";
-    const standard = btn.dataset.standardQty || "";
+  if (finishBtn) {
+    const orderId  = finishBtn.dataset.orderId;
+    const stepSeq  = finishBtn.dataset.stepSeq;
+    const planQty  = finishBtn.dataset.planQty || "";
+    const standard = finishBtn.dataset.standardQty || "";
 
     // hidden input 세팅
     document.getElementById("finish-orderId").value  = orderId;
@@ -384,53 +414,34 @@ document.addEventListener("click", (e) => {
     document.getElementById("finish-goodQty").value  = "";
     document.getElementById("finish-defectQty").value = "";
 
-    // 계획 수량 표시 (있으면)
+    // 계획 수량 표시
     const planInput = document.getElementById("finish-planQty");
-    if (planInput) {
-      planInput.value = planQty ? planQty + " EA" : "-";
-    }
+    if (planInput) planInput.value = planQty ? planQty + " EA" : "-";
 
     // 기준값 라벨/도움말/값 세팅
-    const labelEl = document.getElementById("finish-standardLabel");
-    const helpEl  = document.getElementById("finish-standardHelp");
+    const labelEl  = document.getElementById("finish-standardLabel");
+    const helpEl   = document.getElementById("finish-standardHelp");
     const stdInput = document.getElementById("finish-standardQty");
 
     const stepNum = parseInt(stepSeq, 10);
 
     if (!isNaN(stepNum) && stepNum <= 2) {
-      // 1~2단계: 기준 배합량 
       if (labelEl) labelEl.textContent = "기준 배합량 (표준)";
       if (helpEl)  helpEl.textContent  = "BOM과 계획수량을 기준으로 계산된 이론 배합량입니다.";
-
-      if (standard) {
-        stdInput.value = standard + " ml";   
-      } else {
-        stdInput.value = "-";
-      }
-
+      stdInput.value = standard ? standard + " ml" : "-";
     } else {
-      // 3단계 이후: 기준 완제품 수량 (이론)
       if (labelEl) labelEl.textContent = "기준 완제품 수량 (이론)";
       if (helpEl)  helpEl.textContent  = "현재 배합량으로 이론상 생산 가능한 완제품 개수입니다.";
-
-      if (standard) {
-        stdInput.value = standard + " EA";
-      } else {
-        stdInput.value = "-";
-      }
+      stdInput.value = standard ? standard + " EA" : "-";
     }
 
     // 모달 오픈
     const modal = new bootstrap.Modal(document.getElementById("finishModal"));
     modal.show();
+    return;
   }
 
-  // QC 등록 버튼
-  if (e.target.classList.contains("btn-qc-regist")) {
-    const btn     = e.target;
-    const orderId = btn.dataset.orderId; // 지금은 안 쓰지만, 나중에 파라미터로 넘길 수 있음
-
-    // 그냥 QC 등록 목록으로 이동
+  if (qcBtn) {
     window.location.href = "/qc/regist";
   }
 });
@@ -489,21 +500,23 @@ function handleStartStep(orderId, stepSeq) {
 // -------------------------------
 // 공정 종료
 // -------------------------------
-document.getElementById("btnFinishSubmit").addEventListener("click", () => {
+const btnFinishSubmit = document.getElementById("btnFinishSubmit");
+if (btnFinishSubmit) {
+	btnFinishSubmit.addEventListener("click", () => {
 
-    const orderId  = document.getElementById("finish-orderId").value;
-    const stepSeq  = document.getElementById("finish-stepSeq").value;
-    const goodQty  = document.getElementById("finish-goodQty").value;
-    const defectQty = document.getElementById("finish-defectQty").value;
+	    const orderId  = document.getElementById("finish-orderId").value;
+	    const stepSeq  = document.getElementById("finish-stepSeq").value;
+	    const goodQty  = document.getElementById("finish-goodQty").value;
+	    const defectQty = document.getElementById("finish-defectQty").value;
 
-    if (goodQty === "" || defectQty === "") {
-        alert("양품/불량 수량을 모두 입력해주세요.");
-        return;
-    }
-
-    // API 호출
-    finishStepWithQty(orderId, stepSeq, goodQty, defectQty);
-});
+	    if (goodQty === "" || defectQty === "") {
+	        alert("양품/불량 수량을 모두 입력해주세요.");
+	        return;
+	    }
+    	// API 호출
+    	finishStepWithQty(orderId, stepSeq, goodQty, defectQty);
+	});
+}
 
 function finishStepWithQty(orderId, stepSeq, goodQty, defectQty) {
   
@@ -698,6 +711,69 @@ function updateStepRowInModal(updatedStep) {
     <td>${memoInputHtml}</td>
   `;
 }
+
+
+// ===============================================================================
+// 모달 닫힘 버그
+// ESC 우선순위: finishModal이 떠있으면 finish부터 닫고, detail로 안 넘어가게 막기
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+
+  const finishEl = document.getElementById("finishModal");
+  if (!finishEl) return;
+
+  // finish 모달이 실제로 열려있는지 체크
+  if (finishEl.classList.contains("show")) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const inst = bootstrap.Modal.getInstance(finishEl)
+      || bootstrap.Modal.getOrCreateInstance(finishEl);
+
+    inst.hide();
+  }
+}, true); 
+
+const detailEl = document.getElementById("detailModal");
+const finishEl = document.getElementById("finishModal");
+
+// finish 닫힌 뒤 detail 상태 복구
+if (finishEl && detailEl) {
+  finishEl.addEventListener("hidden.bs.modal", () => {
+    const detailShown = detailEl.classList.contains("show");
+
+    // 1) detail이 열려있는데 body modal-open이 풀려버린 경우 복구
+    if (detailShown) {
+      document.body.classList.add("modal-open");
+
+      // 2) backdrop 정리: detail이 열려있으면 backdrop은 "1개"만 남겨야 함
+      const backs = Array.from(document.querySelectorAll(".modal-backdrop"));
+      if (backs.length > 1) {
+        // 마지막(가장 위) 하나만 남기고 제거
+        backs.slice(0, backs.length - 1).forEach(b => b.remove());
+      }
+
+      // 3) 포커스 detail로 복구 (ESC/키보드 이벤트 정상화)
+      detailEl.focus();
+    } else {
+      // 4) 혹시 둘 다 닫혔는데 backdrop만 남으면 전체 리셋(화면 멈춤 방지)
+      normalizeModalState();
+    }
+  });
+
+  // 어떤 모달이든 닫힌 후 "남은 backdrop / modal-open" 정리
+  function normalizeModalState() {
+    const anyModalShown = document.querySelector(".modal.show");
+    if (!anyModalShown) {
+      document.querySelectorAll(".modal-backdrop").forEach(b => b.remove());
+      document.body.classList.remove("modal-open");
+      document.body.style.removeProperty("padding-right");
+    }
+  }
+  document.addEventListener("hidden.bs.modal", normalizeModalState);
+}
+// ===============================================================================
+
 
 // -------------------------------
 // 날짜 포맷

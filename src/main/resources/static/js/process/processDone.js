@@ -14,12 +14,31 @@ document.addEventListener("DOMContentLoaded", () => {
     columnOptions: { resizable: true },
     pageOptions: { useClient: true, perPage: 10 },
     columns: [
-      { header: "작업지시번호", name: "orderId", width: 150 },
-      { header: "라인", name: "lineName" },
-      { header: "제품명", name: "prdName" },
-      { header: "계획수량", name: "planQty" },
-      { header: "양품", name: "goodQty" },
-      { header: "불량", name: "defectQty" },
+      { 
+		header: "작업지시번호", 
+		name: "orderId", 
+		width: 150 
+	  },
+      { 
+		header: "라인", 
+		name: "lineName" 
+	  },
+      { 
+		header: "제품명", 
+		name: "prdName" 
+	  },
+      { 
+		header: "계획수량", 
+		name: "planQty" 
+	  },
+      { 
+		header: "양품", 
+		name: "goodQty" 
+	  },
+      { 
+		header: "불량", 
+		name: "defectQty" 
+	  },
       {
         header: "처리결과",
         name: "status",
@@ -30,11 +49,17 @@ document.addEventListener("DOMContentLoaded", () => {
           return value || "-";
         }
       },
-	  { header: "완료일시", name: "doneTime", width: 160,
+	  { 
+		header: "완료일시", 
+		name: "doneTime", 
+		width: 160,
 		formatter: ({ value }) =>
 		    value ? value.replace("T", " ").substring(0, 16) : "-"
 	  },
-      { header: "경과시간", name: "elapsedTime" },
+      { 
+		header: "경과시간", 
+		name: "elapsedTime" 
+	  },
       {
         header: " ",
         name: "btn",
@@ -44,8 +69,40 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     ]
   });
+  
+  // 엔터 submit 방지 + 엔터 검색
+  document.getElementById("doneSearchForm")
+    ?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      loadDoneGrid();
+    });
+  
+  // 검색 버튼
+  document.getElementById("btnSearchDone")?.addEventListener("click", (e) => {
+    e.currentTarget.blur();       // 버튼 눌림색 제거
+    loadDoneGrid();
+  });
+  
+  // 처리결과 select 바뀌면 바로 검색
+  document.getElementById("doneStatus")?.addEventListener("change", () => {
+    loadDoneGrid();
+  });
 
-  document.getElementById("btnSearchDone")?.addEventListener("click", loadDoneGrid);
+  // 초기화 버튼
+  document.getElementById("btnResetDone")?.addEventListener("click", (e) => {
+	e.currentTarget.blur(); 
+	
+    const dateEl = document.getElementById("doneDate");
+    const kwEl   = document.getElementById("doneKeyword");
+    const stEl   = document.getElementById("doneStatus");
+
+    if (dateEl) dateEl.value = "";
+    if (kwEl)   kwEl.value = "";
+    if (stEl)   stEl.value = "";
+	
+    loadDoneGrid(); // 초기화 후 재조회
+  });
+  
   loadDoneGrid();
 
   doneGrid.on("click", (ev) => {
@@ -79,6 +136,3 @@ function loadDoneGrid() {
       alert("완료 데이터를 불러오는 중 오류가 발생했습니다.");
     });
 }
-
-document.getElementById("btnSearchDone")?.addEventListener("click", loadDoneGrid);
-document.getElementById("doneStatus")?.addEventListener("change", loadDoneGrid);
