@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
-import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.masterData.service.MaterialMstService;
 import com.yeoun.masterData.service.BomMstService;
 import com.yeoun.masterData.service.ProductMstService;
@@ -40,7 +39,32 @@ public class ProductMstController {
 		model.addAttribute("mstMstList", materialMstService.findAll());
 		return "masterData/product";
  	}
-  	
+	//완제품 품목명(향수타입) 드롭다운
+	@ResponseBody
+	@GetMapping("/product/prdItemNameList")
+	public List<Map<String, Object>> prdItemNameList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+		return productMstService.findByPrdItemNameList();
+	}
+	//완제품 제품유형 드롭다운
+	@ResponseBody
+	@GetMapping("/product/prdItemTypeList")
+	public List<Map<String, Object>> prdTypeList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+		return productMstService.findByPrdTypeList();
+	}
+	//완제품 단위 드롭다운
+	@ResponseBody
+	@GetMapping("/product/prdUnitList")
+	public List<Map<String, Object>> prdUnitList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+		return productMstService.findByPrdUnitList();
+	}
+	//완제품 제품상태 드롭다운
+	@ResponseBody
+	@GetMapping("/product/prdStatusList")
+	public List<Map<String, Object>> prdStatusList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+		return productMstService.findByPrdStatusList();
+	}
+
+	// 완제품 그리드 조회
 	@ResponseBody
 	@GetMapping("/product/list")
 	public List<Map<String, Object>> productList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,

@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 
 import com.yeoun.masterData.entity.BomMst;
 import com.yeoun.masterData.entity.BomMstId;
+import com.yeoun.masterData.entity.MaterialMst;
+import com.yeoun.masterData.entity.ProductMst;
 
 @Repository
 public interface BomMstRepository extends JpaRepository<BomMst, BomMstId>{
@@ -20,6 +22,38 @@ public interface BomMstRepository extends JpaRepository<BomMst, BomMstId>{
 
 	// prdId + matId 쌍으로 bom 찾기
 	Optional<BomMst> findByPrdIdAndMatId(String prdId, String matId);
+	
+	// bom 완제품id 조회
+	@Query(value = """
+			SELECT PRD_ID AS value
+					,PRD_NAME AS text
+			FROM PRODUCT_MST
+			WHERE USE_YN='Y'
+				""", nativeQuery = true)
+	List<Map<String, Object>> findBomPrdList();
+	
+	// bom 원재료id 조회
+	@Query(value="""
+			SELECT *
+			FROM material_mst
+			WHERE USE_YN = 'Y'
+			""",nativeQuery= true)
+	List<MaterialMst> findBomMatList();
+	
+	// bom 단위 드롭다운 조회
+	@Query(value = """
+		SELECT
+			CODE_ID AS value,       -- DB에 저장할 실제 코드 값 ('g', 'ml', 'EA', 'UNIT_BOX')
+			CODE_NAME AS text       -- 사용자에게 보여줄 이름 ('g', 'ml', 'EA', '박스')
+		FROM
+			COMMON_CODE
+		WHERE
+			PARENT_CODE_ID = 'UNIT_TYPE'  -- '단위 구분' 그룹에 속한 하위 코드만 선택
+			AND USE_YN = 'Y'              -- 사용 여부가 'Y'인 활성 코드만 선택
+		ORDER BY
+			CODE_SEQ
+			""", nativeQuery = true)
+	List<Map<String, Object>> findByBomUnitList();
 
 	// BOM 그리드 조회
 	@Query(value="""

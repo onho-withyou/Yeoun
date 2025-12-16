@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yeoun.masterData.entity.BomMst;
+import com.yeoun.masterData.entity.MaterialMst;
 import com.yeoun.masterData.mapper.BomMstMapper;
 import com.yeoun.masterData.repository.BomMstRepository;
 import com.yeoun.outbound.dto.OutboundOrderItemDTO;
@@ -24,6 +25,24 @@ import lombok.extern.log4j.Log4j2;
 public class BomMstService {
 	private final BomMstRepository bomMstRepository;
 	private final BomMstMapper bomMstMapper;
+	
+	
+	//BOM 완제품 드롭다운 조회 findPrdList
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> findBomPrdList() {
+		return bomMstRepository.findBomPrdList();
+	}
+	
+	//BOM 원재료 드롭다운 조회 findMatList
+	@Transactional(readOnly = true)
+	public List<MaterialMst> findBomMatList() {
+		return bomMstRepository.findBomMatList();
+	}
+	//BOM 단위 드롭다운조회
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> findBomUnitList() {
+		return bomMstRepository.findByBomUnitList();
+	}
 	
 	//1. BOM 그리드 조회
 	@Transactional(readOnly = true)

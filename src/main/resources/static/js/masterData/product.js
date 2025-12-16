@@ -2,6 +2,13 @@
 window.onload = function () {	
 	productGridAllSearch();//완제품 그리드 조회
 	materialGridAllSearch();//원재료 그리드 조회
+	prdItemNameList();//완제품 품목명(향수타입) 드롭다운
+	prdItemTypeList();//완제품 제품유형 드롭다운
+	prdUnitList();//완제품 단위 드롭다운
+	prdStatusList();//완제품 제품상태 드롭다운
+	matTypeList();//원재료 원재료유형 드롭다운
+	matUnitList();//원재료 단위 드롭다운
+	
 
 }
 
@@ -19,6 +26,14 @@ document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
     });
 });
 
+
+let perfumeListItems = [];
+let itemTypeListItems = [];
+let unitListItems = [];
+let statusListItems = [];
+
+let matTypeListItems = [];
+let matUnitListItems = [];
 
 const Grid = tui.Grid;
 
@@ -42,11 +57,7 @@ const grid1 = new Grid({
 			,editor: {
 				type: 'select', // 드롭다운 사용
 				options: {
-					// value는 실제 데이터 값, text는 사용자에게 보이는 값
-					listItems: [
-						{ text: '고체향수', value: 'LIQUID' },
-						{ text: '액체향수', value: 'SOLID' }
-					]
+					listItems: perfumeListItems
 				}
 			}
 		}
@@ -62,11 +73,7 @@ const grid1 = new Grid({
 			,editor: {
 				type: 'select', // 드롭다운 사용
 				options: {
-					// value는 실제 데이터 값, text는 사용자에게 보이는 값
-					listItems: [
-						{ text: '완제품', value: 'FINISHED_GOODS' },
-						{ text: '반제품', value: 'SEMI_FINISHED_GOODS' }
-					]
+					listItems: itemTypeListItems
 				}
 			}
 		}
@@ -79,12 +86,7 @@ const grid1 = new Grid({
 			,editor: {
 				type: 'select', // 드롭다운 사용
 				options: {
-					// value는 실제 데이터 값, text는 사용자에게 보이는 값
-					listItems: [
-						{ text: 'g', value: 'g' },
-						{ text: 'ml', value: 'ml' },
-						{ text: 'EA', value: 'EA' }
-					]
+					listItems: unitListItems
 				}
 			}
 		}
@@ -101,13 +103,7 @@ const grid1 = new Grid({
 				type: 'select', // 드롭다운 사용
 				options: {
 					// value는 실제 데이터 값, text는 사용자에게 보이는 값
-					listItems: [
-						{ text: '활성', value: 'ACTIVE' },//활성
-						{ text: '비활성', value: 'INACTIVE' },//비활성
-						{ text: '단종', value: 'DISCONTINUED' },//단종
-						{ text: '시즌상품', value: 'SEASONAL' },//시즌상품
-						{ text: '재고없음', value: 'OUT_OF_STOCK' }//단종
-					]
+					listItems: statusListItems
 				}
 			}
 		}
@@ -118,12 +114,28 @@ const grid1 = new Grid({
 			,renderer:{ type: StatusModifiedRenderer}
 		}
         ,{header: '생성자ID' ,name: 'createdId' ,align: 'center',hidden:true}
-		,{header: '생성자이름' ,name: 'createdByName' ,align: 'center'}
-        ,{header: '생성일자' ,name: 'createdDate' ,align: 'center'}
+		,{header: '생성자이름' ,name: 'createdByName' ,align: 'center',hidden:true}
+        ,{header: '생성일자' ,name: 'createdDate' ,align: 'center',hidden:true}
         ,{header: '수정자ID' ,name: 'updatedId' ,align: 'center',hidden:true}
-		,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center'}
-        ,{header: '수정일자' ,name: 'updatedDate' ,align: 'center'}           
-		,{header: '사용여부' ,name: 'useYn' ,align: 'center', hidden: true}          
+		,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center',hidden:true}
+        ,{header: '수정일자' ,name: 'updatedDate' ,align: 'center',hidden:true}           
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center'
+			,renderer:{ type: StatusModifiedRenderer
+				,options: {
+					isSelect: true   // ⭐ 이걸로 구분
+				}
+			}
+			,editor: {
+				type: 'select', // 드롭다운 사용
+				options: {
+					// value는 실제 데이터 값, text는 사용자에게 보이는 값
+					listItems: [
+						{value: 'Y', text: '활성'},
+						{value: 'N', text: '비활성'}
+					]
+				}
+			}
+		}          
 
 	  ]
 	  ,data: []
@@ -161,19 +173,11 @@ const grid2 = new Grid({
 				,editor: {
 					type: 'select', // 드롭다운 사용
 					options: {
-						// value는 실제 데이터 값, text는 사용자에게 보이는 값
-						listItems: [
-							{ text: '원재료', value: 'RAW' },
-							{ text: '부자재', value: 'SUB' },
-							{ text: '포장재', value: 'PKG' },
-							{ text: '공정중', value: 'WIP' },
-							{ text: '생산품', value: 'FIN' },
-							{ text: '박스', value: 'BOX' }
-						]
+						listItems: matTypeListItems
 					}
 				}
 			}
-		    ,{header: '단위' ,name: 'matUnit' ,align: 'center',editor: 'text',filter: "select",width:60
+		    ,{header: '단위' ,name: 'matUnit' ,align: 'center',editor: 'text',filter: "select",width:70
 				,renderer:{ type: StatusModifiedRenderer
 					,options: {
 					isSelect: true 
@@ -183,28 +187,39 @@ const grid2 = new Grid({
 					type: 'select', // 드롭다운 사용
 					options: {
 						// value는 실제 데이터 값, text는 사용자에게 보이는 값
-						listItems: [
-							{ text: 'g', value: 'g' },
-							{ text: 'ml', value: 'ml' },
-							{ text: 'EA', value: 'EA' },
-							{ text: 'BOX', value:'Box'}
-						]
+						listItems: matUnitListItems
 					}
 				}
 			}
 	        ,{header: '유효일자' ,name: 'effectiveDate' ,align: 'center',editor: 'text'
 				,renderer:{ type: StatusModifiedRenderer}	
 			}
-	        ,{header: '상세설명(원재료)' ,name: 'matDesc' ,align: 'center',editor: 'text',width: 280
+	        ,{header: '상세설명(원재료)' ,name: 'matDesc' ,align: 'center',editor: 'text',width: 370
 				,renderer:{ type: StatusModifiedRenderer}	
 			}
 	        ,{header: '생성자ID' ,name: 'createdId' ,align: 'center',hidden:true}
-			,{header: '생성자이름' ,name: 'createdByName' ,align: 'center'}
-	        ,{header: '생성일자' ,name: 'createdDate' ,align: 'center'}
+			,{header: '생성자이름' ,name: 'createdByName' ,align: 'center',hidden:true}
+	        ,{header: '생성일자' ,name: 'createdDate' ,align: 'center',hidden:true}
 	        ,{header: '수정자ID' ,name: 'updatedId' ,align: 'center',hidden:true}
-			,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center'}
-	        ,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}
-			,{header: '사용여부' ,name: 'useYn' ,align: 'center',hidden: true}          
+			,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center',hidden:true}
+	        ,{header: '수정일시' ,name: 'updatedDate' ,align: 'center',hidden:true}
+			,{header: '사용여부' ,name: 'useYn' ,align: 'center',width:83
+				,renderer:{ type: StatusModifiedRenderer
+					,options: {
+						isSelect: true   // ⭐ 이걸로 구분
+					}
+				}
+				,editor: {
+					type: 'select', // 드롭다운 사용
+					options: {
+						// value는 실제 데이터 값, text는 사용자에게 보이는 값
+						listItems: [
+							{value: 'Y', text: '활성'},
+							{value: 'N', text: '비활성'}
+						]
+					}
+				}
+			}          
 	    ],
 	    data: []
 	    ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
@@ -389,6 +404,168 @@ const transformKeys = (data) => {
   // 객체나 배열이 아니면 값 그대로 반환 (문자열, 숫자, null 등)
   return data;
 };
+
+//완제품 품목명(향수타입) 드롭다운
+function prdItemNameList() {
+	fetch('/masterData/product/prdItemNameList', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		return res.json();
+	})
+	.then(data => {
+		console.log("품목명(향수타입) 드롭다운 데이터:", data);
+	
+		data.forEach(item => {
+			perfumeListItems.push({
+				value: item.VALUE, 
+				text: item.TEXT   
+			});
+		});
+		console.log("perfumeListItems:", perfumeListItems);
+		// Dropdown editor의 listItems 업데이트
+		
+	})
+	.catch(err => {
+		console.error('품목명(향수타입) 드롭다운 조회 오류', err);
+	});
+
+}
+
+//완제품 제품유형 드롭다운 조회
+function prdItemTypeList() {
+	fetch('/masterData/product/prdItemTypeList', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		return res.json();
+	})
+	.then(data => {
+		console.log("제품유형 드롭다운 데이터:", data);
+		data.forEach(item => {
+			itemTypeListItems.push({
+				value: item.VALUE,
+				text: item.TEXT
+			});
+		});
+		console.log("itemTypeListItems:", itemTypeListItems);
+		// Dropdown editor의 listItems 업데이트
+	})
+
+}
+//완제품 단위 드롭다운 조회
+function prdUnitList() {
+	fetch('/masterData/product/prdUnitList', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		return res.json();
+	})
+	.then(data => {
+		console.log("단위 드롭다운 데이터:", data);
+		data.forEach(item => {
+			unitListItems.push({
+				value: item.VALUE,
+				text: item.TEXT
+			});
+		});
+		console.log("unitListItems:", unitListItems);
+		// Dropdown editor의 listItems 업데이트
+	})
+}
+
+//완제품 제품상태 드롭다운
+function prdStatusList() {
+	fetch('/masterData/product/prdStatusList', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		return res.json();
+	})
+	.then(data => {
+		console.log("제품상태 드롭다운 데이터:", data);
+		data.forEach(item => {
+			statusListItems.push({
+				value: item.VALUE,
+				text: item.TEXT
+			});
+		});
+		console.log("statusListItems:", statusListItems);
+		// Dropdown editor의 listItems 업데이트
+	})
+}
+
+//원재료 원재료 유형 드롭다운
+function matTypeList() {
+	fetch('/material/matTypeList', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		return res.json();
+	})
+	.then(data => {
+		console.log("원재료 원재료유형 드롭다운 데이터:", data);
+		data.forEach(item => {
+			matTypeListItems.push({
+				value: item.VALUE,
+				text: item.TEXT
+			});
+		});
+		console.log("matTypeListItems:", matTypeListItems);
+		// Dropdown editor의 listItems 업데이트
+	})
+}
+
+//원재료 단위 드롭다운
+function matUnitList() {
+	fetch('/material/matUnitList', {
+		method: 'GET',
+		headers: {
+			[csrfHeader]: csrfToken,
+			'Content-Type': 'application/json'
+		},
+	})
+	.then(res => {
+		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		return res.json();
+	})
+	.then(data => {
+		console.log("원재료 원재료 단위 드롭다운 데이터:", data);
+		data.forEach(item => {
+			matUnitListItems.push({
+				value: item.VALUE,
+				text: item.TEXT
+			});
+		});
+		console.log("matUnitListItems:", matUnitListItems);
+		// Dropdown editor의 listItems 업데이트
+	})
+}
 
 //완제품 row 추가
 const addProductRowBtn = document.getElementById('addProductRowBtn');
