@@ -35,6 +35,9 @@ public interface WorkOrderProcessRepository extends JpaRepository<WorkOrderProce
     // 공정 Id로 정보 조회
 	Optional<WorkOrderProcess> findByWopId(String wopId);
 	
+	// QC 공정 이후 모든 공정 단계 조회 (QC 실패 시 미진행 공정 정리용)
+	List<WorkOrderProcess> findByWorkOrderOrderIdAndStepSeqGreaterThan(String orderId, int qcStepSeq);
+	
 	// ==========================
 	// 생산관리 대시보드
 	// ==========================
@@ -73,6 +76,5 @@ public interface WorkOrderProcessRepository extends JpaRepository<WorkOrderProce
     	""")
 	List<WorkOrderProcess> findForHeatmap(@Param("statuses") List<String> statuses,
     	    							  @Param("orderStatuses") List<String> orderStatuses);
-
 
 }
