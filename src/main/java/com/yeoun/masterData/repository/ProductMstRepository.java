@@ -103,7 +103,7 @@ public interface ProductMstRepository extends JpaRepository<ProductMst, String> 
 				WHERE (:prdId IS NULL OR :prdId = '' OR p.PRD_ID LIKE '%' || :prdId || '%')
 			AND (:prdName IS NULL OR :prdName = '' OR p.PRD_NAME LIKE '%' || :prdName || '%')
 			ORDER BY
-			    p.USE_YN DESC
+			    p.USE_YN DESC,p.prd_id ASC
 			""", nativeQuery = true)
 	List<Map<String, Object>> findByPrdIdList(@Param("prdId") String prdId, @Param("prdName") String prdName);
 
