@@ -10,11 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const gridEl = document.getElementById("processGrid");
 
-  if (!gridEl) {
-    console.error("processGrid 요소를 찾을 수 없습니다.");
-    return;
-  }
-
+  if (!gridEl) return;
+  
   if (!window.tui || !tui.Grid) {
     console.error("Toast UI Grid 스크립트가 로드되지 않았습니다.");
     return;
