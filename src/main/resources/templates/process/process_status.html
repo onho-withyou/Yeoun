@@ -110,7 +110,58 @@
 	      </div>
 	    </div>
 	  </div>
+	  
+	  <!-- FINISH MODAL (공정 종료 수량 입력) -->
+		<div class="modal fade" id="finishModal" tabindex="-1">
+		  <div class="modal-dialog modal-md modal-dialog-centered">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title">공정 종료</h5>
+		        <button class="btn-close" data-bs-dismiss="modal"></button>
+		      </div>
+		
+		      <div class="modal-body">
+		        <!-- hidden -->
+		        <input type="hidden" id="finish-orderId">
+		        <input type="hidden" id="finish-stepSeq">
+		
+		        <div class="row g-2">
+		          <div class="col-12">
+		            <label class="form-label">계획 수량</label>
+		            <input type="text" class="form-control" id="finish-planQty" readonly>
+		          </div>
+		
+		          <div class="col-12">
+		            <label class="form-label" id="finish-standardLabel">기준값</label>
+		            <input type="text" class="form-control" id="finish-standardQty" readonly>
+		            <div class="form-text" id="finish-standardHelp"></div>
+		          </div>
+		
+		          <div class="col-6">
+		            <label class="form-label">양품 수량</label>
+		            <input type="number" class="form-control" id="finish-goodQty" min="0">
+		          </div>
+		
+		          <div class="col-6">
+		            <label class="form-label">불량 수량</label>
+		            <input type="number" class="form-control" id="finish-defectQty" min="0">
+		          </div>
+		        </div>
+		      </div>
+		
+		      <div class="modal-footer">
+		        <button class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+		        <button class="btn btn-success" type="button" id="btnFinishSubmit">종료 처리</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+			  
 
   </div>
 </th:block>
 </th:block>
+
+
+<script src="/js/process/processStatus.js"></script>
+<script src="/js/process/processDone.js"></script> 
