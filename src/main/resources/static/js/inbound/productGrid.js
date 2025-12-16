@@ -7,6 +7,9 @@ const productGrid = new Grid({
 	    useClient: true,  // 클라이언트 사이드 페이징
 	    perPage: 20       // 페이지당 10개 행
 	},	
+	columnOptions: {
+		resizable: true
+	},
 	columns: [
 		{
 			header: "입고번호",
