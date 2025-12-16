@@ -73,6 +73,7 @@ public interface BomMstRepository extends JpaRepository<BomMst, BomMstId>{
 				    b.updated_id = eu.emp_id
 				WHERE (:bomId IS NULL OR :bomId = '' OR b.BOM_ID LIKE '%' || :bomId || '%')
 				AND (:matId IS NULL OR :matId = '' OR b.MAT_ID LIKE '%' || :matId || '%')
+				ORDER BY bom_id asc, bom_seq_no asc
 				""", nativeQuery = true)
 	List<Map<String, Object>> findBybomList(@Param("bomId") String bomId, @Param("matId") String matId);
 

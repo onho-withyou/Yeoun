@@ -408,21 +408,24 @@ grid2.on('beforeChange', (ev) => {
 	    }
 });
 //BOM정보 원재료 id-> 원재료 조회 클릭시 row 더블클릭시 값이 들어감 
-grid2.on('focusChange', (ev) => {
-    // ev 객체에는 현재 포커스가 변경된 셀의 정보가 담겨 있습니다.
-    const { rowKey, columnName } = ev;
+// 1. grid7에 dblclick 이벤트 리스너 등록
+grid7.on('dblclick', function(ev) {
+    if (ev.targetType !== 'cell' && ev.targetType !== 'rowHeader') {
+        return; 
+    }
 
-    // 1. rowKey와 columnName을 사용하여 셀 값 가져오기
-    const cellValue = grid.getValue(rowKey, columnName);
+    var sourceRowKey = ev.rowKey; 
+    var rowData = grid7.getRow(sourceRowKey); 
+	console.log("선택된 원재료 데이터:", rowData.matId);
+	var focusedRowIndex = grid2.getFocusedCell();
+	console.log("포커스된 행 인덱스:", focusedRowIndex);
+	if (focusedRowIndex.value === null || focusedRowIndex.value === undefined) {
+		var targetRowKey = focusedRowIndex.rowKey;
+		grid2.setValue(targetRowKey, 'matId', rowData.matId);
+		//모달닫기
+		document.querySelector('#matItems-modal .modal-footer [data-bs-dismiss="modal"]').click();
+	}
 
-    // 2. rowKey를 사용하여 해당 행의 전체 데이터 가져오기
-    const rowData = grid.getRow(rowKey);
-
-    console.log('--- Focus Changed ---');
-    console.log('Row Key:', rowKey);
-    console.log('Column Name:', columnName);
-    console.log('Cell Value:', cellValue);
-    console.log('Row Data:', rowData);
 });
 
 
