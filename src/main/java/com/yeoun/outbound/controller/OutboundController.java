@@ -20,12 +20,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
-import com.yeoun.inbound.dto.ReceiptDTO;
 import com.yeoun.outbound.dto.OutboundOrderDTO;
 import com.yeoun.outbound.service.OutboundService;
 import com.yeoun.sales.dto.OrderDetailDTO;
-import com.yeoun.sales.dto.ShipmentDetailDTO;
-import com.yeoun.sales.service.ShipmentDetailService;
 import com.yeoun.sales.service.ShipmentService;
 
 import lombok.RequiredArgsConstructor;
@@ -37,7 +34,6 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class OutboundController {
 	private final OutboundService outboundService;
-	private final ShipmentDetailService shipmentDetailService;
 	private final ShipmentService shipmentService;
 
 	
@@ -149,9 +145,9 @@ public class OutboundController {
 	public Map<String, Object> productComplete(@RequestBody OutboundOrderDTO OutboundOrderDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
 		outboundService.updateOutbound(OutboundOrderDTO, loginDTO.getEmpId());
 		
-		  // 출하 확정 + TRACKING_NUMBER 생성
-	   // String shipmentId = OutboundOrderDTO.getShipmentId(); // ⭐ 중요
-	   // shipmentService.confirmShipment(shipmentId, loginDTO.getEmpId());
+		// 출하 확정 + TRACKING_NUMBER 생성
+	    String shipmentId = OutboundOrderDTO.getShipmentId();
+	    shipmentService.confirmShipment(shipmentId, loginDTO.getEmpId());
 		
 		Map<String, Object> result = new HashMap<>();
 		
