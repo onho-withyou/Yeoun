@@ -62,12 +62,12 @@ public class MaterialMstService {
 				for (Map<String,Object> row : created) {
 					Object idObj = row.get("matId");
 					String matId = (idObj == null) ? "" : String.valueOf(idObj).trim();
-	
+
 					if (!matId.isEmpty()) {
-						materialMstRepository.findById(matId)
-							    .ifPresent(existingProduct -> {
-							        throw new IllegalStateException("중복되는 원재료id 이미 존재합니다.");
-							    });//중복중
+						// 예외를 던지지 않고 중복을 감지하여 호출자에게 에러 문자열로 알립니다.
+						if (materialMstRepository.existsById(matId)) {
+							return "error: 중복되는 원재료id 이미 존재합니다.";
+						}
 					}
 					MaterialMst m = mapToMaterial(row);
 					m.setCreatedId(empId);
@@ -135,7 +135,19 @@ public class MaterialMstService {
 		if (row.get("matName") != null) m.setMatName(String.valueOf(row.get("matName")));
 		if (row.get("matType") != null) m.setMatType(String.valueOf(row.get("matType")));
 		if (row.get("matUnit") != null) m.setMatUnit(String.valueOf(row.get("matUnit")));
-		if (row.get("effectiveDate") != null) m.setEffectiveDate(String.valueOf(row.get("effectiveDate")));
+		if (row.get("effectiveDate") != null) {
+			Object eff = row.get("effectiveDate");
+			try {
+				if (eff instanceof Number) {
+					m.setEffectiveDate(((Number) eff).intValue());
+				} else {
+					String s = eff.toString().trim();
+					if (!s.isEmpty()) m.setEffectiveDate(Integer.valueOf(s));
+				}
+			} catch (Exception ignore) {
+				// invalid number format: leave as null
+			}
+		}
 		if (row.get("matDesc") != null) m.setMatDesc(String.valueOf(row.get("matDesc")));
 		// useYn 기본값을 'Y'로 설정 (DB의 NOT NULL 제약 대비)
 		if (row.get("useYn") != null) {

@@ -20,7 +20,7 @@ import lombok.Setter;
 @IdClass(BomMstId.class)
 public class BomMst {
 	
-	@Column(name="BOM_ID", length = 20, nullable = false)
+	@Column(name="BOM_ID", length = 50, nullable = false)
 	private String bomId; //BOMid
 	
 	@Id
