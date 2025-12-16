@@ -269,6 +269,8 @@ public class WorkOrderProcessService {
         if ("COMPLETED".equals(workOrder.getStatus()) || "SCRAPPED".equals(workOrder.getStatus())) {
         	dto.setDoneTime(workOrder.getActEndDate()); // 없으면 null
         }
+        dto.setPlanStartDate(workOrder.getPlanStartDate());
+        dto.setPlanEndDate(workOrder.getPlanEndDate());
         
         // 라인 정보
         if (workOrder.getLine() != null) {

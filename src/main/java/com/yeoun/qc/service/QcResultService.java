@@ -536,13 +536,12 @@ public class QcResultService {
 	                if (qcProc.getEndTime() == null) {
 	                    qcProc.setEndTime(LocalDateTime.now());
 	                }
-
+	                
 	                workOrderProcessRepository.save(qcProc);
 	            });
 
 	    // LOT / WORK_ORDER 연동
 	    applyQcResultToLotAndWorkOrder(header);
-
 	}
 	
 	// ----------------------------------------------------------
@@ -619,7 +618,7 @@ public class QcResultService {
 	            workOrder.setStatus("SCRAPPED");
 	            workOrder.setActEndDate(LocalDateTime.now());
 	            
-	            // QC FAIL이면 이후 공정 단계는 중단 처
+	            // QC FAIL이면 이후 공정 단계는 중단 처리
 	            skipAfterQcSteps(orderId);
 	            
 	            // 사용 원자재 폐기

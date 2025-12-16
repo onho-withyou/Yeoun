@@ -49,5 +49,10 @@ public class WorkOrderProcessDTO {
 	
 	// 완료/폐기 시각
 	private LocalDateTime doneTime; 
+	
+	// 계획 시작 시간
+	private LocalDateTime planStartDate;
+	
+	private LocalDateTime planEndDate;
 
 }

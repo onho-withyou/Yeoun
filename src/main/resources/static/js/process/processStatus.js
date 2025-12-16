@@ -55,6 +55,13 @@ document.addEventListener("DOMContentLoaded", () => {
         align: "right"
       },
 	  {
+	    header: "계획기간",
+	    name: "planPeriod",
+	    align: "center",
+	    width: 200,
+	    formatter: ({ row }) => formatPlanPeriod(row.planStartDate, row.planEndDate)
+	  },
+	  {
 	    header: "진행률",
 	    name: "progressRate",
 	    align: "center",
@@ -700,4 +707,17 @@ function updateStepRowInModal(updatedStep) {
 function formatDateTime(dt) {
   if (!dt) return "-";
   return dt.replace("T", " ").substring(0, 16);
+}
+
+function formatPlanPeriod(start, end) {
+  if (!start || !end) return "-";
+
+  const s = start.replace("T", " ").substring(5, 16);
+  const e = end.replace("T", " ").substring(5, 16);
+
+  // 같은 날이면 종료 날짜 제거
+  if (s.substring(0,5) === e.substring(0,5)) {
+    return `${s} ~ ${e.substring(6)}`;
+  }
+  return `${s} ~ ${e}`;
 }
