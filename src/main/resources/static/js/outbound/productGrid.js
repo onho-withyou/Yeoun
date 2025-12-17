@@ -109,26 +109,37 @@ async function loadProductOutbound(startDate, endDate, keyword) {
 	}
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-	//스피너 on
-	showSpinner();
+// 페이지 뒤로가기에만 지정한 날짜 적용되게 하는 로직
+window.addEventListener("pageshow", async (e) => {
+	const isBackForward = e.persisted || performance.getEntriesByType("navigation")[0].type ===  "back_forward";
 	
-	// 오늘 날짜 구하기
-	const today = new Date();
-	const year = today.getFullYear();
-	const month = today.getMonth() + 1;
-	const day = today.getDate();
+	let startDate;
+	let endDate;
 	
-	// 이번 달 1일과 오늘 날짜 계산
-	const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
-	const endDate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+	if (isBackForward) {
+		// 뒤로 가기 했을 경우 이전 조회 날짜 유지
+		startDate = sessionStorage.getItem("product_startDate");
+		endDate = sessionStorage.getItem("product_endDate");
+	}
 	
-	// 날짜 input 기본값 설정
+	if (!startDate || !endDate) {
+		const today = new Date();
+	    const year  = today.getFullYear();
+	    const month = today.getMonth() + 1;
+	    const day   = today.getDate();
+		
+		startDate = `${year}-${String(month).padStart(2, "0")}-01`;
+		endDate   = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+		
+		sessionStorage.removeItem("product_startDate");
+		sessionStorage.removeItem("product_endDate");
+	}
+	
 	prdStartDateInput.value = startDate;
-	prdEndDateInput.value = endDate;
+	prdEndDateInput.value   = endDate;
 	
 	await loadProductOutbound(startDate, endDate, null);
-	
+
 	//스피너  off
 	hideSpinner();
 });
@@ -153,6 +164,9 @@ document.querySelector("#prdStartDate").addEventListener("input", async () => {
 	const endDate = prdEndDateInput.value;
 	const keyword = document.querySelector("#productKeyword").value;
 	
+	sessionStorage.setItem("product_startDate", prdStartDateInput.value);
+	sessionStorage.setItem("product_endDate", prdEndDateInput.value);
+	
 	await loadProductOutbound(startDate, endDate, keyword);
 });
 
@@ -161,6 +175,9 @@ document.querySelector("#prdEndDate").addEventListener("input", async () => {
 	const startDate = prdStartDateInput.value;
 	const endDate = prdEndDateInput.value;
 	const keyword = document.querySelector("#productKeyword").value;
+	
+	sessionStorage.setItem("product_startDate", prdStartDateInput.value);
+	sessionStorage.setItem("product_endDate", prdEndDateInput.value);
 	
 	await loadProductOutbound(startDate, endDate, keyword);
 });

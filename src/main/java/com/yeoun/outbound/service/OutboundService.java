@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 
@@ -290,9 +291,6 @@ public class OutboundService {
 		} else { // 완제품 출고일 경우
 			Shipment shipment = shipmentRepository.findByShipmentId(outboundOrderDTO.getShipmentId())
 					.orElseThrow(() -> new NoSuchElementException("출하지시서를 찾을 수 없습니다."));
-			
-			// 출하지시 상태 변경
-			shipment.changeStatus(ShipmentStatus.SHIPPED);
 			
 			// 수주확인서 조회
 			Orders orders = ordersRepository.findByOrderId(shipment.getOrderId())
