@@ -43,9 +43,10 @@ public interface LotRelationshipRepository extends JpaRepository<LotRelationship
 		    SELECT lr 
 		    FROM LotRelationship lr
 		    JOIN FETCH lr.inputLot il
-		    LEFT JOIN FETCH il.material
+		    LEFT JOIN FETCH il.material m
+		    LEFT JOIN FETCH il.product p
 		    WHERE lr.outputLot.lotNo = :outputLotNo
 		    """)
-	List<LotRelationship> findByOutputLotNoWithFetch(@Param("outputLotNo") String outputLotNo);
+	List<LotRelationship> findByOutputLotNoWithFullFetch(@Param("outputLotNo") String outputLotNo);
 
 }

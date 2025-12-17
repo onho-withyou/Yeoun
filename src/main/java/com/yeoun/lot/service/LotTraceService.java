@@ -469,7 +469,7 @@ public class LotTraceService {
 	public List<LotMaterialNodeDTO> getMaterialNodesForLot(String lotNo) {
 		
 		List<LotRelationship> rels = 
-		        lotRelationshipRepository.findByOutputLotNoWithFetch(lotNo);
+		        lotRelationshipRepository.findByOutputLotNoWithFullFetch(lotNo);
 		
 		if (rels.isEmpty()) {
 			return List.of();
