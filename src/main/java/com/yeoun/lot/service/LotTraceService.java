@@ -269,7 +269,24 @@ public class LotTraceService {
 	                .map(p -> p.getProcess().getProcessName())    // 예: 블렌딩, 여과, 충전...
 	                .collect(Collectors.joining(" \u2192 "));     // "블렌딩 → 여과 → 충전 → ..."
 	    }
+	    
+	    // 출하 정보
+	    // 이력 존재 여부
+	    boolean shipped = historyRepository.existsByLot_LotNoAndEventType(lotNo, "FG_SHIP");
+	    
+	    // 출하 이력 중 가장 최신 1건 (출하 일시 표시용)
+	    LotHistory lastShip = historyRepository
+	    		.findFirstByLot_LotNoAndEventTypeOrderByCreatedDateDesc(lotNo, "FG_SHIP")
+	    		.orElse(null);
+	    
+	    // 출하 일자 (LotHistory.createdDate는 LocalDate)
+	    LocalDate shippedAt = (lastShip != null) ? lastShip.getCreatedDate() : null;
 
+	    // 출하 수량 합계 (부분 출하 대비)
+	    Integer shippedQty = shipped
+	    		? historyRepository.sumQuantityByLotNoAndEventType(lotNo, "FG_SHIP")
+	    		: null;
+	    
 	    return LotRootDetailDTO.builder()
 	            .lotNo(lot.getLotNo())
 	            .productCode(productCode)
@@ -284,6 +301,9 @@ public class LotTraceService {
 	            .expectedEndDate(expectedEndDate)
 	            .routeId(routeId)
 	            .routeSteps(routeSteps)
+	            .shippedYn(shipped ? "Y" : "N")
+	            .shippedAt(shippedAt)
+	            .shippedQty(shippedQty)
 	            .build();
 	}
 	
@@ -544,6 +564,7 @@ public class LotTraceService {
 
 	
 
+	// ================================================================================================
 	private static final Map<String, String> STATUS_LABEL = Map.ofEntries(
 		// LOT 상태
 	    Map.entry("NEW", "신규"),

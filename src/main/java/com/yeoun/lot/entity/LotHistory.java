@@ -107,8 +107,7 @@ public class LotHistory {
 	@CreatedDate
     @Column(name = "CREATED_DATE", nullable = false)
     private LocalDate createdDate;
-	
-	
+
 	
 
 }

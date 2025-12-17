@@ -77,7 +77,31 @@
             <div th:text="${rootDetail.expectedEndDate}">2025-01-02</div>
           </div>
         </div>
-
+        
+        <div class="mb-3">
+		  <div class="text-muted small">출하 여부</div>
+		
+		  <!-- shippedYn = 'Y'면 배지 표시 -->
+		  <span class="badge bg-success"
+		        th:if="${rootDetail.shippedYn == 'Y'}">출하완료</span>
+		
+		  <!-- shippedYn = 'N' 또는 null이면 -->
+		  <span class="badge bg-secondary"
+		        th:if="${rootDetail.shippedYn != 'Y'}">미출하</span>
+		</div>
+		
+		<!-- 출하일 / 출하수량은 출하완료일 때만 보여주기 -->
+		<div class="mb-3" th:if="${rootDetail.shippedYn == 'Y'}">
+		  <div class="text-muted small">출하일자</div>
+		  <div th:text="${rootDetail.shippedAt != null ? #temporals.format(rootDetail.shippedAt, 'yyyy-MM-dd') : '-'}">-</div>
+		</div>
+		
+		<div class="mb-3" th:if="${rootDetail.shippedYn == 'Y'}">
+		  <div class="text-muted small">출하수량</div>
+		  <div>
+		    <span th:text="${rootDetail.shippedQty != null ? rootDetail.shippedQty : '-'}">-</span> EA
+		  </div>
+		</div>
       </div>
 
       <!-- 공정 상세 패널 -->
@@ -244,6 +268,8 @@
           </div>
         </div>
       </div>
+      
+      
 
     </th:block>
 
