@@ -11,8 +11,8 @@ import com.yeoun.equipment.entity.ProdLine;
 @Repository
 public interface ProdLineRepository extends JpaRepository<ProdLine, String> {
 
-	// 라인 3개 고정 출력용
-    List<ProdLine> findAllByOrderByLineIdAsc();
+	// 사용중(Y) 라인만 정렬 조회
+    List<ProdLine> findByUseYnOrderByLineIdAsc(String useYn);
 
     // 가장 마지막 라인넘버 찾기
     @Query(value = """

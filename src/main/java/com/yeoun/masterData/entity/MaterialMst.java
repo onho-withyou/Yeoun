@@ -34,7 +34,7 @@ public class MaterialMst {
 	private String matUnit; //단위
 	
 	@Column(name="EFFECTIVE_DATE")
-	private String effectiveDate; //유효일자
+	private Integer effectiveDate; //유효일자
 	
 	@Column(name="MAT_DESC", length = 255)
 	private String matDesc; //상세설명

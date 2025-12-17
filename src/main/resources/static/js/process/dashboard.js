@@ -211,3 +211,31 @@ document.addEventListener("DOMContentLoaded", function() {
 		new bootstrap.Tooltip(tooltipTriggerEl);
 	});
 });
+
+
+// 분 -> 사람이 읽기 쉬운 시간 포맷
+function formatMinutes(min) {
+  if (min == null || min <= 0) return "0분";
+
+  if (min < 60) {
+    return min + "분";
+  }
+
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+
+  return m === 0 ? `${h}시간` : `${h}시간 ${m}분`;
+}
+
+// 라인 히트맵 "1164분" -> "19시간 24분" 변환
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".rack .big-mid").forEach(el => {
+    const stay = Number(el.dataset.stay);
+    const active = Number(el.dataset.active);
+
+    // 진행중(또는 QC대기 포함해서 inProgressCnt에 들어오는 값)인 경우만 포맷 적용
+    if (active > 0 && !Number.isNaN(stay)) {
+      el.textContent = formatMinutes(stay);
+    }
+  });
+});

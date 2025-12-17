@@ -1,5 +1,7 @@
 package com.yeoun.sales.service;
 
+import com.yeoun.common.e_num.AlarmDestination;
+import com.yeoun.common.service.AlarmService;
 import com.yeoun.outbound.service.OutboundService;
 import com.yeoun.sales.dto.ShipmentListDTO;
 import com.yeoun.sales.entity.OrderItem;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -36,6 +39,9 @@ public class ShipmentService {
     private final OrderItemRepository orderItemRepository;
     private final ShipmentQueryRepository shipmentQueryRepository;
     private final OutboundService outboundService;
+    private final AlarmService alarmService;
+    
+    private static final SecureRandom RANDOM = new SecureRandom();
 
 
     // ================================
@@ -107,6 +113,10 @@ public class ShipmentService {
      }
 
      log.info("출하 예약 완료 → shipmentId={}, orderId={}", shipmentId, orderId);
+     
+     // 🔥 출하 예약 후 알림 발송
+     String message = String.format("새로운 출하 예약이 생성되었습니다. (주문번호: %s)", orderId);
+     alarmService.sendAlarmMessage(AlarmDestination.SHIPMENT, message);
 
      return shipmentId;
  }
@@ -170,4 +180,48 @@ public class ShipmentService {
         // 3️⃣ 출하지시 상태 → WAITING (재예약 가능)
         shipment.changeStatus(ShipmentStatus.WAITING);
     }
+    
+ // ================================
+ // 출하 확정 + 운송장번호(TRACKING_NUMBER) 생성
+ // ================================
+ @Transactional
+ public void confirmShipment(String shipmentId, String empId) {
+
+     Shipment shipment = shipmentRepository.findById(shipmentId)
+         .orElseThrow(() -> new IllegalArgumentException("출하 데이터 없음"));
+
+     // 이미 출하 완료면 차단
+     if (shipment.getShipmentStatus() == ShipmentStatus.SHIPPED) {
+         throw new IllegalStateException("이미 출하 완료된 건입니다.");
+     }
+
+     // ⭐ TRACKING_NUMBER 없을 때만 생성
+     if (shipment.getTrackingNumber() == null) {
+         shipment.setTrackingNumber(generateTrackingNumber());
+     }
+
+     shipment.setShipmentStatus(ShipmentStatus.SHIPPED);
+     shipment.setShipmentDate(LocalDate.now());
+     shipment.setEmpId(empId);
+     
+     // 🔥 출하 확정 후 알림 발송
+     String message = String.format("출하가 확정되었습니다. (운송장번호: %s)", shipment.getTrackingNumber());
+     alarmService.sendAlarmMessage(AlarmDestination.SHIPMENT, message);
+ }
+ 
+//================================
+//TRACKING_NUMBER 생성
+//TRK + yyyyMMdd + - + 4자리
+//================================
+ private String generateTrackingNumber() {
+
+	    String today = LocalDate.now()
+	            .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+	    int randomNumber = RANDOM.nextInt(900000) + 100000; // 100000 ~ 999999
+
+	    return "TRK" + today + "-" + randomNumber;
+	}
+
+
 }

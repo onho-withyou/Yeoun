@@ -5,6 +5,7 @@ let qcRegModal = null;
 let qcSaved = false;        // 저장 성공 여부
 let currentOrderId = null;  // 모달이 열려있는 orderId (cancel 때 필요)
 let qcDirty = false;		// 입력 변경 여부
+let allRegistRows = []; 	// PENDING 전체 캐시 (필터용)
 
 document.addEventListener("DOMContentLoaded", () => {
 	
@@ -68,10 +69,6 @@ document.addEventListener("DOMContentLoaded", () => {
 				name: 'orderId'
 			},
 			{
-				header: '제품코드',
-				name: 'prdId'
-			},
-			{
 				header: '제품명',
 				name: 'prdName'
 			},
@@ -80,24 +77,21 @@ document.addEventListener("DOMContentLoaded", () => {
 				name: 'planQty'
 			},
 			{
-				header: '상태',
-				name: 'overallResult',
-				formatter: ({ value }) => {
-				    switch (value) {
-					  case "PENDING" :
-						return "검사대기";
-				      case "PASS":
-				        return "합격";
-				      case "FAIL":
-				        return "불합격";
-				      default:
-				        return value || "-";
-				    }
-			    }
+			  header: '라인',
+			  name: 'lineName'
 			},
 			{
-				header: '검사일',
-				name: 'inspectionDate'
+			  header: '대기시간',
+			  name: 'qcCreatedAt',
+			  formatter: ({ value }) => {
+			    if (!value) return '-';
+			    const dt = new Date(value);
+			    const diffMin = Math.floor((Date.now() - dt.getTime()) / 60000);
+			    if (diffMin < 60) return diffMin + '분';
+			    const h = Math.floor(diffMin / 60);
+			    const m = diffMin % 60;
+			    return `${h}시간 ${m}분`;
+			  }
 			},
 			{
 			  	header: " ",
@@ -172,6 +166,18 @@ document.addEventListener("DOMContentLoaded", () => {
 	if (btnSave) {
 		btnSave.addEventListener("click", onClickSaveQcResult);
 	}
+	
+	// 필터 select 변경 이벤트
+	document.getElementById("orderFilter")?.addEventListener("change", () => {
+	  // 작업지시 선택하면 제품도 자동으로 맞춰주는 UX
+	  syncProductByOrder();
+	  applyRegistFilter();
+	});
+
+	document.getElementById("productFilter")?.addEventListener("change", () => {
+	  applyRegistFilter();
+	});
+
 });
 
 //FAIL 사유 활성/비활성 제어 함수
@@ -197,7 +203,13 @@ function loadQcRegistGrid() {
     fetch("/qc/regist/data")
         .then(res => res.json())
         .then(data => {
-            qcRegistGrid.resetData(data);
+            allRegistRows = Array.isArray(data) ? data : [];
+			
+			// 셀렉트 옵션 채우기(처음 1회만 / 혹은 데이터 바뀔 때마다 갱신)
+			fillRegistFilters(allRegistRows);
+			
+			// 현재 선택값 기준으로 필터 적용해서 그리드 갱신
+			applyRegistFilter();
         });
 }
 
@@ -302,8 +314,8 @@ function renderQcDetailTable(detailList) {
 	  <td>
 	    <select class="form-select form-select-sm"
 	            name="details[${idx}].result">
-	      <option value="PASS" ${row.result === "PASS" ? "selected" : ""}>PASS</option>
-	      <option value="FAIL" ${row.result === "FAIL" ? "selected" : ""}>FAIL</option>
+	      <option value="PASS" ${row.result === "PASS" ? "selected" : ""}>합격</option>
+	      <option value="FAIL" ${row.result === "FAIL" ? "selected" : ""}>불합격</option>
 	    </select>
 	  </td>
 	  <td>
@@ -473,9 +485,13 @@ function onClickSaveQcResult() {
       detailRows: detailRows
     };
 	
+	const overallLabel = overallResult === "PASS" ? "합격"
+	                   : overallResult === "FAIL" ? "불합격"
+	                   : overallResult === "PENDING" ? "검사대기" : overallResult;
+	
 	// 저장 전 최종 확인
     let confirmMsg = `다음 내용으로 QC 결과를 저장하시겠습니까?\n\n`
-                   + `ㆍ전체 판정 : ${overallResult}\n`
+                   + `ㆍ전체 판정 : ${overallLabel}\n`
                    + `ㆍ양품 수량 : ${goodQty}\n`
                    + `ㆍ불량 수량 : ${defectQty}\n`;
 
@@ -660,3 +676,90 @@ function onClickSaveQcResult() {
       console.error("QC cancel 오류:", err);
     });
   }
+
+  // -------------------------------------------------------------------------
+  // 셀렉트 옵션 채우기
+  function fillRegistFilters(rows) {
+    const orderSel = document.getElementById("orderFilter");
+    const prodSel  = document.getElementById("productFilter");
+    if (!orderSel || !prodSel) return;
+
+    const prevOrder = orderSel.value || "ALL";
+    const prevProd  = prodSel.value || "ALL";
+
+    // 작업지시(중복 제거)
+    const orderIds = [...new Set(rows.map(r => r.orderId).filter(Boolean))];
+
+    orderSel.innerHTML =
+      `<option value="ALL">전체 작업지시</option>` +
+      orderIds.map(id => `<option value="${id}">${id}</option>`).join("");
+
+    // 제품(중복 제거: prdId 기준)
+    const prodMap = new Map();
+    rows.forEach(r => {
+      if (r.prdId && !prodMap.has(r.prdId)) {
+        prodMap.set(r.prdId, { prdId: r.prdId, prdName: r.prdName || "" });
+      }
+    });
+
+    prodSel.innerHTML =
+      `<option value="ALL">전체 제품</option>` +
+      [...prodMap.values()]
+        .map(p => `<option value="${p.prdId}">${p.prdName} (${p.prdId})</option>`)
+        .join("");
+
+    // 기존 선택 유지(없으면 ALL)
+    orderSel.value = orderIds.includes(prevOrder) ? prevOrder : "ALL";
+    prodSel.value  = prodMap.has(prevProd) ? prevProd : "ALL";
+  }
+  
+  // 필터 적용해서 그리드 갱신
+  function applyRegistFilter() {
+    const orderSel = document.getElementById("orderFilter");
+    const prodSel  = document.getElementById("productFilter");
+    if (!orderSel || !prodSel) {
+      qcRegistGrid.resetData(allRegistRows);
+      return;
+    }
+
+    const orderId = orderSel.value;
+    const prdId   = prodSel.value;
+
+    const filtered = allRegistRows.filter(r => {
+      const okOrder = (orderId === "ALL") || (r.orderId === orderId);
+      const okProd  = (prdId === "ALL")   || (r.prdId === prdId);
+      return okOrder && okProd;
+    });
+
+    qcRegistGrid.resetData(filtered);
+  }
+
+  function syncProductByOrder() {
+    const orderSel = document.getElementById("orderFilter");
+    const prodSel  = document.getElementById("productFilter");
+    if (!orderSel || !prodSel) return;
+
+    const orderId = orderSel.value;
+    if (orderId === "ALL") return;
+
+    // 선택된 작업지시의 제품을 찾아서 제품 select를 자동으로 맞춤
+    const row = allRegistRows.find(r => r.orderId === orderId);
+    if (row && row.prdId) {
+      prodSel.value = row.prdId;
+    }
+  }
+  
+  // 필터 초기화 버튼
+  document.getElementById("btnResetFilter")?.addEventListener("click", (e) => {
+    const orderSel = document.getElementById("orderFilter");
+    const prodSel  = document.getElementById("productFilter");
+
+    if (orderSel) orderSel.value = "ALL";
+    if (prodSel)  prodSel.value  = "ALL";
+
+    applyRegistFilter();
+
+    e.target.blur();
+  });
+
+

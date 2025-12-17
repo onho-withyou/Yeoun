@@ -475,6 +475,9 @@ async function renderOrderGrid() {
 			    useClient: true, 
 			    perPage: 5 
 			},
+			columnOptions: {
+				resizable: true
+			},
 	        columns: [
 	            { header: '작업지시서',   name: 'orderId', minWidth: 160 },
 	            { header: '생산 품목', name: 'productName', minWidth: 110, align: 'center' },
@@ -575,6 +578,9 @@ async function renderShipmentGrid() {
 	   bodyHeight: 160,
 	   rowHeaders: ['rowNum'],
 	   pageOptions: { useClient: true, perPage: 5 },
+	   columnOptions: {
+	   	resizable: true
+	   },
 	   columns: [
 		{ header: '출하지시서', name: 'shipmentId', minWidth: 140 },
 		{ header: '거래처',     name: 'clientName', minWidth: 120 },
@@ -587,7 +593,7 @@ async function renderShipmentGrid() {
 			width: 100,
 			align: 'center',
 			formatter: ({ rowKey }) =>
-			`<button type="button" class="btn btn-primary btn-sm" data-row="${rowKey}">출고등록</button>`
+			`<button type="button" class="btn btn btn-outline-info btn-sm" data-row="${rowKey}">출고등록</button>`
 		}
 		],
 		data: shipmentData   // 여기서 /api/shipment/list 결과 사용
@@ -732,6 +738,9 @@ async function renderNeedOrderStockGrid() {
 		    useClient: true, 
 		    perPage: 5 
 		},
+		columnOptions: {
+			resizable: true
+		},
         columns: [
             { header: '품목명',   name: 'itemName', minWidth: 160 },
 //            { header: '품목코드', name: 'itemId', width: 110, align: 'center' },
@@ -758,7 +767,7 @@ async function renderNeedOrderStockGrid() {
 		    },
 			{ header: '단위',   name: 'itemUnit', minWidth: 50 },
 			{ header: '발주',      name: "btn", width: 100, align: "center",
-			  formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary btn-sm' data-row='${cellInfo.rowKey}' >발주</button>"
+			  formatter: (cellInfo) => "<button type='button' class='btn-detail btn btn-outline-info btn-sm' data-row='${cellInfo.rowKey}' >발주</button>"
 			}
         ],
         data: needOrderStocks
@@ -932,6 +941,9 @@ async function renderExpireDisposalGrid() {
 		    useClient: true,
 		    perPage: 5
 		},
+		columnOptions: {
+			resizable: true
+		},
         columns: [
 //            { header: '품목코드', name: 'itemId', width: 110, align: 'center' },
             { header: '품목명',   name: 'prodName', minWidth: 160 },
@@ -974,7 +986,7 @@ async function renderExpireDisposalGrid() {
 			},
 			{
 				header: '상세',      name: "btn", width: 100, align: "center",
-				formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary btn-sm' data-row='${cellInfo.rowKey}' >상세</button>"
+				formatter: (cellInfo) => "<button type='button' class='btn-detail btn btn-outline-info btn-sm' data-row='${cellInfo.rowKey}' >상세</button>"
 			}
         ],
         data: rows

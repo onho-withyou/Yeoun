@@ -36,10 +36,19 @@ public class OrderDetailDTO {
     
     private String empId;     
     private String empName;  
-
+       
     private String orderMemo;
+    
+    /* =========================
+    수주 품목
+ 	========================= */
 
     private List<OrderItemDTO> items;
     
     private BigDecimal totalAmount;
-}
+    
+    /* =========================
+    ⭐ 출하 이력 
+	 ========================= */
+	 private List<OrderShipmentHistoryDTO> shipmentHistories;
+	}

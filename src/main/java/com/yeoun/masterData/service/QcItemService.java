@@ -1,18 +1,14 @@
 package com.yeoun.masterData.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.yeoun.masterData.entity.ProductMst;
 import com.yeoun.masterData.entity.QcItem;
 import com.yeoun.masterData.repository.QcItemRepository;
 
@@ -33,7 +29,7 @@ public class QcItemService {
 	}
 	//품질 항목 기준 조회
 	@Transactional(readOnly = true)
-	public List<QcItem> qcItemList(String qcItemId) {
+	public List<Map<String, Object>> qcItemList(String qcItemId) {
 		return qcItemRepository.findByQcItemList(qcItemId);
 	}
 	//품질 항목 기준 저장

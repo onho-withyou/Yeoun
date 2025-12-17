@@ -6,6 +6,9 @@ const reMaterialGrid = new tui.Grid({
 	    useClient: true,  // 클라이언트 사이드 페이징
 	    perPage: 20       // 페이지당 20개 행
 	},	
+	columnOptions: {
+		resizable: true
+	},
 	columns: [
 		{
 			header: "입고번호",
@@ -34,7 +37,7 @@ const reMaterialGrid = new tui.Grid({
 			header: " ",
 			name: "btn",
 			formatter: (rowInfo) => {
-				return `<button class="btn btn-primary btn-sm" data-id="${rowInfo.row.id}">상세</button>`
+				return `<button class="btn btn-outline-info btn-sm" data-id="${rowInfo.row.id}">상세</button>`
 			}
 		}
 	]
@@ -93,8 +96,6 @@ async function loadReMaterialInbound(startDate, endDate, searchType, keyword) {
 		// 재입고 정보만 필터
 		data = data.filter(row => row.inboundType == "RE_IB");
 		
-		console.log(data);
-		
 		// 상태값이 영어로 들어오는 것을 한글로 변환해서 기존 data에 덮어씌움
 		data = data.map(item => ({
 			...item,
@@ -111,33 +112,39 @@ async function loadReMaterialInbound(startDate, endDate, searchType, keyword) {
 document.addEventListener("DOMContentLoaded", async () => {
 	//스피너 on
 	showSpinner();
+});
+
+// 페이지 뒤로가기에만 지정한 날짜 적용되게 하는 로직
+window.addEventListener("pageshow", async (e) => {
+	const isBackForward = e.persisted || performance.getEntriesByType("navigation")[0].type ===  "back_forward";
 	
-	// 오늘 날짜 구하기
-	const today = new Date();
-	const year = today.getFullYear();
-	const month = today.getMonth() + 1;
-	const day = today.getDate();
+	let startDate;
+	let endDate;
 	
-	// 이번 달 1일과 오늘 날짜 계산
-	const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
-	const endDate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+	if (isBackForward) {
+		// 뒤로 가기 했을 경우 이전 조회 날짜 유지
+		startDate = sessionStorage.getItem("rematerial_startDate");
+		endDate = sessionStorage.getItem("rematerial_endDate");
+	}
 	
-	// 날짜 input 기본값 설정
+	if (!startDate || !endDate) {
+		const today = new Date();
+	    const year  = today.getFullYear();
+	    const month = today.getMonth() + 1;
+	    const day   = today.getDate();
+		
+		startDate = `${year}-${String(month).padStart(2, "0")}-01`;
+		endDate   = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+		
+		sessionStorage.removeItem("rematerial_startDate");
+		sessionStorage.removeItem("rematerial_endDate");
+	}
+	
 	reStartDateInput.value = startDate;
 	reEndDateInput.value = endDate;
 	
 	await loadReMaterialInbound(startDate, endDate, "all", "");
-	
-	// -----------------------------------------------
-	// 화면 페이지 로딩 css 추가
-	const content = document.getElementById("tabContentArea");
-	
-	if (content) {
-       requestAnimationFrame(() => {
-           content.classList.add("loaded");
-       });
-	 }
-	 
+
 	//스피너  off
 	hideSpinner();
 });
@@ -162,7 +169,10 @@ document.querySelector("#reStartDate").addEventListener("input", async () => {
 	const startDate = reStartDateInput.value;
 	const endDate = reEndDateInput.value;
 	const keyword = document.querySelector("#reMaterialKeyword").value;
-	const searchType = document.querySelector("select[name='searchType']").value;
+	const searchType = document.querySelector("select[name='reSearchType']").value;
+	
+	sessionStorage.setItem("rematerial_startDate", reStartDateInput.value);
+	sessionStorage.setItem("rematerial_endDate", reEndDateInput.value);
 	
 	await loadReMaterialInbound(startDate, endDate, searchType, keyword);
 });
@@ -172,7 +182,10 @@ document.querySelector("#reEndDate").addEventListener("input", async () => {
 	const startDate = reStartDateInput.value;
 	const endDate = reEndDateInput.value;
 	const keyword = document.querySelector("#reMaterialKeyword").value;
-	const searchType = document.querySelector("select[name='searchType']").value;
+	const searchType = document.querySelector("select[name='reSearchType']").value;
+	
+	sessionStorage.setItem("rematerial_startDate", reStartDateInput.value);
+	sessionStorage.setItem("rematerial_endDate", reEndDateInput.value);
 	
 	await loadReMaterialInbound(startDate, endDate, searchType, keyword);
 });

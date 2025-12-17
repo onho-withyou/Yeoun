@@ -95,9 +95,12 @@
 			</div>
 			<div class="d-flex">
 				<h2>입고관리</h2>
-				<!-- 오른쪽: 발령 등록 버튼 -->
+				<!-- 오른쪽: 발주 등록 버튼 -->
 				<div class="col-12 col-lg d-flex justify-content-end">
-					<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCenter"> 발주 등록 </button>
+					<button type="button" class="btn btn-primary px-2 py-0" data-bs-toggle="modal" data-bs-target="#modalCenter"
+						sec:authorize="hasAnyRole('SYS_ADMIN', 'LOG_ADMIN')">
+						발주 등록 
+					</button>
 				</div>
 			</div>
 		  	<ul class="nav pay-tabs">
@@ -113,7 +116,7 @@
 					<div class="modal-content">
 						<div class="modal-header">
 							<h5 class="modal-title" id="modalCenterTitle">발주등록</h5>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+							<button type="button" class="btn-close m-0" data-bs-dismiss="modal" aria-label="Close"></button>
 						</div>
 						<div class="modal-body">
 							<div id="purchaseForm">

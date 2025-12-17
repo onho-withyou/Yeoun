@@ -194,16 +194,18 @@
 				</div>
 				
 				<div class="d-flex gap-2 flex-wrap">
-					<span class="mini-chip">OK</span>
+					<span class="mini-chip" style="background:#ecfdf5;color:#065f46;">정상</span>
 					<span class="mini-chip" style="background:#fff7ed;color:#9a3412;">주의</span>
 			        <span class="mini-chip" style="background:#fee2e2;color:#991b1b;">지연</span>
 				</div>
 			</div>
 			
 			<!-- 진행중/대기 데이터 없음 안내 -->
-			<div th:if="${heatmapTotal == 0}" class="alert alert-light border text-center text-muted mb-3">
-				현재 <b>진행중 / QC대기</b> 공정이 없습니다.
+			<div th:if="${#lists.isEmpty(heatmapRows)}"
+			     class="alert alert-light border text-center text-muted mb-3">
+			  현재 <b>진행중 / QC대기</b> 공정이 없습니다.
 			</div>
+
 			
 			<!-- 테이블 -->
 			<div class="table-responsive">
@@ -224,29 +226,44 @@
 						<!-- 라인 반복 -->
 						<tr th:each="row : ${heatmapRows}">
 							<!-- 라인명 -->
-							<th class="fw-bold nowrap" th:text="${row.lineName}">
-								LINE 1
+							<th class="fw-bold nowrap">
+							  <div th:text="${row.lineName}">라인1</div>
+							
+							  <div class="text-muted small"
+							       th:if="${row.activeOrderId != null}"
+							       th:text="${row.activeOrderId}">
+							       WO-20251215-0001
+							  </div>
 							</th>
 							
 							<!-- 공정 6단계 반복 -->
 							<td th:each="cell : ${row.steps}">
-								<div class="rack kpi-card" th:data-line="${row.lineId}" th:data-step="${cell.stepSeq}"
-									 th:classappend="${cell.level} == 'DELAY' ? ' border border-danger bg-danger-subtle' :
-									 				 (${cell.level} == 'WARN' ? ' border border-warning bg-warning-subtle' : '')">
-									 				 
-				 					<!-- 체류 시간 -->
-				 					<div class="big-mid" th:text="${cell.inProgressCnt > 0 ? cell.stayMin + '분'
-				 												  : (cell.startableCnt > 0 ? '시작대기' : (cell.hasReady ? '대기' : '-'))}">
-				 						45분
-				 					</div>		
-				 					
-				 					<!-- 진행 중 건수 -->	
-				 					<div class="small-bot text-muted" th:text="${cell.inProgressCnt > 0	? '진행중 ' + cell.inProgressCnt + '건'
-				 						 : (cell.startableCnt > 0 ? '시작대기 ' + cell.startableCnt + '건'	
-				 						 : (cell.hasReady ? '대기 ' + cell.readyCnt + '건' : '진행중 0건'))}">
-			 							진행중 1건
-			 						</div>												  
-				 				</div>
+								<div class="rack kpi-card"
+								     th:data-line="${row.lineId}" th:data-step="${cell.stepSeq}"
+								     th:with="activeCnt=${cell.inProgressCnt + cell.qcPendingCnt}"
+								     th:classappend="${activeCnt > 0 ?
+								            (cell.level == 'DELAY' ? ' border border-danger bg-danger-subtle' :
+								             cell.level == 'WARN'  ? ' border border-warning bg-warning-subtle' :
+								                                     ' border border-success bg-success-subtle')
+								            : ''}">
+								
+								  <!-- 체류 시간 -->
+								  <div class="big-mid"
+								       th:data-stay="${cell.stayMin}"
+								       th:data-active="${activeCnt}"
+								       th:text="${activeCnt > 0 ? cell.stayMin + '분'
+								              : (cell.startableCnt > 0 ? '시작대기'
+								              : (cell.hasReady ? '대기' : ''))}">
+								  </div>
+								
+								  <!-- 상태 문구 -->
+								  <div class="small-bot text-muted"
+									   th:if="${cell.startTime != null}"
+									   th:text="${#temporals.format(cell.startTime,'HH:mm') + (cell.endTime!=null ? ' ~ ' + #temporals.format(cell.endTime,'HH:mm') : '')}">
+								  </div>
+
+
+								</div>
 							</td>
 						</tr>
 					</tbody>
@@ -348,7 +365,7 @@
 					    </td>
 					    <!-- 지연시간(기준별 계산) -->
 					    <td class="nowrap">
-					    	<span th:text="${T(java.lang.String).format('%02d:%02d', a.elapsedMin/60, a.elapsedMin%60)}">00:35</span>
+					    	<span th:text="${T(java.lang.String).format('%02d시간 %02d분', a.elapsedMin/60, a.elapsedMin%60)}"></span>
 					    </td>
 		    			<!-- 상세 -->
 					    <td>

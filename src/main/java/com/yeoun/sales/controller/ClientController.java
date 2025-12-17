@@ -40,13 +40,15 @@ public class ClientController {
     @GetMapping
     public String list(
             @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "itemKeyword", required = false) String itemKeyword,
             @RequestParam(value = "type", required = false, defaultValue = "CUSTOMER") String type,
             Model model
     ) {
-        List<Client> list = clientService.search(keyword, type);
+        List<Client> list = clientService.search(keyword, itemKeyword, type);
 
         model.addAttribute("list", list);
         model.addAttribute("keyword", keyword);
+        model.addAttribute("itemKeyword", itemKeyword);
         model.addAttribute("type", type);
 
         return "sales/client_list";
@@ -60,10 +62,12 @@ public class ClientController {
     @ResponseBody
     public List<Client> listData(
             @RequestParam(value="keyword", required = false) String keyword,
+            @RequestParam(value="itemKeyword", required = false) String itemKeyword,
             @RequestParam(value="type", required = false, defaultValue = "CUSTOMER") String type
     ) {
-        return clientService.search(keyword, type);
+        return clientService.search(keyword, itemKeyword, type);
     }
+
 
 
     /* ======================================================

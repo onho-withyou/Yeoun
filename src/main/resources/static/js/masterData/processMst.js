@@ -7,11 +7,12 @@ window.onload = function () {
 document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
     tab.addEventListener('shown.bs.tab', function (e) {
         const targetId = e.target.getAttribute('data-bs-target');
-
         if (targetId === '#navs-process-tab') {//제품별 공정라우트 탭
             grid1.refreshLayout();
+			productRouteSearch();
         } else if (targetId === '#navs-processCode-tab') {//공정코드 관리 탭
             grid2.refreshLayout();
+			processCodeGridAllSearch();
         }
     });
 });
@@ -39,10 +40,12 @@ const grid1 = new Grid({
 		,{header: '라우트명' ,name: 'routeName' ,align: 'center',width: 150,filter: "select"}
 		,{header: '설명' ,name: 'description' ,align: 'center',width: 550}
 		,{header: '사용여부' ,name: 'useYn' ,align: 'center',width: 90,hidden: true}  
-		,{header: '생성자id' ,name: 'createdId' ,align: 'center',hidden: true}  
-		,{header: '생성일시' ,name: 'createdDate' ,align: 'center',hidden: true}  
-		,{header: '수정자id' ,name: 'updatedId' ,align: 'center',hidden: true}  
-		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center',hidden: true} 
+		,{header: '생성자id' ,name: 'createdId' ,align: 'center'}
+		,{header: '생성자이름' ,name: 'createdByName' ,align: 'center'}  
+		,{header: '생성일시' ,name: 'createdDate' ,align: 'center'}  
+		,{header: '수정자id' ,name: 'updatedId' ,align: 'center'} 
+		,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center'} 
+		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'} 
 		, {
 			header: '상세보기', name: 'view_details', align: 'center', width: 100
 			, formatter: (rowInfo) => {
@@ -92,7 +95,7 @@ const grid2 = new Grid({
 	    ,{header: '설명' ,name: 'description' ,align: 'center',editor: 'text' ,width: 370
 			,renderer:{ type: StatusModifiedRenderer}
 		}
-        ,{header: '사용여부' ,name: 'useYn' ,align: 'center',hidden: true
+        ,{header: '사용여부' ,name: 'useYn' ,align: 'center'
 			,renderer:{ type: StatusModifiedRenderer}
 			,editor: {
 				type: 'select', // 드롭다운 사용
@@ -104,9 +107,11 @@ const grid2 = new Grid({
 				}
 			}
 		}
-		,{header: '생성자id' ,name: 'createdId' ,align: 'center'}
+		,{header: '생성자id' ,name: 'createdId' ,align: 'center',hidden:true}
+		,{header: '생성자이름' ,name: 'createdByName' ,align: 'center'}  
 		,{header: '생성일시' ,name: 'createdDate' ,align: 'center'}
-		,{header: '수정자id' ,name: 'updatedId' ,align: 'center'}
+		,{header: '수정자id' ,name: 'updatedId' ,align: 'center',hidden:true}
+		,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center'} 
 		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}
 	    ],
 	    data: []
@@ -157,6 +162,7 @@ const grid3 = new Grid({
 		,{header: '생성자id' ,name: 'createdId' ,align: 'center'}	
 		,{header: '생성일시' ,name: 'createdDate' ,align: 'center'}	
 		,{header: '수정자id' ,name: 'updatedId' ,align: 'center'}	
+		,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center'} 
 		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
 	    ],
 	    data: []
@@ -183,6 +189,7 @@ const grid4 = new Grid({
 	    ,{header: '설명' ,name: 'description' ,align: 'center',width: 315}
 		,{header: '사용여부' ,name: 'useYn' ,align: 'center',hidden: true}
 		,{header: '생성자id' ,name: 'createdId' ,align: 'center',hidden: true}
+		,{header: '생성자이름' ,name: 'createdByName' ,align: 'center'}  
 		,{header: '생성일시' ,name: 'createdDate' ,align: 'center',hidden: true}
 		,{header: '수정자id' ,name: 'updatedId' ,align: 'center',hidden: true}
 		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center',hidden: true}
@@ -297,10 +304,10 @@ function productRouteSearch(){
 	})
 		.then(data => {
 			console.log("검색데이터 grid1:", data);
-			data.map(item => {
-				item.prdId = item.product.prdId;
-			});
-			grid1.resetData(data);
+			
+			const camelCaseData = transformKeys(data);
+			console.log("camelCaseData",camelCaseData);
+			grid1.resetData(camelCaseData);
 		})
 		.catch(err => {
 			console.error("조회오류", err);
@@ -334,14 +341,17 @@ function processCodeGridAllSearch() {
 		})
 		.then(data => {
 			console.log("검색데이터 grid2:", data);
-			grid2.resetData(data);
-			grid4.resetData(data);//신규라우트 모달 그리드 - 공정코드조회 모달
+			const camelCaseData = transformKeys(data);
+			console.log("camelCaseData",camelCaseData);
+			grid2.resetData(camelCaseData);
+			grid4.resetData(camelCaseData);//신규라우트 모달 그리드 - 공정코드조회 모달
 		})
 		.catch(err => {	
 			console.error("조회오류", err);
 			grid2.resetData([]);
 		});
 }
+
 //grid3 신규라우트 모달 그리드 - 공정단계 조회
 function processStepSearch(routeId) {
 	
@@ -371,6 +381,49 @@ function processStepSearch(routeId) {
 		});
 }
 
+
+
+const toCamelCase = (snakeCaseString) => {
+  if (!snakeCaseString || typeof snakeCaseString !== 'string') {
+    return snakeCaseString;
+  }
+
+  // 1. 소문자로 변환
+  // 2. 언더스코어(_)를 기준으로 문자열을 분리
+  // 3. reduce를 사용하여 카멜 케이스로 조합
+  return snakeCaseString.toLowerCase().split('_').reduce((acc, part) => {
+    // 첫 번째 파트는 그대로 사용 (created)
+    if (acc === '') {
+      return part;
+    }
+    // 두 번째 파트부터는 첫 글자를 대문자로 변환 후 뒤에 붙임 (ByName)
+    return acc + part.charAt(0).toUpperCase() + part.slice(1);
+  }, '');
+};
+
+const transformKeys = (data) => {
+  if (Array.isArray(data)) {
+    // 배열이면 배열의 모든 요소에 대해 재귀 호출
+    return data.map(transformKeys);
+  }
+
+  if (data !== null && typeof data === 'object') {
+    // 객체이면 키를 순회하며 변환
+    const newObject = {};
+    for (const key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        const newKey = toCamelCase(key);
+        // 값도 객체나 배열일 수 있으므로 재귀적으로 처리
+        newObject[newKey] = transformKeys(data[key]);
+      }
+    }
+    return newObject;
+  }
+
+  // 객체나 배열이 아니면 값 그대로 반환 (문자열, 숫자, null 등)
+  return data;
+};
+
 //제품별 공정라우트 그리드 - 상세보기 버튼 클릭 이벤트
 grid1.on("click", async (ev) => {
 
@@ -391,9 +444,9 @@ grid1.on("click", async (ev) => {
 		document.getElementById('modalRouteName').value = rowData.routeName;//라우트명
 		document.getElementById('modalRouteUseYn').value = rowData.useYn;//사용여부
 		document.getElementById('modalRouteRemark').value = rowData.description;//비고
-		document.getElementById('modalRouteCreatedId').value = rowData.createdId;//생성자
+		document.getElementById('modalRouteCreatedId').value = rowData.createdByName;//생성자
 		document.getElementById('modalRouteCreatedDate').value = rowData.createdDate;//생성일시
-		document.getElementById('modalRouteUpdatedId').value = rowData.updatedId;//수정자
+		document.getElementById('modalRouteUpdatedId').value = rowData.updatedByName;//수정자
 		document.getElementById('modalRouteUpdatedDate').value = rowData.updatedDate;//수정일시
 		
 		document.getElementById('userAndDate').style.display = 'flex';
@@ -406,9 +459,6 @@ grid1.on("click", async (ev) => {
 //라우트 모달 셀렉트박스 값선택시 자동으로 routeId생성
 document.getElementById('modalProcessprdId').addEventListener('change', function() {
 	const prdId = this.value;
-	const timestamp = Date.now(); // 현재 시간을 밀리초로 가져옴
-	console.log('제품코드 선택됨:', prdId);
-	console.log('타임스탬프:', timestamp);
 	const generatedRouteId = `RT-${prdId}`; // 예: RT-제품코드-타임스탬프
 	document.getElementById('modalRouteId').value = generatedRouteId;
 });

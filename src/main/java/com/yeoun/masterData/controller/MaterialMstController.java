@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yeoun.auth.dto.LoginDTO;
-import com.yeoun.masterData.entity.MaterialMst;
 import com.yeoun.masterData.service.MaterialMstService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -30,13 +29,30 @@ public class MaterialMstController {
 	//원재료 조회
     @ResponseBody
   	@GetMapping("/list")
-  	public List<MaterialMst> materialList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,
+  	public List<Map<String, Object>> materialList(Model model, @AuthenticationPrincipal LoginDTO loginDTO,
   					@RequestParam(value = "matId", required = false) String matId,
   					@RequestParam(value = "matName", required = false) String matName) {
   		// 서비스에서 null/빈값 처리를 수행하므로 그대로 전달
   		return materialMstService.findByMatIdList(matId, matName);
 
   	}
+    
+    //원재료 유형 드롭다운
+    @ResponseBody
+  	@GetMapping("/matTypeList")
+  	public List<Map<String, Object>> materialTypeList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+  		return materialMstService.findByMatTypeList();
+
+  	}
+    
+    //원재료 단위 드롭다운
+    @ResponseBody
+  	@GetMapping("/matUnitList")
+  	public List<Map<String, Object>> materialUnitList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
+  		return materialMstService.findByMatUnitList();
+
+  	}
+    
 
 	//원재료 저장
     @ResponseBody

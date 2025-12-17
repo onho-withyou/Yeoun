@@ -33,6 +33,8 @@ clientInput.addEventListener("focus", async () => {
 
 // 거래처 검색 이벤트 (검색어 입력했을 때)
 clientInput.addEventListener("input", async function() {
+	resetClientSelection();
+	
 	// input에 입력한 검색어
 	const keyword = clientInput.value.trim().toLowerCase();
 	
@@ -278,6 +280,26 @@ orderTableBody.addEventListener("change", (e) => {
 	 tr.querySelector(".totalPrice").textContent = total.toLocaleString();
 });
 
+// 거래처 선택 해제용 함수
+function resetClientSelection() {
+	hiddenId.value = "";
+	
+	document.querySelector("#managerName").value = "";
+	
+	itemSelect.innerHTML = "";
+	itemSelect.disabled = true;
+	
+	const defaultOption = document.createElement("option");
+	
+	defaultOption.value = "";
+	defaultOption.textContent = "거래처를 먼저 선택하세요.";
+	defaultOption.selected = true;
+	itemSelect.appendChild(defaultOption);
+	
+	// 발주 테이블 초기화
+	orderTableBody.innerHTML = "";
+}
+
 // ----------------------------------------------------------
 // 발주 등록
 const submitOrder = async () => {
@@ -289,14 +311,9 @@ const submitOrder = async () => {
 	
 	// 선택된 품목들을 items에 추가
 	document.querySelectorAll("#orderTable tbody tr").forEach(tr => {
-		// 발주 단위
-		const unit = tr.querySelector("input[name=unit]").value;
-		// 단위 변환(발주 단위와 재고 단위를 비교해서 변환)
-		const convertOrderAmount = convertToBaseUnit(tr.querySelector("input[name=orderAmount]").value, unit)
-		
 		items.push({
 			itemId: tr.querySelector("input[name=itemId]").value,
-			orderAmount: convertOrderAmount,
+			orderAmount: tr.querySelector("input[name=orderAmount]").value,
 			unitPrice: tr.querySelector("input[name=unitPrice]").value,
 		});
 	});

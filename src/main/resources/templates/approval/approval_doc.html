@@ -13,9 +13,15 @@
 <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
 <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
 </head>
-<style>
-	
-</style>
+<th:block layout:fragment="pageCss">
+	<style>
+	.required-field::after {
+	  content: ' *' !important; /* content 속성이 적용되는지 확인 */
+	  color: red !important;
+	  display: inline-block; /* Try adding this */
+	}
+	</style>
+</th:block>
 <body>
 <th:block layout:fragment="content">
 	<!-- 현재사용자 사번, 이름 저장 -->
@@ -122,12 +128,14 @@
 				</div>
 				<div class="modal-body">
 					<h5 class="d-flex">
-						<label class="p-1" style="width: 200px;">문서 날짜 </label>
+						<label class="required-field" style="width: 200px;">문서 날짜 </label>
 						<p id="today-date"></p>
 					</h5>
 					<h5 class="d-flex">
-						<label class="p-1" style="width: 200px;"> 문서 제목 </label> 	                 
-						<input id="approval-title" class="form-control" type="text" name="approvalTitle" placeholder="문서제목" style="width:800px;height: 38.94px;">
+						<label class="p-1 required-field" style="width: 200px;">
+							문서 제목
+						</label> 	                 
+						<input id="approval-title" class="form-control" type="text" name="approvalTitle" placeholder="문서제목" style="width:800px;height: 38.94px;" required>
 					</h5>
 					<h5 class="d-flex">
 						<label class="p-1" style="width: 200px;">양식 종류 </label> 
@@ -144,26 +152,26 @@
 						</div>
 					</h5>
 					<h5 class="d-flex">
-						<label class="p-1" style="width: 200px;">결재자명(기안자)</label> 
+						<label class="p-1 required-field" style="width: 200px;">결재자명(기안자)</label> 
 						<div class="mb-6 mb-0" style="width: 344px;">
 							<p id="approver-name" name="empId" th:text="|${#authentication.principal.empName} (${#authentication.principal.empId})|"></p> 
 						</div>
 					</h5>
 					<h5 class="d-flex">
-						<label class="p-1" style="width: 200px;">결재완료기간</label>
+						<label class="p-1 required-field" style="width: 200px;">결재완료기간</label>
 						<div class="row flex-nowrap">
 							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-								<input type="date" name="createdDate" id="create-date" class="form-control">
+								<input type="date" name="createdDate" id="create-date" class="form-control" required>
 							</div>
 							~
 							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-								<input type="date" name="finishDate"  id="finish-date" class="form-control">
+								<input type="date" name="finishDate"  id="finish-date" class="form-control" required>
 							</div>
 						</div>
 					</h5>
 					
 					<h5 id="leavePeriodForm" style="display:none;">
-						<label class="p-1" style="width: 200px;">휴가기간</label>
+						<label class="p-1 required-field" style="width: 200px;">휴가기간</label>
 						<div class="row flex-nowrap">
 							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
 								<input type="date" name="startDate"  id="start-date" class="form-control">
@@ -176,7 +184,7 @@
 					</h5>
 				
 					<h5 id="leaveTypeForm" style="display: none;">
-						<label class="p-1" style="width: 200px;">휴가종류</label><!---휴가(연차)신청서-->
+						<label class="p-1 required-field" style="width: 200px;">휴가종류</label><!---휴가(연차)신청서-->
 						<div class="mb-6 mb-0" style="width: 344px;">
 							<select id="leave-type" name="leaveType" class="form-select">
 								<option selected></option>
@@ -198,7 +206,7 @@
 						</div>
 					</h5>
 					<h5 id="positionForm" style="display: none;"> <!--인사발령신청서-->
-						<label class="p-1" style="width: 200px;">직급</label><!--- 인사발령신청서-->
+						<label class="p-1 required-field" style="width: 200px;">직급</label><!--- 인사발령신청서-->
 						<div class="mb-6 mb-0" style="width: 344px;">
 							<select id="position" name="position" class="form-select" >
 								<option value="" selected>직급</option>
@@ -210,7 +218,7 @@
 						</div>
 					</h5>
 					<h5 id="toDeptForm" style="display: none;">
-						<label class="p-1" style="width: 200px;">발령부서</label><!--- 인사발령신청서-->
+						<label class="p-1 required-field" style="width: 200px;">발령부서</label><!--- 인사발령신청서-->
 						<div class="mb-6 mb-0" style="width: 344px;">
 							<select id="to-dept-id" name="toDeptId" class="form-select" >
 								<option value="" selected>부서</option>
@@ -222,7 +230,7 @@
 						</div>
 					</h5>
 					<h5 id="expndTypeForm" style="display:none;">
-						<label class="p-1"  style="width: 200px;">지출종류 </label><!-- 지출결의서-->
+						<label class="p-1 required-field"  style="width: 200px;">지출종류 </label><!-- 지출결의서-->
 						<div class="mb-6 mb-0" style="width: 344px;">
 							<select id="expnd-type" name="expndType" class="form-select" >
 								<option value="" selected disabled hidden>지출종류 선택</option>

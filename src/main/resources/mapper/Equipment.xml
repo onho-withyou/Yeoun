@@ -18,5 +18,41 @@
         AND p.STEP_SEQ = #{step}
         AND p.STATUS != 'READY'
     </select>
+    
+    <select id="selectDowntimeHistories" resultType="com.yeoun.equipment.dto.EquipDowntimeDTO">
+    	SELECT
+    		d.DOWN_ID,
+    		d.EQUIP_ID,
+    		e.EQUIP_CODE,
+    		e.EQUIP_NAME,
+    		e.LINE_ID,
+    		d.DOWN_REASON,
+    		d.START_TIME,
+    		d.END_TIME
+    	FROM EQUIP_DOWNTIME d
+    		JOIN PROD_EQUIP e ON d.EQUIP_ID = e.EQUIP_ID 
+    	<where>
+    		<if test="equipment != null">
+    			AND e.EQUIP_CODE = #{equipment}
+    		</if>
+    		
+    		<if test="line != null">
+    			AND e.LINE_ID = #{line}
+    		</if>
+    		
+    		<if test="reason != null">
+    			AND d.DOWN_REASON = #{reason}
+    		</if>
+    		
+    		<if test="start != null">
+    			AND d.END_TIME <![CDATA[ >= ]]> TO_DATE(#{start}, 'YYYY-MM-DD')
+    		</if>
+    		
+    		<if test="end != null">
+    			AND d.START_TIME <![CDATA[ <= ]]> TO_DATE(#{end}, 'YYYY-MM-DD') + 1
+    		</if>
+    	</where>
+    	ORDER BY d.START_TIME DESC
+    </select>
 
 </mapper>

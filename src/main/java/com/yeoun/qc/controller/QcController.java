@@ -1,6 +1,5 @@
 package com.yeoun.qc.controller;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,14 +20,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.yeoun.auth.dto.LoginDTO;
 import com.yeoun.common.dto.FileAttachDTO;
-import com.yeoun.common.service.FileAttachService;
 import com.yeoun.qc.dto.QcDetailRowDTO;
 import com.yeoun.qc.dto.QcRegistDTO;
 import com.yeoun.qc.dto.QcResultListDTO;
 import com.yeoun.qc.dto.QcResultViewDTO;
 import com.yeoun.qc.dto.QcSaveRequestDTO;
-import com.yeoun.qc.entity.QcResultDetail;
-import com.yeoun.qc.repository.QcResultDetailRepository;
 import com.yeoun.qc.service.QcResultService;
 
 import lombok.RequiredArgsConstructor;
@@ -73,8 +69,11 @@ public class QcController {
 	// QC 결과 목록 데이터
 	@GetMapping("/result/data")
 	@ResponseBody
-	public List<QcResultListDTO> qcResultListForGrid() {
-		return qcResultService.getQcResultListForView();
+	public List<QcResultListDTO> qcResultListForGrid(@RequestParam(name = "startDate", required = false) String startDate,
+											         @RequestParam(name = "endDate", required = false) String endDate,
+											         @RequestParam(name = "keyword", required = false) String keyword,
+											         @RequestParam(name = "result", defaultValue = "ALL") String result) {
+		return qcResultService.getQcResultListForView(startDate, endDate, keyword, result);
 	}
 	
 	// --------------------------------------------------------------
