@@ -202,7 +202,7 @@ public class LotTraceService {
 
 	    WorkOrder wo = null;
 	    if (lot.getOrderId() != null) {
-	        wo = workOrderRepository.findById(lot.getOrderId()).orElse(null);
+	    	wo = workOrderRepository.findByIdWithFetch(lot.getOrderId()).orElse(null);
 	    }
 
 	    // 제품
@@ -468,8 +468,8 @@ public class LotTraceService {
 	// 선택 LOT 기준 2차 자재 LOT 트리용 노드
 	public List<LotMaterialNodeDTO> getMaterialNodesForLot(String lotNo) {
 		
-		List<LotRelationship> rels =
-		        lotRelationshipRepository.findByOutputLotNoFetchInputAndMaterial(lotNo);
+		List<LotRelationship> rels = 
+		        lotRelationshipRepository.findByOutputLotNoWithFetch(lotNo);
 		
 		if (rels.isEmpty()) {
 			return List.of();
@@ -612,9 +612,6 @@ public class LotTraceService {
 	@Transactional(readOnly = true)
 	public List<LotRootDTO> getMaterialRootLots(String keyword, String status, String type) {
 
-	    List<String> lotTypes = List.of("RAW", "SUB", "PKG");
-	    List<LotMaster> lots = lotMasterRepository.findRootLotsOrdered(lotTypes);
-
 	    final String kw = (keyword == null) ? "" : keyword.trim();
 	    final String st = (status == null) ? "" : status.trim();
 	    final String tp = (type == null) ? "" : type.trim();
@@ -703,7 +700,8 @@ public class LotTraceService {
 	@Transactional(readOnly = true)
 	public List<LotUsedProductNodeDTO> getUsedProductsByMaterialLot(String inputLotNo) {
 
-	    List<LotRelationship> rels = lotRelationshipRepository.findByInputLot_LotNo(inputLotNo);
+		List<LotRelationship> rels = lotRelationshipRepository.findByInputLotNoWithFetch(inputLotNo);
+		
 	    if (rels == null || rels.isEmpty()) return List.of();
 
 	    return rels.stream().map(rel -> {

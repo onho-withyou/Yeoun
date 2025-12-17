@@ -18,15 +18,34 @@ public interface LotRelationshipRepository extends JpaRepository<LotRelationship
 
 	Optional<LotRelationship> findByOutputLot_LotNoAndInputLot_LotNo(String outputLotNo, String inputLotNo);
 	
-	List<LotRelationship> findByInputLot_LotNo(String inputLotNo);
+//	List<LotRelationship> findByInputLot_LotNo(String inputLotNo);
 	
 	@Query("""
-	        select lr
-	        from LotRelationship lr
-	        join fetch lr.inputLot il
-	        left join fetch il.material
-	        where lr.outputLot.lotNo = :lotNo
-	    """)
-    List<LotRelationship> findByOutputLotNoFetchInputAndMaterial(@Param("lotNo") String lotNo);
+		    SELECT lr 
+		    FROM LotRelationship lr
+		    JOIN FETCH lr.outputLot ol
+		    JOIN FETCH lr.inputLot il
+		    LEFT JOIN FETCH il.material
+		    WHERE il.lotNo = :inputLotNo
+		    """)
+	List<LotRelationship> findByInputLotNoWithFetch(@Param("inputLotNo") String inputLotNo);
+	
+//	@Query("""
+//	        select lr
+//	        from LotRelationship lr
+//	        join fetch lr.inputLot il
+//	        left join fetch il.material
+//	        where lr.outputLot.lotNo = :lotNo
+//	    """)
+//    List<LotRelationship> findByOutputLotNoFetchInputAndMaterial(@Param("lotNo") String lotNo);
+	
+	@Query("""
+		    SELECT lr 
+		    FROM LotRelationship lr
+		    JOIN FETCH lr.inputLot il
+		    LEFT JOIN FETCH il.material
+		    WHERE lr.outputLot.lotNo = :outputLotNo
+		    """)
+	List<LotRelationship> findByOutputLotNoWithFetch(@Param("outputLotNo") String outputLotNo);
 
 }
