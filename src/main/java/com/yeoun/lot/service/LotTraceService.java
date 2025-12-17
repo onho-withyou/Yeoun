@@ -159,36 +159,42 @@ public class LotTraceService {
 	@Transactional(readOnly = true)
 	public List<LotRootDTO> getFinishedLots(String keyword, String status, String type) {
 		
-		// 완제품 공정에 속한 LOT 타입
-		List<String> lotTypes = List.of("WIP", "FIN");
-		
-		// 1) FIN WIP LOT 목록 조회
-		List<LotMaster> lots = 
-				lotMasterRepository.findRootLotsOrdered(lotTypes);
-		
 		final String kw = (keyword == null) ? "" : keyword.trim();
 		final String st = (status == null) ? "" : status.trim();
 		final String tp = (type == null) ? "" : type.trim();
 		
-		return lots.stream()
-		        .filter(lm -> {
+		// 1) FIN WIP LOT 목록 조회
+		List<Object[]> results = lotMasterRepository.findFinishedLotsNative();
+		
+		return results.stream()
+		        .filter(row -> {
 		            if (kw.isEmpty()) return true;
-		            return (lm.getLotNo() != null && lm.getLotNo().contains(kw))
-		                || (lm.getDisplayName() != null && lm.getDisplayName().contains(kw));
+		            String lotNo = (String) row[0];
+		            String displayName = (String) row[1];
+		            return (lotNo != null && lotNo.contains(kw))
+		                || (displayName != null && displayName.contains(kw));
 		        })
-		        .filter(lm -> {
+		        .filter(row -> {
 		            if (st.isEmpty()) return true;
-		            return st.equals(lm.getCurrentStatus());
+		            return st.equals((String) row[2]);
 		        })
-		        .filter(lm -> {
+		        .filter(row -> {
 		            if (tp.isEmpty()) return true;
-		            return tp.equals(lm.getLotType());
+		            String lotNo = (String) row[0];
+		            String lotType = lotNo.split("-")[0]; // WIP 또는 FIN
+		            return tp.equals(lotType);
 		        })
-		        .map(lm -> {
-		            LotStatus statusEnum = LotStatus.fromCode(lm.getCurrentStatus());
-		            String statusLabel = (statusEnum != null) ? statusEnum.getLabel() : lm.getCurrentStatus();
+		        .map(row -> {
+		            String lotNo = (String) row[0];
+		            String displayName = (String) row[1];
+		            String currentStatus = (String) row[2];
+		            
+		            LotStatus statusEnum = LotStatus.fromCode(currentStatus);
+		            String statusLabel = (statusEnum != null) 
+		                ? statusEnum.getLabel() 
+		                : currentStatus;
 
-		            return new LotRootDTO(lm.getLotNo(), lm.getDisplayName(), statusLabel);
+		            return new LotRootDTO(lotNo, displayName, statusLabel);
 		        })
 		        .toList();
 	}
@@ -713,7 +719,6 @@ public class LotTraceService {
 	            unit = in.getMaterial().getMatUnit();
 	        }
 
-	        // 상태 라벨까지 넣고 싶으면
 	        String statusLabel = null;
 	        if (out != null) {
 	            LotStatus s = LotStatus.fromCode(out.getCurrentStatus());
@@ -730,21 +735,5 @@ public class LotTraceService {
 	    }).toList();
 	}
 
-	
-	private String materialStockStatusLabel(String lotNo) {
-	    Inventory inv = inventoryRepository.findTopByLotNoOrderByIvIdDesc(lotNo).orElse(null);
-
-	    // 재고 row 자체가 없으면 소진완료
-	    if (inv == null) return "소진완료";
-
-	    // 있으면 재고상태 라벨
-	    return labelOf(inv.getIvStatus()); // NORMAL/DISPOSAL_WAIT/DISPOSAL -> 라벨
-	}
-	
-	
-	
-	
-	
-	
 	
 } // LotTraceService 끝
