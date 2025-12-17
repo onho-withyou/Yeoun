@@ -81,15 +81,16 @@
         <div class="mb-3">
 		  <div class="text-muted small">출하 여부</div>
 		
-		  <!-- shippedYn = 'Y'면 배지 표시 -->
+		  <span class="badge bg-light text-dark"
+		        th:if="${rootDetail.lotStatusLabel == '폐기'}">해당없음</span>
+		
 		  <span class="badge bg-success"
-		        th:if="${rootDetail.shippedYn == 'Y'}">출하완료</span>
+		        th:if="${rootDetail.lotStatusLabel != '폐기' and rootDetail.shippedYn == 'Y'}">출하완료</span>
 		
-		  <!-- shippedYn = 'N' 또는 null이면 -->
 		  <span class="badge bg-secondary"
-		        th:if="${rootDetail.shippedYn != 'Y'}">미출하</span>
+		        th:if="${rootDetail.lotStatusLabel != '폐기' and rootDetail.shippedYn != 'Y'}">미출하</span>
 		</div>
-		
+
 		<!-- 출하일 / 출하수량은 출하완료일 때만 보여주기 -->
 		<div class="mb-3" th:if="${rootDetail.shippedYn == 'Y'}">
 		  <div class="text-muted small">출하일자</div>
