@@ -150,12 +150,7 @@ public class LotTraceService {
 	// ================================================================================
 	// [ROOT - 완제품 LOT]
 	// ================================================================================
-	// 완제품 ROOT 목록
-	@Transactional(readOnly = true)
-	public List<LotRootDTO> getFinishedLots() {
-	    return getFinishedLots(null, null, null);
-	}
-	
+	// 완제품 ROOT 목록 조회 - WIP/FIN ROOT 후보를 가져옴
 	@Transactional(readOnly = true)
 	public List<LotRootDTO> getFinishedLots(String keyword, String status, String type) {
 		
@@ -163,11 +158,12 @@ public class LotTraceService {
 		final String st = (status == null) ? "" : status.trim();
 		final String tp = (type == null) ? "" : type.trim();
 		
-		// 1) FIN WIP LOT 목록 조회
+		// 1) 완제품(WIP/FIN) ROOT 목록 조회 (native 결과)
 		List<Object[]> results = lotMasterRepository.findFinishedLotsNative();
 		
 		return results.stream()
 		        .filter(row -> {
+		        	// keyword: lotNo 또는 displayName 부분 포함
 		            if (kw.isEmpty()) return true;
 		            String lotNo = (String) row[0];
 		            String displayName = (String) row[1];
@@ -175,16 +171,19 @@ public class LotTraceService {
 		                || (displayName != null && displayName.contains(kw));
 		        })
 		        .filter(row -> {
+		        	// status: currentStatus 코드 일치
 		            if (st.isEmpty()) return true;
 		            return st.equals((String) row[2]);
 		        })
 		        .filter(row -> {
+		        	// type: LOT 번호 prefix로 WIP/FIN 판별
 		            if (tp.isEmpty()) return true;
 		            String lotNo = (String) row[0];
 		            String lotType = lotNo.split("-")[0]; // WIP 또는 FIN
 		            return tp.equals(lotType);
 		        })
 		        .map(row -> {
+		        	// 상태 코드를 화면 라벨로 변환
 		            String lotNo = (String) row[0];
 		            String displayName = (String) row[1];
 		            String currentStatus = (String) row[2];
@@ -199,19 +198,22 @@ public class LotTraceService {
 		        .toList();
 	}
 	
-	// LOT ROOT 상세 정보 조회
+	// ROOT LOT 상세(우측 패널용)
+	// - LOT 마스터 + 작업지시(제품/계획/일정) + 공정결과(양/불) + 출하이력까지 묶어서 반환
 	@Transactional(readOnly = true)
 	public LotRootDetailDTO getRootLotDetail(String lotNo) {
 
+		// 1) LOT 마스터 조회
 	    LotMaster lot = lotMasterRepository.findByLotNo(lotNo)
 	            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 LOT : " + lotNo));
 
+	    // 2) LOT와 연결된 작업지시 조회(있으면 fetch join)
 	    WorkOrder wo = null;
 	    if (lot.getOrderId() != null) {
 	    	wo = workOrderRepository.findByIdWithFetch(lot.getOrderId()).orElse(null);
 	    }
 
-	    // 제품
+	    // 3) 제품 정보(품번/품명/유형)
 	    String productCode = null;
 	    String productName = null;
 	    String productType = null;
@@ -222,17 +224,17 @@ public class LotTraceService {
 	        productType = p.getPrdCat(); 
 	    }
 
-	    // 상태 라벨
+	    // 4) LOT 상태 라벨
 	    LotStatus lotStatusEnum = LotStatus.fromCode(lot.getCurrentStatus());
 	    String statusLabel = (lotStatusEnum != null)
 	            ? lotStatusEnum.getLabel()
 	            : lot.getCurrentStatus();
 
 
-	    // 수량
+	    // 5) 계획 수량
 	    Integer planQty = (wo != null) ? wo.getPlanQty() : null;
 
-	    // 양품/불량 = work_order_process 에서 마지막 결과 가져오기 
+	 	// 6) 양품/불량: 공정 결과가 기록된 마지막 단계에서 추출
 	    Integer goodQty = null;
 	    Integer defectQty = null;
 	    if (wo != null) {
@@ -251,7 +253,7 @@ public class LotTraceService {
 	        }
 	    }
 
-	    // 일정
+	    // 7) 일정: 실제 시작일(있으면) 없으면 계획 시작일 / 종료는 계획 종료일
 	    LocalDate startDate = null;
 	    LocalDate expectedEndDate = null;
 	    if (wo != null) {
@@ -261,7 +263,7 @@ public class LotTraceService {
 	        expectedEndDate = wo.getPlanEndDate().toLocalDate();
 	    }
 
-	    // 라우트 요약 : RT-SC2501-5G (블렌딩 → 여과 → )
+	    // 8) 라우트 요약 : RT-SC2501-5G (블렌딩 → 여과 → )
 	    String routeId = null;
 	    String routeSteps = null;
 
@@ -277,8 +279,7 @@ public class LotTraceService {
 	                .collect(Collectors.joining(" \u2192 "));     // "블렌딩 → 여과 → 충전 → ..."
 	    }
 	    
-	    // 출하 정보
-	    // 이력 존재 여부
+	    // 9) 출하 여부/일자/수량(이력 기반)
 	    boolean shipped = historyRepository.existsByLot_LotNoAndEventType(lotNo, "FG_SHIP");
 	    
 	    // 출하 이력 중 가장 최신 1건 (출하 일시 표시용)
@@ -317,7 +318,7 @@ public class LotTraceService {
 	// ================================================================================
 	// 공정 정보
 	// ================================================================================
-	// 선택 LOT 기준 1차 공정 LOT 트리용 노드
+	// 선택 LOT 기준 공정 노드 목록(좌측 트리용)
 	@Transactional(readOnly = true)
 	public List<LotProcessNodeDTO> getProcessNodesForLot(String lotNo) {
 
@@ -352,7 +353,7 @@ public class LotTraceService {
 	            .toList();
 	}
 
-	// 공정 상세 조회
+	// 공정 상세(우측 상세 패널용)
 	@Transactional(readOnly = true)
 	public LotProcessDetailDTO getProcessDetail(String orderId, Integer stepSeq) {
 		
@@ -471,7 +472,7 @@ public class LotTraceService {
 	// ================================================================================
 	// 자재 정보
 	// ================================================================================
-	// 선택 LOT 기준 2차 자재 LOT 트리용 노드
+	// 선택 LOT 기준 자재 노드 목록(좌측 트리용)
 	public List<LotMaterialNodeDTO> getMaterialNodesForLot(String lotNo) {
 		
 		List<LotRelationship> rels = 
@@ -508,25 +509,25 @@ public class LotTraceService {
 				.toList();
 	}
 
-	// 자재 상세 정보
+	// 자재 상세(우측 상세 패널용)
 	public LotMaterialDetailDTO getMaterialDetail(String outputLotNo, String inputLotNo) {
 		
 		// 1) 자재 엔티티 조회 (부모 LOT + 자식 LOT)
 		LotRelationship lr = lotRelationshipRepository.findByOutputLot_LotNoAndInputLot_LotNo(outputLotNo, inputLotNo)
 			        .orElseThrow(() -> new IllegalArgumentException("관계 없음: output=" + outputLotNo + ", input=" + inputLotNo));
 		
-		// 2) 원자재 LOT 꺼내기
+		// 2) 자재 LOT / 자재 마스터
 	    LotMaster lot = lr.getInputLot();          // inputLot == 원자재 LOT
 	    MaterialMst m = (lot != null) ? lot.getMaterial() : null;
 
-	    // 3) lotNo로 입고/재고
+	    // 3) 입고/재고 최신 정보
 	    InboundItem ii = inboundItemRepository.findTopByLotNoOrderByInboundItemIdAsc(inputLotNo)
 	    		.orElse(null);
 	    
 	    Inventory inv = inventoryRepository.findTopByLotNoOrderByIvIdDesc(inputLotNo)
 	    		.orElse(null);
 	    
-	    // 4) 거래처 정보
+	    // 4) 거래처: inbound -> 발주 -> client 연결
 	    Client client = null;
 
 	    if (ii != null && ii.getInbound() != null) {
@@ -573,12 +574,14 @@ public class LotTraceService {
 	
 
 	// ================================================================================================
+	// 코드 -> 라벨 변환 유틸
 	private static final Map<String, String> STATUS_LABEL = Map.ofEntries(
 		// LOT 상태
 	    Map.entry("NEW", "신규"),
 	    Map.entry("IN_PROCESS", "진행 중"),
 	    Map.entry("PROD_DONE", "생산 완료"),
 	    
+	    // 공정 상태
 	    Map.entry("IN_PROGRESS", "진행 중"),
 	    Map.entry("READY", "대기"),
 	    Map.entry("DONE", "완료"),
@@ -603,6 +606,7 @@ public class LotTraceService {
 	    Map.entry("MAINTENANCE", "점검")
 	);
 
+	// 공통 라벨링
 	private String labelOf(String code) {
 	    if (code == null) return "-";
 	    String key = code.trim();          // 공백 제거
@@ -615,6 +619,9 @@ public class LotTraceService {
 	}
 
 	// ================================================================================================
+    // [ROOT - 자재 LOT]
+    // ================================================================================================
+	// 자재 ROOT 목록 조회
 	@Transactional(readOnly = true)
 	public List<LotRootDTO> getMaterialRootLots(String keyword, String status, String type) {
 
@@ -645,6 +652,7 @@ public class LotTraceService {
 	        .toList();
 	}
 	
+	// 자재 ROOT 상세(우측 상세 패널용)
 	@Transactional(readOnly = true)
 	public LotMaterialDetailDTO getMaterialRootDetail(String lotNo) {
 
@@ -703,6 +711,7 @@ public class LotTraceService {
 	        .build();
 	}
 
+	// 자재 LOT -> 사용된 완제품 LOT 목록(Forward 추적)
 	@Transactional(readOnly = true)
 	public List<LotUsedProductNodeDTO> getUsedProductsByMaterialLot(String inputLotNo) {
 
