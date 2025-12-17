@@ -618,17 +618,28 @@ public class LotTraceService {
 	    final String tp = (type == null) ? "" : type.trim();
 
 	    return lots.stream()
+    		// 검색어(LOT 번호/자재명)
 	        .filter(lm -> kw.isEmpty()
 	            || (lm.getLotNo() != null && lm.getLotNo().contains(kw))
 	            || (lm.getDisplayName() != null && lm.getDisplayName().contains(kw)))
-	        .filter(lm -> st.isEmpty() || st.equals(lm.getCurrentStatus()))
+	        // 유형(RAW/SUB/PKG)
 	        .filter(lm -> tp.isEmpty() || tp.equals(lm.getLotType()))
-	        .map(lm -> {
-	            LotStatus statusEnum = LotStatus.fromCode(lm.getCurrentStatus());
-	            String statusLabel = (statusEnum != null) ? statusEnum.getLabel() : lm.getCurrentStatus();
-	            return new LotRootDTO(lm.getLotNo(), lm.getDisplayName(), statusLabel);
+	        // 상태는 inventory 기준 + SOLD_OUT 처리
+	        .filter(lm -> {
+	            if (st.isEmpty()) return true;
+
+	            Inventory inv = inventoryRepository.findTopByLotNoOrderByIvIdDesc(lm.getLotNo()).orElse(null);
+
+	            if ("SOLD_OUT".equals(st)) return inv == null;      // 소진완료
+	            return inv != null && st.equals(inv.getIvStatus()); // NORMAL/DISPOSAL_WAIT/DISPOSAL
 	        })
-	        .toList();
+	    	// status 라벨은 재고 상태로 넣기
+	        .map(lm -> new LotRootDTO(
+	                lm.getLotNo(),
+	                lm.getDisplayName(),
+	                materialStockStatusLabel(lm.getLotNo())
+	            ))
+            .toList();
 	}
 
 	
@@ -723,9 +734,15 @@ public class LotTraceService {
 	}
 
 	
-	
-	
-	
+	private String materialStockStatusLabel(String lotNo) {
+	    Inventory inv = inventoryRepository.findTopByLotNoOrderByIvIdDesc(lotNo).orElse(null);
+
+	    // 재고 row 자체가 없으면 소진완료
+	    if (inv == null) return "소진완료";
+
+	    // 있으면 재고상태 라벨
+	    return labelOf(inv.getIvStatus()); // NORMAL/DISPOSAL_WAIT/DISPOSAL -> 라벨
+	}
 	
 	
 	

@@ -118,46 +118,71 @@
           	<input type="hidden" name="mode" th:value="${mode}">
             <div class="row gx-3 gy-2 align-items-end">
 
+			  <!-- 공통 : 검색어 -->
               <div class="col-md-4">
                 <label class="form-label" for="searchKeyword">검색어</label>
                 <input type="text"
                        class="form-control"
                        id="searchKeyword"
                        name="keyword"
-                       placeholder="LOT 번호 / 제품명"
+                       th:placeholder="${mode}=='PRODUCT' ? 'LOT 번호 / 제품명' : 'LOT 번호 / 자재명'"
                        th:value="${keyword}">
               </div>
 
-              <div class="col-md-3">
-                <label class="form-label" for="searchProductStatus">생산 상태</label>
-				<select class="form-select" id="searchProductStatus" name="status">
-				  <option value="" th:selected="${status == null || status == ''}">전체</option>
-				  <option value="IN_PROCESS" th:selected="${status == 'IN_PROCESS'}">공정 진행 중</option>
-				  <option value="PROD_DONE"  th:selected="${status == 'PROD_DONE'}">생산 완료</option>
-				  <option value="SCRAPPED"   th:selected="${status == 'SCRAPPED'}">폐기</option>
-				</select>
-              </div>
-
-              <div class="col-md-3">
-                <label class="form-label" for="searchProductType">제품 유형</label>
-                <select class="form-select" id="searchProductType" name="type">
-				  <option value="" th:selected="${type == null || type == ''}">전체</option>
-				  <option value="WIP" th:selected="${type == 'WIP'}">재공</option>
-				  <option value="FIN" th:selected="${type == 'FIN'}">완제품</option>
-				</select>
-              </div>
+			  <!-- PRODUCT 모드 필터 -->
+			  <th:block th:if="${mode}=='PRODUCT'">
+	              <div class="col-md-3">
+	                <label class="form-label" for="searchStatus">생산 상태</label>
+					<select class="form-select" id="searchStatus" name="status">
+					  <option value="" th:selected="${status == null || status == ''}">전체</option>
+					  <option value="IN_PROCESS" th:selected="${status == 'IN_PROCESS'}">공정 진행 중</option>
+					  <option value="PROD_DONE"  th:selected="${status == 'PROD_DONE'}">생산 완료</option>
+					  <option value="SCRAPPED"   th:selected="${status == 'SCRAPPED'}">폐기</option>
+					</select>
+	              </div>
+	
+	              <div class="col-md-3">
+	                <label class="form-label" for="searchType">제품 유형</label>
+	                <select class="form-select" id="searchType" name="type">
+					  <option value="" th:selected="${type == null || type == ''}">전체</option>
+					  <option value="WIP" th:selected="${type == 'WIP'}">재공</option>
+					  <option value="FIN" th:selected="${type == 'FIN'}">완제품</option>
+					</select>
+	              </div>
+              </th:block>
+              
+			  <!-- MATERIAL 모드 필터 -->
+			  <th:block th:if="${mode}=='MATERIAL'">
+	              <div class="col-md-3">
+	                <label class="form-label" for="searchtatus">재고 상태</label>
+					<select class="form-select" id="searchStatus" name="status">
+					  <option value="" th:selected="${status == null || status == ''}">전체</option>
+					  <option value="NORMAL" th:selected="${status == 'NORMAL'}">정상</option>
+					  <option value="DISPOSAL_WAIT"  th:selected="${status == 'DISPOSAL_WAIT'}">임박</option>
+					  <option value="DISPOSAL"   th:selected="${status == 'DISPOSAL'}">폐기</option>
+					  <option value="SOLD_OUT"   th:selected="${status == 'SOLD_OUT'}">소진완료</option>
+					</select>
+	              </div>
+	
+	              <div class="col-md-3">
+	                <label class="form-label" for="searchType">자재 유형</label>
+	                <select class="form-select" id="searchType" name="type">
+					  <option value="" th:selected="${type == null || type == ''}">전체</option>
+					  <option value="RAW" th:selected="${type == 'RAW'}">원재료</option>
+					  <option value="SUB" th:selected="${type == 'SUB'}">부자재</option>
+					  <option value="PKG" th:selected="${type == 'PKG'}">포장재</option>
+					</select>
+	              </div>
+              </th:block>
 
               <div class="col-md-1">
-                <button type="submit"
-                        class="btn btn-outline-primary w-100"
-                        id="btnSearch">
+                <button type="submit" class="btn btn-outline-primary w-100" id="btnSearch">
                   검색
                 </button>
               </div>
               
               <div class="col-md-1">
-				 <a th:href="@{/lot/trace(mode=${mode})}"
-				    class="btn btn-outline-secondary w-100">
+				 <a th:href="@{/lot/trace(mode=${mode})}" class="btn btn-outline-secondary w-100">
 				    초기화
 				 </a>
 			  </div>
@@ -193,14 +218,20 @@
 				    <span th:text="' / ' + ${lot.displayName}"> / 제품명</span>
 				
 				    <!-- 상태만 색상 -->
-				    <span class="ms-1 fw-semibold"
-				          th:text="' / ' + ${lot.status}"
-				          th:classappend="
-				            ${lot.status}=='공정 진행 중' ? ' lot-status-in' :
-				            (${lot.status}=='생산 완료' ? ' lot-status-done' :
-				            (${lot.status}=='폐기' ? ' lot-status-scrap' : ' lot-status-etc'))">
-				      / 상태
-				    </span>
+					<span class="ms-1 fw-semibold"
+					      th:text="' / ' + ${lot.status}"
+					      th:classappend="
+					        ${mode}=='PRODUCT' ?
+					          (${lot.status}=='공정 진행 중' ? ' lot-status-in' :
+					           (${lot.status}=='생산 완료' ? ' lot-status-done' :
+					            (${lot.status}=='폐기' ? ' lot-status-scrap' : ' lot-status-etc')))
+					        :
+					          (${lot.status}=='정상' ? ' lot-status-done' :
+					           (${lot.status}=='임박' ? ' lot-status-in' :
+					            (${lot.status}=='폐기' ? ' lot-status-scrap' :
+					             (${lot.status}=='소진완료' ? ' lot-status-etc' : ' lot-status-etc'))))">
+					  / 상태
+					</span>
 				  </a>
 
 		
