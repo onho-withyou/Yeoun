@@ -38,6 +38,7 @@ import com.yeoun.lot.entity.LotRelationship;
 import com.yeoun.lot.repository.LotHistoryRepository;
 import com.yeoun.lot.repository.LotMasterRepository;
 import com.yeoun.lot.repository.LotRelationshipRepository;
+import com.yeoun.lot.repository.MaterialRootRow;
 import com.yeoun.equipment.entity.Equipment;
 import com.yeoun.masterData.entity.MaterialMst;
 import com.yeoun.masterData.entity.ProcessMst;
@@ -467,7 +468,8 @@ public class LotTraceService {
 	// 선택 LOT 기준 2차 자재 LOT 트리용 노드
 	public List<LotMaterialNodeDTO> getMaterialNodesForLot(String lotNo) {
 		
-		List<LotRelationship> rels = lotRelationshipRepository.findByOutputLot_LotNo(lotNo);
+		List<LotRelationship> rels =
+		        lotRelationshipRepository.findByOutputLotNoFetchInputAndMaterial(lotNo);
 		
 		if (rels.isEmpty()) {
 			return List.of();
@@ -616,32 +618,29 @@ public class LotTraceService {
 	    final String kw = (keyword == null) ? "" : keyword.trim();
 	    final String st = (status == null) ? "" : status.trim();
 	    final String tp = (type == null) ? "" : type.trim();
+	    
+	    List<MaterialRootRow> rows =
+	            lotMasterRepository.findMaterialRootLots();
 
-	    return lots.stream()
-    		// 검색어(LOT 번호/자재명)
-	        .filter(lm -> kw.isEmpty()
-	            || (lm.getLotNo() != null && lm.getLotNo().contains(kw))
-	            || (lm.getDisplayName() != null && lm.getDisplayName().contains(kw)))
-	        // 유형(RAW/SUB/PKG)
-	        .filter(lm -> tp.isEmpty() || tp.equals(lm.getLotType()))
-	        // 상태는 inventory 기준 + SOLD_OUT 처리
-	        .filter(lm -> {
+	    return rows.stream()
+	        .filter(r -> kw.isEmpty()
+	            || r.getLotNo().contains(kw)
+	            || (r.getDisplayName() != null && r.getDisplayName().contains(kw)))
+	        .filter(r -> tp.isEmpty() || tp.equalsIgnoreCase("RAW") || true) // 필요 시 제거
+	        .filter(r -> {
 	            if (st.isEmpty()) return true;
-
-	            Inventory inv = inventoryRepository.findTopByLotNoOrderByIvIdDesc(lm.getLotNo()).orElse(null);
-
-	            if ("SOLD_OUT".equals(st)) return inv == null;      // 소진완료
-	            return inv != null && st.equals(inv.getIvStatus()); // NORMAL/DISPOSAL_WAIT/DISPOSAL
+	            if ("SOLD_OUT".equals(st)) return "SOLD_OUT".equals(r.getInvStatus());
+	            return st.equals(r.getInvStatus());
 	        })
-	    	// status 라벨은 재고 상태로 넣기
-	        .map(lm -> new LotRootDTO(
-	                lm.getLotNo(),
-	                lm.getDisplayName(),
-	                materialStockStatusLabel(lm.getLotNo())
-	            ))
-            .toList();
+	        .map(r -> new LotRootDTO(
+	            r.getLotNo(),
+	            r.getDisplayName(),
+	            "SOLD_OUT".equals(r.getInvStatus())
+	                ? "소진완료"
+	                : labelOf(r.getInvStatus())
+	        ))
+	        .toList();
 	}
-
 	
 	@Transactional(readOnly = true)
 	public LotMaterialDetailDTO getMaterialRootDetail(String lotNo) {

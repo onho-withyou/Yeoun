@@ -51,5 +51,35 @@ public interface LotMasterRepository extends JpaRepository<LotMaster, String> {
 			  lm.createdDate desc
 			""")
 	List<LotMaster> findRootLotsOrdered(@Param("lotTypes") List<String> lotTypes);
+	
+	@Query(value = """
+			WITH target_lot AS (
+			  SELECT lm.lot_no, lm.prd_id, lm.created_date
+			  FROM lot_master lm
+			  WHERE lm.lot_type IN ('RAW','SUB','PKG')
+			),
+			latest_iv_id AS (
+			  SELECT lot_no, MAX(iv_id) AS max_iv_id
+			  FROM inventory
+			  WHERE lot_no IN (SELECT lot_no FROM target_lot)
+			  GROUP BY lot_no
+			)
+			SELECT
+			  tl.lot_no AS lotNo,
+			  CASE
+			    WHEN p.prd_name IS NOT NULL THEN p.prd_name
+			    WHEN m.mat_name IS NOT NULL THEN m.mat_name
+			    ELSE tl.prd_id
+			  END AS displayName,
+			  COALESCE(inv.iv_status, 'SOLD_OUT') AS invStatus
+			FROM target_lot tl
+			LEFT JOIN product_mst p ON p.prd_id = tl.prd_id
+			LEFT JOIN material_mst m ON m.mat_id = tl.prd_id
+			LEFT JOIN latest_iv_id li ON li.lot_no = tl.lot_no
+			LEFT JOIN inventory inv ON inv.iv_id = li.max_iv_id
+			ORDER BY tl.created_date DESC
+		    """, nativeQuery = true)
+	List<MaterialRootRow> findMaterialRootLots();  // ✅ 올바른 반환 타입
+
 
 }
