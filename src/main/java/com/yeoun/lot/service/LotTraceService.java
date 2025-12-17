@@ -1,6 +1,7 @@
 package com.yeoun.lot.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -288,7 +289,9 @@ public class LotTraceService {
 	    		.orElse(null);
 	    
 	    // 출하 일자 (LotHistory.createdDate는 LocalDate)
-	    LocalDate shippedAt = (lastShip != null) ? lastShip.getCreatedDate() : null;
+	    LocalDate shippedAt = (lastShip != null && lastShip.getCreatedDate() != null)
+	            ? lastShip.getCreatedDate().toLocalDate()
+	            : null;
 
 	    // 출하 수량 합계 (부분 출하 대비)
 	    Integer shippedQty = shipped
@@ -510,6 +513,7 @@ public class LotTraceService {
 	}
 
 	// 자재 상세(우측 상세 패널용)
+	@Transactional(readOnly = true)
 	public LotMaterialDetailDTO getMaterialDetail(String outputLotNo, String inputLotNo) {
 		
 		// 1) 자재 엔티티 조회 (부모 LOT + 자식 LOT)
@@ -550,7 +554,7 @@ public class LotTraceService {
 	        .lotNo(lot.getLotNo())
 	        .lotType(labelOf(lot.getLotType()))
 	        .lotStatus(labelOf(lot.getCurrentStatus()))
-	        .lotCreatedDate(lot.getCreatedDate())
+	        .lotCreatedDate(resolveLotCreatedAt(lot))
 	        .matId(m != null ? m.getMatId() : null)
 	        .matName(m != null ? m.getMatName() : lot.getDisplayName())
 	        .matType(labelOf(m != null ? m.getMatType() : null))
@@ -563,7 +567,7 @@ public class LotTraceService {
 	        .ivAmount(inv != null ? inv.getIvAmount() : null)
 	        .ivStatus(labelOf(inv != null ? inv.getIvStatus() : null))
 	        .inventoryLocationId(inv != null && inv.getWarehouseLocation() != null ? inv.getWarehouseLocation().getLocationId() : null)
-	        .ibDate(inv != null ? inv.getIbDate() : null)
+	        .ibDate(ii != null && ii.getInbound() != null ? ii.getInbound().getCreatedDate() : null)
 	        .clientId(client != null ? client.getClientId() : null)
 	        .clientName(client != null ? client.getClientName() : null)
 	        .businessNo(client != null ? client.getBusinessNo() : null)
@@ -684,7 +688,7 @@ public class LotTraceService {
 	        .lotNo(lot.getLotNo())
 	        .lotType(labelOf(lot.getLotType()))
 	        .lotStatus(labelOf(lot.getCurrentStatus()))
-	        .lotCreatedDate(lot.getCreatedDate())
+	        .lotCreatedDate(resolveLotCreatedAt(lot))
 
 	        // ROOT 상세에서는 “완제품 기준 투입수량” 의미 없음 → null 또는 0
 	        .usedQty(null)
@@ -701,7 +705,7 @@ public class LotTraceService {
 	        .ivStatus(labelOf(inv != null ? inv.getIvStatus() : null))
 	        .inventoryLocationId(inv != null && inv.getWarehouseLocation() != null
 	                ? inv.getWarehouseLocation().getLocationId() : null)
-	        .ibDate(inv != null ? inv.getIbDate() : null)
+	        .ibDate(ii != null && ii.getInbound() != null ? ii.getInbound().getCreatedDate() : null)
 
 	        // 거래처
 	        .clientId(client != null ? client.getClientId() : null)
@@ -742,6 +746,19 @@ public class LotTraceService {
 	            .status(statusLabel)         // 선택
 	            .build();
 	    }).toList();
+	}
+	
+	// LOT 생성일시 조회: 마스터 createdDate 우선, 없으면 최초 이력 시간으로 보정
+	private LocalDateTime resolveLotCreatedAt(LotMaster lot) {
+	    if (lot == null) return null;
+
+	    LocalDateTime cd = lot.getCreatedDate();
+	    if (cd != null) return cd;
+
+	    return historyRepository
+	        .findFirstByLot_LotNoOrderByCreatedDateAscHistIdAsc(lot.getLotNo())
+	        .map(LotHistory::getCreatedDate)
+	        .orElse(null);
 	}
 
 	

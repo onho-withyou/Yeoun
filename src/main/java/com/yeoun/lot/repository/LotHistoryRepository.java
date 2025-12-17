@@ -34,4 +34,6 @@ public interface LotHistoryRepository extends JpaRepository<LotHistory, Long> {
 			""")
 	int sumQuantityByLotNoAndEventType(@Param("lotNo") String lotNo,
 									   @Param("eventType") String eventType);
+	
+	Optional<LotHistory> findFirstByLot_LotNoOrderByCreatedDateAscHistIdAsc(String lotNo);
 }
