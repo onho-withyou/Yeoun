@@ -22,6 +22,7 @@ import com.yeoun.inbound.dto.ReceiptDTO;
 import com.yeoun.inbound.dto.ReceiptItemDTO;
 import com.yeoun.inbound.entity.Inbound;
 import com.yeoun.inbound.entity.InboundItem;
+import com.yeoun.inbound.enums.Unit;
 import com.yeoun.inbound.mapper.InboundMapper;
 import com.yeoun.inbound.repository.InboundItemRepository;
 import com.yeoun.inbound.repository.InboundRepository;
@@ -111,11 +112,17 @@ public class InboundService {
 				expirationDate = null;
 			}
 			
+			String orderUnit = clientItem.getUnit(); // 발주 단위
+			
+			Unit fromUnit = Unit.from(orderUnit);
+			
+			long convertedAmount = fromUnit.toBase(item.getOrderAmount());
+			
 			// 입고대기 품목 생성
 			InboundItemDTO inboundItemDTO = InboundItemDTO.builder()
 					.inboundId(inboundId)
 					.itemId(clientItem.getMaterialId())
-					.requestAmount(item.getOrderAmount())
+					.requestAmount(convertedAmount)
 					.inboundAmount(0L)
 					.disposeAmount(0L)
 					.itemType(materialMst.getMatType())
