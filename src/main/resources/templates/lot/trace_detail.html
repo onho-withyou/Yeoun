@@ -347,7 +347,10 @@
 
           <div class="mb-3">
             <div class="text-muted small">입고 수량</div>
-            <div th:text="${materialDetail.inboundAmount != null ? materialDetail.inboundAmount : '-'}">-</div>
+            <div>
+              <span th:text="${materialDetail.inboundAmount != null ? materialDetail.inboundAmount : '-'}">-</span>
+              <span th:text="${materialDetail.matUnit}">EA</span>
+            </div>
           </div>
 
           <div class="mb-3">
@@ -380,14 +383,24 @@
       <h6 class="fw-semibold mb-3">재고 정보</h6>
       <div class="row gx-4 mb-4">
         <div class="col-sm-6">
-          <div class="mb-3">
-            <div class="text-muted small">재고 상태</div>
-            <div th:text="${materialDetail.ivStatus != null ? materialDetail.ivStatus : '-'}">-</div>
-          </div>
+       	  <div class="mb-3">
+		    <div class="text-muted small">재고 수량</div>
+		    <div>
+		      <span th:text="${materialDetail.ivAmount != null ? materialDetail.ivAmount : '-'}">-</span>
+		      <span th:text="${materialDetail.matUnit}">EA</span>
+		    </div>
+		  </div>
 
           <div class="mb-3">
             <div class="text-muted small">재고 위치</div>
             <div th:text="${materialDetail.inventoryLocationId != null ? materialDetail.inventoryLocationId : '-'}">-</div>
+          </div>
+        </div>
+        
+        <div class="col-sm-6">
+          <div class="mb-3">
+            <div class="text-muted small">재고 상태</div>
+            <div th:text="${materialDetail.ivStatus != null ? materialDetail.ivStatus : '-'}">-</div>
           </div>
         </div>
       </div>
