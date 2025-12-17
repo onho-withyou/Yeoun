@@ -362,17 +362,17 @@
         <div class="col-sm-6">
           <div class="mb-3">
             <div class="text-muted small">제조일</div>
-            <div th:text="${materialDetail.manufactureDate != null ? materialDetail.manufactureDate : '-'}">-</div>
+            <div th:text="${materialDetail.manufactureDate != null ? #temporals.format(materialDetail.manufactureDate, 'yyyy-MM-dd') : '-'}">-</div>
           </div>
 
           <div class="mb-3">
             <div class="text-muted small">유통기한</div>
-            <div th:text="${materialDetail.expirationDate != null ? materialDetail.expirationDate : '-'}">-</div>
+            <div th:text="${materialDetail.expirationDate != null ? #temporals.format(materialDetail.expirationDate, 'yyyy-MM-dd') : '-'}">-</div>
           </div>
 
           <div class="mb-3">
             <div class="text-muted small">입고일</div>
-            <div th:text="${materialDetail.ibDate != null ? #temporals.format(materialDetail.ibDate, 'yyyy-MM-dd HH:mm') : '-'}">-</div>
+            <div th:text="${materialDetail.ibDate != null ? #temporals.format(materialDetail.ibDate, 'yyyy-MM-dd HH:mm:ss') : '-'}">-</div>
           </div>
         </div>
       </div>
