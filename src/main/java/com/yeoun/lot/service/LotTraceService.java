@@ -492,7 +492,7 @@ public class LotTraceService {
 	    MaterialMst m = (lot != null) ? lot.getMaterial() : null;
 
 	    // 3) lotNo로 입고/재고
-	    InboundItem ii = inboundItemRepository.findTopByLotNoOrderByInboundItemIdDesc(inputLotNo)
+	    InboundItem ii = inboundItemRepository.findTopByLotNoOrderByInboundItemIdAsc(inputLotNo)
 	    		.orElse(null);
 	    
 	    Inventory inv = inventoryRepository.findTopByLotNoOrderByIvIdDesc(inputLotNo)
@@ -619,7 +619,7 @@ public class LotTraceService {
 
 	    MaterialMst m = lot.getMaterial();
 
-	    InboundItem ii = inboundItemRepository.findTopByLotNoOrderByInboundItemIdDesc(lotNo).orElse(null);
+	    InboundItem ii = inboundItemRepository.findTopByLotNoOrderByInboundItemIdAsc(lotNo).orElse(null);
 	    Inventory inv = inventoryRepository.findTopByLotNoOrderByIvIdDesc(lotNo).orElse(null);
 
 	    Client client = null;
