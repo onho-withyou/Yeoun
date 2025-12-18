@@ -119,6 +119,25 @@ document.addEventListener("DOMContentLoaded", () => {
   // 2) 검색/초기화 이벤트 바인딩
   const btnSearch = document.getElementById("btnSearchProcess");
   const btnReset  = document.getElementById("btnResetProcess");
+  
+  // 셀렉트는 변경 즉시 검색 (현재공정/상태)
+  const selProcess = document.getElementById("searchProcess");
+  const selStatus  = document.getElementById("searchHStatus");
+
+  // 디바운스(연속 변경 시 호출 난사 방지)
+  const debounce = (fn, delay = 250) => {
+    let t = null;
+    return (...args) => {
+      clearTimeout(t);
+      t = setTimeout(() => fn(...args), delay);
+    };
+  };
+  
+  const autoSearch = debounce(() => loadProcessGrid(), 250);
+
+  selProcess?.addEventListener("change", autoSearch);
+  selStatus?.addEventListener("change", autoSearch);
+  document.getElementById("workDate")?.addEventListener("change", autoSearch);
 
   btnSearch?.addEventListener("click", (e) => {
     e.preventDefault();
