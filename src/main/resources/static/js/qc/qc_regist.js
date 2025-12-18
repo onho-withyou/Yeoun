@@ -459,7 +459,6 @@ function onClickSaveQcResult() {
 	if (planQty !== null && !isNaN(planQty)) {
 	  if (goodQty + defectQty !== planQty) {
 	    alert("양품 수량 + 불량 수량이 지시수량과 일치하지 않습니다.");
-	    // 필요하면 여기서 return 빼고 경고만 띄우게 바꿀 수도 있어
 	    return;
 	  }
 	}
@@ -467,7 +466,7 @@ function onClickSaveQcResult() {
 	const hasDetailFail = detailRows.some(r => (r.result || "").toUpperCase() === "FAIL");
 
 	if (overallResult === "PASS" && hasDetailFail) {
-	  if (!confirm("상세 항목에 FAIL이 포함되어 있습니다.\n그래도 전체 판정을 PASS로 저장할까요?")) {
+	  if (!confirm("상세 항목에 불합격이 포함되어 있습니다.\n그래도 전체 판정을 합격으로 저장할까요?")) {
 	    return;
 	  }
 	}
@@ -660,7 +659,8 @@ function onClickSaveQcResult() {
       method: "POST",
       headers: {
         ...(csrfToken && csrfHeaderName ? { [csrfHeaderName]: csrfToken } : {})
-      }
+      },
+	  body: JSON.stringify({ orderId, qcResultId })
     })
     .then(res => {
       if (!res.ok) throw new Error("HTTP " + res.status);
