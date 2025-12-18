@@ -36,7 +36,7 @@ public class BomHdrController {
 	//BOM 그룹 BOM_HDR_TYPE 타입 드롭다운
 	//hdrTypeLis
 	@ResponseBody
-	@GetMapping("/hdrTypeLis")
+	@GetMapping("/hdrTypeList")
 	public List<Map<String, Object>> findBomHdrTypeList(Model model, @AuthenticationPrincipal LoginDTO loginDTO) {
 		return bomHdrService.findBomHdrTypeList();
 	}

@@ -980,7 +980,7 @@ function bomUnitList(){
 // Bom 그룹 드롭다운
 function bomHdrTypeList() {
 	
-	fetch('/bom/hdrTypeLis', {
+	fetch('/bom/hdrTypeList', {
 			method: 'GET',
 			headers: {
 				[csrfHeader]: csrfToken,
