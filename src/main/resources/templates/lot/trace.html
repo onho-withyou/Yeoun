@@ -96,17 +96,17 @@
         <ul class="nav pay-tabs mb-3">
 		  <li class="nav-item">
 		    <a class="nav-link"
-		       th:href="@{/lot/trace(mode='PRODUCT', keyword=${keyword}, status=${status}, type=${type})}"
-		       th:classappend="${mode}=='PRODUCT' ? ' active'">
-		      완제품 LOT 기준
-		    </a>
+			   th:href="@{/lot/trace(mode='PRODUCT', keyword=${keyword})}"
+			   th:classappend="${mode}=='PRODUCT' ? ' active'">
+			  완제품 LOT 기준
+			</a>
 		  </li>
 		  <li class="nav-item">
 		    <a class="nav-link"
-		       th:href="@{/lot/trace(mode='MATERIAL', keyword=${keyword}, status=${status}, type=${type})}"
-		       th:classappend="${mode}=='MATERIAL' ? ' active'">
-		      자재 LOT 기준
-		    </a>
+			   th:href="@{/lot/trace(mode='MATERIAL', keyword=${keyword})}"
+			   th:classappend="${mode}=='MATERIAL' ? ' active'">
+			  자재 LOT 기준
+			</a>
 		  </li>
 		</ul>
       </div>
@@ -132,8 +132,8 @@
 			  <!-- PRODUCT 모드 필터 -->
 			  <th:block th:if="${mode}=='PRODUCT'">
 	              <div class="col-md-3">
-	                <label class="form-label" for="searchStatus">생산 상태</label>
-					<select class="form-select" id="searchStatus" name="status">
+	                <label class="form-label" for="pStatus">생산 상태</label>
+					<select class="form-select" id="pStatus" name="status">
 					  <option value="" th:selected="${status == null || status == ''}">전체</option>
 					  <option value="IN_PROCESS" th:selected="${status == 'IN_PROCESS'}">공정 진행 중</option>
 					  <option value="PROD_DONE"  th:selected="${status == 'PROD_DONE'}">생산 완료</option>
@@ -142,8 +142,8 @@
 	              </div>
 	
 	              <div class="col-md-3">
-	                <label class="form-label" for="searchType">제품 유형</label>
-	                <select class="form-select" id="searchType" name="type">
+	                <label class="form-label" for="pType">제품 유형</label>
+	                <select class="form-select" id="pType" name="type">
 					  <option value="" th:selected="${type == null || type == ''}">전체</option>
 					  <option value="WIP" th:selected="${type == 'WIP'}">재공</option>
 					  <option value="FIN" th:selected="${type == 'FIN'}">완제품</option>
@@ -154,8 +154,8 @@
 			  <!-- MATERIAL 모드 필터 -->
 			  <th:block th:if="${mode}=='MATERIAL'">
 	              <div class="col-md-3">
-	                <label class="form-label" for="searchtatus">재고 상태</label>
-					<select class="form-select" id="searchStatus" name="status">
+	                <label class="form-label" for="mStatus">재고 상태</label>
+					<select class="form-select" id="mStatus" name="status">
 					  <option value="" th:selected="${status == null || status == ''}">전체</option>
 					  <option value="NORMAL" th:selected="${status == 'NORMAL'}">정상</option>
 					  <option value="DISPOSAL_WAIT"  th:selected="${status == 'DISPOSAL_WAIT'}">임박</option>
@@ -165,8 +165,8 @@
 	              </div>
 	
 	              <div class="col-md-3">
-	                <label class="form-label" for="searchType">자재 유형</label>
-	                <select class="form-select" id="searchType" name="type">
+	                <label class="form-label" for="mType">자재 유형</label>
+	                <select class="form-select" id="mType" name="type">
 					  <option value="" th:selected="${type == null || type == ''}">전체</option>
 					  <option value="RAW" th:selected="${type == 'RAW'}">원재료</option>
 					  <option value="SUB" th:selected="${type == 'SUB'}">부자재</option>
