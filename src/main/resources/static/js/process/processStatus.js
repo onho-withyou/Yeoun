@@ -381,25 +381,34 @@ function renderProcessDetail(detail) {
 // 상세 모달 열기
 // -------------------------------
 function openDetailModal(orderId) {
+  const modalEl = document.getElementById("detailModal");
+  const modal   = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+  // 일단 모달부터 띄우고(overlay DOM 보장)
+  modal.show();
+
+  // 이전 내용 대충 비우기(선택)
+  document.getElementById("summaryGrid").innerHTML = "";
+  document.querySelector("#stepTable tbody").innerHTML =
+    `<tr><td colspan="11" class="text-center text-muted py-4">로딩 중...</td></tr>`;
+
+  showDetailOverlay("상세 불러오는 중...");
+
   fetch(`/process/status/detail/${orderId}`)
     .then((res) => {
       if (!res.ok) throw new Error("HTTP " + res.status);
       return res.json();
     })
     .then((data) => {
-      console.log("공정 상세 데이터:", data);
-
-      // ★ 공통 렌더 함수 사용
       renderProcessDetail(data);
-
-      // 모달 띄우기
-      const modalEl = document.getElementById("detailModal");
-      const modal   = new bootstrap.Modal(modalEl);
-      modal.show();
     })
     .catch((err) => {
       console.error("공정 상세 조회 오류", err);
       alert("공정 상세 정보를 불러오는 중 오류가 발생했습니다.");
+      modal.hide();
+    })
+    .finally(() => {
+      hideDetailOverlay();
     });
 }
 
@@ -481,9 +490,9 @@ document.addEventListener("change", (e) => {
 // 공정 시작
 // -------------------------------
 function handleStartStep(orderId, stepSeq) {
-  if (!confirm('해당 공정을 시작 처리하시겠습니까?')) {
-    return;
-  }
+  if (!confirm('해당 공정을 시작 처리하시겠습니까?')) return;
+
+  showDetailOverlay("공정 시작 처리 중...");
 
   const headers = { 'Content-Type': 'application/json' };
   if (typeof csrfHeader !== 'undefined' && typeof csrfToken !== 'undefined') {
@@ -492,7 +501,7 @@ function handleStartStep(orderId, stepSeq) {
 
   fetch('/process/status/step/start', {
     method: 'POST',
-    headers: headers,
+    headers,
     body: JSON.stringify({ orderId, stepSeq })
   })
     .then(res => res.json())
@@ -506,15 +515,17 @@ function handleStartStep(orderId, stepSeq) {
 
       // ★ detail 전체로 모달 다시 렌더링
       const detail = result.detail;
-      if (detail) {
-        renderProcessDetail(detail);
-      }
+      if (detail) renderProcessDetail(detail);
     })
     .catch(err => {
       console.error('공정 시작 처리 오류', err);
       alert('공정 시작 처리 중 오류가 발생했습니다.');
+    })
+    .finally(() => {
+      hideDetailOverlay();
     });
 }
+
 
 // -------------------------------
 // 공정 종료
