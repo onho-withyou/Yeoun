@@ -529,7 +529,6 @@ const grid8 = new Grid({
 	  	  }
 });
 
-
 grid2.on('beforeChange', (ev) => {
     const { rowKey, columnName } = ev.changes[0]; // 변경된 데이터 목록 (배열)
 	if (columnName === 'prdId' || columnName === 'matId') {
@@ -537,8 +536,15 @@ grid2.on('beforeChange', (ev) => {
 	        const prdIdValue = grid2.getValue(rowKey, 'prdId');
 			const matIdValue = grid2.getValue(rowKey, 'matId');
 	        
-	        // prdId 값이 비어있거나 null, undefined인 경우를 '새 행'으로 간주합니다.
-	        const isNewRow = !prdIdValue || !matIdValue; 
+			let isNewRow = false;
+			try {
+				const modified = (typeof grid2.getModifiedRows === 'function') ? (grid2.getModifiedRows() || {}) : {};
+				const createdRows = Array.isArray(modified.createdRows) ? modified.createdRows : [];
+				isNewRow = createdRows.some(r => r && String(r.rowKey) === String(rowKey));
+			} catch (e) {
+				// 실패 시 기존 fallback 사용
+				isNewRow = !!prdIdValue || !matIdValue;
+			}
 
 	        console.log("prdId 값:", prdIdValue,"matId 값:",matIdValue, " | isNewRow:", isNewRow);
 
@@ -549,8 +555,21 @@ grid2.on('beforeChange', (ev) => {
 	        }
 	    }
 });
+
+
+//공정단계 - 공정 id 가 추가되면 라우트 단계id가 자동으로들어간다.
+grid2.on('afterChange', (ev) => {
+    const { rowKey, columnName,value } = ev.changes[0]; // 변경된 데이터 목록 (배열)
+	if (columnName === 'prdId') {
+	        // 💡 핵심 수정: rowKey 대신, 현재 행의 'prdId' 값을 가져옵니다.
+	        const prdIdValue = grid2.getValue(rowKey, 'prdId');
+			const generatedPrdId = `${prdIdValue}-`;
+			grid2.setValue(rowKey,'bomId',generatedPrdId);
+			console.log(`RowKey: ${rowKey} | RouteStepId 생성 완료: ${generatedPrdId}`);
+	    }
+});
 //BOM정보 원재료 id-> 원재료 조회 클릭시 row 더블클릭시 값이 들어감 
-// 1. grid7에 dblclick 이벤트 리스너 등록
+// 1. grid7에 dblclick 이벤트 리스너 등록//됏다 안됏다함
 grid7.on('dblclick', function(ev) {
     if (ev.targetType !== 'cell' && ev.targetType !== 'rowHeader') {
         return; 
@@ -589,6 +608,7 @@ grid3.on('beforeChange', (ev) => {
 	        }
 	    }
 });
+
 
 //bom상세 그리드 전체조회
 function bomDetailGridAllSearch() {
@@ -1175,7 +1195,7 @@ function safetyStockStatusList(){
 
 
 
-//bom row 추가
+//bom 정보 row 추가
 const addBomRowBtn = document.getElementById('addBomRowBtn');
 addBomRowBtn.addEventListener('click', function() {
 	grid2.prependRow();
@@ -1554,42 +1574,42 @@ deleteBomRowBtn.addEventListener('click', async function() {
 
 			// 서버에 삭제 요청 보낼 prdId+matId 쌍이 있으면 삭제 요청 수행
 			if (serverPairs.length > 0) {
-				if (!confirm('서버에서 실제로 삭제할 항목이 포함되어 있습니다. 선택한 항목을 삭제하시겠습니까?')) return;
-				fetch('/bom/delete', {
-					method: 'POST',
-					credentials: 'same-origin',
-					headers: {
-						[csrfHeader]: csrfToken,
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify(serverPairs)
-				})
-				.then(res => {
-					if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-					const ct = (res.headers.get('content-type') || '').toLowerCase();
-					if (ct.includes('application/json')) return res.json();
-					return res.text();
-				})
-				.then(parsed => {
-					console.log('삭제 응답:', parsed);
-					const okTexts = ['success','ok','true'];
-					let success = false;
-					if (typeof parsed === 'string') {
-						const p = parsed.trim().toLowerCase();
-						success = okTexts.includes(p) || p.startsWith('success') || p.startsWith('ok');
-					} else if (parsed && typeof parsed === 'object') {
-						const status = (parsed.status || parsed.result || '').toString().toLowerCase();
-						const message = (parsed.message || '').toString().toLowerCase();
-						success = status === 'success' || okTexts.includes(message) || message.includes('success');
-					}
-					if (!success) throw new Error('Unexpected response: ' + JSON.stringify(parsed));
-					// 서버 삭제 성공 시 그리드 재조회
-					bomGridAllSearch();
-				})
-				.catch(err => {
-					console.error('삭제 중 오류', err);
-					try { alert('삭제 중 오류가 발생했습니다. ' + (err && err.message ? err.message : '')); } catch (e) {}
-				});
+				// if (!confirm('서버에서 실제로 삭제할 항목이 포함되어 있습니다. 선택한 항목을 삭제하시겠습니까?')) return;
+				// fetch('/bom/delete', {
+				// 	method: 'POST',
+				// 	credentials: 'same-origin',
+				// 	headers: {
+				// 		[csrfHeader]: csrfToken,
+				// 		'Content-Type': 'application/json'
+				// 	},
+				// 	body: JSON.stringify(serverPairs)
+				// })
+				// .then(res => {
+				// 	if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+				// 	const ct = (res.headers.get('content-type') || '').toLowerCase();
+				// 	if (ct.includes('application/json')) return res.json();
+				// 	return res.text();
+				// })
+				// .then(parsed => {
+				// 	console.log('삭제 응답:', parsed);
+				// 	const okTexts = ['success','ok','true'];
+				// 	let success = false;
+				// 	if (typeof parsed === 'string') {
+				// 		const p = parsed.trim().toLowerCase();
+				// 		success = okTexts.includes(p) || p.startsWith('success') || p.startsWith('ok');
+				// 	} else if (parsed && typeof parsed === 'object') {
+				// 		const status = (parsed.status || parsed.result || '').toString().toLowerCase();
+				// 		const message = (parsed.message || '').toString().toLowerCase();
+				// 		success = status === 'success' || okTexts.includes(message) || message.includes('success');
+				// 	}
+				// 	if (!success) throw new Error('Unexpected response: ' + JSON.stringify(parsed));
+				// 	// 서버 삭제 성공 시 그리드 재조회
+				// 	bomGridAllSearch();
+				// })
+				// .catch(err => {
+				// 	console.error('삭제 중 오류', err);
+				// 	try { alert('삭제 중 오류가 발생했습니다. ' + (err && err.message ? err.message : '')); } catch (e) {}
+				// });
 			} else {
 				if (removedUi > 0) alert('추가한 행을 화면에서만 삭제했습니다. (DB에는 반영되지 않음)');
 			}

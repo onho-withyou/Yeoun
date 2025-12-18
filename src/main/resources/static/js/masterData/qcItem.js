@@ -19,7 +19,7 @@ const grid1 = new Grid({
 		,{header: '기준 텍스트' ,name: 'stdText' ,align: 'center',width: 230}
 		,{header: 'MIN' ,name: 'minValue' ,align: 'center'}
         ,{header: 'MAX' ,name: 'maxValue' ,align: 'center'}
-		,{header: '사용' ,name: 'useYn' ,align: 'center'
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center'
 			,renderer:{ type: StatusModifiedRenderer}
 		}  
 		,{header: '정렬순서' ,name: 'sortOrder' ,align: 'center',hidden: true}
@@ -179,7 +179,8 @@ const qcItemRegistBtn = document.getElementById('qcItemRegistBtn');
 qcItemRegistBtn.addEventListener("click", function() {
 	document.getElementById('qcmodalTilte').innerText= 'QC 항목 등록';
 	qcModalreset();
-	document.getElementById('modalQcItemId').readOnly = false;
+	document.getElementById('modalQcItemId').value = 'QC-';
+	document.getElementById('qcItemId').readOnly = false;
 	document.getElementById('userAndDate').style.display ='none';//생성자
 	
 });
