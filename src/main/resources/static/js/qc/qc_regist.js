@@ -423,7 +423,7 @@ function onClickSaveQcResult() {
 
 	// FAIL인데 불합격 사유가 없으면 막기
 	if (overallResult === "FAIL" && failReason === "") {
-	  alert("전체 판정이 FAIL인 경우, 불합격 사유를 입력해주세요.");
+	  alert("전체 판정이 불합격인 경우, 불합격 사유를 입력해주세요.");
 	  failReasonEl?.removeAttribute("readonly");
 	  failReasonEl?.focus();
 	  return;
