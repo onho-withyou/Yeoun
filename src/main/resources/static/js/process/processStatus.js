@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
         align: "center"
       },
 	  {
-	    header: "진행률",
+	    header: "공정 진행도",
 	    name: "progressRate",
 	    align: "center",
 	    formatter: ({ value }) => {

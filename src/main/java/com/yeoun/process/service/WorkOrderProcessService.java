@@ -236,7 +236,7 @@ public class WorkOrderProcessService {
             }
         }
 
-        int progressRate = calculateProgressRate(processes);
+        int progressRate = calculateProgressRateHybrid(processes);
         String currentProcess = resolveCurrentProcess(processes);
         LocalDateTime endAt = null;
 
@@ -285,28 +285,30 @@ public class WorkOrderProcessService {
     }
 
     /**
-     * 진행률 계산
-     * - DONE + IN_PROGRESS + QC_PENDING 을 '진행한 단계'로 간주
-     * - READY는 미진행
+     * 진행률(완료율) 계산
+     * - DONE만 완료로 인정
+     * - IN_PROGRESS/QC_PENDING/READY는 미완료
      */
-    private int calculateProgressRate(List<WorkOrderProcess> processes) {
-    	if (processes == null || processes.isEmpty()) return 0;
+    private int calculateProgressRateHybrid(List<WorkOrderProcess> processes) {
+        if (processes == null || processes.isEmpty()) return 0;
 
         int totalSteps = processes.size();
 
-        long progressedCount = processes.stream()
-            .filter(Objects::nonNull)
-            .filter(p -> {
-                // 1) startTime 있으면 무조건 진행 시작으로 간주
-                if (p.getStartTime() != null) return true;
-
-                // 2) status는 trim + 대문자 정규화해서 비교
-                String s = (p.getStatus() == null) ? "" : p.getStatus().trim().toUpperCase();
-                return s.equals("DONE") || s.equals("IN_PROGRESS") || s.equals("QC_PENDING");
-            })
+        long doneCount = processes.stream()
+            .filter(p -> "DONE".equalsIgnoreCase(p.getStatus()))
             .count();
 
-        return (int) Math.round(progressedCount * 100.0 / totalSteps);
+        boolean hasInProgress = processes.stream()
+            .anyMatch(p -> "IN_PROGRESS".equalsIgnoreCase(p.getStatus())
+                        || "QC_PENDING".equalsIgnoreCase(p.getStatus()));
+
+        double progress = doneCount * 100.0 / totalSteps;
+
+        if (hasInProgress && doneCount < totalSteps) {
+            progress += (100.0 / totalSteps) * 0.5;
+        }
+
+        return (int) Math.round(Math.min(progress, 99));
     }
 
     /**
