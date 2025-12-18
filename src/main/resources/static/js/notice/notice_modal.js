@@ -327,7 +327,7 @@ async function initReadModal(createdUser) {
 		modifyNoticeBtn.disabled = false;
 		deleteNoticeBtn.style.display = 'block';
 		modifyNoticeBtn.style.disabled = 'block';
-		fixDiv.style.display = 'block';
+		fixDiv.style.display = 'flex';
 		uploadArea.style.display = 'block';
 	} else { //권한이 없을때 수정,삭제 불가능
 		
