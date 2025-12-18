@@ -90,6 +90,14 @@ public class WebSecurityConfig {
 						.permitAll()
 						.requestMatchers("/equipment/**")
 						.permitAll()
+						
+					// ================== MES (생산부) ==================
+					.requestMatchers("/production/**", "/process/**", "/lot/**")
+					.hasAnyRole("SYS_ADMIN", "MES_USER", "MES_MANAGER")
+
+					// ================== 품질관리 ==================
+					.requestMatchers("/qc/**")
+					.hasAnyRole("SYS_ADMIN", "QC_USER", "QC_ADMIN")
 
 					// 물류관리부
 					// 대시보드
@@ -114,7 +122,7 @@ public class WebSecurityConfig {
 					//영업관리
 					.requestMatchers("/sales/**")
 					.hasAnyRole("SYS_ADMIN", "SALES_ADMIN")
-						
+					
 	                // 그 외 나머지는 로그인만 되어있으면 접근 허용
 	                .anyRequest().authenticated()
 	                
