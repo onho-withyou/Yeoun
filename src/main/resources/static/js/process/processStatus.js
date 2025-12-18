@@ -201,17 +201,17 @@ function loadProcessGrid() {
   if (searchKeyword) params.append("searchKeyword", searchKeyword);   // String keyword
 
   fetch("/process/status/data?" + params.toString())
-    .then((res) => {
+    .then(async (res) => {
       if (!res.ok) {
+        const text = await res.text();
+        console.error("HTTP", res.status, "response:", text);
         throw new Error("HTTP " + res.status);
       }
       return res.json();
     })
     .then((data) => {
       console.log("공정현황 목록:", data);
-      if (processGrid) {
-        processGrid.resetData(data);
-      }
+      processGrid?.resetData(data);
     })
     .catch((err) => {
       console.error("공정현황 데이터 로딩 중 오류", err);

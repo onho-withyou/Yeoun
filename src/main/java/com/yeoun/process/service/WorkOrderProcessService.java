@@ -12,11 +12,8 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.yeoun.common.dto.AlarmDTO;
 import com.yeoun.common.e_num.AlarmDestination;
 import com.yeoun.common.service.AlarmService;
-import com.yeoun.emp.entity.Emp;
-import com.yeoun.emp.repository.EmpRepository;
 import com.yeoun.inbound.service.InboundService;
 import com.yeoun.lot.dto.LotHistoryDTO;
 import com.yeoun.lot.dto.LotMasterDTO;
@@ -288,17 +285,28 @@ public class WorkOrderProcessService {
     }
 
     /**
-     * 진행률 계산 (DONE + QC_PENDING 단계 수 / 전체 단계 수 * 100)
+     * 진행률 계산
+     * - DONE + IN_PROGRESS + QC_PENDING 을 '진행한 단계'로 간주
+     * - READY는 미진행
      */
     private int calculateProgressRate(List<WorkOrderProcess> processes) {
-    	int totalSteps = processes.size();
-        if (totalSteps == 0) return 0;
+    	if (processes == null || processes.isEmpty()) return 0;
 
-        long doneCount = processes.stream()
-                .filter(p -> "DONE".equals(p.getStatus()))
-                .count();
+        int totalSteps = processes.size();
 
-        return (int) Math.round(doneCount * 100.0 / totalSteps);
+        long progressedCount = processes.stream()
+            .filter(Objects::nonNull)
+            .filter(p -> {
+                // 1) startTime 있으면 무조건 진행 시작으로 간주
+                if (p.getStartTime() != null) return true;
+
+                // 2) status는 trim + 대문자 정규화해서 비교
+                String s = (p.getStatus() == null) ? "" : p.getStatus().trim().toUpperCase();
+                return s.equals("DONE") || s.equals("IN_PROGRESS") || s.equals("QC_PENDING");
+            })
+            .count();
+
+        return (int) Math.round(progressedCount * 100.0 / totalSteps);
     }
 
     /**
