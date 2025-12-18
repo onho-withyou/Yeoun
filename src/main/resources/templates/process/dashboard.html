@@ -208,7 +208,7 @@
 
 			
 			<!-- 테이블 -->
-			<div class="table-responsive">
+			<div class="table-responsive" th:if="${not #lists.isEmpty(heatmapRows)}">
 				<table class="table align-middle text-center mb-0">
 					<thead>
 						<tr>
