@@ -542,6 +542,32 @@ public class WorkOrderProcessService {
                     return dto;
                 })
                 .collect(Collectors.toList());
+        
+	     // =============================
+	     // (추가) standardQty를 "이전 공정 양품" 기준으로 재설정
+    	 // - 이전 공정이 DONE이고 goodQty가 있을 때만 적용
+	     // =============================
+	     for (int i = 1; i < stepDTOs.size(); i++) {
+	
+	         WorkOrderProcessStepDTO curr = stepDTOs.get(i);
+	         WorkOrderProcessStepDTO prev = stepDTOs.get(i - 1);
+	
+	         // 이전 공정 양품수량 (없으면 null)
+	         String prevStatus = (prev.getStatus() == null) ? "" : prev.getStatus().trim().toUpperCase();
+	         Integer prevGood = prev.getGoodQty();
+	
+	         // 핵심: 이전 공정이 "완료(DONE)" + 양품수량 존재할 때만 기준값을 prevGood로 덮어씀
+	         if ("DONE".equals(prevStatus) && prevGood != null && prevGood >= 0) {
+	             curr.setStandardQty(prevGood.doubleValue());
+	             continue;
+	         }
+
+	         // fallback: 2단계 여과는 1단계 기준배합량(이론) 그대로 보여주기
+	         if ("PRC-FLT".equals(curr.getProcessId())) {
+	             curr.setStandardQty(prev.getStandardQty());
+	         }
+	     }
+
 
         // 2) 공정 시작/종료 버튼 활성화 여부 계산
         for (int i = 0; i < stepDTOs.size(); i++) {
