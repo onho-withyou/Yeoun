@@ -15,24 +15,24 @@ window.onload = function () {
 }
 
 document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
-    tab.addEventListener('shown.bs.tab', function (e) {
-        const targetId = e.target.getAttribute('data-bs-target');
+	tab.addEventListener('shown.bs.tab', function (e) {
+		const targetId = e.target.getAttribute('data-bs-target');
 
-        if (targetId === '#navs-bomDetail-tab') {//bom 상세탭
-            grid1.refreshLayout();
+		if (targetId === '#navs-bomDetail-tab') {//bom 상세탭
+			grid1.refreshLayout();
 			bomDetailGridAllSearch();
-        } else if (targetId === '#navs-bom-tab') {//bom 정보 탭
-            grid2.refreshLayout();
+		} else if (targetId === '#navs-bom-tab') {//bom 정보 탭
+			grid2.refreshLayout();
 			bomGridAllSearch();
-			matGridAllSearch();	// bom 정보 - bom 원재료id 모달
+			matGridAllSearch();    // bom 정보 - bom 원재료id 모달
 			prdItemList(); // bom 정보 - bom 완제품id 드롭다운
 			bomUnitList(); // bom 정보 - bom 단위 드롭다운 
-        }else if(targetId === '#navs-bomGroup-tab'){ //bom그룹탭
+		}else if(targetId === '#navs-bomGroup-tab'){ //bom그룹탭
 			grid8.refreshLayout();
 			bomHdrGridAllSearch();
 			bomHdrTypeList(); //bom 그룹 - bom hdr type 드롭다운
 		}
-    });
+	});
 });
 
 const modalElement = document.getElementById('safetyStock-modal');//안전재고 모달
@@ -135,6 +135,12 @@ const grid5 = new Grid({
 				}
 				,{header: '필요수량' ,name: 'matQty' ,align: 'center',editor: 'text',width: 65
 					,renderer:{ type: StatusModifiedRenderer}
+					,editor: {
+							type: NumberOnlyEditor, // ⬅️ 클래스 이름 직접 사용
+						options: {
+						maxLength: 10
+						}
+					}
 				}
 				,{header: '단위' ,name: 'matUnit' ,align: 'center',editor: 'text',width: 65
 					,renderer:{ type: StatusModifiedRenderer
@@ -177,6 +183,12 @@ const grid6 = new Grid({
 				,{header: '원재료유형' ,name: 'matType' ,align: 'center'}
 				,{header: '필요수량' ,name: 'matQty' ,align: 'center',editor: 'text',width: 65
 					,renderer:{ type: StatusModifiedRenderer}
+					,editor: {
+						type: NumberOnlyEditor, // ⬅️ 클래스 이름 직접 사용
+					options: {
+					maxLength: 10
+					}
+			}
 				}
 				,{header: '단위' ,name: 'matUnit' ,align: 'center',editor: 'text',width: 65
 					,renderer:{ type: StatusModifiedRenderer
@@ -194,6 +206,12 @@ const grid6 = new Grid({
 				}
 				,{header: 'bom 순서' ,name: 'bomSeqNo' ,align: 'center',editor: 'text',width: 65
 					,renderer:{ type: StatusModifiedRenderer}
+						,editor: {
+							type: NumberOnlyEditor, // ⬅️ 클래스 이름 직접 사용
+						options: {
+						maxLength: 10
+						}
+					}
 				}
 				,{header: '설명' ,name: 'matDesc' ,align: 'center',width: 320}
 
@@ -329,6 +347,12 @@ const grid3 = new Grid({
 			}
 			,{header: '용량' ,name: 'volume' ,align: 'center',editor: 'text',filter: "select"
 				,renderer:{ type: StatusModifiedRenderer}
+				,editor: {
+						type: NumberOnlyEditor, // ⬅️ 클래스 이름 직접 사용
+					options: {
+					maxLength: 10
+					}
+				}
 			}
 			,{header: '단위' ,name: 'itemUnit' ,align: 'center',width:60
 				,renderer:{ type: StatusModifiedRenderer
@@ -359,12 +383,30 @@ const grid3 = new Grid({
 			}
 			,{header: '정책일수' ,name: 'policyDays' ,align: 'center',editor: 'text'
 				,renderer:{ type: StatusModifiedRenderer}
+				,editor: {
+						type: NumberOnlyEditor, // ⬅️ 클래스 이름 직접 사용
+					options: {
+					maxLength: 10
+					}
+				}
 			}
 	        ,{header: '일별 수량' ,name: 'safetyStockQtyDaily' ,align: 'center',editor: 'text'
 				,renderer:{ type: StatusModifiedRenderer}
+				,editor: {
+						type: NumberOnlyEditor, // ⬅️ 클래스 이름 직접 사용
+					options: {
+					maxLength: 10
+					}
+				}
 			}
 			,{header: '총 수량' ,name: 'safetyStockQty' ,align: 'center',editor: 'text'
 				,renderer:{ type: StatusModifiedRenderer}
+				,editor: {
+						type: NumberOnlyEditor, // ⬅️ 클래스 이름 직접 사용
+					options: {
+					maxLength: 10
+					}
+				}
 			}
 			,{header: '상태' ,name: 'status' ,align: 'center',editor: 'text'
 				,renderer:{ type: StatusModifiedRenderer
@@ -1297,11 +1339,11 @@ function saveBomRow(type) {
 		alert("저장 중 오류가 발생했습니다.");
 	});
 }
+//bomHdr row 저장- 학원에 구현되어있음
 
 //안전재고 row 저장
 const saveSafetyStockRowBtn = document.getElementById('saveSafetyStockRowBtn');
 saveSafetyStockRowBtn.addEventListener('click', function() {
-	console.log("안전재고 저장버튼 클릭");
 	const modifiedData = (typeof grid3.getModifiedRows === 'function') ? (grid3.getModifiedRows() || {}) : {};
 	const updatedRows = Array.isArray(modifiedData.updatedRows) ? modifiedData.updatedRows : [];
 	let createdRows = Array.isArray(modifiedData.createdRows) ? modifiedData.createdRows : [];
