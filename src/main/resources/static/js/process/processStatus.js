@@ -791,8 +791,21 @@ if (finishEl && detailEl) {
   }
   document.addEventListener("hidden.bs.modal", normalizeModalState);
 }
-// ===============================================================================
 
+// 페이지 오버레이
+function showDetailOverlay(msg = "처리 중...") {
+  const el = document.getElementById("detailLoadingOverlay");
+  if (!el) return;
+  const txt = el.querySelector(".text-muted");
+  if (txt) txt.textContent = msg;
+  el.classList.remove("d-none");
+}
+
+function hideDetailOverlay() {
+  const el = document.getElementById("detailLoadingOverlay");
+  if (!el) return;
+  el.classList.add("d-none");
+}
 
 // -------------------------------
 // 날짜 포맷
