@@ -450,7 +450,7 @@ document.addEventListener("click", (e) => {
       stdInput.value = standard ? standard + " ml" : "-";
     } else {
       if (labelEl) labelEl.textContent = "기준 완제품 수량 (이론)";
-      if (helpEl)  helpEl.textContent  = "현재 배합량으로 이론상 생산 가능한 완제품 개수입니다.";
+      if (helpEl)  helpEl.textContent  = "계획수량 기준으로 표시되는 표준 기준값(이론)입니다. (손실 반영 X)";
       stdInput.value = standard ? standard + " EA" : "-";
     }
 
