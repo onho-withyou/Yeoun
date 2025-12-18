@@ -98,9 +98,95 @@ document.addEventListener('DOMContentLoaded', function () {
       });
   });
 
-  // ================== 4) 권한 저장 버튼 클릭 ==================
-  btnSaveRole.addEventListener('click', function () {
-    document.getElementById('roleAssignForm').submit();
+  // ================== 4) 권한 저장: confirm -> (SYS_ADMIN 추가 confirm) -> 비번 모달 -> verify -> submit ==================
+    const roleForm = document.getElementById('roleAssignForm');
+
+    const adminPwModalEl = document.getElementById('adminPwModal');
+    const adminPwModal = adminPwModalEl ? new bootstrap.Modal(adminPwModalEl) : null;
+
+    const adminPwInput = document.getElementById('adminPassword');
+    const adminPwError = document.getElementById('adminPwError');
+    const btnVerifyAdminPw = document.getElementById('btnVerifyAdminPw');
+
+    btnSaveRole.addEventListener('click', function () {
+      // 사원 선택 안 했으면 방어
+      if (!formEmpId.value) {
+        alert('사원을 선택하세요.');
+        return;
+      }
+
+      if (!confirm('선택한 권한으로 저장하시겠습니까?')) return;
+
+      // SYS_ADMIN 선택 시 추가 확인
+      const sysAdminCb = document.querySelector("input[name='roleCodes'][value='ROLE_SYS_ADMIN']");
+      if (sysAdminCb && sysAdminCb.checked) {
+        const ok = confirm('⚠ SYS_ADMIN은 최상위 권한입니다.\n정말 부여하시겠습니까?');
+        if (!ok) return;
+      }
+
+      // 비밀번호 확인 모달
+      if (!adminPwModal) {
+        // 모달이 없다면 최소 fallback(원하면 막아도 됨)
+        roleForm.submit();
+        return;
+      }
+
+      adminPwInput.value = '';
+      adminPwError.classList.add('d-none');
+      adminPwModal.show();
+    });
+
+    btnVerifyAdminPw?.addEventListener('click', function () {
+      const pw = (adminPwInput.value || '').trim();
+      if (!pw) {
+        adminPwError.textContent = '비밀번호를 입력하세요.';
+        adminPwError.classList.remove('d-none');
+        return;
+      }
+
+      // 비밀번호 재확인 API 호출
+      fetch('/auth/manage/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          ...(typeof csrfHeader !== 'undefined' && typeof csrfToken !== 'undefined'
+              ? { [csrfHeader]: csrfToken }
+              : {})
+        },
+        body: new URLSearchParams({ password: pw })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (!data || !data.success) {
+          adminPwError.textContent = data?.message || '비밀번호 확인 실패';
+          adminPwError.classList.remove('d-none');
+          return;
+        }
+
+        adminPwModal.hide();
+        roleForm.submit(); // 검증 성공 시에만 저장 요청
+      })
+      .catch(err => {
+        console.error('verify error', err);
+        adminPwError.textContent = '비밀번호 확인 중 오류가 발생했습니다.';
+        adminPwError.classList.remove('d-none');
+      });
+    });
+
   });
 
-});
+  // 비밀번호 보기/숨기기 (manage 페이지에 없으면 추가)
+  function togglePassword(inputId, iconEl) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    if (input.type === 'password') {
+      input.type = 'text';
+      iconEl.classList.remove('bx-hide');
+      iconEl.classList.add('bx-show');
+    } else {
+      input.type = 'password';
+      iconEl.classList.remove('bx-show');
+      iconEl.classList.add('bx-hide');
+    }
+  }
