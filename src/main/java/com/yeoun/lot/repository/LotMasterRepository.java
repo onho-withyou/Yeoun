@@ -41,7 +41,8 @@ public interface LotMasterRepository extends JpaRepository<LotMaster, String> {
 		    SELECT
 		      lm.lot_no AS lotNo,
 		      COALESCE(p.prd_name, m.mat_name, lm.prd_id) AS displayName,
-		      lm.current_status AS currentStatus
+		      lm.current_status AS currentStatus,
+		      lm.lot_type AS lotType
 		    FROM lot_master lm
 		    LEFT JOIN product_mst p ON p.prd_id = lm.prd_id
 		    LEFT JOIN material_mst m ON m.mat_id = lm.prd_id

@@ -179,9 +179,8 @@ public class LotTraceService {
 		        .filter(row -> {
 		        	// type: LOT 번호 prefix로 WIP/FIN 판별
 		            if (tp.isEmpty()) return true;
-		            String lotNo = (String) row[0];
-		            String lotType = lotNo.split("-")[0]; // WIP 또는 FIN
-		            return tp.equals(lotType);
+		            String lotType = (String) row[3];
+		            return tp.equalsIgnoreCase(lotType);
 		        })
 		        .map(row -> {
 		        	// 상태 코드를 화면 라벨로 변환
@@ -607,7 +606,12 @@ public class LotTraceService {
 	    Map.entry("RUN", "가동"),
 	    Map.entry("STOP", "정지"),
 	    Map.entry("BREAKDOWN", "고장"),
-	    Map.entry("MAINTENANCE", "점검")
+	    Map.entry("MAINTENANCE", "점검"),
+	    
+	    // 재고 상태 (UI와 일치)
+	    Map.entry("DISPOSAL_WAIT", "임박"),
+	    Map.entry("DISPOSAL", "폐기"),
+	    Map.entry("SOLD_OUT", "소진완료")
 	);
 
 	// 공통 라벨링
@@ -637,25 +641,35 @@ public class LotTraceService {
 	            lotMasterRepository.findMaterialRootLots();
 
 	    return rows.stream()
-	        .filter(r -> kw.isEmpty()
-	            || r.getLotNo().contains(kw)
-	            || (r.getDisplayName() != null && r.getDisplayName().contains(kw)))
-	        .filter(r -> tp.isEmpty() || tp.equalsIgnoreCase("RAW") || true) // 필요 시 제거
-	        .filter(r -> {
-	            if (st.isEmpty()) return true;
-	            if ("SOLD_OUT".equals(st)) return "SOLD_OUT".equals(r.getInvStatus());
-	            return st.equals(r.getInvStatus());
-	        })
-	        .map(r -> new LotRootDTO(
-	            r.getLotNo(),
-	            r.getDisplayName(),
-	            "SOLD_OUT".equals(r.getInvStatus())
-	                ? "소진완료"
-	                : labelOf(r.getInvStatus())
-	        ))
-	        .toList();
-	}
-	
+            // 1) 키워드
+            .filter(r -> kw.isEmpty()
+                || (r.getLotNo() != null && r.getLotNo().contains(kw))
+                || (r.getDisplayName() != null && r.getDisplayName().contains(kw)))
+
+            // 2) 타입 (RAW/SUB/PKG)
+            .filter(r -> {
+                if (tp.isEmpty()) return true;
+                String lotNo = r.getLotNo();
+                if (lotNo == null || !lotNo.contains("-")) return false;
+                String lotType = lotNo.split("-")[0];   // RAW / SUB / PKG
+                return tp.equalsIgnoreCase(lotType);
+            })
+
+            // 3) 재고 상태 (NORMAL / DISPOSAL_WAIT / DISPOSAL / SOLD_OUT)
+            .filter(r -> {
+                if (st.isEmpty()) return true;
+                return st.equalsIgnoreCase(r.getInvStatus());
+            })
+
+            // 4) DTO 변환 (화면 라벨)
+            .map(r -> new LotRootDTO(
+                r.getLotNo(),
+                r.getDisplayName(),
+                labelOf(r.getInvStatus())
+            ))
+            .toList();
+    }
+
 	// 자재 ROOT 상세(우측 상세 패널용)
 	@Transactional(readOnly = true)
 	public LotMaterialDetailDTO getMaterialRootDetail(String lotNo) {
