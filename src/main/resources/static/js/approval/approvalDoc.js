@@ -2199,7 +2199,7 @@ function approvalNo(count, text) {
 	                    type="button" class="btn btn-primary" 
 	                    data-count="${count}" 
 	                    onclick="applyDelegateChange(this)"
-						style="display:none;">
+						style="display:none;margin-left:5px;">
 	                전결자로 지정
 	            </button>
 	        `;
