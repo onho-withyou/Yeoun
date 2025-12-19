@@ -4,6 +4,7 @@ import com.yeoun.equipment.dto.*;
 import com.yeoun.equipment.entity.Equipment;
 import com.yeoun.equipment.entity.ProdLine;
 import com.yeoun.equipment.repository.EquipmentRepository;
+import com.yeoun.equipment.repository.ProdEquipRepository;
 import com.yeoun.equipment.repository.ProdLineRepository;
 import com.yeoun.equipment.service.EquipmentService;
 
@@ -37,6 +38,7 @@ public class EquipmentController {
     private final EquipmentService equipmentService;
     private final EquipmentRepository equipmentRepository;
     private final ProdLineRepository prodLineRepository;
+    private final ProdEquipRepository prodEquipRepository;
 
     // ===================================================
     // 설비, 라인 기준정보 페이지
@@ -170,6 +172,15 @@ public class EquipmentController {
         List<ProdLineDTO> useLines = prodLineRepository.findByUseYn("Y").stream()
                 .map(ProdLineDTO::fromEntity)
                 .toList();
+        
+        // 보유 설비 갯수
+        Integer totalEquipCount = prodEquipRepository.findAll().size();
+        Integer activeEquipCount = equipmentService.selectRunningEquipmentCount();
+        Integer inactiveEquipCount = totalEquipCount - activeEquipCount;
+        Integer downEquipCount = prodEquipRepository.findByStatus("STOP").size();
+        Integer activePer = (int) ((double) activeEquipCount / totalEquipCount * 100);
+        Integer downPer = (int) ((double) downEquipCount / totalEquipCount * 100);
+        Integer inactivePer = 100 - activePer - downPer;
 
 
         model.addAttribute("equipTypes", equipments);
@@ -177,6 +188,13 @@ public class EquipmentController {
         model.addAttribute("lines", lines);
         model.addAttribute("useLines", useLines);
         model.addAttribute("req", req);
+        model.addAttribute("totalEquipCount", totalEquipCount);
+        model.addAttribute("activeEquipCount", activeEquipCount);
+        model.addAttribute("inactiveEquipCount", inactiveEquipCount);
+        model.addAttribute("downEquipCount", downEquipCount);
+        model.addAttribute("activePer", activePer);
+        model.addAttribute("inactivePer", inactivePer);
+        model.addAttribute("downPer", downPer);
     	return "equipment/list";
     }
 
@@ -202,7 +220,7 @@ public class EquipmentController {
     // 설비별 작업 이력 조회
     @GetMapping("/equip/{id}/history")
     @ResponseBody
-    public List<WorkOrderProcessDTO> loadHistory(@PathVariable Long id) {
+    public List<WorkOrderProcessDTO> loadHistory(@PathVariable("id") Long id) {
         List<WorkOrderProcessDTO> list = equipmentService.loadAllEquipmentHistory(id);
         log.info("list ::::::::: " + list);
         return list;

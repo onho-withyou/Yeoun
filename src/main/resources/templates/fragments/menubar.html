@@ -242,7 +242,7 @@
 	            </ul>
             </li>
 
-            <li class="menu-item">
+            <li class="menu-item" sec:authorize="hasAnyRole('MES_USER','MES_MANAGER','SYS_ADMIN')">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <div data-i18n="Work order">생산관리</div>
                 </a>               
@@ -267,7 +267,7 @@
             </li>
             
             <!-- 설비 관리 -->
-            <li class="menu-item">
+            <li class="menu-item" sec:authorize="hasAnyRole('MES_USER','MES_MANAGER','SYS_ADMIN')">
             	<a href="javascript:void(0);" class="menu-link menu-toggle">
                     <div data-i18n="Equipment management">설비관리</div>
                 </a>
