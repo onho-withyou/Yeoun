@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -116,14 +117,15 @@ public interface InventoryRepository
 	@Query("""
 		    SELECT i
 		    FROM Inventory i
-		    WHERE i.itemId = :itemId
+		    JOIN FETCH i.warehouseLocation
+		    WHERE i.itemId IN :itemIds
 		      AND i.ivStatus <> :status
 		    ORDER BY
-			    i.expirationDate ASC,
-			    i.ibDate ASC,
-			    i.ivAmount DESC
+		        i.itemId ASC,
+		        i.expirationDate ASC,
+		        i.ibDate ASC
 		""")
-	List<Inventory> findByItemIdAndIvStatusNot(@Param("itemId") String itemId, @Param("status") String status);
+	List<Inventory> findByItemIdAndIvStatusNot(@Param("itemIds") Set<String> itemsIds, @Param("status") String status);
 
 	// 재고삭제
 	void delete(Inventory stock);
