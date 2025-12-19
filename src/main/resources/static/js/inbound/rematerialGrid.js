@@ -84,7 +84,7 @@ async function loadReMaterialInbound(startDate, endDate, searchType, keyword) {
 		
 		// 데이터가 없을 경우 빈배열 반환
 		if (!data || data.length === 0) {
-			grid.resetData([]);
+			reMaterialGrid.resetData([]);
 		}
 		
 		const statusMap = {
