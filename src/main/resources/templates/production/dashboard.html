@@ -1,0 +1,50 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
+<th:block layout:fragment="content">
+
+  <div class="custom-body container-xxl flex-grow-1 container-p-y">
+
+    <!-- 제목 -->
+    <div class="d-flex align-items-end justify-content-between flex-wrap gap-2 mb-3">
+      <div>
+        <h4 class="mb-0"><b>생산관리 대시보드</b></h4>
+      </div>
+    </div>
+
+    <!-- ******************************************************* -->
+	<!-- 3. 생산 현황 추적 차트 -->
+	<div class="card card-soft mb-3">
+		<div class="card-body">
+			<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+				<div>
+					<h6 class="section-title">생산 현황 추적</h6>
+					<div class="section-sub">기간별 계획 대비 완료 추이</div>
+				</div>
+				<div class="btn-group" role="group">
+					<button type="button" class="btn btn-outline-primary btn-sm" data-range="month">월</button>
+					<button type="button" class="btn btn-outline-primary btn-sm" data-range="week">주</button>
+            		<button type="button" class="btn btn-primary btn-sm" data-range="day">일</button>
+				</div>
+			</div>
+			
+			<div id="prodChart" style="height: 320px;"></div>
+			<div class="text-muted small mt-2">※ 일/주/월 기준 집계</div>
+		</div>
+	</div>
+
+  </div> <!-- /container -->
+
+  <!-- ApexCharts CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  
+  <!-- 서버 주입 데이터 -->
+  <script th:inline="javascript">
+    window.ctx = /*[[@{/}]]*/ '';
+    window.initialTrend = /*[[${trend}]]*/ null;
+  </script>
+
+  <script src="/js/production/dashboard.js"></script>
+
+</th:block>
+</th:block>
