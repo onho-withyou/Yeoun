@@ -18,9 +18,9 @@ import com.yeoun.process.service.ProductionDashboardService;
 import lombok.RequiredArgsConstructor;
 
 @Controller
-@RequestMapping("/production")
+@RequestMapping("/process")
 @RequiredArgsConstructor
-public class ProductionDashboardController {
+public class ProcessDashboardController {
 	
 	private final ProductionDashboardService productionDashboardService;
 	
