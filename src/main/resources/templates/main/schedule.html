@@ -191,8 +191,8 @@
 	            			onclick="handleAttendanceToggle(this.dataset.empId)" 
 	            			id="attendance" 
 	            			style="width:50%"
-	            			 th:attr="data-emp-id=${#authentication.name},
-                 					  disabled=${buttonEnabled} ? null : 'disabled'">
+	            			th:attr="data-emp-id=${#authentication.name},
+                 					 disabled=${buttonEnabled} ? null : 'disabled'">
 	            				<span th:if="${status == 'WORKIN' or status == 'LATE'}">퇴근</span>
 	            				<span th:unless="${status == 'WORKIN' or status == 'LATE'}">출근</span>
 	            		</button>
@@ -202,7 +202,7 @@
 	            	</div>
 					<div class="card">
 						<div>
-							<h3 style="font-size:18px; font-weight:700;">공지사항 목록</h3>
+							<h3 style="font-size:18px; font-weight:700; text-align: center;">공지사항 목록</h3>
 						</div>
 						<div class="table-responsive text-nowrap" id="noticeGrid"></div>
 							<p style="font-size:10px; text-align: right; vertical-align: bottom;">
@@ -211,7 +211,7 @@
 					</div>
 					<div class="card">
 						<div>
-							<h3 style="font-size:18px; font-weight:700;">결재 문서 목록</h3>
+							<h3 style="font-size:18px; font-weight:700; text-align: center;">결재 문서 목록</h3>
 						</div>
 						<div class="table-responsive text-nowrap" id="approvalGrid"></div>
 							<p style="font-size:10px; text-align: right; vertical-align: bottom;">
