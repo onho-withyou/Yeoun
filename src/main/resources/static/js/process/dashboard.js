@@ -62,22 +62,66 @@ function formatMinutes(min) {
 }
 
 // -------------------------------
-// 라인 히트맵 "1164분" -> "19시간 24분" 변환
+// 마지막 업데이트 시간 표시
+// -------------------------------
+function updateLastUpdatedAt(date = new Date()) {
+  const el = document.getElementById("lastUpdatedAt");
+  if (!el) return;
+
+  const hh = String(date.getHours()).padStart(2, "0");
+  const mm = String(date.getMinutes()).padStart(2, "0");
+  const ss = String(date.getSeconds()).padStart(2, "0");
+
+  el.textContent = `${hh}:${mm}`;
+}
+
+// -------------------------------
+// 라인 히트맵: 초기 포맷 + 실시간 증가(1분마다)
 // -------------------------------
 document.addEventListener("DOMContentLoaded", () => {
+
+  // 1) 초기 1회: "1164분" -> "19시간 24분"
   document.querySelectorAll(".rack .big-mid").forEach(el => {
     const stay = Number(el.dataset.stay);
     const active = Number(el.dataset.active);
-	
-	// 서버가 이미 라벨 포함 텍스트를 넣어둔 경우(예: "QC대기 14분")는 덮어쓰지 않음
-    const current = (el.textContent || "").trim();
-    if (current.includes("QC") || current.includes("대기") || current.includes("시작대기")) {
-      return;
-    }
 
-    // 진행중(또는 QC대기 포함해서 inProgressCnt에 들어오는 값)인 경우만 포맷 적용
+    const current = (el.textContent || "").trim();
+    if (current.includes("QC") || current.includes("대기") || current.includes("시작대기")) return;
+
     if (active > 0 && !Number.isNaN(stay)) {
       el.textContent = formatMinutes(stay);
     }
   });
+
+  // 2) 1분 tick
+  function tickHeatmapMinutes() {
+    document.querySelectorAll(".rack .big-mid").forEach(el => {
+      const active = Number(el.dataset.active);
+      if (!(active > 0)) return;
+
+      let stay = Number(el.dataset.stay);
+
+      // QC대기 n분 같은 케이스를 대비한 파싱
+      if (Number.isNaN(stay)) {
+        const m = (el.textContent || "").match(/(\d+)\s*분/);
+        stay = m ? Number(m[1]) : NaN;
+      }
+      if (Number.isNaN(stay)) return;
+
+      stay += 1;
+      el.dataset.stay = String(stay);
+
+      const current = (el.textContent || "").trim();
+      if (current.startsWith("QC대기")) {
+        el.textContent = `QC대기 ${stay}분`;
+      } else {
+        el.textContent = formatMinutes(stay);
+      }
+    });
+
+    updateLastUpdatedAt(); // tick 1회마다 갱신
+  }
+
+  updateLastUpdatedAt();                 // 최초 1회
+  setInterval(tickHeatmapMinutes, 60_000);
 });
