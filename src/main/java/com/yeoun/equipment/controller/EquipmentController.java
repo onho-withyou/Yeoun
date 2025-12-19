@@ -83,7 +83,7 @@ public class EquipmentController {
     // ===================================================
     // 설비 마스터 수정하기
     @PatchMapping("/equipType/{id}")
-    public ResponseEntity<?> updateEquipType(@PathVariable String id,
+    public ResponseEntity<?> updateEquipType(@PathVariable("id") String id,
                 @Valid @RequestBody EquipmentTypeCreateRequest req) {
         equipmentService.modifyEquipmentType(req);
         return ResponseEntity.ok().build();
@@ -92,7 +92,7 @@ public class EquipmentController {
     // ===================================================
     // 설비 마스터 삭제(비활성화)하기
     @PatchMapping("/equipType/{id}/inActive")
-    public ResponseEntity<?> deleteEquipType(@PathVariable String id,
+    public ResponseEntity<?> deleteEquipType(@PathVariable("id") String id,
                                              @RequestBody EquipmentTypeCreateRequest req) {
         equipmentService.modifyYnEquipmentType(id, req.getUseYn());
         return ResponseEntity.ok().build();
@@ -133,7 +133,7 @@ public class EquipmentController {
     // ===================================================
     // 라인 수정하기
     @PatchMapping("/line/{id}")
-    public ResponseEntity<?> updateLine(@PathVariable String id,
+    public ResponseEntity<?> updateLine(@PathVariable("id") String id,
                @Valid @RequestBody LineCreateRequest req) {
         equipmentService.modifyLine(req);
         return ResponseEntity.ok().build();
@@ -142,7 +142,7 @@ public class EquipmentController {
     // ===================================================
     // 라인 삭제(비활성화)하기
     @PatchMapping("/line/{id}/inActive")
-    public ResponseEntity<?> deleteLine(@PathVariable String id,
+    public ResponseEntity<?> deleteLine(@PathVariable("id") String id,
                @RequestBody LineCreateRequest req) {
         equipmentService.modifyYnLine(id, req.getUseYn());
         return ResponseEntity.ok().build();

@@ -143,7 +143,7 @@
                 <span class="menu-header-text">MES</span>
             </li>
             <li class="menu-item">
-                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <a href="javascript:void(0);" class="menu-link menu-toggle"  sec:authorize="hasAnyRole('MES_USER','MES_MANAGER','SYS_ADMIN')">
                     <div data-i18n="Master Data Management" class="menu-link-sub">기준정보관리</div>
                 </a>
                 <ul class="menu-sub">
