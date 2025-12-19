@@ -191,6 +191,12 @@ public class EquipmentService {
 	public List<EquipDowntimeDTO> loadAllEquipDowntimeHistory(HistorySearchDTO dto) {
 		return equipmentMapper.selectDowntimeHistories(dto);
 	}
+	
+	// 가동중 설비 목록
+	public Integer selectRunningEquipmentCount () {
+		return equipmentMapper.countRunningEquipments();
+	}
+	
 }
 
 
