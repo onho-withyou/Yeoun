@@ -771,11 +771,15 @@ async function initNoticeGrid(data) {
 	                        dateHtml = `<span style="font-size: 11px; color: #888; margin-left: 10px; flex-shrink: 0;">${dateText}</span>`;
 	                    }
 	                }
+					
+					const textAlignStyle = row.noticeYN === 'Y' ? 'text-align: center; font-weight: bold;' : 'display: flex;';
 
 	                // Flexbox를 사용하여 제목(왼쪽)과 날짜(오른쪽) 배치
 	                return `
-	                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-	                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.7rem;">${title}</span>
+            			<div style="justify-content: space-between; align-items: center; width: 100%; ${textAlignStyle}">
+						<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.7rem;">
+						${title}
+						</span>
 	                        ${dateHtml}
 	                    </div>
 	                `;
