@@ -33,7 +33,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class ProductionDashboardService {
+public class ProcessDashboardService {
 	
 	private final QcResultRepository qcResultRepository;
 	private final WorkOrderRepository workOrderRepository;

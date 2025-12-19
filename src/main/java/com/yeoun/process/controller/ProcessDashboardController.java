@@ -13,7 +13,7 @@ import com.yeoun.process.dto.LineStayRowDTO;
 import com.yeoun.process.dto.ProductionDashboardKpiDTO;
 import com.yeoun.process.dto.ProductionTrendResponseDTO;
 import com.yeoun.process.dto.StayCellDTO;
-import com.yeoun.process.service.ProductionDashboardService;
+import com.yeoun.process.service.ProcessDashboardService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,17 +22,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProcessDashboardController {
 	
-	private final ProductionDashboardService productionDashboardService;
+	private final ProcessDashboardService processDashboardService;
 	
 	@GetMapping("/dashboard")
 	public String dashboard(Model model) {
 		
 		// 1. 상단 KPI
-		ProductionDashboardKpiDTO kpi = productionDashboardService.getKpis();
+		ProductionDashboardKpiDTO kpi = processDashboardService.getKpis();
         model.addAttribute("kpi", kpi);
         
         // 2. 라인
-        List<LineStayRowDTO> rows = productionDashboardService.getLineStayHeatmap();
+        List<LineStayRowDTO> rows = processDashboardService.getLineStayHeatmap();
         model.addAttribute("heatmapRows", rows);
 
         // 전체 셀 중 진행중 건수 합
@@ -44,11 +44,11 @@ public class ProcessDashboardController {
         model.addAttribute("heatmapTotal", heatmapTotal);
         
         // 3. 차트
-        ProductionTrendResponseDTO trend = productionDashboardService.getProductionTrend("day");
+        ProductionTrendResponseDTO trend = processDashboardService.getProductionTrend("day");
         model.addAttribute("trend", trend);
         
         // 4. 즉시 조치 리스트
-        model.addAttribute("actions", productionDashboardService.getImmediateActions(10));
+        model.addAttribute("actions", processDashboardService.getImmediateActions(10));
         
 		return "/process/dashboard";
 	}
@@ -57,7 +57,7 @@ public class ProcessDashboardController {
     @GetMapping("/dashboard/trend")
     @ResponseBody
     public ProductionTrendResponseDTO trend(@RequestParam(name = "range", defaultValue = "day") String range) {
-        return productionDashboardService.getProductionTrend(range);
+        return processDashboardService.getProductionTrend(range);
     }
 
 }
