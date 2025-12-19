@@ -20,7 +20,7 @@ import lombok.Setter;
 @IdClass(BomMstId.class)
 public class BomMst {
 	
-	@Column(name="BOM_ID", length = 20, nullable = false)
+	@Column(name="BOM_ID", length = 50, nullable = false)
 	private String bomId; //BOMid
 	
 	@Id
@@ -31,7 +31,7 @@ public class BomMst {
 	@Column(name="MAT_ID", length = 50, nullable = false)
 	private String matId; //원재료id
 	
-	@Column(name="MAT_QTY",nullable = false)
+	@Column(name="MAT_QTY", nullable = false, precision = 10, scale = 3)
 	private BigDecimal matQty; //원재료사용량
 
 	@Column(name="MAT_UNIT", length = 20)
@@ -52,6 +52,9 @@ public class BomMst {
 	
 	@Column(name="UPDATED_DATE")
 	private LocalDate updatedDate; //수정일시
+
+	@Column(name="USE_YN", length = 1)
+	private String useYn; //사용여부
 
 
 }

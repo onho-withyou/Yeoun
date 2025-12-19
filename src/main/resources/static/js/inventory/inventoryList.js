@@ -4,9 +4,67 @@ let inventoryGrid; // 그리드 객체 변수
 let inventoryData = []; // 그리드로 그려지는 데이터 저장
 let locationInfo = [];
 
+function showSpinner() {
+	document.getElementById('loading-overlay').style.display = 'flex';
+}
+function hideSpinner() {
+	document.getElementById('loading-overlay').style.display = 'none';
+}
 
+const ibFrom = document.getElementById('searchDateFrom');
+const ibTo   = document.getElementById('searchDateTo');
+// From 변경 시 To의 최소값 제한
+ibFrom.addEventListener('change', () => {
+	if (!ibFrom.value) {
+		ibTo.min = '';
+		return;
+	}
+	ibTo.min = ibFrom.value;     // To는 From 이후만 선택 가능
+	if (ibTo.value && ibTo.value < ibFrom.value) {
+		ibTo.value = ibFrom.value; // 이미 선택된 값이 더 작으면 맞춰줌
+	}
+});
+// To 변경 시 From의 최대값 제한
+ibTo.addEventListener('change', () => {
+	if (!ibTo.value) {
+	    ibFrom.max = '';
+	    return;
+	}
+	ibFrom.max = ibTo.value;     // From은 To 이전만 선택 가능
+	if (ibFrom.value && ibFrom.value > ibTo.value) {
+    	ibFrom.value = ibTo.value; // 이미 선택된 값이 더 크면 맞춰줌
+	}
+});
+// 유통기한 기간설정
+const expFrom = document.getElementById('searchExpireDateFrom');
+const expTo   = document.getElementById('searchExpireDateTo');
+
+// From 변경 시
+expFrom.addEventListener('change', () => {
+	if (!expFrom.value) {
+	    expTo.min = '';
+	    return;
+	}
+	expTo.min = expFrom.value;
+	if (expTo.value && expTo.value < expFrom.value) {
+		expTo.value = expFrom.value;
+	}
+});
+
+// To 변경 시
+expTo.addEventListener('change', () => {
+	if (!expTo.value) {
+	    expFrom.max = '';
+	    return;
+	}
+	expFrom.max = expTo.value;
+	if (expFrom.value && expFrom.value > expTo.value) {
+		expFrom.value = expTo.value;
+	}
+});
 // 문서 로딩 후 시작
 document.addEventListener('DOMContentLoaded', async function () {
+	
 	// 창고정보 저장
 	locationInfo = await getLocationInfo();
 	inputLocationInfo(locationInfo);
@@ -18,10 +76,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 	
 	// 받아온 데이터로 그리드 생성
 	inventoryGrid.resetData(firstData);
-	inventoryGrid.sort('ibDate', true);
+	inventoryGrid.sort('ibDate', false);
 	// 그리드생성한 재고데이터를 저장
 	inventoryData = firstData;	
-	
+	hideSpinner();
 });
 
 // 검색 데이터 설정(검색, 상세검색 입력값으로 requestBody생성)
@@ -47,15 +105,26 @@ async function getSearchData() {
 			document.getElementById('searchRack').value:'',
 		status: document.getElementById('searchStatus')?
 			document.getElementById('searchStatus').value:'',
-		ibDate: document.getElementById('searchDate')?
-			addDefaultTime(document.getElementById('searchDate').value,"00:00:00"):'',
-		expirationDate: document.getElementById('searchExpireDate')?
-			addDefaultTime(document.getElementById('searchExpireDate').value,"00:00:00"):''
+		// 입고일 범위
+	    ibDateFrom: document.getElementById('searchDateFrom')
+	      ? addDefaultTime(document.getElementById('searchDateFrom').value, "00:00:00")
+	      : '',
+	    ibDateTo: document.getElementById('searchDateTo')
+	      ? addDefaultTime(document.getElementById('searchDateTo').value, "23:59:59")
+	      : '',
+	    // 유통기한 범위
+	    expDateFrom: document.getElementById('searchExpireDateFrom')
+	      ? addDefaultTime(document.getElementById('searchExpireDateFrom').value, "00:00:00")
+	      : '',
+	    expDateTo: document.getElementById('searchExpireDateTo')
+	      ? addDefaultTime(document.getElementById('searchExpireDateTo').value, "23:59:59")
+	      : ''
 	};
 }
 
 // 검색데이터에 기반하여 재고 데이터 정보 가져오기
 async function fetchInventoryData(searchData) {
+	console.log(searchData);
 	const response = 
 		await fetch('/api/inventories', {
 			method: 'POST',
@@ -79,6 +148,8 @@ const btnSearch = document.getElementById('btnSearch');
 btnSearch.addEventListener('click', async () => {
 	event.preventDefault(); // 폼제출 막기
 	
+	showSpinner();
+	
 	const searchData = await getSearchData();
 	const gridData = await fetchInventoryData(searchData)
 	// 받아온 데이터로 그리드 생성
@@ -86,6 +157,7 @@ btnSearch.addEventListener('click', async () => {
 	// 그리드생성한 재고데이터를 저장
 	inventoryData = gridData;	
 	
+	hideSpinner();
 
 });
 
@@ -141,7 +213,10 @@ function initGrid() {
 		pageOptions: {
 		    useClient: true,  // 클라이언트 사이드 페이징
 		    perPage: 20       // 페이지당 20개 행
-		},	
+		},
+		columnOptions: {
+			resizable: true
+		},
 		columns: [
 		  { header: 'LOT 번호',  name: 'lotNo',    minWidth: 220 },
 		  { header: '상품명',    name: 'prodName', minWidth: 180 },
@@ -162,10 +237,12 @@ function initGrid() {
 		  { header: 'Rack',      name: 'rack',     minWidth: 60, hidden: true },
 		  { header: 'Row',       name: 'rackRow',  minWidth: 60, hidden: true },
 		  { header: 'Col',       name: 'rackCol',  minWidth: 60, hidden: true },
-		  { header: '입고일',    name: 'ibDate',   minWidth: 120, 
+		  { header: '입고일',    name: 'ibDate',   minWidth: 120,
+			sortable:true, sortingType: 'desc',
 			formatter: ({ value }) => value ? value.substring(0, 16) : ''
 		  },
 		  { header: '유통기한',  name: 'expirationDate', minWidth: 120, 
+			sortable:true,
 			formatter: ({ value }) => value ? value.substring(0, 10) : '없음'
 		  },
 		  { header: '상태',      name: 'ivStatus', width: 80, 
@@ -204,6 +281,7 @@ function initGrid() {
 			}
 		}
 	});
+
 }
 
 
@@ -251,38 +329,6 @@ function inputLocationInfo(locationInfo) {
 	fillSelect(zoneSelect, zones);
 	fillSelect(rackSelect, racks);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // 상세검색버튼
 document.getElementById('btnToggleAdvanced').addEventListener('click', function () {

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+// QC 결과 조회 화면 목록용
 @Getter
 @Setter
 @NoArgsConstructor
@@ -33,5 +34,8 @@ public class QcResultListDTO {
 	
 	// 불합격사유
 	private String failReason;
+	
+	// 검사자
+	private String inspectorId;
 	
 }

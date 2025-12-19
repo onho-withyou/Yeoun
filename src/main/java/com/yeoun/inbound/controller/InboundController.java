@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -50,12 +51,28 @@ public class InboundController {
 		return "inbound/inbound_list";
 	}
 	
+	// 재입고 페이지
+	@GetMapping("/reInboundList")
+	public String reMaterial(Model model) {
+		// 탭 활성화를 위한 정보
+		model.addAttribute("activeTab", "re");
+		return "inbound/inbound_list";
+	}
+	
 	// 완제품 페이지
 	@GetMapping("/productList")
 	public String product(Model model) {
 		// 탭 활성화를 위한 정보
-		model.addAttribute("activeTab", "pro");
+		model.addAttribute("activeTab", "prd");
 		return "inbound/inbound_list";
+	}
+	
+	// 입고상세정보 - 작업지시서 새창
+	@GetMapping("/detail/prodWin/{id}")
+	public String product(Model model, @PathVariable("id") String id) {
+		// 탭 활성화를 위한 정보
+		model.addAttribute("id", id);
+		return "inbound/workorder_window";
 	}
 	
 	// 원재료 목록 데이터(날짜 지정과 검색 기능 포함)
@@ -81,10 +98,29 @@ public class InboundController {
 	public String materialDetail(@PathVariable("inboundId") String inboundId, Model model) {
 		
 		ReceiptDTO receiptDTO = inboundService.getMaterialInbound(inboundId);
-		
 		model.addAttribute("receiptDTO", receiptDTO);
 		
 		return "inbound/inbound_detail";
+	}
+	
+	// 완제품 입고 상세페이지
+	@GetMapping("/prd/{inboundId}")
+	public String productDetail(@PathVariable("inboundId") String inboundId, Model model) {
+		
+		ReceiptDTO receiptDTO = inboundService.getMaterialInbound(inboundId);
+		model.addAttribute("receiptDTO", receiptDTO);
+		
+		return "inbound/product_detail";
+	}
+	
+	// 재입고 상세페이지
+	@GetMapping("/re/{inboundId}")
+	public String reMaterialDetailDetail(@PathVariable("inboundId") String inboundId, Model model) {
+		
+		ReceiptDTO receiptDTO = inboundService.getMaterialInbound(inboundId);
+		model.addAttribute("receiptDTO", receiptDTO);
+		
+		return "inbound/re_material_detail";
 	}
 	
 	// 원재료 입고 처리
@@ -92,7 +128,18 @@ public class InboundController {
 	@ResponseBody
 	public Map<String, Object> materialComplete(@RequestBody ReceiptDTO receiptDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
 		inboundService.updateInbound(receiptDTO, loginDTO.getEmpId());
-//		System.out.println(receiptDTO);
+		Map<String, Object> result = new HashMap<>();
+		
+		result.put("success", true);
+		
+		return result;
+	}
+	
+	// 재입고 처리
+	@PostMapping("/re/complete")
+	@ResponseBody
+	public Map<String, Object> reMaterialComplete(@RequestBody ReceiptDTO receiptDTO, @AuthenticationPrincipal LoginDTO loginDTO) {
+		inboundService.updateReInbound(receiptDTO, loginDTO.getEmpId());
 		Map<String, Object> result = new HashMap<>();
 		
 		result.put("success", true);

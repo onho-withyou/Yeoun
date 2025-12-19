@@ -4,6 +4,8 @@ import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,6 +21,11 @@ public class WebSecurityConfig {
 	private final CustomUserDetailsService customuserDetailsService;
 	private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 	
+	@Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+	
 	// ====================================================================
 	// 스프링 시큐리티 보안 필터 설정
 	// => 리턴타입이 SecurityFilterChain 타입을 리턴하는 메서드여야 함
@@ -33,6 +40,13 @@ public class WebSecurityConfig {
 				.sessionManagement(session -> session
 	                    .invalidSessionUrl("/login?session=expired")
 	            )
+
+				// ================== CSRF 예외 설정 ==================
+				.csrf(csrf -> csrf
+						.ignoringRequestMatchers(
+								"/messenger/status/offline"
+						)
+				)
 				
 				// --------- 요청에 대한 접근 허용 여부 등의 요청 경로에 대한 권한 설정 -------
 				.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
@@ -72,13 +86,13 @@ public class WebSecurityConfig {
                     	.hasAnyRole("SYS_ADMIN")
                     	
 	                // 급여 관리
-                    	// 사원용 급여명세서
-                    	.requestMatchers("/pay/emp_pay", "/pay/emp_pay/**" ,"/pay/pdf/**")
-                    	    .authenticated()
+                	// 사원용 급여명세서
+                	.requestMatchers("/pay/emp_pay", "/pay/emp_pay/**" ,"/pay/pdf/**")
+                	    .authenticated()
 
-                    	// 급여 관리자 페이지
-                    	.requestMatchers("/pay/rule/**", "/pay/rule_calc/**", "/pay/rule_item/**", "/pay/calc/**", "/pay/history/**", "/pay/**" )
-                       	.hasAnyRole("SYS_ADMIN")
+                	// 급여 관리자 페이지
+                	.requestMatchers("/pay/rule/**", "/pay/rule_calc/**", "/pay/rule_item/**", "/pay/calc/**", "/pay/history/**", "/pay/**" )
+                   	.hasAnyRole("SYS_ADMIN")
                     	
                     	
 	                // 전자결재 설정(양식/결재선 관리 등)
@@ -88,9 +102,45 @@ public class WebSecurityConfig {
 	                // MES 일반 사용자
 						.requestMatchers("/order/**")
 						.permitAll()
+						.requestMatchers("/equipment/**")
+						.permitAll()
+						
+					// ================== MES (생산부) ==================
+					.requestMatchers("/production/**", "/process/**", "/lot/**")
+					.hasAnyRole("SYS_ADMIN", "MES_USER", "MES_MANAGER")
 
+					// ================== 품질관리 ==================
+					.requestMatchers("/qc/**")
+					.hasAnyRole("SYS_ADMIN", "QC_USER", "QC_ADMIN")
+
+					// 물류관리부
+					// 대시보드
+					.requestMatchers("/inventory/dashboard/**")
+					.hasAnyRole("SYS_ADMIN", "LOG_ADMIN")
+					// 재고조회
+					.requestMatchers("/inventory/list/**")
+					.hasAnyRole("SYS_ADMIN", "MES_USER")
+					// 재고이력
+					.requestMatchers("/inventory/history/**")
+					.hasAnyRole("SYS_ADMIN", "MES_USER")
+					// 재고실사
+					.requestMatchers("/inventory/stock-take/**")
+					.hasAnyRole("SYS_ADMIN", "LOG_USER")
+					// 입고관리
+					.requestMatchers("/inventory/inbound/**")
+					.hasAnyRole("SYS_ADMIN", "LOG_USER")
+					// 출고관리
+					.requestMatchers("/inventory/outbound/**")
+					.hasAnyRole("SYS_ADMIN", "LOG_USER")
+					
+					//영업관리
+					.requestMatchers("/sales/**")
+					.hasAnyRole("SYS_ADMIN", "SALES_ADMIN")
+					
 	                // 그 외 나머지는 로그인만 되어있으면 접근 허용
 	                .anyRequest().authenticated()
+	                
+	                
 				 )
 				// ---------- 로그인 처리 설정 ---------
 				.formLogin(login -> login

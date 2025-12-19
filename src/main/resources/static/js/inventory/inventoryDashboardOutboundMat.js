@@ -37,8 +37,6 @@ matObWorkOrderSelect.addEventListener("focus", async () => {
 		return;
 	}
 	
-	console.log(workOrderList);
-	
 	matObWorkOrderSelect.innerHTML = `<option value="">작업지시서를 선택하세요</option>`;
 	
 	// 옵션 추가
@@ -47,8 +45,7 @@ matObWorkOrderSelect.addEventListener("focus", async () => {
 		opt.value = el.orderId;
 		opt.textContent = `${el.orderId} - ${el.productName}`;
 		opt.dataset.productId = el.productId;
-		matObWorkId.value = el.orderId;
-		matObManagerId.value = el.createdId;
+		opt.dataset.managerId = el.productId;
 		
 		matObWorkOrderSelect.appendChild(opt);
 	});
@@ -56,12 +53,17 @@ matObWorkOrderSelect.addEventListener("focus", async () => {
 
 // 작업지시 선택 시 상세 정보 입력
 matObWorkOrderSelect.addEventListener("change", async () => {
-	const matObWorkId = matObWorkOrderSelect.value;
+	matObWorkId.value = matObWorkOrderSelect.value;
+	let createdData = workOrderList.find(el => {
+		return el.orderId === matObWorkId.value;
+	})
 	
-	if (!matObWorkId) return;
+	matObManagerId.value = createdData.createdId;
+	const obWorkId = matObWorkId.value;
+	if (!obWorkId) return;
 	
 	// 선택한 작업지시서 리스트에서 찾기
-	const workOrder = workOrderList.find(el => el.orderId === matObWorkId); 
+	const workOrder = workOrderList.find(el => el.orderId === obWorkId); 
 	
 	if (!workOrder) {
 		alert("작업지시 데이터를 찾을 수 없습니다.");
@@ -71,7 +73,16 @@ matObWorkOrderSelect.addEventListener("change", async () => {
 	// 선택한 작업지시에 따른 담당자, 제품명, 출고일 정보 입력
 	matObManagerName.value = workOrder.createdUserName;
 	matObProductName.value = workOrder.productName + "|" + workOrder.planQty;
-	matObDueDate.value = workOrder.planStartDate?.split("T")[0] || "0";
+	
+	// 오늘 날짜 구하기(한국 시간)
+	const now = new Date();
+	const today = new Date(now.getTime() - (now.getTimezoneOffset() * 60000))
+			.toISOString()
+			.split("T")[0];
+			
+	matObDueDate.min = today;
+	
+	matObDueDate.value = workOrder.planStartDate?.split("T")[0] || today;
 	
 	outboundDate = workOrder.planStartDate;
 	
@@ -101,8 +112,8 @@ async function loadBomList(productId, planQty) {
 					<td >${bom.matId}</td>
 					<td>${bom.matName}</td>
 					<td>${bom.matUnit}</td>
-					<td>${needQty}</td>
-					<td>${stock.stock}</td>
+					<td data-qty="${needQty}" name="needQty">${needQty}</td>
+					<td data-stock="${stock.stock}" name="stock">${stock.stock}</td>
 					<td>
 						<input type="number" class="form-control outboundQty" min="0">
 						<input type="hidden" name="matId" value="${bom.matId}"/>
@@ -123,44 +134,92 @@ async function loadBomList(productId, planQty) {
 const submitOutbound = async () => {
 	// 출고 품목을 담을 변수
 	const items = [];
+	const rows = document.querySelectorAll("#matObBomTbody tr");
+	
+	// 유효성 검사 플래그
+	let isValid = true;
+	let errorMessage = "";
 	
 	// 출고 품목들을 items에 추가
-	document.querySelectorAll("#matObBomTbody tr").forEach(tr => {
+	for(const row of rows) {
+		const needQty = Number(row.querySelector("td[name=needQty]").dataset.qty);
+		// 출고 수량
+		const outboundQty = Number(row.querySelector(".outboundQty").value);
+		// 재고수량
+		const stock = Number(row.querySelector("td[name=stock]").dataset.stock);
+		// 출고 수량과 재고 수량 비교
+		if (outboundQty > stock) {
+			isValid = false;
+			errorMessage = "출고 수량이 재고 수량보다 많습니다.";
+			break;
+		} 
+
+		// 출고 수량과 요청 수량 비교
+		if (needQty > outboundQty) {
+			isValid = false;
+			errorMessage = "출고 수량이 요청 수량보다 적습니다.";
+			break;
+		}
+		
+		// 출고 수량과 요청 수량 비교
+		if (needQty < outboundQty) {
+			isValid = false;
+			errorMessage = "출고 수량이 요청 수량보다 많습니다.";
+			break;
+		}
+
 		items.push({
-			matId : tr.querySelector("input[name=matId]").value,
-			outboundQty: tr.querySelector(".outboundQty").value
+			matId : row.querySelector("input[name=matId]").value,
+			outboundQty
 		});
-	});
+	}
 	
-	// body에 담아서 보낼 내용
-	const payload = {
-		workOrderId: matObWorkId.value,
-		createdId: matObManagerId.value,
-		startDate: outboundDate,
-		type: "MAT",
-		items
-	};
-	
-	const res = await fetch("/inventory/outbound/mat/regist", {
-		method: "POST",
-		headers: {
-			[csrfHeader]: csrfToken, 
-			"Content-Type": "application/json"
-		},
-		body: JSON.stringify(payload)
-	});
-	
-	if (!res.ok) {
-		console.error("요청 처리 중 오류가 발생했습니다.");
+	// 검사 실패 시 종료
+	if (!isValid) {
+		alert(errorMessage);
 		return;
 	}
 	
-	const result = await res.json();
+	// 스피너 시작
+	showSpinner();
 	
-	alert("출고 등록이 완료되었습니다." || result.message);
-	
-	setTimeout(() => {
-		location.reload();
-	}, 300);
+	try {
+		// body에 담아서 보낼 내용
+		const payload = {
+			workOrderId: matObWorkId.value,
+			createdId: matObManagerId.value,
+			startDate: outboundDate,
+			type: "MAT",
+			items
+		};
+		
+		const res = await fetch("/inventory/outbound/mat/regist", {
+			method: "POST",
+			headers: {
+				[csrfHeader]: csrfToken, 
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(payload)
+		});
+		
+		if (!res.ok) {
+			throw new Error("서버 오류가 발생했습니다.");
+		}
+		
+		const result = await res.json();
+		
+		alert("출고 등록이 완료되었습니다." || result.message);
+		
+		setTimeout(() => {
+			location.reload();
+		}, 300);
+		
+	} catch (error) {
+		console.error(error);
+		alert("요청 처리 중 오류가 발생했습니다." || error.message);
+	} finally {
+		//스피너  off
+		hideSpinner(); 
+	}
 }
 

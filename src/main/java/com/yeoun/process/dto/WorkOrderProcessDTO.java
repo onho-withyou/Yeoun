@@ -1,5 +1,7 @@
 package com.yeoun.process.dto;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,11 +22,18 @@ public class WorkOrderProcessDTO {
 	// 제품명
 	private String prdName;
 	
+	// 라인 정보
+	private String lineId;     
+    private String lineName;
+	
 	// 계획수량
 	private Integer planQty;
 	
 	// 양품수량 (= 최종 공정 기준 양품수량)
 	private Integer goodQty;
+	
+	// 불량수량
+	private Integer defectQty;
 	
 	// 진행률 (공정 단계 기반 == (완료 단계 수 / 전체 단계 수) * 100)
 	private Integer progressRate;
@@ -37,5 +46,13 @@ public class WorkOrderProcessDTO {
 	
 	// 경과시간 (첫 공정이 시작된 시간 ~ 지금까지 걸린 총 시간)
 	private String elapsedTime;
+	
+	// 완료/폐기 시각
+	private LocalDateTime doneTime; 
+	
+	// 계획 시작 시간
+	private LocalDateTime planStartDate;
+	
+	private LocalDateTime planEndDate;
 
 }

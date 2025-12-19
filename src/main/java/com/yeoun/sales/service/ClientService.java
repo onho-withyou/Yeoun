@@ -2,6 +2,8 @@ package com.yeoun.sales.service;
 
 import com.yeoun.sales.entity.Client;
 import com.yeoun.sales.repository.ClientRepository;
+
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,11 +22,25 @@ public class ClientService {
     }
 
     /** 검색 */
-    public List<Client> search(String name, String type) {
-        if ((name == null || name.isBlank()) && (type == null || type.isBlank()))
-            return clientRepository.findAll();
-        return clientRepository.search(name, type);
+    public List<Client> search(String keyword, String itemKeyword, String type) {
+
+        boolean hasItemKeyword = itemKeyword != null && !itemKeyword.isBlank();
+
+        // 협력사 + 품목 검색
+        if ("SUPPLIER".equalsIgnoreCase(type) && hasItemKeyword) {
+            return clientRepository.searchSupplierByItem(
+                    keyword == null || keyword.isBlank() ? null : keyword.trim(),
+                    itemKeyword.trim()
+            );
+        }
+
+        // 일반 검색
+        return clientRepository.search(
+                keyword == null || keyword.isBlank() ? null : keyword.trim(),
+                type
+        );
     }
+
 
     /** 상세조회 */
     public Client get(String clientId) {
@@ -45,6 +61,10 @@ public class ClientService {
 
         if (client.getBusinessNo() == null || client.getBusinessNo().isBlank())
             throw new IllegalArgumentException("사업자번호는 필수입니다.");
+        
+        /* ⭐ 업태/업종 기본값 보정*/
+        if (client.getBizType() == null) client.setBizType("");
+        if (client.getBizItem() == null) client.setBizItem("");
 
 
         /* ⭐⭐ 2. 사업자번호 숫자만 남기기 */
@@ -85,6 +105,8 @@ public class ClientService {
         origin.setClientName(updateForm.getClientName());
         origin.setClientType(updateForm.getClientType());
         origin.setBusinessNo(updateForm.getBusinessNo());
+        origin.setBizType(updateForm.getBizType());
+        origin.setBizItem(updateForm.getBizItem());
         origin.setCeoName(updateForm.getCeoName());
         origin.setManagerName(updateForm.getManagerName());
         origin.setManagerDept(updateForm.getManagerDept());
@@ -134,10 +156,6 @@ public class ClientService {
     }
 
     /* 사업자번호 중복 체크 API용 */
-
-//    public boolean existsByBusinessNo(String businessNo) {
-//        return clientRepository.existsByBusinessNo(cleanBizNo(businessNo));
-//    }
     
     private String cleanBizNo(String no) {
         if (no == null) return null;
@@ -147,6 +165,33 @@ public class ClientService {
     public boolean existsByBusinessNoClean(String businessNo) {
         return clientRepository.existsBizNoClean(businessNo);
     }
+    
+    
+ 
+ // 고객사 정보 수정
+    @Transactional
+    public void update(Client req) {
+        Client c = clientRepository.findById(req.getClientId()).orElseThrow();
+        
+        c.setCeoName(req.getCeoName());
+        c.setManagerName(req.getManagerName());
+        c.setManagerDept(req.getManagerDept());
+        c.setManagerTel(req.getManagerTel());
+        c.setManagerEmail(req.getManagerEmail());
+        c.setAddr(req.getAddr());
+        c.setAddrDetail(req.getAddrDetail());
+        
+        c.setPostCode(req.getPostCode()); 
+        c.setBizType(req.getBizType());
+        c.setBizItem(req.getBizItem());
+
+        c.setBankName(req.getBankName());         
+        c.setAccountNumber(req.getAccountNumber());
+        c.setAccountName(req.getAccountName());
+
+        c.setStatusCode(req.getStatusCode());
+    }
+
 
 
 

@@ -12,6 +12,8 @@
 		<result property="prodId"  column="PROD_ID"/>
 		<result property="orderEmpName"  column="ORDEREMPNAME"/>
 		<result property="materialEmpName"  column="MATERIALEMPNAME"/>
+		<result property="inboundType"  column="INBOUND_TYPE"/>
+		<result property="workOrderEmpName" column="WORKORDEREMPNAME"/>
 		
 		<collection property="items" ofType="com.yeoun.inbound.dto.ReceiptItemDTO">
 			<id property="inboundItemId" column="INBOUND_ITEM_ID"/>
@@ -28,6 +30,7 @@
 			<result property="unitPrice" column="UNIT_PRICE"/>
 			<result property="supplyAmount" column="SUPPLY_AMOUNT"/>
 			<result property="totalPrice" column="TOTAL_PRICE"/>
+			<result property="unit" column="UNIT"/>
 		</collection>
 	</resultMap>
 	
@@ -38,6 +41,7 @@
 			, i.INBOUND_STATUS
 			, i.MATERIAL_ID
 			, i.PROD_ID
+			, i.INBOUND_TYPE
 			, c.CLIENT_NAME
 			, e1.EMP_NAME AS orderEmpName
 			, e2.EMP_NAME AS materialEmpName
@@ -141,6 +145,7 @@
 			, c.CLIENT_NAME
 			, e1.EMP_NAME AS orderEmpName
 			, e2.EMP_NAME AS materialEmpName
+			, E3.EMP_NAME AS workOrderEmpName
 			, it.INBOUND_ITEM_ID
 			, it.LOT_NO
 			, it.ITEM_TYPE
@@ -153,6 +158,7 @@
 			, mi.UNIT_PRICE
 			, mi.SUPPLY_AMOUNT
 			, mi.TOTAL_PRICE
+			, ci.UNIT
 			, CASE
 				WHEN
 					mat.MAT_NAME IS NOT NULL THEN mat.MAT_NAME
@@ -201,6 +207,19 @@
 		ON
 			it.ITEM_ID = prd.PRD_ID
 			AND it.ITEM_TYPE = 'FG'
+		LEFT JOIN
+			CLIENT_ITEM ci
+		ON
+			ci.CLIENT_ID = c.CLIENT_ID	
+			AND ci.MATERIAL_ID = it.item_id
+		LEFT JOIN
+			WORK_ORDER wo
+		ON 
+			i.PROD_ID = wo.ORDER_ID
+		LEFT JOIN
+			EMP e3
+		ON
+			wo.CREATED_ID = e3.EMP_ID
 		WHERE 
 			i.INBOUND_ID = #{inboundId}
 		ORDER BY

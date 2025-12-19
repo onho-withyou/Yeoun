@@ -22,11 +22,12 @@ public interface InventoryRepository
 	
 	// 생산계획시 필요한 제품(PRD_ID / ITEM_ID) 기준 전체 재고 조회
 		@Query(value = """
-		    SELECT 
-		        ITEM_ID AS prdId,
-		        SUM(IV_AMOUNT-EXPECT_OB_AMOUNT) AS currentStock
-		    FROM INVENTORY		   
-		    GROUP BY ITEM_ID
+		   SELECT
+		    ITEM_ID AS prdId,
+		    SUM(NVL(IV_AMOUNT, 0) - NVL(EXPECT_OB_AMOUNT, 0)) AS currentStock
+		FROM INVENTORY
+		GROUP BY ITEM_ID
+
 		""", nativeQuery = true)
 		List<Map<String, Object>> findCurrentStockGrouped();		
 
@@ -110,7 +111,7 @@ public interface InventoryRepository
 	void updateAllStatusByExpirationDate(@Param("today") LocalDateTime today, 
 		    @Param("disposalWaitDate") LocalDateTime disposalWaitDate);
 
-	// itemId로 재고 조회
+	// itemId로 재고 조회(선입선출)
 	@Query("""
 		    SELECT i
 		    FROM Inventory i
@@ -140,6 +141,14 @@ public interface InventoryRepository
 		    """,
 		    nativeQuery = true)
 		Map<String, Object> findMaterialStock(@Param("matId") String matId);
+
+	Optional<Inventory> findTopByLotNoOrderByIvIdDesc(String inputLotNo);
+
+	// lot번호와 창고위치로 재고 조회
+	Optional<Inventory> findByLotNoAndWarehouseLocation_LocationId(String lotNo, String locationId);
+
+	// 창고 위치 ID로 재고 존재 확인
+	boolean existsByWarehouseLocation_LocationId(String locationId);
 
 
 }

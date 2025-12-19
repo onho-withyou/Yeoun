@@ -33,6 +33,8 @@ clientInput.addEventListener("focus", async () => {
 
 // 거래처 검색 이벤트 (검색어 입력했을 때)
 clientInput.addEventListener("input", async function() {
+	resetClientSelection();
+	
 	// input에 입력한 검색어
 	const keyword = clientInput.value.trim().toLowerCase();
 	
@@ -134,7 +136,6 @@ function selectClient(item, data) {
 // 품목 선택 후 테이블 추가 및 납기일 계산 
 itemSelect.addEventListener("change", () => {
 	const option = itemSelect.options[itemSelect.selectedIndex];
-	
 	// 값이 없으면 리턴
 	if (!option.value) return;
 	
@@ -142,7 +143,7 @@ itemSelect.addEventListener("change", () => {
 	let isDuplicate = false;
 	const existingRow = orderTableBody.querySelectorAll("tr");
 	const selectedItemId = option.value;
-	const orderUnit = parseInt(option.dataset.unit) || 1; // 주문단위
+	const orderUnit = parseInt(option.dataset.orderUnit) || 1; // 주문단위
 	
 	existingRow.forEach(row => {
 		 const itemIdInput = row.querySelector("input[name=itemId]");
@@ -172,12 +173,21 @@ itemSelect.addEventListener("change", () => {
 	
 	// 선택한 품목의 리드타임 적용(오늘 날짜 + 리드타임)
 	const leadDays = parseInt(option.dataset.leadDays, 10);
-	const today = new Date();
-	today.setDate(today.getDate() + leadDays);
 	
-	const yyyy = today.getFullYear();
-	const mm = String(today.getMonth() + 1).padStart(2, "0");
-	const dd = String(today.getDate()).padStart(2, "0");
+	const now = new Date();
+	const minDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000))
+	                .toISOString()
+	                .split("T")[0];
+	
+	// 오늘 날짜 이전 선택 불가
+	dueDateInput.min = minDate;
+	
+	const targetDate  = new Date();
+	targetDate .setDate(targetDate .getDate() + leadDays);
+	
+	const yyyy = targetDate .getFullYear();
+	const mm = String(targetDate .getMonth() + 1).padStart(2, "0");
+	const dd = String(targetDate .getDate()).padStart(2, "0");
 	
 	dueDateInput.value = `${yyyy}-${mm}-${dd}`;
 	
@@ -194,6 +204,7 @@ itemSelect.addEventListener("change", () => {
 		<tr>
 			<td>${itemName}</td>
 			<td>${minOrder}</td>
+			<td>${option.dataset.unit}</td>
 			<td>
 				<input 
 					type="number" 
@@ -202,13 +213,14 @@ itemSelect.addEventListener("change", () => {
 					min="${minOrder}" 
 					step="${option.dataset.orderUnit}"
 					data-min="${minOrder}"
-					data-unit="${option.dataset.orderUnit}"
+					data-order-unit="${option.dataset.orderUnit}"
 					data-price="${unitPrice}"
 					name="orderAmount"
 					/>
 				<input type="hidden" name="itemId" value="${option.value}">
 				<input type="hidden" name="vat" value="${tax}">
 				<input type="hidden" name="unitPrice" value="${unitPrice}">
+				<input type="hidden" name="unit" value="${option.dataset.unit}">
 			</td>
 			<td>${unitPrice.toLocaleString()}</td>
 			<td class="supplyPrice">${supplyPrice.toLocaleString()}</td>
@@ -233,14 +245,13 @@ orderTableBody.addEventListener("change", (e) => {
 	 if (!e.target.classList.contains("orderQty")) return;
 	 
 	 const qtyInput = e.target;
-	 
 	 const minOrder = parseInt(qtyInput.dataset.min);
-	 const unit = parseInt(qtyInput.dataset.unit);
+	 const unit = parseInt(qtyInput.dataset.orderUnit);
 	 const price = parseInt(qtyInput.dataset.price);
 	 
 	 let qty = parseInt(qtyInput.value);
-	 
-	 // 최소 주문수량 체크
+
+	 	 // 최소 주문수량 체크
 	 if (qty < minOrder) {
 	     qty = minOrder;
 	     qtyInput.value = qty;
@@ -269,6 +280,26 @@ orderTableBody.addEventListener("change", (e) => {
 	 tr.querySelector(".totalPrice").textContent = total.toLocaleString();
 });
 
+// 거래처 선택 해제용 함수
+function resetClientSelection() {
+	hiddenId.value = "";
+	
+	document.querySelector("#managerName").value = "";
+	
+	itemSelect.innerHTML = "";
+	itemSelect.disabled = true;
+	
+	const defaultOption = document.createElement("option");
+	
+	defaultOption.value = "";
+	defaultOption.textContent = "거래처를 먼저 선택하세요.";
+	defaultOption.selected = true;
+	itemSelect.appendChild(defaultOption);
+	
+	// 발주 테이블 초기화
+	orderTableBody.innerHTML = "";
+}
+
 // ----------------------------------------------------------
 // 발주 등록
 const submitOrder = async () => {
@@ -286,6 +317,21 @@ const submitOrder = async () => {
 			unitPrice: tr.querySelector("input[name=unitPrice]").value,
 		});
 	});
+	
+	if (clientId.trim().length === 0) {
+		alert("거래처를 선택해주세요.");
+		return;
+	}
+	
+	if (items.length <= 0) {
+		alert("품목을 선택해주세요.");
+		return;
+	}
+	
+	if (dueDate.value === null || dueDate.value === "") {
+		alert("예상도착일을 입력해주세요.");
+		return;
+	}
 	
 	// body에 담아서 보낼 내용
 	const payload = {

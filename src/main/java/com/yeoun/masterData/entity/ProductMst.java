@@ -1,5 +1,6 @@
 package com.yeoun.masterData.entity;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -20,7 +21,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class) 
-public class ProductMst {
+public class ProductMst implements Serializable{
 	
 		@Id
 		@Column(name="PRD_ID", length = 50)
@@ -65,6 +66,9 @@ public class ProductMst {
 		
 		@Column(name="UPDATED_DATE")
 		private LocalDate updatedDate; //수정일시
+
+		@Column(name="USE_YN", length = 1)
+		private String useYn; //사용여부
 		
 
 	}

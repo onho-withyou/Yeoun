@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	showNoticeForm.addEventListener('submit', function(event) {
 		event.preventDefault(); //기본제출 막기
 		
-		fetch('/notices/' + selectedNoticeId, {
+		fetch('/notice/' + selectedNoticeId, {
 			method: 'PATCH'
 			, headers: {
 				[csrfHeader]: csrfToken
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		
 		alert("정말 삭제하시겠습니까?");
 		
-		fetch('/notices/' + selectedNoticeId, {
+		fetch('/notice/' + selectedNoticeId, {
 			method: 'DELETE'
 			, headers: {
 				[csrfHeader]: csrfToken
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	createNoticeForm.addEventListener('submit', function(event) {
 		event.preventDefault(); //기본제출 막기
 		
-		fetch('/notices', {
+		fetch('/notice', {
 			method: 'POST'
 			, headers: {
 				[csrfHeader]: csrfToken
@@ -173,7 +173,7 @@ async function inputReadData(data){
 	}
 	
 	document.getElementById('notice-writer-read').textContent = `(${deptName})${createdUserName}`
-	document.getElementById('notice-createdDate-read').textContent = NoticeDetailFormatDate(createdDate);
+//	document.getElementById('notice-createdDate-read').textContent = NoticeDetailFormatDate(createdDate);
 //	console.log("formatDate(createdDate) : ", formatDate(createdDate));
 	document.getElementById('notice-updatedDate-read').textContent = NoticeDetailFormatDate(updatedDate);
 //	console.log("formatDate(updatedDate) : ", formatDate(updatedDate));
@@ -310,6 +310,9 @@ function hasRole(role) {
 
 // 공지조회 모달 열때 공지쓰기 권한이 있는지 판별
 async function initReadModal(createdUser) {
+	const fixDiv = document.getElementById('noticeFixDiv'); 
+	const uploadArea = document.getElementById('uploadArea');
+	
 	
 	if(hasRole('ROLE_NOTICE_WRITER')) { // 권한이있을때
 		Array.from(showNoticeForm.elements).forEach(el => {
@@ -324,7 +327,11 @@ async function initReadModal(createdUser) {
 		modifyNoticeBtn.disabled = false;
 		deleteNoticeBtn.style.display = 'block';
 		modifyNoticeBtn.style.disabled = 'block';
+		fixDiv.style.display = 'flex';
+		uploadArea.style.display = 'block';
 	} else { //권한이 없을때 수정,삭제 불가능
+		
+		
 		Array.from(showNoticeForm.elements).forEach(el => {	
 			if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
 				el.readOnly = true;
@@ -337,6 +344,8 @@ async function initReadModal(createdUser) {
 		modifyNoticeBtn.disabled = true;
 		deleteNoticeBtn.style.display = 'none';
 		modifyNoticeBtn.style.display = 'none';
+		fixDiv.style.display = 'none';
+		uploadArea.style.display = 'none';
 		
 	}
 }

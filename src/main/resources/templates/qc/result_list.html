@@ -1,177 +1,70 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{/layouts/layout.html}">
-<body>
-<th:block layout:fragment="content">
-	<div class="custom-body container-xxl flex-grow-1 container-p-y">
-	
-	<h2>QC 결과 조회</h2>
-	
-	<div class="row g-2 align-items-center">
-	
-	 <!-- Search Filter -->
-<!--         <div class="card mb-4"> -->
-<!--             <div class="card-body"> -->
-                <form id="qcResultSearchForm">
-                    <div class="row gx-3 gy-2 align-items-center">
-					    <!-- 검사일자 -->
-					    <div class="col-md-2">
-					      <label class="form-label" for="workDate">검사일자 (시작)</label>
-					      <input type="date" class="form-control" id="startDate">
-					    </div>
-					    <div class="col-md-2">
-					      <label class="form-label" for="workDate">검사일자 (종료)</label>
-					      <input type="date" class="form-control" id="endDate">
-					    </div>
-					    <!-- 검색어 -->
-                        <div class="col-md-3">
-                            <label class="form-label" for="searchKeyword">검색어 (작업지시번호)</label>
-                            <input type="text" class="form-control" id="searchKeyword" placeholder="검색어 입력">
-                        </div>
-					    <!-- 합격 여부 구분-->
-                        <div class="col-md-2">
-                            <label class="form-label" for="searchHStatus">합격 여부</label>
-                            <select class="form-select" id="searchHStatus">
-                                <option value="">전체</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label d-block">&nbsp;</label>
-                            <button type="button" class="btn btn-outline-primary  w-100" id="btnSearchProcess">검색</button>
-                        </div>
-                    </div>
-                </form>
-<!--             </div> -->
-<!--         </div> -->
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="~{/layouts/layout.html}">
 
-	</div>
+  <th:block layout:fragment="content">
+    <div class="custom-body container-xxl flex-grow-1 container-p-y">
 
-	<br>
-	
-	<div class="card-body p-0">
-	    <div id="qcResultGrid"></div>
+      <h2>QC 결과 조회</h2>
+
+      <div class="row g-2 align-items-center">
+
+        <form id="qcResultSearchForm" method="get" action="/qc/result">
+		  <div class="row gx-3 gy-2 align-items-end">
+		
+		    <!-- 검사일자(기간) -->
+		    <div class="col-md-4">
+		      <label class="form-label">검사일자</label>
+		      <div class="d-flex align-items-center gap-2">
+		        <input type="date" class="form-control" id="startDate" name="startDate"
+		               th:value="${param.startDate}">
+		        <span class="text-muted fw-semibold">~</span>
+		        <input type="date" class="form-control" id="endDate" name="endDate"
+		               th:value="${param.endDate}">
+		      </div>
+		    </div>
+		
+		    <!-- 검색어 -->
+		    <div class="col-md-3">
+		      <label class="form-label" for="searchKeyword">검색어</label>
+		      <input type="text" class="form-control"
+		             id="searchKeyword" name="keyword"
+		             th:value="${param.keyword}"
+		             placeholder="작업지시번호 / 제품명">
+		    </div>
+		
+		    <!-- 합격 여부 -->
+		    <div class="col-md-2">
+		      <label class="form-label" for="searchHStatus">합격 여부</label>
+		      <select class="form-select" id="searchHStatus" name="result">
+		        <option value="ALL"  th:selected="${param.result == null || param.result[0] == 'ALL'}">전체</option>
+		        <option value="PASS" th:selected="${param.result != null && param.result[0] == 'PASS'}">합격</option>
+		        <option value="FAIL" th:selected="${param.result != null && param.result[0] == 'FAIL'}">불합격</option>
+		      </select>
+		    </div>
+		
+		    <!-- 버튼 -->
+		    <div class="col-md-3 d-flex gap-2">
+		      <button type="submit" class="btn btn-outline-primary flex-fill">검색</button>
+		      <a href="/qc/result" class="btn btn-outline-secondary flex-fill">초기화</a>
+		    </div>
+		
+		  </div>
+		</form>
+      </div>
+
+      <br>
+
+      <div class="card-body p-0">
+        <div id="qcResultGrid"></div>
+      </div>
+
+      <th:block th:replace="qc/qc_view_modal :: qcViewModal"></th:block>
+
     </div>
-    
-    <!-- 검사등록 모달 -->
-    <div class="modal fade" id="qcResultModal" tabindex="-1" aria-hidden="true">
-	  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-	    <div class="modal-content">
-	      <div class="modal-header">
-	        <!-- 동적으로 채울 제목 -->
-	        <h5 class="modal-title">
-	          QC 검사 등록 -
-	          <span id="qcModalTitleOrder"></span>
-	          /
-	          <span id="qcModalTitleProduct"></span>
-	        </h5>
-	        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-	      </div>
-	
-	      <div class="modal-body">
-	        <form id="qcRegForm">
-	          <!-- 숨겨진 필드 (qcResultId, orderId 등) -->
-	          <input type="hidden" id="qcResultId" name="qcResultId">
-	          <input type="hidden" id="orderId" name="orderId">
-	
-	          <!-- 기본 정보 (QC_RESULT 헤더) -->
-	          <div class="row mb-3">
-	            <div class="col-md-4">
-	              <label class="form-label">작업지시번호</label>
-	              <div id="qcOrderIdText" class="fw-semibold"></div>
-	            </div>
-	            <div class="col-md-4">
-	              <label class="form-label">제품</label>
-	              <div id="qcProductText"></div>
-	            </div>
-	            <div class="col-md-2">
-	              <label class="form-label">지시수량</label>
-	              <div id="qcPlanQtyText"></div>
-	            </div>
-	            <div class="col-md-2">
-	              <label class="form-label required">검사일자</label>
-	              <input type="date"
-	                     class="form-control form-control-sm"
-	                     id="inspectionDate"
-	                     name="inspectionDate"
-	                     required>
-	            </div>
-	          </div>
-	
-	          <div class="row mb-3">
-	            <div class="col-md-3">
-	              <label class="form-label required">검사자 (INSPECTOR_ID)</label>
-	              <input type="text"
-	                     class="form-control form-control-sm"
-	                     id="inspectorId"
-	                     name="inspectorId"
-	                     placeholder="예: EMP0001">
-	              <!-- 나중에 로그인 사용자로 자동 세팅하고 readOnly 처리해도 됨 -->
-	            </div>
-	            <div class="col-md-3">
-	              <label class="form-label">LOT 번호</label>
-	              <div id="qcLotNoText">-</div>
-	              <!-- 필요하면 input 으로 바꾸고 name="lotNo" 로 전송 -->
-	            </div>
-	          </div>
-	
-	          <!-- QC_RESULT_DETAIL 입력 테이블 -->
-	          <div class="table-responsive mb-3">
-	            <table class="table table-sm table-bordered align-middle">
-	              <thead class="table-light">
-	              <tr>
-	                <th style="width: 170px;">QC 항목ID / 항목명</th>
-	                <th style="width: 90px;">단위</th>
-	                <th style="width: 200px;">기준값</th>
-	                <th style="width: 150px;">측정값</th>
-	                <th style="width: 110px;">판정</th>
-	                <th>비고</th>
-	              </tr>
-	              </thead>
-	              <tbody id="qcDetailTbody">
-	                <!--
-	                  나중에 JS로 QC 항목 리스트를 받아서
-	                  여기다 <tr>들을 append 할 예정.
-	                  지금처럼 더미로 하드코딩해도 OK.
-	                -->
-	              </tbody>
-	            </table>
-	          </div>
-	
-	          <!-- 전체 판정 / 불합격 사유 (QC_RESULT) -->
-	          <div class="row g-3">
-	            <div class="col-md-3">
-	              <label class="form-label required">전체 판정</label>
-	              <select class="form-select form-select-sm"
-	                      id="overallResult"
-	                      name="overallResult"
-	                      required>
-	                <option value="">전제</option>
-	                <option value="PASS">합격</option>
-	                <option value="FAIL">불합격</option>
-	              </select>
-	            </div>
-	            <div class="col-md-9">
-	              <label class="form-label">불합격 사유</label>
-	              <textarea class="form-control form-control-sm"
-	                        id="failReason"
-	                        name="failReason"
-	                        rows="2"
-	                        placeholder="불합격일 경우 주요 사유를 입력하세요."></textarea>
-	            </div>
-	          </div>
-	        </form>
-	      </div>
-	
-	      <div class="modal-footer">
-	        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">닫기</button>
-	      </div>
-	    </div>
-	  </div>
-	</div>
-    
-	</div>
 
-<script src="/js/qc/qc_result.js"></script>		
-	
+    <script src="/js/qc/qc_result.js"></script>
+
+  </th:block>
+
 </th:block>
-</body>
