@@ -765,7 +765,7 @@ async function initNoticeGrid(data) {
 	                        const min = String(date.getMinutes()).padStart(2, '0');
 	                        
 	                        // 날짜 텍스트 생성
-	                        const dateText = `(${mm}-${dd} ${hh}:${min})`;
+	                        const dateText = `(${mm}-${dd})`;
 	                        
 	                        // 날짜 부분에만 적용할 스타일 (글자 작게, 줄바꿈 방지 등)
 	                        dateHtml = `<span style="font-size: 11px; color: #888; margin-left: 10px; flex-shrink: 0;">${dateText}</span>`;
