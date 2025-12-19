@@ -1361,6 +1361,60 @@ function saveBomRow(type) {
 }
 //bomHdr row 저장- 학원에 구현되어있음
 
+//bom 그룹 수정 (저장)
+const saveBomGroupRowBtn = document.getElementById('saveBomGroupRowBtn');
+saveBomGroupRowBtn.addEventListener('click', function() {
+	console.log("bom 그룹 수정");
+	const modifiedData = (typeof grid8.getModifiedRows === 'function') ? (grid8.getModifiedRows() || {}) : {};
+	const updatedRows = Array.isArray(modifiedData.updatedRows) ? modifiedData.updatedRows : [];
+	
+	if (updatedRows.length === 0) {
+		alert('수정된 내용이 없습니다.');
+		return;
+	}
+	
+	fetch('/bom/bomHdrSave', {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: {
+				[csrfHeader]: csrfToken,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(modifiedData)
+		})
+		.then(res => {
+			if (!res.ok) {
+				throw new Error(`HTTP error! status: ${res.status}`);
+			}
+			const ct = (res.headers.get('content-type') || '').toLowerCase();
+			if (ct.includes('application/json')) return res.json();
+			return res.text();
+		})
+		.then(parsed => {
+			console.log("저장응답데이터:", parsed);
+			    
+			    // 서버가 "Success..." 라는 단순 문자열을 보낼 때의 처리
+			    if (typeof parsed === 'string' && parsed.includes("Success")) {
+			        alert("저장이 완료되었습니다.");
+					bomHdrGridAllSearch();
+			    } 
+			    // 서버가 객체 { success: true } 를 보낼 때의 처리
+			    else if (parsed.success === true || parsed === "Success") {
+			        alert("저장이 완료되었습니다.");
+					bomHdrGridAllSearch();
+			    } 
+			    else {
+			        // 이 부분으로 빠져서 "알 수 없는 오류"가 출력되는 것임
+			        alert("저장 실패: " + (parsed.message || "알 수 없는 오류"));
+			    }
+
+		})
+		.catch(err => {
+			console.error("저장오류", err);
+			alert("저장 중 오류가 발생했습니다.");
+		});
+	
+});
 //안전재고 row 저장
 const saveSafetyStockRowBtn = document.getElementById('saveSafetyStockRowBtn');
 saveSafetyStockRowBtn.addEventListener('click', function() {
