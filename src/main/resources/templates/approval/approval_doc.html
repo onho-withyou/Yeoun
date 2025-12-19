@@ -50,12 +50,15 @@
 				</div>
 			</div>
 			<div class="d-flex justify-content-end">
-				<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-					<input id="searchStartDate" type="date" name="startDate" class="form-control">
-				</div>
-				~
-				<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-					<input id="searchEndDate" type="date" name="endDate" class="form-control">
+				<div class="d-flex align-items-center gap-2" style="min-width: 280px;">
+			
+					<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+						<input id="searchStartDate" type="date" name="startDate" class="form-control">
+					</div>
+					<span>~</span>
+					<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+						<input id="searchEndDate" type="date" name="endDate" class="form-control">
+					</div>
 				</div>
 					<input id="searchEmpIdAndformType" class="form-control" type="text" placeholder="기안자및문서제목" style="width: 200px;height: 38.94px;margin-left:5px;">
 				<div style="margin-left:5px;">
@@ -95,23 +98,23 @@
             </ul>
             <div class="tab-content" style="height: 700px;">
               <div class="tab-pane fade show active"  id="nav-approval-tab" role="tabpanel">
-                <h2>결재사항</h2>
+                <!--<h2>결재사항</h2>-->
 			  	<div id="approvalGrid" ></div>
               </div>
               <div class="tab-pane fade" id="navs-all-tab" role="tabpanel">
-                <h2>전체결재</h2>
+                <!--<h2>전체결재</h2>-->
 			  	<div id="allApprovalGrid"></div>
               </div>
               <div class="tab-pane fade" id="navs-my-tab" role="tabpanel">
-                <h2>내 결재목록</h2>
+                <!--<h2>내 결재목록</h2>-->
 			  	<div id="myApprovalGrid"></div>
               </div>
 			  <div class="tab-pane fade" id="navs-waiting-tab" role="tabpanel">
-                <h2>결재대기</h2>
+                <!--<h2>결재대기</h2>-->
 				<div id="waitingApprovalGrid" ></div>
               </div>
 			  <div class="tab-pane fade" id="navs-done-tab" role="tabpanel">
-                <h2>결재완료</h2>
+                <!--<h2>결재완료</h2>-->
 				<div id="doneApprovalGrid"></div>
               </div>
             </div>

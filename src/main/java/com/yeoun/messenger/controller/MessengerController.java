@@ -39,13 +39,6 @@ public class MessengerController {
 	private final MsgRoomRepository msgRoomRepository;
 	private final RoomNameGenerator roomNameGenerator;
 	private final RoomMemberQueryService roomMemberQueryService;
-
-	// ==========================================================================
-	// 메신저 큰 화면 (보류) => MES 끝나고 시간 남으면 다시 만나 ...
-//	@GetMapping(value = {"/", "/index"})
-//	public String index(Model model) {
-//		return "/messenger/index";
-//	}
 	
 	// ==========================================================================
 	// 메신저 팝업 목록 - 친구목록
@@ -76,6 +69,19 @@ public class MessengerController {
 		statusChangeRequest.setEmpId(authentication.getName());
 		messengerService.updateStatus(statusChangeRequest);
 		chatService.changeStatus(statusChangeRequest);
+		return ResponseEntity.noContent().build();
+	}
+
+	// ==========================================================================
+	// 메신저 상태 실시간 변경 (오프라인 처리용)
+	@PostMapping("/status/offline")
+	public ResponseEntity<?> changeStatusOffline(Authentication authentication){
+		StatusChangeRequest req = new StatusChangeRequest();
+
+		req.setEmpId(authentication.getName());
+		req.setAvlbStat("OFFLINE");
+		messengerService.updateStatus(req);
+		chatService.changeStatus(req);
 		return ResponseEntity.noContent().build();
 	}
 	
