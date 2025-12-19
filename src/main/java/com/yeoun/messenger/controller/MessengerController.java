@@ -203,7 +203,7 @@ public class MessengerController {
 	// 방 이름 수정
 	@PatchMapping("/room/{roomId}/rename")
 	public ResponseEntity<String> renameRoom(
-			@PathVariable Long roomId,
+			@PathVariable("roomId") Long roomId,
 			@RequestBody Map<String, String> request
 	) {
 		log.info("방 이름 수정 컨트롤러....");

@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventorySafetyCheckDTO;
 import com.yeoun.inventory.entity.Inventory;
 import com.yeoun.inventory.entity.WarehouseLocation;
@@ -151,4 +152,8 @@ public interface InventoryRepository
 
 	// 창고 위치 ID로 재고 존재 확인
 	boolean existsByWarehouseLocation_LocationId(String locationId);
+
+	List<Inventory> findByIvStatusNot(String status);
+
+
 }
