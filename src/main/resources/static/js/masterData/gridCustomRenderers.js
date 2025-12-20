@@ -42,7 +42,11 @@ const CODE_MAP = {
 	'DAYS_COVER': '일수기반',
 	
 	//품질항목기준 - 대상구분
-	'FINISHED_QC':'완제품'
+	'FINISHED_QC':'완제품',
+    'qc_pH':'pH',
+    'qc_cps':'cps',
+    'qc_ml':'ml'
+
 };
 
 class StatusModifiedRenderer {

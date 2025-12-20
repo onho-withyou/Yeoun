@@ -1560,7 +1560,7 @@ document.getElementById('modal-doc').addEventListener('submit', async function (
 			if (!response.ok) {	
 					throw new Error('서버 응답이 실패했습니다. 상태 코드: ' + response.status);	
 			}else{
-					// 모달 닫기
+				// 모달 닫기
 				const modalElement = document.getElementById('approval-modal');
 				const modalInstance = bootstrap.Modal.getInstance(modalElement);
 				modalInstance.hide();
