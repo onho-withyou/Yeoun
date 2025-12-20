@@ -1542,13 +1542,11 @@ saveSafetyStockRowBtn.addEventListener('click', function() {
 			const message = (parsed.message || '').toString().toLowerCase();
 			success = status === 'success' || okTexts.includes(message) || message.includes('success') || message.includes('created');
 		}
-		if (!success) throw new Error('Unexpected response: ' + JSON.stringify(parsed));
-		alert("저장이 완료되었습니다.");
+		if (!success) throw new Error(alert(parsed));
 		safetyStockGridAllSearch();//저장후 전체조회
 	})
 	.catch(err => {
 		console.error("저장오류", err);
-		alert("저장 중 오류가 발생했습니다.");
 	});
 });
 
