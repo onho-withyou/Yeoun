@@ -105,21 +105,34 @@ class StatusModifiedRenderer {
         const displayText = (!hasValue && isCreated) ? '' : koreanText;
 
         let contentHTML = '';
+        const showArrow = hasEditor;
         
-        if (isSelect) {
-            // ⭐ 2. isSelect 모드일 때도 editor가 있을 때만 화살표 렌더링
-            const arrow = hasEditor ? `<span style="font-size:10px;opacity:0.6;">▼</span>` : '';
+        // ⭐ 수정된 부분: Y/N 컬럼인지 확인하는 로직 (값 유무와 상관없이)
+        const isYNColumn = columnInfo.name === 'useYn' || columnInfo.name === 'status'; // 프로젝트의 Y/N 컬럼명을 넣으세요
+
+        if (value === 'Y' || value === 'N') {
+            // 1. 이미 값이 있는 경우 (기존 배지 로직)
+            contentHTML = this.formatStatusBadge(value, showArrow);
+        } else if (isYNColumn && isCreated) {
+            // 2. ⭐ Y/N 컬럼인데 신규 행이라서 아직 값이 없는 경우
+            // 빈 텍스트 상태의 배지 모양이나 화살표가 포함된 레이아웃을 그려줍니다.
+            const arrow = showArrow ? `<span style="font-size:10px;opacity:0.6;">▼</span>` : '';
             contentHTML = `
-            <div style="width:100%; height:100%; padding:0px 10px; box-sizing:border-box; display:flex; justify-content:space-between; align-items:center; background:transparent; cursor:pointer;">
-                <span>${displayText}</span>
-                ${arrow}
-            </div>
+                <div style="width:100%; height:100%; padding:0px 10px; box-sizing:border-box; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                    <span></span> ${arrow}
+                </div>
             `;
-        } else if (value === 'Y' || value === 'N') {
-            // ⭐ 3. 배지 함수에 editor 여부 전달
-            contentHTML = this.formatStatusBadge(value, hasEditor);
+        } else if (isSelect) {
+            // 3. 일반 Select 컬럼
+            const arrow = showArrow ? `<span style="font-size:10px;opacity:0.6;">▼</span>` : '';
+            contentHTML = `
+                <div style="width:100%; height:100%; padding:0px 10px; box-sizing:border-box; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                    <span>${displayText}</span>
+                    ${arrow}
+                </div>
+            `;
         } else {
-            contentHTML = koreanText;
+            contentHTML = displayText;
         }
 
         this.el.innerHTML = contentHTML;

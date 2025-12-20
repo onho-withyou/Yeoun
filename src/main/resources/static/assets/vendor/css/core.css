@@ -2935,6 +2935,10 @@ textarea.form-control-lg {
   font-size: 0.75rem;
   border-radius: 0.25rem;
 }
+.btn-md-sm {
+    padding: 0.45rem 0.8rem; /* sm보다 크고 기본보다 작음 */
+    line-height: 1.5;
+  }
 
 .fade {
   transition: opacity 0.15s linear;
@@ -8077,6 +8081,7 @@ form select.selectpicker.is-invalid ~ .btn {
 }
 .modal .modal-header .btn-close {
   margin-top: -1.25rem;
+  margin: 12px;
 }
 
 .modal-footer {

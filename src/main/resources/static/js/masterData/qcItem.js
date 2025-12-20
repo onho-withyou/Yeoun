@@ -4,6 +4,7 @@ window.onload = function () {
 
 
 const Grid = tui.Grid;
+
 //g-grid1 품질항목기준
 const grid1 = new Grid({
 	  el: document.getElementById('qcItemGrid'), 

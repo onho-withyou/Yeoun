@@ -1683,6 +1683,7 @@ function applyDelegateChange(button) {
 }
 
 const Grid = tui.Grid;
+
 // g- 결재사항
 const grid1 = new Grid({
 	el: document.getElementById('approvalGrid'),

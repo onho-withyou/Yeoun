@@ -29,6 +29,7 @@ processLookupModalElement.addEventListener('shown.bs.modal', function () {
 });
 
 const Grid = tui.Grid;
+
 // g- grid1 제품별 공정 라우트 그리드
 const grid1 = new Grid({
 	  el: document.getElementById('processGrid'), 
@@ -410,7 +411,7 @@ function processCodeGridAllSearch() {
 			grid4.resetData(camelCaseData);//신규라우트 모달 그리드 - 공정코드조회 모달
 			//공정코드 라우트 step id 자동생성 데이터 넣어주기
 			processDataList = camelCaseData.map((item, index) => {
-				let currentStep = item.stepNo || (index + 1);
+				let currentStep = item.stepNo || '';
 				let displayStep = String(currentStep).padStart(2, '0');
 				return {
 					// 데이터에 stepNo가 있으면 그대로 쓰고, 없으면 순번(index+1)을 2자리 문자열로 만듭니다.

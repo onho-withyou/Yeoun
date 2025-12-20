@@ -66,6 +66,8 @@ let safetyStockStatusListItems = []; //안전재고 상태
 
 
 const Grid = tui.Grid;
+
+
 //g-grid1 bom 상세 bomDetailGrid
 const grid1 = new Grid({
 	  el: document.getElementById('bomDetailGrid'),
@@ -82,7 +84,7 @@ const grid1 = new Grid({
 			}  
 
 	  ]
-	  ,bodyHeight: 1200 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
+	  ,bodyHeight: 1157 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
 	  ,height:100
 	  ,columnOptions: {
     		resizable: true
@@ -229,7 +231,7 @@ const grid2 = new Grid({
       rowHeaders: ['rowNum','checkbox'],
 	  columns: [
 
-	    {header: 'BOMId' ,name: 'bomId' ,align: 'center',editor: 'text',filter: "select"
+	    {header: 'BOMId' ,name: 'bomId' ,align: 'center',filter: "select"
 			,renderer:{ type: StatusModifiedRenderer}	
 		}
 		,{header: '완제품 id' ,name: 'prdId' ,align: 'center',filter: "select"
@@ -551,42 +553,109 @@ grid2.on('beforeChange', (ev) => {
 	        // 기존 행일 경우 (isNewRow가 false, 즉 prdIdValue가 있는 경우)
 	        if (!isNewRow) {
 	            ev.stop(); // 편집 모드 진입 차단
-	            alert('기존 완제품 Id,원재료Id는 수정할 수 없습니다.  삭제후 새로추가(등록) 해주세요!'); 
+	            alert('기존 완제품 Id,원재료Id는 수정할 수 없습니다.  비활성 -> 저장 후 새로추가(등록) 해주세요!'); 
 	        }
 	    }
 });
 
 
-//공정단계 - 공정 id 가 추가되면 라우트 단계id가 자동으로들어간다.
+// bomID - 완제품 id가 추가되면 순번이 포함된 bomId가 자동으로 들어간다.
 grid2.on('afterChange', (ev) => {
-    const { rowKey, columnName,value } = ev.changes[0]; // 변경된 데이터 목록 (배열)
-	if (columnName === 'prdId') {
-	        // 💡 핵심 수정: rowKey 대신, 현재 행의 'prdId' 값을 가져옵니다.
-	        const prdIdValue = grid2.getValue(rowKey, 'prdId');
-			const generatedPrdId = `${prdIdValue}-`;
-			grid2.setValue(rowKey,'bomId',generatedPrdId);
-			console.log(`RowKey: ${rowKey} | RouteStepId 생성 완료: ${generatedPrdId}`);
-	    }
+    // 여러 줄이 변경될 수 있으므로 forEach를 사용합니다.
+    ev.changes.forEach(change => {
+        const { rowKey, columnName, value } = change;
+
+        // 완제품 ID(prdId)가 입력되거나 변경된 경우
+        if (columnName === 'prdId' && value) {
+            
+            // 1. 현재 그리드의 모든 데이터를 가져옵니다.
+            const allRows = grid2.getData();
+
+            // 2. 같은 완제품 ID를 가진 행들의 bomId에서 숫자 부분만 추출합니다.
+            const existingNumbers = allRows
+                .filter(row => 
+                    row.prdId === value &&           // 같은 완제품 ID여야 함
+                    row.bomId &&                     // bomId가 이미 있어야 함
+                    row.bomId.includes('-') &&       // '-' 구분자가 포함되어야 함
+                    row.rowKey !== rowKey            // 현재 편집 중인 행은 제외
+                )
+                .map(row => {
+                    // "PRD001-018" 같은 문자열에서 마지막 "018"만 잘라냅니다.
+                    const parts = row.bomId.split('-');
+                    const lastPart = parts[parts.length - 1];
+                    const num = parseInt(lastPart, 10);
+                    
+                    return isNaN(num) ? 0 : num; // 숫자가 아니면 0으로 처리
+                });
+
+            // 3. 기존 번호 중 최대값을 찾습니다. 없으면 0부터 시작합니다.
+            const maxNum = existingNumbers.length > 0 ? Math.max(...existingNumbers) : 0;
+
+            // 4. 다음 번호는 (최대값 + 1)
+            const nextSeq = maxNum + 1;
+            const paddedSeq = String(nextSeq).padStart(3, '0'); // 1 -> 001, 2 -> 002
+
+            // 5. 최종 ID 생성 및 입력
+            const finalBomId = `${value}-${paddedSeq}`;
+            grid2.setValue(rowKey, 'bomId', finalBomId);
+
+            console.log(`[BOM ID 생성] 완제품: ${value} | 기존 최대: ${maxNum} | 새 번호: ${finalBomId}`);
+        }
+    });
 });
+
+grid2.on('dblclick', function(ev) {
+    // 1. 클릭한 위치가 셀(cell)인지 확인
+    // 2. 더블클릭한 컬럼 이름이 'matId'인지 확인
+    if (ev.targetType === 'cell' && ev.columnName === 'matId') {
+        
+        const rowData = grid2.getRow(ev.rowKey);
+		// 2. 현재 행이 신규로 추가된 행인지 확인
+        const { createdRows } = grid2.getModifiedRows();
+        const isNewRow = createdRows.some(row => String(row.rowKey) === String(ev.rowKey));
+
+        // 3. 신규 행일 때만 모달 열기
+        if (isNewRow) {
+            const rowData = grid2.getRow(ev.rowKey);
+            if (rowData) {
+                const myModal = new bootstrap.Modal(document.getElementById('matItems-modal'));
+                myModal.show();
+            }
+        } else {
+            // 기존 셀인 경우 경고를 띄우거나 아무 일도 일어나지 않게 함
+            console.log("기존 데이터는 수정할 수 없습니다.");
+            alert("기존 데이터의 원재료Id는 수정할 수 없습니다."); // 필요시 주석 해제
+        }
+        
+    }
+});
+
+
+
 //BOM정보 원재료 id-> 원재료 조회 클릭시 row 더블클릭시 값이 들어감 
 // 1. grid7에 dblclick 이벤트 리스너 등록//됏다 안됏다함
+
 grid7.on('dblclick', function(ev) {
     if (ev.targetType !== 'cell' && ev.targetType !== 'rowHeader') {
         return; 
     }
 
-    var sourceRowKey = ev.rowKey; 
-    var rowData = grid7.getRow(sourceRowKey); 
-	console.log("선택된 원재료 데이터:", rowData.matId);
-	var focusedRowIndex = grid2.getFocusedCell();
-	console.log("포커스된 행 인덱스:", focusedRowIndex);
-	if (focusedRowIndex.value === null || focusedRowIndex.value === undefined) {
-		var targetRowKey = focusedRowIndex.rowKey;
-		grid2.setValue(targetRowKey, 'matId', rowData.matId);
-		//모달닫기
-		document.querySelector('#matItems-modal .modal-footer [data-bs-dismiss="modal"]').click();
-	}
+    let rowData = grid7.getRow(ev.rowKey); 
+    let focusInfo = grid2.getFocusedCell();
 
+    if (focusInfo && focusInfo.rowKey !== null) {
+        grid2.finishEditing(focusInfo.rowKey, 'matId');
+        // 데이터 입력 실행
+        grid2.setValue(focusInfo.rowKey, 'matId', rowData.matId);
+        console.log("입력 완료:", focusInfo.rowKey, rowData.matId);
+
+        // 4. 모달 닫기
+        let closeBtn = document.querySelector('#matItems-modal .modal-footer [data-bs-dismiss="modal"]');
+        if (closeBtn) closeBtn.click();
+        
+    } else {
+        alert("데이터를 입력할 행을 먼저 선택해주세요.");
+    }
 });
 
 
@@ -1027,14 +1096,18 @@ function bomUnitList(){
 	})
 	.then(data => {
 		console.log("단위 드롭다운 데이터:", data);
-
 		data.forEach(item => {
-			unitListItems.push({
-				value: item.VALUE, 
-				text: item.TEXT   
-			});
+			// 1. unitListItems 배열 안에 현재 item.VALUE와 같은 값을 가진 요소가 있는지 확인
+			const isDuplicate = unitListItems.some(existingItem => existingItem.value === item.VALUE);
+
+			// 2. 중복되지 않았을 때만 푸쉬
+			if (!isDuplicate) {
+				unitListItems.push({
+					value: item.VALUE, 
+					text: item.TEXT   
+				});
+			}
 		});
-		console.log("unitListItems:", unitListItems);
 		// Dropdown editor의 listItems 업데이트
 		
 	})
