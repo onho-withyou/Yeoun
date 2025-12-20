@@ -93,6 +93,7 @@ public class ProcessMstService {
 							.processName(processName)
 							.description(description)
 							.processType(processType)
+							.stepNo(row.get("stepNo").toString())
 							.useYn(useYn)
 							.createdId(empId)
 							.createdDate(LocalDateTime.now())
@@ -121,6 +122,7 @@ public class ProcessMstService {
 							.processName(processName)
 							.description(row.get("description").toString())
 							.processType(row.get("processType").toString())
+							.stepNo(row.get("stepNo").toString())
 							.useYn(row.get("useYn").toString())
 							.createdId(row.get("createdId").toString())
 							.createdDate(
