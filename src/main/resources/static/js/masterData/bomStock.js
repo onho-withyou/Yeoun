@@ -1346,8 +1346,7 @@ function saveBomRow(type) {
 			const message = (parsed.message || '').toString().toLowerCase();
 			success = status === 'success' || okTexts.includes(message) || message.includes('success');
 		}
-		if (!success) throw new Error('Unexpected response: ' + JSON.stringify(parsed));
-		alert("저장이 완료되었습니다.");
+		if (!success) throw new Error(alert(parsed));
 		bomGridAllSearch();//저장후 전체조회
 		if( type === 'bomDetail') {
 			//grid1.focus();
@@ -1360,7 +1359,6 @@ function saveBomRow(type) {
 	})
 	.catch(err => {
 		console.error("저장오류", err);
-		alert("저장 중 오류가 발생했습니다.");
 	});
 }
 //bomHdr row 저장- 학원에 구현되어있음
