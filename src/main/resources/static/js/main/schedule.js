@@ -331,7 +331,9 @@ function initCalendar() {
 		        name: '공휴일',
 		        color: '#fff',
 		        backgroundColor: '#fdebe8',
-		        borderColor: '#e74c3c'
+		        borderColor: '#e74c3c',
+				isDraggable: false,
+				isResizable: false
 		    },
 			{
                 id: 'private',
@@ -595,7 +597,10 @@ function convertScheduleDataToSchedules(monthScheduleData) {
 			start: item.scheduleStart.replace(" ", "T"),
 			end: item.scheduleFinish.replace(" ", "T"),
 			category: isAllday ? "allday" : "time",
-			isAllday
+			isAllday,
+			isDraggable: false,  
+            isResizable: false,
+			isReadOnly: true
 //			raw: { ...item } // 기타등등 넣을정보
 		};
 	});
