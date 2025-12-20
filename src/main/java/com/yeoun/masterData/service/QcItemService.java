@@ -157,23 +157,28 @@ public class QcItemService {
 			return "error: " + e.getMessage();
 		}
 	}
-	// 품질 항목 기준 삭제
+	// 품질 항목 기준 삭제 (사용여부 N으로 변경)
 	@Transactional
 	public String deleteQcItem(List<String> qcItemIds) {
-		log.info("qcItemRepository------------->{}", qcItemIds);
+		log.info("qcItemRepository deleteQcItem------------->{}", qcItemIds);
 		try {
-			// 기본 삭제 수행
-			qcItemRepository.deleteAllById(qcItemIds);
-			// 즉시 flush 하여 DB 제약(FOREIGN KEY 등) 오류가 있으면 이 시점에 발생하도록 함
+			// 사용여부를 'N'으로 변경 (soft delete)
+			for(String qcItemId : qcItemIds) {
+				Optional<QcItem> optionalQcItem = qcItemRepository.findById(qcItemId);
+				if(optionalQcItem.isPresent()) {
+					QcItem qcItem = optionalQcItem.get();
+					qcItem.setUseYn("N");
+					qcItem.setUpdatedDate(LocalDate.now());
+					qcItemRepository.save(qcItem);
+				} else {
+					log.warn("삭제하려는 QC 항목을 찾을 수 없습니다: {}", qcItemId);
+				}
+			}
+			// 즉시 flush 하여 DB 업데이트 확실히 적용
 			qcItemRepository.flush();
 			return "success";
-		} catch (DataIntegrityViolationException dive) {
-			// 제약 위반은 구체적으로 로깅하고 사용자에게 명확한 메시지를 반환
-			log.error("QC Item delete constraint violation", dive);
-			String causeMsg = dive.getMostSpecificCause() != null ? dive.getMostSpecificCause().getMessage() : dive.getMessage();
-			return "error: constraint violation - " + (causeMsg != null ? causeMsg : "referential integrity");
 		} catch (Exception e) {
-			log.error("qcItemRepository error", e);
+			log.error("deleteQcItem error", e);
 			return "error: " + e.getMessage();
 		}
 	}

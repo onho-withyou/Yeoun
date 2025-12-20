@@ -79,19 +79,6 @@ const grid2 = new Grid({
 					isSelect: false   // ⭐ 이걸로 구분
 				}
 			}
-			// ,editor: {
-			// 	type: 'select', // 드롭다운 사용
-			// 	options: {
-			// 		listItems: [
-			// 			{ text: '블렌딩', value: '블렌딩' },
-			// 			{ text: '여과', value: '여과' },
-			// 			{ text: '충전', value: '충전' },
-			// 			{ text: '캡/펌프', value: '캡/펌프' },
-			// 			{ text: 'QC 검사', value: 'QC 검사' },
-			// 			{ text: '라벨링', value: '라벨링' }
-			// 		]
-			// 	}
-			// }
 		}
 	    ,{header: '공정유형' ,name: 'processType' ,align: 'center',editor: 'text'
 			,renderer:{ type: StatusModifiedRenderer}
@@ -226,7 +213,6 @@ const PROCESS_CODE_TO_TYPE_MAP = {
     '캡/펌프': 'CAPPING', 
     'QC 검사': 'QC',         
     '라벨링': 'PACK'        
-    
 };
 //공정코드 관리 그리드 수정시 기존 공정ID수정 불가
 grid2.on('beforeChange', (ev) => {
@@ -722,9 +708,17 @@ saveRouteBtn.addEventListener('click', function() {
 	if (missing.length > 0) {
 		alert(missing.join(' 및 ') + '을(를) 입력해주세요.');
 		return;
-	}else{
-		modifiedData.routeInfo = routeNewData;
 	}
+
+	// routeInfo에 mode 추가
+	if(document.getElementById('routeModalTitle').textContent === '신규 라우트 등록'){
+		routeNewData.mode = 'new';
+	}else{
+		routeNewData.mode = 'modify';
+	}
+	
+	// 모든 유효성 검사 완료 후 routeInfo 설정
+	modifiedData.routeInfo = routeNewData;
 	
 
 	// 새로 추가된 행 중 모든 필드가 비어있는(빈 행) 경우 그리드에서 제거하고 서버 전송 대상에서 제외
