@@ -448,6 +448,24 @@ async function empData() {
 		//셀렉트박스 - 토스트유아이
 		selectBox = new tui.SelectBox('#select-box', {
 			data: itemData
+			,
+			theme: {
+				'common.border': '1px solid #e4e4e4',
+				'common.color': '#353535',
+				'common.background': '#fcfcfc',
+				'common.width': '400px',
+				'common.height': '45px',
+				'common.border-radius': '5px',
+
+				'common.disabled.background': '#eceef1',
+				'common.disabled.color': '#708093',
+
+				'dropdown.maxHeight': '300px',
+
+				'itemGroup.items.paddingLeft': '15px',
+
+				'itemGroup.label.color': 'black',
+				}
 		});
 
 		//셀렉트박스 닫힐때
@@ -2227,6 +2245,29 @@ function defaultPrint() {
 }
 
 defalutapprover();
+
+// 화살표를 동적으로 관리하는 함수
+function updateArrows() {
+	// 기존 화살표들 모두 제거
+	const existingArrows = approverDiv.querySelectorAll('.bi-caret-right-fill');
+	existingArrows.forEach(arrow => arrow.remove());
+	
+	// 카드 개수 확인 (btn 클래스를 가진 div들)
+	const cards = approverDiv.querySelectorAll('.btn');
+	
+	// 카드가 2개 이상일 때만 화살표 추가
+	if (cards.length >= 2) {
+		for (let i = 0; i < cards.length - 1; i++) {
+			const arrow = document.createElement('i');
+			arrow.className = 'bi bi-caret-right-fill';
+			arrow.style.marginTop = '95px';
+			
+			// 현재 카드 다음에 화살표 삽입
+			cards[i].insertAdjacentElement('afterend', arrow);
+		}
+	}
+}
+
 //f- 결재권한자 div 버튼 생성 함수
 function print(type, text) {
 
@@ -2236,19 +2277,32 @@ function print(type, text) {
 		// type이 "detail"일 때는 닫기 버튼을 표시하지 않음 (상세 보기용)
 		const closeButton = type === "detail" ? '' : '<a id="approver_close_' + idx + '" onclick="approverDivclose(this,' + "'" + type + "'" + ',' + idx + ')" style="float:right;margin-right: 8px;">&times;</a>';
 		
-		const cardHtml = '<div class="btn btn-success"'
-			+ 'style="width:250px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
-			+ closeButton
-			+ '<p id="approver_' + idx + '" onclick="approvalNo(' + idx + ',' + "'" + text + "'" + ')" style="margin-top:30px;height: 129px;font-size:22px;">' + idx + '차 결재권한자 ' + '<br>' + text + '<br>' + '</p>'
-			+ '</div>';
+		// const cardHtml = '<div class="btn"'
+		// 	+ 'style="background-color: #E7E7FF;width:250px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
+		// 	+ closeButton
+		// 	+ '<p id="approver_' + idx + '" onclick="approvalNo(' + idx + ',' + "'" + text + "'" + ')" style="margin-top:30px;height: 129px;font-size:22px;">' + idx + '차 결재권한자 ' + '<br>' + text + '<br>' + '</p>'
+		// 	+ '</div>';
 
-		// 화살표 아이콘은 두번째 카드가 추가될 때(=idx===2)와 세번째 카드가 추가될 때(=idx===3)에만 삽입
-		if (idx > 1) {
-			approverDiv.innerHTML += '<i class="bi bi-caret-right-fill" style="margin-top:95px;"></i>';
-		}
+		const cardHtml = '<div class="btn" '
+            + 'style="background-color: #E7E7FF; width:250px; height:200px; margin:5px; padding: 5px 0px 0px 0px; '
+            + 'border-radius: 10px; border: 1px solid #D1D1F5; cursor: pointer; ' // 기본 테두리
+            + 'box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.1s, box-shadow 0.1s; display: inline-block; vertical-align: top;" ' // 입체감 추가
+            + 'onmouseover="this.style.backgroundColor=\'#DADAFF\';" ' // 마우스 올리면 살짝 진해짐
+            + 'onmouseout="this.style.backgroundColor=\'#E7E7FF\';" '
+            + 'onmousedown="this.style.transform=\'translateY(2px)\'; this.style.boxShadow=\'0 2px 3px rgba(0,0,0,0.15)\';" ' // 클릭 시 아래로 눌림
+            + 'onmouseup="this.style.transform=\'translateY(0px)\'; this.style.boxShadow=\'0 4px 6px rgba(0,0,0,0.1)\';">' // 떼면 복귀
+            + closeButton
+            + '<p id="approver_' + idx + '" onclick="approvalNo(' + idx + ',' + "'" + text + "'" + ')" '
+            + 'style="margin-top:30px; height: 129px; font-size:22px;">' // 기존 시퀀스(마진, 높이) 유지
+            + idx + '차 결재권한자 ' + '<br>' + text + '<br>' 
+            + '</p>'
+            + '</div>';
 
 		approverDiv.innerHTML += cardHtml;
 		this.count = idx;
+		
+		// 카드 추가 후 화살표 업데이트
+		updateArrows();
 	}
 }
 
@@ -2280,8 +2334,8 @@ function approvalNo(count, text) {
 	                    type="button" class="btn btn-primary" 
 	                    data-count="${count}" 
 	                    onclick="applyDelegateChange(this)"
-						style="display:none;margin-left:5px;">
-	                전결자로 지정
+						style="display:none;margin-left:5px;background-color: #788393; color:#e9ecef;">
+	                결재권한자로 지정
 	            </button>
 	        `;
 		jeongyeoljaDiv.style.display = 'block';
@@ -2312,7 +2366,6 @@ function approverDivclose(buttonDiv, type, count) {
 
 	}
 
-
 	jeongyeoljaDiv.style.display = 'none';
 	//defalut 태그 닫기 버튼시 
 	if (buttonDiv.parentElement.id === "" || type === "defalut") {//결재권한자
@@ -2323,11 +2376,17 @@ function approverDivclose(buttonDiv, type, count) {
 		}
 		approverArr = approverArr.filter((ev) => ev !== count);
 		this.count = count - 1; //제거 라벨 카운트 원상복기
+		
+		// 카드 삭제 후 화살표 업데이트
+		updateArrows();
 	}
 	if (type === "close") { //전결자 변경 닫기버튼시
 		divElement.remove(); //자신의 div 제거
 		//전결자 변경시 결재권한자 배열에서 해당 결재권한자 제거
 		approverArr = approverArr.filter((ev) => ev.approverOrder !== count);
+		
+		// 카드 삭제 후 화살표 업데이트
+		updateArrows();
 	}
 	if (approverArr.length === 0) {
 		this.count = 0;
