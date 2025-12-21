@@ -52,7 +52,7 @@ public class WebSecurityConfig {
 				.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
 				    // 공통: 정적 리소스 및 로그인/회원가입 등 완전 공개 구역
 					.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-					.requestMatchers("/assets/**", "/css/**", "/custom_bg/**", "/icon/**", "/js/**").permitAll()
+					.requestMatchers("/assets/**", "/css/**", "/custom_bg/**", "/icon/**", "/js/**", "/files/download/**").permitAll()
 					.requestMatchers("/", "/login", "/logout").permitAll()
 					
 					// ================== 로그인 한 모든 사원 ==================

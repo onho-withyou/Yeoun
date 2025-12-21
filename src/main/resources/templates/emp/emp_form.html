@@ -103,8 +103,14 @@
   					<div class="col-12 col-md-6 text-center">
     				  <label class="form-label">사진 미리보기</label>
     				  <div class="mt-1">
-      					<img id="photoPreview" th:src="${empDTO.photoFileId != null} ? @{'/files/download/' + ${empDTO.photoFileId}} : @{/img/default-profile.png}"
-        						 alt="프로필 사진" class="rounded shadow-sm" style="width:140px; height:140px; object-fit:cover;">
+						<img id="photoPreview"
+						     th:src="${empDTO.photoFileId != null}
+						              ? @{/files/download/{id}(id=${empDTO.photoFileId})}
+						              : @{/img/default-profile.png}"
+						     onerror="this.onerror=null; this.src='/img/default-profile.png';"
+						     alt="프로필 사진"
+						     class="rounded shadow-sm"
+						     style="width:140px; height:140px; object-fit:cover;">
     				  </div>
   					</div>
 				  </div>
