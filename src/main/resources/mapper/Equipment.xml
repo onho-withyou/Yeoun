@@ -18,5 +18,54 @@
         AND p.STEP_SEQ = #{step}
         AND p.STATUS != 'READY'
     </select>
+    
+    <select id="selectDowntimeHistories" resultType="com.yeoun.equipment.dto.EquipDowntimeDTO">
+    	SELECT
+    		d.DOWN_ID,
+    		d.EQUIP_ID,
+    		e.EQUIP_CODE AS EQUIP_TYPE_ID,
+    		e.EQUIP_NAME,
+    		e.LINE_ID,
+    		d.DOWN_REASON,
+    		d.START_TIME AS START_DATE,
+    		d.END_TIME AS END_DATE
+    	FROM EQUIP_DOWNTIME d
+    		JOIN PROD_EQUIP e ON d.EQUIP_ID = e.EQUIP_ID 
+    	<where>
+    		<if test="equipment != null">
+    			AND e.EQUIP_CODE = #{equipment}
+    		</if>
+    		
+    		<if test="line != null">
+    			AND e.LINE_ID = #{line}
+    		</if>
+    		
+    		<if test="reason != null">
+    			AND d.DOWN_REASON = #{reason}
+    		</if>
+    		
+    		<if test="start != null">
+    			AND d.END_TIME <![CDATA[ >= ]]> TO_DATE(#{start}, 'YYYY-MM-DD')
+    		</if>
+    		
+    		<if test="end != null">
+    			AND d.START_TIME <![CDATA[ <= ]]> TO_DATE(#{end}, 'YYYY-MM-DD') + 1
+    		</if>
+    	</where>
+    	ORDER BY d.START_TIME DESC
+    </select>
+    
+    <select id="countRunningEquipments" resultType="Integer">
+    SELECT COUNT(DISTINCT pe.equip_id)
+	FROM prod_equip pe
+	JOIN equipment p
+	  ON pe.equip_code = p.equip_id
+	JOIN work_order_process wop
+	  ON p.process_id = wop.process_id
+	JOIN work_order wo
+	  ON wop.order_id = wo.order_id
+	WHERE wop.status = 'IN_PROGRESS'
+	  AND SYSDATE BETWEEN wop.start_time AND NVL(wop.end_time, SYSDATE)
+    </select>
 
 </mapper>

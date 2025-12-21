@@ -36,6 +36,67 @@ public interface LotMasterRepository extends JpaRepository<LotMaster, String> {
 	
 	// 완제품 LOT 목록 조회 (LOT_TYPE = 'WIP', 'FIN' 인 LOT만 대상)
 	// - LOT 추적에서 왼쪽 목록에 출력될 ROOT
-	List<LotMaster> findByLotTypeInOrderByCreatedDateDesc(List<String> lotTypes);
+	
+	@Query(value = """
+		    SELECT
+		      lm.lot_no AS lotNo,
+		      COALESCE(p.prd_name, m.mat_name, lm.prd_id) AS displayName,
+		      lm.current_status AS currentStatus,
+		      lm.lot_type AS lotType
+		    FROM lot_master lm
+		    LEFT JOIN product_mst p ON p.prd_id = lm.prd_id
+		    LEFT JOIN material_mst m ON m.mat_id = lm.prd_id
+		    WHERE lm.lot_type IN ('WIP', 'FIN')
+		    ORDER BY
+		      CASE lm.current_status
+		        WHEN 'IN_PROCESS' THEN 0
+		        WHEN 'PROD_DONE' THEN 1
+		        WHEN 'SCRAPPED' THEN 2
+		        ELSE 3
+		      END,
+		      lm.created_date DESC
+		    """, nativeQuery = true)
+	List<Object[]> findFinishedLotsNative();
+	
+	@Query(value = """
+			WITH base AS (
+			  SELECT
+			    lm.lot_no AS lotNo,
+			    COALESCE(p.prd_name, m.mat_name, lm.prd_id) AS displayName,
+			    lm.created_date AS createdDate,
+			    COALESCE(
+			      (SELECT i.iv_status
+			       FROM inventory i
+			       WHERE i.iv_id = (
+			         SELECT MAX(i2.iv_id)
+			         FROM inventory i2
+			         WHERE i2.lot_no = lm.lot_no
+			       )
+			      ),
+			      'SOLD_OUT'
+			    ) AS invStatus
+			  FROM lot_master lm
+			  LEFT JOIN product_mst p ON p.prd_id = lm.prd_id
+			  LEFT JOIN material_mst m ON m.mat_id = lm.prd_id
+			  WHERE lm.lot_type IN ('RAW','SUB','PKG')
+			)
+			SELECT
+			  lotNo,
+			  displayName,
+			  invStatus
+			FROM base
+			ORDER BY
+			  CASE invStatus
+			    WHEN 'EXPIRED'       THEN 0
+			    WHEN 'DISPOSAL'      THEN 1
+			    WHEN 'DISPOSAL_WAIT' THEN 2
+			    WHEN 'NORMAL'        THEN 3
+			    WHEN 'SOLD_OUT'      THEN 4
+			    ELSE 9
+			  END,
+			  createdDate DESC
+			""", nativeQuery = true)
+	List<MaterialRootRow> findMaterialRootLots();
+
 
 }

@@ -33,7 +33,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 	showSpinner();
 	
 	// 재고정보 
-	inventoryInfo = await fetchInventoryData();
+	inventoryInfo = await fetchNotNormalInventoryData();
+//	console.log("@@@@@@",inventoryInfo);
 	// 안전재고 수량정보
 	inventorySafetyStockInfo = await fetchInventorySafetyStockData();
 	// 오늘 입고 정보
@@ -475,6 +476,9 @@ async function renderOrderGrid() {
 			    useClient: true, 
 			    perPage: 5 
 			},
+			columnOptions: {
+				resizable: true
+			},
 	        columns: [
 	            { header: '작업지시서',   name: 'orderId', minWidth: 160 },
 	            { header: '생산 품목', name: 'productName', minWidth: 110, align: 'center' },
@@ -485,7 +489,7 @@ async function renderOrderGrid() {
 	      		  }	
 				},
 				{ header: '출고등록',      name: "btn", width: 100, align: "center",
-				  formatter: (cellInfo) => "<button type='button' class='btn-detail btn-primary btn-sm' data-row='${cellInfo.rowKey}' >출고등록</button>"
+				  formatter: (cellInfo) => "<button type='button' class='btn btn-outline-info btn-sm' data-row='${cellInfo.rowKey}' >출고등록</button>"
 				}
 	        ],
 	        data: outboundNList
@@ -575,6 +579,9 @@ async function renderShipmentGrid() {
 	   bodyHeight: 160,
 	   rowHeaders: ['rowNum'],
 	   pageOptions: { useClient: true, perPage: 5 },
+	   columnOptions: {
+	   	resizable: true
+	   },
 	   columns: [
 		{ header: '출하지시서', name: 'shipmentId', minWidth: 140 },
 		{ header: '거래처',     name: 'clientName', minWidth: 120 },
@@ -731,6 +738,9 @@ async function renderNeedOrderStockGrid() {
 		pageOptions: {
 		    useClient: true, 
 		    perPage: 5 
+		},
+		columnOptions: {
+			resizable: true
 		},
         columns: [
             { header: '품목명',   name: 'itemName', minWidth: 160 },
@@ -932,6 +942,9 @@ async function renderExpireDisposalGrid() {
 		    useClient: true,
 		    perPage: 5
 		},
+		columnOptions: {
+			resizable: true
+		},
         columns: [
 //            { header: '품목코드', name: 'itemId', width: 110, align: 'center' },
             { header: '품목명',   name: 'prodName', minWidth: 160 },
@@ -1007,9 +1020,9 @@ async function renderExpireDisposalGrid() {
 // 데이터 정보 가져오기
 
 // 재고정보 가져오기
-async function fetchInventoryData() {
+async function fetchNotNormalInventoryData() {
 	const response = 
-		await fetch('/api/inventories', {
+		await fetch('/api/inventories/expiration', {
 			method: 'POST',
 			headers: {
 				[csrfHeader]: csrfToken,
@@ -1021,7 +1034,7 @@ async function fetchInventoryData() {
 		throw new Error('재고데이터를 가져올 수 없습니다.')
 	}
 	return await response.json();
-} 
+}
 
 // 안전재고/재고 비교 정보 데이터
 async function fetchInventorySafetyStockData() {

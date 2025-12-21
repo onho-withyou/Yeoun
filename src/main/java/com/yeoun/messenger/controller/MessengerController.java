@@ -11,6 +11,8 @@ import com.yeoun.messenger.entity.MsgRoom;
 import com.yeoun.messenger.repository.MsgRoomRepository;
 
 import com.yeoun.messenger.service.ChatService;
+import com.yeoun.messenger.service.RoomMemberQueryService;
+import com.yeoun.messenger.support.RoomNameGenerator;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -35,13 +37,8 @@ public class MessengerController {
 	private final MessengerService messengerService;
 	private final EmpRepository empRepository;
 	private final MsgRoomRepository msgRoomRepository;
-
-	// ==========================================================================
-	// 메신저 큰 화면 (보류) => MES 끝나고 시간 남으면 다시 만나 ...
-//	@GetMapping(value = {"/", "/index"})
-//	public String index(Model model) {
-//		return "/messenger/index";
-//	}
+	private final RoomNameGenerator roomNameGenerator;
+	private final RoomMemberQueryService roomMemberQueryService;
 	
 	// ==========================================================================
 	// 메신저 팝업 목록 - 친구목록
@@ -72,6 +69,19 @@ public class MessengerController {
 		statusChangeRequest.setEmpId(authentication.getName());
 		messengerService.updateStatus(statusChangeRequest);
 		chatService.changeStatus(statusChangeRequest);
+		return ResponseEntity.noContent().build();
+	}
+
+	// ==========================================================================
+	// 메신저 상태 실시간 변경 (오프라인 처리용)
+	@PostMapping("/status/offline")
+	public ResponseEntity<?> changeStatusOffline(Authentication authentication){
+		StatusChangeRequest req = new StatusChangeRequest();
+
+		req.setEmpId(authentication.getName());
+		req.setAvlbStat("OFFLINE");
+		messengerService.updateStatus(req);
+		chatService.changeStatus(req);
 		return ResponseEntity.noContent().build();
 	}
 	
@@ -129,11 +139,11 @@ public class MessengerController {
 		List<MsgMessageDTO> msgList = messengerService.getMessages(id);
 
 		// 2) 멤버 불러오기
-		List<RoomMemberDTO> memberList = messengerService.getMembers(id);
+		List<RoomMemberDTO> memberList = roomMemberQueryService.getMembers(id);
 
 		// 3) 방 정보 불러오기
 		MsgRoom room = msgRoomRepository.findById(id).get();
-		String groupName = messengerService.resolveRoomName(id, authentication.getName());
+		String groupName = roomNameGenerator.create(id, authentication.getName(), memberList);
 
 		// 5) 방 이름 모델에 담기
 		model.addAttribute("roomId", id);
@@ -193,7 +203,7 @@ public class MessengerController {
 	// 방 이름 수정
 	@PatchMapping("/room/{roomId}/rename")
 	public ResponseEntity<String> renameRoom(
-			@PathVariable Long roomId,
+			@PathVariable("roomId") Long roomId,
 			@RequestBody Map<String, String> request
 	) {
 		log.info("방 이름 수정 컨트롤러....");

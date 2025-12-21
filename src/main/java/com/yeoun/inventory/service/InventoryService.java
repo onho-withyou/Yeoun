@@ -23,10 +23,12 @@ import com.yeoun.common.service.AlarmService;
 import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryGroupDTO;
+import com.yeoun.inventory.dto.InventoryHistorySearchDTO;
 import com.yeoun.inventory.dto.WarehouseLocationDTO;
 import com.yeoun.inventory.entity.Inventory;
 import com.yeoun.inventory.entity.InventoryHistory;
 import com.yeoun.inventory.entity.WarehouseLocation;
+import com.yeoun.inventory.mapper.InventoryHistoryMapper;
 import com.yeoun.inventory.repository.InventoryHistoryRepository;
 import com.yeoun.inventory.repository.InventoryOrderCheckViewRepository;
 import com.yeoun.inventory.repository.InventoryRepository;
@@ -51,6 +53,7 @@ public class InventoryService {
 	private final WorkOrderRepository workOrderRepository;
 	private final InventoryOrderCheckViewRepository ivOrderCheckViewRepository;
 	private final SimpMessagingTemplate messagingTemplate;
+	private final InventoryHistoryMapper inventoryHistoryMapper;
 	private final AlarmService alarmService;
 	
 	// 검색조건을 통해 재고리스트 조회
@@ -272,10 +275,27 @@ public class InventoryService {
 	
 	// ------------------------------------------------------------------------
 	// 재고내역 불러오기
-	public List<InventoryHistoryDTO> getInventoryHistorys() {
-		List<InventoryHistory> historyList = inventoryHistoryRepository.findAll();
+	public List<InventoryHistoryDTO> getInventoryHistorys(InventoryHistorySearchDTO condition) {
+	    LocalDateTime startDateTime = null;
+	    LocalDateTime endDateTime = null;
+	    String workType = null;
+	    String searchKeyword = null;
+
+	    if (condition.getStartDate() != null) {
+	        startDateTime = condition.getStartDate().atStartOfDay();
+	    }
+	    if (condition.getEndDate() != null) {
+	        endDateTime = condition.getEndDate().atTime(23, 59, 59);
+	    }
+	    if (condition.getWorkType() != null && !condition.getWorkType().isBlank()) {
+	        workType = condition.getWorkType();
+	    }
+	    if (condition.getSearchKeyword() != null && !condition.getSearchKeyword().isBlank()) {
+	        searchKeyword = "%" + condition.getSearchKeyword().trim().toLowerCase() + "%";
+	    }
 		
-		return historyList.stream().map(InventoryHistoryDTO::fromEntity).toList(); 
+		return inventoryHistoryMapper.searchInventoryHistory(
+				startDateTime, endDateTime, workType, searchKeyword);
 	}
 	
 	// 재고 등록(입고 시 사용)
@@ -365,6 +385,15 @@ public class InventoryService {
 	}
 
 	// ==================================
+	
+	// 재고상태가 normal이 아닌 재고 조회
+	public List<InventoryDTO> getInventoryNotnormal() {
+		
+		return inventoryRepository.findByIvStatusNot("NORMAL")
+				.stream()
+				.map(InventoryDTO::fromEntity).toList();
+	}
+	
 	// 창고 등록
 	@Transactional
 	public void createLocations(WarehouseLocationCreateRequest req) {
@@ -450,5 +479,6 @@ public class InventoryService {
 		
 		warehouseLocationRepository.deleteAllByZoneAndRack(zone, rack);
 	}
+	
 
 }

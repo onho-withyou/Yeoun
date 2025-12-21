@@ -26,6 +26,7 @@ import com.yeoun.inventory.dto.InventoryOrderCheckViewDTO;
 import com.yeoun.inventory.dto.InventoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryDTO;
 import com.yeoun.inventory.dto.InventoryHistoryGroupDTO;
+import com.yeoun.inventory.dto.InventoryHistorySearchDTO;
 import com.yeoun.inventory.dto.WarehouseLocationDTO;
 import com.yeoun.inventory.dto.InventorySafetyCheckDTO;
 import com.yeoun.inventory.dto.WarehouseLocationCreateRequest;
@@ -107,10 +108,10 @@ public class InventoryRestController {
 	
 	//-----------------------------------------------------------------------------
 	// 재고이력 정보
-	@GetMapping("/historys")
-	public ResponseEntity<List<InventoryHistoryDTO>> historys() {
+	@PostMapping("/historys")
+	public ResponseEntity<List<InventoryHistoryDTO>> historys(@RequestBody InventoryHistorySearchDTO condition) {
 		
-		List<InventoryHistoryDTO> historyDTOList = inventoryService.getInventoryHistorys();
+		List<InventoryHistoryDTO> historyDTOList = inventoryService.getInventoryHistorys(condition);
 		
 		return ResponseEntity.ok(historyDTOList);
 	}
@@ -127,6 +128,14 @@ public class InventoryRestController {
 	
 	// ----------------------------------------------------------------------------
 	// 대시보드
+	
+	// 재고의 상태가 normal이아닌 재고데이터
+	@PostMapping("/expiration")
+	public ResponseEntity<List<InventoryDTO>> getNotnormalIv() {
+		List<InventoryDTO> inventoryList = inventoryService.getInventoryNotnormal();
+		
+		return ResponseEntity.ok(inventoryList);
+	}
 	
 	// 상품별 재고정보 조회
 	@GetMapping("/inventorySafetyStockCheckInfo")

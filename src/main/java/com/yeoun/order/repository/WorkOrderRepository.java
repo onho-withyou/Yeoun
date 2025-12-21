@@ -26,6 +26,7 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, String> {
             FROM WORK_ORDER w
             WHERE w.PLAN_ID = :planId
             AND w.STATUS != 'CANCELED'
+            AND w.STATUS != 'SCRAPPED'
     """, nativeQuery = true)
 	Integer sumWorkOrderQty(@Param("planId")String planId);
 
@@ -43,6 +44,15 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, String> {
 	
 	// 같은 PLAN_ID 아래 아직 완료 안 된 작업지시가 있는지 확인
 	boolean existsByPlanIdAndStatusNot(String planId, String status);
+	
+	@Query("""
+		    SELECT wo
+		    FROM WorkOrder wo
+		    LEFT JOIN FETCH wo.product
+		    LEFT JOIN FETCH wo.line
+		    WHERE wo.orderId = :orderId
+		    """)
+	Optional<WorkOrder> findByIdWithFetch(@Param("orderId") String orderId);
 	
 	
 	// ==========================

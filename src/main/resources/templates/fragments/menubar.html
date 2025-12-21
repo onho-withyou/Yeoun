@@ -64,6 +64,11 @@
                             <div data-i18n="Menu2" class="menu-link-sub">출/퇴근 현황</div>
                         </a>
                     </li>
+                    <li class="menu-item" sec:authorize="isAuthenticated()">
+                        <a href="/attendance/outwork" class="menu-link">
+                            <div data-i18n="Menu2" class="menu-link-sub">외근 현황</div>
+                        </a>
+                    </li>
                     <!-- 로그인한 사람 누구나 -->
                     <li class="menu-item" sec:authorize="isAuthenticated()">
                         <a href="/leave/my" class="menu-link">
@@ -217,7 +222,7 @@
                 </ul>
             </li>
               
-            <li class="menu-item">
+            <li class="menu-item" sec:authorize="hasAnyRole('SALES_ADMIN','SYS_ADMIN')">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></i>
                     <div data-i18n="Sales management">영업관리</div>
@@ -243,13 +248,18 @@
 	            </ul>
             </li>
 
-            <li class="menu-item">
+            <li class="menu-item" sec:authorize="hasAnyRole('MES_USER','MES_MANAGER','SYS_ADMIN')">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg></i>
                     <div data-i18n="Work order">생산관리</div>
                 </a>               
                 
                 <ul class="menu-sub">
+              		<li class="menu-item" sec:authorize="isAuthenticated()">
+                        <a th:href="@{/production/dashboard}" class="menu-link">
+                            <div data-i18n="Menu1" class="menu-link-sub">대시보드</div>
+                        </a>
+                    </li>
                		<li class="menu-item" sec:authorize="isAuthenticated()">
                         <a th:href="@{/production/plan}" class="menu-link">
                             <div data-i18n="Menu1" class="menu-link-sub">생산계획</div>
@@ -269,7 +279,7 @@
             </li>
             
             <!-- 설비 관리 -->
-            <li class="menu-item">
+            <li class="menu-item" sec:authorize="hasAnyRole('MES_USER','MES_MANAGER','SYS_ADMIN')">
             	<a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.7-3.7a1 1 0 0 0-1.4-1.4l-3.7 3.7Z"/><path d="m2 22 5-5"/><path d="M9.5 14.5 16 21l4.5-4.5L14 10l-4.5 4.5Z"/></svg></i>
                     <div data-i18n="Equipment management">설비관리</div>
@@ -281,22 +291,22 @@
 	                   </a>
 	                </li>
 	                <li class="menu-item" sec:authorize="isAuthenticated()">
-	                   <a th:href="@{/equipment/line}" class="menu-link">
-	                       <div data-i18n="Menu2" class="menu-link-sub">라인현황</div>
+	                   <a th:href="@{/equipment/history}" class="menu-link">
+	                       <div data-i18n="Menu2" class="menu-link-sub">설비이력</div>
 	                   </a>
 	                </li>
                 </ul>
             </li>
             
             <!-- 공정 관리 -->              
-            <li class="menu-item">
+            <li class="menu-item" sec:authorize="hasAnyRole('MES_USER','MES_MANAGER','SYS_ADMIN')">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12a10 10 0 1 1-2-6l-2 2h5V3l-2 2a12 12 0 1 0 2 10"/><path d="M12 7v5l3 3"/></svg></i>
                     <div data-i18n="Process management">공정관리</div>
                 </a>
                 <ul class="menu-sub">
                		<li class="menu-item" sec:authorize="isAuthenticated()">
-                        <a th:href="@{/production/dashboard}" class="menu-link">
+                        <a th:href="@{/process/dashboard}" class="menu-link">
                             <div data-i18n="Menu1" class="menu-link-sub">대시보드</div>
                         </a>
                     </li>
@@ -316,7 +326,7 @@
             </li>
             
             <!-- 품질 관리 -->
-            <li class="menu-item">
+            <li class="menu-item" sec:authorize="hasAnyRole('QC_USER','QC_ADMIN','SYS_ADMIN')">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></i>
                     <div data-i18n="Qc management">품질관리</div>

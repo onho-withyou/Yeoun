@@ -311,17 +311,27 @@ const submitOrder = async () => {
 	
 	// 선택된 품목들을 items에 추가
 	document.querySelectorAll("#orderTable tbody tr").forEach(tr => {
-		// 발주 단위
-		const unit = tr.querySelector("input[name=unit]").value;
-		// 단위 변환(발주 단위와 재고 단위를 비교해서 변환)
-		const convertOrderAmount = convertToBaseUnit(tr.querySelector("input[name=orderAmount]").value, unit)
-		
 		items.push({
 			itemId: tr.querySelector("input[name=itemId]").value,
-			orderAmount: convertOrderAmount,
+			orderAmount: tr.querySelector("input[name=orderAmount]").value,
 			unitPrice: tr.querySelector("input[name=unitPrice]").value,
 		});
 	});
+	
+	if (clientId.trim().length === 0) {
+		alert("거래처를 선택해주세요.");
+		return;
+	}
+	
+	if (items.length <= 0) {
+		alert("품목을 선택해주세요.");
+		return;
+	}
+	
+	if (dueDate.value === null || dueDate.value === "") {
+		alert("예상도착일을 입력해주세요.");
+		return;
+	}
 	
 	// body에 담아서 보낼 내용
 	const payload = {
