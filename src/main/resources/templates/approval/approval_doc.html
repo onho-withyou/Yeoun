@@ -33,7 +33,7 @@
 		<div class="d-flex justify-content-between">
 			<div class="d-flex justify-content-start">
 				<div class="mb-6 mb-0" style="width: 180px;">
-					<select class="form-select" onchange="draftValFn(this)">
+					<select id="form-type-defalut" class="form-select" onchange="draftValFn(this)">
 						<option value="" selected disabled hidden>기안서</option>
 							<option th:each="item, iterStat : ${formTypes}" 
 									th:value="${item.formName}" 
@@ -44,26 +44,32 @@
 					</select>
 				</div>
 				<div style="margin-left: 5px;">
-					<button id="writeBtn" data-action="create" onclick="defaultPrint()" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#approval-modal" style="width: 71px;">
+					<button id="writeBtn" data-action="create" onclick="defaultPrint()" class="btn btn-outline-secondary me-1" data-bs-toggle="modal" data-bs-target="#approval-modal" style="width: 71px;">
 					작성
 					</button>
 				</div>
 			</div>
 			<div class="d-flex justify-content-end">
-				<div class="d-flex align-items-center gap-2" style="min-width: 280px;">
+				<div class="d-flex align-items-center gap-2" style="min-width: 280px;margin-right:25px;">
 			
 					<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+						<label class="form-label">결재생성일</label>
 						<input id="searchStartDate" type="date" name="startDate" class="form-control">
 					</div>
-					<span>~</span>
+					<span style="margin-top: 33px;">~</span>
 					<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+						<label class="form-label">결재완료일</label>
 						<input id="searchEndDate" type="date" name="endDate" class="form-control">
 					</div>
-				</div>
-					<input id="searchEmpIdAndformType" class="form-control" type="text" placeholder="기안자및문서제목" style="width: 200px;height: 38.94px;margin-left:5px;">
-				<div style="margin-left:5px;">
-					<button id="searchBtn" onclick="AllGridSearch()" class="btn btn-primary">조회</button>
-				</div>
+					<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+						<label class="form-label">기안자및문서제목</label>
+						<input id="searchEmpIdAndformType" class="form-control" type="text" placeholder="기안자및문서제목" style="width: 200px;height: 38.94px;margin-left:5px;">
+						
+					</div>
+					<button id="searchBtn" onclick="AllGridSearch()" class="btn btn-primary" style="position: relative;margin-left: 27px;margin-top: 37px;">
+						조회
+					</button>
+				</div>	
 			</div>
 		</div>
 		<hr>
@@ -98,23 +104,18 @@
             </ul>
             <div class="tab-content" style="height: 700px;">
               <div class="tab-pane fade show active"  id="nav-approval-tab" role="tabpanel">
-                <!--<h2>결재사항</h2>-->
 			  	<div id="approvalGrid" ></div>
               </div>
               <div class="tab-pane fade" id="navs-all-tab" role="tabpanel">
-                <!--<h2>전체결재</h2>-->
 			  	<div id="allApprovalGrid"></div>
               </div>
               <div class="tab-pane fade" id="navs-my-tab" role="tabpanel">
-                <!--<h2>내 결재목록</h2>-->
 			  	<div id="myApprovalGrid"></div>
               </div>
 			  <div class="tab-pane fade" id="navs-waiting-tab" role="tabpanel">
-                <!--<h2>결재대기</h2>-->
 				<div id="waitingApprovalGrid" ></div>
               </div>
 			  <div class="tab-pane fade" id="navs-done-tab" role="tabpanel">
-                <!--<h2>결재완료</h2>-->
 				<div id="doneApprovalGrid"></div>
               </div>
             </div>
@@ -164,45 +165,26 @@
 						<label class="p-1 required-field" style="width: 200px;">결재완료기간</label>
 						
 						<div class="d-flex align-items-center gap-2" style="min-width: 280px;">
-							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 160px;">
 								<input id="create-date" type="date" name="createdDate" class="form-control" required>
 							</div>
 							<span>~</span>
-							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 160px;">
 								<input id="finish-date" type="date" name="finishDate" class="form-control" required>
 							</div>
 						</div>
-					<!-- 	<div class="row flex-nowrap">
-							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-								<input type="date" name="createdDate" id="create-date" class="form-control" required>
-							</div>
-							~
-							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-								<input type="date" name="finishDate"  id="finish-date" class="form-control" required>
-							</div>
-						</div>
-					</h5> -->
 					
 					<h5 id="leavePeriodForm" style="display:none;">
 						<label class="p-1 required-field" style="width: 200px;">휴가기간</label>
 						<div class="d-flex align-items-center gap-2" style="min-width: 280px;">
-							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 160px;">
 								<input id="start-date" type="date" name="startDate" class="form-control" >
 							</div>
 							<span>~</span>
-							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
+							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 160px;">
 								<input id="end-date" type="date" name="endDate" class="form-control" >
 							</div>
 						</div>
-						<!-- <div class="row flex-nowrap">
-							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-								<input type="date" name="startDate"  id="start-date" class="form-control">
-							</div>
-							~
-							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-								<input type="date" name="endDate"  id="end-date" class="form-control">
-							</div>
-						</div> -->
 					</h5>
 				
 					<h5 id="leaveTypeForm" style="display: none;">
@@ -264,7 +246,11 @@
 					</h5>
 					<h5>
 						<label class="p-1" style="width: 200px;">사유내용</label>
-						<textarea id="reason-write" class="form-control" name="reason" rows="10" placeholder="결재사유내용 작성"></textarea>
+						<div>
+							<textarea id="reason-write" class="form-control" name="reason" rows="10" 
+								placeholder="결재사유내용 작성" maxlength="3000"></textarea>
+							<small id="reason-char-count" class="form-text text-muted" style="float:right;">0/3000자</small>
+						</div>
 					</h5>
 					<h5 class="d-flex">
 						<label>결재권한자 </label> 
@@ -321,19 +307,19 @@
 				</div>
 				<div class="modal-footer">
 					<div id="fileListContainer" class="d-flex"></div>
-						<button type="button" id="attachmentBtn" class="btn btn-primary">첨부파일</button>		
+						<button type="button" id="attachmentBtn" class="btn btn-primary btn-md-sm">첨부파일</button>		
 						<input type="file" id="realFileInput" name="itemImgFiles" accept="image/*,application/pdf" style="display: none;" multiple>
 						<div id="downloadArea"></div>
 				</div>
 				<div class="modal-footer">
 					<div>
-						<button type="button" id="approvalCompanionBtn" class="btn btn-primary" style="display:none;">반려</button>
-						<button type="button" id="approvalCheckBtn" class="btn btn-primary" style="display:none;">결재확인</button>
+						<button type="button" id="approvalCompanionBtn" class="btn btn-outline-danger btn-md-sm" style="display:none;">반려</button>
+						<button type="button" id="approvalCheckBtn" class="btn btn-outline-primary me-2 btn-md-sm" style="display:none;">결재확인</button>
 					</div>
 					<hr>
-					<button type="button" id="printBtn" class="btn btn-primary">인쇄</button>
-					<button type="submit" id="saveBtn" class="btn btn-primary" >등록</button>
-					<button type="button" id="modalCloseBtn" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+					<button type="button" id="printBtn" class="btn btn-outline-secondary me-1 btn-md-sm">인쇄</button>
+					<button type="submit" id="saveBtn" class="btn btn-primary btn-md-sm" >등록</button>
+					<!-- <button type="button" id="modalCloseBtn" class="btn btn-secondary btn-md-sm" data-bs-dismiss="modal">닫기</button> -->
 				</div>
 				
 				</form>
