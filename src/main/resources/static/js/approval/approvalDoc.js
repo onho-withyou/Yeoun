@@ -2201,8 +2201,14 @@ function defaultPrint() {
 	const today = new Date();
 	const isoFormattedDate = today.toISOString().split('T')[0]; // YYYY-MM-DD 형식
 	
+	// today-date 요소에 오늘 날짜 설정 (읽기 전용 표시용)
+	const todayDateElement = document.getElementById('today-date');
+	if (todayDateElement) {
+		todayDateElement.textContent = isoFormattedDate;
+		console.log('defaultPrint - today-date 설정됨:', isoFormattedDate);
+	}
+	
 	const createDateInput = document.getElementById('create-date');
-
 	if (createDateInput) {
 		createDateInput.value = isoFormattedDate;
 		console.log('defaultPrint - create-date 설정됨:', isoFormattedDate);
