@@ -287,6 +287,11 @@
 	                       <div data-i18n="Menu2" class="menu-link-sub">설비이력</div>
 	                   </a>
 	                </li>
+                    <li class="menu-item" sec:authorize="isAuthenticated()">
+	                   <a th:href="@{/equipment/stopHistory}" class="menu-link">
+	                       <div data-i18n="Menu2" class="menu-link-sub">고장이력</div>
+	                   </a>
+	                </li>
                 </ul>
             </li>
             
