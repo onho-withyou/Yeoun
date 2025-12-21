@@ -96,19 +96,29 @@ const grid2 = new Grid({
 				}
 			}
 		}
-        ,{header: '사용여부' ,name: 'useYn' ,align: 'center'
-			,renderer:{ type: StatusModifiedRenderer
-				,options: {
-					isSelect: false   // ⭐ 이걸로 구분
-				}
-			}
-		}
 		,{header: '생성자id' ,name: 'createdId' ,align: 'center',hidden:true}
 		,{header: '생성자이름' ,name: 'createdByName' ,align: 'center'}  
 		,{header: '생성일시' ,name: 'createdDate' ,align: 'center'}
 		,{header: '수정자id' ,name: 'updatedId' ,align: 'center',hidden:true}
 		,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center'} 
 		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center'
+			,renderer:{ type: StatusModifiedRenderer
+				,options: {
+					isSelect: false   // ⭐ 이걸로 구분
+				}
+			}
+			,editor: {
+				type: 'select', // 드롭다운 사용
+				options: {
+					// value는 실제 데이터 값, text는 사용자에게 보이는 값
+					listItems: [
+						{value: 'Y', text: '활성'},
+						{value: 'N', text: '비활성'}
+					]
+				}
+			}
+		}
 	    ],
 	    data: []
 	    ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
@@ -1017,7 +1027,7 @@ modifyProcessCodeRowBtn.addEventListener('click', async function() {
 			// 서버에 삭제 요청 보낼 processId가 있으면 기존 로직 수행
 			if (serverProcessIds.length > 0) {
 				// processId가 있는 항목이 포함된 경우에만 삭제 확인창 표시
-				if (!confirm('서버에서 실제로 삭제할 항목이 포함되어 있습니다. 선택한 항목을 삭제하시겠습니까?')) return;
+				/*if (!confirm('서버에서 실제로 삭제할 항목이 포함되어 있습니다. 선택한 항목을 삭제하시겠습니까?')) return;
 				fetch('/masterData/processCode/modify', {
 					method: 'POST',
 					credentials: 'same-origin',
@@ -1049,7 +1059,7 @@ modifyProcessCodeRowBtn.addEventListener('click', async function() {
 				.catch(err => {
 					console.error('삭제 중 오류', err);
 					try { alert('삭제 중 오류가 발생했습니다. ' + (err && err.message ? err.message : '')); } catch (e) {}
-				});
+				});*/
 			} else {
 				if (removedUi > 0) alert('추가한 행을 화면에서만 삭제했습니다. (DB에는 반영되지 않음)');
 			}

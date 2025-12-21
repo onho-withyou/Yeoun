@@ -1066,10 +1066,16 @@ function prdItemList() {
 		console.log("완제품 id 드롭다운 데이터:", data);
 	
 		data.forEach(item => {
-			prdListItems.push({
-				value: item.VALUE, 
-				text: item.TEXT   
-			});
+			// 1. prdListItems 배열 안에 현재 item.VALUE와 같은 값을 가진 요소가 있는지 확인
+			const isDuplicate = prdListItems.some(existingItem => existingItem.value === item.VALUE);
+
+			// 2. 중복되지 않았을 때만 푸쉬
+			if (!isDuplicate) {
+				prdListItems.push({
+					value: item.VALUE, 
+					text: item.TEXT   
+				});
+			}
 		});
 		console.log("prdListItems:", prdListItems);
 		// Dropdown editor의 listItems 업데이트
@@ -1168,12 +1174,17 @@ function safetyStockMatTypeList(){
 	.then(data => {
 		console.log("안전재고 품목종류 드롭다운 데이터:", data);
 		data.forEach(item => {
-			safetyStockMatTypeListItems.push({
-				value: item.VALUE, 
-				text: item.TEXT   
-			});
-		}
-		);
+			// 1. unitListItems 배열 안에 현재 item.VALUE와 같은 값을 가진 요소가 있는지 확인
+			const isDuplicate = safetyStockMatTypeListItems.some(existingItem => existingItem.value === item.VALUE);
+
+			// 2. 중복되지 않았을 때만 푸쉬
+			if (!isDuplicate) {
+				safetyStockMatTypeListItems.push({
+					value: item.VALUE, 
+					text: item.TEXT   
+				});
+			}
+		});
 		console.log("safetyStockMatTypeListItems:", safetyStockMatTypeListItems);
 		// Dropdown editor의 listItems 업데이트
 	}
@@ -1199,10 +1210,16 @@ function safetyStockUnitList(){
 	.then(data => {
 		console.log("안전재고 단위 드롭다운 데이터:", data);		
 		data.forEach(item => {
-			safetyStockUnitListItems.push({
-				value: item.VALUE,
-				text: item.TEXT
-			});
+			// 1. unitListItems 배열 안에 현재 item.VALUE와 같은 값을 가진 요소가 있는지 확인
+			const isDuplicate = safetyStockUnitListItems.some(existingItem => existingItem.value === item.VALUE);
+
+			// 2. 중복되지 않았을 때만 푸쉬
+			if (!isDuplicate) {
+				safetyStockUnitListItems.push({
+					value: item.VALUE, 
+					text: item.TEXT   
+				});
+			}
 		});
 		console.log("safetyStockUnitListItems:", safetyStockUnitListItems);
 		// Dropdown editor의 listItems 업데이트
@@ -1225,12 +1242,19 @@ function safetyStockPolicyTypeList(){
 		return res.json();
 	})
 	.then(data => {
-		console.log("안전재고 정책방식 드롭다운 데이터:", data);		
+		console.log("안전재고 정책방식 드롭다운 데이터:", data);	
+		
 		data.forEach(item => {
-			safetyStockPolicyTypeListItems.push({
-				value: item.VALUE,
-				text: item.TEXT
-			});
+			// 1. safetyStockPolicyTypeListItems 배열 안에 현재 item.VALUE와 같은 값을 가진 요소가 있는지 확인
+			const isDuplicate = safetyStockPolicyTypeListItems.some(existingItem => existingItem.value === item.VALUE);
+
+			// 2. 중복되지 않았을 때만 푸쉬
+			if (!isDuplicate) {
+				safetyStockPolicyTypeListItems.push({
+					value: item.VALUE, 
+					text: item.TEXT   
+				});
+			}
 		});
 		console.log("safetyStockPolicyTypeListItems:", safetyStockPolicyTypeListItems);
 		// Dropdown editor의 listItems 업데이트
@@ -1256,12 +1280,17 @@ function safetyStockStatusList(){
 	.then(data => {
 		console.log("안전재고 상태 드롭다운 데이터:", data);
 		data.forEach(item => {
-			safetyStockStatusListItems.push({
-				value: item.VALUE, 
-				text: item.TEXT   
-			});
-		}
-		);
+			// 1. unitListItems 배열 안에 현재 item.VALUE와 같은 값을 가진 요소가 있는지 확인
+			const isDuplicate = safetyStockStatusListItems.some(existingItem => existingItem.value === item.VALUE);
+
+			// 2. 중복되지 않았을 때만 푸쉬
+			if (!isDuplicate) {
+				safetyStockStatusListItems.push({
+					value: item.VALUE, 
+					text: item.TEXT   
+				});
+			}
+		});
 		console.log("safetyStockStatusListItems:", safetyStockStatusListItems);
 		// Dropdown editor의 listItems 업데이트
 	})
