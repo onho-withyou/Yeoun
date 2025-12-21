@@ -1743,7 +1743,7 @@ const grid1 = new Grid({
 		, { header: '문서제목', name: 'approval_title', align: 'center', width: 370 }
 		, { header: '양식', name: 'form_type', align: 'center', width: 136, filter: "select" }
 		, { header: '사원번호', name: 'emp_id', align: 'center' }
-		, { header: '기안자', name: 'emp_name', align: 'center' }
+		, { header: '기안자', name: 'emp_name', align: 'center', filter: "select"}
 		, { header: '직급코드', name: 'pos_code', align: 'center', hidden: true }
 		, { header: '직급', name: 'pos_name', align: 'center', width: 51 }
 		, { header: '부서코드', name: 'dept_id', align: 'center', hidden: true }
@@ -1751,7 +1751,7 @@ const grid1 = new Grid({
 		, { header: '결재권한자id', name: 'approver', align: 'center', hidden: true }
 		, { header: '결재권한자', name: 'approver_name', align: 'center' }
 		, { header: '생성일', name: 'created_date', align: 'center' }
-		, { header: '결재완료일자', name: 'finish_date', align: 'center' }
+		, { header: '결재완료일자', name: 'finish_date', align: 'center' , width: 110,sortable: true}
 		, { header: '휴가시작일자', name: 'start_date', align: 'center', hidden: true }
 		, { header: '휴가종료일자', name: 'end_date', align: 'center', hidden: true }
 		, { header: '연차유형', name: 'leave_type', align: 'center', hidden: true }
@@ -1759,7 +1759,7 @@ const grid1 = new Grid({
 		, { header: '발령부서', name: 'to_dept_id', align: 'center', hidden: true }
 		, { header: '지출종류', name: 'expnd_type', align: 'center', hidden: true }
 		, { header: '결재사유내용', name: 'reason', align: 'center', hidden: true }
-		, { header: '상태', name: 'doc_status', align: 'center' 
+		, { header: '상태', name: 'doc_status', align: 'center', filter: "select"
 			,renderer:{ type: StatusBadgeRenderer}
 		}
 		, {
@@ -1793,7 +1793,7 @@ const grid2 = new Grid({
 		, { header: '문서제목', name: 'approval_title', align: 'center', width: 370 }
 		, { header: '양식', name: 'form_type', align: 'center', width: 136, filter: "select" }
 		, { header: '사원번호', name: 'emp_id', align: 'center' }
-		, { header: '기안자', name: 'emp_name', align: 'center' }
+		, { header: '기안자', name: 'emp_name', align: 'center' ,filter: "select"}
 		, { header: '직급코드', name: 'pos_code', align: 'center', hidden: true }
 		, { header: '직급', name: 'pos_name', align: 'center', width: 51 }
 		, { header: '부서코드', name: 'dept_id', align: 'center', hidden: true }
@@ -1801,7 +1801,7 @@ const grid2 = new Grid({
 		, { header: '결재권한자id', name: 'approver', align: 'center', hidden: true }
 		, { header: '결재권한자', name: 'approver_name', align: 'center' }
 		, { header: '생성일', name: 'created_date', align: 'center' }
-		, { header: '결재완료일자', name: 'finish_date', align: 'center' }
+		, { header: '결재완료일자', name: 'finish_date', align: 'center' , width: 110,sortable: true,}
 		, { header: '휴가시작일자', name: 'start_date', align: 'center', hidden: true }
 		, { header: '휴가종료일자', name: 'end_date', align: 'center', hidden: true }
 		, { header: '연차유형', name: 'leave_type', align: 'center', hidden: true }
@@ -1809,7 +1809,7 @@ const grid2 = new Grid({
 		, { header: '발령부서', name: 'to_dept_id', align: 'center', hidden: true }
 		, { header: '지출종류', name: 'expnd_type', align: 'center', hidden: true }
 		, { header: '결재사유내용', name: 'reason', align: 'center', hidden: true }
-		, { header: '상태', name: 'doc_status', align: 'center' 
+		, { header: '상태', name: 'doc_status', align: 'center' ,filter: "select"
 			,renderer:{ type: StatusBadgeRenderer}
 		}
 		, {
@@ -1840,7 +1840,7 @@ const grid3 = new Grid({
 		, { header: '문서제목', name: 'approval_title', align: 'center', width: 370 }
 		, { header: '양식', name: 'form_type', align: 'center', width: 136, filter: "select" }
 		, { header: '사원번호', name: 'emp_id', align: 'center' }
-		, { header: '기안자', name: 'emp_name', align: 'center' }
+		, { header: '기안자', name: 'emp_name', align: 'center' ,filter: "select" }
 		, { header: '직급코드', name: 'pos_code', align: 'center', hidden: true }
 		, { header: '직급', name: 'pos_name', align: 'center', width: 51 }
 		, { header: '부서코드', name: 'dept_id', align: 'center', hidden: true }
@@ -1848,7 +1848,7 @@ const grid3 = new Grid({
 		, { header: '결재권한자id', name: 'approver', align: 'center', hidden: true }
 		, { header: '결재권한자', name: 'approver_name', align: 'center' }
 		, { header: '생성일', name: 'created_date', align: 'center' }
-		, { header: '결재완료일자', name: 'finish_date', align: 'center' }
+		, { header: '결재완료일자', name: 'finish_date', align: 'center' , width: 110,sortable: true,}
 		, { header: '휴가시작일자', name: 'start_date', align: 'center', hidden: true }
 		, { header: '휴가종료일자', name: 'end_date', align: 'center', hidden: true }
 		, { header: '연차유형', name: 'leave_type', align: 'center', hidden: true }
@@ -1856,7 +1856,7 @@ const grid3 = new Grid({
 		, { header: '발령부서', name: 'to_dept_id', align: 'center', hidden: true }
 		, { header: '지출종류', name: 'expnd_type', align: 'center', hidden: true }
 		, { header: '결재사유내용', name: 'reason', align: 'center', hidden: true }
-		, { header: '상태', name: 'doc_status', align: 'center' 
+		, { header: '상태', name: 'doc_status', align: 'center' ,filter: "select"
 			,renderer:{ type: StatusBadgeRenderer}
 		}
 		, {
@@ -1887,7 +1887,7 @@ const grid4 = new Grid({
 		, { header: '문서제목', name: 'approval_title', align: 'center', width: 370 }
 		, { header: '양식', name: 'form_type', align: 'center', width: 136, filter: "select" }
 		, { header: '사원번호', name: 'emp_id', align: 'center' }
-		, { header: '기안자', name: 'emp_name', align: 'center' }
+		, { header: '기안자', name: 'emp_name', align: 'center' ,filter: "select"}
 		, { header: '직급코드', name: 'pos_code', align: 'center', hidden: true }
 		, { header: '직급', name: 'pos_name', align: 'center', width: 51 }
 		, { header: '부서코드', name: 'dept_id', align: 'center', hidden: true }
@@ -1895,7 +1895,7 @@ const grid4 = new Grid({
 		, { header: '결재권한자id', name: 'approver', align: 'center', hidden: true }
 		, { header: '결재권한자', name: 'approver_name', align: 'center' }
 		, { header: '생성일', name: 'created_date', align: 'center' }
-		, { header: '결재완료일자', name: 'finish_date', align: 'center' }
+		, { header: '결재완료일자', name: 'finish_date', align: 'center' , width: 110,sortable: true}
 		, { header: '휴가시작일자', name: 'start_date', align: 'center', hidden: true }
 		, { header: '휴가종료일자', name: 'end_date', align: 'center', hidden: true }
 		, { header: '연차유형', name: 'leave_type', align: 'center', hidden: true }
@@ -1903,7 +1903,7 @@ const grid4 = new Grid({
 		, { header: '발령부서', name: 'to_dept_id', align: 'center', hidden: true }
 		, { header: '지출종류', name: 'expnd_type', align: 'center', hidden: true }
 		, { header: '결재사유내용', name: 'reason', align: 'center', hidden: true }
-		, { header: '상태', name: 'doc_status', align: 'center' 
+		, { header: '상태', name: 'doc_status', align: 'center' ,filter: "select"
 			,renderer:{ type: StatusBadgeRenderer}
 		}
 		, {
@@ -1942,7 +1942,7 @@ const grid5 = new Grid({
 		, { header: '결재권한자id', name: 'approver', align: 'center', hidden: true }
 		, { header: '결재권한자', name: 'approver_name', align: 'center' }
 		, { header: '생성일', name: 'created_date', align: 'center' }
-		, { header: '결재완료일자', name: 'finish_date', align: 'center' }
+		, { header: '결재완료일자', name: 'finish_date', align: 'center' , width: 110,sortable: true}
 		, { header: '휴가시작일자', name: 'start_date', align: 'center', hidden: true }
 		, { header: '휴가종료일자', name: 'end_date', align: 'center', hidden: true }
 		, { header: '연차유형', name: 'leave_type', align: 'center', hidden: true }
