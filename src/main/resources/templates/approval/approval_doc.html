@@ -404,10 +404,10 @@
 					</div>
 					
 					<div class="approver-info-card">
-					<h5 class="d-flex">
-						<label style="padding-right: 14px;padding-right: 14px;margin-top: 12px;">결재권한자</label> 
-						<div id="select-box"></div>
-					</h5>
+						<h5 class="d-flex">
+							<label style="padding-right: 14px;padding-right: 14px;margin-top: 12px;">결재권한자</label> 
+							<div id="select-box"></div>
+						</h5>
 						<label id="approverInfo">* 해당하는 결재권한자버튼을 누르면,결재권한자를 변경할수있습니다.</label>
 						<div id="approver" th:value="${empList}"  style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
 						
@@ -448,7 +448,9 @@
 									</select>
 								</span>
 
-							</div>					</div>						</div>						
+							</div>					
+						</div>						
+					</div>						
 
 
 						<!-- 전결자 클릭시 추가 태그 -->
@@ -532,5 +534,6 @@
 </body>
 
 <th:block layout:fragment="myScript"> 
+		<script th:inline="javascript" th:src="@{/js/masterData/gridCustomRenderers.js}"></script>
 		<script th:inline="javascript" th:src="@{/js/approval/approvalDoc.js}"></script>
 </th:block>
