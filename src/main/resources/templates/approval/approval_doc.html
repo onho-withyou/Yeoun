@@ -44,7 +44,7 @@
 					</select>
 				</div>
 				<div style="margin-left: 5px;">
-					<button id="writeBtn" data-action="create" onclick="defaultPrint()" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#approval-modal" style="width: 71px;">
+					<button id="writeBtn" data-action="create" onclick="defaultPrint()" class="btn btn-outline-secondary me-1" data-bs-toggle="modal" data-bs-target="#approval-modal" style="width: 71px;">
 					작성
 					</button>
 				</div>
@@ -246,7 +246,11 @@
 					</h5>
 					<h5>
 						<label class="p-1" style="width: 200px;">사유내용</label>
-						<textarea id="reason-write" class="form-control" name="reason" rows="10" placeholder="결재사유내용 작성"></textarea>
+						<div>
+							<textarea id="reason-write" class="form-control" name="reason" rows="10" 
+								placeholder="결재사유내용 작성" maxlength="3000"></textarea>
+							<small id="reason-char-count" class="form-text text-muted" style="float:right;">0/3000자</small>
+						</div>
 					</h5>
 					<h5 class="d-flex">
 						<label>결재권한자 </label> 
@@ -303,19 +307,19 @@
 				</div>
 				<div class="modal-footer">
 					<div id="fileListContainer" class="d-flex"></div>
-						<button type="button" id="attachmentBtn" class="btn btn-primary">첨부파일</button>		
+						<button type="button" id="attachmentBtn" class="btn btn-primary btn-md-sm">첨부파일</button>		
 						<input type="file" id="realFileInput" name="itemImgFiles" accept="image/*,application/pdf" style="display: none;" multiple>
 						<div id="downloadArea"></div>
 				</div>
 				<div class="modal-footer">
 					<div>
-						<button type="button" id="approvalCompanionBtn" class="btn btn-primary" style="display:none;">반려</button>
-						<button type="button" id="approvalCheckBtn" class="btn btn-primary" style="display:none;">결재확인</button>
+						<button type="button" id="approvalCompanionBtn" class="btn btn-outline-danger btn-md-sm" style="display:none;">반려</button>
+						<button type="button" id="approvalCheckBtn" class="btn btn-outline-primary me-2 btn-md-sm" style="display:none;">결재확인</button>
 					</div>
 					<hr>
-					<button type="button" id="printBtn" class="btn btn-primary">인쇄</button>
-					<button type="submit" id="saveBtn" class="btn btn-primary" >등록</button>
-					<button type="button" id="modalCloseBtn" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+					<button type="button" id="printBtn" class="btn btn-outline-secondary me-1 btn-md-sm">인쇄</button>
+					<button type="submit" id="saveBtn" class="btn btn-primary btn-md-sm" >등록</button>
+					<!-- <button type="button" id="modalCloseBtn" class="btn btn-secondary btn-md-sm" data-bs-dismiss="modal">닫기</button> -->
 				</div>
 				
 				</form>

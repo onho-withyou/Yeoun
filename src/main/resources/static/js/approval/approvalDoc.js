@@ -518,6 +518,7 @@ async function empData() {
 				await loadAndDisplayApprovers(approvalId);
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+				updateCharCount(); // 글자 수 카운터 업데이트
 				selectBox.disable();
 				// 상세버튼 양식종류에 따른 form 보이기/숨기기
 				formChange(rowData.form_type);
@@ -569,6 +570,7 @@ async function empData() {
 				await loadAndDisplayApprovers(approvalId);
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+				updateCharCount(); // 글자 수 카운터 업데이트
 				selectBox.disable();
 				formChange(rowData.form_type);
 				formDisable();
@@ -620,6 +622,7 @@ async function empData() {
 				await loadAndDisplayApprovers(approvalId);
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+				updateCharCount(); // 글자 수 카운터 업데이트
 				selectBox.disable();
 				formChange(rowData.form_type);
 				formDisable();
@@ -670,6 +673,7 @@ async function empData() {
 				await loadAndDisplayApprovers(approvalId);
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+				updateCharCount(); // 글자 수 카운터 업데이트
 				selectBox.disable();
 				formDisable();
 			}
@@ -717,6 +721,7 @@ async function empData() {
 				await loadAndDisplayApprovers(approvalId);
 				//document.getElementById('approver').innerText = rowData.approver;//전결자
 				document.getElementById('reason-write').value = rowData.reason;//결재사유내용
+				updateCharCount(); // 글자 수 카운터 업데이트
 				selectBox.disable();
 				formChange(rowData.form_type);
 				formDisable();
@@ -814,6 +819,17 @@ function formDisable() {
 	document.getElementById('to-dept-id').disabled = true;
 	document.getElementById('expnd-type').disabled = true;
 	document.getElementById('reason-write').disabled = true;
+	
+	// 결재권한자 변경 div가 열려있다면 닫기
+	if (jeongyeoljaDiv && jeongyeoljaDiv.style.display !== 'none') {
+		jeongyeoljaDiv.style.display = 'none';
+	}
+	
+	// 상세보기일 때 결재권한자 안내 문구 숨기기
+	const approverInfo = document.getElementById('approverInfo');
+	if (approverInfo) {
+		approverInfo.style.display = 'none';
+	}
 
 }
 //f- 기안서작성 클릭시 활성화 시켜주는 함수
@@ -833,6 +849,29 @@ function formEnable() {
 	document.getElementById('to-dept-id').disabled = false;
 	document.getElementById('expnd-type').disabled = false;
 	document.getElementById('reason-write').disabled = false;
+	// 작성일 때 결재권한자 안내 문구 보이기
+	const approverInfo = document.getElementById('approverInfo');
+	if (approverInfo) {
+		approverInfo.style.display = 'block';
+	}
+}
+
+//f- 글자 수 업데이트 함수 (전역 함수로 정의)
+function updateCharCount() {
+	const reasonTextarea = document.getElementById('reason-write');
+	const charCount = document.getElementById('reason-char-count');
+	
+	if (reasonTextarea && charCount) {
+		const currentLength = reasonTextarea.value.length;
+		charCount.textContent = `${currentLength}/3000자`;
+		
+		// 3000자 초과 시 경고 스타일 적용
+		if (currentLength > 2950) {
+			charCount.style.color = currentLength >= 3000 ? 'red' : 'orange';
+		} else {
+			charCount.style.color = '#6c757d'; // 기본 Bootstrap muted 색상
+		}
+	}
 }
 
 //f- 모달 첨부파일
@@ -844,6 +883,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	attachBtn.addEventListener('click', () => fileInput.click());
 	fileInput.addEventListener('change', updateFileListDisplay);
+
+	// 사유내용 글자 수 체크 기능 추가
+	const reasonTextarea = document.getElementById('reason-write');
+	const charCount = document.getElementById('reason-char-count');
+	
+	if (reasonTextarea && charCount) {
+		// 여러 이벤트에 리스너 등록
+		reasonTextarea.addEventListener('input', updateCharCount);
+		reasonTextarea.addEventListener('keyup', updateCharCount);
+		reasonTextarea.addEventListener('paste', function() {
+			// 붙여넣기 후 약간의 지연을 두고 카운트 업데이트
+			setTimeout(updateCharCount, 10);
+		});
+		
+		// 초기 로드 시에도 카운트 표시
+		updateCharCount();
+	}
 
 	function resetAttachments() {
 		fileInput.value = ''; // input[type=file]의 파일 목록을 초기화
@@ -2039,6 +2095,13 @@ function formReset(ev) {
 	document.getElementById("to-dept-id").selectedIndex = 0;//발령부서
 	document.getElementById("expnd-type").selectedIndex = 0;//지출종류
 	document.getElementById("reason-write").value = "";//사유내용
+	
+	// 사유내용 글자 수 카운터 초기화
+	const charCount = document.getElementById('reason-char-count');
+	if (charCount) {
+		charCount.textContent = '0/3000자';
+		charCount.style.color = '#6c757d'; // 기본 색상으로 복원
+	}
 	//selectBox.resetItems();
 	//selectBox.setItems(itemData);
 
@@ -2194,6 +2257,17 @@ function print(type, text) {
 function approvalNo(count, text) {
 	// 그리드에서 모달을 열었을 때는 approvalNo 동작을 무시합니다.
 	if (modalOpenedFromGrid) return;
+	
+	// 상세보기 상태인지 확인 (reason-write가 disabled된 경우)
+	const reasonTextarea = document.getElementById('reason-write');
+	if (reasonTextarea && reasonTextarea.disabled) {
+		// 상세보기 모드에서는 열려있는 결재권한자 변경 div를 닫음
+		if (jeongyeoljaDiv && jeongyeoljaDiv.style.display !== 'none') {
+			jeongyeoljaDiv.style.display = 'none';
+		}
+		return;
+	}
+	
 	elemApproverIdNum = count;
 	let type = "change";
 	if (jeongyeoljaDiv) {
