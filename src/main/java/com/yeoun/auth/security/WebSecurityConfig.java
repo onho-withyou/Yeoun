@@ -108,7 +108,9 @@ public class WebSecurityConfig {
 					// ================== MES (생산부) ==================
 					.requestMatchers("/production/**", "/process/**", "/lot/**")
 					.hasAnyRole("SYS_ADMIN", "MES_USER", "MES_MANAGER")
-
+					.requestMatchers("/production/orderChart/**").permitAll()
+					.requestMatchers("/production/itemOrderChart/**").permitAll()
+					.requestMatchers("/production/itemChart/**").permitAll()
 					// ================== 품질관리 ==================
 					.requestMatchers("/qc/**")
 					.hasAnyRole("SYS_ADMIN", "QC_USER", "QC_ADMIN")
