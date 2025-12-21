@@ -14,7 +14,8 @@
  -->
 <!-- beautify ignore:start -->
 <html lang="en" class="light-style layout-menu-fixed" dir="ltr"
-	data-theme="theme-default" th:attr="data-assets-path=@{/assets/}"
+	data-theme="theme-default" 
+	th:attr="data-assets-path=@{/assets/}"
 	data-template="vertical-menu-template-free"
 	xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
@@ -89,6 +90,7 @@
 	const csrfToken  = document.querySelector('meta[name="_csrf_token"]').content;
 	const csrfHeader = document.querySelector('meta[name="_csrf_headerName"]').content;
 </script>
+
 </head>
 
 <body th:attr="data-mode=${mode}">
