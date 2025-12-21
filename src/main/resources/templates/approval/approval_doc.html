@@ -315,7 +315,7 @@
 						
 						<div class="d-flex align-items-center gap-2" style="min-width: 280px;">
 							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 160px;">
-								<input id="create-date" type="date" name="createdDate" class="form-control" required>
+								<input id="create-date" type="date" name="createdDate" class="form-control" required readonly>
 							</div>
 							<span>~</span>
 							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 160px;">
@@ -404,10 +404,10 @@
 					</div>
 					
 					<div class="approver-info-card">
-					<h5 class="d-flex">
-						<label style="padding-right: 14px;padding-right: 14px;margin-top: 12px;">결재권한자</label> 
-						<div id="select-box"></div>
-					</h5>
+						<h5 class="d-flex">
+							<label style="padding-right: 14px;padding-right: 14px;margin-top: 12px;">결재권한자</label> 
+							<div id="select-box"></div>
+						</h5>
 						<label id="approverInfo">* 해당하는 결재권한자버튼을 누르면,결재권한자를 변경할수있습니다.</label>
 						<div id="approver" th:value="${empList}"  style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
 						
@@ -448,7 +448,9 @@
 									</select>
 								</span>
 
-							</div>					</div>						</div>						
+							</div>					
+						</div>						
+					</div>						
 
 
 						<!-- 전결자 클릭시 추가 태그 -->
@@ -506,11 +508,18 @@
 				</div>
 				<div class="modal-footer">
 					<div>
-						<button type="button" id="approvalCompanionBtn" class="btn btn-outline-danger btn-md-sm" style="display:none;">반려</button>
-						<button type="button" id="approvalCheckBtn" class="btn btn-outline-primary me-2 btn-md-sm" style="display:none;">결재확인</button>
+						<button type="button" id="approvalCompanionBtn" class="btn btn-outline-danger btn-md-sm" style="display:none;background-color: #e6381a;color:white;">반려</button>
+						<button type="button" id="approvalCheckBtn" class="btn btn-outline-primary me-2 btn-md-sm" style="display:none;background-color: #696cff;color:white;">결재확인</button>
 					</div>
 					<hr>
-					<button type="button" id="printBtn" class="btn btn-outline-secondary me-1 btn-md-sm" style="background-color: #788393; color:#e9ecef;">인쇄</button>
+					<button type="button" id="printBtn" class="btn btn-outline-secondary me-1 btn-md-sm" style="background-color: #788393; color:#e9ecef;">
+						<i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<polyline points="6 9 6 2 18 2 18 9"></polyline>
+							<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+							<rect x="6" y="14" width="12" height="8"></rect>
+						</svg></i>
+						인쇄
+					</button>
 					<button type="submit" id="saveBtn" class="btn btn-primary btn-md-sm" >등록</button>
 					<!-- <button type="button" id="modalCloseBtn" class="btn btn-secondary btn-md-sm" data-bs-dismiss="modal">닫기</button> -->
 				</div>
@@ -525,5 +534,6 @@
 </body>
 
 <th:block layout:fragment="myScript"> 
+		<script th:inline="javascript" th:src="@{/js/masterData/gridCustomRenderers.js}"></script>
 		<script th:inline="javascript" th:src="@{/js/approval/approvalDoc.js}"></script>
 </th:block>
