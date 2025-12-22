@@ -799,7 +799,7 @@ async function initNoticeGrid(data) {
 //	console.log(noticeGrid.gridEl, "노티스그리드");
 	const rows = noticeGrid.getData();
 	rows.forEach(row => {
-		console.log(row);
+//		console.log(row);
 		if(row.noticeYN == 'Y'){
 			noticeGrid.addCellClassName(row.rowKey, 'noticeTitle', 'notice-cell');
 		}
