@@ -1968,7 +1968,7 @@ const grid5 = new Grid({
 		, { header: '발령부서', name: 'to_dept_id', align: 'center', hidden: true }
 		, { header: '지출종류', name: 'expnd_type', align: 'center', hidden: true }
 		, { header: '결재사유내용', name: 'reason', align: 'center', hidden: true }
-		, { header: '상태', name: 'doc_status', align: 'center' 
+		, { header: '상태', name: 'doc_status', align: 'center' , filter: "select"
 			,renderer:{ type: StatusBadgeRenderer}
 		}
 		, {
