@@ -99,13 +99,28 @@ async function displayStampsForApprovers(approvalId) {
 	// 결재권자 div들을 순회하며 도장 이미지 표시
 	const approverDivs = document.querySelectorAll('#approver > div');
 	approverDivs.forEach((div, index) => {
-		const order = (index + 1).toString(); // 1, 2, 3
-		const stampUrl = stampImages[order];
-		// p 태그 찾기
+		// HTML div 순서가 아닌 실제 결재 순서를 찾아야 함
+		// 일단 HTML div 순서를 기본값으로 사용
+		const displayOrder = (index + 1).toString(); // 화면 표시 순서: 1, 2, 3
+		
+		// p 태그에서 empId 추출
 		const pTag = div.querySelector('p');
+		let empId = null;
+		if (pTag && pTag.textContent) {
+			const match = pTag.textContent.match(/\((\d+)\)/);
+			if (match) {
+				empId = match[1];
+			}
+		}
+		
+		// 화면 순서 기준 또는 empId 기준으로 도장 찾기
+		let stampUrl = stampImages[displayOrder]; // 우선 화면 순서로 찾기
+		if (!stampUrl && empId) {
+			stampUrl = stampImages['emp_' + empId]; // empId로 찾기
+		}
 
 		// 디버그: 어떤 값들이 왔는지 확인
-		console.debug(`[도장 디버그] order=${order}, stampUrl=`, stampUrl, ` approvalStampImage present=`, !!approvalStampImage, ` approvalStampIsReject=`, approvalStampIsReject, ` currentDocStatus=`, currentDocStatus, ` pText=`, pTag ? pTag.textContent : 'N/A');
+		console.debug(`[도장 디버그] displayOrder=${displayOrder}, empId=${empId}, stampUrl=`, stampUrl, ` approvalStampImage present=`, !!approvalStampImage, ` approvalStampIsReject=`, approvalStampIsReject, ` currentDocStatus=`, currentDocStatus, ` pText=`, pTag ? pTag.textContent : 'N/A');
 
 		// 우선순위 변경 (요청사항): 문서 상태가 '반려'일 때는
 		// - 해당 결재권자(=반려를 실행한 사용자)의 자리에는 항상 반려 도장을 표시합니다.
@@ -1612,6 +1627,9 @@ document.getElementById('modal-doc').addEventListener('submit', async function (
 				const modalElement = document.getElementById('approval-modal');
 				const modalInstance = bootstrap.Modal.getInstance(modalElement);
 				modalInstance.hide();
+				const myTabBtn = document.querySelector('button[data-bs-target="#navs-my-tab"]');
+				const tab = bootstrap.Tab.getOrCreateInstance(myTabBtn);
+				tab.show();
 			}
 			// 2. 응답 본문을 JSON으로 파싱
 			return response.json(); 
@@ -2088,6 +2106,10 @@ function draftValFn(ev) {
 	//양식종류에따라 보여지는 화면이 다름
 	document.getElementById('approvalCompanionBtn').style.display = "none";//반려
 	document.getElementById('approvalCheckBtn').style.display = "none";//결재확인
+	
+	console.log("draft_doc----->",draft_doc);
+	// 인사발령신청서 선택시 제목에 '[승진]' 자동 설정
+	
 	formChange(draft_doc);
 
 	formReset();
@@ -2189,7 +2211,11 @@ function defaultPrint() {
 	window.count = 0;
 	approverArr = [];//form-type-defalut
 	document.getElementById('form-menu').value = document.getElementById('form-type-defalut').value;//양식종류
-	
+
+	if(document.getElementById('form-type-defalut').value === '인사발령신청서'){
+		document.getElementById('approval-title').placeholder = '[부서이동 또는 승진]만 가능합니다, 제목을입력해주세요!';
+	}
+
 	// 작성 모드용 버튼 설정
 	document.getElementById('saveBtn').style.display = "block";//등록 버튼 보이기
 	document.getElementById('attachmentBtn').style.display = 'block';//첨부파일 버튼 보이기
