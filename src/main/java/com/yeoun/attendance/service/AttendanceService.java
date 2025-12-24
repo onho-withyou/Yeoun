@@ -212,8 +212,6 @@ public class AttendanceService {
 		
 		int minutes = (int) ChronoUnit.MINUTES.between(in, out);
 		
-		log.info(">>>>>>>>>>> minutes : " + minutes);
-		
 		// 점심시간 제외
 		LocalTime lunchStart = LocalTime.parse(workPolicy.getLunchIn());
 		LocalTime lunchEnd = LocalTime.parse(workPolicy.getLunchOut());
