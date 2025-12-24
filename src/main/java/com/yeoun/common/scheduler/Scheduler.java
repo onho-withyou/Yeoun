@@ -39,7 +39,7 @@ public class Scheduler {
 	
 	
 	// 발령 자동 적용 스케줄러 (매일 00:00 실행)
-	@Scheduled(cron = "0 * * * * *")
+	@Scheduled(cron = "0 0 0 * * *")
 	public void applyHrActions() {
 		log.info("[스케줄러] 발령 자동 적용 시작");
 	

@@ -2213,7 +2213,7 @@ function defaultPrint() {
 	document.getElementById('form-menu').value = document.getElementById('form-type-defalut').value;//양식종류
 
 	if(document.getElementById('form-type-defalut').value === '인사발령신청서'){
-		document.getElementById('approval-title').placeholder = '[부서이동 또는 승진]만 가능합니다, 제목을입력해주세요!';
+		document.getElementById('approval-title').placeholder = '[승진 또는 전보]만 가능합니다, 제목을입력해주세요!';
 	}
 
 	// 작성 모드용 버튼 설정

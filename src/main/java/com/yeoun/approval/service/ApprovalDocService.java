@@ -228,7 +228,7 @@ public class ApprovalDocService {
 		hrAction.setCreatedUser(createdUser);
 
 		// 발령유형 - 직위변경으로 기본 설정
-		if(targetEmp.getDept().getDeptId().equals(doc.get("position").isEmpty())) {
+		if(targetEmp.getDept().getDeptId().equals(doc.get("toDeptId"))) {
 			hrAction.setActionType("PROMOTION");// 승진:직급상승
 			log.info("[승진] ---> PROMOTION");
 		}else{
