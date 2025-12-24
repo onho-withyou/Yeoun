@@ -40,12 +40,19 @@ public class WebSecurityConfig {
 				.sessionManagement(session -> session
 	                    .invalidSessionUrl("/login?session=expired")
 	            )
+
+				// ================== CSRF 예외 설정 ==================
+				.csrf(csrf -> csrf
+						.ignoringRequestMatchers(
+								"/messenger/status/offline"
+						)
+				)
 				
 				// --------- 요청에 대한 접근 허용 여부 등의 요청 경로에 대한 권한 설정 -------
 				.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
 				    // 공통: 정적 리소스 및 로그인/회원가입 등 완전 공개 구역
 					.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-					.requestMatchers("/assets/**", "/css/**", "/custom_bg/**", "/icon/**", "/js/**").permitAll()
+					.requestMatchers("/assets/**", "/css/**", "/custom_bg/**", "/icon/**", "/js/**", "/files/download/**").permitAll()
 					.requestMatchers("/", "/login", "/logout").permitAll()
 					
 					// ================== 로그인 한 모든 사원 ==================
@@ -85,7 +92,7 @@ public class WebSecurityConfig {
 
                 	// 급여 관리자 페이지
                 	.requestMatchers("/pay/rule/**", "/pay/rule_calc/**", "/pay/rule_item/**", "/pay/calc/**", "/pay/history/**", "/pay/**" )
-                   	.hasAnyRole("SYS_ADMIN")
+                   	.hasAnyRole("SYS_ADMIN", "PAYROLL_ADMIN")
                     	
                     	
 	                // 전자결재 설정(양식/결재선 관리 등)
@@ -101,7 +108,9 @@ public class WebSecurityConfig {
 					// ================== MES (생산부) ==================
 					.requestMatchers("/production/**", "/process/**", "/lot/**")
 					.hasAnyRole("SYS_ADMIN", "MES_USER", "MES_MANAGER")
-
+					.requestMatchers("/production/orderChart/**").permitAll()
+					.requestMatchers("/production/itemOrderChart/**").permitAll()
+					.requestMatchers("/production/itemChart/**").permitAll()
 					// ================== 품질관리 ==================
 					.requestMatchers("/qc/**")
 					.hasAnyRole("SYS_ADMIN", "QC_USER", "QC_ADMIN")
@@ -112,10 +121,10 @@ public class WebSecurityConfig {
 					.hasAnyRole("SYS_ADMIN", "LOG_ADMIN")
 					// 재고조회
 					.requestMatchers("/inventory/list/**")
-					.hasAnyRole("SYS_ADMIN", "MES_USER")
+					.hasAnyRole("SYS_ADMIN", "MES_USER", "LOG_USER")
 					// 재고이력
 					.requestMatchers("/inventory/history/**")
-					.hasAnyRole("SYS_ADMIN", "MES_USER")
+					.hasAnyRole("SYS_ADMIN", "MES_USER", "LOG_USER")
 					// 재고실사
 					.requestMatchers("/inventory/stock-take/**")
 					.hasAnyRole("SYS_ADMIN", "LOG_USER")

@@ -1,6 +1,6 @@
 
   .card-title {
-    font-size: 1.6em;
+    font-size: 1.3rem;
     font-weight: 600;
     color: #41388f;
     display: flex;
@@ -346,6 +346,7 @@
     border-top: 1px solid #eeeafc;
     padding: 16px 24px;
     text-align: right;
+    justify-content: end;
   }
 
   /* 입력폼 스타일 보완 */

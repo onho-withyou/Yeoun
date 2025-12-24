@@ -21,7 +21,8 @@ function openPlanDetail(planId) {
                 PLANNING: "검토대기",
                 MATERIAL_PENDING: "자재확보중",
                 IN_PROGRESS: "생산중",
-                DONE: "생산완료"
+                DONE: "생산완료",
+				CANCELLED:"취소"
             };
 
             // 전역에 저장
@@ -31,8 +32,13 @@ function openPlanDetail(planId) {
             // 🔥 기본 정보 표시
             // ============================
             document.getElementById("d_planId").innerText = data.planId;
-			document.getElementById("d_createdAt").innerText =
-			    data.createdAt?.substring(0, 10);
+			document.getElementById("d_createdAt").innerText =			    
+			data.createdAt
+			        ?.replace("T", " ")
+			        ?.split(".")[0] ?? "";
+			document.getElementById("d_createdBy").innerText =
+				data.createdByName ?? "";
+		
 
 
             // ■ 상태 한글 변환 적용
@@ -87,12 +93,13 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById("modalPlanItemGrid"),
         {
             columnDefs: [
-                { field: "prdId", headerName: "제품ID", width: 120 },
-                { field: "prdName", headerName: "제품명", width: 180 },
-                { field: "planQty", headerName: "계획수량", width: 120 },
-                { field: "bomStatus", headerName: "BOM부족", width: 120 }               
+                { field: "prdId", headerName: "제품ID", width: 200 },
+                { field: "prdName", headerName: "제품명", width: 200 },
+                { field: "planQty", headerName: "계획수량", width: 200 }
+                             
             ],
-            rowSelection: { mode: 'singleRow' },
+			domLayout: "autoHeight",
+            //rowSelection: { mode: 'singleRow' },
             onRowClicked: function(event) {
                 const prdId = event.data.prdId;
                 const orders = orderItemMap[prdId] || [];

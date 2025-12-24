@@ -1,7 +1,54 @@
 /**
  * tui ui 수정스타일변경과 영어표기를 따로 만든 클래스
  */
-// 영어 한글 표기 CODE_MAP
+//전자결재
+class StatusBadgeRenderer {
+  constructor(props) {
+    const el = document.createElement('div');
+    el.style.textAlign = 'center'; // 가운데 정렬
+    
+    this.el = el;
+    this.render(props);
+  }
+
+  getElement() {
+    return this.el;
+  }
+
+  render(props) {
+    const value = String(props.value || '');
+    let style = { bg: '#F1F3F5', text: '#868E96' }; // 기본 회색
+
+    // '대기'라는 단어만 포함되어 있으면 무조건 파랑 적용
+    if (value.includes('대기')) {
+      style = { bg: '#D0EBFF', text: '#228BE6' };
+    } 
+    else if (value === '완료' || value.includes('승인')) {
+      style = { bg: '#D3F9D8', text: '#40C057' }; // 초록
+    } 
+    else if (value === '반려') {
+      style = { bg: '#FFE3E3', text: '#FA5252' }; // 빨강
+    }
+
+   this.el.innerHTML = `
+      <span style="
+        background-color: ${style.bg};
+        color: ${style.text};
+        padding: 4px 12px;
+        border-radius: 20px; /* 알약 모양 */
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+        min-width: 50px;
+        line-height: 1.4;
+      ">
+        ${value}
+      </span>
+    `;
+  }
+}
+
+// 영어 한글 표기 mes - CODE_MAP
 const CODE_MAP = {
 	//제품유형
     'FINISHED_GOODS': '완제품',
@@ -34,15 +81,19 @@ const CODE_MAP = {
 	'RWRK':	'재작업 BOM',
 	
 	//향수 유형
-	'LIQUID': '고체향수', 
-	'SOLID': '액체향수',
+	'LIQUID': '액체향수', 
+	'SOLID': '고체향수',
 	
 	//안전재고 - 정책방식
 	'FIXED_QTY':'고정 계산방식',
 	'DAYS_COVER': '일수기반',
 	
 	//품질항목기준 - 대상구분
-	'FINISHED_QC':'완제품'
+	'FINISHED_QC':'완제품',
+    'qc_pH':'pH',
+    'qc_cps':'cps',
+    'qc_ml':'ml'
+
 };
 
 class StatusModifiedRenderer {
@@ -101,21 +152,34 @@ class StatusModifiedRenderer {
         const displayText = (!hasValue && isCreated) ? '' : koreanText;
 
         let contentHTML = '';
+        const showArrow = hasEditor;
         
-        if (isSelect) {
-            // ⭐ 2. isSelect 모드일 때도 editor가 있을 때만 화살표 렌더링
-            const arrow = hasEditor ? `<span style="font-size:10px;opacity:0.6;">▼</span>` : '';
+        // ⭐ 수정된 부분: Y/N 컬럼인지 확인하는 로직 (값 유무와 상관없이)
+        const isYNColumn = columnInfo.name === 'useYn' || columnInfo.name === 'status'; // 프로젝트의 Y/N 컬럼명을 넣으세요
+
+        if (value === 'Y' || value === 'N') {
+            // 1. 이미 값이 있는 경우 (기존 배지 로직)
+            contentHTML = this.formatStatusBadge(value, showArrow);
+        } else if (isYNColumn && isCreated) {
+            // 2. ⭐ Y/N 컬럼인데 신규 행이라서 아직 값이 없는 경우
+            // 빈 텍스트 상태의 배지 모양이나 화살표가 포함된 레이아웃을 그려줍니다.
+            const arrow = showArrow ? `<span style="font-size:10px;opacity:0.6;">▼</span>` : '';
             contentHTML = `
-            <div style="width:100%; height:100%; padding:0px 10px; box-sizing:border-box; display:flex; justify-content:space-between; align-items:center; background:transparent; cursor:pointer;">
-                <span>${displayText}</span>
-                ${arrow}
-            </div>
+                <div style="width:100%; height:100%; padding:0px 10px; box-sizing:border-box; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                    <span></span> ${arrow}
+                </div>
             `;
-        } else if (value === 'Y' || value === 'N') {
-            // ⭐ 3. 배지 함수에 editor 여부 전달
-            contentHTML = this.formatStatusBadge(value, hasEditor);
+        } else if (isSelect) {
+            // 3. 일반 Select 컬럼
+            const arrow = showArrow ? `<span style="font-size:10px;opacity:0.6;">▼</span>` : '';
+            contentHTML = `
+                <div style="width:100%; height:100%; padding:0px 10px; box-sizing:border-box; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                    <span>${displayText}</span>
+                    ${arrow}
+                </div>
+            `;
         } else {
-            contentHTML = koreanText;
+            contentHTML = displayText;
         }
 
         this.el.innerHTML = contentHTML;
@@ -132,7 +196,7 @@ class StatusModifiedRenderer {
     }
 }
 
-// 숫자만 입력 가능하도록 하는 커스텀 에디터 클래스
+// 숫자와 소수점 입력 가능하도록 하는 커스텀 에디터 클래스
 class NumberOnlyEditor {
   constructor(props) {
     const el = document.createElement('input');
@@ -140,9 +204,9 @@ class NumberOnlyEditor {
     this.el = el;
 
     // 초기 값 설정
-    this.el.value = props.value;
+    this.el.value = props.value || '';
 
-    // 입력 이벤트를 감지하여 숫자만 남기는 함수 바인딩
+    // 입력 이벤트를 감지하여 숫자와 소수점만 남기는 함수 바인딩
     this.el.addEventListener('input', this.handleInput.bind(this));
   }
 
@@ -151,13 +215,37 @@ class NumberOnlyEditor {
   }
 
   getValue() {
-    // 최종적으로 저장될 때도 숫자가 아닌 문자는 제거하고 반환합니다.
-    return this.el.value.replace(/[^0-9]/g, ''); 
+    // 최종적으로 저장될 때도 유효한 숫자 형태만 반환합니다.
+    return this.sanitizeNumber(this.el.value);
   }
   
-  // 입력 시마다 실행되어 숫자(0-9)가 아닌 문자를 제거합니다.
+  // 유효한 숫자 형태로 정리하는 메서드
+  sanitizeNumber(value) {
+    // 숫자와 소수점만 남기고, 소수점이 여러 개면 첫 번째만 남김
+    let cleaned = value.replace(/[^0-9.]/g, '');
+    
+    // 소수점이 여러 개 있는 경우 첫 번째만 남기기
+    const parts = cleaned.split('.');
+    if (parts.length > 2) {
+      cleaned = parts[0] + '.' + parts.slice(1).join('');
+    }
+    
+    return cleaned;
+  }
+  
+  // 입력 시마다 실행되어 숫자와 소수점만 남기는 함수
   handleInput() {
-    this.el.value = this.el.value.replace(/[^0-9]/g, ''); 
+    const currentValue = this.el.value;
+    const sanitized = this.sanitizeNumber(currentValue);
+    
+    // 값이 변경되었을 때만 업데이트 (커서 위치 유지)
+    if (currentValue !== sanitized) {
+      const cursorPos = this.el.selectionStart;
+      this.el.value = sanitized;
+      // 커서 위치 복원 (제거된 문자 수만큼 조정)
+      const removedChars = currentValue.length - sanitized.length;
+      this.el.setSelectionRange(cursorPos - removedChars, cursorPos - removedChars);
+    }
   }
 }
 

@@ -39,12 +39,6 @@
                                 th:text="|${line.lineId} (${line.lineName})|">
                         </option>
                     </select>
-                    <select id="searchReason" class="form-select" style="max-width: 150px;">
-                        <option value="ALL">사유</option>
-                        <option value="BREAKDOWN">고장</option>
-                        <option value="REPAIR">수리</option>
-                        <option value="INSPECTION">점검</option>
-                    </select>
                     <input type="date" class="form-control" id="startDate" style="max-width: 150px;">
                     ~
                     <input type="date" class="form-control" id="endDate" style="max-width: 150px;">
@@ -96,16 +90,20 @@
                 },
                 columnOptions: { resizable: true },
                 columns: [
-                    { header: "ID", name: "equipId", align: "center" },
-                    { header: "종류", name: "equipTypeId", align: "left" },
-                    { header: "설비명", name: "equipName", align: "left" },
-                    { header: "소속라인", name: "lineId", align: "center" },
-                    { header: "사유", name: "downReason", align: "center",
-                    	formatter: ({ value }) => formatStatusBadge(value)},
-                    { header: "시작일자", name: "startDate", align: "center",
+                    { header: "설비명", name: "equipName", align: "center" },
+                    { header: "설비타입", name: "equipId", align: "left" },
+                    { header: "작업지시", name: "orderId", align: "left" },
+                    { header: "제품", name: "productName", align: "center" },
+                    { header: "상태", name: "status", align: "center" },
+                    { header: "시작시간", name: "startTime", align: "center",
                         formatter: ({ value }) => formatTimeFull(value ? new Date(value) : undefined)},
-                    { header: "종료일자", name: "endDate", align: "center",
-                        formatter: ({ value }) => formatTimeFull(value ? new Date(value) : undefined)},
+                    {
+                        header: "종료시간", name: "endTime", align: "center",
+                        formatter: ({value}) => {
+                            if (!value) return "";
+                            return formatTimeFull(new Date(value));
+                        }
+                    }
                 ]
             })
 
@@ -117,7 +115,7 @@
                 openHistoryDetailModal(row);
             });
 
-            ["searchEquipment", "searchLine", "searchReason", "startDate", "endDate"].forEach(id => {
+            ["searchEquipment", "searchLine", "startDate", "endDate"].forEach(id => {
                 document.getElementById(id).addEventListener("change", loadHistory);
             });
         });
@@ -125,7 +123,6 @@
         function loadHistory(){
             const equip  = document.getElementById("searchEquipment")?.value;
             const line   = document.getElementById("searchLine")?.value;
-            const reason = document.getElementById("searchReason")?.value;
             const start  = document.getElementById("startDate")?.value;
             const end    = document.getElementById("endDate")?.value;
 
@@ -133,7 +130,6 @@
 
             if (equip !== "ALL")  query.append("equipment", equip);
             if (line !== "ALL")   query.append("line", line);
-            if (reason !== "ALL") query.append("reason", reason);
             if (start)  query.append("start", start);
             if (end) 	query.append("end", end);
 

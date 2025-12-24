@@ -116,7 +116,7 @@
 	        <div class="row">
 				<!-- 왼쪽 열: 달력/탭(View 변환) -->
 	            <div class="col-md-7 col-lg-8" >
-	                <section class="panel calendar border">
+	                <section class="panel calendar">
 	                    <div class="calendar-header d-flex align-items-center pb-2">
 	                        <!-- 달력 타입변환 -->
 	                        <div class="btn-group" role="group">
@@ -165,7 +165,7 @@
 	                    </div>
 	                    <!-- 실제 TUI 캘린더 출력 -->
 	                    <div id="mainContent"> 
-		                    <div id="calendar" style="height: 700px; border: solid;"></div>
+		                    <div id="calendar" style="height: 700px; border: 2px solid #D9DEE3;"></div>
 	                    </div>
                    		<!-- 스피너 -->
 						<div id="calendar-loading-overlay" style="display:none; 
@@ -191,8 +191,8 @@
 	            			onclick="handleAttendanceToggle(this.dataset.empId)" 
 	            			id="attendance" 
 	            			style="width:50%"
-	            			 th:attr="data-emp-id=${#authentication.name},
-                 					  disabled=${buttonEnabled} ? null : 'disabled'">
+	            			th:attr="data-emp-id=${#authentication.name},
+                 					 disabled=${buttonEnabled} ? null : 'disabled'">
 	            				<span th:if="${status == 'WORKIN' or status == 'LATE'}">퇴근</span>
 	            				<span th:unless="${status == 'WORKIN' or status == 'LATE'}">출근</span>
 	            		</button>
@@ -202,7 +202,7 @@
 	            	</div>
 					<div class="card">
 						<div>
-							<h3 style="font-size:18px; font-weight:700;">공지사항 목록</h3>
+							<h3 style="font-size:18px; font-weight:700; text-align: center;">공지사항 목록</h3>
 						</div>
 						<div class="table-responsive text-nowrap" id="noticeGrid"></div>
 							<p style="font-size:10px; text-align: right; vertical-align: bottom;">
@@ -211,7 +211,7 @@
 					</div>
 					<div class="card">
 						<div>
-							<h3 style="font-size:18px; font-weight:700;">결재 문서 목록</h3>
+							<h3 style="font-size:18px; font-weight:700; text-align: center;">결재 문서 목록</h3>
 						</div>
 						<div class="table-responsive text-nowrap" id="approvalGrid"></div>
 							<p style="font-size:10px; text-align: right; vertical-align: bottom;">
@@ -306,20 +306,8 @@
 		           		<select id="leave-type" name="leaveType" class="form-select">
 		            		<option selected></option>
 		            		<option value="연차">연차</option>
-		            		<option value="1차대기">연차</option>
-							<option value="오전반차">오전반차</option>
-							<option value="오후반차">오후반차</option>
+							<option value="반차">반차</option>
 							<option value="병가">병가</option>
-							<option value="공가">공가</option>
-							<option value="연차유급휴가">연차유급휴가</option>
-							<option value="출산전후휴가">출산전후휴가</option>
-							<option value="배우자출산휴가">배우자출산휴가</option>
-							<option value="생리휴가">생리휴가</option>
-							<option value="가족돌봄휴가">가족돌봄휴가</option>
-							<option value="경조사휴가">경조사휴가</option>
-							<option value="여름휴가">여름휴가</option>
-							<option value="개인사정">개인사정</option>
-							<option value="기타">기타</option>
 		            	</select>
 	            	</div>
 		        </h5>

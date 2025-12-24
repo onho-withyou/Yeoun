@@ -12,6 +12,8 @@ import com.yeoun.equipment.repository.ProdLineRepository;
 import com.yeoun.process.dto.WorkOrderProcessDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +42,7 @@ public class EquipmentService {
     // ===================================================
     // 라인 목록
     public List<ProdLineDTO> loadAllLines() {
-        return prodLineRepository.findAll().stream()
+        return prodLineRepository.findAll(Sort.by(Sort.Direction.ASC, "lineId")).stream()
                 .map(ProdLineDTO::fromEntity)
                 .toList();
     }
@@ -78,6 +80,7 @@ public class EquipmentService {
 				.equipId(req.getEquipId())
 				.koName(req.getKoName())
 				.equipName(req.getEquipName())
+				.useYn("Y")
 				.remark(req.getRemark())
 				.build();
 		
@@ -162,19 +165,29 @@ public class EquipmentService {
 				.orElseThrow(() -> new RuntimeException("해당하는 설비 타입이 없습니다.")));
 		equipment.setLine(prodLineRepository.findById(req.getLineId())
 				.orElseThrow(() -> new RuntimeException("해당하는 라인이 없습니다.")));
-		equipment.setStatus("STOP");
+		equipment.setStatus("RUN");
 		equipment.setEquipName(req.getEquipName());
 
 		prodEquipRepository.save(equipment);
 	}
 
 
-	public List<WorkOrderProcessDTO> loadAllEquipmentHistory(Long id) {
+	public List<WorkOrderProcessDTO> loadAllEquipmentHistory(Long id, HistorySearchDTO dto) {
+
+		if (dto == null) {
+			dto = new HistorySearchDTO();
+		}
+
+		if (id == null) {
+			dto.setType("ALL");
+			return equipmentMapper.selectProcessByLineAndStep(dto);
+		}
+
+		dto.setType("DIV");
 
 		ProdEquip equipment = prodEquipRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("해당 설비가 없습니다."));
-
-		String line = equipment.getLine().getLineId();
+		dto.setLine(equipment.getLine().getLineId());
 		int step = switch (equipment.getEquipment().getEquipId())
 		{
 			case "BLENDING_TANK", "MIXER_AGITATOR" -> 1;
@@ -184,13 +197,20 @@ public class EquipmentService {
 			case "LABELING_AUTO", "PACKING_SEMI"   -> 6;
 			default -> throw new IllegalArgumentException("설비 타입 오류");
 		};
+		dto.setStep(step);
 
-		return equipmentMapper.selectProcessByLineAndStep(line, step);
+		return equipmentMapper.selectProcessByLineAndStep(dto);
 	}
 
 	public List<EquipDowntimeDTO> loadAllEquipDowntimeHistory(HistorySearchDTO dto) {
 		return equipmentMapper.selectDowntimeHistories(dto);
 	}
+	
+	// 가동중 설비 목록
+	public Integer selectRunningEquipmentCount () {
+		return equipmentMapper.countRunningEquipments();
+	}
+	
 }
 
 

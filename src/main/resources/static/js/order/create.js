@@ -210,6 +210,7 @@
 			  document.querySelector('[name="prcFlt"]').value,
 			  document.querySelector('[name="prcFil"]').value,
 			  document.querySelector('[name="prcCap"]').value,
+              document.querySelector('[name="prcQc"]').value,
 			  document.querySelector('[name="prcLbl"]').value
 		  ].filter(v => v)	// null 제거
 	  };
@@ -355,6 +356,7 @@
 
 	lines.forEach(lineId => {
 		const btn = document.createElement("button");
+		btn.type = "button";
 		btn.className = "btn btn-sm btn-outline-primary me-1";
 		btn.innerText = lineId;
 		btn.onclick = () => {
@@ -374,6 +376,7 @@
 
 	  workers.forEach(workerId => {
 		 const btn = document.createElement("button");
+		 btn.type = "button";
 		 btn.className = "btn btn-sm btn-outline-primary me-1";
 		 btn.innerText = workerId;
 		 btn.onclick = () => {
@@ -394,7 +397,7 @@
 
   // 작업자 필드
   const workerFields = [
-	  "prcBld", "prcFlt", "prcFil", "prcCap", "prcLbl"
+	  "prcBld", "prcFlt", "prcFil", "prcCap", "prcQc", "prcLbl"
   ];
 
   // 비어있는 슬롯 찾기
@@ -484,6 +487,7 @@
       document.querySelector('select[name="prcFlt"]').value = "";
       document.querySelector('select[name="prcFil"]').value = "";
       document.querySelector('select[name="prcCap"]').value = "";
+      document.querySelector('select[name="prcQc"]').value = "";
       document.querySelector('select[name="prcLbl"]').value = "";
 
       // 표시용 텍스트 초기화

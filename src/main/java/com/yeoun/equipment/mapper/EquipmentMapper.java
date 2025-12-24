@@ -12,13 +12,12 @@ import java.util.List;
 public interface EquipmentMapper {
 
     // 라인 및 공정별 작업진행현황
-    List<WorkOrderProcessDTO> selectProcessByLineAndStep(
-            @Param("line") String line,
-            @Param("step") Integer step
-    );
-    
+    List<WorkOrderProcessDTO> selectProcessByLineAndStep(HistorySearchDTO dto);
 	
 	// 설비 비가동 사유 정보 불러오기
 	List<EquipDowntimeDTO> selectDowntimeHistories (HistorySearchDTO dto);
+	
+	// 현재 가동중인!! 설비
+	Integer countRunningEquipments();
 
 }

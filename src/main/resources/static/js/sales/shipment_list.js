@@ -43,6 +43,17 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btnSearch")?.addEventListener("click", () => {
         loadShipmentList(getSelectedStatus());
     });
+	
+	//엔터키로 검색
+	const keywordInput = document.getElementById("keyword");
+	   if (keywordInput) {
+	       keywordInput.addEventListener("keydown", (e) => {
+	           if (e.key === "Enter") {
+	               e.preventDefault();
+	               loadShipmentList(getSelectedStatus());
+	           }
+	       });
+	   }
 
 	// 초기화 버튼
 	   document.getElementById("btnReset")?.addEventListener("click", () => {
@@ -82,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function initGrid() {
 
     const columnDefs = [
-        { headerName: "선택", checkboxSelection: true, width: 60 },
+      //  { headerName: "선택", checkboxSelection: true, width: 60 },
 
         // ⭐ rowGroup 제거 - Community 버전에서는 사용 불가
         { 

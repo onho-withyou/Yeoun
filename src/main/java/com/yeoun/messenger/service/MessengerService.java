@@ -177,7 +177,7 @@ public class MessengerService {
 	// ========================================================
 	// 새 방 생성
 	@Transactional
-	public MsgRoomDTO createRoom(RoomCreateRequest roomCreateRequestDTO) throws IOException {
+	public MsgRoomDTO createRoom(RoomCreateRequest roomCreateRequestDTO, String id) throws IOException {
 		////////////////////////////////// 파일추가 잊지말것...... /////////////////////////////////
 		boolean hasText = roomCreateRequestDTO.getFirstMessage() != null
 				&& !roomCreateRequestDTO.getFirstMessage().isBlank();
@@ -192,9 +192,10 @@ public class MessengerService {
 
 		// 2) 참여자 relations 저장
 		Set<String> memberIds = new HashSet<>(roomCreateRequestDTO.getMembers());
-		memberIds.add(roomCreateRequestDTO.getCreatedUser());
+		memberIds.add(id);
 
 		for (String empId : memberIds) {
+			System.out.println("empId = [" + empId + "]");
 			MsgRelation relation = new MsgRelation();
 			relation.setRoomId(newRoom);
 			relation.setEmpId(empRepository.getReferenceById(empId));
@@ -253,14 +254,23 @@ public class MessengerService {
 		
 		if (statusChangeRequest.getAvlbStat() != null) {
 			msgStatus.setAvlbStat(statusChangeRequest.getAvlbStat());
+			msgStatus.setAvlbUpdated(LocalDateTime.now());
+
+			if ("OFFLINE".equals(statusChangeRequest.getAvlbStat())){
+				msgStatus.setOnlineYn("N");
+			} else {
+				msgStatus.setOnlineYn("Y");
+			}
 		}
 		
 		if (statusChangeRequest.getWorkStat() != null) {
 			msgStatus.setManualWorkStat(statusChangeRequest.getWorkStat());
 			msgStatus.setWorkStatSource("MANUAL");
+			msgStatus.setWorkStatUpdated(LocalDateTime.now());
 		}
 		
 		msgStatus.setWorkStatUpdated(LocalDateTime.now());
+		msgStatusRepository.save(msgStatus);
 	}
 
 	// ========================================================

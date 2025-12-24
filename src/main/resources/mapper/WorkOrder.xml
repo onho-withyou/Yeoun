@@ -36,7 +36,7 @@
 			</if>
 
 			<!-- 상태 검색 -->
-			<if test="status != null and status != '' and status != 'ALL'">
+			<if test="status != null and status != '' and status != 'ALL' and status != 'DONE'">
 				AND w.STATUS = #{status}
 			</if>
 
@@ -44,6 +44,11 @@
 			<if test="startDateFrom != null and startDateFrom != ''">
 				AND TO_CHAR(w.PLAN_START_DATE, 'YYYY-MM-DD') = #{startDateFrom}
 			</if>
+			
+			<if test="status == 'DONE'">
+				AND w.STATUS = 'SCRAPPED' OR w.STATUS = 'COMPLETED' OR w.STATUS = 'CANCELED'
+			</if>
+
 		</where>
 		ORDER BY w.ORDER_ID DESC
 	</select>
@@ -110,6 +115,7 @@
 		    s.END_DATE AS END_TIME,
 		    s.WORK_ID,
 		    o.LINE_ID,
+		    o.PLAN_QTY,
 		    l.LINE_NAME,
 		    pm.PRD_NAME AS PRODUCT_NAME
 		FROM WORK_SCHEDULE s
@@ -154,6 +160,19 @@
 		AND w.STATUS IN ('CREATED', 'RELEASED', 'IN_PROGRESS')
 		AND w.PLAN_START_DATE <![CDATA[ < ]]> #{endTime}
 		AND w.PLAN_END_DATE   <![CDATA[ > ]]> #{startTime}
+	</select>
+
+	<select id="countTodayProductionPlan" resultType="Integer">
+		SELECT COUNT(PLAN_ID)
+			FROM PRODUCTION_PLAN
+		WHERE PLAN_DATE = TRUNC(SYSDATE)
+	</select>
+
+	<select id="countTodayWorkOrder" resultType="Integer">
+		SELECT COUNT(ORDER_ID)
+			FROM WORK_ORDER
+		WHERE PLAN_START_DATE >= TRUNC(SYSDATE)
+			AND PLAN_START_DATE <![CDATA[ < ]]> TRUNC(SYSDATE) + 1
 	</select>
 	
 </mapper>
