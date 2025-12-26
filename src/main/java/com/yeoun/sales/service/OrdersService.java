@@ -318,7 +318,7 @@ public class OrdersService {
                 .clientName(order.getClient().getClientName())
                 .orderDate(order.getOrderDate())
                 .deliveryDate(order.getDeliveryDate())
-                .orderStatus(order.getOrderStatus().name())
+                .orderStatus(order.getOrderStatus())
                 .managerName(order.getManagerName())
                 .managerTel(order.getManagerTel())
                 .managerEmail(order.getManagerEmail())

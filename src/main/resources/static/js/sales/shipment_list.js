@@ -37,6 +37,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     initGrid();
+	
+	gridApi.setColumnsVisible(["outboundDate"], false);
     loadShipmentList("ALL");
 
     // 검색 버튼
@@ -78,6 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 			// 그룹이면 배열, 아니면 단일값
 			const statusList = STATUS_GROUP_MAP[statusKey] ?? statusKey;
+			toggleOutboundDateColumn(statusKey);
 
 			loadShipmentList(statusList);
 
@@ -104,9 +107,22 @@ function initGrid() {
 
         { headerName: "거래처명", field: "clientName", width: 150 },
         { headerName: "제품명",   field: "prdName", width: 150 },
-        { headerName: "수주수량", field: "orderQty", width: 150 },
-        { headerName: "현재재고", field: "stockQty", width: 150 },
-        { headerName: "납기요청일", field: "dueDate", width: 150 },
+        { headerName: "수주수량", field: "orderQty", width: 120 },
+        { headerName: "현재재고", field: "stockQty", width: 120 },
+        { headerName: "납기요청일", field: "dueDate", width: 120 },
+		
+				{
+						  headerName: "출하일자",
+						  field: "outboundDate",
+						  width: 160,
+						  valueFormatter: p => {
+						    if (!p.value) return "-";
+						    return p.value.substring(0, 16).replace("T", " ");
+						  }
+						},
+
+
+		
 
         // 상태 컬럼
         {
@@ -122,7 +138,7 @@ function initGrid() {
         ========================================================= */
 		{
 		    headerName: "예약",
-		    width: 120,
+		    width: 80,
 		    cellRenderer: params => {
 
 		        if (!params.data) return "";
@@ -185,7 +201,8 @@ function initGrid() {
 
 		{
 		    headerName: "상세",
-		    width: 100,
+		    width: 120,	
+			flex:1,		
 		    cellRenderer: params => {
 		        if (!params.data) return "";
 		        return `
@@ -196,7 +213,6 @@ function initGrid() {
 		        `;
 		    }
 		}
-
     ];
 
 
@@ -362,4 +378,14 @@ function cancelShipment(orderId) {
         console.error("예약취소 오류", err);
         alert("예약취소 중 오류 발생");
     });
+}
+
+
+function toggleOutboundDateColumn(statusKey) {
+    if (!gridApi) return;
+
+    // 출하완료 탭에서만 표시
+    const show = statusKey === "SHIPPED";
+
+    gridApi.setColumnsVisible(["outboundDate"], show);
 }

@@ -15,26 +15,26 @@
      header: headerMeta.content
    };
  }
- /* ============================
-	  상태값 한글처리
-	============================ */
- 
- document.addEventListener("DOMContentLoaded", () => {
-    const statusEl = document.getElementById("orderStatusText");
-    if (!statusEl) return;
-
-    const statusMap = {
-      REQUEST: "요청",
-      RECEIVED: "수주접수",
-      CONFIRMED: "수주확정",
-      PLANNED: "생산계획",
-      SHIPPED: "출하완료",
-      CANCEL: "취소"
-    };
-
-    const rawStatus = statusEl.innerText.trim();
-    statusEl.innerText = statusMap[rawStatus] ?? rawStatus;
-  });
+// /* ============================
+//	  상태값 한글처리
+//	============================ */
+// 
+// document.addEventListener("DOMContentLoaded", () => {
+//    const statusEl = document.getElementById("orderStatusText");
+//    if (!statusEl) return;
+//
+//    const statusMap = {
+//      REQUEST: "요청",
+//      RECEIVED: "수주접수",
+//      CONFIRMED: "수주확정",
+//      PLANNED: "생산계획",
+//      SHIPPED: "출하완료",
+//      CANCEL: "취소"
+//    };
+//
+//    const rawStatus = statusEl.innerText.trim();
+//    statusEl.innerText = statusMap[rawStatus] ?? rawStatus;
+//  });
 
  /* ============================
     입금 확인
