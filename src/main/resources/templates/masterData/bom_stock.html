@@ -94,7 +94,7 @@
 				 <div class="d-flex justify-content-start">
 			        	<div class="mb-6 mb-0" style="width: 200px;margin-right:4px;">
 				        	<select  id="bomId" class="form-select">
-				        	    <option value="" selected>BOMID</option>
+				        	    <option value="" selected>BOM ID</option>
 			        	    	<option th:each="row : ${bomIdList}" 
 										th:value="${row[0]}" 
 										th:text="${row[0]}"
@@ -103,7 +103,7 @@
 				        	</select>
 				        </div>
 						<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
-							<input type="text" id="matId" name="matId" class="form-control"  placeholder="원재료id">
+							<input type="text" id="matId" name="matId" class="form-control"  placeholder="원재료 ID">
 						</div>
 				        
 			           	<button type="button" class="btn btn-primary" onclick="bomGridAllSearch()" style="margin-left:5px;">조회</button>

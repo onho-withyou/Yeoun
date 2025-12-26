@@ -11,7 +11,7 @@ const grid1 = new Grid({
       rowHeaders: ['rowNum','checkbox'],
 	  columns: [
 
-		{header: 'QC항목ID' ,name: 'qcItemId' ,align: 'center'}
+		{header: 'QC 항목 ID' ,name: 'qcItemId' ,align: 'center'}
 		,{header: '항목명' ,name: 'itemName' ,align: 'center'}
 		,{header: '대상구분' ,name: 'targetType' ,align: 'center',width: 110,filter: "select"
 			,renderer:{ type: StatusModifiedRenderer}

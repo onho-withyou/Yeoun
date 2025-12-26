@@ -74,7 +74,7 @@ const grid1 = new Grid({
 	  data: [],
 	  rowHeaders: ['rowNum'],
 	  columns: [
-			{header: 'BOMID' ,name: 'bomId' ,align: 'center',filter: "select"}
+			{header: 'BOM ID' ,name: 'bomId' ,align: 'center',filter: "select"}
 			,{header: '사용여부' ,name: 'useYn' ,align: 'center',filter: "select",width:83
 				,renderer:{ type: StatusModifiedRenderer
 					,options: {
@@ -100,8 +100,8 @@ const grid4 = new Grid({
 	  data: [],
 	  rowHeaders: ['rowNum'],
 	  columns: [
-				{header: 'BOMID' ,name: 'bomId' ,align: 'center',hidden: true}
-				,{header: '완제품 id' ,name: 'prdId' ,align: 'center'
+				{header: 'BOM ID' ,name: 'bomId' ,align: 'center',hidden: true}
+				,{header: '완제품 ID' ,name: 'prdId' ,align: 'center'
 					,renderer:{ type: StatusModifiedRenderer}
 				}
 				,{header: '제품명' ,name: 'prdName' ,align: 'center'}
@@ -126,9 +126,9 @@ const grid5 = new Grid({
 	  data: [],
 	  rowHeaders: ['rowNum'],
 	  columns: [
-				{header: 'BOMID' ,name: 'bomId' ,align: 'center',hidden: true}
-				,{header: '완제품 id' ,name: 'prdId' ,align: 'center',hidden: true}
-				,{header: '원재료 id' ,name: 'matId' ,align: 'center'
+				{header: 'BOM ID' ,name: 'bomId' ,align: 'center',hidden: true}
+				,{header: '완제품 ID' ,name: 'prdId' ,align: 'center',hidden: true}
+				,{header: '원재료 ID' ,name: 'matId' ,align: 'center'
 					,renderer:{ type: StatusModifiedRenderer}
 				}
 				,{header: '원재료명' ,name: 'matName' ,align: 'center'}
@@ -161,7 +161,7 @@ const grid5 = new Grid({
 						}
 					}	
 				}
-				,{header: 'bom 순서' ,name: 'bomSeqNo' ,align: 'center',editor: 'text',width: 65
+				,{header: 'BOM 순서' ,name: 'bomSeqNo' ,align: 'center',editor: 'text',width: 65
 					,renderer:{ type: StatusModifiedRenderer}
 				}
 				,{header: '설명' ,name: 'matDesc' ,align: 'center',width: 320}
@@ -178,9 +178,9 @@ const grid6 = new Grid({
 	  data: [],
 	  rowHeaders: ['rowNum'],
 	  columns: [
-				{header: 'BOMID' ,name: 'bomId' ,align: 'center',hidden: true}
-				,{header: '완제품 id' ,name: 'prdId' ,align: 'center',hidden: true}
-				,{header: '원재료 id' ,name: 'matId' ,align: 'center'}
+				{header: 'BOM ID' ,name: 'bomId' ,align: 'center',hidden: true}
+				,{header: '완제품 ID' ,name: 'prdId' ,align: 'center',hidden: true}
+				,{header: '원재료 ID' ,name: 'matId' ,align: 'center'}
 				,{header: '원재료명' ,name: 'matName' ,align: 'center'}
 				,{header: '원재료유형' ,name: 'matType' ,align: 'center'}
 				,{header: '필요수량' ,name: 'matQty' ,align: 'center',editor: 'text',width: 65
@@ -206,7 +206,7 @@ const grid6 = new Grid({
 						}
 					}	
 				}
-				,{header: 'bom 순서' ,name: 'bomSeqNo' ,align: 'center',editor: 'text',width: 65
+				,{header: 'BOM 순서' ,name: 'bomSeqNo' ,align: 'center',editor: 'text',width: 65
 					,renderer:{ type: StatusModifiedRenderer}
 						,editor: {
 							type: NumberOnlyEditor, // ⬅️ 클래스 이름 직접 사용
@@ -231,10 +231,10 @@ const grid2 = new Grid({
       rowHeaders: ['rowNum','checkbox'],
 	  columns: [
 
-	    {header: 'BOMId' ,name: 'bomId' ,align: 'center',filter: "select",editor:"text"
+	    {header: 'BOM ID' ,name: 'bomId' ,align: 'center',filter: "select",editor:"text"
 			,renderer:{ type: StatusModifiedRenderer}	
 		}
-		,{header: '완제품 id' ,name: 'prdId' ,align: 'center',filter: "select"
+		,{header: '완제품 ID' ,name: 'prdId' ,align: 'center',filter: "select"
 			,renderer:{ type: StatusModifiedRenderer
 				,options: {
 					isSelect: true 
@@ -248,7 +248,7 @@ const grid2 = new Grid({
 				}
 			}	
 		}
-		,{header: '원재료 id' ,name: 'matId' ,align: 'center',editor: 'text',width: 230
+		,{header: '원재료 ID' ,name: 'matId' ,align: 'center',editor: 'text',width: 230
 			,renderer:{ type: StatusModifiedRenderer}	
 		}
 		,{header: '원재료 사용량' ,name: 'matQty' ,align: 'center',editor: 'text'
@@ -282,10 +282,10 @@ const grid2 = new Grid({
             	}
           	}		
 		}
-		,{header: '생성자ID' ,name: 'createdId' ,align: 'center',hidden:true}
+		,{header: '생성자 ID' ,name: 'createdId' ,align: 'center',hidden:true}
 		,{header: '생성자이름' ,name: 'createdByName' ,align: 'center'}
 		,{header: '생성일자' ,name: 'createdDate' ,align: 'center'}
-		,{header: '수정자ID' ,name: 'updatedId' ,align: 'center',hidden:true}
+		,{header: '수정자 ID' ,name: 'updatedId' ,align: 'center',hidden:true}
 		,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center'}
 		,{header: '수정일시' ,name: 'updatedDate' ,align: 'center'}   
 		,{header: '사용여부' ,name: 'useYn' ,align: 'center',width: 83
@@ -445,7 +445,7 @@ const grid7 = new Grid({
 		  data: [],
 	      rowHeaders: ['rowNum'],
 		  columns: [
-			    {header: '원재료ID' ,name: 'matId' ,align: 'center'
+			    {header: '원재료 ID' ,name: 'matId' ,align: 'center'
 					,renderer:{ type: StatusModifiedRenderer}	
 				}
 			    ,{header: '원재료 품목명' ,name: 'matName' ,align: 'center'
