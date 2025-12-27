@@ -246,7 +246,6 @@ const grid2 = new Grid({
 				}
 			}          
 	    ]
-		,editingEvent: 'click'
 	    ,data: []
 	    ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
 	    ,height:100
@@ -306,17 +305,20 @@ grid2.on('beforeChange', (ev) => {
 	    }
 });
 
-let lastFocused = { rowKey: null, columnName: null };
-
-// IME 및 문자 입력 보조: 전역 헬퍼 사용
-if (typeof initGridImeSupport === 'function') {
-    initGridImeSupport([
-        { id: 'productGrid', grid: grid1, containerId: 'productGrid' },
-        { id: 'materialGrid', grid: grid2, containerId: 'materialGrid' }
-    ]);
-} else {
-    console.warn('initGridImeSupport is not available. Include grid-ime-helper.js to enable IME support.');
-}
+// IME 및 문자 입력 보조: 전역 헬퍼 사용 (안전한 등록 — 로드 순서와 무관)
+(function registerGridIme() {
+	const gridsToRegister = [
+		{ id: 'productGrid', grid: grid1, containerId: 'productGrid' },
+		{ id: 'materialGrid', grid: grid2, containerId: 'materialGrid' }
+	];
+	if (typeof initGridImeSupport === 'function') {
+		initGridImeSupport(gridsToRegister);
+	} else {
+		window.__pendingGridImeGrids = window.__pendingGridImeGrids || [];
+		window.__pendingGridImeGrids.push(...gridsToRegister);
+		console.debug('Queued grids for initGridImeSupport (will initialize when helper loads)');
+	}
+})();
 
 function productGridAllSearch() {
 

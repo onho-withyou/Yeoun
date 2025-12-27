@@ -543,6 +543,28 @@ if (!window.isAdmin) {
     console.log("관리자 권한 없음: 그리드 비활성화");
 }
 
+// IME 및 문자 입력 보조: 전역 헬퍼 사용 (안전한 등록 — 로드 순서와 무관)
+(function registerGridIme() {
+	const gridsToRegister = [
+		{ id: 'bomDetailGrid', grid: grid1, containerId: 'bomDetailGrid' },
+		{ id: 'bomGrid', grid: grid2, containerId: 'bomGrid' },
+		{ id: 'safetyStockGrid', grid: grid3, containerId: 'safetyStockGrid' },
+		{ id: 'bomPrdGrid', grid: grid4, containerId: 'bomPrdGrid' },
+		{ id: 'bomMatGrid', grid: grid5, containerId: 'bomMatGrid' },
+		{ id: 'bomMatTypeGrid', grid: grid6, containerId: 'bomMatTypeGrid' },
+		{ id: 'matItemsGrid', grid: grid7, containerId: 'matItemsGrid' },
+		{ id: 'bomGroupGrid', grid: grid8, containerId: 'bomGroupGrid' }
+	];
+	if (typeof initGridImeSupport === 'function') {
+		initGridImeSupport(gridsToRegister);
+	} else {
+		window.__pendingGridImeGrids = window.__pendingGridImeGrids || [];
+		window.__pendingGridImeGrids.push(...gridsToRegister);
+		console.debug('Queued grids for initGridImeSupport (will initialize when helper loads)');
+	}
+})();
+
+
 grid2.on('beforeChange', (ev) => {
     const { rowKey, columnName } = ev.changes[0]; // 변경된 데이터 목록 (배열)
 	if (columnName === 'prdId' || columnName === 'matId') {

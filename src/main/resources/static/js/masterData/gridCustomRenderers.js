@@ -76,7 +76,7 @@ class StatusModifiedRenderer {
         const item = map[status] || { text: status, cls: "status-badge" };
         
         // editor 설정이 있을 때만 화살표 추가
-        const arrow = hasEditor ? `<span class="tui-select-arrow" style="font-size:8px;opacity:0.6;padding-left:3px;">▼</span>` : '';
+        const arrow = hasEditor ? `<span style="font-size:8px;opacity:0.6;padding-left:3px;">▼</span>` : '';
         
         return `<span class="${item.cls}" style="padding: 4px 8px; border-radius: 4px; color: white;">${item.text}${arrow}</span> `;
     }
@@ -116,7 +116,7 @@ class StatusModifiedRenderer {
         } else if (isYNColumn && isCreated) {
             // 2. ⭐ Y/N 컬럼인데 신규 행이라서 아직 값이 없는 경우
             // 빈 텍스트 상태의 배지 모양이나 화살표가 포함된 레이아웃을 그려줍니다.
-            const arrow = showArrow ? `<span class="tui-select-arrow" style="font-size:10px;opacity:0.6;">▼</span>` : '';
+            const arrow = showArrow ? `<span style="font-size:10px;opacity:0.6;">▼</span>` : '';
             contentHTML = `
                 <div style="width:100%; height:100%; padding:0px 10px; box-sizing:border-box; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
                     <span></span> ${arrow}
@@ -124,7 +124,7 @@ class StatusModifiedRenderer {
             `;
         } else if (isSelect) {
             // 3. 일반 Select 컬럼
-            const arrow = showArrow ? `<span class="tui-select-arrow" style="font-size:10px;opacity:0.6;">▼</span>` : '';
+            const arrow = showArrow ? `<span style="font-size:10px;opacity:0.6;">▼</span>` : '';
             contentHTML = `
                 <div style="width:100%; height:100%; padding:0px 10px; box-sizing:border-box; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
                     <span>${displayText}</span>

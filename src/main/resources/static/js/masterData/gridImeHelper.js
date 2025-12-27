@@ -163,3 +163,15 @@ function initGridImeSupport(grids) {
 // 브라우저 전역에서 사용 가능하도록 window에 노출
 // (모듈 시스템이 있으면 별도 export가 필요할 수 있음)
 if (typeof window !== 'undefined') window.initGridImeSupport = initGridImeSupport;
+// If any grids were queued before this helper loaded, initialize them now.
+if (typeof window !== 'undefined') {
+  try {
+    if (Array.isArray(window.__pendingGridImeGrids) && window.__pendingGridImeGrids.length) {
+      console.debug('initGridImeSupport: initializing queued grids', window.__pendingGridImeGrids.length);
+      initGridImeSupport(window.__pendingGridImeGrids);
+      window.__pendingGridImeGrids = [];
+    }
+  } catch (e) {
+    console.debug('initGridImeSupport: error initializing queued grids', e);
+  }
+}

@@ -143,6 +143,21 @@ const transformKeys = (data) => {
   return data;
 };
 
+
+// IME 및 문자 입력 보조: 전역 헬퍼 사용 (안전한 등록 — 로드 순서와 무관)
+(function registerGridIme() {
+	const gridsToRegister = [
+		{ id: 'qcItemGrid', grid: grid1, containerId: 'qcItemGrid' }
+	];
+	if (typeof initGridImeSupport === 'function') {
+		initGridImeSupport(gridsToRegister);
+	} else {
+		window.__pendingGridImeGrids = window.__pendingGridImeGrids || [];
+		window.__pendingGridImeGrids.push(...gridsToRegister);
+		console.debug('Queued grids for initGridImeSupport (will initialize when helper loads)');
+	}
+})();
+
 grid1.on("click", async (ev) => {
 
 	const target = ev.nativeEvent.target;
@@ -245,6 +260,7 @@ if (qcItemForm) {
         });
     });
 }
+
 // 항목 등록
 const qcItemRegistBtn = document.getElementById('qcItemRegistBtn');
 qcItemRegistBtn.addEventListener("click", function() {

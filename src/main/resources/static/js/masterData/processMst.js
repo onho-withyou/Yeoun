@@ -228,6 +228,22 @@ const grid4 = new Grid({
         }
 });
 
+// IME 및 문자 입력 보조: 전역 헬퍼 사용 (안전한 등록 — 로드 순서와 무관)
+(function registerGridIme() {
+	const gridsToRegister = [
+		{ id: 'processGrid', grid: grid1, containerId: 'processGrid' },
+		{ id: 'processCodeGrid', grid: grid2, containerId: 'processCodeGrid' },
+		{ id: 'processStepGrid', grid: grid3, containerId: 'processStepGrid' },
+		{ id: 'routeStepCodeGrid', grid: grid4, containerId: 'routeStepCodeGrid' }
+	];
+	if (typeof initGridImeSupport === 'function') {
+		initGridImeSupport(gridsToRegister);
+	} else {
+		window.__pendingGridImeGrids = window.__pendingGridImeGrids || [];
+		window.__pendingGridImeGrids.push(...gridsToRegister);
+		console.debug('Queued grids for initGridImeSupport (will initialize when helper loads)');
+	}
+})();
 
 const PROCESS_CODE_TO_TYPE_MAP = {
     '블렌딩': 'MIX',         
