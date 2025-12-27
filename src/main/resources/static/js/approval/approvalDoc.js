@@ -447,6 +447,9 @@ async function loadAndDisplayApprovers(approvalId) {
 //grid - 4.결재대기 - 나와관련된 모든 결재대기
 //grid - 5.결재완료 - 나와 관련된 결재완료한 문서
 window.onload = function () {
+	// approver-name에 서버가 렌더링한 텍스트를 보관
+	const approverNameEl = document.getElementById('approver-name');
+	if (approverNameEl) initialApproverText = approverNameEl.textContent || approverNameEl.innerText || '';
 	AllGridSearch();//조회버튼
 	empData();
 }
@@ -2258,6 +2261,12 @@ function defaultPrint() {
 	if (createDateInput) {
 		createDateInput.value = isoFormattedDate;
 		console.log('defaultPrint - create-date 설정됨:', isoFormattedDate);
+	}
+
+	// 작성 모드일 때는 템플릿에 렌더된 approver-name 원본 텍스트를 사용
+	const approverEl = document.getElementById('approver-name');
+	if (approverEl) {
+		approverEl.innerText = initialApproverText;
 	}
 	// selectedForm 값이 없을 경우 에러가 생길 수 있어서 에러 처리
 	//<option selected>기안서</option> 해당구문 없앨시에 마지막인덱스로됨
