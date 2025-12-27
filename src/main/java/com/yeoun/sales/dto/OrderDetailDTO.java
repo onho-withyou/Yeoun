@@ -24,7 +24,7 @@ public class OrderDetailDTO {
     private LocalDate orderDate;
     private LocalDate deliveryDate;
 
-    private String orderStatus;
+    private OrderStatus orderStatus;
 
     private String managerName;
     private String managerTel;

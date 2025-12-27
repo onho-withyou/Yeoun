@@ -8,7 +8,7 @@ import com.yeoun.equipment.repository.ProdEquipRepository;
 import com.yeoun.equipment.entity.Equipment;
 import com.yeoun.equipment.repository.EquipmentRepository;
 import com.yeoun.equipment.repository.ProdLineRepository;
-
+import com.yeoun.masterData.repository.ProcessMstRepository;
 import com.yeoun.process.dto.WorkOrderProcessDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -26,6 +26,7 @@ import java.util.List;
 @Log4j2
 public class EquipmentService {
 
+	private final ProcessMstRepository processMstRepository;
     private final EquipmentRepository equipmentRepository;
     private final ProdLineRepository prodLineRepository;
     private final ProdEquipRepository prodEquipRepository;
@@ -171,7 +172,8 @@ public class EquipmentService {
 		prodEquipRepository.save(equipment);
 	}
 
-
+	// ===================================================
+	// 설비 이력 불러오기
 	public List<WorkOrderProcessDTO> loadAllEquipmentHistory(Long id, HistorySearchDTO dto) {
 
 		if (dto == null) {
@@ -202,13 +204,31 @@ public class EquipmentService {
 		return equipmentMapper.selectProcessByLineAndStep(dto);
 	}
 
+	// ===================================================
+	// 설비 고장이력 확인
 	public List<EquipDowntimeDTO> loadAllEquipDowntimeHistory(HistorySearchDTO dto) {
 		return equipmentMapper.selectDowntimeHistories(dto);
 	}
 	
+	// ===================================================
 	// 가동중 설비 목록
 	public Integer selectRunningEquipmentCount () {
 		return equipmentMapper.countRunningEquipments();
+	}
+	
+	// ===================================================
+	// 설비 가동 상태 변경
+	@Transactional
+	public void updateEquipmentStatus (String process, String line, String status) {
+		List<ProdEquipDTO> dtos = equipmentMapper.selectProdEquipByLineAndProcess(line, process);
+		
+		for (ProdEquipDTO dto : dtos) {
+			ProdEquip prodEquip = prodEquipRepository.findById(dto.getEquipId())
+					.orElseThrow(() -> new RuntimeException("해당하는 설비 Id가 없습니다."));
+			
+			prodEquip.setStatus(status);
+			prodEquipRepository.save(prodEquip);
+		}
 	}
 	
 }

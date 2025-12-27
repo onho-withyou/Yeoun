@@ -69,13 +69,12 @@
 			  <td class="text-center">
 			
 			    <!-- ✅ 상태 텍스트 (enum 코드 그대로) -->
-			    <span id="orderStatusText"
-			          class="fw-semibold"
-			          th:text="${order.orderStatus}">
-			    </span>
+			    <span class="fw-semibold"
+			      th:text="${order.orderStatus.label}">
+			</span>
 			
 			    <!-- ✅ REQUEST 상태일 때만 버튼 표시 -->
-			    <span th:if="${order.orderStatus == 'REQUEST'}" class="ms-2">
+			    <span th:if="${order.orderStatus.name() == 'REQUEST'}" class="ms-2">
 			
 			      <button type="button"
 			              class="btn btn-sm btn-warning rounded-pill"

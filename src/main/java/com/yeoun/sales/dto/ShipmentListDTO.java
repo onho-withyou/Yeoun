@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -19,8 +20,10 @@ public class ShipmentListDTO {
     private BigDecimal stockQty;
     private LocalDate dueDate;
     private String status;
+    private LocalDateTime outboundDate;   // ⭐ 출하일자 (출하완료 탭용)
     private boolean reservable;         // 품목 단위 예약 가능 여부
     private boolean reservableGroup;    // 주문 단위 예약 가능 여부
+   
 
     public ShipmentListDTO(
             String orderId,
@@ -29,7 +32,8 @@ public class ShipmentListDTO {
             BigDecimal orderQty,
             BigDecimal stockQty,
             Object dueDate,
-            String status,
+            Object outboundDate,   
+            String status,             
             Object reservable,
             Object reservableGroup
     ) {
@@ -44,6 +48,10 @@ public class ShipmentListDTO {
             this.dueDate = ts.toLocalDateTime().toLocalDate();
         } else if (dueDate instanceof java.sql.Date d) {
             this.dueDate = d.toLocalDate();
+        }
+        
+        if (outboundDate instanceof java.sql.Timestamp ts) {
+            this.outboundDate = ts.toLocalDateTime();
         }
 
         this.status = status;
