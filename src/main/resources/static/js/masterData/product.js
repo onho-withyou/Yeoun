@@ -308,33 +308,15 @@ grid2.on('beforeChange', (ev) => {
 
 let lastFocused = { rowKey: null, columnName: null };
 
-// 2. 그리드 포커스 이벤트 설정
-grid1.on('focusChange', (ev) => {
-    lastFocused.rowKey = ev.rowKey;
-    lastFocused.columnName = ev.columnName;
-});
-
-// 3. 네이티브 키다운을 가장 상단(document)에서 가로채기
-document.addEventListener('keydown', function(ev) {
-	console.log("document.addEventListener('keydown'");
-    const { rowKey, columnName } = lastFocused;
-    
-    // 포커스가 없거나, 이미 편집 중이면 패스
-    if (rowKey === null || grid1.getFocusedCell().editing) return;
-
-	// 1. 입력 키가 문자인지 확인
-    const isChar = ev.key.length === 1 && !ev.ctrlKey && !ev.metaKey && !ev.altKey;
-    
-    if (isChar) {
-        // [수정 핵심] 
-        // 2. startEditing(rowKey, columnName, 값) 
-        // 세 번째 인자에 ev.key를 넣으면 에디터가 열리면서 그 값이 바로 들어갑니다.
-        grid1.startEditing(rowKey, columnName, ev.key);
-        
-        // 3. 만약 select 박스라면 바로 리스트가 보일 수 있게 보정만 해줍니다.
-        // 텍스트 에디터라면 위 한 줄로 끝납니다.
-    }
-}, true); // true (Capturing)가 매우 중요합니다. 그리드보다 먼저 가로챕니다.
+// IME 및 문자 입력 보조: 전역 헬퍼 사용
+if (typeof initGridImeSupport === 'function') {
+    initGridImeSupport([
+        { id: 'productGrid', grid: grid1, containerId: 'productGrid' },
+        { id: 'materialGrid', grid: grid2, containerId: 'materialGrid' }
+    ]);
+} else {
+    console.warn('initGridImeSupport is not available. Include grid-ime-helper.js to enable IME support.');
+}
 
 function productGridAllSearch() {
 
