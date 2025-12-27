@@ -22,8 +22,22 @@ const grid1 = new Grid({
 		,{header: '기준 텍스트' ,name: 'stdText' ,align: 'center',width: 230}
 		,{header: 'MIN' ,name: 'minValue' ,align: 'center'}
         ,{header: 'MAX' ,name: 'maxValue' ,align: 'center'}
-		,{header: '사용여부' ,name: 'useYn' ,align: 'center'
-			,renderer:{ type: StatusModifiedRenderer}
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center',width: 100
+			,renderer:{ type: StatusModifiedRenderer
+				,options: {
+					isSelect: false   // ⭐ 이걸로 구분
+				}
+			}
+			,editor: {
+				type: 'select', // 드롭다운 사용
+				options: {
+					// value는 실제 데이터 값, text는 사용자에게 보이는 값
+					listItems: [
+						{value: 'Y', text: '활성'},
+						{value: 'N', text: '비활성'}
+					]
+				}
+			}
 		}  
 		,{header: '정렬순서' ,name: 'sortOrder' ,align: 'center',hidden: true}
 		,{header: '생성자id' ,name: 'createdId' ,align: 'center',hidden: true} 
