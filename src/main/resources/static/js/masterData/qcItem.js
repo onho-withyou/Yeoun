@@ -11,7 +11,7 @@ const grid1 = new Grid({
       rowHeaders: ['rowNum','checkbox'],
 	  columns: [
 
-		{header: 'QC항목ID' ,name: 'qcItemId' ,align: 'center'}
+		{header: 'QC 항목 ID' ,name: 'qcItemId' ,align: 'center'}
 		,{header: '항목명' ,name: 'itemName' ,align: 'center'}
 		,{header: '대상구분' ,name: 'targetType' ,align: 'center',width: 110,filter: "select"
 			,renderer:{ type: StatusModifiedRenderer}
@@ -22,8 +22,22 @@ const grid1 = new Grid({
 		,{header: '기준 텍스트' ,name: 'stdText' ,align: 'center',width: 230}
 		,{header: 'MIN' ,name: 'minValue' ,align: 'center'}
         ,{header: 'MAX' ,name: 'maxValue' ,align: 'center'}
-		,{header: '사용여부' ,name: 'useYn' ,align: 'center'
-			,renderer:{ type: StatusModifiedRenderer}
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center',width: 100
+			,renderer:{ type: StatusModifiedRenderer
+				,options: {
+					isSelect: false   // ⭐ 이걸로 구분
+				}
+			}
+			,editor: {
+				type: 'select', // 드롭다운 사용
+				options: {
+					// value는 실제 데이터 값, text는 사용자에게 보이는 값
+					listItems: [
+						{value: 'Y', text: '활성'},
+						{value: 'N', text: '비활성'}
+					]
+				}
+			}
 		}  
 		,{header: '정렬순서' ,name: 'sortOrder' ,align: 'center',hidden: true}
 		,{header: '생성자id' ,name: 'createdId' ,align: 'center',hidden: true} 
@@ -143,6 +157,21 @@ const transformKeys = (data) => {
   return data;
 };
 
+
+// IME 및 문자 입력 보조: 전역 헬퍼 사용 (안전한 등록 — 로드 순서와 무관)
+(function registerGridIme() {
+	const gridsToRegister = [
+		{ id: 'qcItemGrid', grid: grid1, containerId: 'qcItemGrid' }
+	];
+	if (typeof initGridImeSupport === 'function') {
+		initGridImeSupport(gridsToRegister);
+	} else {
+		window.__pendingGridImeGrids = window.__pendingGridImeGrids || [];
+		window.__pendingGridImeGrids.push(...gridsToRegister);
+		console.debug('Queued grids for initGridImeSupport (will initialize when helper loads)');
+	}
+})();
+
 grid1.on("click", async (ev) => {
 
 	const target = ev.nativeEvent.target;
@@ -245,6 +274,7 @@ if (qcItemForm) {
         });
     });
 }
+
 // 항목 등록
 const qcItemRegistBtn = document.getElementById('qcItemRegistBtn');
 qcItemRegistBtn.addEventListener("click", function() {

@@ -159,8 +159,9 @@ class NumberOnlyEditor {
     // 초기 값 설정
     this.el.value = props.value || '';
 
-    // 입력 이벤트를 감지하여 숫자와 소수점만 남기는 함수 바인딩
-    this.el.addEventListener('input', this.handleInput.bind(this));
+    // 입력 이벤트를 감지하여 숫자만 남기는 함수 바인딩
+        this.el.addEventListener('input', this.handleInput.bind(this));
+        try { console.debug('NumberOnlyEditor: constructed for value=', props.value); } catch (e) {}
   }
 
   getElement() {
@@ -188,17 +189,43 @@ class NumberOnlyEditor {
   
   // 입력 시마다 실행되어 숫자와 소수점만 남기는 함수
   handleInput() {
-    const currentValue = this.el.value;
-    const sanitized = this.sanitizeNumber(currentValue);
-    
-    // 값이 변경되었을 때만 업데이트 (커서 위치 유지)
-    if (currentValue !== sanitized) {
-      const cursorPos = this.el.selectionStart;
-      this.el.value = sanitized;
-      // 커서 위치 복원 (제거된 문자 수만큼 조정)
-      const removedChars = currentValue.length - sanitized.length;
-      this.el.setSelectionRange(cursorPos - removedChars, cursorPos - removedChars);
-    }
+                try {
+                        const el = this.el;
+                        const before = el.value || '';
+                        const selStart = typeof el.selectionStart === 'number' ? el.selectionStart : before.length;
+
+                        // sanitize: allow digits and dots, but keep only the first dot
+                        let sanitized = before.replace(/[^0-9.]/g, '');
+                        const firstDotInSan = sanitized.indexOf('.');
+                        if (firstDotInSan !== -1) {
+                            sanitized = sanitized.slice(0, firstDotInSan + 1) + sanitized.slice(firstDotInSan + 1).replace(/\./g, '');
+                        }
+
+                        // determine original first dot index (in original string)
+                        const firstDotInOriginal = before.indexOf('.');
+
+                        // compute new caret position: count allowed chars before original selStart
+                        let newPos = 0;
+                        for (let i = 0; i < selStart; i++) {
+                            const ch = before.charAt(i);
+                            if (/[0-9]/.test(ch)) {
+                                newPos++;
+                            } else if (ch === '.') {
+                                // only count this dot if it's the first dot in original (we'll keep it)
+                                if (i === firstDotInOriginal) newPos++;
+                            }
+                        }
+
+                        if (before !== sanitized) {
+                            el.value = sanitized;
+                            try {
+                                if (typeof el.setSelectionRange === 'function') el.setSelectionRange(newPos, newPos);
+                            } catch (e) {}
+                        }
+
+                        const after = el.value;
+                        console.debug('NumberOnlyEditor: handleInput before=', before, 'after=', after, 'caret->', newPos);
+                } catch (e) {}
   }
 }
 

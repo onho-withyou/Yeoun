@@ -16,6 +16,19 @@ const approvalCheckBtn = document.getElementById('approvalCheckBtn');
 // 반려 버튼
 const approvalCompanionBtn = document.getElementById('approvalCompanionBtn');
 
+// 상태에 따라 버튼 표시를 조정하는 헬퍼
+function applyStatusToButtons() {
+	const checkBtn = document.getElementById('approvalCheckBtn');
+	const denyBtn = document.getElementById('approvalCompanionBtn');
+	if (!checkBtn || !denyBtn) return;
+	// '미결만료'가 포함된 상태는 UI상 반려로 처리하되, 결재확인 버튼과 반려 버튼을 모두 숨김
+	if (String(currentDocStatus).includes('미결만료')) {
+		currentDocStatus = '미결만료';
+		checkBtn.style.display = 'none';
+		denyBtn.style.display = 'none';
+	}
+}
+
 // ========================================================
 // v- 결재권한자
 let elemApproverIdNum = null;//결재권한자 count 중요! 꼬이면안됨
@@ -434,6 +447,9 @@ async function loadAndDisplayApprovers(approvalId) {
 //grid - 4.결재대기 - 나와관련된 모든 결재대기
 //grid - 5.결재완료 - 나와 관련된 결재완료한 문서
 window.onload = function () {
+	// approver-name에 서버가 렌더링한 텍스트를 보관
+	const approverNameEl = document.getElementById('approver-name');
+	if (approverNameEl) initialApproverText = approverNameEl.textContent || approverNameEl.innerText || '';
 	AllGridSearch();//조회버튼
 	empData();
 }
@@ -522,6 +538,8 @@ async function empData() {
 				approvalId = rowData.approval_id;
 				// 현재 문서 상태 저장
 				currentDocStatus = rowData.doc_status || rowData.status || null;
+				// 상태 기반 버튼 표시 보정
+				applyStatusToButtons();
 				getApprovalDocFileData(approvalId);
 				// 문서 열릴때 현재 결재권자(approval) 저장
 				currentApprover = rowData.approver;
@@ -532,7 +550,7 @@ async function empData() {
 				document.getElementById('today-date').innerText = toDateStr(rowData.created_date);//결재 작성날짜 = 결재시작일
 				document.getElementById('approval-title').value = rowData.approval_title;
 				//양식종류 form-menu
-				document.getElementById('approver-name').value = rowData.emp_id;//결재자명
+				document.getElementById('approver-name').innerText = (rowData.emp_name ? rowData.emp_name : '') + (rowData.emp_id ? ' (' + rowData.emp_id + ')' : ''); // 기안자명 (사번)
 				document.getElementById('form-menu').value = rowData.form_type;//양식종류
 				//const createdDate = rowData.created_date;
 				document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
@@ -577,6 +595,8 @@ async function empData() {
 				approvalId = rowData.approval_id;
 				// 현재 문서 상태 저장
 				currentDocStatus = rowData.doc_status || rowData.status || null;
+				// 상태 기반 버튼 표시 보정
+				applyStatusToButtons();
 				getApprovalDocFileData(approvalId);
 				// 문서 열릴때 현재 결재권자(approval) 저장
 				currentApprover = rowData.approver;
@@ -586,7 +606,7 @@ async function empData() {
 				document.getElementById('today-date').innerText = toDateStr(rowData.created_date);//결재 작성날짜 = 결재시작일
 				document.getElementById('approval-title').value = rowData.approval_title;
 				document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
-				document.getElementById('approver-name').value = rowData.emp_id;//결재자명
+				document.getElementById('approver-name').innerText = (rowData.emp_name ? rowData.emp_name : '') + (rowData.emp_id ? ' (' + rowData.emp_id + ')' : ''); // 기안자명 (사번)
 				document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
 				document.getElementById('finish-date').value = toDateStr(rowData.finish_date);//결재완료날짜
 				//휴가 연차신청서 
@@ -629,6 +649,8 @@ async function empData() {
 				approvalId = rowData.approval_id;
 				// 현재 문서 상태 저장
 				currentDocStatus = rowData.doc_status || rowData.status || null;
+				// 상태 기반 버튼 표시 보정
+				applyStatusToButtons();
 				getApprovalDocFileData(approvalId);
 				// 문서 열릴때 현재 결재권자(approval) 저장
 				currentApprover = rowData.approver;
@@ -638,7 +660,7 @@ async function empData() {
 				document.getElementById('today-date').innerText = toDateStr(rowData.created_date);//결재 작성날짜 = 결재시작일
 				document.getElementById('approval-title').value = rowData.approval_title;
 				document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
-				document.getElementById('approver-name').value = rowData.emp_id;//결재자명
+				document.getElementById('approver-name').innerText = (rowData.emp_name ? rowData.emp_name : '') + (rowData.emp_id ? ' (' + rowData.emp_id + ')' : ''); // 기안자명 (사번)
 				console.debug("rowData.created_date", toDateStr(rowData.created_date));
 				const createdDate = rowData.created_date;
 				document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
@@ -680,6 +702,8 @@ async function empData() {
 				approvalId = rowData.approval_id;
 				// 현재 문서 상태 저장
 				currentDocStatus = rowData.doc_status || rowData.status || null;
+				// 상태 기반 버튼 표시 보정
+				applyStatusToButtons();
 				getApprovalDocFileData(approvalId);
 				// 문서 열릴때 현재 결재권자(approval) 저장
 				currentApprover = rowData.approver;
@@ -689,7 +713,7 @@ async function empData() {
 				document.getElementById('today-date').innerText = toDateStr(rowData.created_date);//결재 작성날짜 = 결재시작일
 				document.getElementById('approval-title').value = rowData.approval_title;
 				document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
-				document.getElementById('approver-name').value = rowData.emp_id;//결재자명
+				document.getElementById('approver-name').innerText = (rowData.emp_name ? rowData.emp_name : '') + (rowData.emp_id ? ' (' + rowData.emp_id + ')' : ''); // 기안자명 (사번)
 
 				const createdDate = rowData.created_date;
 				document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
@@ -728,6 +752,8 @@ async function empData() {
 				approvalId = rowData.approval_id;
 				// 현재 문서 상태 저장
 				currentDocStatus = rowData.doc_status || rowData.status || null;
+				// 상태 기반 버튼 표시 보정
+				applyStatusToButtons();
 				getApprovalDocFileData(approvalId);
 				// 문서 열릴때 현재 결재권자(approval) 저장
 				currentApprover = rowData.approver;
@@ -737,7 +763,7 @@ async function empData() {
 				document.getElementById('today-date').innerText = rowData.created_date.split('T')[0];//결재 작성날짜 = 결재시작일
 				document.getElementById('approval-title').value = rowData.approval_title;
 				document.getElementById('form-menu').value = rowData.form_type;//양식종류//양식종류form-menu
-				document.getElementById('approver-name').value = rowData.emp_id;//결재자명
+				document.getElementById('approver-name').innerText = (rowData.emp_name ? rowData.emp_name : '') + (rowData.emp_id ? ' (' + rowData.emp_id + ')' : ''); // 기안자명 (사번)
 
 				const createdDate = rowData.created_date;
 				document.getElementById('create-date').value = toDateStr(rowData.created_date);//결재시작일 =결재 작성날짜 
@@ -2235,6 +2261,12 @@ function defaultPrint() {
 	if (createDateInput) {
 		createDateInput.value = isoFormattedDate;
 		console.log('defaultPrint - create-date 설정됨:', isoFormattedDate);
+	}
+
+	// 작성 모드일 때는 템플릿에 렌더된 approver-name 원본 텍스트를 사용
+	const approverEl = document.getElementById('approver-name');
+	if (approverEl) {
+		approverEl.innerText = initialApproverText;
 	}
 	// selectedForm 값이 없을 경우 에러가 생길 수 있어서 에러 처리
 	//<option selected>기안서</option> 해당구문 없앨시에 마지막인덱스로됨

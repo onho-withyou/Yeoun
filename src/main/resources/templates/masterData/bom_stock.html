@@ -94,7 +94,7 @@
 				 <div class="d-flex justify-content-start">
 			        	<div class="mb-6 mb-0" style="width: 200px;margin-right:4px;">
 				        	<select  id="bomId" class="form-select">
-				        	    <option value="" selected>BOMID</option>
+				        	    <option value="" selected>BOM ID</option>
 			        	    	<option th:each="row : ${bomIdList}" 
 										th:value="${row[0]}" 
 										th:text="${row[0]}"
@@ -103,7 +103,7 @@
 				        	</select>
 				        </div>
 						<div class="mb-6 mb-0" style="width: 200px;margin-right: 4px;">
-							<input type="text" id="matId" name="matId" class="form-control"  placeholder="원재료id">
+							<input type="text" id="matId" name="matId" class="form-control"  placeholder="원재료 ID">
 						</div>
 				        
 			           	<button type="button" class="btn btn-primary" onclick="bomGridAllSearch()" style="margin-left:5px;">조회</button>
@@ -119,11 +119,11 @@
 	            <div class="tab-pane fade" id="navs-bomGroup-tab" role="tabpanel">
 				 <div class="d-flex justify-content-start">
 			        	<div class="mb-6 mb-0" style="width: 200px;margin-right:4px;">
-				        	<input type="text" id="bomHdrId" name="bomHdrId" class="form-control"  placeholder="BOM그룹 Id">
+				        	<input type="text" id="bomHdrId" name="bomHdrId" class="form-control"  placeholder="BOM 그룹 ID">
 				        </div>
 						<div class="mb-6 mb-0" style="width: 200px;margin-right:4px;">
 				        	<select  id="bomHdrType" class="form-select">
-				        	    <option value="" selected>BOM타입</option>
+				        	    <option value="" selected>BOM 타입</option>
 			        	    	<option th:each="row : ${bomHdrTypeList}" 
 										th:value="${row.value}" 
 										th:text="${row.text}"
@@ -219,5 +219,6 @@
         </script>
     </th:block>
 	<script th:src="@{/js/masterData/gridCustomRenderers.js}"></script>
+	<script th:src="@{/js/masterData/gridImeHelper.js}"></script>
 	<script th:inline="javascript" th:src="@{/js/masterData/bomStock.js}"></script>
 </th:block>

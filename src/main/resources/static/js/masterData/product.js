@@ -51,10 +51,10 @@ const grid1 = new Grid({
 			{ type: 'checkbox'}
 		],
 	  columns: [
-		{header: '품번' ,name: 'prdId' ,align: 'center',editor: 'text',width: 100
+		{header: '품번' ,name: 'prdId' ,align: 'center',editor: 'text', width: 100
 			,renderer:{ type: StatusModifiedRenderer}	
 		}
-		,{header: '품목명' ,name: 'itemName' ,align: 'center',editor: 'text',filter: "select",width: 100
+		,{header: '품목명' ,name: 'itemName' ,align: 'center',editor: 'text', filter: "select",width: 100
 			,renderer:{ type: StatusModifiedRenderer
 				,options: {
 					isSelect: true   // ⭐ 이걸로 구분
@@ -70,7 +70,7 @@ const grid1 = new Grid({
 		,{header: '제품명' ,name: 'prdName' ,align: 'center',editor: 'text'
 			,renderer:{ type: StatusModifiedRenderer}
 		}
-		,{header: '제품유형' ,name: 'prdCat' ,align: 'center',filter: "select",width: 100
+		,{header: '제품유형' ,name: 'prdCat' ,align: 'center',filter: "select", width: 100
 			,renderer:{ type: StatusModifiedRenderer
 				,options: {
 					isSelect: true   // ⭐ 이걸로 구분
@@ -83,7 +83,7 @@ const grid1 = new Grid({
 				}
 			}
 		}
-		,{header: '단위' ,name: 'prdUnit' ,align: 'center',width:80
+		,{header: '단위' ,name: 'prdUnit' ,align: 'center', width:80
 			,renderer:{ type: StatusModifiedRenderer
 				,options: {
 					isSelect: true   // ⭐ 이걸로 구분
@@ -105,7 +105,7 @@ const grid1 = new Grid({
 				}
 			}
 		}
-        ,{header: '상태' ,name: 'prdStatus' ,align: 'center',hidden:true
+        ,{header: '상태' ,name: 'prdStatus' ,align: 'center', hidden:true
 			,renderer:{ type: StatusModifiedRenderer
 				,options: {
 					isSelect: true   // ⭐ 이걸로 구분
@@ -119,7 +119,7 @@ const grid1 = new Grid({
 				}
 			}
 		}
-		,{header: '유효일자(개월)' ,name: 'effectiveDate' ,align: 'center'
+		,{header: '유효일자(개월)' ,name: 'effectiveDate' , align: 'center'
 			,renderer:{ type: StatusModifiedRenderer}
 			,editor: {
             	type: NumberOnlyEditor, // ⬅️ 클래스 이름 직접 사용
@@ -128,7 +128,7 @@ const grid1 = new Grid({
 				},
 			}
 		}
-        ,{header: '제품상세설명' ,name: 'prdSpec' ,align: 'center',editor: 'text',width: 370
+        ,{header: '제품상세설명' ,name: 'prdSpec' ,align: 'center',editor: 'text', width: 370
 			,renderer:{ type: StatusModifiedRenderer}
 		}
         ,{header: '생성자ID' ,name: 'createdId' ,align: 'center',hidden:true}
@@ -137,7 +137,7 @@ const grid1 = new Grid({
         ,{header: '수정자ID' ,name: 'updatedId' ,align: 'center',hidden:true}
 		,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center',hidden:true}
         ,{header: '수정일자' ,name: 'updatedDate' ,align: 'center',hidden:true}           
-		,{header: '사용여부' ,name: 'useYn' ,align: 'center',filter: "select",width:83
+		,{header: '사용여부' ,name: 'useYn' ,align: 'center',filter: "select", width:83
 			,renderer:{ type: StatusModifiedRenderer
 				,options: {
 					isSelect: false   // ⭐ 이걸로 구분
@@ -156,6 +156,7 @@ const grid1 = new Grid({
 		}          
 
 	  ]
+	  //,editingEvent: 'click'
 	  ,data: []
 	  ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
 	  ,height:100
@@ -176,13 +177,13 @@ const grid2 = new Grid({
 			{ type: 'checkbox'}
 		],
 	    columns: [
-		    {header: '원재료ID' ,name: 'matId' ,align: 'center',editor: 'text'
+		    {header: '원재료 ID' ,name: 'matId' ,align: 'center',editor: 'text'
 				,renderer:{ type: StatusModifiedRenderer}	
 			}
 		    ,{header: '원재료 품목명' ,name: 'matName' ,align: 'center',editor: 'text'
 				,renderer:{ type: StatusModifiedRenderer}	
 			}
-		    ,{header: '원재료 유형' ,name: 'matType' ,align: 'center',editor: 'text',filter: "select",width: 102
+		    ,{header: '원재료 유형' ,name: 'matType' ,align: 'center',editor: 'text',filter: "select", width: 102
 				,renderer:{ type: StatusModifiedRenderer
 					,options: {
 					isSelect: true   
@@ -195,7 +196,7 @@ const grid2 = new Grid({
 					}
 				}
 			}
-		    ,{header: '단위' ,name: 'matUnit' ,align: 'center',editor: 'text',filter: "select",width:70
+		    ,{header: '단위' ,name: 'matUnit' ,align: 'center',editor: 'text',filter: "select", width:70
 				,renderer:{ type: StatusModifiedRenderer
 					,options: {
 					isSelect: true 
@@ -209,7 +210,7 @@ const grid2 = new Grid({
 					}
 				}
 			}
-	        ,{header: '유효일자(개월)' ,name: 'effectiveDate' ,align: 'center',width: 102
+	        ,{header: '유효일자(개월)' ,name: 'effectiveDate' ,align: 'center', width: 102
 				,renderer:{ type: StatusModifiedRenderer}	
 				,editor: {
             		type: NumberOnlyEditor 
@@ -227,7 +228,7 @@ const grid2 = new Grid({
 	        ,{header: '수정자ID' ,name: 'updatedId' ,align: 'center',hidden:true}
 			,{header: '수정자이름' ,name: 'updatedByName' ,align: 'center',hidden:true}
 	        ,{header: '수정일시' ,name: 'updatedDate' ,align: 'center',hidden:true}
-			,{header: '사용여부' ,name: 'useYn' ,align: 'center',filter: "select",width:83
+			,{header: '사용여부' ,name: 'useYn' ,align: 'center',filter: "select", width:83
 				,renderer:{ type: StatusModifiedRenderer
 					,options: {
 						isSelect: false   // ⭐ 이걸로 구분
@@ -244,8 +245,8 @@ const grid2 = new Grid({
 					}
 				}
 			}          
-	    ],
-	    data: []
+	    ]
+	    ,data: []
 	    ,bodyHeight: 500 // 그리드 본문의 높이를 픽셀 단위로 지정. 스크롤이 생김.
 	    ,height:100
 	    ,columnOptions: {
@@ -304,6 +305,20 @@ grid2.on('beforeChange', (ev) => {
 	    }
 });
 
+// IME 및 문자 입력 보조: 전역 헬퍼 사용 (안전한 등록 — 로드 순서와 무관)
+(function registerGridIme() {
+	const gridsToRegister = [
+		{ id: 'productGrid', grid: grid1, containerId: 'productGrid' },
+		{ id: 'materialGrid', grid: grid2, containerId: 'materialGrid' }
+	];
+	if (typeof initGridImeSupport === 'function') {
+		initGridImeSupport(gridsToRegister);
+	} else {
+		window.__pendingGridImeGrids = window.__pendingGridImeGrids || [];
+		window.__pendingGridImeGrids.push(...gridsToRegister);
+		console.debug('Queued grids for initGridImeSupport (will initialize when helper loads)');
+	}
+})();
 
 function productGridAllSearch() {
 
