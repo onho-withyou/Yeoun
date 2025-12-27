@@ -26,6 +26,46 @@ FROM user_source
 WHERE name = 'SP_SYNC_BOM_STATUS' -- OBJECT_NAME
 ORDER BY line;
 
+
+-- 전자결재 자동 미결만료
+
+DECLARE
+    v_job_exists NUMBER;
+BEGIN
+    -- 1. 기존에 동일한 이름의 Job이 있는지 확인
+    SELECT COUNT(*) INTO v_job_exists 
+    FROM ALL_SCHEDULER_JOBS 
+    WHERE JOB_NAME = 'JOB_UPDATE_EXPIRED_APPROVAL';
+
+    -- 2. 존재한다면 삭제
+    IF v_job_exists > 0 THEN
+        DBMS_SCHEDULER.DROP_JOB('JOB_UPDATE_EXPIRED_APPROVAL');
+    END IF;
+
+    -- 3. Job 신규 생성
+    DBMS_SCHEDULER.CREATE_JOB (
+        job_name        => 'JOB_UPDATE_EXPIRED_APPROVAL',
+        job_type        => 'PLSQL_BLOCK',
+        job_action      => 'BEGIN 
+                               UPDATE APPROVAL_DOC 
+                               SET doc_status = REPLACE(doc_status, ''대기'', ''미결만료'') 
+                               WHERE doc_status LIKE ''%대기%'' 
+                                 AND finish_date < TRUNC(SYSDATE);
+                               COMMIT;
+                            END;',
+        start_date      => TRUNC(SYSDATE) + 1, 
+        repeat_interval => 'FREQ=DAILY; BYHOUR=0; BYMINUTE=0; BYSECOND=0', 
+        enabled         => TRUE,
+        comments        => '매일 자정 기한 만료된 결재 서류 상태를 미결만료로 변경'
+    );
+END;
+/
+
+-- 등록된 Job의 설정 상태와 다음 실행 예정 시간 확인
+SELECT job_name, next_run_date, state, last_start_date, last_run_duration
+FROM ALL_SCHEDULER_JOBS
+WHERE job_name = 'JOB_UPDATE_EXPIRED_APPROVAL';
+
 -- BOM_HDR 테이블의 BOM_HDR_ID 자동 생성 및 관리
 -- 캐싱의 의미
 -- "캐싱(Caching)"은 컴퓨터 과학 및 데이터베이스 분야에서 데이터를 임시적으로 저장하여
