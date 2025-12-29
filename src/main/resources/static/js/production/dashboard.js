@@ -193,7 +193,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         stroke: { width: [0, 3], curve: 'smooth' },
         plotOptions: { bar: { columnWidth: '45%', borderRadius: 4 } },
         markers: { size: 4, strokeWidth: 2 },
-        colors: ['#c7c9f7', '#6a5acd'],
+        colors: ['#2563eb', '#dc2626'],
         xaxis: { categories: init.categories },
         yaxis: { min: 0, max: init.yMax },
         legend: {
@@ -303,7 +303,7 @@ async function renderItemQtyChart() {
                 borderRadius: 4
             }
         },
-        colors: ['#c7c9f7', '#6a5acd'],
+        colors: ['#2563eb', '#dc2626'],
         xaxis: {
             categories,
             labels: {
@@ -377,7 +377,7 @@ function onSelectItem(item) {
                 { name: '작업지시', data: [] }
             ],
             stroke: { width: [0, 3], curve: 'smooth' },
-            colors: ['#c7c9f7', '#6a5acd'],
+            colors: ['#2563eb', '#dc2626'],
             xaxis: {
                 categories: [],
                 style: {
