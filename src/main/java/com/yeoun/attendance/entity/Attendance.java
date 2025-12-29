@@ -1,9 +1,9 @@
 package com.yeoun.attendance.entity;
 
 import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 
@@ -32,6 +32,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+/**
+ * 근태 엔티티
+ */
 
 @Entity
 @Table(name = "ATTENDANCE")
@@ -95,6 +99,22 @@ public class Attendance {
 		
 		return attendance;
 	}
+	/**
+	 * 출퇴근 버튼 클릭했을 때 출퇴근 로직 등록
+	 * 
+	 * <p>
+	 * 파라미터로 받아온 accessLogs에서 외근 여부를 확인 후 <br>
+	 * 외근 데이터가 없을 경우 출근기준시간과 지각유예시간보다 늦게 출근 버튼을 클릭하면 지각처리
+	 * </p>
+	 * 
+	 * @param emp {@link Emp} 엔티티
+	 * @param date 오늘 날짜
+	 * @param now 현재 시간
+	 * @param standardIn 출근기준시간
+	 * @param lateLimit 지각유예시간
+	 * @param accessLogs {@link AccessLog} 건물출입기록 목록
+	 * @return {@link Attendance} 근태 엔티티
+	 */
 	
 	// 자동 출근 (출퇴근 버튼 찍었을 경우)
 	public static Attendance createForWorkIn(Emp emp, LocalDate date, LocalTime now, 

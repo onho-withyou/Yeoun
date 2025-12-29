@@ -29,6 +29,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * 건물출입 기록 엔티티<br>
+ * 외근 기록도 포함
+ */
+
 @Entity
 @Table(name = "ACCESS_LOG")
 @SequenceGenerator(
