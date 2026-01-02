@@ -79,7 +79,12 @@ public class QcItemService {
 				qcItem.setQcItemId(qcItemId);
 				qcItem.setCreatedId(empId);
 				qcItem.setCreatedDate(LocalDate.now());
-				qcItem.setUseYn("Y");
+				// useYn 처리: null 안전하게 처리하고 기본값은 'Y'
+				if(param.get("useYn") != null && !param.get("useYn").toString().trim().isEmpty()) {
+					qcItem.setUseYn(param.get("useYn").toString().trim());
+				} else {
+					qcItem.setUseYn("Y");
+				}
 				
 			} else if("modify".equals(mode)) {
 				log.info("------------------modify----------------------------------");
@@ -94,6 +99,10 @@ public class QcItemService {
 				// 수정 정보 설정
 				qcItem.setUpdatedId(empId);
 				qcItem.setUpdatedDate(LocalDate.now());
+				// 수정 시 useYn 값이 들어오면 반영
+				if(param.get("useYn") != null && !param.get("useYn").toString().trim().isEmpty()) {
+					qcItem.setUseYn(param.get("useYn").toString().trim());
+				}
 				
 			} else {
 				return "error: 잘못된 모드입니다. mode=" + mode;
