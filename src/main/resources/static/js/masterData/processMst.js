@@ -292,6 +292,10 @@ grid2.on('afterChange', (ev) => {
 		}
 		
 	}
+	if (columnName === 'useYn') {
+	  //활성/비활성 즉각 변화 저장
+	  saveProcessCode();
+    }
 	
 });
 
@@ -660,7 +664,9 @@ grid3.on('afterChange', (ev) => {
 
 //공정코드관리 그리드 저장
 const saveProcessCodeRowBtn = document.getElementById('saveProcessCodeRowBtn');
-saveProcessCodeRowBtn.addEventListener('click', function() {
+saveProcessCodeRowBtn.addEventListener('click', saveProcessCode);
+
+function saveProcessCode() {
 		
 	const modifiedData = (typeof grid2.getModifiedRows === 'function') ? (grid2.getModifiedRows() || {}) : {};
 	const updatedRows = Array.isArray(modifiedData.updatedRows) ? modifiedData.updatedRows : [];
@@ -725,12 +731,12 @@ saveProcessCodeRowBtn.addEventListener('click', function() {
 	    if (resp.type === 'json') {
 	        console.log('저장결과(JSON):', resp.data);
 	        // 서버에서 JSON 형태로 상태를 보내는 경우 추가 처리 가능
-	        alert('저장 완료');
+	        //alert('저장 완료');
 	    } else {
 	        const text = String(resp.data || '').trim();
 	        console.log('저장결과(텍스트):', text);
 	        if (text === 'success') {
-	            alert('저장 완료');
+	            //alert('저장 완료');
 				processCodeGridAllSearch();
 				
 	        } else if (text === 'no-data') {
@@ -739,7 +745,7 @@ saveProcessCodeRowBtn.addEventListener('click', function() {
 	            alert('저장 중 오류: ' + text);
 	        } else {
 	            // 미확인 텍스트 응답
-	            alert('저장 완료 (서버 응답: ' + text.substring(0, 200) + ')');
+	           // alert('저장 완료 (서버 응답: ' + text.substring(0, 200) + ')');
 	        }
 	    }
 	})
@@ -748,7 +754,7 @@ saveProcessCodeRowBtn.addEventListener('click', function() {
 		alert('저장 중 오류가 발생했습니다. 콘솔 로그를 확인하세요.');
 	});
 	
-});
+}
 
 // 라우트모달 공정단계 저장
 const saveRouteBtn = document.getElementById('saveRouteBtn');
@@ -898,7 +904,7 @@ saveRouteBtn.addEventListener('click', function() {
 	    if (resp.type === 'json') {
 	        console.log('저장결과(JSON):', resp.data);
 	        // 서버에서 JSON 형태로 상태를 보내는 경우 추가 처리 가능
-	        alert('저장 완료');
+	        //alert('저장 완료');
 			//공정단계그리드조회
 			
 			processStepSearch(document.getElementById('modalRouteId').value);
@@ -906,7 +912,7 @@ saveRouteBtn.addEventListener('click', function() {
 	        const text = String(resp.data || '').trim();
 	        console.log('저장결과(텍스트):', text);
 	        if (text === 'success') {
-	            alert('저장 완료');
+	            //alert('저장 완료');
 				//공정단계그리드조회
 				processStepSearch(document.getElementById('modalRouteId').value);
 	        } else if (text === 'no-data') {
@@ -915,7 +921,7 @@ saveRouteBtn.addEventListener('click', function() {
 	            alert('저장 중 오류: ' + text);
 	        } else {
 	            // 미확인 텍스트 응답
-	            alert('저장 완료 (서버 응답: ' + text.substring(0, 200) + ')');
+	            //alert('저장 완료 (서버 응답: ' + text.substring(0, 200) + ')');
 	        }
 	    }
 	})

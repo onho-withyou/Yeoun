@@ -123,21 +123,41 @@ async function getApproverList(approvalId) {
 }
 
 async function print(type, text) {
-	// 결재권한자변경 div 버튼 생성
-//	console.log(window.count, "@@@@@@@@@@@@");
-	if(this.count < 3){
-//	console.log(this.count, "this.count:!!!!!!!!!!!!")
-		this.count++;
-		approverDiv.innerHTML +='<div class="btn btn-success approvers"'
-	  						+'style="width:200px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
-	//  						+'<p onclick="approverDivclose(this,' + "'"+ type + "'"+ ','+ count +')" style="float:right;margin-right: 8px;">&times;</p>'
-	//  						+'<p onclick="approvalNo('+ (this.count)+','+ "'"+ text + "'" +')" style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
-	  						+'<p style="float:right;margin-right: 8px;">&times;</p>'
-	  						+'<p style="margin-top:50px;height: 129px;">'+(this.count) + '차 결재권한자 : (직급)' + text + ' 변경</p>'
-							+'</div>';
-	}
 
-} 
+	if (this.count < 3) {
+		const idx = this.count + 1;
+		
+		// type이 "detail"일 때는 닫기 버튼을 표시하지 않음 (상세 보기용)
+		const closeButton = type === "detail" ? '' : '<a id="approver_close_' + idx + '" onclick="approverDivclose(this,' + "'" + type + "'" + ',' + idx + ')" style="float:right;margin-right: 8px;">&times;</a>';
+		
+		// const cardHtml = '<div class="btn"'
+		// 	+ 'style="background-color: #E7E7FF;width:250px;height:200px; margin:5px; padding: 5px 0px 0px 0px;">'
+		// 	+ closeButton
+		// 	+ '<p id="approver_' + idx + '" onclick="approvalNo(' + idx + ',' + "'" + text + "'" + ')" style="margin-top:30px;height: 129px;font-size:22px;">' + idx + '차 결재권한자 ' + '<br>' + text + '<br>' + '</p>'
+		// 	+ '</div>';
+
+		const cardHtml = '<div class="btn" '
+            + 'style="background-color: #E7E7FF; width:250px; height:200px; margin:5px; padding: 5px 0px 0px 0px; '
+            + 'border-radius: 10px; border: 1px solid #D1D1F5; cursor: pointer; ' // 기본 테두리
+            + 'box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.1s, box-shadow 0.1s; display: inline-block; vertical-align: top;" ' // 입체감 추가
+            + 'onmouseover="this.style.backgroundColor=\'#DADAFF\';" ' // 마우스 올리면 살짝 진해짐
+            + 'onmouseout="this.style.backgroundColor=\'#E7E7FF\';" '
+            + 'onmousedown="this.style.transform=\'translateY(2px)\'; this.style.boxShadow=\'0 2px 3px rgba(0,0,0,0.15)\';" ' // 클릭 시 아래로 눌림
+            + 'onmouseup="this.style.transform=\'translateY(0px)\'; this.style.boxShadow=\'0 4px 6px rgba(0,0,0,0.1)\';">' // 떼면 복귀
+            + closeButton
+            + '<p id="approver_' + idx + '" onclick="approvalNo(' + idx + ',' + "'" + text + "'" + ')" '
+            + 'style="margin-top:30px; height: 129px; font-size:22px;">' // 기존 시퀀스(마진, 높이) 유지
+            + idx + '차 결재권한자 ' + '<br>' + text + '<br>' 
+            + '</p>'
+            + '</div>';
+
+		approverDiv.innerHTML += cardHtml;
+		this.count = idx;
+		
+		// 카드 추가 후 화살표 업데이트
+		updateArrows();
+	}
+}
 // -----------------------------------------------------------------
 //---------------------------------------------------------
 // 캘린더위 버튼, 날짜 함수
@@ -840,7 +860,7 @@ let approverDiv = document.querySelector('#approver');
 // 결제그리드 그리기 함수
 async function initApprovalGrid(data) {
 	const Pagination = tui.Pagination;
-//	console.log(data, "공지데이터");
+	// console.log(data, "공지데이터");
 	approvalGrid = new tui.Grid({
 		el: document.getElementById("approvalGrid"),
 		editable: true,
@@ -866,7 +886,7 @@ async function initApprovalGrid(data) {
 	let obj ={};
 	selectData.map((item,index)=>{
 		obj["value"] = item[0]; //사번
-		obj["label"] = (index+1) +" : "+item[1]+"("+item[0]+")"; //이름(사번)
+		obj["label"] = item[1]+"("+item[0]+")"; //이름(사번)
 		itemData.push(obj);
 		obj = {};
 	});
@@ -874,6 +894,23 @@ async function initApprovalGrid(data) {
 	//셀렉트박스 - 토스트유아이
 	let selectBox = new tui.SelectBox('#select-box', {
 	  data: itemData
+	  ,theme: {
+				'common.border': '1px solid #e4e4e4',
+				'common.color': '#353535',
+				'common.background': '#fcfcfc',
+				'common.width': '400px',
+				'common.height': '45px',
+				'common.border-radius': '5px',
+
+				'common.disabled.background': '#eceef1',
+				'common.disabled.color': '#708093',
+
+				'dropdown.maxHeight': '300px',
+
+				'itemGroup.items.paddingLeft': '15px',
+
+				'itemGroup.label.color': 'black',
+				}
 	});
 	//셀렉트박스 닫힐때
 	selectBox.on('close',(ev)=>{
@@ -930,16 +967,16 @@ async function initApprovalGrid(data) {
 		
 		// formType별 display 제어
 		if (rowData.formType === '연차신청서') {
-		  document.getElementById('leavePeriodForm').style.display = 'block';
+		  document.getElementById('leavePeriodForm').style.display = 'flex';
 		  document.getElementById('start-date').value = rowData.startDate;
 		  document.getElementById('end-date').value = rowData.endDate;
-		  document.getElementById('leaveTypeForm').style.display = 'block';
+		  document.getElementById('leaveTypeForm').style.display = 'flex';
 		  document.getElementById('leave-type').value = rowData.leaveType;
 		} else if (rowData.formType === '지출결의서') {
-		  document.getElementById('expndTypeForm').style.display = 'block';
+		  document.getElementById('expndTypeForm').style.display = 'flex';
 		  document.getElementById('expnd-type').value = rowData.expndType;
 		} else if (rowData.formType === '인사발령신청서') {
-		  document.getElementById('toDeptForm').style.display = 'block';
+		  document.getElementById('toDeptForm').style.display = 'flex';
 		  document.getElementById('to-dept-id').value = rowData.toDeptId;
 		}
 //		console.log(rowData.empId);
@@ -949,7 +986,9 @@ async function initApprovalGrid(data) {
 		document.getElementById('approval-title').value = rowData.approvalTitle;
 		//양식종류 form-menu
 //		document.getElementById('approver-name').value  = rowData.empId;//결재자명
-		
+		//console.log("rowData------------------------------------------------------------>",rowData);
+		document.getElementById('approver-name').innerText = (rowData.empName ? rowData.empName : '') + (rowData.empId ? ' (' + rowData.empId + ')' : ''); // 기안자명 (사번)
+
 		//const createdDate = rowData.created_date;
 		document.getElementById('create-date').value = toDateStr(rowData.createdDate);//결재시작일 =결재 작성날짜 
 		document.getElementById('finish-date').value = toDateStr(rowData.finishDate);//결재완료날짜
@@ -979,7 +1018,7 @@ async function initApprovalGrid(data) {
 			
 			for (const approver of sortedList) {
 				selectBox.select(approver.empId);
-				print("default", selectBox.getSelectedItem().label);
+				print("detail", selectBox.getSelectedItem().label);
 			}
 			
 		}

@@ -457,8 +457,8 @@ window.onload = function () {
 let approverDiv = document.querySelector('#approver');
 
 let itemData;
-	let selectBox = null;
-	let modalOpenedFromGrid = false;
+let selectBox = null;
+let modalOpenedFromGrid = false;
 
 
 // f- selectbox - 인사정보 불러오기
@@ -479,8 +479,7 @@ async function empData() {
 		//셀렉트박스 - 토스트유아이
 		selectBox = new tui.SelectBox('#select-box', {
 			data: itemData
-			,
-			theme: {
+			,theme: {
 				'common.border': '1px solid #e4e4e4',
 				'common.color': '#353535',
 				'common.background': '#fcfcfc',
