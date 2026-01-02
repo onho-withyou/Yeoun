@@ -635,6 +635,15 @@ grid2.on('afterChange', (ev) => {
 
             console.log(`[BOM ID 생성] 완제품: ${value} | 기존 최대: ${maxNum} | 새 번호: ${finalBomId}`);
         }
+
+		// 특정 컬럼이 바뀌었을 때만 즉시 저장
+		if (change.columnName === 'useYn') {
+			const rowData = grid2.getRow(change.rowKey);
+			//console.log("rowData useYn--->",rowData.useYn);
+			//활성/비활성 즉각 변화 저장
+			saveBomRow();
+		}
+
     });
 });
 

@@ -172,6 +172,50 @@ const transformKeys = (data) => {
 	}
 })();
 
+grid1.on('afterChange', (ev) => {
+  ev.changes.forEach(change => {
+    // 특정 컬럼이 바뀌었을 때만 즉시 저장
+    if (change.columnName === 'useYn') {
+      const rowData = grid1.getRow(change.rowKey);
+      //console.log("rowData useYn--->",rowData.useYn);
+	  //활성/비활성 즉각 변화 저장
+	  // 행의 qcItemId와 변경된 useYn 값만 전송
+	  if (rowData && rowData.qcItemId) {
+		  saveQcItemQuick(rowData.qcItemId, rowData.useYn);
+	  }
+    }
+  });
+});
+
+// useYn 컬럼 즉시 저장(간단한 폼 데이터 전송)
+function saveQcItemQuick(qcItemId, useYn) {
+		const params = new URLSearchParams();
+		params.append('mode', 'modify');
+		params.append('qcItemId', qcItemId);
+		params.append('useYn', useYn || 'N');
+
+		fetch('/masterData/qcItem/save', {
+				method: 'POST',
+				credentials: 'same-origin',
+				headers: {
+						[csrfHeader]: csrfToken,
+						'Content-Type': 'application/x-www-form-urlencoded',
+						'X-Requested-With': 'XMLHttpRequest'
+				},
+				body: params.toString()
+		})
+		.then(res => res.text())
+		.then(result => {
+				// 기존의 응답 처리 재사용
+				handleQcResponse(result);
+		})
+		.catch(err => {
+				console.error('useYn 저장 오류', err);
+				alert('사용여부 저장 중 오류가 발생했습니다.');
+		});
+}
+
+
 grid1.on("click", async (ev) => {
 
 	const target = ev.nativeEvent.target;
@@ -207,73 +251,93 @@ grid1.on("click", async (ev) => {
 
 });
 
-// 모달 내 폼을 가로채서 AJAX로 전송하여 서버 에러 메시지를 alert로 표시
-const qcItemForm = document.querySelector('#qcItem-modal form');
-if (qcItemForm) {
-    qcItemForm.addEventListener('submit', function (ev) {
-        ev.preventDefault();
-        const form = ev.target;
-           // mode 값을 기존 input에 설정 (form에 name="mode"인 input이 있다면)
-        const modeValue = document.getElementById('qcmodalTilte').innerText == 'QC 항목 등록' ? 'new' : 'modify';
-        let modeInput = form.querySelector('input[name="mode"]');
-        
-        if (modeInput) {
-            modeInput.value = modeValue;
-        } else {
-            // mode input이 없으면 새로 생성
-            modeInput = document.createElement('input');
-            modeInput.type = 'hidden';
-            modeInput.name = 'mode';
-            modeInput.value = modeValue;
-            form.appendChild(modeInput);
-        }
-        
-        const formData = new FormData(form);
-        const params = new URLSearchParams(formData);
-        console.log('최종 params:', params.toString());
+/**
+ * 1. 응답 처리 함수
+ * (가장 먼저 정의하거나, 최소한 호출하는 곳보다 위에 배치하는 것이 안전합니다)
+ */
+const handleQcResponse = (result) => {
+    console.log('서버 응답:', result);
+    const lowerResult = (result || '').toLowerCase();
 
-        fetch(form.action, {
-            method: form.method || 'POST',
-            credentials: 'same-origin',
-            headers: {
-                [csrfHeader]: csrfToken,
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: params.toString()
-        })
-        .then(res => {
-            if (!res.ok) return res.text().then(t => { throw new Error(`HTTP ${res.status}: ${t || res.statusText}`); });
-            return res.text();
-        })
-        .then(result => {
-            console.log('서버 응답:', result);
-            
-            // 오류 응답 처리
-            if (result && result.toLowerCase().startsWith('error')) {
-                const errorMsg = result.replace(/^error:\s*/i, '').trim();
-                alert(errorMsg);
-                return;
-            }
-            
-            // 성공 응답 처리
-            if (result && result.toLowerCase().includes('success')) {
-                alert('저장되었습니다.');
-                // 성공 시 모달 닫고 그리드 갱신
-                document.querySelector('#qcItem-modal .modal-footer [data-bs-dismiss="modal"]').click();
-                qcModalreset();
-                qcItemGridAllSearch();
-            } else {
-                // 예상치 못한 응답도 일단 표시
-                alert(result || '알 수 없는 오류가 발생했습니다.');
-            }
-        })
-        .catch(err => {
-            console.error('QC 저장 오류', err);
-            alert(err.message || '저장 중 오류가 발생했습니다.');
-        });
+    // 에러 메시지 처리
+    if (lowerResult.startsWith('error')) {
+        const errorMsg = result.replace(/^error:\s*/i, '').trim();
+        alert(errorMsg);
+        return;
+    }
+
+    // 성공 처리
+    if (lowerResult.includes('success')) {
+        //alert('저장되었습니다.');
+        const closeBtn = document.querySelector('#qcItem-modal .modal-footer [data-bs-dismiss="modal"]');
+        if (closeBtn) closeBtn.click();
+        
+        // 함수 존재 여부 확인 후 실행
+        if (typeof qcModalreset === 'function') qcModalreset();
+        if (typeof qcItemGridAllSearch === 'function') qcItemGridAllSearch();
+    } else {
+        alert(result || '알 수 없는 오류가 발생했습니다.');
+    }
+};
+
+/**
+ * 2. 전송 실행 함수
+ */
+function saveQcItem(form) {
+    // 모드 설정 로직
+    const modalTitleElem = document.getElementById('qcmodalTilte');
+    const modeValue = (modalTitleElem && modalTitleElem.innerText === 'QC 항목 등록') ? 'new' : 'modify';
+    
+    let modeInput = form.querySelector('input[name="mode"]');
+    if (!modeInput) {
+        modeInput = document.createElement('input');
+        modeInput.type = 'hidden';
+        modeInput.name = 'mode';
+        form.appendChild(modeInput);
+    }
+    modeInput.value = modeValue;
+
+    const formData = new FormData(form);
+    const params = new URLSearchParams(formData);
+
+    fetch(form.action, {
+        method: form.method || 'POST',
+        credentials: 'same-origin',
+        headers: {
+            [csrfHeader]: csrfToken, // 상단에 선언되어 있어야 함
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: params.toString()
+    })
+    .then(res => {
+        if (!res.ok) return res.text().then(t => { throw new Error(`HTTP ${res.status}: ${t || res.statusText}`); });
+        return res.text();
+    })
+    .then(result => {
+        // 여기서 위에서 정의한 함수 호출
+        handleQcResponse(result);
+    })
+    .catch(err => {
+        console.error('QC 저장 오류', err);
+        alert(err.message || '저장 중 오류가 발생했습니다.');
     });
 }
+
+/**
+ * 3. 이벤트 바인딩 (DOM이 로드된 후 실행)
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    const qcItemForm = document.querySelector('#qcItem-modal form');
+    if (qcItemForm) {
+        qcItemForm.addEventListener('submit', function (ev) {
+            ev.preventDefault();
+            saveQcItem(ev.target);
+        });
+    }
+});
+window.addEventListener('keydown', (e) => e.stopPropagation(), true);
+
 
 // 항목 등록
 const qcItemRegistBtn = document.getElementById('qcItemRegistBtn');

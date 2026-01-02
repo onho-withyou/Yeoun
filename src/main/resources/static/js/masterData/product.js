@@ -258,6 +258,29 @@ const grid2 = new Grid({
         }
 });
 
+grid1.on('afterChange', (ev) => {
+  ev.changes.forEach(change => {
+    // 특정 컬럼이 바뀌었을 때만 즉시 저장
+    if (change.columnName === 'useYn') {
+      const rowData = grid1.getRow(change.rowKey);
+      //console.log("rowData useYn--->",rowData.useYn);
+	  //활성/비활성 즉각 변화 저장
+	  saveProduct();
+    }
+  });
+});
+
+grid2.on('afterChange', (ev) => {
+  ev.changes.forEach(change => {
+    // 특정 컬럼이 바뀌었을 때만 즉시 저장
+    if (change.columnName === 'useYn') {
+      const rowData = grid2.getRow(change.rowKey);
+      //console.log("rowData useYn--->",rowData.useYn);
+	  //활성/비활성 즉각 변화 저장
+	  saveMaterial();
+    }
+  });
+});
 grid1.on('beforeChange', (ev) => {
     const { rowKey, columnName } = ev.changes[0]; // 변경된 데이터 목록 (배열)
 	if (columnName === 'prdId') {
@@ -631,7 +654,9 @@ addMaterialRowBtn.addEventListener('click', function() {
 
 //완제품 row 저장: POST JSON형식으로 서버에 요청
 const saveProductRowBtn = document.getElementById('saveProductRowBtn');
-saveProductRowBtn.addEventListener('click', function() {
+saveProductRowBtn.addEventListener('click',saveProduct);
+
+function saveProduct() {
 
 	const modifiedData = (typeof grid1.getModifiedRows === 'function') ? (grid1.getModifiedRows() || {}) : {};
 	const updatedRows = Array.isArray(modifiedData.updatedRows) ? modifiedData.updatedRows : [];
@@ -743,11 +768,11 @@ saveProductRowBtn.addEventListener('click', function() {
 		console.error('저장 오류', err && err.message ? err.message : err);
 		try { alert(err && err.message ? err.message : err); } catch (e) {}
 	});
-});
-
+}
 //원재료 row 저장: POST JSON형식으로 서버에 요청
 const saveMaterialRowBtn = document.getElementById('saveMaterialRowBtn');
-saveMaterialRowBtn.addEventListener('click', function() {
+saveMaterialRowBtn.addEventListener('click', saveMaterial);
+function saveMaterial() {
 	const modifiedData = (typeof grid2.getModifiedRows === 'function') ? (grid2.getModifiedRows() || {}) : {};
 	const updatedRows = Array.isArray(modifiedData.updatedRows) ? modifiedData.updatedRows : [];
 	let createdRows = Array.isArray(modifiedData.createdRows) ? modifiedData.createdRows : [];
@@ -850,8 +875,7 @@ saveMaterialRowBtn.addEventListener('click', function() {
 		alert('오류: ' + err.message);
 		
 	});
-});
-
+}
 
 //완제품row 삭제: POST JSON형식으로 서버에 요청
 const deleteProductRowBtn = document.getElementById('deleteProductRowBtn');
