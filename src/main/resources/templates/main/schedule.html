@@ -101,6 +101,25 @@
         color: #666;
         margin-left: 6px;
     }
+	/* Harmonize approval modal with main page style */
+	#approval-modal .modal-content {
+		background: linear-gradient(135deg, #f8f9fa 0%, #eef2f6 100%);
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+		border: 1px solid #d9dee3; /* same subtle border as main calendar */
+		border-radius: 8px;
+		padding: 0.25rem;
+	}
+	#approval-modal .modal-header {
+		background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+		border-bottom: 1px solid #dee2e6;
+		padding: 0.9rem 1rem;
+	}
+	#approval-modal .modal-body {
+		background: #ffffff; /* white sheet inside the modal */
+		padding: 1rem 1.25rem;
+		border-radius: 6px;
+		box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+	}
 	</style>
 	
 </head>
@@ -241,13 +260,11 @@
 		    <form class="modal-content" id="modal-doc" th:action="@{/approval/approval_doc}" method="POST" enctype="multipart/form-data">
 		      <div class="modal-header" data-draggable="true">
 				<h3 class="modal-title" id="Drafting">모달 타이틀</h3>
-<!-- 				<input type="text" id="Drafting" name="drafting" value=""> -->
-		        <!--<p class="modal-title" id="Drafting" name="drafting" style="font-size: 50px;">기안서 작성</p>-->
 		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		      </div>
 		      <div class="modal-body">
 		        <h5 class="d-flex">
-					<label>문서 날짜 : </label>
+					<label class="required-field" style="width: 200px;">문서 날짜 </label>
 					<p id="today-date"></p>
 				</h5>
 		        <h5 class="d-flex">
@@ -268,37 +285,37 @@
 		            	</select>
 	            	</div>
 		        </h5>
-<!-- 		        <h5 class="d-flex"> -->
-<!-- 					<label class="p-1" style="width: 200px;">결재자명(기안자)</label>  -->
-<!-- 		        	<div class="mb-6 mb-0" style="width: 344px;"> -->
-<!-- 		        		<p id="approver-name" name="empId" th:text="|${#authentication.principal.empName} (${#authentication.principal.empId})|"></p>  -->
-<!-- 	            	</div> -->
-<!-- 		        </h5> -->
-		        <h5 class="d-flex">
-					<label class="p-1" style="width: 200px;">결재완료기간</label>
-		        	<div class="row flex-nowrap">
-						<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-							<input type="date" name="createdDate" id="create-date" class="form-control">
+				<h5 class="d-flex">
+					<label class="p-1" style="width: 200px;">결재자명(기안자) </label> 
+		        	<div class="col-sm-9 d-flex align-items-center">
+							<p id="approver-name" name="empId" th:text="|${#authentication.principal.empName} (${#authentication.principal.empId})|" class="mb-0"></p>
 						</div>
-		                ~
-		                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-			                <input type="date" name="finishDate"  id="finish-date" class="form-control">
-		                </div>
-					</div>
 		        </h5>
-				
-		        <h5 id="leavePeriodForm" style="display:none;">
-					<label class="p-1" style="width: 200px;">휴가기간</label>
-		        	<div class="row flex-nowrap">
-						<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-							<input type="date" name="startDate"  id="start-date" class="form-control">
+		        <h5 class="d-flex no-box">
+						<label class="p-1 required-field" style="width: 200px;">결재완료기간</label>
+						
+						<div class="d-flex align-items-center gap-2" style="min-width: 280px;">
+							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 160px;">
+								<input id="create-date" type="date" name="createdDate" class="form-control" required readonly>
+							</div>
+							<span>~</span>
+							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 160px;">
+								<input id="finish-date" type="date" name="finishDate" class="form-control" required>
+							</div>
 						</div>
-		                ~
-		                <div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 180px;">
-			                <input type="date" name="endDate"  id="end-date" class="form-control">
-		                </div>
-					</div>
-		        </h5>
+					
+					<h5 id="leavePeriodForm" class="no-box" style="display:none;">
+						<label class="p-1 required-field" style="width: 200px;">휴가기간</label>
+						<div class="d-flex align-items-center gap-2" style="min-width: 280px;">
+							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 160px;">
+								<input id="start-date" type="date" name="startDate" class="form-control" >
+							</div>
+							<span>~</span>
+							<div class="mb-6 col-lg-5 col-xl-7 col-12 mb-0" style="width: 160px;">
+								<input id="end-date" type="date" name="endDate" class="form-control" >
+							</div>
+						</div>
+					</h5>
 			
 		       	<h5 id="leaveTypeForm" style="display: none;">
 					<label class="p-1" style="width: 200px;">휴가종류</label><!---휴가(연차)신청서-->
@@ -335,17 +352,18 @@
 	            	</div>
 		        </h5>
 		        <h5>
-					<label class="p-1" style="width: 200px;">사유내용</label>
+					<label class="p-1" style="width: 200px;margin-bottom: 5px;">사유내용</label>
 		        	<textarea id="reason-write" class="form-control" name="reason" rows="10" placeholder="결재사유내용 작성"></textarea>
 		        </h5>
 		        <!--<h5 class="d-flex">결재권한자 변경:
 		        	<input class="form-check-input" type="checkbox" id="opt-in">
 		        
 		        </h5>-->
-		        <h5 class="d-flex">
-					<label>결재권한자 : </label> 
-		          	<div id="select-box" style="width: 200px"></div>
-		        </h5>
+					<h5 class="d-flex">
+						<label style="padding-right: 14px;padding-right: 14px;margin-top: 12px;">결재권한자</label> 
+						<div id="select-box"></div>
+					</h5>
+		        
      				<div id="approver" th:value="${empList}"  style="display: flex; margin: 5px; border-radius: 3%; font-weight: 600;">
 					<!-- 결재권한자 버튼 생성 영역 -->
      				</div>	
@@ -382,19 +400,18 @@
 						  </div>
 						</div>
 					</div>
-	     				<!--에디터-->
-		        <!--  <div id="editor" style="border: 1px solid black;;"></div> -->
 		      </div>
 		      <div class="modal-footer">
 		      	<div>
-			     	<button type="button" id="attachmentBtn" class="btn btn-primary" style="display: none;">첨부파일</button>
-			     	<button type="button" id="approvalCompanionBtn" class="btn btn-primary" >반려</button>
-			      	<button type="button" id="approvalCheckBtn" class="btn btn-primary" >결재확인</button>
+		      	<button type="button" id="attachmentFileBtn" class="btn btn-primary" style="display: none;">첨부파일</button>
+				<button type="button" id="attachmentBtn" class="btn btn-primary btn-md-sm" onclick="window.location.href='/approval/approval_doc'">전자결재 페이지 이동</button>
+					<button type="button" id="approvalCompanionBtn" class="btn btn-outline-danger btn-md-sm" style="display: none;background-color: #e6381a;color:white;">반려</button>
+					<button type="button" id="approvalCheckBtn" class="btn btn-outline-primary me-2 btn-md-sm" style="display: none;background-color: #696cff;color:white;">결재확인</button>
 			    </div>
 		      	<hr>
 		      	<button type="button" id="printBtn" class="btn btn-primary" style="display: none;">인쇄</button>
 		        <button type="submit" id="saveBtn" class="btn btn-primary">등록</button>
-		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+				<button type="button" id="modalCloseBtn" class="btn btn-secondary btn-md-sm" data-bs-dismiss="modal">닫기</button>
 		      </div>
 		</form>
 	    </div>
@@ -428,8 +445,7 @@
 	          alert(el.dataset.msg);
 	      }
 	  });
-	</script>
-	
+	</script>	
 </th:block>
 
 </body>

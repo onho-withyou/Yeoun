@@ -56,6 +56,9 @@ public class ApprovalDocDTO {
 	private String expndType; //지출종류 - 지출결의서
 	
 	private String reason; //사유 - 자유양식결재서
+
+	// 작성자 이름(서비스에서 리포지토리 서브쿼리로 별도 조회하여 설정)
+	private String empName;
 	
 	// ----------------------------------------------------------
 	// fromEntity, toEntity 설정

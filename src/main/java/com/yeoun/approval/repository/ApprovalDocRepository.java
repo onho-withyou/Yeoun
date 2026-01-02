@@ -91,6 +91,15 @@ public interface ApprovalDocRepository extends JpaRepository<ApprovalDoc, Long> 
 			+ "or a.empId = :empId "
 			+ "order by createdDate desc")
 	Page<ApprovalDoc> getSummaryApprovalPage(@Param("empId") String empId, Pageable pageable);
+
+	// 결재문서와 작성자명(empName)을 함께 가져오는 쿼리
+	// 반환값: Page<Object[]> -> [0]=ApprovalDoc, [1]=empName(String)
+	@Query("select a, (select e.empName from Emp e where e.empId = a.empId) "
+			+ "from ApprovalDoc a "
+			+ "where (a.docStatus not in ('완료', '반려') and a.approver = :empId) "
+			+ "or a.empId = :empId "
+			+ "order by a.createdDate desc")
+	Page<Object[]> getSummaryApprovalPageWithEmpName(@Param("empId") String empId, Pageable pageable);
 			
 
 

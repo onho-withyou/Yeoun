@@ -497,9 +497,16 @@ public class ApprovalDocService {
 	public Page<ApprovalDocDTO> getSummaryApproval(String empId) {
 
 		PageRequest pageRequest = PageRequest.of(0, 5);
-		Page<ApprovalDoc> approvalDOCPage = approvalDocRepository.getSummaryApprovalPage(empId, pageRequest);
+		Page<Object[]> approvalDOCPage = approvalDocRepository.getSummaryApprovalPageWithEmpName(empId, pageRequest);
 
-		return approvalDOCPage.map(ApprovalDocDTO::fromEntity);
+		// approvalDOCPage의 각 요소는 Object[] { ApprovalDoc, empName }
+		return approvalDOCPage.map(tuple -> {
+			ApprovalDoc approvalDoc = (ApprovalDoc) tuple[0];
+			String empName = tuple[1] != null ? String.valueOf(tuple[1]) : null;
+			ApprovalDocDTO dto = ApprovalDocDTO.fromEntity(approvalDoc);
+			dto.setEmpName(empName);
+			return dto;
+		});
 	}
 
 	// 문자열을 LocalDate로 안전하게 파싱하는 헬퍼 메서드
