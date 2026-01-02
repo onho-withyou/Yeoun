@@ -2,7 +2,21 @@
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:fragment="nav">
 	<head>
-		
+		<style>
+			.icon-base.icon {
+				transition: transform .12s ease, color .12s ease;
+				cursor: pointer;
+				color: inherit;
+			}
+			.icon-base.icon:hover {
+				color: #0d6efd; /* Bootstrap primary */
+			}
+			/* Ensure position-relative keeps badge placement */
+			.position-relative { position: relative; }
+			#badge_approval, #badge_chat {
+				font-size: 0.69rem;
+			}
+		</style>
 	</head>
 		<nav
             class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
@@ -14,17 +28,17 @@
 			        <i class="bx bx-menu bx-sm"></i>
 			    </a>
               <ul class="navbar-nav flex-row align-items-center ms-auto dropdown">
-<!--               	<li class="nav-item lh-1 me-3"> -->
-<!--               		<i class="icon-base bx bx-folder icon" data-bs-toggle="dropdown" id="payment"></i>  -->
-<!--               		<span id="badge_payment"></span> -->
-<!-- 				    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink"> -->
-<!-- 					  <li><a class="dropdown-item" href="#">Action</a></li> -->
-<!-- 					  <li><a class="dropdown-item" href="#">Another action</a></li> -->
-<!-- 					  <li><a class="dropdown-item" href="#">Something else here</a></li> -->
-<!-- 					  <li><hr class="dropdown-divider"></li> -->
-<!-- 					  <li><a class="dropdown-item" href="#">Separated link</a></li> -->
-<!-- 					</ul> -->
-<!--                 </li> -->
+               	<li class="nav-item lh-1 me-3"> 
+               		<i class="icon-base bx bx-folder icon position-relative" data-bs-toggle="dropdown" id="approval">
+						 <span id="badge_approval" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.69rem;">
+						</span>
+					</i> 
+			  		<ul class="dropdown-menu" id="paymentDropdown" aria-labelledby="navbarDropdownMenuLink"> 
+			  		  	<li><a class="dropdown-item" href="#">현재 결재해야 할 사항</a></li> 
+			  		  	<li><hr class="dropdown-divider"></li> 
+			 			  <li class="dropdown-placeholder"><a class="dropdown-item" href="#">결재 내역이 없습니다.</a></li>
+			 			</ul>
+                 </li> 
               	<li class="nav-item lh-1 me-3"> 
               		<div class="bell-wrapper">
 		              	<i class="icon-base bx bx-bell icon" data-bs-toggle="dropdown" id="bell"></i>
@@ -37,21 +51,12 @@
 						  <li>
 						  	<a class="dropdown-item" th:href="@{/notice}">공지사항</a>
 						  </li>
-<!-- 						  <li><hr class="dropdown-divider"></li> -->
-<!-- 						  <li><a class="dropdown-item" href="#">집중</a></li> -->
 						</ul>
               		</div>
                 </li>
               	<li class="nav-item lh-1 me-3">
               		<i class="icon-base bx bx-chat icon" data-bs-toggle="dropdown" id="chat"></i>
 					<span id="badge_chat" class="has-alert"></span>
-                   <!--<ul class="dropdown-menu">
-					  <li><a class="dropdown-item" href="#">점심시간입니다.</a></li>
-					  <li><a class="dropdown-item" href="#">퇴근 시간입니다.</a></li>
-					  <li><a class="dropdown-item" href="#">무슨 커피드실래요</a></li>
-					  <li><hr class="dropdown-divider"></li>
-					  <li><a class="dropdown-item" href="#">헤이즐럿라떼요</a></li>
-					</ul>-->
                 </li>
                 
 				<!-- 로그인한 경우에만 프로필 드롭다운 보이게 -->
@@ -95,79 +100,51 @@
 		</form>
 		
 		<!-- 상단바 (내 정보, 개인정보 수정, 로그아웃) -->
-		<script src="/js/auth/myInfo.js"></script>
-		
-		  <script>
-			//Resources
-		  
-//          	const payment = document.getElementById("payment");
-      		const chat = document.getElementById("chat");
-
-//         	const badgePayment = document.getElementById("badge_payment");
-//         	const badgeBell = document.getElementById("badge_bell");
-        	const badgeChat = document.getElementById("badge_chat");
-//             this.pamentCount = 0;
-            this.chatCount = 0;
-
-//     		payment.addEventListener("click",()=>{
-    			
-//     		    if(badgePayment.style.display === 'none'){
-//     		    	this.pamentCount += 1;
-//     		    	badgePayment.textContent = this.pamentCount;
-//     		    	badgePayment.style.display = 'unset';
-//     		    }else {
-//     		    	badgePayment.style.display = 'none';
-//     		    }
-//     		});
-
-    		
-    		bell.addEventListener("click",()=>{
-    			if(badgeBell.style.display === 'none'){
-       		    	badgeBell.style.display = 'block';
-       		    }else {
-       		    	badgeBell.style.display = 'none';
-       		    }
-      		});
-    		
-    		chat.addEventListener("click",()=>{
-    	    	 window.open(
-    			    "/messenger/list",
-    			    "messenger",
-    			    "noopener,noreferrer,width=500,height=700,left=200,top=100,resizable=no"
-    			 );
-            	/*const iframe = document.createElement("iframe");
-    			iframe.src = "/messenger/popup";
-    			iframe.style.position = "fixed";
-    			iframe.style.right = "20px";
-    			iframe.style.bottom = "20px";
-    			iframe.style.width = "400px";
-    			iframe.style.height = "600px";
-    			iframe.style.border = "1px solid #ccc";
-    			iframe.style.boxShadow = "0 0 12px rgba(0,0,0,0.2)";
-    			iframe.style.borderRadius = "12px";
-    			iframe.style.zIndex = "9999";
-    			document.body.appendChild(iframe);*/
-    			
-    			/*if(badgeChat.style.display === 'none')  {
-          		   	this.chatCount += 1;
-          		   	badgeChat.textContent = this.chatCount;
-          		   	badgeChat.style.display = 'block';
-          		}else {
-          			badgeChat.style.display = 'none';
-          		}*/
-      		});
-    		
-    		window.addEventListener("message", (event) => {
-   			  if (event.data === "closeMessengerFrame") {
-   			    document.querySelector("iframe[src='/messenger/popup']")?.remove();
-   			  }
-   			});
-          </script>
-          
-		<script>
-		 
+		<script src="/js/auth/myInfo.js"></script>		
+		<script>		  
+			const chat = document.getElementById("chat");
+			const badgeChat = document.getElementById("badge_chat");
+			bell.addEventListener("click",()=>{
+				if(badgeBell.style.display === 'none'){
+					badgeBell.style.display = 'block';
+				}else {
+					badgeBell.style.display = 'none';
+				}
+			});
+			
+			chat.addEventListener("click",()=>{
+					window.open(
+					"/messenger/list",
+					"messenger",
+					"noopener,noreferrer,width=500,height=700,left=200,top=100,resizable=no"
+					);
+				/*const iframe = document.createElement("iframe");
+				iframe.src = "/messenger/popup";
+				iframe.style.position = "fixed";
+				iframe.style.right = "20px";
+				iframe.style.bottom = "20px";
+				iframe.style.width = "400px";
+				iframe.style.height = "600px";
+				iframe.style.border = "1px solid #ccc";
+				iframe.style.boxShadow = "0 0 12px rgba(0,0,0,0.2)";
+				iframe.style.borderRadius = "12px";
+				iframe.style.zIndex = "9999";
+				document.body.appendChild(iframe);*/
+				
+				/*if(badgeChat.style.display === 'none')  {
+					this.chatCount += 1;
+					badgeChat.textContent = this.chatCount;
+					badgeChat.style.display = 'block';
+				}else {
+					badgeChat.style.display = 'none';
+				}*/
+			});
+			
+			window.addEventListener("message", (event) => {
+				if (event.data === "closeMessengerFrame") {
+				document.querySelector("iframe[src='/messenger/popup']")?.remove();
+				}
+			});
 		</script>
-
-
-          
+    
 </th:block>

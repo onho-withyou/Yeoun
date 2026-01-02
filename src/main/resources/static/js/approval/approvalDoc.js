@@ -2086,13 +2086,6 @@ function AllGridSearch() {
 	console.log("params:", params);
 
 }
-const searchBtn = document.getElementById("searchBtn");
-if (searchBtn) {
-	searchBtn.addEventListener("click", (ev) => {
-
-	});
-
-}
 
 // 서버에서 받아온 default 결재권자 담을 변수
 let formList = [];

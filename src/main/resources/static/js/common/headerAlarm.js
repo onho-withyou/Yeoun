@@ -28,6 +28,66 @@ function subscribeEvent() {
     const section = getSectionPath();
     autoSubscribeByPath(section);
     subscribePersonalAlarm();
+
+    // 3) 전자결재 알림 결재사항 (실시간 처리)
+    stompClient.subscribe(`/user/approval`, async (message) => {
+        console.log('approval push received:', message);
+        // 안전하게 body 파싱
+        let payload = null;
+        try {
+            payload = (typeof message.body === 'string') ? JSON.parse(message.body) : (message.body || message);
+        } catch (e) {
+            payload = message.body || message;
+        }
+
+        // items: 배열 형태로 통일
+        let items = [];
+        if (Array.isArray(payload)) items = payload;
+        else if (payload && Array.isArray(payload.items)) items = payload.items;
+        else if (payload && Array.isArray(payload.grid1Data)) items = payload.grid1Data;
+        else if (payload) items = [payload];
+
+        // 드롭다운 렌더링: renderApprovalDropdown이 있으면 items로 바로 렌더
+        try {
+            if (typeof renderApprovalDropdown === 'function') {
+                renderApprovalDropdown(items);
+            } else {
+                // 없으면 전체 재조회 후 렌더 시도
+                const fresh = await AllApprovalSearch();
+                if (typeof renderApprovalDropdown === 'function') renderApprovalDropdown(fresh);
+            }
+        } catch (e) {
+            console.warn('Failed to render approval dropdown on push, will fallback to AllApprovalSearch', e);
+            try { const fresh = await AllApprovalSearch(); if (typeof renderApprovalDropdown === 'function') renderApprovalDropdown(fresh); } catch(_){}
+        }
+
+        // 배지 갱신: 서버가 전체 카운트를 보냈다면 우선 사용, 없으면 items.length 사용
+        try {
+            const badgeEl = document.getElementById('badge_approval');
+            let count = null;
+            if (payload && (payload.count || payload.totalCount || payload.approvalCount)) {
+                count = Number(payload.count || payload.totalCount || payload.approvalCount);
+            } else if (Array.isArray(items)) {
+                count = items.length;
+            }
+            if (count !== null && !isNaN(count)) {
+                if (badgeEl) {
+                    if (count > 0) {
+                        badgeEl.style.display = 'unset';
+                        badgeEl.textContent = count >= 30 ? '30+' : count;
+                    } else {
+                        badgeEl.style.display = 'none';
+                    }
+                }
+            } else {
+                // fallback: DOM 기반으로 동기화
+                if (typeof updatePaymentBadgeFromDOM === 'function') updatePaymentBadgeFromDOM();
+            }
+        } catch (e) {
+            console.error('Error updating badge on approval push', e);
+        }
+    });
+
 	
 }
 
@@ -184,3 +244,113 @@ async function getAlarmReadStatus() {
 	}
 })();
 // ----------------------------------------------------------------------
+//전자결재 알림
+(async () => {
+    const alarmData = await AllApprovalSearch();
+    console.log('AllApprovalSearch:', alarmData, alarmData && alarmData.length);
+
+    // badge_approval에 개수 표시
+    try {
+        const badgeApprovalEl = document.getElementById('badge_approval');
+        const count = Array.isArray(alarmData) ? alarmData.length : (alarmData && alarmData.length ? alarmData.length : 0);
+        if (badgeApprovalEl) {
+            if (count > 0) {
+                badgeApprovalEl.style.display = 'unset';
+                badgeApprovalEl.textContent = count >= 30 ? '30+' : count;
+            } else {
+                badgeApprovalEl.style.display = 'none';
+            }
+        }
+    } catch (e) {
+        console.error('badge_approval update error', e);
+    }
+
+    // 렌더링 함수가 정의되어 있으면 동일한 방식으로 드롭다운에 항목 채우기
+    try {
+        if (typeof renderApprovalDropdown === 'function') {
+            renderApprovalDropdown(alarmData || []);
+        }
+    } catch (e) {
+        console.warn('renderApprovalDropdown 호출 실패', e);
+    }
+})();
+
+
+//결재사항
+async function AllApprovalSearch() {
+    const params = {
+        createDate: "",
+        finishDate: "",
+        empName: "",
+        approvalTitle: ""
+    };
+
+    try {
+        const res = await fetch('/approval/searchAllGrids', {
+            method: 'POST',
+            headers: {
+                [csrfHeader]: csrfToken,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(params)
+        });
+
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+
+        const data = await res.json();
+        return data && data.grid1Data ? data.grid1Data : [];
+    } catch (err) {
+        console.error("결재 목록 조회오류", err);
+        return [];
+    }
+}
+
+// 렌더링: 드롭다운에 결재 항목 넣기
+function renderApprovalDropdown(items) {
+	if (!paymentDropdown) return;
+	// 기본 틀: 첫 두 항목(헤더/구분선)은 고정으로 남기고, 나머지는 동적으로 삽입
+	const maxItems = 5;
+	const toShow = Array.isArray(items) ? items.slice(0, maxItems) : [];
+
+	// 빌드할 HTML
+	let html = '';
+	if (toShow.length === 0) {
+		html = '<li class="dropdown-placeholder"><a class="dropdown-item" href="#">결재 내역이 없습니다.</a></li>';
+	} else {
+		toShow.forEach((it, idx) => {
+			const title = it.approval_title || it.approvalTitle || it.title || '';
+			const displayTitle = truncateText(title, 25);
+			const id = it.id || it.approvalId || '';
+			const href = id ? (`/approval/view/${id}`) : '#';
+			html += `<li><a class="dropdown-item" href="${href}">${escapeHtml(displayTitle)}</a></li>`;
+		});
+		if (items.length > maxItems) {
+			html += '<li><hr class="dropdown-divider"></li>';
+			html += '<li><a class="dropdown-item" href="/approval/approval_doc">더보기</a></li>';
+		}
+	}
+
+	// 바꾸기
+	paymentDropdown.innerHTML = html;
+}
+
+// 간단한 HTML 이스케이프
+function escapeHtml(str) {
+	if (!str) return '';
+	return String(str)
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;');
+}
+
+// 문자열을 안전하게 자르기 (유니코드 보존)
+function truncateText(str, maxLen) {
+	if (!str) return '';
+	const arr = [...String(str)];
+	if (arr.length <= maxLen) return arr.join('');
+	return arr.slice(0, maxLen).join('') + '...';
+}
