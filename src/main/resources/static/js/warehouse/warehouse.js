@@ -269,14 +269,14 @@ async function saveLocationStatus() {
         if (!response.ok) throw new Error('상태 변경 실패');
         
         selectedLocation.useYn = newStatus;
-        alert('위치 상태가 변경되었습니다.');
+        alert('창고 상태가 변경되었습니다.');
         
         bsLocationStatusModal.hide();
         updateRackDetail();
         await loadWarehouseData();
     } catch (error) {
-        console.error('위치 상태 변경 실패:', error);
-        alert('위치 상태 변경에 실패했습니다.');
+        console.error('창고 상태 변경 실패:', error);
+        alert('창고 상태 변경에 실패했습니다.');
     }
 }
 
