@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import com.yeoun.inventory.dto.InventoryModalRequestDTO;
 import com.yeoun.inventory.dto.InventoryOrderCheckViewDTO;
 import com.yeoun.inventory.dto.InventorySafetyCheckDTO;
-import com.yeoun.inventory.dto.WarehouseLocationCreateRequest;
 import com.yeoun.common.e_num.AlarmDestination;
 import com.yeoun.common.entity.Dispose;
 import com.yeoun.common.repository.DisposeRepository;
@@ -27,15 +26,16 @@ import com.yeoun.inventory.dto.InventoryHistorySearchDTO;
 import com.yeoun.inventory.dto.WarehouseLocationDTO;
 import com.yeoun.inventory.entity.Inventory;
 import com.yeoun.inventory.entity.InventoryHistory;
-import com.yeoun.inventory.entity.WarehouseLocation;
 import com.yeoun.inventory.mapper.InventoryHistoryMapper;
 import com.yeoun.inventory.repository.InventoryHistoryRepository;
 import com.yeoun.inventory.repository.InventoryOrderCheckViewRepository;
 import com.yeoun.inventory.repository.InventoryRepository;
-import com.yeoun.inventory.repository.WarehouseLocationRepository;
 import com.yeoun.inventory.specification.InventorySpecs;
 import com.yeoun.order.dto.WorkOrderDTO;
 import com.yeoun.order.repository.WorkOrderRepository;
+import com.yeoun.warehouse.dto.WarehouseLocationCreateRequest;
+import com.yeoun.warehouse.entity.WarehouseLocation;
+import com.yeoun.warehouse.repository.WarehouseLocationRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -393,92 +393,5 @@ public class InventoryService {
 				.stream()
 				.map(InventoryDTO::fromEntity).toList();
 	}
-	
-	// 창고 등록
-	@Transactional
-	public void createLocations(WarehouseLocationCreateRequest req) {
-		// 기존 창고 조회
-		List<WarehouseLocation> existing = warehouseLocationRepository.findAllByZoneAndRack(req.getZone(), req.getRack());
-		
-		// 기존 위치 Set 생성
-		Set<String> existingSet = existing.stream()
-				.map(d -> d.getRackRow() + "-" + d.getRackCol())
-				.collect(Collectors.toSet());
-		
-		List<WarehouseLocation> toInsert = new ArrayList<>();
-		
-		for (int r = req.getRowStart(); r <= req.getRowEnd(); r++) {
-			// r은 숫자로 들어오고 이걸 문자로 변환
-			String rowChar = String.valueOf((char) ('A' + r - 1));
-			
-			for (int c = req.getColStart(); c <= req.getColEnd(); c++) {
-				String colStr  = String.format("%02d", c);
-				String key = rowChar + "-" + colStr;
-				
-				if (existingSet.contains(key)) {
-					continue;
-				}
-				
-				Long seq = warehouseLocationRepository.getNextLocationSeq();
-				
-				WarehouseLocationDTO locationDTO = new WarehouseLocationDTO();
-				locationDTO.setLocationId(String.valueOf(seq));
-				locationDTO.setZone(req.getZone());
-				locationDTO.setRack(normalizeRack(req.getRack()));
-				locationDTO.setRackRow(rowChar);
-				locationDTO.setRackCol(colStr);
-				
-				WarehouseLocation location = locationDTO.toEntity();
-				
-				toInsert.add(location);
-			}
-		}
-		warehouseLocationRepository.saveAll(toInsert);
-	}
-	
-	private String normalizeRack(String rack) {
-	    return String.format("%02d", Integer.parseInt(rack));
-	}
-
-	// zone 삭제
-	@Transactional
-	public void deleteLocationZone(String zoneName) {
-		// zone으로 창고 조회
-		List<WarehouseLocation> warehouseLocations = warehouseLocationRepository.findAllByZone(zoneName);
-		
-		if (warehouseLocations.isEmpty()) {
-			 throw new IllegalStateException("존재하지 않는 Zone입니다.");
-		}
-		
-		for (WarehouseLocation loc : warehouseLocations) {
-			if (inventoryRepository.existsByWarehouseLocation_LocationId(loc.getLocationId())) {
-				throw new IllegalStateException("재고가 존재하는 위치가 있어 삭제할 수 없습니다.");
-			}
-		}
-		
-		warehouseLocationRepository.deleteAllByZone(zoneName);
-	}
-
-	// rack 삭제
-	@Transactional
-	public void deleteLocationRack(String zone, String rack) {
-		List<WarehouseLocation> warehouseLocations = warehouseLocationRepository.findAllByZoneAndRack(zone, rack);
-		
-		if (warehouseLocations.isEmpty()) {
-			 throw new IllegalStateException("존재하지 않는 Rack 입니다.");
-		}
-		
-		// 재고가 존재하는 location 이면 true가 반환
-		boolean hasInventory = warehouseLocations.stream()
-				.anyMatch(loc -> 
-					inventoryRepository.existsByWarehouseLocation_LocationId(loc.getLocationId()));
-		
-		if (hasInventory) {
-			throw new IllegalStateException("재고가 존재하는 위치가 있어 삭제할 수 없습니다.");
-		}
-		
-		warehouseLocationRepository.deleteAllByZoneAndRack(zone, rack);
-	}
-	
 
 }

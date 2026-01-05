@@ -29,10 +29,10 @@ import com.yeoun.inventory.dto.InventoryHistoryGroupDTO;
 import com.yeoun.inventory.dto.InventoryHistorySearchDTO;
 import com.yeoun.inventory.dto.WarehouseLocationDTO;
 import com.yeoun.inventory.dto.InventorySafetyCheckDTO;
-import com.yeoun.inventory.dto.WarehouseLocationCreateRequest;
-import com.yeoun.inventory.entity.WarehouseLocation;
 import com.yeoun.inventory.service.InventoryService;
 import com.yeoun.order.dto.WorkOrderDTO;
+import com.yeoun.warehouse.dto.WarehouseLocationCreateRequest;
+import com.yeoun.warehouse.entity.WarehouseLocation;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
