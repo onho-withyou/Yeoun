@@ -193,49 +193,6 @@ public class InventoryRestController {
 		
 		return ResponseEntity.ok(inventoryOrderCheckDTOList);
 	}
-	
-	// =========================================
-	// 창고 등록
-//	@PostMapping("/locations/add")
-//	public ResponseEntity<String> createLocations(@RequestBody WarehouseLocationCreateRequest req) {
-//		inventoryService.createLocations(req);
-//		
-//		 return ResponseEntity.ok().build();
-//	}
-	
-	// zone 삭제
-//	@DeleteMapping("/zones/{zoneName}")
-//	public ResponseEntity<?> deleteZone(@PathVariable("zoneName") String zoneName) {
-//		try {
-//			inventoryService.deleteLocationZone(zoneName);
-//			return ResponseEntity.ok().build();
-//		} catch (IllegalStateException e) {
-//			return ResponseEntity
-//					.status(HttpStatus.CONFLICT)
-//					.body(e.getMessage());
-//		} catch (Exception e) {
-//			return ResponseEntity
-//					.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//					.body("서버 오류가 발생했습니다.");
-//		}
-//	}
-	
-	// rack 삭제
-//	@DeleteMapping("/racks")
-//	public ResponseEntity<?> deleteRack(@RequestParam(name = "zone") String zone, @RequestParam(name = "rack") String rack) {
-//		try {
-//			inventoryService.deleteLocationRack(zone, rack);
-//			return ResponseEntity.ok().build();
-//		} catch (IllegalStateException e) {
-//			return ResponseEntity
-//					.status(HttpStatus.CONFLICT)
-//					.body(e.getMessage());
-//		} catch (Exception e) {
-//			return ResponseEntity
-//					.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//					.body("서버 오류가 발생했습니다.");
-//		}
-//	}
 }
 
 

@@ -2,11 +2,8 @@ package com.yeoun.inventory.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -33,7 +30,6 @@ import com.yeoun.inventory.repository.InventoryRepository;
 import com.yeoun.inventory.specification.InventorySpecs;
 import com.yeoun.order.dto.WorkOrderDTO;
 import com.yeoun.order.repository.WorkOrderRepository;
-import com.yeoun.warehouse.dto.WarehouseLocationCreateRequest;
 import com.yeoun.warehouse.entity.WarehouseLocation;
 import com.yeoun.warehouse.repository.WarehouseLocationRepository;
 
@@ -85,7 +81,7 @@ public class InventoryService {
 	//창고 로케이션 정보 불러오기 로직
 	public List<WarehouseLocationDTO> getLocationInfo() {
 		
-		return warehouseLocationRepository.findAll().stream()
+		return warehouseLocationRepository.findByUseYn("Y").stream()
 				.map(WarehouseLocationDTO::fromEntity)
 				.toList();
 	}

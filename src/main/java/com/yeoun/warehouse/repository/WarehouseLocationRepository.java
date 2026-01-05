@@ -22,5 +22,8 @@ public interface WarehouseLocationRepository extends JpaRepository<WarehouseLoca
 
 	// 창고 ID로 정보 조회
 	Optional<WarehouseLocation> findByLocationId(String locationId);
+	
+	// 활성화된 창고 정보 가져오기
+	List<WarehouseLocation> findByUseYn(String useYn);
 
 }
