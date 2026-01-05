@@ -95,3 +95,8 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+bootWar {
+	archiveBaseName = 'myapp'
+	archiveVersion = ''
+}
